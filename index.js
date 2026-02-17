@@ -558,6 +558,7 @@ console.log("[SERVER] 🔔 Rotas de Push Notifications registradas em /api/notif
 app.get("/api/admin/analytics/resumo", analyticsController.getAnalyticsResumo);
 app.get("/api/admin/analytics/branch/:nomeBranch", analyticsController.getAnatyticsBranchDetalhes);
 app.get("/api/admin/analytics/merges", analyticsController.getAnalyticsMerges);
+app.get("/api/admin/analytics/pull-requests", analyticsController.getAnalyticsPullRequests);
 app.get("/api/admin/analytics/funcionalidades", analyticsController.getAnalyticsFuncionalidades);
 app.get("/api/admin/analytics/estatisticas", analyticsController.getAnalyticsEstatisticas);
 app.get("/api/admin/analytics/sync-status", analyticsController.getGitSyncStatus);
