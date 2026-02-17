@@ -108,8 +108,8 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 #### anti-frankenstein
 | Tipo | Keywords |
 |------|----------|
-| **Primárias** | `anti-frankenstein`, `blindar frontend`, `governança CSS`, `antes de criar CSS`, `já existe?`, `checar antes de criar`, `auditar CSS`, `duplicado CSS` |
-| **Frases PT-BR** | "já existe esse componente?", "antes de criar esse CSS", "tem algum CSS parecido?", "vou criar um novo arquivo CSS", "checar se já existe", "governança de frontend", "garantir que não vai duplicar", "blindar o CSS", "verificar antes de criar tela" |
+| **Primárias** | `anti-frankenstein`, `anti-frank`, `modo anti-frank`, `ative modo anti-frank`, `blindar frontend`, `governança CSS`, `antes de criar CSS`, `já existe?`, `checar antes de criar`, `auditar CSS`, `duplicado CSS`, `HTMLs no modo anti-frank` |
+| **Frases PT-BR** | "ative modo anti-frank", "sempre pensando no modo anti-frank", "anti-frank", "HTMLs ativado no modo anti-frank", "modo anti-frankenstein ativo", "já existe esse componente?", "antes de criar esse CSS", "tem algum CSS parecido?", "vou criar um novo arquivo CSS", "checar se já existe", "governança de frontend", "garantir que não vai duplicar", "blindar o CSS", "verificar antes de criar tela" |
 | **Contexto** | Checkpoint OBRIGATÓRIO antes de criar/modificar CSS, HTML ou componentes. Previne código duplicado, cores hardcoded, inline styles, keyframes repetidos, arquivos órfãos |
 | **Integração** | Roda ANTES de `frontend-crafter` e `code` quando há CSS envolvido |
 | **NÃO confundir** | Criar componente → `frontend-crafter` (anti-frankenstein valida ANTES); Auditoria pós-código → `code-inspector` |
@@ -311,6 +311,10 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | "antes de criar esse componente" | `anti-frankenstein` | Governança de frontend |
 | "blindar o CSS do projeto" | `anti-frankenstein` | Prevenção de duplicidade |
 | "vou criar um arquivo CSS novo" | `anti-frankenstein` | Validação obrigatória |
+| "anti-frank" | `anti-frankenstein` | Alias curto |
+| "ative modo anti-frank" | `anti-frankenstein` | Ativação direta por alias |
+| "sempre pensando no modo anti-frank" | `anti-frankenstein` | Modo persistente de governança |
+| "HTMLs ativado no modo anti-frank" | `anti-frankenstein` | Checkpoint em criação de HTML |
 | "verificar mudanças api cartola" | `context7-monthly-audit` | Check mensal automático |
 | "criar uma skill nova" | `skill-creator` | Meta |
 | "instalar skill X" | `skill-installer` | Meta |

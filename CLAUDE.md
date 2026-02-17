@@ -174,7 +174,7 @@ Documentação das skills: [`docs/skills/`](docs/skills/) (agnóstico, Markdown 
 | "regra de negócio", "cálculo", "config liga" | **league-architect** | Specialist |
 | "script DB", "backup", "migration", "limpeza" | **db-guardian** | Specialist |
 | "auditar código", "security review", "OWASP" | **code-inspector** | Specialist |
-| "já existe esse CSS?", "antes de criar CSS", "blindar frontend" | **anti-frankenstein** | Specialist |
+| "já existe esse CSS?", "anti-frank", "ative modo anti-frank", "blindar frontend" | **anti-frankenstein** | Specialist |
 | "git push", "commit", "suba mudanças" | **git-commit-push** | Utility |
 | "reiniciar servidor", "restart" | **restart-server** | Utility |
 | "pull no replit", "deploy", "sincronizar" | **replit-pull** | Utility |
@@ -245,7 +245,7 @@ As keywords ativam a mesma skill automaticamente (ver tabela acima).
 | `/auditor-module [modulo]` | "audite o módulo X", "checklist módulo" |
 | `/cache-auditor [modo]` | "auditar cache", "cache desatualizado" |
 | `/ux-auditor-app` | "auditar UX do app", "revisar design participante", "visual do app tá ok?" |
-| `/anti-frankenstein` | "antes de criar CSS", "já existe?", "blindar frontend", "governança CSS" |
+| `/anti-frankenstein` | "anti-frank", "ative modo anti-frank", "antes de criar CSS", "já existe?", "blindar frontend", "HTMLs no modo anti-frank" |
 | `/newsession` | "nova sessão", "salvar contexto" |
 | `/liste-pr-github [período]` | "listar PRs", "PRs de hoje", "merges da semana" |
 
