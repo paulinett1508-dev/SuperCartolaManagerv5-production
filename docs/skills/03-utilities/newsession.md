@@ -4,12 +4,47 @@ Handover para nova sessao - carrega contexto do trabalho em andamento e instrui 
 
 ---
 
-## STATUS ATUAL: AUDIT-006 COMPLETO - MODULO ARTILHEIRO AUDITADO
+## STATUS ATUAL: AUDIT-007 COMPLETO - MODULO CAPITAO DE LUXO AUDITADO
 
 **Data:** 17/02/2026
-**Ultima acao:** AUDIT-006 (modulo artilheiro) concluido. 3 fases: criticos, significativos, menores. ~3.260 linhas dead code removidas, 1 bug seguranca corrigido. Stitch simplificado para modo manual.
+**Ultima acao:** AUDIT-007 (modulo capitao de luxo) concluido. Score 80→92. ranking-live reescrito, config limpo, stubs documentados.
+**Sessao atual:** AUDIT-006 (artilheiro, 12 fixes) + AUDIT-007 (capitao, 4 fixes) + Stitch simplificado
 **Sessao anterior:** 14/02/2026 (AUDIT-005: faixas dinamicas ranking, 3 bugs)
 **Sessao 13/02/2026:** AUDIT-004: 4 bugs ranking corrigidos + AUDIT-001/002/003 financeiras + cache stale resolvido
+
+---
+
+## AUDIT-007: MODULO CAPITAO DE LUXO (17/02/2026)
+
+**Problema:** Auditoria completa do modulo capitao de luxo revelou score 80/100. ranking-live retornava dados errados (pontos totais em vez de pontos do capitao), config hardcoded, Manager sem documentacao de stubs.
+
+### Fase 1 - Criticos (commit `6412d2b`)
+
+| # | Bug | Severidade | Arquivo | Fix |
+|---|-----|-----------|---------|-----|
+| 1 | `ligas_habilitadas` hardcoded no JSON | **CRITICAL** | `config/rules/capitao_luxo.json` | Removido (habilitacao via ModuleConfig no MongoDB) |
+| 2 | `ranking-live` retornava pontos TOTAIS do time | **CRITICAL** | `controllers/capitaoController.js` | v1.1.0: reescrito com `buscarCapitaoRodada` + `pontuadosMap` em paralelo. Retorna pontos reais do capitao |
+
+### Fase 2 - HIGH (commit `6b214c9`)
+
+| # | Bug | Severidade | Arquivo | Fix |
+|---|-----|-----------|---------|-----|
+| 3 | CapitaoManager hooks sem `stub: true` | **HIGH** | `services/orchestrator/managers/CapitaoManager.js` | v1.1.0: JSDoc completo, `stub: true`, removidos 4 console.logs |
+| 4 | `RODADA_FINAL: 38` hardcoded no admin JS | **HIGH** | `public/js/capitao-luxo.js` | v1.1.0: import de `season-config.js` |
+
+### Issues reclassificados como nao-issues
+
+| Issue | Motivo |
+|-------|--------|
+| Backend `\|\| 38` defaults (service/controller) | Safety nets razoaveis, padrao do projeto |
+| Frontend `38` em participante-capitao.js | Padrao de outros modulos, cross-dir import arriscado |
+| 402 linhas CSS inline em capitao.html | Convencao projeto: 12+ fronts participante usam inline CSS |
+| console.logs estruturados | Todos com prefixo `[CAPITAO-*]`, production-ready |
+
+### Resultado final
+- **Score:** 80/100 → ~92/100
+- **Bug funcional corrigido:** ranking-live agora mostra pontos reais do capitao
+- **Commits:** `6412d2b`, `6b214c9`
 
 ---
 
@@ -232,6 +267,10 @@ O wizard de modulos (`gerenciar-modulos.html`) salvava corretamente no `ModuleCo
 | `routes/artilheiro-campeao-routes.js` | Rotas artilheiro com verificarAdmin | FIXADO v5.3 (AUDIT-006) |
 | `public/js/artilheiro-campeao.js` | Admin UI artilheiro | v4.7.0 (RODADA_FINAL centralizado) |
 | `config/rules/artilheiro.json` | Regras artilheiro | LIMPO (sem hardcodes, temporada 2026) |
+| `controllers/capitaoController.js` | Controller capitao de luxo | v1.1.0 (ranking-live corrigido, AUDIT-007) |
+| `services/capitaoService.js` | Service capitao (API Cartola) | OK |
+| `public/js/capitao-luxo.js` | Admin UI capitao | v1.1.0 (RODADA_FINAL centralizado) |
+| `config/rules/capitao_luxo.json` | Regras capitao | LIMPO (sem ligas_habilitadas hardcoded) |
 
 ---
 
@@ -285,5 +324,6 @@ Apos invalidacao, o proximo acesso ao extrato de cada participante recalculara a
 9. ~~Simplificar FASE 6 skill git-commit-push~~ ✅ FEITO (commit b4e9c88)
 10. ~~Stitch simplificado para modo manual~~ ✅ FEITO (commit d6674b2)
 11. ~~Auditoria modulo artilheiro~~ ✅ AUDIT-006 (12 fixes, 3 commits)
-12. AUDIT-001 Fase 3 se houver tempo (cosmetico)
+12. ~~Auditoria modulo capitao de luxo~~ ✅ AUDIT-007 (4 fixes, 2 commits)
+13. AUDIT-001 Fase 3 se houver tempo (cosmetico)
 13. Verificar temporada 2025 caches (formato antigo, reconciliacao nao suporta)
