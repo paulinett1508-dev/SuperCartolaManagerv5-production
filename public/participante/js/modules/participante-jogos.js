@@ -163,13 +163,20 @@ export function renderizarJogosAoVivo(jogos, fonte = 'soccerdata', aoVivo = fals
 
     return `
     <section id="jogos-home-section" class="jogos-home-section expanded mx-4 mb-6">
-        <!-- Header Colapsável Agenda do Dia -->
+        <!-- Header Colapsável Agenda do Dia (Padrão Copa) -->
         <button class="jogos-home-header" onclick="window.toggleJogosHome && window.toggleJogosHome()">
             <div class="jogos-home-header-left">
-                <span class="material-icons" style="color: var(--app-primary); font-size: 20px;">sports_soccer</span>
-                <span class="jogos-home-header-title">Agenda do Dia</span>
-                <span class="jogos-home-count-badge">${totalJogos} jogos</span>
-                ${jogosAoVivoCount > 0 ? `<span class="jogos-home-live-badge">${jogosAoVivoCount} ao vivo</span>` : ''}
+                <span class="text-xl">⚽</span>
+                <div>
+                    <h2 class="font-brand text-white text-sm tracking-wide" style="margin:0;line-height:1.2;">Agenda do Dia</h2>
+                    <span class="text-[10px] text-white/70">${totalJogos} jogos · Brasileirão e mais</span>
+                </div>
+                ${jogosAoVivoCount > 0 ? `
+                    <span class="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 ml-2">
+                        <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
+                        ${jogosAoVivoCount} AO VIVO
+                    </span>
+                ` : ''}
             </div>
             <span class="material-icons jogos-home-chevron">expand_more</span>
         </button>

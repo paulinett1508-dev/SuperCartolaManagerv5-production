@@ -1259,7 +1259,7 @@
     border: none;
 }
 
-/* === JOGOS / AGENDA DO DIA - COLAPSÁVEL === */
+/* === JOGOS / AGENDA DO DIA - COLAPSÁVEL (Padrão Copa) === */
 .jogos-home-section {
     padding: 0;
 }
@@ -1270,8 +1270,8 @@
     justify-content: space-between;
     width: 100%;
     padding: 12px 16px;
-    background: linear-gradient(135deg, #1f1f1f 0%, #171717 100%);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: var(--app-agenda-gradient);
+    border: 1px solid var(--app-agenda-border);
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -1279,7 +1279,7 @@
 
 .jogos-home-header:active {
     transform: scale(0.99);
-    background: #252525;
+    opacity: 0.9;
 }
 
 .jogos-home-header-left {
@@ -1291,7 +1291,7 @@
 .jogos-home-header-title {
     font-family: 'Russo One', sans-serif;
     font-size: 13px;
-    color: var(--app-text-primary);
+    color: #ffffff;
     letter-spacing: 0.3px;
 }
 
@@ -1299,8 +1299,8 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
     font-weight: 600;
-    color: rgba(255,255,255,0.5);
-    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.15);
     padding: 3px 8px;
     border-radius: 6px;
 }
@@ -1310,7 +1310,7 @@
     font-size: 9px;
     font-weight: 700;
     color: #4ade80;
-    background: rgba(34, 197, 94, 0.15);
+    background: rgba(34, 197, 94, 0.2);
     padding: 3px 8px;
     border-radius: 6px;
     letter-spacing: 0.3px;
@@ -1318,7 +1318,7 @@
 
 .jogos-home-chevron {
     font-size: 22px;
-    color: rgba(255,255,255,0.5);
+    color: rgba(255,255,255,0.7);
     transition: transform 0.3s ease;
 }
 
@@ -1338,14 +1338,106 @@
     max-height: 800px;
     overflow-y: auto;
     transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
-    background: linear-gradient(180deg, var(--app-surface) 0%, #0f0f0f 100%);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: linear-gradient(180deg, rgba(26, 107, 53, 0.1) 0%, var(--app-surface) 100%);
+    border: 1px solid var(--app-agenda-border);
     border-top: none;
     border-radius: 0 0 12px 12px;
     opacity: 1;
 }
 
 .jogos-home-content.collapsed {
+    max-height: 0;
+    padding: 0;
+    opacity: 0;
+    border: none;
+    overflow: hidden;
+}
+
+/* === NOTÍCIAS DO TIME - COLAPSÁVEL (Padrão Copa) === */
+.noticias-home-section {
+    padding: 0;
+}
+
+.noticias-home-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--app-noticias-fallback-gradient);
+    border: 1px solid var(--app-noticias-border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.noticias-home-header:active {
+    transform: scale(0.99);
+    opacity: 0.9;
+}
+
+.noticias-home-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.noticias-home-header-escudo {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+}
+
+.noticias-home-header-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.noticias-home-header-title {
+    font-family: 'Russo One', sans-serif;
+    font-size: 13px;
+    color: #ffffff;
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+}
+
+.noticias-home-header-sub {
+    font-size: 10px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.2;
+}
+
+.noticias-home-chevron {
+    font-size: 22px;
+    color: rgba(255,255,255,0.7);
+    transition: transform 0.3s ease;
+}
+
+/* Estado expandido */
+.noticias-home-section.expanded .noticias-home-header {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: none;
+}
+
+.noticias-home-section.expanded .noticias-home-chevron {
+    transform: rotate(180deg);
+}
+
+/* Conteúdo colapsável */
+.noticias-home-content {
+    max-height: 1200px;
+    overflow-y: auto;
+    transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+    border: 1px solid var(--app-noticias-border);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    padding: 8px;
+    opacity: 1;
+}
+
+.noticias-home-content.collapsed {
     max-height: 0;
     padding: 0;
     opacity: 0;

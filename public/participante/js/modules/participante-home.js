@@ -1517,6 +1517,28 @@ function toggleJogosHome() {
 window.toggleJogosHome = toggleJogosHome;
 
 // =====================================================================
+// TOGGLE NOTÍCIAS DO TIME (Colapsável)
+// =====================================================================
+function toggleNoticiasHome() {
+    const section = document.getElementById('noticias-home-section');
+    const content = document.getElementById('noticias-home-content');
+
+    if (!section || !content) return;
+
+    const isExpanded = section.classList.contains('expanded');
+
+    if (isExpanded) {
+        section.classList.remove('expanded');
+        content.classList.add('collapsed');
+    } else {
+        section.classList.add('expanded');
+        content.classList.remove('collapsed');
+    }
+}
+
+window.toggleNoticiasHome = toggleNoticiasHome;
+
+// =====================================================================
 // PAINEL DE AVISOS
 // =====================================================================
 function atualizarPainelAvisos(rodadaAtual, totalParticipantes, extras = {}) {
