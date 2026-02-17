@@ -310,6 +310,10 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | "como tá o visual do app" | `ux-auditor-app` | Estado do design do app |
 | "quais branches existem" | `analise-branches` | Análise git |
 | "executar auditoria mensal" | `context7-monthly-audit` | Auditoria preventiva |
+| "já existe esse CSS?" | `anti-frankenstein` | Checkpoint pré-criação |
+| "antes de criar esse componente" | `anti-frankenstein` | Governança de frontend |
+| "blindar o CSS do projeto" | `anti-frankenstein` | Prevenção de duplicidade |
+| "vou criar um arquivo CSS novo" | `anti-frankenstein` | Validação obrigatória |
 | "verificar mudanças api cartola" | `context7-monthly-audit` | Check mensal automático |
 | "criar uma skill nova" | `skill-creator` | Meta |
 | "instalar skill X" | `skill-installer` | Meta |

@@ -260,6 +260,7 @@ As keywords ativam a mesma skill automaticamente (ver tabela acima).
 | `/auditor-module [modulo]` | "audite o módulo X", "checklist módulo" |
 | `/cache-auditor [modo]` | "auditar cache", "cache desatualizado" |
 | `/ux-auditor-app` | "auditar UX do app", "revisar design participante", "visual do app tá ok?" |
+| `/anti-frankenstein` | "antes de criar CSS", "já existe?", "blindar frontend", "governança CSS" |
 | `/newsession` | "nova sessão", "salvar contexto" |
 | `/liste-pr-github [período]` | "listar PRs", "PRs de hoje", "merges da semana" |
 
