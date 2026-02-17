@@ -1,9 +1,13 @@
 // =============================================
-// CAPITÃO DE LUXO - Admin JS v1.0.0
+// CAPITÃO DE LUXO - Admin JS v1.1.0
 // Tabela detalhada de ranking de capitães
 // Padrão: ArtilheiroCampeao (single-file admin module)
+// v1.1.0: Import RODADA_FINAL centralizado de season-config.js
 // =============================================
-console.log("🎖️ [CAPITAO-LUXO] Sistema v1.0.0 carregando...");
+
+import { RODADA_FINAL_CAMPEONATO } from './core/season-config.js';
+
+console.log("🎖️ [CAPITAO-LUXO] Sistema v1.1.0 carregando...");
 
 const CapitaoLuxo = {
     // Configurações
@@ -12,7 +16,7 @@ const CapitaoLuxo = {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get("id");
         },
-        RODADA_FINAL: 38,
+        RODADA_FINAL: RODADA_FINAL_CAMPEONATO,
         API: {
             RANKING: (ligaId) => `/api/capitao/${ligaId}/ranking`,
             RANKING_LIVE: (ligaId) => `/api/capitao/${ligaId}/ranking-live`,
