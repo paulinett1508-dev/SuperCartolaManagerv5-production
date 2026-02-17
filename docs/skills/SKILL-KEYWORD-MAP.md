@@ -108,9 +108,9 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 #### anti-frankenstein
 | Tipo | Keywords |
 |------|----------|
-| **Primárias** | `anti-frankenstein`, `blindar frontend`, `governança CSS`, `validar CSS`, `prevenir duplicação`, `checar antes de criar`, `css registry` |
-| **Frases PT-BR** | "antes de criar CSS", "já existe esse componente?", "posso criar arquivo CSS?", "validar criação frontend", "checar se já tem", "blindar o sistema", "não deixar duplicar", "revisar antes de criar tela", "governança de código visual", "anti-frankstein" |
-| **Contexto** | Checkpoint PREVENTIVO obrigatório antes de criar/modificar CSS, HTML, inline styles ou componentes visuais |
+| **Primárias** | `anti-frankenstein`, `anti-frank`, `modo anti-frank`, `ative modo anti-frank`, `blindar frontend`, `governança CSS`, `validar CSS`, `antes de criar CSS`, `já existe?`, `checar antes de criar`, `auditar CSS`, `duplicado CSS`, `prevenir duplicação`, `css registry`, `HTMLs no modo anti-frank` |
+| **Frases PT-BR** | "ative modo anti-frank", "sempre pensando no modo anti-frank", "anti-frank", "HTMLs ativado no modo anti-frank", "modo anti-frankenstein ativo", "já existe esse componente?", "antes de criar esse CSS", "tem algum CSS parecido?", "vou criar um novo arquivo CSS", "checar se já existe", "posso criar arquivo CSS?", "validar criação frontend", "governança de frontend", "garantir que não vai duplicar", "blindar o CSS", "revisar antes de criar tela", "governança de código visual", "anti-frankstein" |
+| **Contexto** | Checkpoint PREVENTIVO obrigatório antes de criar/modificar CSS, HTML, inline styles ou componentes visuais. Previne código duplicado, cores hardcoded, keyframes repetidos, arquivos órfãos |
 | **Ativação automática** | Deve rodar ANTES de qualquer criação de CSS/HTML. Complementa `frontend-crafter` (que cria) e `code-inspector` (que audita pós-facto) |
 | **NÃO confundir** | Criar tela nova → `frontend-crafter` (mas anti-frankenstein roda ANTES); Auditar código → `code-inspector`; Auditar UX → `ux-auditor-app` |
 | **Localização** | `docs/skills/02-specialists/anti-frankenstein.md` |
@@ -314,6 +314,10 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | "antes de criar esse componente" | `anti-frankenstein` | Governança de frontend |
 | "blindar o CSS do projeto" | `anti-frankenstein` | Prevenção de duplicidade |
 | "vou criar um arquivo CSS novo" | `anti-frankenstein` | Validação obrigatória |
+| "anti-frank" | `anti-frankenstein` | Alias curto |
+| "ative modo anti-frank" | `anti-frankenstein` | Ativação direta por alias |
+| "sempre pensando no modo anti-frank" | `anti-frankenstein` | Modo persistente de governança |
+| "HTMLs ativado no modo anti-frank" | `anti-frankenstein` | Checkpoint em criação de HTML |
 | "verificar mudanças api cartola" | `context7-monthly-audit` | Check mensal automático |
 | "criar uma skill nova" | `skill-creator` | Meta |
 | "instalar skill X" | `skill-installer` | Meta |
