@@ -1,4 +1,5 @@
 // services/parciaisRankingService.js
+// ✅ v1.3: PERF-004 - Retry com backoff exponencial para 429 (rate limit)
 // ✅ v1.2: Calcula ranking parcial em tempo real (rodada em andamento)
 // v1.2: Usa CURRENT_SEASON + fallback liga.times quando liga.participantes ausente
 import axios from "axios";
@@ -11,6 +12,12 @@ const LOG_PREFIX = "[PARCIAIS-RANKING-SERVICE]";
 const CARTOLA_API_BASE = "https://api.cartola.globo.com";
 const REQUEST_TIMEOUT = 10000;
 
+// Config de retry para 429 (PERF-004)
+const RETRY_CONFIG = {
+    maxRetries: 3,
+    baseDelayMs: 1000,  // 1s, 2s, 4s
+};
+
 // Headers padrão para API Cartola
 const CARTOLA_HEADERS = {
     "User-Agent": "Super-Cartola-Manager/1.0.0",
@@ -18,14 +25,43 @@ const CARTOLA_HEADERS = {
 };
 
 /**
+ * Retry com backoff exponencial - retenta em 429 e erros de rede
+ * PERF-004: Resiliência durante picos (fechamento de mercado)
+ */
+async function retryComBackoff(requestFn, label = '') {
+    for (let tentativa = 1; tentativa <= RETRY_CONFIG.maxRetries; tentativa++) {
+        try {
+            return await requestFn();
+        } catch (error) {
+            const status = error.response?.status;
+            const isRetryable = status === 429 || !error.response; // 429 ou erro de rede
+
+            if (!isRetryable || tentativa === RETRY_CONFIG.maxRetries) {
+                throw error;
+            }
+
+            const delayMs = RETRY_CONFIG.baseDelayMs * Math.pow(2, tentativa - 1);
+            console.warn(
+                `${LOG_PREFIX} ⚠️ ${label} - Tentativa ${tentativa}/${RETRY_CONFIG.maxRetries} falhou` +
+                `${status ? ` (HTTP ${status})` : ' (erro de rede)'}. Retry em ${delayMs}ms...`
+            );
+            await new Promise(resolve => setTimeout(resolve, delayMs));
+        }
+    }
+}
+
+/**
  * Busca status do mercado para verificar se rodada está em andamento
  */
 async function buscarStatusMercado() {
     try {
-        const response = await axios.get(`${CARTOLA_API_BASE}/mercado/status`, {
-            timeout: REQUEST_TIMEOUT,
-            headers: CARTOLA_HEADERS,
-        });
+        const response = await retryComBackoff(
+            () => axios.get(`${CARTOLA_API_BASE}/mercado/status`, {
+                timeout: REQUEST_TIMEOUT,
+                headers: CARTOLA_HEADERS,
+            }),
+            'buscarStatusMercado'
+        );
         return response.data;
     } catch (error) {
         console.error(`${LOG_PREFIX} Erro ao buscar status mercado:`, error.message);
@@ -40,13 +76,16 @@ async function buscarStatusMercado() {
  */
 async function buscarAtletasPontuados() {
     try {
-        const response = await axios.get(`${CARTOLA_API_BASE}/atletas/pontuados`, {
-            timeout: REQUEST_TIMEOUT,
-            headers: {
-                ...CARTOLA_HEADERS,
-                "Cache-Control": "no-cache",
-            },
-        });
+        const response = await retryComBackoff(
+            () => axios.get(`${CARTOLA_API_BASE}/atletas/pontuados`, {
+                timeout: REQUEST_TIMEOUT,
+                headers: {
+                    ...CARTOLA_HEADERS,
+                    "Cache-Control": "no-cache",
+                },
+            }),
+            'buscarAtletasPontuados'
+        );
         return {
             atletas: response.data?.atletas || {},
             partidas: response.data?.partidas || {}
@@ -62,10 +101,13 @@ async function buscarAtletasPontuados() {
  */
 async function buscarEscalacaoTime(timeId, rodada) {
     try {
-        const response = await axios.get(`${CARTOLA_API_BASE}/time/id/${timeId}/${rodada}`, {
-            timeout: REQUEST_TIMEOUT,
-            headers: CARTOLA_HEADERS,
-        });
+        const response = await retryComBackoff(
+            () => axios.get(`${CARTOLA_API_BASE}/time/id/${timeId}/${rodada}`, {
+                timeout: REQUEST_TIMEOUT,
+                headers: CARTOLA_HEADERS,
+            }),
+            `buscarEscalacaoTime(${timeId})`
+        );
         return response.data;
     } catch (error) {
         // Time pode não ter escalado ainda

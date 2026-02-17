@@ -1,5 +1,6 @@
 // =====================================================================
-// PARTICIPANTE-RODADA-PARCIAL.JS - v3.0
+// PARTICIPANTE-RODADA-PARCIAL.JS - v3.1
+// ✅ v3.1: PERF-003 - AbortController timeout (8s) em todos os fetches
 // ✅ v3.0: Dados enriquecidos (atletas, atletasEmCampo, capitao_id)
 //          Cache de escalação em memória (reduz requests por ciclo)
 // ✅ v2.2: Inativos aparecem em TODAS as rodadas
@@ -7,7 +8,33 @@
 // CÁLCULO REAL: Busca atletas pontuados e calcula pontuação (igual admin)
 // =====================================================================
 
-if (window.Log) Log.info("[PARCIAIS] 📊 Carregando módulo v3.0...");
+if (window.Log) Log.info("[PARCIAIS] 📊 Carregando módulo v3.1...");
+
+// =====================================================================
+// FETCH COM TIMEOUT (AbortController) - PERF-003
+// =====================================================================
+const FETCH_TIMEOUT_MS = 8000; // 8s timeout para API Cartola
+
+async function fetchComTimeout(url, options = {}, timeout = FETCH_TIMEOUT_MS) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+    try {
+        const response = await fetch(url, {
+            ...options,
+            signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+        return response;
+    } catch (error) {
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') {
+            if (window.Log) Log.warn(`[PARCIAIS] ⏱️ Timeout (${timeout}ms) em: ${url}`);
+            throw new Error(`Timeout após ${timeout}ms: ${url}`);
+        }
+        throw error;
+    }
+}
 
 // Cache de escalações em memória (escalação não muda durante a rodada)
 const _escalacaoCache = new Map();
@@ -175,7 +202,7 @@ function separarTimesAtivosInativos(times) {
 // =====================================================================
 async function buscarStatusMercado() {
     try {
-        const response = await fetch("/api/cartola/mercado/status");
+        const response = await fetchComTimeout("/api/cartola/mercado/status");
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return await response.json();
     } catch (error) {
@@ -189,7 +216,7 @@ async function buscarStatusMercado() {
 // =====================================================================
 async function buscarTimesLiga(ligaId) {
     try {
-        const response = await fetch(`/api/ligas/${ligaId}/times`);
+        const response = await fetchComTimeout(`/api/ligas/${ligaId}/times`);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
 
@@ -212,7 +239,7 @@ async function buscarTimesLiga(ligaId) {
 async function buscarAtletasPontuados() {
     try {
         const timestamp = Date.now();
-        const response = await fetch(
+        const response = await fetchComTimeout(
             `/api/cartola/atletas/pontuados?_t=${timestamp}`,
             {
                 cache: "no-store",
@@ -362,7 +389,7 @@ async function buscarECalcularPontuacao(time, rodada, atletasPontuados) {
 
         if (!dadosEscalacao) {
             const timestamp = Date.now();
-            const response = await fetch(
+            const response = await fetchComTimeout(
                 `/api/cartola/time/id/${timeId}/${rodada}?_t=${timestamp}`,
                 {
                     cache: "no-store",
@@ -853,5 +880,5 @@ window.ParciaisModule = {
 };
 
 if (window.Log) Log.info(
-    "[PARCIAIS] ✅ Módulo v3.0 carregado (dados enriquecidos + cache escalação)",
+    "[PARCIAIS] ✅ Módulo v3.1 carregado (dados enriquecidos + cache escalação + AbortController timeout)",
 );

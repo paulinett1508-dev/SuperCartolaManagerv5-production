@@ -1,5 +1,7 @@
 // =====================================================================
-// CALENDARIO RODADA MODEL - v1.0
+// CALENDARIO RODADA MODEL - v1.1
+// ✅ v1.1: BUG-002 FIX - Timezone America/Sao_Paulo em temJogosAoVivo,
+//          obterProximoJogo e calcularProximoDisparo (era UTC misturado com local)
 // Schema para armazenar horários oficiais dos jogos por rodada
 // =====================================================================
 
@@ -69,11 +71,12 @@ const calendarioRodadaSchema = new mongoose.Schema({
 calendarioRodadaSchema.index({ temporada: 1, rodada: 1 }, { unique: true });
 
 // Método para verificar se há jogos em andamento AGORA
+// ✅ BUG-002 FIX: Usar timezone America/Sao_Paulo (não UTC)
 calendarioRodadaSchema.methods.temJogosAoVivo = function() {
     const agora = new Date();
-    const hoje = agora.toISOString().split('T')[0]; // "2026-01-29"
-    const horaAtual = agora.getHours();
-    const minutoAtual = agora.getMinutes();
+    const hoje = agora.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+    const horaAtual = Number(agora.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo', hour: 'numeric', hour12: false }));
+    const minutoAtual = Number(agora.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo', minute: 'numeric' }));
 
     return this.partidas.some(partida => {
         if (partida.data !== hoje) return false;
@@ -95,11 +98,12 @@ calendarioRodadaSchema.methods.temJogosAoVivo = function() {
 };
 
 // Método para obter próximo jogo (após agora)
+// ✅ BUG-002 FIX: Usar timezone America/Sao_Paulo (não UTC)
 calendarioRodadaSchema.methods.obterProximoJogo = function() {
     const agora = new Date();
-    const hoje = agora.toISOString().split('T')[0];
-    const horaAtual = agora.getHours();
-    const minutoAtual = agora.getMinutes();
+    const hoje = agora.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+    const horaAtual = Number(agora.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo', hour: 'numeric', hour12: false }));
+    const minutoAtual = Number(agora.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo', minute: 'numeric' }));
     const minutosAgora = horaAtual * 60 + minutoAtual;
 
     // Filtrar jogos futuros (hoje ou depois, ainda não começaram)
@@ -131,15 +135,14 @@ calendarioRodadaSchema.methods.obterProximoJogo = function() {
 };
 
 // Método para calcular quando ativar polling (10min antes do próximo jogo)
+// ✅ BUG-002 FIX: Construir Date usando timezone explícito de Brasília
 calendarioRodadaSchema.methods.calcularProximoDisparo = function() {
     const proximoJogo = this.obterProximoJogo();
     if (!proximoJogo) return null;
 
     const agora = new Date();
-    const [ano, mes, dia] = proximoJogo.data.split('-').map(Number);
-    const [hora, minuto] = proximoJogo.horario.split(':').map(Number);
-
-    const dataJogo = new Date(ano, mes - 1, dia, hora, minuto);
+    // Dados do jogo estão em horário de Brasília - construir Date explicitamente
+    const dataJogo = new Date(`${proximoJogo.data}T${proximoJogo.horario}:00-03:00`);
     const dataDisparo = new Date(dataJogo.getTime() - 10 * 60 * 1000); // 10min antes
 
     // Se já passou, retornar null
