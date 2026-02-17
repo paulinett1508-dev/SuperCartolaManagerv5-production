@@ -4,12 +4,68 @@ Handover para nova sessao - carrega contexto do trabalho em andamento e instrui 
 
 ---
 
-## STATUS ATUAL: AUDIT-005 COMPLETO - FAIXAS DINAMICAS OK
+## STATUS ATUAL: AUDIT-006 COMPLETO - MODULO ARTILHEIRO AUDITADO
 
-**Data:** 14/02/2026
-**Ultima acao:** AUDIT-005 (faixas dinamicas ranking) concluido. 3 bugs corrigidos + skill git-commit-push simplificada. Tudo deployado.
-**Sessao anterior:** 14/02/2026 morning (AUDIT-004 completo: 4 bugs ranking, R3 repopulada, ranking reconsolidado)
+**Data:** 17/02/2026
+**Ultima acao:** AUDIT-006 (modulo artilheiro) concluido. 3 fases: criticos, significativos, menores. ~3.260 linhas dead code removidas, 1 bug seguranca corrigido. Stitch simplificado para modo manual.
+**Sessao anterior:** 14/02/2026 (AUDIT-005: faixas dinamicas ranking, 3 bugs)
 **Sessao 13/02/2026:** AUDIT-004: 4 bugs ranking corrigidos + AUDIT-001/002/003 financeiras + cache stale resolvido
+
+---
+
+## AUDIT-006: MODULO ARTILHEIRO CAMPEAO (17/02/2026)
+
+**Problema:** Auditoria completa do modulo artilheiro revelou score 70/100. Dead code extensivo, bug de seguranca nas rotas, configs hardcoded.
+
+### Fase 1 - Criticos (commit `68acaaf`)
+
+| # | Bug | Severidade | Arquivo | Fix |
+|---|-----|-----------|---------|-----|
+| 1 | `public/gols.js` importava controller inexistente | **CRITICAL** | `public/gols.js` | DELETADO (arquivo orfao) |
+| 2 | Config hardcoded para liga Sobral (aposentada) + participantes fixos | **CRITICAL** | `config/rules/artilheiro.json` | Removido hardcodes, temporada 2025→2026, nota sobre ModuleConfig |
+| 3 | ArtilheiroManager stubs sem documentacao (parecia broken) | **CRITICAL** | `services/orchestrator/managers/ArtilheiroManager.js` | v1.1.0: JSDoc completo, `stub: true` em todos hooks |
+
+### Fase 2 - Significativos (commit `0824f17`)
+
+| # | Bug | Severidade | Arquivo | Fix |
+|---|-----|-----------|---------|-----|
+| 4 | `golsService.js` dead code (556 linhas, zero imports) | **HIGH** | `services/golsService.js` | DELETADO |
+| 5 | 6 sub-modulos orfaos em `public/js/artilheiro-campeao/` (~2.565 linhas) | **HIGH** | `public/js/artilheiro-campeao/` | DIRETORIO INTEIRO DELETADO |
+| 6 | Rotas admin sem `verificarAdmin` (qualquer participante podia chamar) | **SECURITY** | `routes/artilheiro-campeao-routes.js` | v5.3: middleware aplicado em 4 rotas POST/DELETE |
+
+**Nota:** `models/ArtilheiroCampeao.js` preservado - importado por `disputasService.js` e `rodadaContextoController.js`.
+
+### Fase 3 - Menores (commit `900b38e`)
+
+| # | Bug | Severidade | Arquivo | Fix |
+|---|-----|-----------|---------|-----|
+| 7 | 4x `console.log('[DEBUG-ARTILHEIRO]')` em producao | LOW | `participante-artilheiro.js` | Removidos (~30 linhas debug) |
+| 8 | `gols-por-rodada.js` orfao (52 linhas, zero imports) | LOW | `public/js/gols-por-rodada.js` | DELETADO |
+| 9 | `RODADA_FINAL: 38` hardcoded em artilheiro-campeao.js | LOW | `public/js/artilheiro-campeao.js` | v4.7.0: import de `season-config.js` |
+
+### Issues reclassificados como nao-issues
+
+| Issue | Motivo |
+|-------|--------|
+| `temporadaEncerrada: true` init | Feature implementada corretamente (15+ refs), nao bug |
+| `assistencias` em artilheiro_def.json | Nao pertence ao modulo artilheiro, so ao modulo Jogos |
+| `ESCUDOS_CLUBES` hardcoded no controller | Fallback intencional quando API nao retorna URL |
+| Shared state (`_coletaAtiva`) | Correto para single-process Node.js |
+
+### Resultado final
+- **Score:** 70/100 → ~90/100
+- **Dead code removido:** ~3.260 linhas em 9 arquivos deletados
+- **Bug seguranca:** Auth corrigida em 4 rotas admin
+- **Commits:** `68acaaf`, `0824f17`, `900b38e`
+
+---
+
+## Stitch Adapter simplificado (17/02/2026)
+
+**Decisao:** Plan B (HTML manual) mantido. Plan A (MCP auto) e Plan C (Figma) descartados.
+- Skill `stitch-adapter.md` v2.0 → v3.0 (modo manual unico)
+- MCPs Stitch e Figma removidos de `settings.local.json`
+- Commit `d6674b2`
 
 ---
 
@@ -138,8 +194,12 @@ O wizard de modulos (`gerenciar-modulos.html`) salvava corretamente no `ModuleCo
 
 ## OUTROS PENDENTES
 
-### ~~Stitch MCP~~ DESCARTADO (2026-02-17)
-- MCP Stitch e Figma removidos. Skill stitch-adapter opera em modo manual (HTML colado).
+### ~~Stitch MCP~~ DESCARTADO (2026-02-17) ✅
+- MCP Stitch e Figma removidos. Skill stitch-adapter v3.0 opera em modo manual (HTML colado).
+
+### ~~Auditoria Modulo Artilheiro~~ ✅ AUDIT-006 COMPLETO (2026-02-17)
+- 3 criticos + 6 significativos + 3 menores corrigidos
+- ~3.260 linhas dead code removidas, 1 bug seguranca (auth rotas), configs hardcoded limpos
 
 ### ~~Trabalho nao commitado (encontrado 12/02)~~ ✅ Resolvido
 - 4/5 arquivos ja commitados (verificado 13/02)
@@ -168,6 +228,10 @@ O wizard de modulos (`gerenciar-modulos.html`) salvava corretamente no `ModuleCo
 | `public/participante/js/modules/participante-extrato-ui.js` | Render extrato app | v11.0 AUDITADO OK |
 | `public/participante/css/_app-tokens.css` | Tokens CSS cores | Correto |
 | `scripts/auditoria-financeira-completa.js` | Script auditoria completa | Correto v1.1 |
+| `controllers/artilheiroCampeaoController.js` | Controller artilheiro (1297 linhas) | v5.2.0 AUDITADO OK |
+| `routes/artilheiro-campeao-routes.js` | Rotas artilheiro com verificarAdmin | FIXADO v5.3 (AUDIT-006) |
+| `public/js/artilheiro-campeao.js` | Admin UI artilheiro | v4.7.0 (RODADA_FINAL centralizado) |
+| `config/rules/artilheiro.json` | Regras artilheiro | LIMPO (sem hardcodes, temporada 2026) |
 
 ---
 
@@ -219,5 +283,7 @@ Apos invalidacao, o proximo acesso ao extrato de cada participante recalculara a
 7. ~~Commitar todos os fixes pendentes~~ ✅ Tudo commitado
 8. ~~Auditoria faixas ranking (valores errados)~~ ✅ AUDIT-005 (3 bugs, commit 9564750)
 9. ~~Simplificar FASE 6 skill git-commit-push~~ ✅ FEITO (commit b4e9c88)
-10. AUDIT-001 Fase 3 se houver tempo (cosmetico)
-11. Verificar temporada 2025 caches (formato antigo, reconciliacao nao suporta)
+10. ~~Stitch simplificado para modo manual~~ ✅ FEITO (commit d6674b2)
+11. ~~Auditoria modulo artilheiro~~ ✅ AUDIT-006 (12 fixes, 3 commits)
+12. AUDIT-001 Fase 3 se houver tempo (cosmetico)
+13. Verificar temporada 2025 caches (formato antigo, reconciliacao nao suporta)
