@@ -10,7 +10,6 @@
  * - Logging e monitoramento de custos
  */
 
-import Anthropic from '@anthropic-ai/sdk';
 import NodeCache from 'node-cache';
 import crypto from 'crypto';
 
@@ -40,8 +39,9 @@ class LLMLogger {
 
 // Cliente Anthropic (lazy initialization)
 let anthropicClient = null;
+let AnthropicSDK = null;
 
-function getAnthropicClient() {
+async function getAnthropicClient() {
   if (!anthropicClient) {
     const apiKey = process.env.ANTHROPIC_API_KEY;
 
@@ -49,7 +49,18 @@ function getAnthropicClient() {
       throw new Error('ANTHROPIC_API_KEY não configurada no .env');
     }
 
-    anthropicClient = new Anthropic({ apiKey });
+    if (!AnthropicSDK) {
+      try {
+        const module = await import('@anthropic-ai/sdk');
+        AnthropicSDK = module.default;
+      } catch (err) {
+        throw new Error(
+          'Pacote @anthropic-ai/sdk não está instalado. Execute: npm install @anthropic-ai/sdk'
+        );
+      }
+    }
+
+    anthropicClient = new AnthropicSDK({ apiKey });
     LLMLogger.info('Cliente Anthropic inicializado');
   }
 
@@ -255,7 +266,7 @@ export async function solicitarAnalise({ tipo, contexto, useCache = true, model 
     const userPrompt = promptConfig.userPromptTemplate(contextoSanitizado);
 
     // Fazer request para API Claude
-    const client = getAnthropicClient();
+    const client = await getAnthropicClient();
 
     const requestFn = async () => {
       return await client.messages.create({
