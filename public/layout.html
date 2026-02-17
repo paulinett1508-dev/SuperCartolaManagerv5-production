@@ -222,21 +222,9 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="sidebar-accordion-item" id="sidebarModoManutencao" onclick="abrirModoManutencaoSidebar(event)">
+                                <a href="modo-manutencao-avancado.html" class="sidebar-accordion-item" data-page="modo-manutencao-avancado.html">
                                     <span class="material-icons">engineering</span>
                                     <span>Modo Manutenção</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="modo-manutencao.html" class="sidebar-accordion-item" data-page="modo-manutencao.html">
-                                    <span class="material-icons">build_circle</span>
-                                    <span>Manutenção Participante</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="modo-manutencao-avancado.html" class="sidebar-accordion-item" data-page="modo-manutencao-avancado.html">
-                                    <span class="material-icons">settings_suggest</span>
-                                    <span>Manutenção Avançada</span>
                                 </a>
                             </li>
                             <li>
@@ -710,7 +698,6 @@
                         'ferramentas-rodadas.html': 'operacoes',
                         'gerenciar-modulos.html': 'operacoes',
                         'admin-consolidacao.html': 'operacoes',
-                        'modo-manutencao.html': 'operacoes',
                         'modo-manutencao-avancado.html': 'operacoes',
                         'notificador.html': 'operacoes',
                         'admin-orchestrator.html': 'operacoes',
@@ -969,8 +956,7 @@
                         "admin-analises-ia.html": { title: "Análises IA", subtitle: "Análises Inteligentes" },
                         "admin-validacao-migracao.html": { title: "Validação", subtitle: "Validação de Migração" },
                         "migrar-localstorage-mongodb.html": { title: "Migrar Dados", subtitle: "LocalStorage para MongoDB" },
-                        "modo-manutencao.html": { title: "Manutenção", subtitle: "Manutenção do Participante" },
-                        "modo-manutencao-avancado.html": { title: "Manutenção Avançada", subtitle: "Configurações Avançadas" },
+                        "modo-manutencao-avancado.html": { title: "Modo Manutenção", subtitle: "Configuração e Controle" },
                         "dashboard-saude.html": { title: "Saúde do Sistema", subtitle: "Monitoramento e Diagnóstico" },
                         "api-football-analytics.html": { title: "API Football", subtitle: "Monitoramento de APIs" },
                     };
@@ -1049,7 +1035,6 @@
                     'admin-analises-ia.html',
                     'admin-validacao-migracao.html',
                     'migrar-localstorage-mongodb.html',
-                    'modo-manutencao.html',
                     'modo-manutencao-avancado.html'
                 ],
 
@@ -1622,18 +1607,6 @@
                     alert(mensagemErro);
                     btn.disabled = false;
                     atualizarBotaoConsolidar();
-                }
-            };
-
-            window.abrirModoManutencaoSidebar = function(event) {
-                event.preventDefault();
-                event.stopPropagation();
-
-                // Navegar para página de Modo Manutenção
-                if (SPANavigation.enabled) {
-                    SPANavigation.navigate('modo-manutencao.html');
-                } else {
-                    window.location.href = 'modo-manutencao.html';
                 }
             };
 
