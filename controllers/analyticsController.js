@@ -9,6 +9,7 @@ import https from 'https';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import logger from '../utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -177,7 +178,7 @@ async function buscarBranchesGitHub(desde = null, ate = null) {
 
     return branches;
   } catch (erro) {
-    console.error('[Analytics] Erro ao buscar branches do GitHub:', erro.message);
+    logger.error('[Analytics] Erro ao buscar branches do GitHub:', erro.message);
     return [];
   }
 }
@@ -229,7 +230,7 @@ async function buscarCommitsGitHub(nomeBranch, desde = null, ate = null) {
 
     return commits;
   } catch (erro) {
-    console.error(`[Analytics] Erro ao buscar commits de ${nomeBranch}:`, erro.message);
+    logger.error(`[Analytics] Erro ao buscar commits de ${nomeBranch}:`, erro.message);
     return [];
   }
 }
@@ -335,7 +336,7 @@ async function buscarPullRequestsGitHub(desde = null, ate = null) {
 
     return prs;
   } catch (erro) {
-    console.error('[Analytics] Erro ao buscar PRs do GitHub:', erro.message);
+    logger.error('[Analytics] Erro ao buscar PRs do GitHub:', erro.message);
     return [];
   }
 }
@@ -458,7 +459,7 @@ export async function getAnalyticsResumo(req, res) {
       branches: branchesDetalhadas
     });
   } catch (erro) {
-    console.error('[Analytics] Erro em getAnalyticsResumo:', erro.message);
+    logger.error('[Analytics] Erro em getAnalyticsResumo:', erro.message);
     res.status(500).json({
       success: false,
       error: 'Erro ao gerar analytics',
@@ -502,7 +503,7 @@ export async function getAnatyticsBranchDetalhes(req, res) {
       }
     });
   } catch (erro) {
-    console.error('[Analytics] Erro em getAnatyticsBranchDetalhes:', erro.message);
+    logger.error('[Analytics] Erro em getAnatyticsBranchDetalhes:', erro.message);
     res.status(500).json({
       success: false,
       error: 'Erro ao buscar detalhes',
@@ -570,7 +571,7 @@ export async function getAnalyticsMerges(req, res) {
       ate: ateData
     });
   } catch (erro) {
-    console.error('[Analytics] Erro em getAnalyticsMerges:', erro.message);
+    logger.error('[Analytics] Erro em getAnalyticsMerges:', erro.message);
     res.status(500).json({
       success: false,
       error: 'Erro ao buscar merges',
@@ -624,7 +625,7 @@ export async function getAnalyticsFuncionalidades(req, res) {
       funcionalidades
     });
   } catch (erro) {
-    console.error('[Analytics] Erro em getAnalyticsFuncionalidades:', erro.message);
+    logger.error('[Analytics] Erro em getAnalyticsFuncionalidades:', erro.message);
     res.status(500).json({
       success: false,
       error: 'Erro ao buscar funcionalidades',
@@ -724,7 +725,7 @@ export async function getAnalyticsEstatisticas(req, res) {
       stats
     });
   } catch (erro) {
-    console.error('[Analytics] Erro em getAnalyticsEstatisticas:', erro.message);
+    logger.error('[Analytics] Erro em getAnalyticsEstatisticas:', erro.message);
     res.status(500).json({
       success: false,
       error: 'Erro ao buscar estatísticas',
@@ -765,7 +766,7 @@ function executeGitCommand(command) {
       stdio: ['pipe', 'pipe', 'ignore']
     }).trim();
   } catch (error) {
-    console.error(`[Analytics] Erro ao executar comando: ${command}`, error.message);
+    logger.error(`[Analytics] Erro ao executar comando: ${command}`, error.message);
     return '';
   }
 }
@@ -810,7 +811,7 @@ export async function getGitSyncStatus(req, res) {
     res.json(status);
 
   } catch (erro) {
-    console.error('[Analytics] Erro em getGitSyncStatus:', erro.message);
+    logger.error('[Analytics] Erro em getGitSyncStatus:', erro.message);
     res.status(500).json({
       success: false,
       error: 'Erro ao verificar status de sincronização',
@@ -841,7 +842,7 @@ export async function postGitSyncTrigger(req, res) {
     });
 
   } catch (erro) {
-    console.error('[Analytics] Erro em postGitSyncTrigger:', erro.message);
+    logger.error('[Analytics] Erro em postGitSyncTrigger:', erro.message);
     res.status(500).json({
       success: false,
       error: 'Erro ao sincronizar',

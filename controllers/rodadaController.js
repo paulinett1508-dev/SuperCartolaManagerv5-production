@@ -15,6 +15,7 @@ import RankingGeralCache from "../models/RankingGeralCache.js";
 import mongoose from "mongoose";
 import { isSeasonFinished, logBlockedOperation, SEASON_CONFIG } from "../utils/seasonGuard.js";
 import { CURRENT_SEASON } from "../config/seasons.js";
+import logger from '../utils/logger.js';
 
 // ✅ Converter ligaId para ObjectId
 function toLigaId(ligaId) {
@@ -38,7 +39,7 @@ function getConfigRankingRodada(liga, rodada = 1) {
   const config = liga?.configuracoes?.ranking_rodada;
 
   if (!config) {
-    console.warn(`[CONFIG] Liga ${liga?._id} sem configuracoes.ranking_rodada, usando fallback`);
+    logger.warn(`[CONFIG] Liga ${liga?._id} sem configuracoes.ranking_rodada, usando fallback`);
     return { valores: {}, temporal: false, totalParticipantes: 0 };
   }
 
@@ -94,7 +95,7 @@ async function obterMapaClubeId(ligaIdObj) {
     mapa[r._id] = r.clube_id;
   });
 
-  console.log(`[MAPA-CLUBE-ID] ${Object.keys(mapa).length} times mapeados`);
+  logger.log(`[MAPA-CLUBE-ID] ${Object.keys(mapa).length} times mapeados`);
   return mapa;
 }
 
@@ -117,7 +118,7 @@ export const popularRodadas = async (req, res) => {
   }
 
   try {
-    console.log(`[POPULAR-RODADAS] Iniciando para liga ${ligaId}`, {
+    logger.log(`[POPULAR-RODADAS] Iniciando para liga ${ligaId}`, {
       rodada,
       inicio,
       fim,
@@ -147,14 +148,14 @@ export const popularRodadas = async (req, res) => {
 
     // ✅ FIX: Converter ligaId para ObjectId
     const ligaIdObj = toLigaId(ligaId);
-    console.log(`[POPULAR-RODADAS] ligaId convertido: ${ligaIdObj}`);
+    logger.log(`[POPULAR-RODADAS] ligaId convertido: ${ligaIdObj}`);
 
     // 1. BUSCAR TODOS OS TIMES DA LIGA
     // ✅ v2.6: Buscar via Liga.times (array de IDs numéricos)
     const liga = await Liga.findById(ligaIdObj).lean();
 
     if (!liga) {
-      console.error(`[POPULAR-RODADAS] Liga não encontrada: ${ligaId}`);
+      logger.error(`[POPULAR-RODADAS] Liga não encontrada: ${ligaId}`);
       return res.status(404).json({
         error: "Liga não encontrada",
         ligaId: ligaId,
@@ -162,14 +163,14 @@ export const popularRodadas = async (req, res) => {
     }
 
     if (!Array.isArray(liga.times) || liga.times.length === 0) {
-      console.error(`[POPULAR-RODADAS] Liga sem times cadastrados: ${ligaId}`);
+      logger.error(`[POPULAR-RODADAS] Liga sem times cadastrados: ${ligaId}`);
       return res.status(404).json({
         error: "Nenhum time cadastrado na liga",
         ligaId: ligaId,
       });
     }
 
-    console.log(
+    logger.log(
       `[POPULAR-RODADAS] Liga tem ${liga.times.length} times cadastrados`,
     );
 
@@ -195,7 +196,7 @@ export const popularRodadas = async (req, res) => {
       };
     });
 
-    console.log(`[POPULAR-RODADAS] ${times.length} times encontrados (ativo via Liga.participantes: ${participantesMap.size})`);
+    logger.log(`[POPULAR-RODADAS] ${times.length} times encontrados (ativo via Liga.participantes: ${participantesMap.size})`);
 
     // ✅ v2.4: Buscar mapa de clube_id existentes
     const mapaClubeId = await obterMapaClubeId(ligaIdObj);
@@ -210,7 +211,7 @@ export const popularRodadas = async (req, res) => {
     const detalhes = [];
 
     for (let numRodada = rodadaInicio; numRodada <= rodadaFim; numRodada++) {
-      console.log(`[POPULAR-RODADAS] Processando rodada ${numRodada}...`);
+      logger.log(`[POPULAR-RODADAS] Processando rodada ${numRodada}...`);
 
       try {
         const resultadoRodada = await processarRodada(
@@ -231,7 +232,7 @@ export const popularRodadas = async (req, res) => {
           `Rodada ${numRodada}: ${resultadoRodada.inseridas} inseridas, ${resultadoRodada.atualizadas} atualizadas`,
         );
       } catch (error) {
-        console.error(
+        logger.error(
           `[POPULAR-RODADAS] Erro na rodada ${numRodada}:`,
           error.message,
         );
@@ -253,9 +254,9 @@ export const popularRodadas = async (req, res) => {
         ligaId: ligaIdForCache,
         temporada: CURRENT_SEASON,
       });
-      console.log(`[POPULAR-RODADAS] 🗑️ Caches invalidados: ${deletedTurno.deletedCount} RankingTurno, ${deletedGeral.deletedCount} RankingGeralCache`);
+      logger.log(`[POPULAR-RODADAS] 🗑️ Caches invalidados: ${deletedTurno.deletedCount} RankingTurno, ${deletedGeral.deletedCount} RankingGeralCache`);
     } catch (cacheErr) {
-      console.warn(`[POPULAR-RODADAS] ⚠️ Erro ao invalidar caches (não-bloqueante):`, cacheErr.message);
+      logger.warn(`[POPULAR-RODADAS] ⚠️ Erro ao invalidar caches (não-bloqueante):`, cacheErr.message);
     }
 
     // 4. RESPOSTA
@@ -273,7 +274,7 @@ export const popularRodadas = async (req, res) => {
       participantesTotal: times.length,
     });
   } catch (error) {
-    console.error("[POPULAR-RODADAS] Erro geral:", error);
+    logger.error("[POPULAR-RODADAS] Erro geral:", error);
     res.status(500).json({
       error: "Erro ao popular rodadas",
       detalhes: error.message,
@@ -295,7 +296,7 @@ async function processarRodada(
 ) {
   // ✅ v3.0: Buscar configuração do banco ao invés de hardcode
   const configRanking = getConfigRankingRodada(liga, rodada);
-  console.log(`[PROCESSAR-RODADA] Config ranking para rodada ${rodada}:`,
+  logger.log(`[PROCESSAR-RODADA] Config ranking para rodada ${rodada}:`,
     configRanking.temporal ? `${configRanking.fase} (temporal)` : 'simples');
 
   let inseridas = 0;
@@ -305,7 +306,7 @@ async function processarRodada(
   if (!repopular) {
     const existente = await Rodada.findOne({ ligaId: ligaIdObj, rodada, temporada: CURRENT_SEASON }).lean();
     if (existente) {
-      console.log(`[PROCESSAR-RODADA] Rodada ${rodada} temporada ${CURRENT_SEASON} já existe (pulando)`);
+      logger.log(`[PROCESSAR-RODADA] Rodada ${rodada} temporada ${CURRENT_SEASON} já existe (pulando)`);
       return { inseridas: 0, atualizadas: 0 };
     }
   }
@@ -320,7 +321,7 @@ async function processarRodada(
 
     // Se time já tinha desistido antes desta rodada, pular
     if (!ativoNestaRodada) {
-      console.log(
+      logger.log(
         `[PROCESSAR-RODADA] Time ${time.timeId} inativo na rodada ${rodada} (desistência: ${rodadaDesistencia})`,
       );
       continue;
@@ -351,7 +352,7 @@ async function processarRodada(
           });
         } catch (dumpErr) {
           // Não bloquear o fluxo principal se o dump falhar
-          console.warn(`[PROCESSAR-RODADA] Erro ao salvar dump time ${time.timeId} rodada ${rodada}:`, dumpErr.message);
+          logger.warn(`[PROCESSAR-RODADA] Erro ao salvar dump time ${time.timeId} rodada ${rodada}:`, dumpErr.message);
         }
 
         // ✅ v2.4: clube_id da API OU do mapa de rodadas anteriores
@@ -396,12 +397,12 @@ async function processarRodada(
           reserva_luxo_id: dados.reserva_luxo_id || null,
         });
 
-        console.log(
+        logger.log(
           `[PROCESSAR-RODADA] Time ${time.timeId} rodada ${rodada}: ${dados.pontos} pontos (clube_id: ${clubeIdFinal})`,
         );
       } else {
         // API falhou - criar registro com clube_id herdado
-        console.warn(
+        logger.warn(
           `[PROCESSAR-RODADA] API falhou para time ${time.timeId} rodada ${rodada} (status: ${response.status})`,
         );
 
@@ -417,7 +418,7 @@ async function processarRodada(
         });
       }
     } catch (error) {
-      console.error(
+      logger.error(
         `[PROCESSAR-RODADA] Erro ao buscar time ${time.timeId}:`,
         error.message,
       );
@@ -489,14 +490,14 @@ async function processarRodada(
         atualizadas++;
       }
     } catch (saveError) {
-      console.error(
+      logger.error(
         `[PROCESSAR-RODADA] Erro ao salvar time ${time.timeId}:`,
         saveError.message,
       );
     }
   }
 
-  console.log(
+  logger.log(
     `[PROCESSAR-RODADA] Rodada ${rodada}: ${atualizadas} registros processados (${timesAtivos.length} ativos)`,
   );
 
@@ -525,7 +526,7 @@ export const obterRodadas = async (req, res) => {
       filtro.rodada = { $gte: Number(inicio), $lte: Number(fim) };
     }
 
-    console.log(`[OBTER-RODADAS] Filtro:`, JSON.stringify(filtro));
+    logger.log(`[OBTER-RODADAS] Filtro:`, JSON.stringify(filtro));
 
     // Buscar rodadas do banco
     const rodadas = await Rodada.find(filtro)
@@ -595,14 +596,14 @@ export const obterRodadas = async (req, res) => {
         return (a.posicao || 999) - (b.posicao || 999);
       });
 
-      console.log(`[OBTER-RODADAS] Retornando: ${rodadasComTotal.length} rodadas (SuperCartola - posições recalculadas)`);
+      logger.log(`[OBTER-RODADAS] Retornando: ${rodadasComTotal.length} rodadas (SuperCartola - posições recalculadas)`);
       return res.json(rodadasComTotal);
     }
 
     // =====================================================================
     // ✅ v3.0: LÓGICA PARA LIGAS COM CONFIG TEMPORAL (ex: 2 FASES)
     // =====================================================================
-    console.log(`[OBTER-RODADAS] Liga com config temporal - aplicando lógica de fases`);
+    logger.log(`[OBTER-RODADAS] Liga com config temporal - aplicando lógica de fases`);
 
     // Buscar mapa de desistências (liga já foi buscada acima)
     let mapaDesistencia = {};
@@ -619,7 +620,7 @@ export const obterRodadas = async (req, res) => {
         }
       });
 
-      console.log(`[OBTER-RODADAS] Mapa de desistências:`, mapaDesistencia);
+      logger.log(`[OBTER-RODADAS] Mapa de desistências:`, mapaDesistencia);
     }
 
     // ✅ v3.0: Buscar rodada de transição do config do banco
@@ -631,7 +632,7 @@ export const obterRodadas = async (req, res) => {
     const rodadasFase2Raw = rodadas.filter((r) => r.rodada >= rodadaTransicao);
 
     // FASE 1: Retornar como está no banco (sem alterações)
-    console.log(`[OBTER-RODADAS] FASE 1 (R1-R${rodadaTransicao - 1}): ${rodadasFase1.length} registros (sem recálculo)`);
+    logger.log(`[OBTER-RODADAS] FASE 1 (R1-R${rodadaTransicao - 1}): ${rodadasFase1.length} registros (sem recálculo)`);
     rodadasProcessadas.push(...rodadasFase1);
 
     // FASE 2 (R29+): Filtrar inativos e recalcular posições
@@ -644,7 +645,7 @@ export const obterRodadas = async (req, res) => {
     });
 
     const removidosFase2 = rodadasFase2Raw.length - rodadasFase2Filtradas.length;
-    console.log(`[OBTER-RODADAS] FASE 2 (R${rodadaTransicao}+): ${removidosFase2} inativos filtrados`);
+    logger.log(`[OBTER-RODADAS] FASE 2 (R${rodadaTransicao}+): ${removidosFase2} inativos filtrados`);
 
     // Agrupar FASE 2 por rodada para recalcular
     const rodadasFase2PorNumero = new Map();
@@ -684,11 +685,11 @@ export const obterRodadas = async (req, res) => {
       return a.posicao - b.posicao;
     });
 
-    console.log(`[OBTER-RODADAS] Retornando: ${rodadasProcessadas.length} rodadas (FASE 1: original, FASE 2: recalculada)`);
+    logger.log(`[OBTER-RODADAS] Retornando: ${rodadasProcessadas.length} rodadas (FASE 1: original, FASE 2: recalculada)`);
 
     res.json(rodadasProcessadas);
   } catch (error) {
-    console.error("[OBTER-RODADAS] Erro:", error);
+    logger.error("[OBTER-RODADAS] Erro:", error);
     res.status(500).json({
       error: "Erro ao obter rodadas",
       detalhes: error.message,
@@ -711,7 +712,7 @@ export const criarIndiceUnico = async (req, res) => {
       mensagem: "Índice único criado com sucesso",
     });
   } catch (error) {
-    console.error("[CRIAR-INDICE] Erro:", error);
+    logger.error("[CRIAR-INDICE] Erro:", error);
     res.status(500).json({
       error: "Erro ao criar índice",
       detalhes: error.message,
@@ -719,4 +720,4 @@ export const criarIndiceUnico = async (req, res) => {
   }
 };
 
-console.log("[RODADA-CONTROLLER] ✅ v3.0.0 carregado (SaaS Dinâmico + SEASON GUARD)");
+logger.log("[RODADA-CONTROLLER] ✅ v3.0.0 carregado (SaaS Dinâmico + SEASON GUARD)");

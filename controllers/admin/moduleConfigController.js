@@ -15,6 +15,7 @@ import { CURRENT_SEASON } from '../../config/seasons.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import logger from '../../utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,7 +29,7 @@ export const listarConfigs = async (req, res) => {
         const { ligaId } = req.params;
         const temporada = req.query.temporada ? Number(req.query.temporada) : CURRENT_SEASON;
 
-        console.log(`[ADMIN-MODULE-CONFIG] 📋 Listando configs: Liga ${ligaId}, Temporada ${temporada}`);
+        logger.log(`[ADMIN-MODULE-CONFIG] 📋 Listando configs: Liga ${ligaId}, Temporada ${temporada}`);
 
         // Buscar liga
         const liga = await Liga.findById(ligaId).lean();
@@ -54,7 +55,7 @@ export const listarConfigs = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[ADMIN-MODULE-CONFIG] ❌ Erro ao listar configs:', error);
+        logger.error('[ADMIN-MODULE-CONFIG] ❌ Erro ao listar configs:', error);
         res.status(500).json({
             success: false,
             error: 'Erro ao listar configurações',
@@ -72,7 +73,7 @@ export const buscarConfig = async (req, res) => {
         const { ligaId, moduloId } = req.params;
         const temporada = req.query.temporada ? Number(req.query.temporada) : CURRENT_SEASON;
 
-        console.log(`[ADMIN-MODULE-CONFIG] 🔍 Buscando config: ${moduloId} | Liga ${ligaId} | Temporada ${temporada}`);
+        logger.log(`[ADMIN-MODULE-CONFIG] 🔍 Buscando config: ${moduloId} | Liga ${ligaId} | Temporada ${temporada}`);
 
         // Buscar configuração completa (mesclada com defaults)
         const config = await buscarConfigModulo(ligaId, moduloId, temporada);
@@ -88,7 +89,7 @@ export const buscarConfig = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[ADMIN-MODULE-CONFIG] ❌ Erro ao buscar config:', error);
+        logger.error('[ADMIN-MODULE-CONFIG] ❌ Erro ao buscar config:', error);
         res.status(500).json({
             success: false,
             error: 'Erro ao buscar configuração',
@@ -105,7 +106,7 @@ export const buscarWizard = async (req, res) => {
     try {
         const { moduloId } = req.params;
 
-        console.log(`[ADMIN-MODULE-CONFIG] 🧙 Buscando wizard: ${moduloId}`);
+        logger.log(`[ADMIN-MODULE-CONFIG] 🧙 Buscando wizard: ${moduloId}`);
 
         // Carregar JSON do módulo
         const jsonPath = path.join(__dirname, '..', '..', 'config', 'rules', `${moduloId}.json`);
@@ -127,7 +128,7 @@ export const buscarWizard = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[ADMIN-MODULE-CONFIG] ❌ Erro ao buscar wizard:', error);
+        logger.error('[ADMIN-MODULE-CONFIG] ❌ Erro ao buscar wizard:', error);
         res.status(500).json({
             success: false,
             error: 'Erro ao buscar wizard',
@@ -147,8 +148,8 @@ export const salvarConfig = async (req, res) => {
         const temporada = req.body.temporada || CURRENT_SEASON;
         const usuario = req.session?.usuario?.email || 'admin';
 
-        console.log(`[ADMIN-MODULE-CONFIG] 💾 Salvando config: ${moduloId} | Liga ${ligaId}`);
-        console.log(`[ADMIN-MODULE-CONFIG] Respostas:`, respostas);
+        logger.log(`[ADMIN-MODULE-CONFIG] 💾 Salvando config: ${moduloId} | Liga ${ligaId}`);
+        logger.log(`[ADMIN-MODULE-CONFIG] Respostas:`, respostas);
 
         // Validar liga
         const liga = await Liga.findById(ligaId).lean();
@@ -177,7 +178,7 @@ export const salvarConfig = async (req, res) => {
         // Invalidar cache do módulo
         invalidarCacheModulo(moduloId);
 
-        console.log(`[ADMIN-MODULE-CONFIG] ✅ Config salva com sucesso: ${resultado._id}`);
+        logger.log(`[ADMIN-MODULE-CONFIG] ✅ Config salva com sucesso: ${resultado._id}`);
 
         res.json({
             success: true,
@@ -187,7 +188,7 @@ export const salvarConfig = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[ADMIN-MODULE-CONFIG] ❌ Erro ao salvar config:', error);
+        logger.error('[ADMIN-MODULE-CONFIG] ❌ Erro ao salvar config:', error);
         res.status(500).json({
             success: false,
             error: 'Erro ao salvar configuração',
@@ -207,7 +208,7 @@ export const toggleModulo = async (req, res) => {
         const temporada = req.body.temporada || CURRENT_SEASON;
         const usuario = req.session?.usuario?.email || 'admin';
 
-        console.log(`[ADMIN-MODULE-CONFIG] 🔄 Toggle módulo: ${moduloId} | Ativo: ${ativo}`);
+        logger.log(`[ADMIN-MODULE-CONFIG] 🔄 Toggle módulo: ${moduloId} | Ativo: ${ativo}`);
 
         if (ativo) {
             await ModuleConfig.ativarModulo(ligaId, moduloId, {}, usuario, temporada);
@@ -225,7 +226,7 @@ export const toggleModulo = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[ADMIN-MODULE-CONFIG] ❌ Erro ao toggle módulo:', error);
+        logger.error('[ADMIN-MODULE-CONFIG] ❌ Erro ao toggle módulo:', error);
         res.status(500).json({
             success: false,
             error: 'Erro ao ativar/desativar módulo',
@@ -244,7 +245,7 @@ export const resetarConfig = async (req, res) => {
         const temporada = req.query.temporada ? Number(req.query.temporada) : CURRENT_SEASON;
         const usuario = req.session?.usuario?.email || 'admin';
 
-        console.log(`[ADMIN-MODULE-CONFIG] 🔄 Resetando config: ${moduloId} | Liga ${ligaId}`);
+        logger.log(`[ADMIN-MODULE-CONFIG] 🔄 Resetando config: ${moduloId} | Liga ${ligaId}`);
 
         await ModuleConfig.desativarModulo(ligaId, moduloId, usuario, temporada);
 
@@ -257,7 +258,7 @@ export const resetarConfig = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[ADMIN-MODULE-CONFIG] ❌ Erro ao resetar config:', error);
+        logger.error('[ADMIN-MODULE-CONFIG] ❌ Erro ao resetar config:', error);
         res.status(500).json({
             success: false,
             error: 'Erro ao resetar configuração',
@@ -318,4 +319,4 @@ async function processarRespostasWizard(moduloId, respostas) {
     return config;
 }
 
-console.log('[ADMIN-MODULE-CONFIG] ✅ Controller carregado');
+logger.log('[ADMIN-MODULE-CONFIG] ✅ Controller carregado');

@@ -9,6 +9,7 @@ import Rodada from "../models/Rodada.js";
 import Liga from "../models/Liga.js";
 import Time from "../models/Time.js";
 import mongoose from "mongoose";
+import logger from '../utils/logger.js';
 
 function toLigaId(ligaId) {
   if (mongoose.Types.ObjectId.isValid(ligaId)) {
@@ -31,7 +32,7 @@ function getConfigRankingRodada(liga, rodada = 1) {
   const config = liga?.configuracoes?.ranking_rodada;
 
   if (!config) {
-    console.warn(`[CONFIG] Liga ${liga?._id} sem configuracoes.ranking_rodada, usando fallback`);
+    logger.warn(`[CONFIG] Liga ${liga?._id} sem configuracoes.ranking_rodada, usando fallback`);
     return { valores: {}, temporal: false, totalParticipantes: 0 };
   }
 
@@ -79,8 +80,8 @@ export const corrigirRodadas = async (req, res) => {
   const { rodadaInicio, rodadaFim } = req.body;
 
   try {
-    console.log(`[CORRIGIR-RODADAS] Iniciando correção para liga ${ligaId}`);
-    console.log(`[CORRIGIR-RODADAS] Rodadas: ${rodadaInicio} a ${rodadaFim}`);
+    logger.log(`[CORRIGIR-RODADAS] Iniciando correção para liga ${ligaId}`);
+    logger.log(`[CORRIGIR-RODADAS] Rodadas: ${rodadaInicio} a ${rodadaFim}`);
 
     const ligaIdObj = toLigaId(ligaId);
     const inicio = parseInt(rodadaInicio) || 36;
@@ -111,9 +112,9 @@ export const corrigirRodadas = async (req, res) => {
         }
       });
 
-      console.log(`[CORRIGIR-RODADAS] Times consultados: ${timesStatus.length}`);
+      logger.log(`[CORRIGIR-RODADAS] Times consultados: ${timesStatus.length}`);
     }
-    console.log(`[CORRIGIR-RODADAS] Mapa de desistências:`, mapaDesistencia);
+    logger.log(`[CORRIGIR-RODADAS] Mapa de desistências:`, mapaDesistencia);
 
     // ETAPA 1: Identificar times válidos de uma rodada anterior
     const timesValidos = await Rodada.distinct("timeId", {
@@ -131,16 +132,16 @@ export const corrigirRodadas = async (req, res) => {
       });
     }
 
-    console.log(
+    logger.log(
       `[CORRIGIR-RODADAS] Times válidos encontrados: ${timesValidos.length}`,
     );
-    console.log(`[CORRIGIR-RODADAS] IDs: ${timesValidos.join(", ")}`);
+    logger.log(`[CORRIGIR-RODADAS] IDs: ${timesValidos.join(", ")}`);
 
     const resultados = [];
 
     // ETAPA 2: Para cada rodada a corrigir
     for (let rodada = inicio; rodada <= fim; rodada++) {
-      console.log(`[CORRIGIR-RODADAS] Processando rodada ${rodada}...`);
+      logger.log(`[CORRIGIR-RODADAS] Processando rodada ${rodada}...`);
 
       // 2.1: Limpar registros corrompidos
       const deletados = await Rodada.deleteMany({
@@ -153,7 +154,7 @@ export const corrigirRodadas = async (req, res) => {
         ],
       });
 
-      console.log(
+      logger.log(
         `[CORRIGIR-RODADAS] Rodada ${rodada}: ${deletados.deletedCount} corrompidos removidos`,
       );
 
@@ -168,7 +169,7 @@ export const corrigirRodadas = async (req, res) => {
           rodada,
           timeId: { $in: timesInativosNestaRodada },
         });
-        console.log(
+        logger.log(
           `[CORRIGIR-RODADAS] Rodada ${rodada}: ${deletadosInativos.deletedCount} registros de times inativos removidos`,
         );
       }
@@ -183,7 +184,7 @@ export const corrigirRodadas = async (req, res) => {
         const ativoNestaRodada = !rodadaDesistencia || rodada < rodadaDesistencia;
 
         if (!ativoNestaRodada) {
-          console.log(
+          logger.log(
             `[CORRIGIR-RODADAS] Time ${timeId} IGNORADO na rodada ${rodada} (desistência: R${rodadaDesistencia})`,
           );
           timesIgnorados++;
@@ -206,11 +207,11 @@ export const corrigirRodadas = async (req, res) => {
               pontos: dados.pontos || 0,
             });
 
-            console.log(
+            logger.log(
               `[CORRIGIR-RODADAS] Time ${timeId}: ${dados.pontos} pts`,
             );
           } else {
-            console.warn(
+            logger.warn(
               `[CORRIGIR-RODADAS] API retornou ${response.status} para time ${timeId}`,
             );
           }
@@ -218,14 +219,14 @@ export const corrigirRodadas = async (req, res) => {
           // Rate limiting
           await new Promise((r) => setTimeout(r, 200));
         } catch (error) {
-          console.error(
+          logger.error(
             `[CORRIGIR-RODADAS] Erro ao buscar time ${timeId}:`,
             error.message,
           );
         }
       }
 
-      console.log(
+      logger.log(
         `[CORRIGIR-RODADAS] Rodada ${rodada}: ${timesIgnorados} times inativos ignorados`,
       );
 
@@ -234,7 +235,7 @@ export const corrigirRodadas = async (req, res) => {
 
       // ✅ v2.0: Buscar config para esta rodada específica
       const configRanking = getConfigRankingRodada(liga, rodada);
-      console.log(`[CORRIGIR-RODADAS] Config ranking rodada ${rodada}:`,
+      logger.log(`[CORRIGIR-RODADAS] Config ranking rodada ${rodada}:`,
         configRanking.temporal ? `${configRanking.fase} (temporal)` : 'simples');
 
       // 2.4: Salvar no banco
@@ -300,7 +301,7 @@ export const corrigirRodadas = async (req, res) => {
       verificacao,
     });
   } catch (error) {
-    console.error("[CORRIGIR-RODADAS] Erro:", error);
+    logger.error("[CORRIGIR-RODADAS] Erro:", error);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -370,7 +371,7 @@ export const verificarCorrompidos = async (req, res) => {
       rodadasProblematicas,
     });
   } catch (error) {
-    console.error("[VERIFICAR-CORROMPIDOS] Erro:", error);
+    logger.error("[VERIFICAR-CORROMPIDOS] Erro:", error);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -378,4 +379,4 @@ export const verificarCorrompidos = async (req, res) => {
   }
 };
 
-console.log("[RODADAS-CORRECAO] ✅ v2.0.0 carregado (SaaS Dinâmico)");
+logger.log("[RODADAS-CORRECAO] ✅ v2.0.0 carregado (SaaS Dinâmico)");

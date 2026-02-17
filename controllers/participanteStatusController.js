@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import logger from '../utils/logger.js';
 
 // ==================================================
 // CONTROLLER DE STATUS DE PARTICIPANTE (ADMIN)
@@ -70,7 +71,7 @@ export const obterParticipantesInativos = async (ligaId) => {
             status: "inativo",
         }));
     } catch (error) {
-        console.error("[STATUS] Erro ao obter participantes inativos:", error);
+        logger.error("[STATUS] Erro ao obter participantes inativos:", error);
         return [];
     }
 };
@@ -96,7 +97,7 @@ export const inativarParticipante = async (req, res) => {
 
         // Se não encontrar, criar registro básico
         if (!time) {
-            console.log(
+            logger.log(
                 `[STATUS] Time ${timeIdNum} não existe no banco, criando...`,
             );
             time = new Time({
@@ -115,7 +116,7 @@ export const inativarParticipante = async (req, res) => {
 
         await time.save();
 
-        console.log(
+        logger.log(
             `✅ [STATUS] Participante ${timeIdNum} inativado na rodada ${rodadaNum || "N/D"}`,
         );
 
@@ -129,7 +130,7 @@ export const inativarParticipante = async (req, res) => {
             },
         });
     } catch (err) {
-        console.error("[STATUS] Erro ao inativar:", err);
+        logger.error("[STATUS] Erro ao inativar:", err);
         res.status(500).json({ erro: err.message });
     }
 };
@@ -163,7 +164,7 @@ export const reativarParticipante = async (req, res) => {
 
         await time.save();
 
-        console.log(`✅ [STATUS] Participante ${timeIdNum} reativado`);
+        logger.log(`✅ [STATUS] Participante ${timeIdNum} reativado`);
 
         res.status(200).json({
             success: true,
@@ -174,7 +175,7 @@ export const reativarParticipante = async (req, res) => {
             },
         });
     } catch (err) {
-        console.error("[STATUS] Erro ao reativar:", err);
+        logger.error("[STATUS] Erro ao reativar:", err);
         res.status(500).json({ erro: err.message });
     }
 };
@@ -216,7 +217,7 @@ export const buscarStatusParticipante = async (req, res) => {
             existeNoBanco: true,
         });
     } catch (err) {
-        console.error("[STATUS] Erro ao buscar status:", err);
+        logger.error("[STATUS] Erro ao buscar status:", err);
         res.status(500).json({ erro: err.message });
     }
 };
@@ -265,7 +266,7 @@ export const alternarStatusParticipante = async (req, res) => {
 
         await time.save();
 
-        console.log(
+        logger.log(
             `[TOGGLE] Time ${timeIdNum} alterado para: ${novoStatus ? "Ativo" : "Inativo"}`,
         );
 
@@ -275,7 +276,7 @@ export const alternarStatusParticipante = async (req, res) => {
             status: novoStatus ? "ativo" : "inativo",
         });
     } catch (error) {
-        console.error("[TOGGLE] Erro:", error);
+        logger.error("[TOGGLE] Erro:", error);
         return res
             .status(500)
             .json({ erro: "Erro interno ao alternar status" });
@@ -303,7 +304,7 @@ export const verificarAtivoNaRodada = async (timeId, rodada) => {
 
         return false;
     } catch (error) {
-        console.error("[STATUS] Erro ao verificar ativo na rodada:", error);
+        logger.error("[STATUS] Erro ao verificar ativo na rodada:", error);
         return true; // Em caso de erro, assume ativo
     }
 };

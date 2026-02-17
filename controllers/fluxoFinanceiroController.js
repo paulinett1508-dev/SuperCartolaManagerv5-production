@@ -68,6 +68,7 @@ import { onCamposSaved } from "../utils/cache-invalidator.js";
 // ✅ v8.3.0: Usa getFinancialSeason() para consistência com quitacaoController
 // ✅ v8.4.0: SEASON_CONFIG para verificar status da temporada
 import { CURRENT_SEASON, getFinancialSeason, SEASON_CONFIG } from "../config/seasons.js";
+import logger from '../utils/logger.js';
 
 // ============================================================================
 // 🔧 CONSTANTES DE FALLBACK (usadas apenas se liga.configuracoes não existir)
@@ -89,7 +90,7 @@ export function getConfigRankingRodada(liga, rodada = 1) {
     const config = liga?.configuracoes?.ranking_rodada;
 
     if (!config) {
-        console.warn(`[FLUXO] Liga ${liga?._id} sem configuracoes.ranking_rodada`);
+        logger.warn(`[FLUXO] Liga ${liga?._id} sem configuracoes.ranking_rodada`);
         return { valores: {}, temporal: false };
     }
 
@@ -123,7 +124,7 @@ function getConfigTop10(liga) {
     const config = liga?.configuracoes?.top10;
 
     if (!config) {
-        console.warn(`[FLUXO] Liga ${liga?._id} sem configuracoes.top10`);
+        logger.warn(`[FLUXO] Liga ${liga?._id} sem configuracoes.top10`);
         return { mitos: {}, micos: {} };
     }
 
@@ -179,7 +180,7 @@ async function getStatusMercadoInterno() {
         if (!response.ok) throw new Error("Falha na API Cartola");
         return await response.json();
     } catch (error) {
-        console.warn(
+        logger.warn(
             "[FLUXO-CONTROLLER] Falha ao obter status mercado, usando fallback.",
         );
         return { rodada_atual: 38, status_mercado: 2 };
@@ -302,7 +303,7 @@ async function calcularTop10Historico(liga, timeId, temporada) {
             .lean();
 
         if (!cache || !cache.mitos?.length || !cache.micos?.length) {
-            console.log(`[FLUXO-CONTROLLER] Top10 cache não encontrado ou vazio para liga ${ligaId}`);
+            logger.log(`[FLUXO-CONTROLLER] Top10 cache não encontrado ou vazio para liga ${ligaId}`);
             return [];
         }
 
@@ -350,7 +351,7 @@ async function calcularTop10Historico(liga, timeId, temporada) {
 
         return transacoes;
     } catch (error) {
-        console.error(`[FLUXO-CONTROLLER] Erro ao calcular Top10 histórico:`, error);
+        logger.error(`[FLUXO-CONTROLLER] Erro ao calcular Top10 histórico:`, error);
         return [];
     }
 }
@@ -547,7 +548,7 @@ export const getExtratoFinanceiro = async (req, res) => {
         const temporadaSolicitada = req.query.temporada ? parseInt(req.query.temporada) : null;
         const temporadaAtual = temporadaSolicitada || getFinancialSeason();
 
-        console.log(
+        logger.log(
             `[FLUXO-CONTROLLER] Extrato time ${timeId} | temporada=${temporadaAtual} | refresh=${forcarRecalculo}`,
         );
 
@@ -571,7 +572,7 @@ export const getExtratoFinanceiro = async (req, res) => {
             });
             if (countRodadaLimite === 0) {
                 limiteConsolidacao = limiteConsolidacao - 1;
-                console.log(
+                logger.log(
                     `[FLUXO-CONTROLLER] ⚠️ R${limiteConsolidacaoBase} sem dados na collection Rodada, ajustando limite para R${limiteConsolidacao}`,
                 );
             }
@@ -601,13 +602,13 @@ export const getExtratoFinanceiro = async (req, res) => {
 
             await ExtratoFinanceiroCache.deleteOne({ _id: cache._id });
             cache = null;
-            console.log(`[FLUXO-CONTROLLER] Cache limpo para recálculo (${r0Preservadas.length} R0 preservadas)`);
+            logger.log(`[FLUXO-CONTROLLER] Cache limpo para recálculo (${r0Preservadas.length} R0 preservadas)`);
         }
 
         // ✅ v8.8.0 FIX: Auto-healing - se cache consolidou além do limite validado,
         // pode conter dados incorretos de rodadas não finalizadas. Forçar recálculo.
         if (cache && cache.ultima_rodada_consolidada > limiteConsolidacao) {
-            console.log(
+            logger.log(
                 `[FLUXO-CONTROLLER] ⚠️ Auto-healing: cache consolidado até R${cache.ultima_rodada_consolidada} > limite R${limiteConsolidacao} - forçando recálculo`,
             );
             // Extrair R0 antes de deletar
@@ -632,7 +633,7 @@ export const getExtratoFinanceiro = async (req, res) => {
                 historico_transacoes: r0Preservadas,
             });
             if (r0Preservadas.length > 0) {
-                console.log(`[FLUXO-CONTROLLER] ✅ R0 restauradas: ${r0Preservadas.length} entradas (saldo R0: R$ ${saldoR0Preservado})`);
+                logger.log(`[FLUXO-CONTROLLER] ✅ R0 restauradas: ${r0Preservadas.length} entradas (saldo R0: R$ ${saldoR0Preservado})`);
             }
         }
 
@@ -647,10 +648,10 @@ export const getExtratoFinanceiro = async (req, res) => {
             const modulosFaltantes = detectarModulosFaltantesNoCache(cache, liga, limiteConsolidacao);
 
             if (modulosFaltantes.length > 0) {
-                console.log(
+                logger.log(
                     `[FLUXO-CONTROLLER] 🔧 AUTO-HEALING: Módulos faltantes detectados (${modulosFaltantes.join(', ')}) - invalidando cache...`
                 );
-                console.log(
+                logger.log(
                     `[FLUXO-CONTROLLER] Cache tinha ${cache.historico_transacoes?.length || 0} transações até R${cache.ultima_rodada_consolidada}`
                 );
 
@@ -672,7 +673,7 @@ export const getExtratoFinanceiro = async (req, res) => {
                     historico_transacoes: r0DoCache,
                 });
 
-                console.log(
+                logger.log(
                     `[FLUXO-CONTROLLER] ✅ Cache invalidado - recálculo completo será executado (${r0DoCache.length} R0 preservadas)`
                 );
             }
@@ -689,7 +690,7 @@ export const getExtratoFinanceiro = async (req, res) => {
         let rodadaLimite = limiteConsolidacao;
         if (isInativo && rodadaDesistencia) {
             rodadaLimite = Math.min(limiteConsolidacao, rodadaDesistencia - 1);
-            console.log(
+            logger.log(
                 `[FLUXO-CONTROLLER] Inativo: limitando até R${rodadaLimite}`,
             );
         }
@@ -701,7 +702,7 @@ export const getExtratoFinanceiro = async (req, res) => {
         const isTemporadaFutura = temporadaAtual > temporadaFinanceira;
 
         if (isTemporadaFutura) {
-            console.log(
+            logger.log(
                 `[FLUXO-CONTROLLER] ⚠️ Temporada FUTURA (${temporadaAtual} > ${temporadaFinanceira}) - NÃO calcular rodadas`
             );
         }
@@ -714,7 +715,7 @@ export const getExtratoFinanceiro = async (req, res) => {
 
         // Só calcular rodadas se NÃO for temporada futura
         if (!isTemporadaFutura && cache.ultima_rodada_consolidada < rodadaLimite) {
-            console.log(
+            logger.log(
                 `[FLUXO-CONTROLLER] Calculando R${cache.ultima_rodada_consolidada + 1} → R${rodadaLimite}`,
             );
 
@@ -761,7 +762,7 @@ export const getExtratoFinanceiro = async (req, res) => {
                     novasTransacoes.push(...transacoesTop10);
                     transacoesTop10.forEach((t) => (novoSaldo += t.valor));
                     cacheModificado = true;
-                    console.log(
+                    logger.log(
                         `[FLUXO-CONTROLLER] TOP10 histórico: ${transacoesTop10.length} transações`
                     );
                 }
@@ -785,7 +786,7 @@ export const getExtratoFinanceiro = async (req, res) => {
                     );
                 }
 
-                console.log(`[FLUXO-CONTROLLER] Calculando MATA-MATA histórico para time ${timeId}`);
+                logger.log(`[FLUXO-CONTROLLER] Calculando MATA-MATA histórico para time ${timeId}`);
 
                 // Calcular TODOS os resultados de Mata-Mata
                 const resultadosMM = await getResultadosMataMataCompleto(ligaId, rodadaAtualCartola + 1);
@@ -820,7 +821,7 @@ export const getExtratoFinanceiro = async (req, res) => {
                     novasTransacoes.push(...transacoesMM);
                     transacoesMM.forEach((t) => (novoSaldo += t.valor));
                     cacheModificado = true;
-                    console.log(
+                    logger.log(
                         `[FLUXO-CONTROLLER] MATA-MATA histórico: ${transacoesMM.length} transações`
                     );
                 }
@@ -844,7 +845,7 @@ export const getExtratoFinanceiro = async (req, res) => {
             cache.data_ultima_atualizacao = new Date();
 
             await cache.save();
-            console.log(
+            logger.log(
                 `[FLUXO-CONTROLLER] Cache atualizado: ${cache.historico_transacoes.length} transações`,
             );
         } else if (!isTemporadaFutura && cache.ultima_rodada_consolidada < rodadaLimite) {
@@ -875,7 +876,7 @@ export const getExtratoFinanceiro = async (req, res) => {
                     data: a.criado_em,
                     _id: a._id,
                 }));
-                console.log(`[FLUXO-CONTROLLER] Ajustes 2026+: ${ajustes.length} transações, total R$ ${saldoCampos}`);
+                logger.log(`[FLUXO-CONTROLLER] Ajustes 2026+: ${ajustes.length} transações, total R$ ${saldoCampos}`);
             }
         } else {
             // Campos manuais (temporadas anteriores a 2026)
@@ -921,7 +922,7 @@ export const getExtratoFinanceiro = async (req, res) => {
                 data: a.dataAcerto,
                 metodoPagamento: a.metodoPagamento,
             }));
-            console.log(`[FLUXO-CONTROLLER] Acertos financeiros: ${acertos.length} transações`);
+            logger.log(`[FLUXO-CONTROLLER] Acertos financeiros: ${acertos.length} transações`);
         }
 
         // ✅ v8.11.0 FIX: Incluir inscrição da temporada como lançamento inicial
@@ -935,7 +936,7 @@ export const getExtratoFinanceiro = async (req, res) => {
         // ✅ v8.12.0: Owner/premium isento de inscrição (liga com owner_email)
         const isOwnerPremium = participante?.premium === true && !!liga.owner_email;
         if (isOwnerPremium) {
-            console.log(`[FLUXO-CONTROLLER] 👑 Owner/premium isento de inscrição (${participante.nome_cartola})`);
+            logger.log(`[FLUXO-CONTROLLER] 👑 Owner/premium isento de inscrição (${participante.nome_cartola})`);
         }
 
         // ✅ v8.11.0: Verificar se inscrição já está persistida no cache (R0)
@@ -957,9 +958,9 @@ export const getExtratoFinanceiro = async (req, res) => {
                 valor: -valorInscricao,
                 data: new Date(`${temporadaAtual}-01-01T00:00:00Z`),
             });
-            console.log(`[FLUXO-CONTROLLER] Inscrição ${temporadaAtual}: R$ ${-valorInscricao} (dinâmica, pagou: ${pagouInscricao})`);
+            logger.log(`[FLUXO-CONTROLLER] Inscrição ${temporadaAtual}: R$ ${-valorInscricao} (dinâmica, pagou: ${pagouInscricao})`);
         } else if (inscricaoJaEmCache) {
-            console.log(`[FLUXO-CONTROLLER] Inscrição ${temporadaAtual}: já no cache R0 (não duplicar)`);
+            logger.log(`[FLUXO-CONTROLLER] Inscrição ${temporadaAtual}: já no cache R0 (não duplicar)`);
         }
 
         // Saldo da temporada (sem acertos, com inscrição)
@@ -1015,7 +1016,7 @@ export const getExtratoFinanceiro = async (req, res) => {
             },
         });
     } catch (error) {
-        console.error("[FLUXO-CONTROLLER] Erro crítico:", error);
+        logger.error("[FLUXO-CONTROLLER] Erro crítico:", error);
         res.status(500).json({ error: "Erro interno ao processar financeiro" });
     }
 };
@@ -1028,7 +1029,7 @@ export const getCampos = async (req, res) => {
         let campos = await FluxoFinanceiroCampos.findOne({ ligaId, timeId, temporada: temporadaAtual }).lean();
 
         if (!campos) {
-            console.log(
+            logger.log(
                 `[FLUXO-CONTROLLER] Criando campos padrão para time ${timeId} (temporada ${temporadaAtual})`,
             );
             campos = await FluxoFinanceiroCampos.create({
@@ -1046,7 +1047,7 @@ export const getCampos = async (req, res) => {
 
         res.json({ success: true, campos: campos.campos });
     } catch (error) {
-        console.error("Erro ao buscar campos:", error);
+        logger.error("Erro ao buscar campos:", error);
         res.status(500).json({
             success: false,
             message: "Erro ao buscar campos editáveis",
@@ -1088,7 +1089,7 @@ export const salvarCampo = async (req, res) => {
 
         res.json(documento);
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         res.status(500).json({ error: "Erro ao salvar campo" });
     }
 };
@@ -1128,10 +1129,10 @@ export const resetarCampos = async (req, res) => {
         }
 
         await FluxoFinanceiroCampos.deleteOne({ ligaId, timeId, temporada });
-        console.log(`[FLUXO] Campos resetados: liga=${ligaId}, time=${timeId}, temporada=${temporada}`);
+        logger.log(`[FLUXO] Campos resetados: liga=${ligaId}, time=${timeId}, temporada=${temporada}`);
         res.json({ message: "Campos resetados com sucesso", temporada });
     } catch (error) {
-        console.error('[FLUXO] Erro ao resetar campos:', error);
+        logger.error('[FLUXO] Erro ao resetar campos:', error);
         res.status(500).json({ error: "Erro ao resetar campos" });
     }
 };
@@ -1146,7 +1147,7 @@ export const deletarCampos = async (req, res) => {
 
 export const getFluxoFinanceiroLiga = async (ligaId, rodadaNumero) => {
     try {
-        console.log(
+        logger.log(
             `[FLUXO-CONSOLIDAÇÃO] Processando liga ${ligaId} até R${rodadaNumero}`,
         );
 
@@ -1245,7 +1246,7 @@ export const getFluxoFinanceiroLiga = async (ligaId, rodadaNumero) => {
                     );
 
                     if (!temMataMataNcache) {
-                        console.log(`[FLUXO-CONSOLIDAÇÃO] Recalculando MATA-MATA histórico para time ${timeId}`);
+                        logger.log(`[FLUXO-CONSOLIDAÇÃO] Recalculando MATA-MATA histórico para time ${timeId}`);
 
                         // Calcular TODOS os resultados de Mata-Mata
                         const { getResultadosMataMataCompleto } = await import("./mata-mata-backend.js");
@@ -1277,7 +1278,7 @@ export const getFluxoFinanceiroLiga = async (ligaId, rodadaNumero) => {
                         if (transacoesMM.length > 0) {
                             cache.historico_transacoes.push(...transacoesMM);
                             transacoesMM.forEach((t) => (cache.saldo_consolidado += t.valor));
-                            console.log(`[FLUXO-CONSOLIDAÇÃO] ✅ MATA-MATA: ${transacoesMM.length} transações adicionadas para time ${timeId}`);
+                            logger.log(`[FLUXO-CONSOLIDAÇÃO] ✅ MATA-MATA: ${transacoesMM.length} transações adicionadas para time ${timeId}`);
                         }
                     }
                 }
@@ -1321,14 +1322,14 @@ export const getFluxoFinanceiroLiga = async (ligaId, rodadaNumero) => {
             });
         }
 
-        console.log(
+        logger.log(
             `[FLUXO-CONSOLIDAÇÃO] ✅ ${financeiroPorTime.length} times processados`,
         );
         return financeiroPorTime;
     } catch (error) {
-        console.error("[FLUXO-CONSOLIDAÇÃO] ❌ Erro:", error);
+        logger.error("[FLUXO-CONSOLIDAÇÃO] ❌ Erro:", error);
         throw error;
     }
 };
 
-console.log("[FLUXO-CONTROLLER] ✅ v8.12.0 carregado (Owner premium isento + Preservação R0)");
+logger.log("[FLUXO-CONTROLLER] ✅ v8.12.0 carregado (Owner premium isento + Preservação R0)");

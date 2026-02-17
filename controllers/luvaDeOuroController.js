@@ -8,6 +8,7 @@ import {
   consolidarRodada,
 } from "../services/goleirosService.js";
 import Liga from "../models/Liga.js";
+import logger from '../utils/logger.js';
 
 // =====================================================================
 // ✅ v2.0: VALIDAÇÃO DINÂMICA DE LIGA (SaaS)
@@ -51,8 +52,8 @@ class LuvaDeOuroController {
       const { ligaId } = req.params;
       const { inicio = 1, fim = null, forcar_coleta = false } = req.query;
 
-      console.log(`🥅 [LUVA-OURO] Solicitação de ranking - Liga: ${ligaId}`);
-      console.log(
+      logger.log(`🥅 [LUVA-OURO] Solicitação de ranking - Liga: ${ligaId}`);
+      logger.log(
         `📊 Parâmetros: início=${inicio}, fim=${fim}, forcar_coleta=${forcar_coleta}`,
       );
 
@@ -89,14 +90,14 @@ class LuvaDeOuroController {
 
       // Se forçar coleta, coletar dados primeiro
       if (forcar_coleta === "true") {
-        console.log("🔄 Forçando coleta de dados...");
+        logger.log("🔄 Forçando coleta de dados...");
         try {
           const fimColeta =
             rodadaFim ||
             (await detectarUltimaRodadaConcluida().then((r) => r.recomendacao));
           await coletarDadosGoleiros(ligaId, rodadaInicio, fimColeta);
         } catch (coletaError) {
-          console.error("❌ Erro na coleta forçada:", coletaError);
+          logger.error("❌ Erro na coleta forçada:", coletaError);
           // Continua mesmo com erro na coleta
         }
       }
@@ -108,7 +109,7 @@ class LuvaDeOuroController {
         rodadaFim,
       );
 
-      console.log(
+      logger.log(
         `✅ Ranking gerado: ${resultado.ranking.length} participantes`,
       );
 
@@ -123,7 +124,7 @@ class LuvaDeOuroController {
         },
       });
     } catch (error) {
-      console.error("❌ [LUVA-OURO] Erro ao obter ranking:", error);
+      logger.error("❌ [LUVA-OURO] Erro ao obter ranking:", error);
       res.status(500).json({
         success: false,
         error: "Erro interno do servidor",
@@ -138,7 +139,7 @@ class LuvaDeOuroController {
     try {
       const { ligaId } = req.params;
 
-      console.log(`🥅 [LUVA-OURO] Detectando rodada - Liga: ${ligaId}`);
+      logger.log(`🥅 [LUVA-OURO] Detectando rodada - Liga: ${ligaId}`);
 
       // ✅ v2.0: Validar liga dinamicamente
       const validacao = await validarLigaLuvaOuro(ligaId);
@@ -151,7 +152,7 @@ class LuvaDeOuroController {
 
       const deteccao = await detectarUltimaRodadaConcluida();
 
-      console.log(`✅ Rodada detectada:`, deteccao);
+      logger.log(`✅ Rodada detectada:`, deteccao);
 
       res.json({
         success: true,
@@ -159,7 +160,7 @@ class LuvaDeOuroController {
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
-      console.error("❌ [LUVA-OURO] Erro ao detectar rodada:", error);
+      logger.error("❌ [LUVA-OURO] Erro ao detectar rodada:", error);
       res.status(500).json({
         success: false,
         error: "Erro interno do servidor",
@@ -175,7 +176,7 @@ class LuvaDeOuroController {
       const { ligaId } = req.params;
       const { rodada, inicio, fim, forcar = false } = req.query;
 
-      console.log(`🥅 [LUVA-OURO] Solicitação de coleta - Liga: ${ligaId}`);
+      logger.log(`🥅 [LUVA-OURO] Solicitação de coleta - Liga: ${ligaId}`);
 
       // ✅ v2.0: Validar liga dinamicamente
       const validacao = await validarLigaLuvaOuro(ligaId);
@@ -223,7 +224,7 @@ class LuvaDeOuroController {
         });
       }
 
-      console.log(`✅ Coleta concluída:`, resultado);
+      logger.log(`✅ Coleta concluída:`, resultado);
 
       res.json({
         success: true,
@@ -231,7 +232,7 @@ class LuvaDeOuroController {
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
-      console.error("❌ [LUVA-OURO] Erro na coleta:", error);
+      logger.error("❌ [LUVA-OURO] Erro na coleta:", error);
       res.status(500).json({
         success: false,
         error: "Erro interno do servidor",
@@ -246,7 +247,7 @@ class LuvaDeOuroController {
     try {
       const { ligaId } = req.params;
 
-      console.log(`🔍 [LUVA-OURO] Executando diagnóstico - Liga: ${ligaId}`);
+      logger.log(`🔍 [LUVA-OURO] Executando diagnóstico - Liga: ${ligaId}`);
 
       // ✅ v2.0: Validar liga dinamicamente
       const validacao = await validarLigaLuvaOuro(ligaId);
@@ -339,7 +340,7 @@ class LuvaDeOuroController {
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
-      console.error("❌ [LUVA-OURO] Erro no diagnóstico:", error);
+      logger.error("❌ [LUVA-OURO] Erro no diagnóstico:", error);
       res.status(500).json({
         success: false,
         error: "Erro interno do servidor",
@@ -354,7 +355,7 @@ class LuvaDeOuroController {
     try {
       const { ligaId } = req.params;
 
-      console.log(`🥅 [LUVA-OURO] Obtendo estatísticas - Liga: ${ligaId}`);
+      logger.log(`🥅 [LUVA-OURO] Obtendo estatísticas - Liga: ${ligaId}`);
 
       // ✅ v2.0: Validar liga dinamicamente
       const validacao = await validarLigaLuvaOuro(ligaId);
@@ -372,7 +373,7 @@ class LuvaDeOuroController {
         timestamp: new Date().toISOString(),
       };
 
-      console.log(`✅ Estatísticas obtidas:`, estatisticas);
+      logger.log(`✅ Estatísticas obtidas:`, estatisticas);
 
       res.json({
         success: true,
@@ -380,7 +381,7 @@ class LuvaDeOuroController {
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
-      console.error("❌ [LUVA-OURO] Erro ao obter estatísticas:", error);
+      logger.error("❌ [LUVA-OURO] Erro ao obter estatísticas:", error);
       res.status(500).json({
         success: false,
         error: "Erro interno do servidor",
@@ -395,7 +396,7 @@ class LuvaDeOuroController {
     try {
       const { ligaId } = req.params;
 
-      console.log(`🥅 [LUVA-OURO] Listando participantes - Liga: ${ligaId}`);
+      logger.log(`🥅 [LUVA-OURO] Listando participantes - Liga: ${ligaId}`);
 
       // ✅ v2.0: Validar liga dinamicamente
       const validacao = await validarLigaLuvaOuro(ligaId);
@@ -427,7 +428,7 @@ class LuvaDeOuroController {
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
-      console.error("❌ [LUVA-OURO] Erro ao listar participantes:", error);
+      logger.error("❌ [LUVA-OURO] Erro ao listar participantes:", error);
       res.status(500).json({
         success: false,
         error: "Erro interno do servidor",
@@ -442,7 +443,7 @@ class LuvaDeOuroController {
     try {
       const { ligaId } = req.params;
 
-      console.log(`🔥 [LUVA-OURO] Ranking LIVE (parciais) - Liga: ${ligaId}`);
+      logger.log(`🔥 [LUVA-OURO] Ranking LIVE (parciais) - Liga: ${ligaId}`);
 
       // Validar liga
       const validacao = await validarLigaLuvaOuro(ligaId);
@@ -463,7 +464,7 @@ class LuvaDeOuroController {
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
-      console.error("❌ [LUVA-OURO] Erro no ranking live:", error);
+      logger.error("❌ [LUVA-OURO] Erro no ranking live:", error);
       res.status(500).json({
         success: false,
         error: "Erro interno do servidor",
@@ -479,7 +480,7 @@ class LuvaDeOuroController {
       const { ligaId } = req.params;
       const { rodada } = req.body || req.query;
 
-      console.log(`🔒 [LUVA-OURO] Consolidar rodada ${rodada} - Liga: ${ligaId}`);
+      logger.log(`🔒 [LUVA-OURO] Consolidar rodada ${rodada} - Liga: ${ligaId}`);
 
       // Validar liga
       const validacao = await validarLigaLuvaOuro(ligaId);
@@ -505,7 +506,7 @@ class LuvaDeOuroController {
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
-      console.error("❌ [LUVA-OURO] Erro ao consolidar:", error);
+      logger.error("❌ [LUVA-OURO] Erro ao consolidar:", error);
       res.status(500).json({
         success: false,
         error: "Erro interno do servidor",
@@ -521,10 +522,10 @@ class LuvaDeOuroController {
       const { ligaId, participanteId } = req.params;
       const { inicio = 1, fim } = req.query;
 
-      console.log(
+      logger.log(
         `🥅 [LUVA-OURO] Detalhes do participante ${participanteId} - Liga: ${ligaId}`,
       );
-      console.log(`📊 Parâmetros: início=${inicio}, fim=${fim}`);
+      logger.log(`📊 Parâmetros: início=${inicio}, fim=${fim}`);
 
       // ✅ v2.0: Validar liga dinamicamente
       const validacao = await validarLigaLuvaOuro(ligaId);
@@ -547,7 +548,7 @@ class LuvaDeOuroController {
           );
           const deteccao = await detectarUltimaRodadaConcluida();
           rodadaFim = deteccao.recomendacao || 26;
-          console.log(`📅 Rodada fim detectada automaticamente: ${rodadaFim}`);
+          logger.log(`📅 Rodada fim detectada automaticamente: ${rodadaFim}`);
         } catch (error) {
           rodadaFim = 26; // fallback
         }
@@ -646,7 +647,7 @@ class LuvaDeOuroController {
         estatisticas,
       };
 
-      console.log(
+      logger.log(
         `✅ Detalhes obtidos: ${rodadas.length} rodadas, ${totalPontos.toFixed(1)} pontos totais`,
       );
 
@@ -656,7 +657,7 @@ class LuvaDeOuroController {
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
-      console.error(
+      logger.error(
         "❌ [LUVA-OURO] Erro ao obter detalhes do participante:",
         error,
       );

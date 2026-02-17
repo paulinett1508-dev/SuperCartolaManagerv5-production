@@ -35,6 +35,7 @@ import {
   triggerRodadaFinalizada,
   triggerMitoMico
 } from '../services/notificationTriggers.js';
+import logger from '../utils/logger.js';
 
 // ============================================================================
 // ✅ v3.0: FUNÇÕES SaaS DINÂMICAS (Multi-Tenant)
@@ -69,7 +70,7 @@ function getConfigTop10(liga) {
     const config = liga?.configuracoes?.top10;
 
     if (!config) {
-        console.warn(`[CONSOLIDAÇÃO] Liga ${liga?._id} sem configuracoes.top10`);
+        logger.warn(`[CONSOLIDAÇÃO] Liga ${liga?._id} sem configuracoes.top10`);
         return { mitos: {}, micos: {} };
     }
 
@@ -122,7 +123,7 @@ function isModuloHabilitado(liga, modulo) {
  */
 async function backupRodadaParaDataLake(ligaId, rodadaNum, dadosRodada, temporada = new Date().getFullYear()) {
     try {
-        console.log(`[DATA-LAKE] 💾 Salvando backup R${rodadaNum} (${dadosRodada.length} times)...`);
+        logger.log(`[DATA-LAKE] 💾 Salvando backup R${rodadaNum} (${dadosRodada.length} times)...`);
 
         let salvos = 0;
         let jaExistentes = 0;
@@ -174,11 +175,11 @@ async function backupRodadaParaDataLake(ligaId, rodadaNum, dadosRodada, temporad
             salvos++;
         }
 
-        console.log(`[DATA-LAKE] ✅ Backup R${rodadaNum}: ${salvos} novos, ${jaExistentes} já existentes`);
+        logger.log(`[DATA-LAKE] ✅ Backup R${rodadaNum}: ${salvos} novos, ${jaExistentes} já existentes`);
 
         return { salvos, jaExistentes };
     } catch (error) {
-        console.error(`[DATA-LAKE] ⚠️ Erro no backup R${rodadaNum}:`, error.message);
+        logger.error(`[DATA-LAKE] ⚠️ Erro no backup R${rodadaNum}:`, error.message);
         // Não lança erro para não interromper a consolidação
         return { salvos: 0, erro: error.message };
     }
@@ -193,7 +194,7 @@ export const buscarHistoricoCompleto = async (req, res) => {
         const { ligaId } = req.params;
         const { rodadaInicio = 1, rodadaFim } = req.query;
         
-        console.log(`[CONSOLIDAÇÃO-HISTÓRICO] Buscando snapshots consolidados: R${rodadaInicio}-${rodadaFim || 'atual'}`);
+        logger.log(`[CONSOLIDAÇÃO-HISTÓRICO] Buscando snapshots consolidados: R${rodadaInicio}-${rodadaFim || 'atual'}`);
         
         const query = {
             liga_id: ligaId,
@@ -208,7 +209,7 @@ export const buscarHistoricoCompleto = async (req, res) => {
             .sort({ rodada: 1 })
             .lean();
         
-        console.log(`[CONSOLIDAÇÃO-HISTÓRICO] ✅ ${snapshots.length} snapshots encontrados`);
+        logger.log(`[CONSOLIDAÇÃO-HISTÓRICO] ✅ ${snapshots.length} snapshots encontrados`);
         
         res.json({
             success: true,
@@ -223,7 +224,7 @@ export const buscarHistoricoCompleto = async (req, res) => {
         });
         
     } catch (error) {
-        console.error('[CONSOLIDAÇÃO-HISTÓRICO] ❌ Erro:', error);
+        logger.error('[CONSOLIDAÇÃO-HISTÓRICO] ❌ Erro:', error);
         res.status(500).json({ 
             success: false, 
             error: error.message 
@@ -243,14 +244,14 @@ export const consolidarRodada = async (req, res) => {
         const forcar = req.query.forcar === 'true'; // ✅ NOVO: Permite forçar reconsolidação
         const rodadaNum = parseInt(rodada);
 
-        console.log(`[CONSOLIDAÇÃO] 🔒 Iniciando snapshot R${rodadaNum} da liga ${ligaId} (forçar: ${forcar})`);
+        logger.log(`[CONSOLIDAÇÃO] 🔒 Iniciando snapshot R${rodadaNum} da liga ${ligaId} (forçar: ${forcar})`);
 
         // ✅ GUARD: Não consolidar rodada com mercado aberto
         if (!isSeasonFinished()) {
             try {
                 const statusMercado = await fetch('https://api.cartola.globo.com/mercado/status').then(r => r.json());
                 if (statusMercado?.status_mercado === 1 && rodadaNum >= statusMercado.rodada_atual) {
-                    console.log(`[CONSOLIDAÇÃO] ❌ Bloqueado: R${rodadaNum} com mercado aberto (rodada_atual: ${statusMercado.rodada_atual})`);
+                    logger.log(`[CONSOLIDAÇÃO] ❌ Bloqueado: R${rodadaNum} com mercado aberto (rodada_atual: ${statusMercado.rodada_atual})`);
                     return res.status(400).json({
                         error: `Rodada ${rodadaNum} não pode ser consolidada com mercado aberto`,
                         rodada_atual: statusMercado.rodada_atual,
@@ -258,7 +259,7 @@ export const consolidarRodada = async (req, res) => {
                     });
                 }
             } catch (e) {
-                console.warn('[CONSOLIDAÇÃO] Falha ao verificar status do mercado, prosseguindo...', e.message);
+                logger.warn('[CONSOLIDAÇÃO] Falha ao verificar status do mercado, prosseguindo...', e.message);
             }
         }
 
@@ -276,7 +277,7 @@ export const consolidarRodada = async (req, res) => {
                     existente.dados_consolidados?.ranking_rodada?.length > 0;
                 
                 if (temNovoscampos) {
-                    console.log(`[CONSOLIDAÇÃO] ⚠️ R${rodadaNum} já consolidada (v2) em ${existente.data_consolidacao}`);
+                    logger.log(`[CONSOLIDAÇÃO] ⚠️ R${rodadaNum} já consolidada (v2) em ${existente.data_consolidacao}`);
                     return res.json({
                         success: true,
                         jaConsolidada: true,
@@ -287,10 +288,10 @@ export const consolidarRodada = async (req, res) => {
                 }
                 
                 // Se não tem novos campos, continua para reconsolidar
-                console.log(`[CONSOLIDAÇÃO] ♻️ R${rodadaNum} está na versão antiga, reconsolidando...`);
+                logger.log(`[CONSOLIDAÇÃO] ♻️ R${rodadaNum} está na versão antiga, reconsolidando...`);
             }
         } else {
-            console.log(`[CONSOLIDAÇÃO] ⚡ Forçando reconsolidação da R${rodadaNum}`);
+            logger.log(`[CONSOLIDAÇÃO] ⚡ Forçando reconsolidação da R${rodadaNum}`);
         }
         
         session.startTransaction();
@@ -302,12 +303,12 @@ export const consolidarRodada = async (req, res) => {
         const modulosAtivos = liga.modulos_ativos || {};
         
         // 1. RANKING GERAL (acumulado até esta rodada)
-        console.log(`[CONSOLIDAÇÃO] Calculando ranking geral...`);
+        logger.log(`[CONSOLIDAÇÃO] Calculando ranking geral...`);
         const rankingGeral = await calcularRankingCompleto(ligaId, rodadaNum);
         
         // 2. RANKING DA RODADA (pontuação específica desta rodada)
         // ✅ v3.2.0: Filtrar por temporada para não misturar dados de temporadas diferentes
-        console.log(`[CONSOLIDAÇÃO] Calculando ranking da rodada (temporada ${CURRENT_SEASON})...`);
+        logger.log(`[CONSOLIDAÇÃO] Calculando ranking da rodada (temporada ${CURRENT_SEASON})...`);
         const dadosRodada = await Rodada.find({
             ligaId: new mongoose.Types.ObjectId(ligaId),
             rodada: rodadaNum,
@@ -352,7 +353,7 @@ export const consolidarRodada = async (req, res) => {
             });
 
         // 3. FINANCEIRO (resumo por time + extratos individuais)
-        console.log(`[CONSOLIDAÇÃO] Calculando financeiro...`);
+        logger.log(`[CONSOLIDAÇÃO] Calculando financeiro...`);
         const financeiro = await getFluxoFinanceiroLiga(ligaId, rodadaNum);
         
         // Buscar extratos individuais detalhados
@@ -374,11 +375,11 @@ export const consolidarRodada = async (req, res) => {
         // v2.0: Módulo OPCIONAL, só habilita se === true
         let confrontosPontosCorridos = [];
         if (modulosAtivos.pontosCorridos === true) {
-            console.log(`[CONSOLIDAÇÃO] Calculando confrontos pontos corridos...`);
+            logger.log(`[CONSOLIDAÇÃO] Calculando confrontos pontos corridos...`);
             try {
                 confrontosPontosCorridos = await calcularConfrontosDaRodada(ligaId, rodadaNum, dadosRodada, liga);
             } catch (e) {
-                console.warn(`[CONSOLIDAÇÃO] ⚠️ Erro ao calcular pontos corridos:`, e.message);
+                logger.warn(`[CONSOLIDAÇÃO] ⚠️ Erro ao calcular pontos corridos:`, e.message);
             }
         }
         
@@ -386,16 +387,16 @@ export const consolidarRodada = async (req, res) => {
         // v2.0: Módulo OPCIONAL, só habilita se === true
         let confrontosMataMata = [];
         if (modulosAtivos.mataMata === true) {
-            console.log(`[CONSOLIDAÇÃO] Obtendo confrontos mata-mata...`);
+            logger.log(`[CONSOLIDAÇÃO] Obtendo confrontos mata-mata...`);
             try {
                 confrontosMataMata = await obterConfrontosMataMata(ligaId, rodadaNum);
             } catch (e) {
-                console.warn(`[CONSOLIDAÇÃO] ⚠️ Erro ao obter mata-mata:`, e.message);
+                logger.warn(`[CONSOLIDAÇÃO] ⚠️ Erro ao obter mata-mata:`, e.message);
             }
         }
         
         // 6. TOP 10 (Mitos e Micos da RODADA) - v3.0: Config dinâmica
-        console.log(`[CONSOLIDAÇÃO] Calculando Top 10...`);
+        logger.log(`[CONSOLIDAÇÃO] Calculando Top 10...`);
         const configTop10 = getConfigTop10(liga);
 
         const mitos = rankingRodada.slice(0, 10).map((t, i) => ({
@@ -416,14 +417,14 @@ export const consolidarRodada = async (req, res) => {
         // v2.0: Módulo OPCIONAL, só habilita se === true
         let artilheiroCampeao = { artilheiro: null, campeao_rodada: null };
         if (modulosAtivos.artilheiro === true) {
-            console.log(`[CONSOLIDAÇÃO] Buscando artilheiro/campeão...`);
+            logger.log(`[CONSOLIDAÇÃO] Buscando artilheiro/campeão...`);
             try {
                 const dadosArtilheiro = await getRankingArtilheiroCampeao(ligaId, rodadaNum);
                 if (dadosArtilheiro) {
                     artilheiroCampeao = dadosArtilheiro;
                 }
             } catch (e) {
-                console.warn(`[CONSOLIDAÇÃO] ⚠️ Erro ao obter artilheiro:`, e.message);
+                logger.warn(`[CONSOLIDAÇÃO] ⚠️ Erro ao obter artilheiro:`, e.message);
             }
         }
         
@@ -440,7 +441,7 @@ export const consolidarRodada = async (req, res) => {
         let luvaDeOuro = { ranking: [], melhor_goleiro_rodada: null };
         const luvaOuroHabilitado = isModuloHabilitado(liga, 'luva_ouro') || modulosAtivos.luvaOuro;
         if (luvaOuroHabilitado) {
-            console.log(`[CONSOLIDAÇÃO] Buscando Luva de Ouro...`);
+            logger.log(`[CONSOLIDAÇÃO] Buscando Luva de Ouro...`);
             try {
                 const { obterRankingGoleiros } = await import('../services/goleirosService.js');
                 const rankingGoleiros = await obterRankingGoleiros(ligaId, 1, rodadaNum);
@@ -451,7 +452,7 @@ export const consolidarRodada = async (req, res) => {
                     }
                 }
             } catch (e) {
-                console.warn(`[CONSOLIDAÇÃO] ⚠️ Erro ao obter Luva de Ouro:`, e.message);
+                logger.warn(`[CONSOLIDAÇÃO] ⚠️ Erro ao obter Luva de Ouro:`, e.message);
             }
         }
         
@@ -538,7 +539,7 @@ export const consolidarRodada = async (req, res) => {
         const temporadaAtual = SEASON_CONFIG?.temporada || new Date().getFullYear();
         const backupResult = await backupRodadaParaDataLake(ligaId, rodadaNum, dadosRodada, temporadaAtual);
 
-        console.log(`[CONSOLIDAÇÃO] ✅ R${rodadaNum} consolidada com sucesso! (${rankingRodada.length} times)`);
+        logger.log(`[CONSOLIDAÇÃO] ✅ R${rodadaNum} consolidada com sucesso! (${rankingRodada.length} times)`);
 
         // 14. PUSH NOTIFICATIONS + MÓDULOS DEPENDENTES - Executar em background
         setImmediate(async () => {
@@ -553,9 +554,9 @@ export const consolidarRodada = async (req, res) => {
                 // Gatilho: Mito/Mico (apenas top 1 e ultimo)
                 await triggerMitoMico(ligaId, rodadaNum, { mitos, micos });
 
-                console.log(`[CONSOLIDAÇÃO] 🔔 Notificacoes push disparadas para R${rodadaNum}`);
+                logger.log(`[CONSOLIDAÇÃO] 🔔 Notificacoes push disparadas para R${rodadaNum}`);
             } catch (notifError) {
-                console.error(`[CONSOLIDAÇÃO] ⚠️ Erro ao enviar notificacoes:`, notifError.message);
+                logger.error(`[CONSOLIDAÇÃO] ⚠️ Erro ao enviar notificacoes:`, notifError.message);
             }
 
             // ✅ FIX: Consolidar Capitão de Luxo automaticamente após rodada
@@ -567,12 +568,12 @@ export const consolidarRodada = async (req, res) => {
 
                 if (capitaoAtivo) {
                     const temporadaConsolidacao = SEASON_CONFIG?.temporada || new Date().getFullYear();
-                    console.log(`[CONSOLIDAÇÃO] 🎖️ Consolidando Capitão de Luxo até R${rodadaNum}...`);
+                    logger.log(`[CONSOLIDAÇÃO] 🎖️ Consolidando Capitão de Luxo até R${rodadaNum}...`);
                     await consolidarRankingCapitao(ligaId, temporadaConsolidacao, rodadaNum);
-                    console.log(`[CONSOLIDAÇÃO] 🎖️ Capitão de Luxo consolidado com sucesso!`);
+                    logger.log(`[CONSOLIDAÇÃO] 🎖️ Capitão de Luxo consolidado com sucesso!`);
                 }
             } catch (capitaoError) {
-                console.error(`[CONSOLIDAÇÃO] ⚠️ Erro ao consolidar Capitão de Luxo:`, capitaoError.message);
+                logger.error(`[CONSOLIDAÇÃO] ⚠️ Erro ao consolidar Capitão de Luxo:`, capitaoError.message);
             }
         });
         
@@ -593,7 +594,7 @@ export const consolidarRodada = async (req, res) => {
         
     } catch (error) {
         await session.abortTransaction();
-        console.error('[CONSOLIDAÇÃO] ❌ Erro:', error);
+        logger.error('[CONSOLIDAÇÃO] ❌ Erro:', error);
         res.status(500).json({ error: error.message });
     } finally {
         session.endSession();
@@ -610,13 +611,13 @@ export const consolidarTodasRodadasPassadas = async (req, res) => {
         const { rodadaInicio = 1, rodadaFim = 35, forcar = 'false' } = req.query;
         const forcarReconsolidacao = forcar === 'true';
         
-        console.log(`[CONSOLIDAÇÃO-MASSA] 🏭 Consolidando R${rodadaInicio}-${rodadaFim} da liga ${ligaId} (forçar: ${forcarReconsolidacao})`);
+        logger.log(`[CONSOLIDAÇÃO-MASSA] 🏭 Consolidando R${rodadaInicio}-${rodadaFim} da liga ${ligaId} (forçar: ${forcarReconsolidacao})`);
         
         const resultados = [];
         
         for (let r = parseInt(rodadaInicio); r <= parseInt(rodadaFim); r++) {
             try {
-                console.log(`[CONSOLIDAÇÃO-MASSA] Processando R${r}...`);
+                logger.log(`[CONSOLIDAÇÃO-MASSA] Processando R${r}...`);
                 
                 // Verifica se já está consolidada E na versão atual
                 const existente = await RodadaSnapshot.findOne({
@@ -631,13 +632,13 @@ export const consolidarTodasRodadasPassadas = async (req, res) => {
                         existente.dados_consolidados?.ranking_rodada?.length > 0;
                     
                     if (temNovosCampos) {
-                        console.log(`[CONSOLIDAÇÃO-MASSA] ⏭️ R${r} já consolidada (v2), pulando...`);
+                        logger.log(`[CONSOLIDAÇÃO-MASSA] ⏭️ R${r} já consolidada (v2), pulando...`);
                         resultados.push({ rodada: r, success: true, skipped: true, versao: 2 });
                         continue;
                     }
                     
                     // Versão antiga - precisa reconsolidar
-                    console.log(`[CONSOLIDAÇÃO-MASSA] ♻️ R${r} versão antiga, reconsolidando...`);
+                    logger.log(`[CONSOLIDAÇÃO-MASSA] ♻️ R${r} versão antiga, reconsolidando...`);
                 }
                 
                 // Simula request para reutilizar função existente
@@ -656,7 +657,7 @@ export const consolidarTodasRodadasPassadas = async (req, res) => {
                 await new Promise(resolve => setTimeout(resolve, 500));
                 
             } catch (error) {
-                console.error(`[CONSOLIDAÇÃO-MASSA] ❌ Erro na R${r}:`, error);
+                logger.error(`[CONSOLIDAÇÃO-MASSA] ❌ Erro na R${r}:`, error);
                 resultados.push({ rodada: r, success: false, error: error.message });
             }
         }
@@ -665,7 +666,7 @@ export const consolidarTodasRodadasPassadas = async (req, res) => {
         const pulados = resultados.filter(r => r.skipped).length;
         const reconsolidados = resultados.filter(r => r.success && !r.skipped).length;
         
-        console.log(`[CONSOLIDAÇÃO-MASSA] ✅ Concluído: ${sucessos} novas, ${pulados} puladas`);
+        logger.log(`[CONSOLIDAÇÃO-MASSA] ✅ Concluído: ${sucessos} novas, ${pulados} puladas`);
         
         res.json({
             total: resultados.length,
@@ -677,7 +678,7 @@ export const consolidarTodasRodadasPassadas = async (req, res) => {
         });
         
     } catch (error) {
-        console.error('[CONSOLIDAÇÃO-MASSA] ❌ Erro fatal:', error);
+        logger.error('[CONSOLIDAÇÃO-MASSA] ❌ Erro fatal:', error);
         res.status(500).json({ error: error.message });
     }
 };
@@ -739,9 +740,9 @@ export const verificarStatusConsolidacao = async (req, res) => {
         });
         
     } catch (error) {
-        console.error('[CONSOLIDAÇÃO] Erro ao verificar status:', error);
+        logger.error('[CONSOLIDAÇÃO] Erro ao verificar status:', error);
         res.status(500).json({ error: error.message });
     }
 };
 
-console.log("[CONSOLIDAÇÃO] ✅ v3.0.0 carregado (SaaS Dinâmico)");
+logger.log("[CONSOLIDAÇÃO] ✅ v3.0.0 carregado (SaaS Dinâmico)");

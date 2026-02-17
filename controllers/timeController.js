@@ -2,6 +2,7 @@
 import mongoose from "mongoose";
 import fetch from "node-fetch";
 import NodeCache from "node-cache";
+import logger from '../utils/logger.js';
 
 // ⚡ CACHE TRANSPARENTE (5 minutos TTL)
 const cache = new NodeCache({ stdTTL: 300, checkperiod: 60 });
@@ -49,7 +50,7 @@ async function buscarDadosApiCartola(timeId) {
     );
 
     if (!res.ok) {
-      console.warn(
+      logger.warn(
         `[TIME-CONTROLLER] API Cartola retornou ${res.status} para time ${timeId}`,
       );
       return null;
@@ -68,7 +69,7 @@ async function buscarDadosApiCartola(timeId) {
 
     return null;
   } catch (error) {
-    console.error(
+    logger.error(
       `[TIME-CONTROLLER] Erro ao buscar API Cartola para time ${timeId}:`,
       error.message,
     );
@@ -99,7 +100,7 @@ export const salvarTime = async (timeId) => {
 
     if (time && !dadosIncompletos(time)) {
       if (process.env.NODE_ENV !== "production") {
-        console.log(
+        logger.log(
           `[TIME-CONTROLLER] Time ${timeId} já existe com dados completos`,
         );
       }
@@ -120,14 +121,14 @@ export const salvarTime = async (timeId) => {
     // Se não conseguiu dados da API, retornar o que tem ou criar com padrão
     if (!dadosApi) {
       if (time) {
-        console.warn(
+        logger.warn(
           `[TIME-CONTROLLER] Mantendo dados existentes para time ${timeId} (API indisponível)`,
         );
         return time;
       }
 
       // Criar com dados padrão apenas se não existe
-      console.warn(
+      logger.warn(
         `[TIME-CONTROLLER] Criando time ${timeId} com dados padrão (API indisponível)`,
       );
       time = new Time({
@@ -149,7 +150,7 @@ export const salvarTime = async (timeId) => {
       time.url_escudo_png = dadosApi.url_escudo_png || time.url_escudo_png;
       time.clube_id = dadosApi.clube_id || time.clube_id;
       await time.save();
-      console.log(
+      logger.log(
         `[TIME-CONTROLLER] ✅ Time ${timeId} ATUALIZADO: ${time.nome_cartoleiro} - ${time.nome_time}`,
       );
     } else {
@@ -162,14 +163,14 @@ export const salvarTime = async (timeId) => {
         clube_id: dadosApi.clube_id || null,
       });
       await time.save();
-      console.log(
+      logger.log(
         `[TIME-CONTROLLER] ✅ Time ${timeId} CRIADO: ${time.nome_cartoleiro} - ${time.nome_time}`,
       );
     }
 
     return time;
   } catch (err) {
-    console.error(
+    logger.error(
       `[TIME-CONTROLLER] Erro ao salvar time ${timeId}:`,
       err.message,
     );
@@ -181,7 +182,7 @@ export const obterTimePorId = async (req, res) => {
   const { id } = req.params;
 
   if (process.env.NODE_ENV !== "production") {
-    console.log(
+    logger.log(
       `Requisição recebida para obterTimePorId com ID: "${id}" (tipo: ${typeof id})`,
     );
   }
@@ -189,7 +190,7 @@ export const obterTimePorId = async (req, res) => {
   try {
     if (!id || id === "undefined" || id === "null") {
       if (process.env.NODE_ENV !== "production") {
-        console.warn(`ID inválido recebido: "${id}"`);
+        logger.warn(`ID inválido recebido: "${id}"`);
       }
       return res
         .status(400)
@@ -221,7 +222,7 @@ export const obterTimePorId = async (req, res) => {
       cache.set(cacheKey, time, 300);
 
       // ✅ v2.1: Log para debug de dados do time
-      console.log(`[TIME-CONTROLLER] Retornando time ${id}:`, {
+      logger.log(`[TIME-CONTROLLER] Retornando time ${id}:`, {
         nome_time: time.nome_time,
         nome_cartoleiro: time.nome_cartoleiro,
         nome_cartola: time.nome_cartola,
@@ -265,7 +266,7 @@ export const obterTimePorId = async (req, res) => {
 
     return res.status(404).json({ erro: "Time não encontrado" });
   } catch (err) {
-    console.error(`[TIME-CONTROLLER] Erro em obterTimePorId: ${err.message}`);
+    logger.error(`[TIME-CONTROLLER] Erro em obterTimePorId: ${err.message}`);
     return res.status(500).json({ erro: "Erro interno no servidor" });
   }
 };
