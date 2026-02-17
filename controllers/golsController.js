@@ -1,5 +1,6 @@
 import Gols from "../models/Gols.js";
 import axios from "axios";
+import logger from '../utils/logger.js';
 
 // Exportando a função listarGols explicitamente
 // ✅ v2.0: Adicionado filtro obrigatório por ligaId (multi-tenant fix)
@@ -42,7 +43,7 @@ export const listarGols = async function (req, res) {
       }
     });
   } catch (err) {
-    console.error("Erro ao listar gols:", err);
+    logger.error("Erro ao listar gols:", err);
     return res.status(500).json({
       error: "Erro ao listar gols",
       details: err.message,
@@ -53,9 +54,9 @@ export const listarGols = async function (req, res) {
 // Exportando a função com ambos os nomes para compatibilidade
 // ✅ v2.0: Adicionado ligaId obrigatório (multi-tenant fix)
 export const extrairGolsDaRodada = async function (req, res) {
-  console.log("=== INICIANDO EXTRAÇÃO DE GOLS ===");
+  logger.log("=== INICIANDO EXTRAÇÃO DE GOLS ===");
   const { timeIds, rodada, reprocessar, ligaId } = req.body;
-  console.log("Parâmetros recebidos para extração:", {
+  logger.log("Parâmetros recebidos para extração:", {
     timeIds,
     rodada,
     reprocessar,
@@ -64,7 +65,7 @@ export const extrairGolsDaRodada = async function (req, res) {
 
   // ✅ v2.0: ligaId é OBRIGATÓRIO para isolamento multi-tenant
   if (!ligaId) {
-    console.error("Erro: ligaId é obrigatório");
+    logger.error("Erro: ligaId é obrigatório");
     return res.status(400).json({
       error: "Parâmetro ligaId é obrigatório",
       message: "Informe o ID da liga para extrair os gols"
@@ -72,7 +73,7 @@ export const extrairGolsDaRodada = async function (req, res) {
   }
 
   if (!Array.isArray(timeIds) || !rodada) {
-    console.error("Erro: Parâmetros inválidos", { timeIds, rodada });
+    logger.error("Erro: Parâmetros inválidos", { timeIds, rodada });
     return res.status(400).json({ error: "Parâmetros inválidos (timeIds e rodada são obrigatórios)" });
   }
 
@@ -86,13 +87,13 @@ export const extrairGolsDaRodada = async function (req, res) {
   let totalAtualizados = 0;
 
   try {
-    console.log(
+    logger.log(
       `Iniciando processamento de ${timeIds.length} times para a rodada ${rodada}`,
     );
 
     for (const timeId of timeIds) {
       const url = `https://api.cartola.globo.com/time/id/${timeId}/${rodada}`;
-      console.log(`[Time ${timeId}] Consultando API: ${url}`);
+      logger.log(`[Time ${timeId}] Consultando API: ${url}`);
 
       try {
         const { data } = await axios.get(url, {
@@ -105,21 +106,21 @@ export const extrairGolsDaRodada = async function (req, res) {
         // Implementação da abordagem de fallback em cascata para o campo nome_cartola
         const nomeCartola =
           data.nome_cartola ?? data.time?.nome ?? "Cartoleiro Desconhecido";
-        console.log(`[Time ${timeId}] Nome do cartola: ${nomeCartola}`);
+        logger.log(`[Time ${timeId}] Nome do cartola: ${nomeCartola}`);
 
         if (
           !data.atletas ||
           !Array.isArray(data.atletas) ||
           data.atletas.length === 0
         ) {
-          console.log(
+          logger.log(
             `[Time ${timeId}] Nenhum atleta encontrado para o time ${nomeCartola}`,
           );
           timesSemGols.push({ timeId, nome_cartola: nomeCartola });
           continue;
         }
 
-        console.log(
+        logger.log(
           `[Time ${timeId}] Total de atletas encontrados: ${data.atletas.length}`,
         );
         let atletasComGolNoTime = 0;
@@ -137,21 +138,21 @@ export const extrairGolsDaRodada = async function (req, res) {
               G = Number(atleta.scout.G);
               // Se a conversão resultar em NaN, definir como 0
               if (isNaN(G)) {
-                console.warn(
+                logger.warn(
                   `[Time ${timeId}] Valor inválido para gols do atleta ${apelido}: ${atleta.scout.G}, definindo como 0`,
                 );
                 G = 0;
               }
             }
           } catch (convErr) {
-            console.error(
+            logger.error(
               `[Time ${timeId}] Erro ao converter gols para o atleta ${apelido}:`,
               convErr.message,
             );
             G = 0;
           }
 
-          console.log(
+          logger.log(
             `[Time ${timeId}] Atleta ${apelido} (ID: ${atletaId}) - Gols: ${G} (${typeof G})`,
           );
 
@@ -168,7 +169,7 @@ export const extrairGolsDaRodada = async function (req, res) {
 
             try {
               // ✅ v2.0: Verificar duplicidade com ligaId (índice único do model)
-              console.log(
+              logger.log(
                 `[Time ${timeId}] Verificando duplicidade para ${apelido} - Gols: ${G} - Rodada: ${rodada}`,
               );
 
@@ -179,7 +180,7 @@ export const extrairGolsDaRodada = async function (req, res) {
               });
 
               if (jaExiste && !reprocessar) {
-                console.log(
+                logger.log(
                   `[Time ${timeId}] ⚠️ Registro duplicado para ${apelido} - Gols: ${G} - Rodada: ${rodada}`,
                 );
                 duplicadosDetalhes.push({
@@ -191,7 +192,7 @@ export const extrairGolsDaRodada = async function (req, res) {
                   ligaId,
                 });
               } else if (jaExiste && reprocessar) {
-                console.log(
+                logger.log(
                   `[Time ${timeId}] 🔄 Atualizando registro existente para ${apelido} - Gols: ${G} - Rodada: ${rodada}`,
                 );
 
@@ -215,11 +216,11 @@ export const extrairGolsDaRodada = async function (req, res) {
                     { new: true },
                   );
                   totalAtualizados++;
-                  console.log(
+                  logger.log(
                     `[Time ${timeId}] Registro atualizado com sucesso para ${apelido}`,
                   );
                 } catch (dbErr) {
-                  console.error(
+                  logger.error(
                     `[Time ${timeId}] Erro ao atualizar no banco de dados para ${apelido}:`,
                     dbErr.message,
                   );
@@ -232,7 +233,7 @@ export const extrairGolsDaRodada = async function (req, res) {
                   totalErros++;
                 }
               } else {
-                console.log(
+                logger.log(
                   `[Time ${timeId}] ✅ Criando novo registro para ${apelido} - Gols: ${G} - Rodada: ${rodada}`,
                 );
 
@@ -252,11 +253,11 @@ export const extrairGolsDaRodada = async function (req, res) {
                     clubeNome: atleta.clube?.nome || '',
                   });
                   totalCriados++;
-                  console.log(
+                  logger.log(
                     `[Time ${timeId}] Registro criado com sucesso para ${apelido}`,
                   );
                 } catch (dbErr) {
-                  console.error(
+                  logger.error(
                     `[Time ${timeId}] Erro ao salvar no banco de dados para ${apelido}:`,
                     dbErr.message,
                   );
@@ -270,7 +271,7 @@ export const extrairGolsDaRodada = async function (req, res) {
                 }
               }
             } catch (dbQueryErr) {
-              console.error(
+              logger.error(
                 `[Time ${timeId}] Erro ao consultar banco de dados para ${apelido}:`,
                 dbQueryErr.message,
               );
@@ -285,16 +286,16 @@ export const extrairGolsDaRodada = async function (req, res) {
           }
         }
 
-        console.log(
+        logger.log(
           `[Time ${timeId}] Atletas com gols neste time: ${atletasComGolNoTime}`,
         );
         if (atletasComGolNoTime === 0) {
-          console.log(
+          logger.log(
             `[Time ${timeId}] Nenhum atleta com gols encontrado para o time ${nomeCartola}`,
           );
         }
       } catch (apiErr) {
-        console.error(
+        logger.error(
           `[Time ${timeId}] ❌ Erro ao processar time:`,
           apiErr.message,
         );
@@ -307,38 +308,38 @@ export const extrairGolsDaRodada = async function (req, res) {
     }
 
     // Resumo detalhado da extração
-    console.log("\n=== RESUMO DA EXTRAÇÃO DE GOLS ===");
-    console.log(`- Total de times processados: ${timeIds.length}`);
-    console.log(`- Atletas com gols encontrados: ${atletasComGols.length}`);
+    logger.log("\n=== RESUMO DA EXTRAÇÃO DE GOLS ===");
+    logger.log(`- Total de times processados: ${timeIds.length}`);
+    logger.log(`- Atletas com gols encontrados: ${atletasComGols.length}`);
     if (atletasComGols.length > 0) {
-      console.log("- Lista de atletas com gols:");
+      logger.log("- Lista de atletas com gols:");
       atletasComGols.forEach((a) => {
-        console.log(
+        logger.log(
           `  * ${a.apelido} (Time: ${a.nome_cartola}) - ${a.G} gol(s)`,
         );
       });
     }
 
-    console.log(`- Registros duplicados: ${duplicadosDetalhes.length}`);
+    logger.log(`- Registros duplicados: ${duplicadosDetalhes.length}`);
     if (duplicadosDetalhes.length > 0) {
-      console.log("- Lista de registros duplicados:");
+      logger.log("- Lista de registros duplicados:");
       duplicadosDetalhes.forEach((d) => {
-        console.log(
+        logger.log(
           `  * ${d.apelido} (Time: ${d.nome_cartola}) - ${d.G} gol(s)`,
         );
       });
     }
 
-    console.log(`- Novos registros criados: ${totalCriados}`);
-    console.log(`- Registros atualizados: ${totalAtualizados}`);
-    console.log(`- Erros encontrados: ${totalErros}`);
+    logger.log(`- Novos registros criados: ${totalCriados}`);
+    logger.log(`- Registros atualizados: ${totalAtualizados}`);
+    logger.log(`- Erros encontrados: ${totalErros}`);
     if (totalErros > 0) {
-      console.log(
+      logger.log(
         "- Detalhes dos erros:",
         JSON.stringify(errosDetalhados, null, 2),
       );
     }
-    console.log("=== FIM DA EXTRAÇÃO DE GOLS ===");
+    logger.log("=== FIM DA EXTRAÇÃO DE GOLS ===");
 
     const mensagemFinal = reprocessar
       ? `Extração concluída. Registros criados: ${totalCriados}, atualizados: ${totalAtualizados}`
@@ -357,8 +358,8 @@ export const extrairGolsDaRodada = async function (req, res) {
       reprocessar,
     });
   } catch (err) {
-    console.error("❌ ERRO GERAL NA EXTRAÇÃO:", err);
-    console.error("Stack trace:", err.stack);
+    logger.error("❌ ERRO GERAL NA EXTRAÇÃO:", err);
+    logger.error("Stack trace:", err.stack);
     return res.status(500).json({
       error: "Erro ao extrair gols",
       details: err.message,
@@ -372,7 +373,7 @@ export const extrairGolsRodada = extrairGolsDaRodada;
 
 // Implementação da função extrairGolsRodadaTime que chama extrairGolsDaRodada
 export async function extrairGolsRodadaTime(rodada, time) {
-  console.log(
+  logger.log(
     `Chamando extrairGolsRodadaTime para rodada ${rodada} e time ${time}`,
   );
   // Cria um objeto de requisição e resposta simulados para chamar extrairGolsDaRodada

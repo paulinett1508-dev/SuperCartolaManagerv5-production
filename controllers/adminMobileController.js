@@ -5,6 +5,7 @@
 
 import { generateToken, isAdminAutorizado } from '../middleware/adminMobileAuth.js';
 import { getDB } from '../config/database.js';
+import logger from '../utils/logger.js';
 
 /**
  * POST /api/admin/mobile/auth
@@ -48,7 +49,7 @@ async function authenticate(req, res) {
         timestamp: new Date()
       });
     } catch (logError) {
-      console.error('[adminMobile] Erro ao registrar log:', logError);
+      logger.error('[adminMobile] Erro ao registrar log:', logError);
       // Não bloqueia o login se log falhar
     }
 
@@ -59,7 +60,7 @@ async function authenticate(req, res) {
       expiresIn: '24h'
     });
   } catch (error) {
-    console.error('[adminMobile] Erro no authenticate:', error);
+    logger.error('[adminMobile] Erro no authenticate:', error);
     res.status(500).json({
       error: 'Erro ao autenticar',
       code: 'INTERNAL_ERROR'
@@ -152,7 +153,7 @@ async function getDashboard(req, res) {
             modulosAtivos
           };
         } catch (ligaError) {
-          console.error(`[adminMobile] Erro ao processar liga ${liga.id}:`, ligaError);
+          logger.error(`[adminMobile] Erro ao processar liga ${liga.id}:`, ligaError);
           return null;
         }
       })
@@ -199,7 +200,7 @@ async function getDashboard(req, res) {
       ultimasAcoes: acoesFormatadas
     });
   } catch (error) {
-    console.error('[adminMobile] Erro no getDashboard:', error);
+    logger.error('[adminMobile] Erro no getDashboard:', error);
     res.status(500).json({
       error: 'Erro ao carregar dashboard',
       code: 'INTERNAL_ERROR'
@@ -240,7 +241,7 @@ async function getLigas(req, res) {
 
     res.json(ligasFormatadas);
   } catch (error) {
-    console.error('[adminMobile] Erro no getLigas:', error);
+    logger.error('[adminMobile] Erro no getLigas:', error);
     res.status(500).json({
       error: 'Erro ao listar ligas',
       code: 'INTERNAL_ERROR'
@@ -409,7 +410,7 @@ async function getLigaDetalhes(req, res) {
       }
     });
   } catch (error) {
-    console.error('[adminMobile] Erro no getLigaDetalhes:', error);
+    logger.error('[adminMobile] Erro no getLigaDetalhes:', error);
     res.status(500).json({
       error: 'Erro ao buscar detalhes da liga',
       code: 'INTERNAL_ERROR'
@@ -538,7 +539,7 @@ async function consolidarRodada(req, res) {
         : 'Rodada consolidada com sucesso'
     });
   } catch (error) {
-    console.error('[adminMobile] Erro no consolidarRodada:', error);
+    logger.error('[adminMobile] Erro no consolidarRodada:', error);
     res.status(500).json({
       error: 'Erro ao consolidar rodada: ' + error.message,
       code: 'INTERNAL_ERROR'
@@ -602,7 +603,7 @@ async function getConsolidacaoStatus(req, res) {
       }
     });
   } catch (error) {
-    console.error('[adminMobile] Erro no getConsolidacaoStatus:', error);
+    logger.error('[adminMobile] Erro no getConsolidacaoStatus:', error);
     res.status(500).json({
       error: 'Erro ao buscar status: ' + error.message,
       code: 'INTERNAL_ERROR'
@@ -724,7 +725,7 @@ async function getConsolidacaoHistorico(req, res) {
       historico
     });
   } catch (error) {
-    console.error('[adminMobile] Erro no getConsolidacaoHistorico:', error);
+    logger.error('[adminMobile] Erro no getConsolidacaoHistorico:', error);
     res.status(500).json({
       error: 'Erro ao buscar histórico: ' + error.message,
       code: 'INTERNAL_ERROR'
@@ -835,7 +836,7 @@ async function registrarAcerto(req, res) {
       ...novoAcerto
     });
   } catch (error) {
-    console.error('[adminMobile] Erro no registrarAcerto:', error);
+    logger.error('[adminMobile] Erro no registrarAcerto:', error);
     res.status(500).json({
       error: 'Erro ao registrar acerto',
       code: 'INTERNAL_ERROR'
@@ -914,7 +915,7 @@ async function getAcertos(req, res) {
       }
     });
   } catch (error) {
-    console.error('[adminMobile] Erro no getAcertos:', error);
+    logger.error('[adminMobile] Erro no getAcertos:', error);
     res.status(500).json({
       error: 'Erro ao buscar acertos',
       code: 'INTERNAL_ERROR'
@@ -952,7 +953,7 @@ async function getQuitacoesPendentes(req, res) {
       total: quitacoes.length
     });
   } catch (error) {
-    console.error('[adminMobile] Erro no getQuitacoesPendentes:', error);
+    logger.error('[adminMobile] Erro no getQuitacoesPendentes:', error);
     res.status(500).json({
       error: 'Erro ao buscar quitações',
       code: 'INTERNAL_ERROR'
@@ -1012,7 +1013,7 @@ async function aprovarQuitacao(req, res) {
       observacao
     });
   } catch (error) {
-    console.error('[adminMobile] Erro no aprovarQuitacao:', error);
+    logger.error('[adminMobile] Erro no aprovarQuitacao:', error);
     res.status(500).json({
       error: 'Erro ao aprovar quitação',
       code: 'INTERNAL_ERROR'
@@ -1065,7 +1066,7 @@ async function recusarQuitacao(req, res) {
       motivo
     });
   } catch (error) {
-    console.error('[adminMobile] Erro no recusarQuitacao:', error);
+    logger.error('[adminMobile] Erro no recusarQuitacao:', error);
     res.status(500).json({
       error: 'Erro ao recusar quitação',
       code: 'INTERNAL_ERROR'
@@ -1220,7 +1221,7 @@ async function getHealth(req, res) {
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('[adminMobile] Erro no getHealth:', error);
+    logger.error('[adminMobile] Erro no getHealth:', error);
     res.status(500).json({
       error: 'Erro ao buscar health',
       code: 'INTERNAL_ERROR'

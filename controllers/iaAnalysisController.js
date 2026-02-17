@@ -5,6 +5,7 @@
 
 import { solicitarAnalise, limparCache, estatisticasCache } from '../services/llmService.js';
 import AnalisesIA from '../models/AnalisesIA.js';
+import logger from '../utils/logger.js';
 
 // ============================================
 // SOLICITAR NOVA ANÁLISE
@@ -53,7 +54,7 @@ export async function solicitarNovaAnalise(req, res) {
       });
     }
 
-    console.log(`[IA-ANALYSIS] Nova solicitação de análise tipo: ${tipo} por ${adminEmail}`);
+    logger.log(`[IA-ANALYSIS] Nova solicitação de análise tipo: ${tipo} por ${adminEmail}`);
 
     // Solicitar análise via LLM Service
     const startTime = Date.now();
@@ -86,7 +87,7 @@ export async function solicitarNovaAnalise(req, res) {
 
       await analiseDoc.save();
 
-      console.log(`[IA-ANALYSIS] Análise concluída em ${Date.now() - startTime}ms`, {
+      logger.log(`[IA-ANALYSIS] Análise concluída em ${Date.now() - startTime}ms`, {
         id: analiseDoc._id,
         tokens: resultado.tokensUsados.total,
         custo: resultado.custoEstimado,
@@ -110,7 +111,7 @@ export async function solicitarNovaAnalise(req, res) {
 
     } catch (llmError) {
       // Erro ao solicitar análise (API falhou)
-      console.error('[IA-ANALYSIS] Erro ao solicitar análise:', llmError);
+      logger.error('[IA-ANALYSIS] Erro ao solicitar análise:', llmError);
 
       // Salvar erro no histórico
       analiseDoc = new AnalisesIA({
@@ -138,7 +139,7 @@ export async function solicitarNovaAnalise(req, res) {
     }
 
   } catch (error) {
-    console.error('[IA-ANALYSIS] Erro geral ao solicitar análise:', error);
+    logger.error('[IA-ANALYSIS] Erro geral ao solicitar análise:', error);
     res.status(500).json({
       success: false,
       error: 'Erro interno ao processar solicitação'
@@ -192,7 +193,7 @@ export async function listarAnalises(req, res) {
     });
 
   } catch (error) {
-    console.error('[IA-ANALYSIS] Erro ao listar análises:', error);
+    logger.error('[IA-ANALYSIS] Erro ao listar análises:', error);
     res.status(500).json({
       success: false,
       error: 'Erro ao listar análises'
@@ -222,7 +223,7 @@ export async function buscarAnalisePorId(req, res) {
     });
 
   } catch (error) {
-    console.error('[IA-ANALYSIS] Erro ao buscar análise:', error);
+    logger.error('[IA-ANALYSIS] Erro ao buscar análise:', error);
     res.status(500).json({
       success: false,
       error: 'Erro ao buscar análise'
@@ -263,7 +264,7 @@ export async function deletarAnalise(req, res) {
     });
 
   } catch (error) {
-    console.error('[IA-ANALYSIS] Erro ao deletar análise:', error);
+    logger.error('[IA-ANALYSIS] Erro ao deletar análise:', error);
     res.status(500).json({
       success: false,
       error: 'Erro ao deletar análise'
@@ -312,7 +313,7 @@ export async function avaliarAnalise(req, res) {
     });
 
   } catch (error) {
-    console.error('[IA-ANALYSIS] Erro ao avaliar análise:', error);
+    logger.error('[IA-ANALYSIS] Erro ao avaliar análise:', error);
     res.status(500).json({
       success: false,
       error: 'Erro ao avaliar análise'
@@ -341,7 +342,7 @@ export async function obterEstatisticas(req, res) {
     });
 
   } catch (error) {
-    console.error('[IA-ANALYSIS] Erro ao obter estatísticas:', error);
+    logger.error('[IA-ANALYSIS] Erro ao obter estatísticas:', error);
     res.status(500).json({
       success: false,
       error: 'Erro ao obter estatísticas'
@@ -372,7 +373,7 @@ export async function limparCacheAnalises(req, res) {
     });
 
   } catch (error) {
-    console.error('[IA-ANALYSIS] Erro ao limpar cache:', error);
+    logger.error('[IA-ANALYSIS] Erro ao limpar cache:', error);
     res.status(500).json({
       success: false,
       error: 'Erro ao limpar cache'
