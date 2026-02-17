@@ -432,6 +432,124 @@
     color: #3b82f6;
 }
 
+/* PR Toolbar (filtros + botão cleanup na mesma linha) */
+.repo-pr-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+.repo-pr-toolbar .repo-filters {
+    margin-bottom: 0;
+}
+
+/* Botão Limpeza de Branches */
+.repo-branch-cleanup-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: var(--surface-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+.repo-branch-cleanup-btn:hover {
+    border-color: #f59e0b;
+    color: #f59e0b;
+}
+.repo-branch-cleanup-btn.active {
+    border-color: #f59e0b;
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.08);
+}
+.repo-branch-cleanup-btn .material-icons {
+    font-size: 18px;
+}
+.repo-cleanup-arrow {
+    transition: transform 0.2s;
+    font-size: 18px !important;
+}
+.repo-branch-cleanup-btn.active .repo-cleanup-arrow {
+    transform: rotate(180deg);
+}
+
+/* Painel colapsável de limpeza de branches */
+.repo-branch-cleanup-panel {
+    background: var(--surface-elevated);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-left: 3px solid #f59e0b;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    animation: repoFadeIn 0.25s ease-out;
+}
+.repo-branch-cleanup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+.repo-text-muted {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Categorias de limpeza */
+.repo-cleanup-category {
+    margin-bottom: 12px;
+}
+.repo-cleanup-category:last-child {
+    margin-bottom: 0;
+}
+.repo-cleanup-category-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.repo-cleanup-category .repo-table {
+    font-size: 0.8rem;
+}
+
+/* Branch name na tabela de PRs */
+.repo-pr-branch {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.04);
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Autor na tabela de PRs */
+.repo-pr-author {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+@keyframes repoFadeIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .repo-header {
@@ -444,5 +562,15 @@
     }
     .repo-tab {
         white-space: nowrap;
+    }
+    .repo-pr-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .repo-branch-cleanup-btn {
+        justify-content: center;
+    }
+    .repo-pr-branch {
+        max-width: 120px;
     }
 }
