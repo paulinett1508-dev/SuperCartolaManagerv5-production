@@ -92,6 +92,17 @@
     --app-copa-gradient: linear-gradient(135deg, #8B1538 0%, #1E3A5F 50%, #D4AF37 100%);
     --app-copa-gradient-subtle: linear-gradient(135deg, rgba(139, 21, 56, 0.2) 0%, rgba(30, 58, 95, 0.15) 100%);
 
+    /* Agenda do Dia (Jogos) */
+    --app-agenda-primary: #1a6b35;              /* Verde gramado */
+    --app-agenda-secondary: #0d3d1e;            /* Verde escuro */
+    --app-agenda-accent: #2d9a4e;               /* Verde vibrante */
+    --app-agenda-border: rgba(26, 107, 53, 0.35);
+    --app-agenda-gradient: linear-gradient(135deg, #1a6b35 0%, #0d3d1e 50%, #2d9a4e 100%);
+
+    /* Notícias do Time (gradient dinâmico via inline style) */
+    --app-noticias-border: rgba(255, 255, 255, 0.15);
+    --app-noticias-fallback-gradient: linear-gradient(135deg, #374151 0%, #1f2937 50%, #4b5563 100%);
+
     /* Cores de Posição (Campinho/Escalação) */
     --app-pos-gol: #f97316;
     --app-pos-gol-dark: #c2410c;
