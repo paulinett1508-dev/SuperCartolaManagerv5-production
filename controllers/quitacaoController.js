@@ -17,6 +17,7 @@ import mongoose from "mongoose";
 import ExtratoFinanceiroCache from "../models/ExtratoFinanceiroCache.js";
 import InscricaoTemporada from "../models/InscricaoTemporada.js";
 import { CURRENT_SEASON, getFinancialSeason } from "../config/seasons.js";
+import logger from '../utils/logger.js';
 
 /**
  * Busca dados do participante para exibir no modal de quitação
@@ -97,7 +98,7 @@ export async function buscarDadosParaQuitacao(req, res) {
                 saldoRodadas += (r.bonus || 0) - (r.onus || 0);
             });
 
-            console.log(`[QUITACAO] Cache não encontrado para time ${timeId}/temporada ${temporada}. Calculado diretamente: saldoRodadas=${saldoRodadas}`);
+            logger.log(`[QUITACAO] Cache não encontrado para time ${timeId}/temporada ${temporada}. Calculado diretamente: saldoRodadas=${saldoRodadas}`);
         }
 
         // Calcular saldo final
@@ -142,7 +143,7 @@ export async function buscarDadosParaQuitacao(req, res) {
                 saldoRemanescente = saldoFinal - creditoComprometido;
             }
 
-            console.log(`[QUITACAO] Participante ${timeId} já renovou para ${proximaTemporada}:
+            logger.log(`[QUITACAO] Participante ${timeId} já renovou para ${proximaTemporada}:
                 - Saldo 2025: ${saldoFinal}
                 - Taxa inscrição: ${taxaInscricao}
                 - Pagou inscrição: ${pagouInscricao}
@@ -188,7 +189,7 @@ export async function buscarDadosParaQuitacao(req, res) {
         });
 
     } catch (error) {
-        console.error('[QUITACAO] Erro ao buscar dados:', error);
+        logger.error('[QUITACAO] Erro ao buscar dados:', error);
         return res.status(500).json({
             success: false,
             error: 'Erro ao buscar dados para quitação',
@@ -264,7 +265,7 @@ export async function quitarTemporada(req, res) {
                     observacao: observacao.trim()
                 };
                 await cacheOrigem.save({ session });
-                console.log(`[QUITACAO] Extrato ${temporada_origem} marcado como quitado para time ${timeId}`);
+                logger.log(`[QUITACAO] Extrato ${temporada_origem} marcado como quitado para time ${timeId}`);
             } else {
                 // v1.1: Se não há cache, criar um registro mínimo de quitação
                 await ExtratoFinanceiroCache.create([{
@@ -283,7 +284,7 @@ export async function quitarTemporada(req, res) {
                         criado_sem_cache: true // Flag para auditoria
                     }
                 }], { session });
-                console.log(`[QUITACAO] Cache criado e marcado como quitado para time ${timeId}/temporada ${temporada_origem} (sem cache anterior)`);
+                logger.log(`[QUITACAO] Cache criado e marcado como quitado para time ${timeId}/temporada ${temporada_origem} (sem cache anterior)`);
             }
 
             // 2. Criar/atualizar inscrição na temporada destino com legado manual
@@ -335,7 +336,7 @@ export async function quitarTemporada(req, res) {
                 { $set: inscricaoUpdate },
                 { upsert: true, new: true, session }
             );
-            console.log(`[QUITACAO] Inscricao ${temporada_destino} atualizada com legado manual para time ${timeId}`);
+            logger.log(`[QUITACAO] Inscricao ${temporada_destino} atualizada com legado manual para time ${timeId}`);
 
             // 3. Registrar log de atividade
             try {
@@ -357,7 +358,7 @@ export async function quitarTemporada(req, res) {
                     ip: req.ip
                 }], { session });
             } catch (logError) {
-                console.warn('[QUITACAO] Erro ao registrar log (não crítico):', logError.message);
+                logger.warn('[QUITACAO] Erro ao registrar log (não crítico):', logError.message);
             }
 
             await session.commitTransaction();
@@ -384,7 +385,7 @@ export async function quitarTemporada(req, res) {
         }
 
     } catch (error) {
-        console.error('[QUITACAO] Erro ao quitar temporada:', error);
+        logger.error('[QUITACAO] Erro ao quitar temporada:', error);
         return res.status(500).json({
             success: false,
             error: 'Erro ao processar quitação',
@@ -423,7 +424,7 @@ export async function verificarStatusQuitacao(req, res) {
         });
 
     } catch (error) {
-        console.error('[QUITACAO] Erro ao verificar status:', error);
+        logger.error('[QUITACAO] Erro ao verificar status:', error);
         return res.status(500).json({
             success: false,
             error: 'Erro ao verificar status',
