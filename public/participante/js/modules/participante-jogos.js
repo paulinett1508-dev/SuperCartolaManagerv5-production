@@ -162,7 +162,7 @@ export function renderizarJogosAoVivo(jogos, fonte = 'soccerdata', aoVivo = fals
     const jogosAoVivoCount = jogos.filter(j => isJogoAoVivo(j)).length;
 
     return `
-    <section id="jogos-home-section" class="jogos-home-section expanded mx-4 mb-6">
+    <section id="jogos-home-section" class="jogos-home-section mx-4 mb-6">
         <!-- Header Colapsável Agenda do Dia (Padrão Copa) -->
         <button class="jogos-home-header" onclick="window.toggleJogosHome && window.toggleJogosHome()">
             <div class="jogos-home-header-left">
@@ -182,7 +182,7 @@ export function renderizarJogosAoVivo(jogos, fonte = 'soccerdata', aoVivo = fals
         </button>
 
         <!-- Conteúdo Colapsável -->
-        <div class="jogos-home-content" id="jogos-home-content">
+        <div class="jogos-home-content collapsed" id="jogos-home-content">
             <div class="space-y-3 p-3">
                 ${meuTimeHtml}
                 ${jogosAgendados.length > 0
@@ -512,7 +512,7 @@ export function renderizarSecaoCopa(copa) {
         : 'Copa do Mundo';
 
     return `
-    <section id="copa-home-section" class="copa-home-section expanded mx-4 mb-6">
+    <section id="copa-home-section" class="copa-home-section mx-4 mb-6">
         <!-- Header Colapsável Copa do Mundo -->
         <button class="copa-home-header" onclick="window.toggleCopaHome && window.toggleCopaHome()">
             <div class="copa-home-header-left">
@@ -532,7 +532,7 @@ export function renderizarSecaoCopa(copa) {
         </button>
 
         <!-- Conteúdo Colapsável -->
-        <div class="copa-home-content" id="copa-home-content">
+        <div class="copa-home-content collapsed" id="copa-home-content">
             ${jogosBrasil.length > 0 ? renderizarJogosBrasilCopa(jogosBrasil) : ''}
             ${jogosExibir.length > 0 ? renderizarJogosCopaLista(jogosExibir, copa.jogosDoDia?.length > 0 ? 'Jogos do Dia' : 'Próximos Jogos') : ''}
             ${jogosExibir.length === 0 && jogosBrasil.length === 0 ? `

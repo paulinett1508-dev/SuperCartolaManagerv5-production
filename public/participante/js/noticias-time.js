@@ -254,7 +254,7 @@ const NoticiasTime = {
         }).join('');
 
         return `
-            <section id="noticias-home-section" class="noticias-home-section expanded mx-4 mb-6">
+            <section id="noticias-home-section" class="noticias-home-section mx-4 mb-6">
                 <!-- Header Colapsável Notícias (Degradê Cores do Time) -->
                 <button class="noticias-home-header" style="background:${gradient};border-color:${borderColor};" onclick="window.toggleNoticiasHome && window.toggleNoticiasHome()">
                     <div class="noticias-home-header-left">
@@ -270,7 +270,7 @@ const NoticiasTime = {
                 </button>
 
                 <!-- Conteúdo Colapsável -->
-                <div class="noticias-home-content" id="noticias-home-content" style="background:${contentBg};border-color:${borderColor};">
+                <div class="noticias-home-content collapsed" id="noticias-home-content" style="background:${contentBg};border-color:${borderColor};">
                     <div class="noticias-list">
                         ${noticiasHTML}
                     </div>
