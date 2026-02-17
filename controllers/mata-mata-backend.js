@@ -14,6 +14,7 @@ import { calcularTamanhoIdealMataMata } from "../utils/tournamentUtils.js"; // I
 import mataMataRules from "../config/rules/mata_mata.json" with { type: "json" }; // Importar regras padrão
 import { CURRENT_SEASON } from "../config/seasons.js";
 import _ from 'lodash';
+import logger from '../utils/logger.js';
 
 
 // ============================================================================
@@ -45,7 +46,7 @@ async function getMataMataConfig(ligaId) {
 
         return defaultConfig;
     } catch (error) {
-        console.error(`[MATA-BACKEND] Erro ao carregar configuração do mata-mata para liga ${ligaId}:`, error);
+        logger.error(`[MATA-BACKEND] Erro ao carregar configuração do mata-mata para liga ${ligaId}:`, error);
         // Retorna o padrão em caso de erro para não quebrar a execução
         return _.cloneDeep(mataMataRules);
     }
@@ -71,7 +72,7 @@ async function getRankingRodada(ligaId, rodada) {
             ligaIdQuery = ligaId;
         }
 
-        console.log(
+        logger.log(
             `[MATA-BACKEND] Buscando ranking: liga=${ligaId}, rodada=${rodada}`,
         );
 
@@ -82,12 +83,12 @@ async function getRankingRodada(ligaId, rodada) {
             .select("timeId pontos nome_time nome_cartola")
             .lean();
 
-        console.log(
+        logger.log(
             `[MATA-BACKEND] Encontrados ${registros?.length || 0} registros para R${rodada}`,
         );
 
         if (!registros || registros.length === 0) {
-            console.warn(`[MATA-BACKEND] Sem dados para rodada ${rodada}`);
+            logger.warn(`[MATA-BACKEND] Sem dados para rodada ${rodada}`);
             return [];
         }
 
@@ -104,7 +105,7 @@ async function getRankingRodada(ligaId, rodada) {
 
         return ranking;
     } catch (error) {
-        console.error(
+        logger.error(
             `[MATA-BACKEND] Erro ao buscar ranking rodada ${rodada}:`,
             error.message,
         );
@@ -286,7 +287,7 @@ async function calcularResultadosEdicao(ligaId, edicao, rodadaAtual, config) {
         }
 
         if (tamanhoTorneio === 0) {
-            console.warn(`[MATA-BACKEND] Número de participantes (${totalParticipantes}) insuficiente para o mata-mata.`);
+            logger.warn(`[MATA-BACKEND] Número de participantes (${totalParticipantes}) insuficiente para o mata-mata.`);
             return [];
         }
 
@@ -298,7 +299,7 @@ async function calcularResultadosEdicao(ligaId, edicao, rodadaAtual, config) {
 
         // Exigir número de times do torneio para a 1ª fase
         if (!rankingBase || rankingBase.length < tamanhoTorneio) {
-            console.warn(
+            logger.warn(
                 `[MATA-BACKEND] Ranking base insuficiente para ${edicao.nome}: ${rankingBase?.length || 0} times (esperado: ${tamanhoTorneio})`,
             );
             return [];
@@ -310,7 +311,7 @@ async function calcularResultadosEdicao(ligaId, edicao, rodadaAtual, config) {
         // 32 times → 5 fases, 16 times → 4 fases, 8 times → 3 fases
         const fases = getFasesParaTamanho(tamanhoTorneio);
 
-        console.log(
+        logger.log(
             `[MATA-BACKEND] ${edicao.nome}: Torneio com ${tamanhoTorneio} times (config: ${totalTimesConfig || 'dinâmico'}). ${fases.length} fases: [${fases.join(', ')}].`,
         );
 
@@ -332,7 +333,7 @@ async function calcularResultadosEdicao(ligaId, edicao, rodadaAtual, config) {
 
             // Verificar se rodada já foi concluída
             if (rodadaPontosNum >= rodadaAtual) {
-                console.log(
+                logger.log(
                     `[MATA-BACKEND] Fase ${fase} (R${rodadaPontosNum}) ainda não concluída`,
                 );
                 break;
@@ -394,14 +395,14 @@ async function calcularResultadosEdicao(ligaId, edicao, rodadaAtual, config) {
 
             vencedoresAnteriores = proximosVencedores;
 
-            console.log(
+            logger.log(
                 `[MATA-BACKEND] ${edicao.nome} - ${fase}: ${confrontos.length} confrontos, ${proximosVencedores.length} vencedores`,
             );
         }
 
         return resultadosFinanceiros;
     } catch (error) {
-        console.error(`[MATA-BACKEND] Erro ao calcular ${edicao.nome}:`, error);
+        logger.error(`[MATA-BACKEND] Erro ao calcular ${edicao.nome}:`, error);
         return [];
     }
 }
@@ -415,7 +416,7 @@ async function calcularResultadosEdicao(ligaId, edicao, rodadaAtual, config) {
  * Retorna array consolidado de transações financeiras
  */
 export async function getResultadosMataMataCompleto(ligaId, rodadaAtual) {
-    console.log(
+    logger.log(
         `[MATA-BACKEND] Calculando Mata-Mata para liga ${ligaId}, rodada ${rodadaAtual}`,
     );
 
@@ -427,7 +428,7 @@ export async function getResultadosMataMataCompleto(ligaId, rodadaAtual) {
         (edicao) => rodadaAtual > edicao.rodadaInicial,
     );
 
-    console.log(
+    logger.log(
         `[MATA-BACKEND] ${edicoesProcessaveis.length} edições para processar`,
     );
 
@@ -447,7 +448,7 @@ export async function getResultadosMataMataCompleto(ligaId, rodadaAtual) {
         todosResultados.push(...resultadosEdicao);
     }
 
-    console.log(
+    logger.log(
         `[MATA-BACKEND] Total: ${todosResultados.length} transações calculadas`,
     );
 
@@ -476,13 +477,13 @@ export async function calcularMataMataParaTime(
         return null;
     }
 
-    console.log(
+    logger.log(
         `[MATA-BACKEND] Calculando R${rodadaNumero} para time ${timeId} (${edicao.nome})`,
     );
 
     // Verificar se rodada já foi concluída
     if (rodadaNumero >= rodadaAtual) {
-        console.log(
+        logger.log(
             `[MATA-BACKEND] R${rodadaNumero} ainda não concluída (atual: ${rodadaAtual})`,
         );
         return null;
@@ -496,7 +497,7 @@ export async function calcularMataMataParaTime(
         config,
     );
 
-    console.log(
+    logger.log(
         `[MATA-BACKEND] Resultados da edição: ${resultados.length} transações`,
     );
 
@@ -506,7 +507,7 @@ export async function calcularMataMataParaTime(
     );
 
     if (!resultado) {
-        console.log(
+        logger.log(
             `[MATA-BACKEND] Nenhum resultado para time ${timeId} na R${rodadaNumero}`,
         );
         return null;
@@ -521,7 +522,7 @@ export async function calcularMataMataParaTime(
             final: "Final",
         }[resultado.fase] || resultado.fase;
 
-    console.log(
+    logger.log(
         `[MATA-BACKEND] ✅ Time ${timeId}: ${resultado.valor > 0 ? "Vitória" : "Derrota"} (${faseLabel})`,
     );
 
@@ -550,9 +551,9 @@ export async function criarMapaMataMata(ligaId, rodadaAtual) {
         });
     });
 
-    console.log(`[MATA-BACKEND] Mapa criado com ${mapa.size} entradas`);
+    logger.log(`[MATA-BACKEND] Mapa criado com ${mapa.size} entradas`);
 
     return mapa;
 }
 
-console.log("[MATA-BACKEND] ✅ Módulo v1.1 carregado");
+logger.log("[MATA-BACKEND] ✅ Módulo v1.1 carregado");

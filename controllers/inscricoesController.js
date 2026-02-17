@@ -24,6 +24,7 @@ import Time from "../models/Time.js";
 import { CURRENT_SEASON } from "../config/seasons.js";
 import { calcularSaldoParticipante, classificarSituacao } from "../utils/saldo-calculator.js";
 import crypto from "crypto";
+import logger from '../utils/logger.js';
 
 // =============================================================================
 // FUNÇÕES AUXILIARES
@@ -83,7 +84,7 @@ export async function criarTransacoesIniciais(ligaId, timeId, temporada, valores
         });
 
         if (extratoExistente) {
-            console.log(`[INSCRICOES] ⚠️ Transação INSCRICAO_TEMPORADA já existe para time ${timeId} em ${temporada}. Pulando...`);
+            logger.log(`[INSCRICOES] ⚠️ Transação INSCRICAO_TEMPORADA já existe para time ${timeId} em ${temporada}. Pulando...`);
         } else {
             const txInscricao = {
                 liga_id: ligaObjId,
@@ -155,7 +156,7 @@ export async function criarTransacoesIniciais(ligaId, timeId, temporada, valores
         });
 
         if (extratoComSaldo) {
-            console.log(`[INSCRICOES] ⚠️ Transação SALDO_TEMPORADA_ANTERIOR já existe para time ${timeId} em ${temporada}. Pulando...`);
+            logger.log(`[INSCRICOES] ⚠️ Transação SALDO_TEMPORADA_ANTERIOR já existe para time ${timeId} em ${temporada}. Pulando...`);
         } else {
             const descricao = valores.saldoTransferido > 0
                 ? `Crédito aproveitado da temporada ${temporada - 1}`
@@ -214,71 +215,78 @@ export async function criarTransacoesIniciais(ligaId, timeId, temporada, valores
  * @param {number} temporada - Nova temporada
  */
 export async function adicionarParticipanteNaLiga(ligaId, dadosParticipante, temporada) {
-    const liga = await Liga.findById(ligaId);
-    if (!liga) throw new Error("Liga não encontrada");
+    const session = await mongoose.startSession();
+    try {
+        await session.withTransaction(async () => {
+            const liga = await Liga.findById(ligaId).session(session);
+            if (!liga) throw new Error("Liga não encontrada");
 
-    // Verificar se já existe
-    const jaExiste = liga.participantes?.some(
-        p => Number(p.time_id) === Number(dadosParticipante.time_id)
-    );
+            // Verificar se já existe
+            const jaExiste = liga.participantes?.some(
+                p => Number(p.time_id) === Number(dadosParticipante.time_id)
+            );
 
-    if (!jaExiste) {
-        // Adicionar aos participantes
-        liga.participantes = liga.participantes || [];
-        liga.participantes.push({
-            time_id: Number(dadosParticipante.time_id),
-            nome_time: dadosParticipante.nome_time,
-            nome_cartola: dadosParticipante.nome_cartoleiro || dadosParticipante.nome_cartola,
-            // ✅ v2.15 FIX: Usar campos corretos para consistência com dados da API Cartola
-            // foto_time = escudo do time (URL da imagem)
-            foto_time: dadosParticipante.escudo || dadosParticipante.url_escudo_png || dadosParticipante.foto_time || "",
-            foto_perfil: dadosParticipante.foto_perfil || "",
-            assinante: dadosParticipante.assinante || false,
-            ativo: true,
-            // ✅ v2.12: Campos adicionais para WhatsApp e Time do Coração
-            contato: dadosParticipante.contato || "",
-            clube_id: dadosParticipante.time_coracao || dadosParticipante.clube_id || null,
-            // ✅ v2.13: Senha padrão para novos participantes (evita login bloqueado)
-            senha_acesso: dadosParticipante.senha_acesso || "acessocartola"
-        });
+            if (!jaExiste) {
+                // Adicionar aos participantes
+                liga.participantes = liga.participantes || [];
+                liga.participantes.push({
+                    time_id: Number(dadosParticipante.time_id),
+                    nome_time: dadosParticipante.nome_time,
+                    nome_cartola: dadosParticipante.nome_cartoleiro || dadosParticipante.nome_cartola,
+                    // ✅ v2.15 FIX: Usar campos corretos para consistência com dados da API Cartola
+                    // foto_time = escudo do time (URL da imagem)
+                    foto_time: dadosParticipante.escudo || dadosParticipante.url_escudo_png || dadosParticipante.foto_time || "",
+                    foto_perfil: dadosParticipante.foto_perfil || "",
+                    assinante: dadosParticipante.assinante || false,
+                    ativo: true,
+                    // ✅ v2.12: Campos adicionais para WhatsApp e Time do Coração
+                    contato: dadosParticipante.contato || "",
+                    clube_id: dadosParticipante.time_coracao || dadosParticipante.clube_id || null,
+                    // ✅ v2.13: Senha padrão para novos participantes (evita login bloqueado)
+                    senha_acesso: dadosParticipante.senha_acesso || "acessocartola"
+                });
 
-        // Adicionar ao array de times
-        if (!liga.times?.includes(Number(dadosParticipante.time_id))) {
-            liga.times = liga.times || [];
-            liga.times.push(Number(dadosParticipante.time_id));
-        }
+                // Adicionar ao array de times
+                if (!liga.times?.includes(Number(dadosParticipante.time_id))) {
+                    liga.times = liga.times || [];
+                    liga.times.push(Number(dadosParticipante.time_id));
+                }
 
-        await liga.save();
-    }
-
-    // Garantir que Time existe (busca apenas por id, que é único)
-    // Se existir: atualiza para nova temporada
-    // Se não existir: cria novo
-    await Time.findOneAndUpdate(
-        {
-            id: Number(dadosParticipante.time_id)
-        },
-        {
-            $set: {
-                nome_time: dadosParticipante.nome_time,
-                nome_cartoleiro: dadosParticipante.nome_cartoleiro || dadosParticipante.nome_cartola,
-                nome: dadosParticipante.nome_cartoleiro || dadosParticipante.nome_cartola,
-                // ✅ v2.14: Campos usados pelo frontend para exibição
-                nome_cartola: dadosParticipante.nome_cartoleiro || dadosParticipante.nome_cartola,
-                url_escudo_png: dadosParticipante.escudo || dadosParticipante.url_escudo_png || '',
-                escudo: dadosParticipante.escudo,
-                liga_id: ligaId,
-                temporada: Number(temporada),
-                ativo: true,
-                // ✅ v2.13: Senha padrão para novos participantes
-                senha_acesso: dadosParticipante.senha_acesso || "acessocartola"
-            },
-            $setOnInsert: {
-                id: Number(dadosParticipante.time_id)
+                await liga.save({ session });
             }
-        },
-        { upsert: true, new: true }
-    );
+
+            // Garantir que Time existe (busca apenas por id, que é único)
+            // Se existir: atualiza para nova temporada
+            // Se não existir: cria novo
+            await Time.findOneAndUpdate(
+                {
+                    id: Number(dadosParticipante.time_id)
+                },
+                {
+                    $set: {
+                        nome_time: dadosParticipante.nome_time,
+                        nome_cartoleiro: dadosParticipante.nome_cartoleiro || dadosParticipante.nome_cartola,
+                        nome: dadosParticipante.nome_cartoleiro || dadosParticipante.nome_cartola,
+                        // ✅ v2.14: Campos usados pelo frontend para exibição
+                        nome_cartola: dadosParticipante.nome_cartoleiro || dadosParticipante.nome_cartola,
+                        url_escudo_png: dadosParticipante.escudo || dadosParticipante.url_escudo_png || '',
+                        escudo: dadosParticipante.escudo,
+                        liga_id: ligaId,
+                        temporada: Number(temporada),
+                        ativo: true,
+                        // ✅ v2.13: Senha padrão para novos participantes
+                        senha_acesso: dadosParticipante.senha_acesso || "acessocartola"
+                    },
+                    $setOnInsert: {
+                        id: Number(dadosParticipante.time_id)
+                    }
+                },
+                { upsert: true, new: true, session }
+            );
+        });
+    } finally {
+        await session.endSession();
+    }
 }
 
 // =============================================================================
@@ -320,7 +328,7 @@ export async function processarRenovacao(ligaId, timeId, temporada, opcoes = {})
     }).lean();
 
     const temLegadoManual = inscricaoExistente?.legado_manual?.origem != null;
-    console.log(`[INSCRICOES] Renovação - legado_manual existente: ${temLegadoManual}`);
+    logger.log(`[INSCRICOES] Renovação - legado_manual existente: ${temLegadoManual}`);
 
     // 3. Buscar saldo da temporada anterior
     const saldo = await buscarSaldoTemporada(ligaId, timeId, temporadaAnterior);
@@ -354,7 +362,7 @@ export async function processarRenovacao(ligaId, timeId, temporada, opcoes = {})
             saldoTransferido = legadoValor;
         }
         // Se legadoValor == 0, foi zerado - não transfere nada
-        console.log(`[INSCRICOES] Usando legado_manual: valor=${legadoValor} (tipo: ${inscricaoExistente.legado_manual.tipo_quitacao})`);
+        logger.log(`[INSCRICOES] Usando legado_manual: valor=${legadoValor} (tipo: ${inscricaoExistente.legado_manual.tipo_quitacao})`);
     } else {
         // REGRA NORMAL: Transferir crédito ou dívida para nova temporada
         if (saldo.status === 'credor') {
@@ -365,13 +373,13 @@ export async function processarRenovacao(ligaId, timeId, temporada, opcoes = {})
                 // Exemplo: crédito 421.54 - taxa 180 = 241.54 transferido
                 creditoUsado = creditoTotal;  // Todo crédito foi "usado" (para pagamento + transferência)
                 saldoTransferido = Math.max(0, creditoTotal - taxa);  // Restante após pagar a taxa
-                console.log(`[INSCRICOES] Credor pagou com crédito: total=${creditoTotal}, taxa=${taxa}, restante=${saldoTransferido}`);
+                logger.log(`[INSCRICOES] Credor pagou com crédito: total=${creditoTotal}, taxa=${taxa}, restante=${saldoTransferido}`);
             } else if (rules.inscricao.aproveitar_saldo_positivo && opcoes.aproveitarCredito !== false) {
                 // Não pagou, mas quer usar crédito - taxa vira débito, crédito é transferido
                 // Exemplo: crédito 421.54, taxa 180 (débito) = saldo inicial 241.54
                 creditoUsado = creditoTotal;
                 saldoTransferido = creditoUsado;
-                console.log(`[INSCRICOES] Credor sem pagar, aproveitando crédito: ${creditoUsado}`);
+                logger.log(`[INSCRICOES] Credor sem pagar, aproveitando crédito: ${creditoUsado}`);
             }
             // Se não pagou E não quer aproveitar: crédito permanece na temporada anterior (raro)
         } else if (saldo.status === 'devedor') {
@@ -461,7 +469,7 @@ export async function processarRenovacao(ligaId, timeId, temporada, opcoes = {})
         clube_id: participante.clube_id || participante.time_coracao || null
     }, temporada);
 
-    console.log(`[INSCRICOES] Renovação processada: liga=${ligaId} time=${timeId} temporada=${temporada}`);
+    logger.log(`[INSCRICOES] Renovação processada: liga=${ligaId} time=${timeId} temporada=${temporada}`);
 
     return {
         success: true,
@@ -531,7 +539,7 @@ export async function processarNaoParticipar(ligaId, timeId, temporada, opcoes =
     // 4. NÃO criar Time para nova temporada (ele fica só em 2025)
     // O saldo de 2025 fica congelado, pode quitar depois via AcertoFinanceiro
 
-    console.log(`[INSCRICOES] Não participar processado: liga=${ligaId} time=${timeId} temporada=${temporada}`);
+    logger.log(`[INSCRICOES] Não participar processado: liga=${ligaId} time=${timeId} temporada=${temporada}`);
 
     return {
         success: true,
@@ -561,7 +569,7 @@ export async function processarNovoParticipante(ligaId, temporada, dadosCartola,
     } else if (isCadastroManual) {
         // ID temporário negativo = -timestamp para identificar cadastros manuais
         timeId = -Date.now();
-        console.log(`[INSCRICOES] Cadastro manual - ID temporário gerado: ${timeId}`);
+        logger.log(`[INSCRICOES] Cadastro manual - ID temporário gerado: ${timeId}`);
     } else {
         throw new Error("ID do time é obrigatório");
     }
@@ -662,7 +670,7 @@ export async function processarNovoParticipante(ligaId, temporada, dadosCartola,
     }, temporada);
 
     const tipoLog = isCadastroManual ? 'MANUAL' : 'NOVO';
-    console.log(`[INSCRICOES] ${tipoLog} participante cadastrado: liga=${ligaId} time=${timeId} temporada=${temporada}`);
+    logger.log(`[INSCRICOES] ${tipoLog} participante cadastrado: liga=${ligaId} time=${timeId} temporada=${temporada}`);
 
     return {
         success: true,
@@ -825,8 +833,8 @@ export async function processarDecisaoUnificada(ligaId, timeId, temporada, decis
     const temporadaAnterior = temporada - 1;
     const db = mongoose.connection.db;
 
-    console.log(`[INSCRICOES] Processando decisao unificada: liga=${ligaId} time=${timeId} temporada=${temporada}`);
-    console.log(`[INSCRICOES] Decisao:`, JSON.stringify(decisao, null, 2));
+    logger.log(`[INSCRICOES] Processando decisao unificada: liga=${ligaId} time=${timeId} temporada=${temporada}`);
+    logger.log(`[INSCRICOES] Decisao:`, JSON.stringify(decisao, null, 2));
 
     // 1. Buscar saldo atual
     const saldo = await buscarSaldoTemporada(ligaId, timeId, temporadaAnterior);
@@ -926,10 +934,10 @@ export async function processarDecisaoUnificada(ligaId, timeId, temporada, decis
 
     // Log para debug (documento nao encontrado = cenario raro, mas nao deve criar vazio)
     if (updateQuitacao.matchedCount === 0) {
-        console.warn(`[INSCRICOES] AVISO: Extrato ${temporadaAnterior} nao encontrado para time ${timeId}. Quitacao nao registrada no cache.`);
+        logger.warn(`[INSCRICOES] AVISO: Extrato ${temporadaAnterior} nao encontrado para time ${timeId}. Quitacao nao registrada no cache.`);
     }
 
-    console.log(`[INSCRICOES] Quitacao ${temporadaAnterior} registrada: tipo=${tipoQuitacao} legado=${valorLegado}`);
+    logger.log(`[INSCRICOES] Quitacao ${temporadaAnterior} registrada: tipo=${tipoQuitacao} legado=${valorLegado}`);
 
     // 4. Processar renovacao ou nao-participar
     let resultado;
@@ -1027,7 +1035,7 @@ export async function processarBatchInscricoes(ligaId, temporada, timeIds, acao,
     const resultados = [];
     const db = mongoose.connection.db;
 
-    console.log(`[BATCH] Iniciando: ${acao} para ${timeIds.length} times`);
+    logger.log(`[BATCH] Iniciando: ${acao} para ${timeIds.length} times`);
 
     for (const timeId of timeIds) {
         try {
@@ -1057,8 +1065,8 @@ export async function processarBatchInscricoes(ligaId, temporada, timeIds, acao,
                     sucesso = true;
                     break;
 
-                case 'marcar_pago':
-                    // Atualizar inscrição existente
+                case 'marcar_pago': {
+                    // Atualizar inscrição existente + estornar débito (operação atômica)
                     const inscricao = await InscricaoTemporada.findOne({
                         liga_id: new mongoose.Types.ObjectId(ligaId),
                         time_id: Number(timeId),
@@ -1066,26 +1074,36 @@ export async function processarBatchInscricoes(ligaId, temporada, timeIds, acao,
                     });
 
                     if (inscricao && !inscricao.pagou_inscricao) {
-                        inscricao.pagou_inscricao = true;
-                        inscricao.data_pagamento_inscricao = new Date();
-                        await inscricao.save();
+                        const taxaInscricao = inscricao.taxa_inscricao || 0;
+                        const ligaObjIdMp = new mongoose.Types.ObjectId(ligaId);
+                        const sessionMp = await mongoose.startSession();
+                        try {
+                            await sessionMp.withTransaction(async () => {
+                                inscricao.pagou_inscricao = true;
+                                inscricao.data_pagamento_inscricao = new Date();
+                                await inscricao.save({ session: sessionMp });
 
-                        // Estornar débito do extrato
-                        const ligaObjId = new mongoose.Types.ObjectId(ligaId);
-                        await db.collection('extratofinanceirocaches').updateOne(
-                            {
-                                liga_id: ligaObjId,
-                                time_id: Number(timeId),
-                                temporada: Number(temporada)
-                            },
-                            {
-                                $pull: { historico_transacoes: { tipo: 'INSCRICAO_TEMPORADA' } },
-                                $inc: { saldo_consolidado: inscricao.taxa_inscricao || 0 }
-                            }
-                        );
+                                // Estornar débito do extrato
+                                await db.collection('extratofinanceirocaches').updateOne(
+                                    {
+                                        liga_id: ligaObjIdMp,
+                                        time_id: Number(timeId),
+                                        temporada: Number(temporada)
+                                    },
+                                    {
+                                        $pull: { historico_transacoes: { tipo: 'INSCRICAO_TEMPORADA' } },
+                                        $inc: { saldo_consolidado: taxaInscricao }
+                                    },
+                                    { session: sessionMp }
+                                );
+                            });
+                        } finally {
+                            await sessionMp.endSession();
+                        }
                     }
                     sucesso = true;
                     break;
+                }
 
                 case 'reverter':
                     // Voltar para pendente
@@ -1133,34 +1151,61 @@ export async function processarBatchInscricoes(ligaId, temporada, timeIds, acao,
                     }
                     break;
 
-                case 'ativar':
-                    await Time.updateOne({ id: Number(timeId) }, { $set: { ativo: true } });
-                    await Liga.updateOne(
-                        { _id: ligaId, "participantes.time_id": Number(timeId) },
-                        { $set: { "participantes.$.ativo": true } }
-                    );
+                case 'ativar': {
+                    const sessionAtv = await mongoose.startSession();
+                    try {
+                        await sessionAtv.withTransaction(async () => {
+                            await Time.updateOne({ id: Number(timeId) }, { $set: { ativo: true } }, { session: sessionAtv });
+                            await Liga.updateOne(
+                                { _id: ligaId, "participantes.time_id": Number(timeId) },
+                                { $set: { "participantes.$.ativo": true } },
+                                { session: sessionAtv }
+                            );
+                        });
+                    } finally {
+                        await sessionAtv.endSession();
+                    }
                     sucesso = true;
                     break;
+                }
 
-                case 'inativar':
-                    await Time.updateOne({ id: Number(timeId) }, { $set: { ativo: false } });
-                    await Liga.updateOne(
-                        { _id: ligaId, "participantes.time_id": Number(timeId) },
-                        { $set: { "participantes.$.ativo": false } }
-                    );
+                case 'inativar': {
+                    const sessionIna = await mongoose.startSession();
+                    try {
+                        await sessionIna.withTransaction(async () => {
+                            await Time.updateOne({ id: Number(timeId) }, { $set: { ativo: false } }, { session: sessionIna });
+                            await Liga.updateOne(
+                                { _id: ligaId, "participantes.time_id": Number(timeId) },
+                                { $set: { "participantes.$.ativo": false } },
+                                { session: sessionIna }
+                            );
+                        });
+                    } finally {
+                        await sessionIna.endSession();
+                    }
                     sucesso = true;
                     break;
+                }
 
-                case 'gerar_senhas':
+                case 'gerar_senhas': {
                     // Gerar senha aleatória
                     const novaSenha = crypto.randomBytes(4).toString('hex');
-                    await Time.updateOne({ id: Number(timeId) }, { $set: { senha_acesso: novaSenha } });
-                    await Liga.updateOne(
-                        { _id: ligaId, "participantes.time_id": Number(timeId) },
-                        { $set: { "participantes.$.senha_acesso": novaSenha } }
-                    );
+                    const sessionGs = await mongoose.startSession();
+                    try {
+                        await sessionGs.withTransaction(async () => {
+                            await Time.updateOne({ id: Number(timeId) }, { $set: { senha_acesso: novaSenha } }, { session: sessionGs });
+                            await Liga.updateOne(
+                                { _id: ligaId, "participantes.time_id": Number(timeId) },
+                                { $set: { "participantes.$.senha_acesso": novaSenha } },
+                                { session: sessionGs }
+                            );
+                        });
+                    } finally {
+                        await sessionGs.endSession();
+                    }
                     sucesso = true;
                     break;
+                }
 
                 default:
                     throw new Error(`Ação '${acao}' não reconhecida`);
@@ -1169,7 +1214,7 @@ export async function processarBatchInscricoes(ligaId, temporada, timeIds, acao,
             resultados.push({ timeId, success: sucesso });
 
         } catch (error) {
-            console.error(`[BATCH] Erro no time ${timeId}:`, error.message);
+            logger.error(`[BATCH] Erro no time ${timeId}:`, error.message);
             resultados.push({ timeId, success: false, error: error.message });
         }
     }
@@ -1177,7 +1222,7 @@ export async function processarBatchInscricoes(ligaId, temporada, timeIds, acao,
     const processados = resultados.filter(r => r.success).length;
     const erros = resultados.filter(r => !r.success);
 
-    console.log(`[BATCH] Concluído: ${processados}/${timeIds.length} sucesso, ${erros.length} erros`);
+    logger.log(`[BATCH] Concluído: ${processados}/${timeIds.length} sucesso, ${erros.length} erros`);
 
     return {
         success: true,

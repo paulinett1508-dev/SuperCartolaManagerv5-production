@@ -12,15 +12,16 @@ import {
 } from "../utils/participanteHelper.js";
 import { buscarConfigSimplificada } from "../utils/moduleConfigHelper.js";
 import { CURRENT_SEASON } from "../config/seasons.js";
+import logger from '../utils/logger.js';
 
 // ✅ v3.0: Função para buscar configuração dinâmica do módulo
 async function buscarConfigPontosCorridos(ligaId, temporada = CURRENT_SEASON) {
     try {
         const config = await buscarConfigSimplificada(ligaId, 'pontos_corridos', temporada);
-        console.log(`[CACHE-PC] 📋 Config carregada: rodada ${config.rodadaInicial}, source: ${config.source}`);
+        logger.log(`[CACHE-PC] 📋 Config carregada: rodada ${config.rodadaInicial}, source: ${config.source}`);
         return config;
     } catch (error) {
-        console.error('[CACHE-PC] ❌ Erro ao buscar config, usando defaults:', error.message);
+        logger.error('[CACHE-PC] ❌ Erro ao buscar config, usando defaults:', error.message);
         // Fallback para defaults em caso de erro
         return {
             rodadaInicial: 7,
@@ -100,7 +101,7 @@ async function buscarDadosTimesEnriquecidos(ligaId) {
                 }
             });
         } catch (e) {
-            console.warn(
+            logger.warn(
                 "[CACHE-PC] ⚠️ Erro ao enriquecer com rodadas:",
                 e.message,
             );
@@ -108,7 +109,7 @@ async function buscarDadosTimesEnriquecidos(ligaId) {
 
         return timesMap;
     } catch (error) {
-        console.error("[CACHE-PC] ❌ Erro ao buscar dados dos times:", error);
+        logger.error("[CACHE-PC] ❌ Erro ao buscar dados dos times:", error);
         return {};
     }
 }
@@ -238,7 +239,7 @@ export const salvarCachePontosCorridos = async (req, res) => {
         );
 
         const tipoCache = permanent ? "PERMANENTE" : "temporário";
-        console.log(
+        logger.log(
             `[CACHE-PC] ✅ Cache ${tipoCache} salvo: Liga ${ligaId}, Rodada ${rodada}`,
         );
 
@@ -250,7 +251,7 @@ export const salvarCachePontosCorridos = async (req, res) => {
             classificacao: classificacao?.length || 0,
         });
     } catch (error) {
-        console.error("[CACHE-PC] ❌ Erro ao salvar:", error);
+        logger.error("[CACHE-PC] ❌ Erro ao salvar:", error);
         res.status(500).json({ error: "Erro interno" });
     }
 };
@@ -276,7 +277,7 @@ export const lerCachePontosCorridos = async (req, res) => {
 
         // ✅ v2.1: Buscar dados enriquecidos dos times
         const timesMap = await buscarDadosTimesEnriquecidos(ligaId);
-        console.log(
+        logger.log(
             `[CACHE-PC] 📋 Dados de ${Object.keys(timesMap).length} times carregados para enriquecimento`,
         );
 
@@ -310,7 +311,7 @@ export const lerCachePontosCorridos = async (req, res) => {
                         },
                     );
                 } catch (statusError) {
-                    console.warn(
+                    logger.warn(
                         "[CACHE-PC] ⚠️ Erro ao buscar status:",
                         statusError.message,
                     );
@@ -324,7 +325,7 @@ export const lerCachePontosCorridos = async (req, res) => {
             timesMap,
         );
 
-        console.log(
+        logger.log(
             `[CACHE-PC] ✅ Cache R${cache.rodada_consolidada} enriquecido: ${classificacaoEnriquecida.length} times, ${confrontosEnriquecidos.length} confrontos`,
         );
 
@@ -337,7 +338,7 @@ export const lerCachePontosCorridos = async (req, res) => {
             updatedAt: cache.ultima_atualizacao,
         });
     } catch (error) {
-        console.error("[CACHE-PC] ❌ Erro ao ler:", error);
+        logger.error("[CACHE-PC] ❌ Erro ao ler:", error);
         res.status(500).json({ error: "Erro interno" });
     }
 };
@@ -354,7 +355,7 @@ export const obterConfrontosPontosCorridos = async (
             throw new Error('Parâmetro temporada é obrigatório');
         }
 
-        console.log(`[PONTOS-CORRIDOS] 📊 Buscando dados: Liga ${ligaId}, Temporada ${temporada}`);
+        logger.log(`[PONTOS-CORRIDOS] 📊 Buscando dados: Liga ${ligaId}, Temporada ${temporada}`);
 
         // 0. Buscar configuração do módulo
         const config = await buscarConfigPontosCorridos(ligaId, temporada);
@@ -370,7 +371,7 @@ export const obterConfrontosPontosCorridos = async (
             );
             mercadoStatus = mercadoRes.data;
         } catch (err) {
-            console.warn(
+            logger.warn(
                 "[PONTOS-CORRIDOS] ⚠️ Erro ao buscar mercado, usando padrão",
             );
         }
@@ -380,7 +381,7 @@ export const obterConfrontosPontosCorridos = async (
         const rodadaAtualLiga =
             rodadaAtualBrasileirao - config.rodadaInicial + 1;
 
-        console.log(
+        logger.log(
             `[PONTOS-CORRIDOS] 📊 Mercado: ${mercadoFechado ? "FECHADO" : "ABERTO"}, Rodada BR: ${rodadaAtualBrasileirao}, Rodada Liga: ${rodadaAtualLiga}`,
         );
 
@@ -418,7 +419,7 @@ export const obterConfrontosPontosCorridos = async (
             const isTemporadaPassada = temporada < mercadoTemporada;
 
             if (isTemporadaPassada || rodadaAtualLiga > 0) {
-                console.log(`[PONTOS-CORRIDOS] 🔄 Cache vazio - tentando reconstruir de rodadas históricas (T${temporada}, passada=${isTemporadaPassada})...`);
+                logger.log(`[PONTOS-CORRIDOS] 🔄 Cache vazio - tentando reconstruir de rodadas históricas (T${temporada}, passada=${isTemporadaPassada})...`);
                 dadosPorRodada = await reconstruirCacheDeRodadas(ligaId, temporada, config, timesMap);
             }
         }
@@ -437,7 +438,7 @@ export const obterConfrontosPontosCorridos = async (
                         60000);
 
             if (!rodadaAtualNoCache || cacheDesatualizado) {
-                console.log(
+                logger.log(
                     `[PONTOS-CORRIDOS] 🔥 Calculando rodada ${rodadaAtualLiga} com PARCIAIS AO VIVO...`,
                 );
 
@@ -463,12 +464,12 @@ export const obterConfrontosPontosCorridos = async (
             }
         }
 
-        console.log(
+        logger.log(
             `[PONTOS-CORRIDOS] ✅ ${dadosPorRodada.length} rodadas carregadas: Liga ${ligaId}, Temporada ${temporada}`,
         );
         return dadosPorRodada;
     } catch (error) {
-        console.error(`[PONTOS-CORRIDOS] ❌ Erro ao obter dados (T${temporada}):`, error.message);
+        logger.error(`[PONTOS-CORRIDOS] ❌ Erro ao obter dados (T${temporada}):`, error.message);
         return [];
     }
 };
@@ -485,19 +486,19 @@ async function calcularRodadaComParciais(
         // 1. Buscar liga e times
         const liga = await Liga.findById(ligaId).lean();
         if (!liga) {
-            console.error("[PONTOS-CORRIDOS] ❌ Liga não encontrada");
+            logger.error("[PONTOS-CORRIDOS] ❌ Liga não encontrada");
             return null;
         }
 
         const times = liga.participantes || [];
         if (times.length === 0) {
-            console.error("[PONTOS-CORRIDOS] ❌ Nenhum time na liga");
+            logger.error("[PONTOS-CORRIDOS] ❌ Nenhum time na liga");
             return null;
         }
 
         // ✅ v2.0: Buscar status de todos os times
         const statusMap = await buscarStatusParticipantes(times);
-        console.log(
+        logger.log(
             `[PONTOS-CORRIDOS] 📋 Status de ${times.length} times carregado`,
         );
 
@@ -505,7 +506,7 @@ async function calcularRodadaComParciais(
         const confrontosBase = gerarConfrontos(times);
         const jogosDaRodada = confrontosBase[rodadaLiga - 1];
         if (!jogosDaRodada) {
-            console.warn(
+            logger.warn(
                 `[PONTOS-CORRIDOS] ⚠️ Rodada ${rodadaLiga} não existe nos confrontos`,
             );
             return null;
@@ -532,7 +533,7 @@ async function calcularRodadaComParciais(
                 // ✅ v2.0: Verificar se time está ativo
                 const status = statusMap[String(timeId)] || { ativo: true };
                 if (status.ativo === false) {
-                    console.log(
+                    logger.log(
                         `⏭️ [PONTOS-CORRIDOS] Pulando time inativo: ${timeId}`,
                     );
                     timesDataMap[String(timeId)] = {
@@ -585,7 +586,7 @@ async function calcularRodadaComParciais(
                 }
             }
         } catch (err) {
-            console.warn("[PONTOS-CORRIDOS] ⚠️ Erro ao buscar parciais");
+            logger.warn("[PONTOS-CORRIDOS] ⚠️ Erro ao buscar parciais");
         }
 
         // 4. Montar confrontos com resultados
@@ -646,7 +647,7 @@ async function calcularRodadaComParciais(
             aoVivo: true,
         };
     } catch (error) {
-        console.error(
+        logger.error(
             "[PONTOS-CORRIDOS] ❌ Erro ao calcular rodada ao vivo:",
             error,
         );
@@ -671,7 +672,7 @@ async function reconstruirCacheDeRodadas(ligaId, temporada, config, timesMap) {
         }).lean();
 
         if (rodadasHistoricas.length === 0) {
-            console.log(`[PONTOS-CORRIDOS] ℹ️ Nenhuma rodada histórica encontrada para T${temporada}`);
+            logger.log(`[PONTOS-CORRIDOS] ℹ️ Nenhuma rodada histórica encontrada para T${temporada}`);
             return [];
         }
 
@@ -689,11 +690,11 @@ async function reconstruirCacheDeRodadas(ligaId, temporada, config, timesMap) {
             .map(br => ({ br, liga: br - config.rodadaInicial + 1 }));
 
         if (rodadasLiga.length === 0) {
-            console.log(`[PONTOS-CORRIDOS] ℹ️ Nenhuma rodada após rodadaInicial ${config.rodadaInicial}`);
+            logger.log(`[PONTOS-CORRIDOS] ℹ️ Nenhuma rodada após rodadaInicial ${config.rodadaInicial}`);
             return [];
         }
 
-        console.log(`[PONTOS-CORRIDOS] 🔄 Reconstruindo ${rodadasLiga.length} rodadas de dados históricos...`);
+        logger.log(`[PONTOS-CORRIDOS] 🔄 Reconstruindo ${rodadasLiga.length} rodadas de dados históricos...`);
 
         // Gerar confrontos base (round-robin)
         const confrontosBase = gerarConfrontos(times);
@@ -792,14 +793,14 @@ async function reconstruirCacheDeRodadas(ligaId, temporada, config, timesMap) {
                     { upsert: true, new: true }
                 );
             } catch (saveErr) {
-                console.warn(`[PONTOS-CORRIDOS] ⚠️ Erro ao salvar cache rodada ${rodadaLiga}:`, saveErr.message);
+                logger.warn(`[PONTOS-CORRIDOS] ⚠️ Erro ao salvar cache rodada ${rodadaLiga}:`, saveErr.message);
             }
         }
 
-        console.log(`[PONTOS-CORRIDOS] ✅ Cache reconstruído: ${dadosPorRodada.length} rodadas salvas (T${temporada})`);
+        logger.log(`[PONTOS-CORRIDOS] ✅ Cache reconstruído: ${dadosPorRodada.length} rodadas salvas (T${temporada})`);
         return dadosPorRodada;
     } catch (error) {
-        console.error('[PONTOS-CORRIDOS] ❌ Erro ao reconstruir cache:', error.message);
+        logger.error('[PONTOS-CORRIDOS] ❌ Erro ao reconstruir cache:', error.message);
         return [];
     }
 }
@@ -931,7 +932,7 @@ function calcularClassificacaoAcumulada(
     const rodadaAnterior = rodadasAnteriores[0]; // Pega a última disponível
 
     if (rodadaAnterior?.classificacao) {
-        console.log(`[CACHE-PC] 📊 Carregando classificação acumulada da rodada ${rodadaAnterior.rodada} para calcular rodada ${rodadaAtual}`);
+        logger.log(`[CACHE-PC] 📊 Carregando classificação acumulada da rodada ${rodadaAnterior.rodada} para calcular rodada ${rodadaAtual}`);
         rodadaAnterior.classificacao.forEach((t) => {
             const tid = String(t.timeId || t.time_id || t.id);
             if (tid && classificacao[tid]) {
@@ -950,7 +951,7 @@ function calcularClassificacaoAcumulada(
             }
         });
     } else {
-        console.log(`[CACHE-PC] ℹ️ Nenhuma rodada anterior encontrada para rodada ${rodadaAtual}, iniciando do zero`);
+        logger.log(`[CACHE-PC] ℹ️ Nenhuma rodada anterior encontrada para rodada ${rodadaAtual}, iniciando do zero`);
     }
 
     // Processar confrontos da rodada atual
@@ -1038,7 +1039,7 @@ export const obterClassificacaoGeral = async (ligaId) => {
             .lean();
 
         if (!cache) {
-            console.log(
+            logger.log(
                 `[PONTOS-CORRIDOS] ⚠️ Nenhuma classificação encontrada: Liga ${ligaId}`,
             );
             return null;
@@ -1089,7 +1090,7 @@ export const obterClassificacaoGeral = async (ligaId) => {
             updatedAt: cache.ultima_atualizacao,
         };
     } catch (error) {
-        console.error(
+        logger.error(
             "[PONTOS-CORRIDOS] ❌ Erro ao obter classificação:",
             error,
         );
@@ -1097,6 +1098,6 @@ export const obterClassificacaoGeral = async (ligaId) => {
     }
 };
 
-console.log(
+logger.log(
     "[CACHE-PC] ✅ Controller v3.0 carregado (configuração dinâmica via ModuleConfig)",
 );

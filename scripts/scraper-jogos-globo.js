@@ -6,6 +6,7 @@
 // ✅ Retorna formato compatível com jogos-ao-vivo-routes.js
 
 import fetch from 'node-fetch';
+import { runInNewContext } from 'vm';
 
 /**
  * Formata hora "HH:MM:SS" para "HH:MM"
@@ -47,10 +48,10 @@ async function obterJogosGloboEsporte(data) {
     return [];
   }
 
-  // Parse do objeto JS usando Function (keys não são quotadas)
+  // Parse do objeto JS via vm sandbox (keys não são quotadas no SSR data)
   let scheduleData;
   try {
-    scheduleData = new Function('return ' + match[1])();
+    scheduleData = runInNewContext('(' + match[1] + ')', Object.create(null));
   } catch (e) {
     console.error('[SCRAPER-GLOBO] Erro ao parsear dataSportsSchedule:', e.message);
     return [];
@@ -171,7 +172,7 @@ async function obterJogosGloboMultiDatas() {
 
   let scheduleData;
   try {
-    scheduleData = new Function('return ' + match[1])();
+    scheduleData = runInNewContext('(' + match[1] + ')', Object.create(null));
   } catch (e) {
     console.error('[SCRAPER-GLOBO] Erro ao parsear dataSportsSchedule:', e.message);
     return {};

@@ -881,6 +881,20 @@ process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
 process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 process.on("SIGQUIT", () => gracefulShutdown("SIGQUIT"));
 
+// ====================================================================
+// 🚨 GLOBAL ERROR HANDLERS - Previne crash silencioso
+// ====================================================================
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("[UNHANDLED-REJECTION] Promise não tratada:", reason);
+  // Não encerra o processo - apenas loga para monitoramento
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("[UNCAUGHT-EXCEPTION] Exceção não capturada:", err.message, err.stack);
+  // Encerra gracefully após exceção crítica não capturada
+  gracefulShutdown("uncaughtException").finally(() => process.exit(1));
+});
+
 export default app;
 
 
