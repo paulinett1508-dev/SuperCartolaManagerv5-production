@@ -24,6 +24,7 @@ import Time from "../models/Time.js";
 import { CURRENT_SEASON } from "../config/seasons.js";
 import { calcularSaldoParticipante, classificarSituacao } from "../utils/saldo-calculator.js";
 import crypto from "crypto";
+import logger from '../utils/logger.js';
 
 // =============================================================================
 // FUNÇÕES AUXILIARES
@@ -83,7 +84,7 @@ export async function criarTransacoesIniciais(ligaId, timeId, temporada, valores
         });
 
         if (extratoExistente) {
-            console.log(`[INSCRICOES] ⚠️ Transação INSCRICAO_TEMPORADA já existe para time ${timeId} em ${temporada}. Pulando...`);
+            logger.log(`[INSCRICOES] ⚠️ Transação INSCRICAO_TEMPORADA já existe para time ${timeId} em ${temporada}. Pulando...`);
         } else {
             const txInscricao = {
                 liga_id: ligaObjId,
@@ -155,7 +156,7 @@ export async function criarTransacoesIniciais(ligaId, timeId, temporada, valores
         });
 
         if (extratoComSaldo) {
-            console.log(`[INSCRICOES] ⚠️ Transação SALDO_TEMPORADA_ANTERIOR já existe para time ${timeId} em ${temporada}. Pulando...`);
+            logger.log(`[INSCRICOES] ⚠️ Transação SALDO_TEMPORADA_ANTERIOR já existe para time ${timeId} em ${temporada}. Pulando...`);
         } else {
             const descricao = valores.saldoTransferido > 0
                 ? `Crédito aproveitado da temporada ${temporada - 1}`
@@ -320,7 +321,7 @@ export async function processarRenovacao(ligaId, timeId, temporada, opcoes = {})
     }).lean();
 
     const temLegadoManual = inscricaoExistente?.legado_manual?.origem != null;
-    console.log(`[INSCRICOES] Renovação - legado_manual existente: ${temLegadoManual}`);
+    logger.log(`[INSCRICOES] Renovação - legado_manual existente: ${temLegadoManual}`);
 
     // 3. Buscar saldo da temporada anterior
     const saldo = await buscarSaldoTemporada(ligaId, timeId, temporadaAnterior);
@@ -354,7 +355,7 @@ export async function processarRenovacao(ligaId, timeId, temporada, opcoes = {})
             saldoTransferido = legadoValor;
         }
         // Se legadoValor == 0, foi zerado - não transfere nada
-        console.log(`[INSCRICOES] Usando legado_manual: valor=${legadoValor} (tipo: ${inscricaoExistente.legado_manual.tipo_quitacao})`);
+        logger.log(`[INSCRICOES] Usando legado_manual: valor=${legadoValor} (tipo: ${inscricaoExistente.legado_manual.tipo_quitacao})`);
     } else {
         // REGRA NORMAL: Transferir crédito ou dívida para nova temporada
         if (saldo.status === 'credor') {
@@ -365,13 +366,13 @@ export async function processarRenovacao(ligaId, timeId, temporada, opcoes = {})
                 // Exemplo: crédito 421.54 - taxa 180 = 241.54 transferido
                 creditoUsado = creditoTotal;  // Todo crédito foi "usado" (para pagamento + transferência)
                 saldoTransferido = Math.max(0, creditoTotal - taxa);  // Restante após pagar a taxa
-                console.log(`[INSCRICOES] Credor pagou com crédito: total=${creditoTotal}, taxa=${taxa}, restante=${saldoTransferido}`);
+                logger.log(`[INSCRICOES] Credor pagou com crédito: total=${creditoTotal}, taxa=${taxa}, restante=${saldoTransferido}`);
             } else if (rules.inscricao.aproveitar_saldo_positivo && opcoes.aproveitarCredito !== false) {
                 // Não pagou, mas quer usar crédito - taxa vira débito, crédito é transferido
                 // Exemplo: crédito 421.54, taxa 180 (débito) = saldo inicial 241.54
                 creditoUsado = creditoTotal;
                 saldoTransferido = creditoUsado;
-                console.log(`[INSCRICOES] Credor sem pagar, aproveitando crédito: ${creditoUsado}`);
+                logger.log(`[INSCRICOES] Credor sem pagar, aproveitando crédito: ${creditoUsado}`);
             }
             // Se não pagou E não quer aproveitar: crédito permanece na temporada anterior (raro)
         } else if (saldo.status === 'devedor') {
@@ -461,7 +462,7 @@ export async function processarRenovacao(ligaId, timeId, temporada, opcoes = {})
         clube_id: participante.clube_id || participante.time_coracao || null
     }, temporada);
 
-    console.log(`[INSCRICOES] Renovação processada: liga=${ligaId} time=${timeId} temporada=${temporada}`);
+    logger.log(`[INSCRICOES] Renovação processada: liga=${ligaId} time=${timeId} temporada=${temporada}`);
 
     return {
         success: true,
@@ -531,7 +532,7 @@ export async function processarNaoParticipar(ligaId, timeId, temporada, opcoes =
     // 4. NÃO criar Time para nova temporada (ele fica só em 2025)
     // O saldo de 2025 fica congelado, pode quitar depois via AcertoFinanceiro
 
-    console.log(`[INSCRICOES] Não participar processado: liga=${ligaId} time=${timeId} temporada=${temporada}`);
+    logger.log(`[INSCRICOES] Não participar processado: liga=${ligaId} time=${timeId} temporada=${temporada}`);
 
     return {
         success: true,
@@ -561,7 +562,7 @@ export async function processarNovoParticipante(ligaId, temporada, dadosCartola,
     } else if (isCadastroManual) {
         // ID temporário negativo = -timestamp para identificar cadastros manuais
         timeId = -Date.now();
-        console.log(`[INSCRICOES] Cadastro manual - ID temporário gerado: ${timeId}`);
+        logger.log(`[INSCRICOES] Cadastro manual - ID temporário gerado: ${timeId}`);
     } else {
         throw new Error("ID do time é obrigatório");
     }
@@ -662,7 +663,7 @@ export async function processarNovoParticipante(ligaId, temporada, dadosCartola,
     }, temporada);
 
     const tipoLog = isCadastroManual ? 'MANUAL' : 'NOVO';
-    console.log(`[INSCRICOES] ${tipoLog} participante cadastrado: liga=${ligaId} time=${timeId} temporada=${temporada}`);
+    logger.log(`[INSCRICOES] ${tipoLog} participante cadastrado: liga=${ligaId} time=${timeId} temporada=${temporada}`);
 
     return {
         success: true,
@@ -825,8 +826,8 @@ export async function processarDecisaoUnificada(ligaId, timeId, temporada, decis
     const temporadaAnterior = temporada - 1;
     const db = mongoose.connection.db;
 
-    console.log(`[INSCRICOES] Processando decisao unificada: liga=${ligaId} time=${timeId} temporada=${temporada}`);
-    console.log(`[INSCRICOES] Decisao:`, JSON.stringify(decisao, null, 2));
+    logger.log(`[INSCRICOES] Processando decisao unificada: liga=${ligaId} time=${timeId} temporada=${temporada}`);
+    logger.log(`[INSCRICOES] Decisao:`, JSON.stringify(decisao, null, 2));
 
     // 1. Buscar saldo atual
     const saldo = await buscarSaldoTemporada(ligaId, timeId, temporadaAnterior);
@@ -893,51 +894,49 @@ export async function processarDecisaoUnificada(ligaId, timeId, temporada, decis
         }
     }
 
-    // 3. Registrar quitacao da temporada anterior
+    // ✅ v3.0.0: Transação MongoDB para atomicidade (quitação + legado_manual)
     const agora = new Date();
     const ligaObjId = new mongoose.Types.ObjectId(ligaId);
+    const session = await mongoose.startSession();
 
-    // v1.2.1 FIX: Usar $or para buscar liga_id como String OU ObjectId
-    // Documentos existentes usam String, novos podem usar ObjectId
-    // REMOVIDO upsert: true para evitar criacao de documentos duplicados vazios
-    const updateQuitacao = await db.collection('extratofinanceirocaches').updateOne(
-        {
-            $or: [
-                { liga_id: String(ligaId) },
-                { liga_id: ligaObjId }
-            ],
-            time_id: Number(timeId),
-            temporada: Number(temporadaAnterior)
-        },
-        {
-            $set: {
-                quitacao: {
-                    quitado: true,
-                    tipo: tipoQuitacao,
-                    saldo_no_momento: saldo.saldoFinal,
-                    valor_legado: valorLegado,
-                    data_quitacao: agora,
-                    admin_responsavel: decisao.aprovadoPor || 'admin',
-                    observacao: decisao.observacoes || `Quitacao via modal unificado - ${decisao.decisao}`
+    try {
+        session.startTransaction();
+
+        // 3. Registrar quitacao da temporada anterior
+        // v1.2.1 FIX: Usar $or para buscar liga_id como String OU ObjectId
+        // REMOVIDO upsert: true para evitar criacao de documentos duplicados vazios
+        const updateQuitacao = await db.collection('extratofinanceirocaches').updateOne(
+            {
+                $or: [
+                    { liga_id: String(ligaId) },
+                    { liga_id: ligaObjId }
+                ],
+                time_id: Number(timeId),
+                temporada: Number(temporadaAnterior)
+            },
+            {
+                $set: {
+                    quitacao: {
+                        quitado: true,
+                        tipo: tipoQuitacao,
+                        saldo_no_momento: saldo.saldoFinal,
+                        valor_legado: valorLegado,
+                        data_quitacao: agora,
+                        admin_responsavel: decisao.aprovadoPor || 'admin',
+                        observacao: decisao.observacoes || `Quitacao via modal unificado - ${decisao.decisao}`
+                    }
                 }
-            }
+            },
+            { session }
+        );
+
+        // Log para debug (documento nao encontrado = cenario raro, mas nao deve criar vazio)
+        if (updateQuitacao.matchedCount === 0) {
+            logger.warn(`[INSCRICOES] AVISO: Extrato ${temporadaAnterior} nao encontrado para time ${timeId}. Quitacao nao registrada no cache.`);
         }
-    );
 
-    // Log para debug (documento nao encontrado = cenario raro, mas nao deve criar vazio)
-    if (updateQuitacao.matchedCount === 0) {
-        console.warn(`[INSCRICOES] AVISO: Extrato ${temporadaAnterior} nao encontrado para time ${timeId}. Quitacao nao registrada no cache.`);
-    }
-
-    console.log(`[INSCRICOES] Quitacao ${temporadaAnterior} registrada: tipo=${tipoQuitacao} legado=${valorLegado}`);
-
-    // 4. Processar renovacao ou nao-participar
-    let resultado;
-
-    if (decisao.decisao === 'renovar') {
-        // Criar inscricao com legado_manual se aplicavel
-        if (valorLegado !== saldo.saldoFinal || tipoQuitacao === 'zerado') {
-            // Definir legado manual na inscricao
+        // 4a. Definir legado_manual na inscricao (dentro da transação)
+        if (decisao.decisao === 'renovar' && (valorLegado !== saldo.saldoFinal || tipoQuitacao === 'zerado')) {
             const inscricaoPrevia = await InscricaoTemporada.findOne({
                 liga_id: ligaObjId,
                 time_id: Number(timeId),
@@ -945,7 +944,7 @@ export async function processarDecisaoUnificada(ligaId, timeId, temporada, decis
             }).lean();
 
             if (!inscricaoPrevia) {
-                await InscricaoTemporada.create({
+                await InscricaoTemporada.create([{
                     liga_id: ligaObjId,
                     time_id: Number(timeId),
                     temporada: Number(temporada),
@@ -958,7 +957,7 @@ export async function processarDecisaoUnificada(ligaId, timeId, temporada, decis
                         definido_por: decisao.aprovadoPor || 'admin',
                         data: agora
                     }
-                });
+                }], { session });
             } else {
                 await InscricaoTemporada.updateOne(
                     { _id: inscricaoPrevia._id },
@@ -973,12 +972,27 @@ export async function processarDecisaoUnificada(ligaId, timeId, temporada, decis
                                 data: agora
                             }
                         }
-                    }
+                    },
+                    { session }
                 );
             }
         }
 
-        // Chamar processarRenovacao
+        await session.commitTransaction();
+        logger.log(`[INSCRICOES] Quitacao ${temporadaAnterior} registrada: tipo=${tipoQuitacao} legado=${valorLegado}`);
+
+    } catch (txError) {
+        await session.abortTransaction();
+        logger.error(`[INSCRICOES] Erro na transação de quitação:`, txError.message);
+        throw txError;
+    } finally {
+        session.endSession();
+    }
+
+    // 4b. Processar renovacao ou nao-participar (idempotent, fora da transação)
+    let resultado;
+
+    if (decisao.decisao === 'renovar') {
         resultado = await processarRenovacao(ligaId, Number(timeId), temporada, {
             pagouInscricao: decisao.pagouInscricao === true,
             aproveitarCredito: decisao.aproveitarCredito === true,
@@ -1027,7 +1041,7 @@ export async function processarBatchInscricoes(ligaId, temporada, timeIds, acao,
     const resultados = [];
     const db = mongoose.connection.db;
 
-    console.log(`[BATCH] Iniciando: ${acao} para ${timeIds.length} times`);
+    logger.log(`[BATCH] Iniciando: ${acao} para ${timeIds.length} times`);
 
     for (const timeId of timeIds) {
         try {
@@ -1057,8 +1071,8 @@ export async function processarBatchInscricoes(ligaId, temporada, timeIds, acao,
                     sucesso = true;
                     break;
 
-                case 'marcar_pago':
-                    // Atualizar inscrição existente
+                case 'marcar_pago': {
+                    // ✅ v3.0.0: Transação para atomicidade inscricao + extrato
                     const inscricao = await InscricaoTemporada.findOne({
                         liga_id: new mongoose.Types.ObjectId(ligaId),
                         time_id: Number(timeId),
@@ -1066,26 +1080,40 @@ export async function processarBatchInscricoes(ligaId, temporada, timeIds, acao,
                     });
 
                     if (inscricao && !inscricao.pagou_inscricao) {
-                        inscricao.pagou_inscricao = true;
-                        inscricao.data_pagamento_inscricao = new Date();
-                        await inscricao.save();
+                        const pagoSession = await mongoose.startSession();
+                        try {
+                            pagoSession.startTransaction();
 
-                        // Estornar débito do extrato
-                        const ligaObjId = new mongoose.Types.ObjectId(ligaId);
-                        await db.collection('extratofinanceirocaches').updateOne(
-                            {
-                                liga_id: ligaObjId,
-                                time_id: Number(timeId),
-                                temporada: Number(temporada)
-                            },
-                            {
-                                $pull: { historico_transacoes: { tipo: 'INSCRICAO_TEMPORADA' } },
-                                $inc: { saldo_consolidado: inscricao.taxa_inscricao || 0 }
-                            }
-                        );
+                            inscricao.pagou_inscricao = true;
+                            inscricao.data_pagamento_inscricao = new Date();
+                            await inscricao.save({ session: pagoSession });
+
+                            // Estornar débito do extrato
+                            const ligaObjId = new mongoose.Types.ObjectId(ligaId);
+                            await db.collection('extratofinanceirocaches').updateOne(
+                                {
+                                    liga_id: ligaObjId,
+                                    time_id: Number(timeId),
+                                    temporada: Number(temporada)
+                                },
+                                {
+                                    $pull: { historico_transacoes: { tipo: 'INSCRICAO_TEMPORADA' } },
+                                    $inc: { saldo_consolidado: inscricao.taxa_inscricao || 0 }
+                                },
+                                { session: pagoSession }
+                            );
+
+                            await pagoSession.commitTransaction();
+                        } catch (txErr) {
+                            await pagoSession.abortTransaction();
+                            throw txErr;
+                        } finally {
+                            pagoSession.endSession();
+                        }
                     }
                     sucesso = true;
                     break;
+                }
 
                 case 'reverter':
                     // Voltar para pendente
@@ -1133,34 +1161,72 @@ export async function processarBatchInscricoes(ligaId, temporada, timeIds, acao,
                     }
                     break;
 
-                case 'ativar':
-                    await Time.updateOne({ id: Number(timeId) }, { $set: { ativo: true } });
-                    await Liga.updateOne(
-                        { _id: ligaId, "participantes.time_id": Number(timeId) },
-                        { $set: { "participantes.$.ativo": true } }
-                    );
+                case 'ativar': {
+                    // ✅ v3.0.0: Transação para sincronizar Time + Liga
+                    const ativarSession = await mongoose.startSession();
+                    try {
+                        ativarSession.startTransaction();
+                        await Time.updateOne({ id: Number(timeId) }, { $set: { ativo: true } }, { session: ativarSession });
+                        await Liga.updateOne(
+                            { _id: ligaId, "participantes.time_id": Number(timeId) },
+                            { $set: { "participantes.$.ativo": true } },
+                            { session: ativarSession }
+                        );
+                        await ativarSession.commitTransaction();
+                    } catch (txErr) {
+                        await ativarSession.abortTransaction();
+                        throw txErr;
+                    } finally {
+                        ativarSession.endSession();
+                    }
                     sucesso = true;
                     break;
+                }
 
-                case 'inativar':
-                    await Time.updateOne({ id: Number(timeId) }, { $set: { ativo: false } });
-                    await Liga.updateOne(
-                        { _id: ligaId, "participantes.time_id": Number(timeId) },
-                        { $set: { "participantes.$.ativo": false } }
-                    );
+                case 'inativar': {
+                    // ✅ v3.0.0: Transação para sincronizar Time + Liga
+                    const inativarSession = await mongoose.startSession();
+                    try {
+                        inativarSession.startTransaction();
+                        await Time.updateOne({ id: Number(timeId) }, { $set: { ativo: false } }, { session: inativarSession });
+                        await Liga.updateOne(
+                            { _id: ligaId, "participantes.time_id": Number(timeId) },
+                            { $set: { "participantes.$.ativo": false } },
+                            { session: inativarSession }
+                        );
+                        await inativarSession.commitTransaction();
+                    } catch (txErr) {
+                        await inativarSession.abortTransaction();
+                        throw txErr;
+                    } finally {
+                        inativarSession.endSession();
+                    }
                     sucesso = true;
                     break;
+                }
 
-                case 'gerar_senhas':
-                    // Gerar senha aleatória
-                    const novaSenha = crypto.randomBytes(4).toString('hex');
-                    await Time.updateOne({ id: Number(timeId) }, { $set: { senha_acesso: novaSenha } });
-                    await Liga.updateOne(
-                        { _id: ligaId, "participantes.time_id": Number(timeId) },
-                        { $set: { "participantes.$.senha_acesso": novaSenha } }
-                    );
+                case 'gerar_senhas': {
+                    // ✅ v3.0.0: Transação para sincronizar Time + Liga
+                    const senhaSession = await mongoose.startSession();
+                    try {
+                        senhaSession.startTransaction();
+                        const novaSenha = crypto.randomBytes(4).toString('hex');
+                        await Time.updateOne({ id: Number(timeId) }, { $set: { senha_acesso: novaSenha } }, { session: senhaSession });
+                        await Liga.updateOne(
+                            { _id: ligaId, "participantes.time_id": Number(timeId) },
+                            { $set: { "participantes.$.senha_acesso": novaSenha } },
+                            { session: senhaSession }
+                        );
+                        await senhaSession.commitTransaction();
+                    } catch (txErr) {
+                        await senhaSession.abortTransaction();
+                        throw txErr;
+                    } finally {
+                        senhaSession.endSession();
+                    }
                     sucesso = true;
                     break;
+                }
 
                 default:
                     throw new Error(`Ação '${acao}' não reconhecida`);
@@ -1169,7 +1235,7 @@ export async function processarBatchInscricoes(ligaId, temporada, timeIds, acao,
             resultados.push({ timeId, success: sucesso });
 
         } catch (error) {
-            console.error(`[BATCH] Erro no time ${timeId}:`, error.message);
+            logger.error(`[BATCH] Erro no time ${timeId}:`, error.message);
             resultados.push({ timeId, success: false, error: error.message });
         }
     }
@@ -1177,7 +1243,7 @@ export async function processarBatchInscricoes(ligaId, temporada, timeIds, acao,
     const processados = resultados.filter(r => r.success).length;
     const erros = resultados.filter(r => !r.success);
 
-    console.log(`[BATCH] Concluído: ${processados}/${timeIds.length} sucesso, ${erros.length} erros`);
+    logger.log(`[BATCH] Concluído: ${processados}/${timeIds.length} sucesso, ${erros.length} erros`);
 
     return {
         success: true,

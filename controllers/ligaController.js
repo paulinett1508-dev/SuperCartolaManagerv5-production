@@ -11,6 +11,7 @@ import { CURRENT_SEASON } from "../config/seasons.js";
 import { readFile } from "fs/promises";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import logger from '../utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -19,7 +20,7 @@ const safeAggregate = async (model, pipeline, label) => {
   try {
     return await model.aggregate(pipeline).allowDiskUse(true);
   } catch (error) {
-    console.error(`[LIGAS] Erro ao agregar (${label}):`, error.message || error);
+    logger.error(`[LIGAS] Erro ao agregar (${label}):`, error.message || error);
     return [];
   }
 };
@@ -37,7 +38,7 @@ const buscarCartoleiroPorId = async (req, res) => {
       escudo_url: data.time?.url_escudo_png || "",
     });
   } catch (error) {
-    console.error(`Erro ao buscar time ${id}:`, error.message);
+    logger.error(`Erro ao buscar time ${id}:`, error.message);
     res.status(404).json({ erro: "Time não encontrado na API" });
   }
 };
@@ -175,10 +176,10 @@ const listarLigas = async (req, res) => {
       };
     });
 
-    console.log(`[LIGAS] Listando ${ligas.length} ligas para admin ${req.session?.admin?.email || "anônimo"}`);
+    logger.log(`[LIGAS] Listando ${ligas.length} ligas para admin ${req.session?.admin?.email || "anônimo"}`);
     res.status(200).json(ligasEnriquecidas);
   } catch (err) {
-    console.error("Erro ao listar ligas:", err.message);
+    logger.error("Erro ao listar ligas:", err.message);
     res.status(500).json({ erro: "Erro ao listar ligas: " + err.message });
   }
 };
@@ -248,7 +249,7 @@ const sincronizarParticipantesLiga = async (req, res) => {
       return res.status(404).json({ erro: "Liga não encontrada" });
     }
 
-    console.log(`[SYNC] Sincronizando participantes da liga ${liga.nome}...`);
+    logger.log(`[SYNC] Sincronizando participantes da liga ${liga.nome}...`);
 
     const participantesAtualizados =
       await sincronizarParticipantesInterno(liga);
@@ -258,7 +259,7 @@ const sincronizarParticipantesLiga = async (req, res) => {
     liga.atualizadaEm = new Date();
     await liga.save();
 
-    console.log(
+    logger.log(
       `[SYNC] ✅ ${participantesAtualizados.length} participantes sincronizados`,
     );
 
@@ -268,7 +269,7 @@ const sincronizarParticipantesLiga = async (req, res) => {
       participantes: participantesAtualizados,
     });
   } catch (err) {
-    console.error("[SYNC] Erro ao sincronizar:", err);
+    logger.error("[SYNC] Erro ao sincronizar:", err);
     res.status(500).json({ erro: "Erro ao sincronizar participantes" });
   }
 };
@@ -288,7 +289,7 @@ const sincronizarTodasLigas = async (req, res) => {
       totalSincronizados += participantesAtualizados.length;
     }
 
-    console.log(
+    logger.log(
       `[SYNC] ✅ ${ligas.length} ligas sincronizadas, ${totalSincronizados} participantes`,
     );
 
@@ -298,7 +299,7 @@ const sincronizarTodasLigas = async (req, res) => {
       total_participantes: totalSincronizados,
     });
   } catch (err) {
-    console.error("[SYNC] Erro ao sincronizar todas:", err);
+    logger.error("[SYNC] Erro ao sincronizar todas:", err);
     res.status(500).json({ erro: "Erro ao sincronizar ligas" });
   }
 };
@@ -318,7 +319,7 @@ const buscarLigaPorId = async (req, res) => {
 
     // ✅ MULTI-TENANT: Verificar se admin tem acesso a esta liga
     if (req.session?.admin && !hasAccessToLiga(liga, req.session.admin)) {
-      console.log(`[LIGA] Acesso negado: admin ${req.session.admin.email} tentou acessar liga ${liga.nome}`);
+      logger.log(`[LIGA] Acesso negado: admin ${req.session.admin.email} tentou acessar liga ${liga.nome}`);
       return res.status(403).json({ erro: "Acesso negado a esta liga" });
     }
 
@@ -331,7 +332,7 @@ const buscarLigaPorId = async (req, res) => {
       );
 
     if (precisaSincronizar && liga.times && liga.times.length > 0) {
-      console.log(
+      logger.log(
         `[LIGA] Auto-sincronizando participantes da liga ${liga.nome}...`,
       );
 
@@ -367,18 +368,18 @@ const buscarLigaPorId = async (req, res) => {
       Liga.findByIdAndUpdate(id, {
         participantes: participantesAtualizados,
         atualizadaEm: new Date(),
-      }).catch((err) => console.error("[LIGA] Erro ao auto-sincronizar:", err));
+      }).catch((err) => logger.error("[LIGA] Erro ao auto-sincronizar:", err));
 
       // Retornar com dados atualizados
       liga.participantes = participantesAtualizados;
-      console.log(
+      logger.log(
         `[LIGA] ✅ Auto-sync concluído para ${participantesAtualizados.length} participantes`,
       );
     }
 
     res.status(200).json(liga);
   } catch (err) {
-    console.error(`Erro ao buscar liga ${id}:`, err.message);
+    logger.error(`Erro ao buscar liga ${id}:`, err.message);
     if (err.name === "CastError") {
       return res.status(400).json({ erro: `ID de liga inválido: ${id}` });
     }
@@ -406,7 +407,7 @@ const criarLiga = async (req, res) => {
       rawAdminId = rawAdminId.toString?.() || rawAdminId.$oid || rawAdminId._id || null;
     }
 
-    console.log(`[LIGA] Criando liga "${nome}" - adminId raw: "${rawAdminId}" (tipo: ${typeof rawAdminId})`);
+    logger.log(`[LIGA] Criando liga "${nome}" - adminId raw: "${rawAdminId}" (tipo: ${typeof rawAdminId})`);
 
     const timesIds = Array.isArray(times)
       ? times.map((t) => Number(t.id || t)).filter((id) => !isNaN(id))
@@ -424,12 +425,12 @@ const criarLiga = async (req, res) => {
     if (rawAdminId && typeof rawAdminId === 'string' && /^[a-f0-9]{24}$/i.test(rawAdminId)) {
       try {
         ligaData.admin_id = new mongoose.Types.ObjectId(rawAdminId);
-        console.log(`[LIGA] admin_id definido: ${ligaData.admin_id}`);
+        logger.log(`[LIGA] admin_id definido: ${ligaData.admin_id}`);
       } catch (convErr) {
-        console.warn(`[LIGA] Erro ao converter adminId: ${convErr.message}`);
+        logger.warn(`[LIGA] Erro ao converter adminId: ${convErr.message}`);
       }
     } else if (rawAdminId) {
-      console.warn(`[LIGA] adminId não é hex24: "${rawAdminId}" - usando apenas owner_email`);
+      logger.warn(`[LIGA] adminId não é hex24: "${rawAdminId}" - usando apenas owner_email`);
     }
 
     // Adicionar campos opcionais se fornecidos
@@ -439,11 +440,11 @@ const criarLiga = async (req, res) => {
     const novaLiga = new Liga(ligaData);
     const ligaSalva = await novaLiga.save();
 
-    console.log(`[LIGA] Nova liga "${nome}" criada por ${adminEmail} (id: ${ligaSalva._id})`);
+    logger.log(`[LIGA] Nova liga "${nome}" criada por ${adminEmail} (id: ${ligaSalva._id})`);
 
     res.status(201).json(ligaSalva);
   } catch (err) {
-    console.error("[LIGA] Erro ao criar liga:", err.message, err.stack);
+    logger.error("[LIGA] Erro ao criar liga:", err.message, err.stack);
     res.status(500).json({ erro: "Erro ao criar liga: " + err.message });
   }
 };
@@ -462,7 +463,7 @@ const excluirLiga = async (req, res) => {
     }
     res.status(204).end();
   } catch (err) {
-    console.error("Erro ao excluir liga:", err.message);
+    logger.error("Erro ao excluir liga:", err.message);
     if (err.name === "CastError") {
       return res.status(400).json({ erro: `ID de liga inválido: ${id}` });
     }
@@ -474,10 +475,10 @@ async function salvarTime(timeId) {
   try {
     const timeExistente = await Time.findOne({ id: timeId }).lean();
     if (!timeExistente) {
-      console.log(`Salvando time ${timeId}...`);
+      logger.log(`Salvando time ${timeId}...`);
     }
   } catch (error) {
-    console.error(`Erro ao tentar salvar time ${timeId}:`, error);
+    logger.error(`Erro ao tentar salvar time ${timeId}:`, error);
   }
 }
 
@@ -505,7 +506,7 @@ const atualizarTimesLiga = async (req, res) => {
     await liga.save();
     res.status(200).json(liga);
   } catch (err) {
-    console.error(`Erro ao atualizar times da liga ${id}:`, err.message);
+    logger.error(`Erro ao atualizar times da liga ${id}:`, err.message);
     if (err.name === "CastError") {
       return res.status(400).json({ erro: `ID de liga inválido: ${id}` });
     }
@@ -541,7 +542,7 @@ const removerTimeDaLiga = async (req, res) => {
       res.status(404).json({ erro: "Time não encontrado na liga" });
     }
   } catch (err) {
-    console.error("Erro ao remover time da liga:", err.message);
+    logger.error("Erro ao remover time da liga:", err.message);
     if (err.name === "CastError") {
       return res.status(400).json({ erro: `ID de liga inválido: ${id}` });
     }
@@ -632,11 +633,11 @@ const buscarTimesDaLiga = async (req, res) => {
     // Combinar listas
     const todosParticipantes = [...timesEnriquecidos, ...novosParticipantes];
 
-    console.log(`[LIGAS] buscarTimesDaLiga: ${timesEnriquecidos.length} existentes + ${novosParticipantes.length} novos 2026 = ${todosParticipantes.length} total`);
+    logger.log(`[LIGAS] buscarTimesDaLiga: ${timesEnriquecidos.length} existentes + ${novosParticipantes.length} novos 2026 = ${todosParticipantes.length} total`);
 
     res.json(todosParticipantes);
   } catch (err) {
-    console.error("Erro ao buscar times da liga:", err);
+    logger.error("Erro ao buscar times da liga:", err);
     if (err.name === "CastError") {
       return res
         .status(400)
@@ -688,7 +689,7 @@ const buscarRodadasDaLiga = async (req, res) => {
       res.json(numerosRodadas.sort((a, b) => a - b));
     }
   } catch (err) {
-    console.error("Erro ao buscar rodadas da liga:", err);
+    logger.error("Erro ao buscar rodadas da liga:", err);
     if (err.name === "CastError") {
       return res
         .status(400)
@@ -778,7 +779,7 @@ const buscarConfrontosPontosCorridos = async (req, res) => {
             return acc;
           }, {});
         } catch (err) {
-          console.error(
+          logger.error(
             `Erro ao buscar pontuações da rodada ${rodadaCartola}:`,
             err,
           );
@@ -800,7 +801,7 @@ const buscarConfrontosPontosCorridos = async (req, res) => {
 
     res.json(confrontosComPontos);
   } catch (err) {
-    console.error("Erro ao buscar confrontos da liga:", err);
+    logger.error("Erro ao buscar confrontos da liga:", err);
     if (err.name === "CastError") {
       return res
         .status(400)
@@ -867,7 +868,7 @@ const buscarModulosAtivos = async (req, res) => {
 
     res.json({ modulos: modulosAtivos });
   } catch (err) {
-    console.error("[LIGAS] Erro ao buscar módulos ativos:", err);
+    logger.error("[LIGAS] Erro ao buscar módulos ativos:", err);
     res.status(500).json({ erro: "Erro ao buscar módulos ativos" });
   }
 };
@@ -980,7 +981,7 @@ const buscarRegrasModulo = async (req, res) => {
 
         fonte = "json_default";
       } catch (error) {
-        console.error(`[LIGAS] Erro ao carregar regras default para ${moduloBackend}:`, error.message);
+        logger.error(`[LIGAS] Erro ao carregar regras default para ${moduloBackend}:`, error.message);
         // Se não encontrou JSON, retornar sem valores
         valoresFinanceiros = null;
       }
@@ -1002,7 +1003,7 @@ const buscarRegrasModulo = async (req, res) => {
       }
     });
   } catch (err) {
-    console.error("[LIGAS] Erro ao buscar regras do módulo:", err);
+    logger.error("[LIGAS] Erro ao buscar regras do módulo:", err);
     res.status(500).json({ erro: "Erro ao buscar regras do módulo" });
   }
 };
@@ -1012,18 +1013,18 @@ const atualizarModulosAtivos = async (req, res) => {
   const { modulos } = req.body;
 
   // 🔍 DEBUG: Log do payload recebido
-  console.log('[DEBUG-MODULOS] Liga ID:', ligaIdParam);
-  console.log('[DEBUG-MODULOS] Payload recebido:', JSON.stringify(req.body, null, 2));
-  console.log('[DEBUG-MODULOS] Tipo de modulos:', typeof modulos);
-  console.log('[DEBUG-MODULOS] Módulos keys:', modulos ? Object.keys(modulos) : 'undefined');
+  logger.log('[DEBUG-MODULOS] Liga ID:', ligaIdParam);
+  logger.log('[DEBUG-MODULOS] Payload recebido:', JSON.stringify(req.body, null, 2));
+  logger.log('[DEBUG-MODULOS] Tipo de modulos:', typeof modulos);
+  logger.log('[DEBUG-MODULOS] Módulos keys:', modulos ? Object.keys(modulos) : 'undefined');
 
   if (!mongoose.Types.ObjectId.isValid(ligaIdParam)) {
-    console.log('[DEBUG-MODULOS] ❌ ID de liga inválido:', ligaIdParam);
+    logger.log('[DEBUG-MODULOS] ❌ ID de liga inválido:', ligaIdParam);
     return res.status(400).json({ erro: "ID de liga inválido" });
   }
 
   if (!modulos || typeof modulos !== "object") {
-    console.log('[DEBUG-MODULOS] ❌ Dados de módulos inválidos');
+    logger.log('[DEBUG-MODULOS] ❌ Dados de módulos inválidos');
     return res.status(400).json({ erro: "Dados de módulos inválidos" });
   }
 
@@ -1033,7 +1034,7 @@ const atualizarModulosAtivos = async (req, res) => {
 
   for (const moduloBase of MODULOS_BASE_OBRIGATORIOS) {
     if (modulos[moduloBase] === false) {
-      console.log(`[DEBUG-MODULOS] ⚠️ Forçando módulo base: ${moduloBase} = true`);
+      logger.log(`[DEBUG-MODULOS] ⚠️ Forçando módulo base: ${moduloBase} = true`);
       modulos[moduloBase] = true;
     }
   }
@@ -1060,7 +1061,7 @@ const atualizarModulosAtivos = async (req, res) => {
     );
 
     // 2. Sincronizar com sistema novo (ModuleConfig)
-    console.log(
+    logger.log(
       `[LIGAS] Sincronizando ${Object.keys(modulosComBaseForçada).length} módulos com ModuleConfig...`,
     );
 
@@ -1091,7 +1092,7 @@ const atualizarModulosAtivos = async (req, res) => {
               "sistema_sync",
               temporada,
             );
-            console.log(
+            logger.log(
               `[LIGAS] ✅ Módulo ${moduloBackendId} ativado e criado no ModuleConfig`,
             );
           } else if (!configExistente.ativo) {
@@ -1103,7 +1104,7 @@ const atualizarModulosAtivos = async (req, res) => {
               "sistema_sync",
               temporada,
             );
-            console.log(
+            logger.log(
               `[LIGAS] ✅ Módulo ${moduloBackendId} reativado no ModuleConfig`,
             );
           }
@@ -1117,14 +1118,14 @@ const atualizarModulosAtivos = async (req, res) => {
             temporada,
           );
           if (desativado) {
-            console.log(
+            logger.log(
               `[LIGAS] ⏸️  Módulo ${moduloBackendId} desativado no ModuleConfig`,
             );
             sincronizados++;
           }
         }
       } catch (syncError) {
-        console.error(
+        logger.error(
           `[LIGAS] ❌ Erro ao sincronizar módulo ${moduloKey}:`,
           syncError.message,
         );
@@ -1137,7 +1138,7 @@ const atualizarModulosAtivos = async (req, res) => {
       }
     }
 
-    console.log(
+    logger.log(
       `[LIGAS] Sincronização concluída: ${sincronizados} ok, ${erros} erros`,
     );
 
@@ -1153,7 +1154,7 @@ const atualizarModulosAtivos = async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("[LIGAS] Erro ao atualizar módulos:", err);
+    logger.error("[LIGAS] Erro ao atualizar módulos:", err);
     res.status(500).json({ erro: "Erro ao atualizar módulos ativos" });
   }
 };
@@ -1217,7 +1218,7 @@ const buscarConfiguracoes = async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("[LIGAS] Erro ao buscar configurações:", err);
+    logger.error("[LIGAS] Erro ao buscar configurações:", err);
     res.status(500).json({ erro: "Erro ao buscar configurações da liga" });
   }
 };
@@ -1252,7 +1253,7 @@ const atualizarConfiguracoes = async (req, res) => {
     liga.atualizadaEm = new Date();
     await liga.save();
 
-    console.log(`[LIGAS] ✅ Configurações atualizadas para liga ${liga.nome}`);
+    logger.log(`[LIGAS] ✅ Configurações atualizadas para liga ${liga.nome}`);
 
     res.json({
       success: true,
@@ -1260,7 +1261,7 @@ const atualizarConfiguracoes = async (req, res) => {
       configuracoes: liga.configuracoes,
     });
   } catch (err) {
-    console.error("[LIGAS] Erro ao atualizar configurações:", err);
+    logger.error("[LIGAS] Erro ao atualizar configurações:", err);
     res.status(500).json({ erro: "Erro ao atualizar configurações" });
   }
 };
