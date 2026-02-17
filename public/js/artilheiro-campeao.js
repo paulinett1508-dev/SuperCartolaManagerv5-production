@@ -1,9 +1,13 @@
-// ✅ ARTILHEIRO-CAMPEAO.JS v4.6.0 SaaS
+// ✅ ARTILHEIRO-CAMPEAO.JS v4.7.0 SaaS
 // Tabela com Rodadas em Colunas - DESTAQUE 1º LUGAR + RODADA FINAL + Material Icons
+// v4.7.0: Import RODADA_FINAL centralizado de season-config.js
 // v4.6.0: FIX CRÍTICO - Removido fallback || 38 que causava loop de requisições
 // v4.5.0: Removido liga ID hardcoded - usa URL dinamicamente
 // v4.4.1: Fix temporada encerrada (não mostrar como parcial após R38)
-console.log("🏆 [ARTILHEIRO] Sistema v4.6.0 SaaS carregando...");
+
+import { RODADA_FINAL_CAMPEONATO } from './core/season-config.js';
+
+console.log("🏆 [ARTILHEIRO] Sistema v4.7.0 SaaS carregando...");
 
 const ArtilheiroCampeao = {
     // Configurações
@@ -13,8 +17,8 @@ const ArtilheiroCampeao = {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get("id");
         },
-        RODADAS_VISIVEIS: 38,
-        RODADA_FINAL: 38, // ✅ v4.3: Constante da rodada final
+        RODADAS_VISIVEIS: RODADA_FINAL_CAMPEONATO,
+        RODADA_FINAL: RODADA_FINAL_CAMPEONATO,
         API: {
             RANKING: (ligaId) => `/api/artilheiro-campeao/${ligaId}/ranking`,
             DETECTAR_RODADA: (ligaId) =>

@@ -102,17 +102,7 @@ export async function inicializarArtilheiroParticipante({
         if (!response.ok) throw new Error("Dados não disponíveis");
 
         const responseData = await response.json();
-        
-        // DEBUG: Ver estrutura da resposta
-        console.log('[DEBUG-ARTILHEIRO] Response da API:', {
-            hasData: !!responseData.data,
-            hasRanking: !!responseData.ranking,
-            rankingLength: responseData.data?.ranking?.length || responseData.ranking?.length || 0,
-            firstItem: responseData.data?.ranking?.[0] || responseData.ranking?.[0] || null,
-            responseKeys: Object.keys(responseData),
-            fullResponse: responseData
-        });
-        
+
         if (window.Log) Log.info(
             "[PARTICIPANTE-ARTILHEIRO] 📦 Dados recebidos da API",
         );
@@ -407,15 +397,6 @@ function renderizarBannerRodadaFinal(
 async function renderizarArtilheiro(container, response, meuTimeId) {
     const data = response.data || response;
 
-    console.log('[DEBUG-ARTILHEIRO] Renderizar - dados recebidos:', {
-        hasData: !!data,
-        hasRanking: !!data.ranking,
-        rankingLength: data.ranking?.length || 0,
-        isArray: Array.isArray(data),
-        dataKeys: Object.keys(data),
-        fullData: data
-    });
-
     let ranking = [];
     let estatisticas = {};
 
@@ -425,24 +406,11 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
     } else if (Array.isArray(data)) {
         ranking = data;
     }
-    
-    console.log('[DEBUG-ARTILHEIRO] Ranking extraído:', {
-        rankingLength: ranking.length,
-        firstItem: ranking[0],
-        estatisticas
-    });
 
     // ✅ FILTRAR TIMES INATIVOS - NÃO PODEM FIGURAR NO RANKING
     const rankingAtivos = ranking.filter((time) => {
         const isInativo = time.ativo === false || time.status === "inativo";
         return !isInativo;
-    });
-    
-    console.log('[DEBUG-ARTILHEIRO] Ranking após filtro:', {
-        rankingAtivosLength: rankingAtivos.length,
-        rankingOriginalLength: ranking.length,
-        firstAtivo: rankingAtivos[0],
-        todosItens: rankingAtivos
     });
 
     if (rankingAtivos.length === 0) {
