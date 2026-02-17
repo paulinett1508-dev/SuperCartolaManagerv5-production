@@ -1,7 +1,9 @@
-// capitaoController.js - Controller do módulo Capitão de Luxo
+// capitaoController.js v1.1.0 - Controller do módulo Capitão de Luxo
+// v1.1.0: Fix ranking-live para retornar pontos do CAPITÃO (não pontos totais do time)
 import capitaoService from '../services/capitaoService.js';
+import { buscarCapitaoRodada } from '../services/capitaoService.js';
 import CapitaoCaches from '../models/CapitaoCaches.js';
-import { buscarRankingParcial } from '../services/parciaisRankingService.js';
+import cartolaApiService from '../services/cartolaApiService.js';
 
 /**
  * GET /api/capitao/:ligaId/ranking
@@ -33,46 +35,83 @@ export async function getRankingCapitao(req, res) {
 /**
  * GET /api/capitao/:ligaId/ranking-live
  * Retorna ranking de capitães em tempo real (parciais)
- * REUTILIZA parciaisRankingService
+ * v1.1.0: Usa buscarCapitaoRodada para pontos REAIS do capitão (não pontos totais do time)
  */
 export async function getRankingCapitaoLive(req, res) {
   try {
     const { ligaId } = req.params;
+    const temporada = parseInt(req.query.temporada) || new Date().getFullYear();
 
     if (!ligaId) {
       return res.status(400).json({ success: false, error: 'ligaId obrigatório' });
     }
 
-    // Buscar parciais (já inclui capitao_id)
-    const parciais = await buscarRankingParcial(ligaId);
-
-    if (!parciais || !parciais.disponivel) {
-      return res.json({
-        success: false,
-        disponivel: false,
-        motivo: parciais?.motivo || 'sem_dados'
-      });
+    // 1. Verificar se mercado está fechado (rodada ativa)
+    let rodadaAtual;
+    try {
+      const statusResp = await cartolaApiService.httpClient.get(
+        `${cartolaApiService.baseUrl}/mercado/status`
+      );
+      const mercadoStatus = statusResp.data;
+      if (mercadoStatus.status_mercado !== 2) {
+        return res.json({ success: false, disponivel: false, motivo: 'mercado_aberto' });
+      }
+      rodadaAtual = mercadoStatus.rodada_atual;
+    } catch (err) {
+      return res.json({ success: false, disponivel: false, motivo: 'erro_mercado' });
     }
 
-    // Extrair pontuação dos capitães (já vem dobrada)
-    const rankingCapitaes = parciais.ranking.map(time => ({
-      timeId: time.timeId,
-      nome_cartola: time.nome_cartola,
-      nome_time: time.nome_time,
-      escudo: time.escudo,
-      pontos_capitao: time.pontos, // Simplificado: usar pontos totais parciais
-      // TODO: Calcular APENAS pontos do capitão (requer detalhamento)
-    }));
+    // 2. Buscar pontuados (scores ao vivo) UMA vez
+    let pontuadosMap;
+    try {
+      const pontuadosResp = await cartolaApiService.httpClient.get(
+        `${cartolaApiService.baseUrl}/atletas/pontuados`
+      );
+      pontuadosMap = pontuadosResp.data?.atletas || {};
+    } catch (err) {
+      return res.json({ success: false, disponivel: false, motivo: 'sem_pontuados' });
+    }
 
-    // Ordenar por pontos de capitão
-    rankingCapitaes.sort((a, b) => b.pontos_capitao - a.pontos_capitao);
+    if (Object.keys(pontuadosMap).length === 0) {
+      return res.json({ success: false, disponivel: false, motivo: 'sem_pontuados' });
+    }
+
+    // 3. Buscar ranking consolidado (totais das rodadas anteriores)
+    const cacheRanking = await CapitaoCaches.buscarRanking(ligaId, temporada);
+
+    if (!cacheRanking || cacheRanking.length === 0) {
+      return res.json({ success: false, disponivel: false, motivo: 'sem_cache_consolidado' });
+    }
+
+    // 4. Para cada participante, buscar pontos do CAPITÃO na rodada atual (em paralelo)
+    const rankingLive = await Promise.all(
+      cacheRanking.map(async (cached) => {
+        const capitaoVivo = await buscarCapitaoRodada(cached.timeId, rodadaAtual, pontuadosMap);
+        return {
+          timeId: cached.timeId,
+          nome_cartola: cached.nome_cartola,
+          nome_time: cached.nome_time,
+          escudo: cached.escudo,
+          pontuacao_historica: cached.pontuacao_total,
+          pontos_capitao_rodada: capitaoVivo.pontuacao,
+          capitao_nome: capitaoVivo.capitao_nome,
+          capitao_jogou: capitaoVivo.jogou,
+          pontuacao_total: cached.pontuacao_total + capitaoVivo.pontuacao,
+          media_capitao: cached.media_capitao,
+        };
+      })
+    );
+
+    // 5. Ordenar por pontuação total (histórico + rodada atual)
+    rankingLive.sort((a, b) => b.pontuacao_total - a.pontuacao_total);
 
     res.json({
       success: true,
       disponivel: true,
-      ranking: rankingCapitaes,
-      rodada: parciais.rodada,
-      atualizado_em: parciais.atualizado_em
+      ranking: rankingLive,
+      rodada: rodadaAtual,
+      live: true,
+      atualizado_em: new Date()
     });
   } catch (error) {
     console.error('[CAPITAO-CONTROLLER] Erro getRankingCapitaoLive:', error);
