@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Análises IA - Super Cartola Manager</title>
+    <title>Raio-X Analytics - Super Cartola Manager</title>
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" href="css/_admin-tokens.css" />
     <link rel="stylesheet" href="style.css" />
@@ -21,50 +21,49 @@
         <!-- Header -->
         <div class="admin-header">
             <h1>
-                <span class="material-icons">psychology</span>
-                Análises IA
+                <span class="material-icons">insights</span>
+                Raio-X Analytics
             </h1>
-            <p>Solicite análises inteligentes usando Claude (Anthropic)</p>
+            <p>Análises internas dos dados do sistema — instantâneo e gratuito</p>
         </div>
 
-        <!-- Rate Limit Info -->
-        <div class="rate-limit-info" id="rateLimitInfo">
-            <strong>Limites de uso:</strong> Carregando...
+        <!-- Seletores -->
+        <div class="rx-selectors">
+            <div class="form-group">
+                <label for="selectLiga">Liga</label>
+                <select id="selectLiga">
+                    <option value="">Carregando ligas...</option>
+                </select>
+            </div>
         </div>
 
-        <!-- Formulário de Nova Análise -->
-        <div class="analise-form">
-            <h3 style="margin-top: 0; color: var(--text-primary);">
-                <span class="material-icons" style="vertical-align: middle; color: var(--ia-accent);">add_circle</span>
-                Nova Análise
-            </h3>
-            <form id="formNovaAnalise">
-                <div class="form-group">
-                    <label for="tipoAnalise">Tipo de Análise</label>
-                    <select id="tipoAnalise" required>
-                        <option value="">Selecione...</option>
-                        <option value="financeiro-auditoria">Auditoria Financeira</option>
-                        <option value="performance-participante">Performance de Participante</option>
-                        <option value="comportamento-liga">Comportamento da Liga</option>
-                        <option value="diagnostico-sistema">Diagnóstico de Sistema</option>
-                        <option value="generico">Análise Genérica</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="contextoAnalise">Contexto (JSON ou texto livre)</label>
-                    <textarea
-                        id="contextoAnalise"
-                        placeholder='Ex: {"timeId": "123", "periodo": "últimas 5 rodadas"}'
-                        required
-                    ></textarea>
-                </div>
-
-                <button type="submit" class="btn btn-primary" id="btnSolicitar">
-                    <span class="material-icons">smart_toy</span>
-                    Solicitar Análise
-                </button>
-            </form>
+        <!-- Grid de Análises -->
+        <div class="rx-grid">
+            <button class="rx-card" data-tipo="visao-geral" data-requer-liga="false">
+                <span class="material-icons rx-card-icon">dashboard</span>
+                <div class="rx-card-title">Visão Geral</div>
+                <div class="rx-card-desc">KPIs globais: ligas, participantes, volume financeiro</div>
+            </button>
+            <button class="rx-card" data-tipo="raio-x-financeiro" data-requer-liga="true">
+                <span class="material-icons rx-card-icon">account_balance</span>
+                <div class="rx-card-title">Raio-X Financeiro</div>
+                <div class="rx-card-desc">Saldos, devedores, credores, pagamentos</div>
+            </button>
+            <button class="rx-card" data-tipo="saude-liga" data-requer-liga="true">
+                <span class="material-icons rx-card-icon">favorite</span>
+                <div class="rx-card-title">Saúde da Liga</div>
+                <div class="rx-card-desc">Ativos, desistentes, módulos, engajamento</div>
+            </button>
+            <button class="rx-card" data-tipo="performance" data-requer-liga="true">
+                <span class="material-icons rx-card-icon">emoji_events</span>
+                <div class="rx-card-title">Performance</div>
+                <div class="rx-card-desc">Ranking, consistência, mitos e micos</div>
+            </button>
+            <button class="rx-card" data-tipo="diagnostico" data-requer-liga="false">
+                <span class="material-icons rx-card-icon">monitor_heart</span>
+                <div class="rx-card-title">Diagnóstico</div>
+                <div class="rx-card-desc">Health score, banco, memória, consolidação</div>
+            </button>
         </div>
 
         <!-- Loading -->
@@ -73,19 +72,8 @@
             <p style="color: var(--text-muted); margin-top: 16px;">Processando análise...</p>
         </div>
 
-        <!-- Histórico -->
-        <div class="historico-section">
-            <h2>
-                <span class="material-icons">history</span>
-                Histórico de Análises
-            </h2>
-            <div id="historicoContainer">
-                <div class="empty-state">
-                    <div class="material-icons">inbox</div>
-                    <p>Nenhuma análise encontrada</p>
-                </div>
-            </div>
-        </div>
+        <!-- Resultado -->
+        <div id="resultadoContainer"></div>
     </div>
     </main>
 

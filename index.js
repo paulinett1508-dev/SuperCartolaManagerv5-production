@@ -179,8 +179,8 @@ import manutencaoParticipanteRoutes from "./routes/manutencao-participante-route
 import avisosAdminRoutes from "./routes/avisos-admin-routes.js";
 import avisosParticipanteRoutes from "./routes/avisos-participante-routes.js";
 
-// 🤖 Análises IA - Interface Admin
-import iaAnalysisRoutes from "./routes/iaAnalysisRoutes.js";
+// 📊 Raio-X Analytics (análises internas via MongoDB)
+import raioXAnalyticsRoutes from "./routes/raioXAnalyticsRoutes.js";
 
 // 📦 Versionamento do App
 import appVersionRoutes from "./routes/appVersionRoutes.js";
@@ -570,9 +570,9 @@ console.log("[SERVER] 📢 Rotas de avisos admin registradas em /api/admin/aviso
 app.use("/api/avisos", avisosParticipanteRoutes);
 console.log("[SERVER] 📢 Rotas de avisos participante registradas em /api/avisos");
 
-// 🤖 Análises IA (Claude LLM)
-app.use("/api/admin/ia-analysis", iaAnalysisRoutes);
-console.log("[SERVER] 🤖 Rotas de Análises IA registradas em /api/admin/ia-analysis");
+// 📊 Raio-X Analytics (análises internas)
+app.use("/api/admin/raio-x", raioXAnalyticsRoutes);
+console.log("[SERVER] 📊 Rotas de Raio-X Analytics registradas em /api/admin/raio-x");
 
 // 🎯 Dicas Premium
 app.use("/api/dicas-premium", dicasPremiumRoutes);
