@@ -60,21 +60,26 @@
                 const response = await fetch(`${API_BASE}/api/ligas`);
                 const ligas = await response.json();
 
-                if (!Array.isArray(ligas) || ligas.length === 0) {
+                // Filtrar apenas ligas ativas (excluir aposentadas/suspensas)
+                const ligasAtivas = Array.isArray(ligas)
+                    ? ligas.filter(l => l.ativa !== false && l.status !== 'aposentada' && l.status !== 'suspensa')
+                    : [];
+
+                if (ligasAtivas.length === 0) {
                     grid.innerHTML = `
                         <div class="empty-state">
                             <span class="material-icons">folder_open</span>
-                            <p>Nenhuma liga cadastrada</p>
+                            <p>Nenhuma liga ativa para consolidação</p>
                         </div>
                     `;
                     return;
                 }
 
-                ligasCarregadas = ligas;
+                ligasCarregadas = ligasAtivas;
                 grid.innerHTML = '';
 
                 // Gerar card para cada liga
-                ligas.forEach((liga, index) => {
+                ligasAtivas.forEach((liga, index) => {
                     const ligaId = liga._id || liga.id;
                     const prefix = `liga${index}`;
                     const ligaNome = liga.nome || `Liga ${index + 1}`;
@@ -85,12 +90,12 @@
                 });
 
                 // Mostrar botao de consolidar todas
-                if (ligas.length > 1) {
+                if (ligasAtivas.length > 1) {
                     document.getElementById('consolidarTodasContainer').removeAttribute('hidden');
                 }
 
                 // Verificar status de todas as ligas
-                ligas.forEach((liga, index) => {
+                ligasAtivas.forEach((liga, index) => {
                     const ligaId = liga._id || liga.id;
                     const prefix = `liga${index}`;
                     verificarStatus(ligaId, prefix);
