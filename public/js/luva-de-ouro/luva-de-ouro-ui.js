@@ -1,8 +1,11 @@
-// LUVA DE OURO UI - Tabela com Rodadas em Colunas Navegáveis v4.1.0
+// LUVA DE OURO UI - Tabela com Rodadas em Colunas Navegáveis v4.2.0
+// ✅ v4.2.0: Import RODADA_FINAL centralizado de season-config.js
 // ✅ v4.1.0: Destaque APENAS no 1º lugar + Banner Rodada Final R38 + Parcial em tempo real
 // 12 rodadas visíveis por vez com navegação horizontal
 
-console.log("🎨 [LUVA-UI] Módulo UI v4.1.0 carregando...");
+import { RODADA_FINAL_CAMPEONATO } from '../core/season-config.js';
+
+console.log("🎨 [LUVA-UI] Módulo UI v4.2.0 carregando...");
 
 // Cache de elementos DOM
 const elementsCache = new Map();
@@ -11,12 +14,12 @@ const elementsCache = new Map();
 let estadoNavegacao = {
   rodadaInicio: 1,
   rodadasVisiveis: 12,
-  rodadaAtual: 38,
+  rodadaAtual: RODADA_FINAL_CAMPEONATO,
   mercadoAberto: false,
 };
 
-// ✅ v4.1: Constantes da temporada
-const RODADA_FINAL = 38;
+// ✅ v4.2: Constante centralizada da temporada
+const RODADA_FINAL = RODADA_FINAL_CAMPEONATO;
 
 function getElement(id) {
   const element = document.getElementById(id);

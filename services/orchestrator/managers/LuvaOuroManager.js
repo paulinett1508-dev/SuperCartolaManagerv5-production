@@ -1,6 +1,17 @@
 /**
- * LUVA DE OURO MANAGER v1.0.0
- * Módulo OPCIONAL - Luva de Ouro (coleta defesas de goleiros)
+ * LUVA DE OURO MANAGER v1.1.0
+ * Módulo OPCIONAL - Luva de Ouro (ranking de pontuação dos goleiros)
+ *
+ * STATUS: STUBS — Hooks registrados mas NÃO executam coleta automaticamente.
+ *
+ * FLUXO ATUAL (manual via admin):
+ *   1. Admin clica "Coletar" → GET /api/luva-de-ouro/:ligaId/coletar
+ *   2. Admin clica "Consolidar" → POST /api/luva-de-ouro/:ligaId/consolidar
+ *   Controller: luvaDeOuroController.js (v3.0.0)
+ *   Service: goleirosService.js (busca dados da API Cartola por rodada)
+ *
+ * FUTURO: Quando o orchestrator for implementado end-to-end, estes hooks
+ * devem delegar ao controller via chamadas internas (fetch localhost).
  */
 import BaseManager from './BaseManager.js';
 
@@ -20,33 +31,32 @@ export default class LuvaOuroManager extends BaseManager {
         this._coletaAtiva = false;
     }
 
+    // STUB: Coleta real é feita manualmente pelo admin via GET /:ligaId/coletar
     async onMarketClose(ctx) {
-        console.log(`[LUVA-OURO] Mercado fechou - iniciando coleta de SG R${ctx.rodada}`);
         this._coletaAtiva = true;
-        return { coletaIniciada: true, rodada: ctx.rodada };
+        return { coletaIniciada: false, stub: true, rodada: ctx.rodada };
     }
 
+    // STUB: Parciais são calculadas pelo controller via ranking-live endpoint
     async onLiveUpdate(ctx) {
         if (!this._coletaAtiva) return null;
-
-        console.log(`[LUVA-OURO] Coletando saldos de gols em tempo real R${ctx.rodada}`);
-        return { coletando: true };
+        return { coletando: false, stub: true };
     }
 
+    // STUB: Não há ação automática ao abrir mercado
     async onMarketOpen(ctx) {
         this._coletaAtiva = false;
-        console.log(`[LUVA-OURO] Coleta encerrada - mercado abriu`);
-        return { coletaEncerrada: true };
+        return { coletaEncerrada: true, stub: true };
     }
 
+    // STUB: Consolidação é feita pelo admin via POST /:ligaId/consolidar
     async onRoundFinalize(ctx) {
         this._coletaAtiva = false;
-        console.log(`[LUVA-OURO] Finalizando luva de ouro R${ctx.rodada}`);
-        return { pronto: true };
+        return { pronto: false, stub: true };
     }
 
+    // STUB: Premiação é aplicada durante consolidação manual
     async onConsolidate(ctx) {
-        console.log(`[LUVA-OURO] Consolidando ranking goleiros R${ctx.rodada}`);
-        return { consolidado: true };
+        return { consolidado: false, stub: true };
     }
 }
