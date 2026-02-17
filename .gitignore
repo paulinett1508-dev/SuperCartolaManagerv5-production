@@ -17,5 +17,5 @@ data/backups/
 # MCP config contém credenciais - NUNCA commitar
 .mcp.json
 
-# Google Service Account key - NUNCA commitar
+# Google Service Account - NUNCA commitar
 credentials.json

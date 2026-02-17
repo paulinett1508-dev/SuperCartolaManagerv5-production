@@ -901,51 +901,49 @@ export async function processarDecisaoUnificada(ligaId, timeId, temporada, decis
         }
     }
 
-    // 3. Registrar quitacao da temporada anterior
+    // ✅ v3.0.0: Transação MongoDB para atomicidade (quitação + legado_manual)
     const agora = new Date();
     const ligaObjId = new mongoose.Types.ObjectId(ligaId);
+    const session = await mongoose.startSession();
 
-    // v1.2.1 FIX: Usar $or para buscar liga_id como String OU ObjectId
-    // Documentos existentes usam String, novos podem usar ObjectId
-    // REMOVIDO upsert: true para evitar criacao de documentos duplicados vazios
-    const updateQuitacao = await db.collection('extratofinanceirocaches').updateOne(
-        {
-            $or: [
-                { liga_id: String(ligaId) },
-                { liga_id: ligaObjId }
-            ],
-            time_id: Number(timeId),
-            temporada: Number(temporadaAnterior)
-        },
-        {
-            $set: {
-                quitacao: {
-                    quitado: true,
-                    tipo: tipoQuitacao,
-                    saldo_no_momento: saldo.saldoFinal,
-                    valor_legado: valorLegado,
-                    data_quitacao: agora,
-                    admin_responsavel: decisao.aprovadoPor || 'admin',
-                    observacao: decisao.observacoes || `Quitacao via modal unificado - ${decisao.decisao}`
+    try {
+        session.startTransaction();
+
+        // 3. Registrar quitacao da temporada anterior
+        // v1.2.1 FIX: Usar $or para buscar liga_id como String OU ObjectId
+        // REMOVIDO upsert: true para evitar criacao de documentos duplicados vazios
+        const updateQuitacao = await db.collection('extratofinanceirocaches').updateOne(
+            {
+                $or: [
+                    { liga_id: String(ligaId) },
+                    { liga_id: ligaObjId }
+                ],
+                time_id: Number(timeId),
+                temporada: Number(temporadaAnterior)
+            },
+            {
+                $set: {
+                    quitacao: {
+                        quitado: true,
+                        tipo: tipoQuitacao,
+                        saldo_no_momento: saldo.saldoFinal,
+                        valor_legado: valorLegado,
+                        data_quitacao: agora,
+                        admin_responsavel: decisao.aprovadoPor || 'admin',
+                        observacao: decisao.observacoes || `Quitacao via modal unificado - ${decisao.decisao}`
+                    }
                 }
-            }
+            },
+            { session }
+        );
+
+        // Log para debug (documento nao encontrado = cenario raro, mas nao deve criar vazio)
+        if (updateQuitacao.matchedCount === 0) {
+            logger.warn(`[INSCRICOES] AVISO: Extrato ${temporadaAnterior} nao encontrado para time ${timeId}. Quitacao nao registrada no cache.`);
         }
-    );
 
-    // Log para debug (documento nao encontrado = cenario raro, mas nao deve criar vazio)
-    if (updateQuitacao.matchedCount === 0) {
-        logger.warn(`[INSCRICOES] AVISO: Extrato ${temporadaAnterior} nao encontrado para time ${timeId}. Quitacao nao registrada no cache.`);
-    }
-
-    logger.log(`[INSCRICOES] Quitacao ${temporadaAnterior} registrada: tipo=${tipoQuitacao} legado=${valorLegado}`);
-
-    // 4. Processar renovacao ou nao-participar
-    let resultado;
-
-    if (decisao.decisao === 'renovar') {
-        // Criar inscricao com legado_manual se aplicavel
-        if (valorLegado !== saldo.saldoFinal || tipoQuitacao === 'zerado') {
-            // Definir legado manual na inscricao
+        // 4a. Definir legado_manual na inscricao (dentro da transação)
+        if (decisao.decisao === 'renovar' && (valorLegado !== saldo.saldoFinal || tipoQuitacao === 'zerado')) {
             const inscricaoPrevia = await InscricaoTemporada.findOne({
                 liga_id: ligaObjId,
                 time_id: Number(timeId),
@@ -953,7 +951,7 @@ export async function processarDecisaoUnificada(ligaId, timeId, temporada, decis
             }).lean();
 
             if (!inscricaoPrevia) {
-                await InscricaoTemporada.create({
+                await InscricaoTemporada.create([{
                     liga_id: ligaObjId,
                     time_id: Number(timeId),
                     temporada: Number(temporada),
@@ -966,7 +964,7 @@ export async function processarDecisaoUnificada(ligaId, timeId, temporada, decis
                         definido_por: decisao.aprovadoPor || 'admin',
                         data: agora
                     }
-                });
+                }], { session });
             } else {
                 await InscricaoTemporada.updateOne(
                     { _id: inscricaoPrevia._id },
@@ -981,12 +979,27 @@ export async function processarDecisaoUnificada(ligaId, timeId, temporada, decis
                                 data: agora
                             }
                         }
-                    }
+                    },
+                    { session }
                 );
             }
         }
 
-        // Chamar processarRenovacao
+        await session.commitTransaction();
+        logger.log(`[INSCRICOES] Quitacao ${temporadaAnterior} registrada: tipo=${tipoQuitacao} legado=${valorLegado}`);
+
+    } catch (txError) {
+        await session.abortTransaction();
+        logger.error(`[INSCRICOES] Erro na transação de quitação:`, txError.message);
+        throw txError;
+    } finally {
+        session.endSession();
+    }
+
+    // 4b. Processar renovacao ou nao-participar (idempotent, fora da transação)
+    let resultado;
+
+    if (decisao.decisao === 'renovar') {
         resultado = await processarRenovacao(ligaId, Number(timeId), temporada, {
             pagouInscricao: decisao.pagouInscricao === true,
             aproveitarCredito: decisao.aproveitarCredito === true,
@@ -1066,7 +1079,7 @@ export async function processarBatchInscricoes(ligaId, temporada, timeIds, acao,
                     break;
 
                 case 'marcar_pago': {
-                    // Atualizar inscrição existente + estornar débito (operação atômica)
+                    // ✅ v3.0.0: Transação para atomicidade inscricao + extrato
                     const inscricao = await InscricaoTemporada.findOne({
                         liga_id: new mongoose.Types.ObjectId(ligaId),
                         time_id: Number(timeId),
@@ -1074,31 +1087,35 @@ export async function processarBatchInscricoes(ligaId, temporada, timeIds, acao,
                     });
 
                     if (inscricao && !inscricao.pagou_inscricao) {
-                        const taxaInscricao = inscricao.taxa_inscricao || 0;
-                        const ligaObjIdMp = new mongoose.Types.ObjectId(ligaId);
-                        const sessionMp = await mongoose.startSession();
+                        const pagoSession = await mongoose.startSession();
                         try {
-                            await sessionMp.withTransaction(async () => {
-                                inscricao.pagou_inscricao = true;
-                                inscricao.data_pagamento_inscricao = new Date();
-                                await inscricao.save({ session: sessionMp });
+                            pagoSession.startTransaction();
 
-                                // Estornar débito do extrato
-                                await db.collection('extratofinanceirocaches').updateOne(
-                                    {
-                                        liga_id: ligaObjIdMp,
-                                        time_id: Number(timeId),
-                                        temporada: Number(temporada)
-                                    },
-                                    {
-                                        $pull: { historico_transacoes: { tipo: 'INSCRICAO_TEMPORADA' } },
-                                        $inc: { saldo_consolidado: taxaInscricao }
-                                    },
-                                    { session: sessionMp }
-                                );
-                            });
+                            inscricao.pagou_inscricao = true;
+                            inscricao.data_pagamento_inscricao = new Date();
+                            await inscricao.save({ session: pagoSession });
+
+                            // Estornar débito do extrato
+                            const ligaObjId = new mongoose.Types.ObjectId(ligaId);
+                            await db.collection('extratofinanceirocaches').updateOne(
+                                {
+                                    liga_id: ligaObjId,
+                                    time_id: Number(timeId),
+                                    temporada: Number(temporada)
+                                },
+                                {
+                                    $pull: { historico_transacoes: { tipo: 'INSCRICAO_TEMPORADA' } },
+                                    $inc: { saldo_consolidado: inscricao.taxa_inscricao || 0 }
+                                },
+                                { session: pagoSession }
+                            );
+
+                            await pagoSession.commitTransaction();
+                        } catch (txErr) {
+                            await pagoSession.abortTransaction();
+                            throw txErr;
                         } finally {
-                            await sessionMp.endSession();
+                            pagoSession.endSession();
                         }
                     }
                     sucesso = true;
@@ -1152,56 +1169,67 @@ export async function processarBatchInscricoes(ligaId, temporada, timeIds, acao,
                     break;
 
                 case 'ativar': {
-                    const sessionAtv = await mongoose.startSession();
+                    // ✅ v3.0.0: Transação para sincronizar Time + Liga
+                    const ativarSession = await mongoose.startSession();
                     try {
-                        await sessionAtv.withTransaction(async () => {
-                            await Time.updateOne({ id: Number(timeId) }, { $set: { ativo: true } }, { session: sessionAtv });
-                            await Liga.updateOne(
-                                { _id: ligaId, "participantes.time_id": Number(timeId) },
-                                { $set: { "participantes.$.ativo": true } },
-                                { session: sessionAtv }
-                            );
-                        });
+                        ativarSession.startTransaction();
+                        await Time.updateOne({ id: Number(timeId) }, { $set: { ativo: true } }, { session: ativarSession });
+                        await Liga.updateOne(
+                            { _id: ligaId, "participantes.time_id": Number(timeId) },
+                            { $set: { "participantes.$.ativo": true } },
+                            { session: ativarSession }
+                        );
+                        await ativarSession.commitTransaction();
+                    } catch (txErr) {
+                        await ativarSession.abortTransaction();
+                        throw txErr;
                     } finally {
-                        await sessionAtv.endSession();
+                        ativarSession.endSession();
                     }
                     sucesso = true;
                     break;
                 }
 
                 case 'inativar': {
-                    const sessionIna = await mongoose.startSession();
+                    // ✅ v3.0.0: Transação para sincronizar Time + Liga
+                    const inativarSession = await mongoose.startSession();
                     try {
-                        await sessionIna.withTransaction(async () => {
-                            await Time.updateOne({ id: Number(timeId) }, { $set: { ativo: false } }, { session: sessionIna });
-                            await Liga.updateOne(
-                                { _id: ligaId, "participantes.time_id": Number(timeId) },
-                                { $set: { "participantes.$.ativo": false } },
-                                { session: sessionIna }
-                            );
-                        });
+                        inativarSession.startTransaction();
+                        await Time.updateOne({ id: Number(timeId) }, { $set: { ativo: false } }, { session: inativarSession });
+                        await Liga.updateOne(
+                            { _id: ligaId, "participantes.time_id": Number(timeId) },
+                            { $set: { "participantes.$.ativo": false } },
+                            { session: inativarSession }
+                        );
+                        await inativarSession.commitTransaction();
+                    } catch (txErr) {
+                        await inativarSession.abortTransaction();
+                        throw txErr;
                     } finally {
-                        await sessionIna.endSession();
+                        inativarSession.endSession();
                     }
                     sucesso = true;
                     break;
                 }
 
                 case 'gerar_senhas': {
-                    // Gerar senha aleatória
-                    const novaSenha = crypto.randomBytes(4).toString('hex');
-                    const sessionGs = await mongoose.startSession();
+                    // ✅ v3.0.0: Transação para sincronizar Time + Liga
+                    const senhaSession = await mongoose.startSession();
                     try {
-                        await sessionGs.withTransaction(async () => {
-                            await Time.updateOne({ id: Number(timeId) }, { $set: { senha_acesso: novaSenha } }, { session: sessionGs });
-                            await Liga.updateOne(
-                                { _id: ligaId, "participantes.time_id": Number(timeId) },
-                                { $set: { "participantes.$.senha_acesso": novaSenha } },
-                                { session: sessionGs }
-                            );
-                        });
+                        senhaSession.startTransaction();
+                        const novaSenha = crypto.randomBytes(4).toString('hex');
+                        await Time.updateOne({ id: Number(timeId) }, { $set: { senha_acesso: novaSenha } }, { session: senhaSession });
+                        await Liga.updateOne(
+                            { _id: ligaId, "participantes.time_id": Number(timeId) },
+                            { $set: { "participantes.$.senha_acesso": novaSenha } },
+                            { session: senhaSession }
+                        );
+                        await senhaSession.commitTransaction();
+                    } catch (txErr) {
+                        await senhaSession.abortTransaction();
+                        throw txErr;
                     } finally {
-                        await sessionGs.endSession();
+                        senhaSession.endSession();
                     }
                     sucesso = true;
                     break;

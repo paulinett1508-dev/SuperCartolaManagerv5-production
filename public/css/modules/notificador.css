@@ -1,8 +1,4 @@
-/* ============================================================
-   NOTIFICADOR - Styles
-   Extraído de notificador.html | Namespace: .notificador-*
-   ============================================================ */
-
+/* Namespace .notificador-* */
 .notificador-page {
     background: var(--surface-bg);
     min-height: 100vh;

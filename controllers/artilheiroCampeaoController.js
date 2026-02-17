@@ -20,6 +20,7 @@ import {
     obterUltimaRodadaValida,
     ordenarRankingComInativos,
 } from "../utils/participanteHelper.js";
+import { apiError, apiServerError } from '../utils/apiResponse.js';
 import logger from '../utils/logger.js';
 
 // ========================================

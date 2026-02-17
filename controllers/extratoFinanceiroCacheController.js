@@ -59,6 +59,7 @@ import AjusteFinanceiro from "../models/AjusteFinanceiro.js";
 import mongoose from "mongoose";
 // ✅ v5.9: Import getFinancialSeason para pegar temporada correta durante pré-temporada
 import { CURRENT_SEASON, getFinancialSeason } from "../config/seasons.js";
+import { apiError, apiServerError } from '../utils/apiResponse.js';
 import logger from '../utils/logger.js';
 
 // ✅ v5.1: Buscar acertos financeiros do participante

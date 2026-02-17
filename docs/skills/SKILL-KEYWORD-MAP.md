@@ -105,6 +105,17 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 | **NÃO confundir** | Gerar PRD (pesquisa) ≠ explicar sistema (system-scribe) |
 | **Localização** | `docs/skills/02-specialists/system-scribe.md` |
 
+#### anti-frankenstein
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `anti-frankenstein`, `anti-frank`, `modo anti-frank`, `ative modo anti-frank`, `blindar frontend`, `governança CSS`, `validar CSS`, `antes de criar CSS`, `já existe?`, `checar antes de criar`, `auditar CSS`, `duplicado CSS`, `prevenir duplicação`, `css registry`, `HTMLs no modo anti-frank` |
+| **Frases PT-BR** | "ative modo anti-frank", "sempre pensando no modo anti-frank", "anti-frank", "HTMLs ativado no modo anti-frank", "modo anti-frankenstein ativo", "já existe esse componente?", "antes de criar esse CSS", "tem algum CSS parecido?", "vou criar um novo arquivo CSS", "checar se já existe", "posso criar arquivo CSS?", "validar criação frontend", "governança de frontend", "garantir que não vai duplicar", "blindar o CSS", "revisar antes de criar tela", "governança de código visual", "anti-frankstein" |
+| **Contexto** | Checkpoint PREVENTIVO obrigatório antes de criar/modificar CSS, HTML, inline styles ou componentes visuais. Previne código duplicado, cores hardcoded, keyframes repetidos, arquivos órfãos |
+| **Ativação automática** | Deve rodar ANTES de qualquer criação de CSS/HTML. Complementa `frontend-crafter` (que cria) e `code-inspector` (que audita pós-facto) |
+| **NÃO confundir** | Criar tela nova → `frontend-crafter` (mas anti-frankenstein roda ANTES); Auditar código → `code-inspector`; Auditar UX → `ux-auditor-app` |
+| **Localização** | `docs/skills/02-specialists/anti-frankenstein.md` |
+| **Referências** | `config/css-registry.json`, `docs/rules/audit-frontend.md` |
+
 ---
 
 ### 03 - Utilities (Ferramentas Auxiliares)
@@ -273,6 +284,8 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | "especifique as mudanças" | `spec` | Planejamento técnico |
 | "implemente isso" | `code` | Execução de mudanças |
 | "crie uma tela de ranking" | `frontend-crafter` | Criação de UI |
+| "antes de criar CSS, valide" | `anti-frankenstein` | Governança preventiva |
+| "já existe esse componente?" | `anti-frankenstein` | Check de duplicação |
 | "como funciona o mata-mata?" | `system-scribe` | Explicação do sistema |
 | "qual a regra de desempate?" | `league-architect` | Regra de negócio |
 | "limpe os dados antigos" | `db-guardian` | Operação no banco |
@@ -297,6 +310,14 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | "como tá o visual do app" | `ux-auditor-app` | Estado do design do app |
 | "quais branches existem" | `analise-branches` | Análise git |
 | "executar auditoria mensal" | `context7-monthly-audit` | Auditoria preventiva |
+| "já existe esse CSS?" | `anti-frankenstein` | Checkpoint pré-criação |
+| "antes de criar esse componente" | `anti-frankenstein` | Governança de frontend |
+| "blindar o CSS do projeto" | `anti-frankenstein` | Prevenção de duplicidade |
+| "vou criar um arquivo CSS novo" | `anti-frankenstein` | Validação obrigatória |
+| "anti-frank" | `anti-frankenstein` | Alias curto |
+| "ative modo anti-frank" | `anti-frankenstein` | Ativação direta por alias |
+| "sempre pensando no modo anti-frank" | `anti-frankenstein` | Modo persistente de governança |
+| "HTMLs ativado no modo anti-frank" | `anti-frankenstein` | Checkpoint em criação de HTML |
 | "verificar mudanças api cartola" | `context7-monthly-audit` | Check mensal automático |
 | "criar uma skill nova" | `skill-creator` | Meta |
 | "instalar skill X" | `skill-installer` | Meta |
@@ -308,6 +329,7 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | Cenário | Sequência de Skills |
 |---------|---------------------|
 | Feature nova completa | `workflow` → `pesquisa` → `spec` → `ai-problems-detection` → `code` → `git-commit-push` |
+| Feature com frontend | `workflow` → `pesquisa` → `spec` → `anti-frankenstein` → `frontend-crafter` → `code` → `git-commit-push` |
 | Bug report | `fact-checker` → `code-inspector` → `code` → `git-commit-push` |
 | Refatoração | `Refactor-Monolith` → `code-inspector` → `git-commit-push` |
 | Deploy completo | `git-commit-push` → `replit-pull` → `restart-server` |

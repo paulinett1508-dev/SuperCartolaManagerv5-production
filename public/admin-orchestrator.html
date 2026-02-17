@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orchestrator - Super Cartola Manager</title>
     <link rel="stylesheet" href="css/admin-shell.css" />
+    <link rel="stylesheet" href="css/modules/orchestrator.css" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/modules/orchestrator.css" />
 </head>
 <body>
     <div class="app-container">
@@ -28,7 +28,7 @@
         <div id="orch-app">
             <div class="orch-loading">
                 <span class="material-icons">sync</span>
-                <p style="margin-top: 12px">Conectando ao orchestrator...</p>
+                <p class="orch-loading-text">Conectando ao orchestrator...</p>
             </div>
         </div>
     </div>
@@ -84,9 +84,9 @@
             if (orchApp) {
                 orchApp.innerHTML = `
                     <div class="orch-loading">
-                        <span class="material-icons" style="animation:none; color: var(--color-danger)">error</span>
-                        <p style="margin-top:12px">Erro ao conectar: ${err.message}</p>
-                        <button class="orch-btn orch-btn-primary" style="margin:16px auto" onclick="carregarStatus()">
+                        <span class="material-icons orch-error-icon">error</span>
+                        <p class="orch-loading-text">Erro ao conectar: ${err.message}</p>
+                        <button class="orch-btn orch-btn-primary orch-retry-btn" onclick="carregarStatus()">
                             <span class="material-icons">refresh</span> Tentar novamente
                         </button>
                     </div>
@@ -272,7 +272,7 @@
                 Eventos Recentes
             </div>
             <div class="orch-timeline">
-                ${eventos.length === 0 ? '<div style="text-align:center;color:#666;padding:20px">Nenhum evento registrado</div>' : ''}
+                ${eventos.length === 0 ? '<div class="orch-empty-state">Nenhum evento registrado</div>' : ''}
                 ${eventos.map(e => {
                     let dotClass = 'outro';
                     if (e.tipo.includes('transicao')) dotClass = 'transicao';
@@ -302,10 +302,10 @@
             return `Consolidacao R${e.rodada} completa (${e.detalhes?.ligas || '?'} ligas)`;
         }
         if (e.tipo === 'erro_consolidacao') {
-            return `<span style="color:#f87171">Erro consolidacao R${e.rodada}: ${e.detalhes?.erro || 'desconhecido'}</span>`;
+            return `<span class="orch-error-text">Erro consolidacao R${e.rodada}: ${e.detalhes?.erro || 'desconhecido'}</span>`;
         }
         if (e.tipo === 'erro_poll') {
-            return `<span style="color:#f87171">Erro poll: ${e.detalhes?.erro || 'desconhecido'}</span>`;
+            return `<span class="orch-error-text">Erro poll: ${e.detalhes?.erro || 'desconhecido'}</span>`;
         }
         if (e.tipo === 'rodada_encerrada') {
             return `Rodada ${e.rodada} encerrada`;

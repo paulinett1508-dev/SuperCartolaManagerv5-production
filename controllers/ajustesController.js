@@ -10,6 +10,7 @@
 
 import AjusteFinanceiro from "../models/AjusteFinanceiro.js";
 import { CURRENT_SEASON } from "../config/seasons.js";
+import logger from '../utils/logger.js';
 
 // =============================================================================
 // LISTAR AJUSTES DE UM PARTICIPANTE
@@ -34,7 +35,7 @@ export async function listarAjustes(req, res) {
             totais
         });
     } catch (error) {
-        console.error("[AJUSTES] Erro ao listar:", error);
+        logger.error("[AJUSTES] Erro ao listar:", error);
         res.status(500).json({
             success: false,
             error: error.message
@@ -86,7 +87,7 @@ export async function criarAjuste(req, res) {
         }).lean();
 
         if (ajusteDuplicado) {
-            console.warn(`[AJUSTES] ⚠️ Ajuste duplicado detectado para time ${timeId} (idempotência)`);
+            logger.warn(`[AJUSTES] ⚠️ Ajuste duplicado detectado para time ${timeId} (idempotência)`);
             return res.status(409).json({
                 success: false,
                 error: "Ajuste duplicado detectado. Um ajuste idêntico foi criado há menos de 60 segundos.",
@@ -106,7 +107,7 @@ export async function criarAjuste(req, res) {
             criado_por: criadoPor
         });
 
-        console.log(`[AJUSTES] Criado: ${descricao} = R$ ${valor} para time ${timeId} por ${criadoPor}`);
+        logger.log(`[AJUSTES] Criado: ${descricao} = R$ ${valor} para time ${timeId} por ${criadoPor}`);
 
         // Retornar ajuste criado + totais atualizados
         const totais = await AjusteFinanceiro.calcularTotal(ligaId, timeId, temporada);
@@ -117,7 +118,7 @@ export async function criarAjuste(req, res) {
             totais
         });
     } catch (error) {
-        console.error("[AJUSTES] Erro ao criar:", error);
+        logger.error("[AJUSTES] Erro ao criar:", error);
 
         // Erro de validação do Mongoose
         if (error.name === 'ValidationError') {
@@ -179,7 +180,7 @@ export async function atualizarAjuste(req, res) {
             });
         }
 
-        console.log(`[AJUSTES] Atualizado: ${ajuste._id} por ${atualizadoPor}`);
+        logger.log(`[AJUSTES] Atualizado: ${ajuste._id} por ${atualizadoPor}`);
 
         // Retornar totais atualizados
         const totais = await AjusteFinanceiro.calcularTotal(
@@ -194,7 +195,7 @@ export async function atualizarAjuste(req, res) {
             totais
         });
     } catch (error) {
-        console.error("[AJUSTES] Erro ao atualizar:", error);
+        logger.error("[AJUSTES] Erro ao atualizar:", error);
 
         if (error.name === 'ValidationError') {
             const mensagens = Object.values(error.errors).map(e => e.message);
@@ -235,7 +236,7 @@ export async function removerAjuste(req, res) {
             });
         }
 
-        console.log(`[AJUSTES] Removido: ${ajuste._id} (${ajuste.descricao}) por ${removidoPor}`);
+        logger.log(`[AJUSTES] Removido: ${ajuste._id} (${ajuste.descricao}) por ${removidoPor}`);
 
         // Retornar totais atualizados
         const totais = await AjusteFinanceiro.calcularTotal(
@@ -250,7 +251,7 @@ export async function removerAjuste(req, res) {
             totais
         });
     } catch (error) {
-        console.error("[AJUSTES] Erro ao remover:", error);
+        logger.error("[AJUSTES] Erro ao remover:", error);
         res.status(500).json({
             success: false,
             error: error.message
@@ -284,7 +285,7 @@ export async function obterAjuste(req, res) {
             ajuste
         });
     } catch (error) {
-        console.error("[AJUSTES] Erro ao obter:", error);
+        logger.error("[AJUSTES] Erro ao obter:", error);
         res.status(500).json({
             success: false,
             error: error.message
@@ -328,7 +329,7 @@ export async function listarAjustesLiga(req, res) {
             por_time: Object.values(porTime)
         });
     } catch (error) {
-        console.error("[AJUSTES] Erro ao listar por liga:", error);
+        logger.error("[AJUSTES] Erro ao listar por liga:", error);
         res.status(500).json({
             success: false,
             error: error.message

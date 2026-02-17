@@ -113,7 +113,7 @@
                         <span class="material-icons">person_add</span>
                         Registrar Novo Cliente (Admin)
                     </h3>
-                    <p style="color: #9ca3af; font-size: 0.85rem; margin: 0 0 16px 0;">
+                    <p class="gestao-form-hint">
                         O cliente recebera uma senha provisoria para acessar o sistema.
                     </p>
                     <div class="form-row">
@@ -132,24 +132,24 @@
                     </button>
                 </div>
 
-                <div id="senhaModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center;">
-                    <div style="background: #1a1a1a; border-radius: 12px; padding: 24px; max-width: 500px; width: 90%; border: 2px solid #10b981;">
-                        <h3 style="color: #10b981; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">
+                <div id="senhaModal" class="gestao-modal-overlay">
+                    <div class="gestao-modal-content">
+                        <h3 class="gestao-modal-title">
                             <span class="material-icons">check_circle</span>
                             Cliente Registrado!
                         </h3>
-                        <p style="color: #9ca3af; margin: 0 0 16px 0;">Envie a senha provisoria abaixo para o cliente:</p>
-                        <div style="background: #252525; padding: 16px; border-radius: 8px; text-align: center; margin-bottom: 16px;">
-                            <span style="color: #fff; font-size: 1.5rem; font-family: monospace; letter-spacing: 2px;" id="senhaProvisoria">--------</span>
-                            <button onclick="copiarSenha()" style="margin-left: 12px; background: #333; border: none; color: #fff; padding: 8px 12px; border-radius: 4px; cursor: pointer;">
-                                <span class="material-icons" style="font-size: 16px; vertical-align: middle;">content_copy</span>
+                        <p class="gestao-modal-desc">Envie a senha provisoria abaixo para o cliente:</p>
+                        <div class="gestao-modal-senha-box">
+                            <span class="gestao-modal-senha-text" id="senhaProvisoria">--------</span>
+                            <button onclick="copiarSenha()" class="gestao-modal-copy-btn">
+                                <span class="material-icons">content_copy</span>
                             </button>
                         </div>
-                        <p style="color: #f59e0b; font-size: 0.85rem; margin: 0 0 16px 0;">
-                            <span class="material-icons" style="font-size: 16px; vertical-align: middle;">warning</span>
+                        <p class="gestao-modal-warning">
+                            <span class="material-icons">warning</span>
                             Esta senha so aparece uma vez. Anote-a antes de fechar!
                         </p>
-                        <button onclick="fecharModalSenha()" style="width: 100%; background: #10b981; border: none; color: #fff; padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                        <button onclick="fecharModalSenha()" class="gestao-modal-confirm-btn">
                             Entendido, ja anotei
                         </button>
                     </div>
@@ -228,7 +228,7 @@
                                     <span class="material-icons">delete</span>
                                 </button>
                             </div>
-                        ` : '<div class="admin-actions" style="color: #10b981; font-size: 0.8rem;">Protegido</div>'}
+                        ` : '<div class="admin-actions admin-actions-protected">Protegido</div>'}
                     </div>
                 `).join('');
 
@@ -273,7 +273,7 @@
 
                 // Mostrar modal com senha provisoria
                 document.getElementById('senhaProvisoria').textContent = data.senhaProvisoria;
-                document.getElementById('senhaModal').style.display = 'flex';
+                document.getElementById('senhaModal').classList.add('show');
 
                 document.getElementById('inputEmail').value = '';
                 document.getElementById('inputNome').value = '';
@@ -306,7 +306,7 @@
 
         // Fechar modal de senha
         function fecharModalSenha() {
-            document.getElementById('senhaModal').style.display = 'none';
+            document.getElementById('senhaModal').classList.remove('show');
         }
 
         // Toggle ativo/inativo

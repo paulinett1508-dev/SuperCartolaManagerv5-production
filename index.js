@@ -882,17 +882,22 @@ process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 process.on("SIGQUIT", () => gracefulShutdown("SIGQUIT"));
 
 // ====================================================================
-// 🚨 GLOBAL ERROR HANDLERS - Previne crash silencioso
+// 🛡️ GLOBAL ERROR HANDLERS - Captura erros não tratados
 // ====================================================================
 process.on("unhandledRejection", (reason, promise) => {
-  console.error("[UNHANDLED-REJECTION] Promise não tratada:", reason);
-  // Não encerra o processo - apenas loga para monitoramento
+  const logError = IS_PRODUCTION ? originalConsole.error : console.error;
+  logError("[UNHANDLED_REJECTION] Promise rejeitada sem catch:", reason?.message || reason);
+  if (reason?.stack && !IS_PRODUCTION) {
+    logError("[UNHANDLED_REJECTION] Stack:", reason.stack);
+  }
 });
 
-process.on("uncaughtException", (err) => {
-  console.error("[UNCAUGHT-EXCEPTION] Exceção não capturada:", err.message, err.stack);
-  // Encerra gracefully após exceção crítica não capturada
-  gracefulShutdown("uncaughtException").finally(() => process.exit(1));
+process.on("uncaughtException", (error) => {
+  const logError = IS_PRODUCTION ? originalConsole.error : console.error;
+  logError("[UNCAUGHT_EXCEPTION] Erro nao capturado:", error.message);
+  logError("[UNCAUGHT_EXCEPTION] Stack:", error.stack);
+  // Encerrar gracefully - uncaughtException deixa o processo em estado instavel
+  gracefulShutdown("UNCAUGHT_EXCEPTION");
 });
 
 export default app;

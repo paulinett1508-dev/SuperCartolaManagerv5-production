@@ -1,6 +1,5 @@
 /* ============================================================
    ANALISAR PARTICIPANTES - v1.0
-   Extraído de analisar-participantes.html | Namespace: .analisar-*
    ============================================================ */
 
 .analisar-page {
@@ -571,9 +570,7 @@ table.participantes-table {
     margin: 0 auto 12px;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
+/* @keyframes spin → centralizado em _admin-tokens.css */
 
 /* Empty state */
 .empty-state {
@@ -781,7 +778,7 @@ table.participantes-table {
 /* ── Body ── */
 .dl-body { padding: 12px; }
 
-/* ── Card Desempenho ── */
+/* ── Card Desempenho (estilo participante) ── */
 .dl-desemp-card {
     background: var(--surface-card, #1a1a1a);
     border: 1px solid #2d2d2d;
@@ -875,7 +872,7 @@ table.participantes-table {
 .dl-esc-dot.sairam { color: #ef4444; }
 .dl-esc-dot.entraram { color: #f59e0b; }
 
-/* ── Escalação Section ── */
+/* ── Escalacao Section (estilo participante) ── */
 .dl-escalacao-section {
     background: var(--surface-card, #1a1a1a);
     border: 1px solid #2d2d2d;
@@ -913,7 +910,7 @@ table.participantes-table {
     border-radius: 10px;
 }
 
-/* Grupo de posição */
+/* Grupo de posicao */
 .dl-esc-grupo-title {
     display: flex;
     align-items: center;
@@ -1025,7 +1022,7 @@ table.participantes-table {
 .dl-esc-multiplicador.cap { color: var(--color-primary, #FF5500); }
 .dl-esc-multiplicador.lux { color: #8b5cf6; }
 
-/* Divisória e Banco */
+/* Divisoria e Banco */
 .dl-escalacao-divisoria {
     height: 1px;
     background: #374151;
@@ -1159,7 +1156,6 @@ table.participantes-table {
 }
 .dl-sync-btn .material-icons { font-size: 14px; }
 
-/* Responsive */
 @media (max-width: 480px) {
     .dl-desemp-pontos-valor { font-size: 1.6rem; }
     .dl-desemp-stats { gap: 12px; }
@@ -1167,6 +1163,7 @@ table.participantes-table {
     .dl-round-control-left { min-width: 140px; }
 }
 
+/* Responsive */
 @media (max-width: 768px) {
     .stats-grid {
         grid-template-columns: repeat(3, 1fr);

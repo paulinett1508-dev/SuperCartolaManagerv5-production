@@ -1,5 +1,6 @@
 import MataMataCache from "../models/MataMataCache.js";
 import { CURRENT_SEASON } from "../config/seasons.js";
+import logger from '../utils/logger.js';
 
 export const salvarCacheMataMata = async (req, res) => {
     try {
@@ -49,12 +50,12 @@ export const salvarCacheMataMata = async (req, res) => {
             { new: true, upsert: true },
         );
 
-        console.log(
+        logger.log(
             `[CACHE-MATA] Snapshot da Liga ${ligaId} (Edição ${edicao}) salvo.`,
         );
         res.json({ success: true });
     } catch (error) {
-        console.error("[CACHE-MATA] Erro ao salvar:", error);
+        logger.error("[CACHE-MATA] Erro ao salvar:", error);
         res.status(500).json({ error: "Erro interno" });
     }
 };
@@ -82,7 +83,7 @@ export const lerCacheMataMata = async (req, res) => {
             updatedAt: cache.ultima_atualizacao,
         });
     } catch (error) {
-        console.error("[CACHE-MATA] Erro ao ler:", error);
+        logger.error("[CACHE-MATA] Erro ao ler:", error);
         res.status(500).json({ error: "Erro interno" });
     }
 };
@@ -96,12 +97,12 @@ export const deletarCacheMataMata = async (req, res) => {
             edicao: Number(edicao),
         });
 
-        console.log(
+        logger.log(
             `[CACHE-MATA] Cache deletado: Liga ${ligaId}, Edição ${edicao}`,
         );
         res.json({ success: true, message: 'Cache deletado' });
     } catch (error) {
-        console.error("[CACHE-MATA] Erro ao deletar:", error);
+        logger.error("[CACHE-MATA] Erro ao deletar:", error);
         res.status(500).json({ error: "Erro interno" });
     }
 };
@@ -112,7 +113,7 @@ export const deletarCacheMataMata = async (req, res) => {
 
 export const obterConfrontosMataMata = async (ligaId, rodadaNumero, temporada = CURRENT_SEASON) => {
     try {
-        console.log(`[MATA-CONSOLIDAÇÃO] Processando liga ${ligaId} até R${rodadaNumero}, temporada ${temporada}`);
+        logger.log(`[MATA-CONSOLIDAÇÃO] Processando liga ${ligaId} até R${rodadaNumero}, temporada ${temporada}`);
 
         // Buscar caches APENAS da temporada especificada
         const caches = await MataMataCache.find({
@@ -121,7 +122,7 @@ export const obterConfrontosMataMata = async (ligaId, rodadaNumero, temporada = 
         }).sort({ edicao: 1 });
         
         if (caches.length === 0) {
-            console.log('[MATA-CONSOLIDAÇÃO] Nenhum cache encontrado');
+            logger.log('[MATA-CONSOLIDAÇÃO] Nenhum cache encontrado');
             return [];
         }
         
@@ -132,11 +133,11 @@ export const obterConfrontosMataMata = async (ligaId, rodadaNumero, temporada = 
             ultima_atualizacao: cache.ultima_atualizacao
         }));
         
-        console.log(`[MATA-CONSOLIDAÇÃO] ✅ ${confrontosConsolidados.length} edições processadas`);
+        logger.log(`[MATA-CONSOLIDAÇÃO] ✅ ${confrontosConsolidados.length} edições processadas`);
         return confrontosConsolidados;
         
     } catch (error) {
-        console.error('[MATA-CONSOLIDAÇÃO] ❌ Erro:', error);
+        logger.error('[MATA-CONSOLIDAÇÃO] ❌ Erro:', error);
         throw error;
     }
 };
