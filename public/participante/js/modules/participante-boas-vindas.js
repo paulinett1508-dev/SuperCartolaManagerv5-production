@@ -929,7 +929,8 @@ function renderizarBoasVindas(container, data, ligaRules) {
                     </div>
                 </div>
 
-                    <div id="jogos-do-dia-placeholder"></div>
+                    <div id="copa-do-mundo-placeholder"></div>
+                <div id="jogos-do-dia-placeholder"></div>
             </div>
         `;
         // ✅ v10.9: Carregar e renderizar jogos ao vivo (API-Football) para todos
@@ -1080,6 +1081,7 @@ function renderizarBoasVindas(container, data, ligaRules) {
                 </div>
 
                 <!-- Jogos ao Vivo -->
+                <div id="copa-do-mundo-placeholder"></div>
                 <div id="jogos-do-dia-placeholder"></div>
             </div>
         `;
@@ -1101,15 +1103,26 @@ async function carregarEExibirJogos() {
         if (window.Log) Log.info("PARTICIPANTE-BOAS-VINDAS", "Resultado jogos:", {
             quantidade: result.jogos?.length || 0,
             fonte: result.fonte,
-            aoVivo: result.aoVivo
+            aoVivo: result.aoVivo,
+            copa: result.copa?.fase || 'inativa'
         });
 
         // Armazenar jogos em cache global para modal
         window._jogosCache = result.jogos || [];
         console.log('[BOAS-VINDAS-DEBUG] _jogosCache populado com', window._jogosCache.length, 'jogos');
 
+        // ✅ Copa do Mundo 2026 - Seção separada (ANTES dos jogos brasileiros)
+        if (result.copa && result.copa.fase) {
+            const copaEl = document.getElementById('copa-do-mundo-placeholder');
+            if (copaEl) {
+                const copaHtml = mod.renderizarSecaoCopa(result.copa);
+                copaEl.innerHTML = copaHtml;
+                if (window.Log) Log.info("PARTICIPANTE-BOAS-VINDAS", `🏆 Copa do Mundo renderizada (fase: ${result.copa.fase})`);
+            }
+        }
+
         if (result.jogos && result.jogos.length > 0) {
-            const html = mod.renderizarJogosAoVivo(result.jogos, result.fonte, result.aoVivo);
+            const html = mod.renderizarJogosAoVivo(result.jogos, result.fonte, result.aoVivo, result.atualizadoEm);
             const el = document.getElementById('jogos-do-dia-placeholder');
             if (el) {
                 el.innerHTML = html;
@@ -1120,11 +1133,18 @@ async function carregarEExibirJogos() {
             if (result.aoVivo) {
                 mod.iniciarAutoRefresh((novoResult) => {
                     window._jogosCache = novoResult.jogos || [];
-                    const novoHtml = mod.renderizarJogosAoVivo(novoResult.jogos, novoResult.fonte, novoResult.aoVivo);
+                    const novoHtml = mod.renderizarJogosAoVivo(novoResult.jogos, novoResult.fonte, novoResult.aoVivo, novoResult.atualizadoEm);
                     const container = document.getElementById('jogos-do-dia-placeholder');
                     if (container) {
                         container.innerHTML = novoHtml;
                         if (window.Log) Log.debug("PARTICIPANTE-BOAS-VINDAS", "Jogos atualizados via auto-refresh");
+                    }
+                    // Atualizar Copa também no refresh
+                    if (novoResult.copa && novoResult.copa.fase) {
+                        const copaContainer = document.getElementById('copa-do-mundo-placeholder');
+                        if (copaContainer) {
+                            copaContainer.innerHTML = mod.renderizarSecaoCopa(novoResult.copa);
+                        }
                     }
                 });
             }

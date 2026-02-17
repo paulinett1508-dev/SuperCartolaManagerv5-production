@@ -83,6 +83,15 @@
     --app-teal: #14b8a6;
     --app-amber: #f59e0b;
 
+    /* Copa do Mundo 2026 */
+    --app-copa-primary: #8B1538;             /* Vinho FIFA 2026 */
+    --app-copa-secondary: #D4AF37;           /* Dourado troféu */
+    --app-copa-accent: #1E3A5F;              /* Azul profundo */
+    --app-copa-muted: rgba(139, 21, 56, 0.15);
+    --app-copa-border: rgba(139, 21, 56, 0.3);
+    --app-copa-gradient: linear-gradient(135deg, #8B1538 0%, #1E3A5F 50%, #D4AF37 100%);
+    --app-copa-gradient-subtle: linear-gradient(135deg, rgba(139, 21, 56, 0.2) 0%, rgba(30, 58, 95, 0.15) 100%);
+
     /* Cores de Posição (Campinho/Escalação) */
     --app-pos-gol: #f97316;
     --app-pos-gol-dark: #c2410c;
