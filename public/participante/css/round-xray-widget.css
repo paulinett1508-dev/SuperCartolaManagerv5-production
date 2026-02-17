@@ -226,6 +226,33 @@
     margin: 0;
 }
 
+.rxray-narrative-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.rxray-narrative-list li {
+    position: relative;
+    padding-left: 16px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--rxray-text-white);
+}
+
+.rxray-narrative-list li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--rxray-primary);
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 1.3;
+}
+
 /* Disputas */
 .rxray-disputa-card {
     background: var(--rxray-surface-elevated);

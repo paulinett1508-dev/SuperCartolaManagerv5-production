@@ -63,6 +63,8 @@ export function gerarNarrativa(contexto) {
     return {
         resumida: narrativaResumida,
         completa: narrativaCompleta,
+        abertura: abertura,
+        eventos: eventos.slice(0, 3),
     };
 }
 

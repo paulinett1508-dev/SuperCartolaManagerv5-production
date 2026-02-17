@@ -39,6 +39,7 @@ const RXrayState = {
 const RXRAY_STORAGE_KEY = "rxray-fab-position";
 const RXRAY_CACHE_KEY = "rxray-cache-v2";
 const RXRAY_CACHE_DURATION = 30 * 60 * 1000; // 30 minutos
+const RXRAY_SEEN_KEY = "rxray-seen-rodada";
 
 // ============================================
 // INICIALIZAÇÃO
@@ -109,6 +110,9 @@ async function mostrarWidget() {
     // Mostrar
     fab.style.display = "flex";
     RXrayState.isVisible = true;
+
+    // Esconder badge se rodada já foi vista
+    atualizarBadgeVisto(fab);
 
     if (window.Log) Log.info("[ROUND-XRAY] Widget visível");
 }
@@ -276,7 +280,41 @@ function fecharModal() {
     }
     RXrayState.isModalOpen = false;
 
+    // Marcar rodada como vista e esconder badge
+    marcarRodadaComoVista();
+
     if (window.Log) Log.info("[ROUND-XRAY] Modal fechado");
+}
+
+/**
+ * Marca rodada atual como vista no localStorage
+ */
+function marcarRodadaComoVista() {
+    try {
+        localStorage.setItem(RXRAY_SEEN_KEY, String(RXrayState.rodadaConsolidada));
+    } catch (e) { /* ignore */ }
+
+    const fab = document.getElementById("rxrayFab");
+    if (fab) atualizarBadgeVisto(fab);
+}
+
+/**
+ * Esconde badge se rodada já foi vista, mostra se é nova
+ */
+function atualizarBadgeVisto(fab) {
+    const badge = fab.querySelector(".rxray-fab-badge");
+    if (!badge) return;
+
+    try {
+        const rodadaVista = localStorage.getItem(RXRAY_SEEN_KEY);
+        if (rodadaVista === String(RXrayState.rodadaConsolidada)) {
+            badge.style.display = "none";
+        } else {
+            badge.style.display = "";
+        }
+    } catch (e) {
+        badge.style.display = "";
+    }
 }
 
 function criarModal() {
@@ -414,9 +452,20 @@ function renderizarModal(contexto) {
     // Rodada no header
     document.getElementById("rxrayModalRodada").textContent = contexto.rodada;
 
-    // 1. Narrativa
+    // 1. Narrativa (com bullet points por assunto)
     const narrativaEl = document.getElementById("rxrayNarrativa");
-    narrativaEl.innerHTML = `<p>${escapeHtml(contexto.narrativa.resumida)}</p>`;
+    if (contexto.narrativa.eventos && contexto.narrativa.eventos.length > 0) {
+        const abertura = escapeHtml(contexto.narrativa.abertura || "");
+        const bullets = contexto.narrativa.eventos
+            .map(ev => `<li>${escapeHtml(ev)}</li>`)
+            .join("");
+        narrativaEl.innerHTML = `
+            <p style="margin-bottom:8px;">${abertura}</p>
+            <ul class="rxray-narrative-list">${bullets}</ul>
+        `;
+    } else {
+        narrativaEl.innerHTML = `<p>${escapeHtml(contexto.narrativa.resumida)}</p>`;
+    }
 
     // 2. Disputas
     renderizarDisputas(contexto.disputas);
