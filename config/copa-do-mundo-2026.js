@@ -19,7 +19,7 @@ const PERIODO = {
   inicioMataMata: '2026-06-28', // Round of 32
   final: '2026-07-19',         // Final: MetLife Stadium, NJ
   // Período "informativo" pré-torneio (exibir agenda estática)
-  inicioPreTorneio: '2026-03-01',
+  inicioPreTorneio: '2026-02-15',
 };
 
 // ════════════════════════════════════════════════════════════════

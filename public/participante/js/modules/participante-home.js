@@ -1,5 +1,5 @@
 // =====================================================================
-// PARTICIPANTE-HOME.JS - v1.3 (Correção Rodada Disputada)
+// PARTICIPANTE-HOME.JS - v1.4 (Integração Copa do Mundo + Jogos ao Vivo)
 // =====================================================================
 import { getZonaInfo } from "./zona-utils.js";
 import * as ParciaisModule from "./participante-rodada-parcial.js";
@@ -15,8 +15,12 @@ import { getClubesNomeMap } from "/js/shared/clubes-data.js";
 // v1.0: Nova Home com componentes premium baseados no SKILL.md v3.2
 // =====================================================================
 
+// v1.4: Integração Copa do Mundo 2026 + Jogos ao Vivo na Home
+//       - Import dinâmico de participante-jogos.js
+//       - Seção Copa do Mundo (pré-torneio / ao vivo)
+//       - Jogos brasileiros do dia com auto-refresh
 if (window.Log)
-    Log.info("PARTICIPANTE-HOME", "Carregando modulo v1.3 (Correção Rodada Disputada)...");
+    Log.info("PARTICIPANTE-HOME", "Carregando modulo v1.4 (Copa do Mundo + Jogos ao Vivo)...");
 
 // Configuracao de temporada
 const TEMPORADA_ATUAL = window.ParticipanteConfig?.CURRENT_SEASON || 2026;
@@ -269,6 +273,9 @@ async function carregarDadosERenderizar(ligaId, timeId, participante) {
         }
     }
 
+    // Carregar jogos ao vivo + Copa do Mundo em background
+    carregarJogosECopa();
+
     // Carregar seção Tabelas Esportivas em background
     carregarTabelasEsportes(participante);
 
@@ -310,6 +317,11 @@ function pararAutoRefreshHome() {
     if (ParciaisModule?.pararAutoRefresh) {
         ParciaisModule.pararAutoRefresh();
     }
+
+    // Parar auto-refresh de jogos ao vivo
+    import('./participante-jogos.js').then(mod => {
+        mod.pararAutoRefresh();
+    }).catch(() => {});
 
     // Limpar estado de parciais
     dadosParciais = null;
@@ -1784,6 +1796,70 @@ function atualizarSaldoProjetado(posicaoParcial) {
 }
 
 // =====================================================================
+// CARREGAR JOGOS AO VIVO + COPA DO MUNDO 2026
+// =====================================================================
+async function carregarJogosECopa() {
+    try {
+        if (window.Log) Log.info("PARTICIPANTE-HOME", "Carregando jogos ao vivo + Copa...");
+
+        const mod = await import('./participante-jogos.js');
+        const result = await mod.obterJogosAoVivo();
+
+        if (window.Log) Log.info("PARTICIPANTE-HOME", "Resultado jogos:", {
+            quantidade: result.jogos?.length || 0,
+            fonte: result.fonte,
+            aoVivo: result.aoVivo,
+            copa: result.copa?.fase || 'inativa'
+        });
+
+        // Copa do Mundo 2026 - Seção separada (ANTES dos jogos brasileiros)
+        if (result.copa && result.copa.fase) {
+            const copaEl = document.getElementById('home-copa-placeholder');
+            if (copaEl) {
+                copaEl.innerHTML = mod.renderizarSecaoCopa(result.copa);
+                if (window.Log) Log.info("PARTICIPANTE-HOME", `Copa do Mundo renderizada (fase: ${result.copa.fase})`);
+            }
+        }
+
+        // Jogos brasileiros do dia
+        const jogosEl = document.getElementById('home-jogos-placeholder');
+        if (result.jogos && result.jogos.length > 0) {
+            const html = mod.renderizarJogosAoVivo(result.jogos, result.fonte, result.aoVivo, result.atualizadoEm);
+            if (jogosEl) jogosEl.innerHTML = html;
+
+            // Auto-refresh se tem jogos ao vivo
+            if (result.aoVivo) {
+                mod.iniciarAutoRefresh((novoResult) => {
+                    const container = document.getElementById('home-jogos-placeholder');
+                    if (container) {
+                        container.innerHTML = mod.renderizarJogosAoVivo(novoResult.jogos, novoResult.fonte, novoResult.aoVivo, novoResult.atualizadoEm);
+                    }
+                    // Atualizar Copa também no refresh
+                    if (novoResult.copa && novoResult.copa.fase) {
+                        const copaContainer = document.getElementById('home-copa-placeholder');
+                        if (copaContainer) {
+                            copaContainer.innerHTML = mod.renderizarSecaoCopa(novoResult.copa);
+                        }
+                    }
+                });
+            }
+        } else if (jogosEl) {
+            const mensagem = result.mensagem || 'Sem jogos brasileiros hoje';
+            jogosEl.innerHTML = `
+                <div class="mx-4 mb-6 rounded-xl bg-gray-800/50 border border-gray-700/50 p-4 text-center">
+                    <div class="flex items-center justify-center gap-2 text-white/70">
+                        <span class="material-icons text-base" style="color: var(--app-primary);">sports_soccer</span>
+                        <span class="text-xs font-medium">${mensagem}</span>
+                    </div>
+                </div>
+            `;
+        }
+    } catch (err) {
+        if (window.Log) Log.error("PARTICIPANTE-HOME", "Erro ao carregar jogos:", err);
+    }
+}
+
+// =====================================================================
 // CARREGAR TABELAS ESPORTIVAS
 // =====================================================================
 async function carregarTabelasEsportes(participante) {
@@ -1899,4 +1975,4 @@ async function buscarCartoletasTime(timeId) {
 }
 
 if (window.Log)
-    Log.info("PARTICIPANTE-HOME", "Modulo v1.0 carregado");
+    Log.info("PARTICIPANTE-HOME", "Modulo v1.4 carregado");
