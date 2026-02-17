@@ -126,7 +126,8 @@
       "Bash(git -C /home/runner/workspace log --oneline -5)",
       "Bash(npm restart:*)",
       "Bash(source .env)",
-      "Bash(__NEW_LINE_d85495b357563d3b__ echo \"=== JOGOS IN HOME MODULE ===\")"
+      "Bash(__NEW_LINE_d85495b357563d3b__ echo \"=== JOGOS IN HOME MODULE ===\")",
+      "Bash(npm uninstall:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
