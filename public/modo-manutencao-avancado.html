@@ -279,16 +279,11 @@
             ManutencaoConfig.inicializar();
         }
 
-        document.addEventListener('DOMContentLoaded', initManutencaoAvancado);
-
-        // ✅ SPA: Reinicializar ao navegar via sidebar
-        window.addEventListener('spa:navigated', (e) => {
-            const { pageName } = e.detail || {};
-            if (pageName === 'modo-manutencao-avancado.html') {
-                console.log('[MANUTENCAO-AVANCADO] Reinicializando após navegação SPA...');
-                initManutencaoAvancado();
-            }
-        });
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initManutencaoAvancado);
+        } else {
+            initManutencaoAvancado();
+        }
 
         // Controlar visibilidade de seções baseado no modo
         document.querySelectorAll('input[name="modo"]').forEach(radio => {

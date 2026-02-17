@@ -148,6 +148,14 @@ Cada módulo possui sua paleta de cores padronizada. **Sempre use variáveis CSS
 - **Error Handling:** Use `try/catch` in async controllers
 - **No React/Vue:** Pure JavaScript for frontend
 - **Nomenclatura em Português:** Use `autorizado` (not `authorized`), `usuario` (not `user`), `senha` (not `password`)
+- **SPA Init Pattern:** Páginas em `supportedPages` (layout.html) NUNCA devem usar `DOMContentLoaded` sozinho. O evento só dispara uma vez — na navegação SPA o DOM já está pronto e o listener nunca executa. Sempre usar:
+```javascript
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init(); // SPA: DOM já pronto, executar imediatamente
+}
+```
 
 ## 🤖 Skills com Ativação por Keywords
 

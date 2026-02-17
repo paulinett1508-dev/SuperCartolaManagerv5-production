@@ -270,7 +270,7 @@
             // Restaurar estado da seção Admin ao carregar
             if (!window.__dl_admin_section_init) {
                 window.__dl_admin_section_init = true;
-                document.addEventListener("DOMContentLoaded", function() {
+                const __dl_initAdminSection = function() {
                     const section = document.getElementById("admin-tools-section");
                     const savedState = localStorage.getItem("adminSectionCollapsed");
                     // Por padrão começa colapsado, a menos que o usuário tenha expandido
@@ -279,7 +279,12 @@
                     }
                     // Atualizar texto do botão voltar baseado no estado inicial
                     atualizarBotaoVoltar();
-                });
+                };
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', __dl_initAdminSection);
+                } else {
+                    __dl_initAdminSection();
+                }
             }
 
             // =====================================================================
@@ -322,14 +327,19 @@
             // Observar mudanças na tela secundária para atualizar o botão
             if (!window.__dl_secondary_observer_init) {
                 window.__dl_secondary_observer_init = true;
-                document.addEventListener("DOMContentLoaded", function() {
+                const __dl_initSecondaryObserver = function() {
                     const secondaryScreen = document.getElementById("secondary-screen");
                     if (secondaryScreen) {
                         const observer = new MutationObserver(atualizarBotaoVoltar);
                         observer.observe(secondaryScreen, { attributes: true, attributeFilter: ["class", "style"] });
                         window.__dl_secondary_observer = observer;
                     }
-                });
+                };
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', __dl_initSecondaryObserver);
+                } else {
+                    __dl_initSecondaryObserver();
+                }
             }
 
             function fecharModalMini(modalId) {
@@ -1172,7 +1182,7 @@
             // Listener para fechar modais ao clicar fora
             if (!window.__dl_modal_close_init) {
                 window.__dl_modal_close_init = true;
-                document.addEventListener("DOMContentLoaded", () => {
+                const __dl_initModalClose = () => {
                     document
                         .querySelectorAll(".modal-cache-mini")
                         .forEach((modal) => {
@@ -1184,7 +1194,12 @@
                                 }
                             });
                         });
-                });
+                };
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', __dl_initModalClose);
+                } else {
+                    __dl_initModalClose();
+                }
             }
         </script>
 
@@ -1239,7 +1254,7 @@
             // Usar MutationObserver para detectar quando o nome da liga é atualizado
             if (!window.__dl_logo_observer_init) {
                 window.__dl_logo_observer_init = true;
-                document.addEventListener('DOMContentLoaded', () => {
+                const __dl_initLogoObserver = () => {
                     const nomeLigaEl = document.getElementById('nomeLiga');
                     if (nomeLigaEl) {
                         const observer = new MutationObserver(atualizarLogoLiga);
@@ -1249,7 +1264,12 @@
                         setTimeout(atualizarLogoLiga, 500);
                         setTimeout(atualizarLogoLiga, 1500);
                     }
-                });
+                };
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', __dl_initLogoObserver);
+                } else {
+                    __dl_initLogoObserver();
+                }
             }
         </script>
 
@@ -1258,51 +1278,56 @@
             // === HANDLERS PARA BOTÕES DE ADMINISTRAÇÃO ===
             if (!window.__dl_admin_handlers_init) {
                 window.__dl_admin_handlers_init = true;
-                document.addEventListener('DOMContentLoaded', () => {
+                const __dl_initAdminHandlers = () => {
                     const ligaId = obterLigaIdCache();
 
-                // Botão Editar Liga
-                const btnEditar = document.getElementById('btnEditarLiga');
-                if (btnEditar) {
-                    btnEditar.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const id = obterLigaIdCache();
-                        if (id) {
-                            window.location.href = `editar-liga.html?id=${id}`;
-                        } else {
-                            SuperModal.toast.warning('Liga nao identificada');
-                        }
-                    });
-                }
+                    // Botão Editar Liga
+                    const btnEditar = document.getElementById('btnEditarLiga');
+                    if (btnEditar) {
+                        btnEditar.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const id = obterLigaIdCache();
+                            if (id) {
+                                window.location.href = `editar-liga.html?id=${id}`;
+                            } else {
+                                SuperModal.toast.warning('Liga nao identificada');
+                            }
+                        });
+                    }
 
-                // Botão Gerenciar Times
-                const btnTimes = document.getElementById('btnGerenciarTimes');
-                if (btnTimes) {
-                    btnTimes.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const id = obterLigaIdCache();
-                        if (id) {
-                            window.location.href = `preencher-liga.html?id=${id}`;
-                        } else {
-                            SuperModal.toast.warning('Liga nao identificada');
-                        }
-                    });
-                }
+                    // Botão Gerenciar Times
+                    const btnTimes = document.getElementById('btnGerenciarTimes');
+                    if (btnTimes) {
+                        btnTimes.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const id = obterLigaIdCache();
+                            if (id) {
+                                window.location.href = `preencher-liga.html?id=${id}`;
+                            } else {
+                                SuperModal.toast.warning('Liga nao identificada');
+                            }
+                        });
+                    }
 
-                // Botão Auditoria
-                const btnAuditoria = document.getElementById('btnAuditoria');
-                if (btnAuditoria) {
-                    btnAuditoria.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const id = obterLigaIdCache();
-                        if (id) {
-                            window.location.href = `auditoria-extratos.html?liga=${id}`;
-                        } else {
-                            SuperModal.toast.warning('Liga nao identificada');
-                        }
-                    });
+                    // Botão Auditoria
+                    const btnAuditoria = document.getElementById('btnAuditoria');
+                    if (btnAuditoria) {
+                        btnAuditoria.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const id = obterLigaIdCache();
+                            if (id) {
+                                window.location.href = `auditoria-extratos.html?liga=${id}`;
+                            } else {
+                                SuperModal.toast.warning('Liga nao identificada');
+                            }
+                        });
+                    }
+                };
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', __dl_initAdminHandlers);
+                } else {
+                    __dl_initAdminHandlers();
                 }
-                });
             }
         </script>
 
