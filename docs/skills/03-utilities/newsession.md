@@ -138,10 +138,8 @@ O wizard de modulos (`gerenciar-modulos.html`) salvava corretamente no `ModuleCo
 
 ## OUTROS PENDENTES
 
-### Stitch MCP - OAuth2 quebrado
-- Config usa `STITCH_API_KEY` mas API exige OAuth2 access token
-- Erro: `API keys are not supported by this API`
-- Requer re-autenticacao interativa com Google
+### ~~Stitch MCP~~ DESCARTADO (2026-02-17)
+- MCP Stitch e Figma removidos. Skill stitch-adapter opera em modo manual (HTML colado).
 
 ### ~~Trabalho nao commitado (encontrado 12/02)~~ ✅ Resolvido
 - 4/5 arquivos ja commitados (verificado 13/02)

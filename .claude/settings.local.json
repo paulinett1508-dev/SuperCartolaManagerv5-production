@@ -115,7 +115,6 @@
       "Bash(GIT_EDITOR=true git rebase:*)",
       "Bash(git -c core.editor=true rebase:*)",
       "Bash(test:*)",
-      "mcp__stitch__list_projects",
       "Bash(cd /home/runner/workspace/public __NEW_LINE_5959da0240686acc__ echo \"=== 1. onerror SEM proteção \\(deve ser ZERO\\) ===\" grep -rn 'onerror=\"\"\"\"this\\\\.src=' --include=\"*.js\" --include=\"*.html\")",
       "Bash(replit:*)",
       "Bash(git hash-object:*)",
@@ -127,16 +126,15 @@
       "Bash(npm restart:*)",
       "Bash(source .env)",
       "Bash(__NEW_LINE_d85495b357563d3b__ echo \"=== JOGOS IN HOME MODULE ===\")",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(git worktree:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "mongo",
     "perplexity",
-    "context7",
-    "figma",
-    "stitch"
+    "context7"
   ],
   "hooks": {
     "SessionStart": [

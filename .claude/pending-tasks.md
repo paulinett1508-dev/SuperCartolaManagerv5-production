@@ -110,27 +110,22 @@
 
 ---
 
-## 🚨 URGENTE - Resolver Autenticacao Google Stitch MCP
+## ~~[MCP-001]~~ DESCARTADO (2026-02-17)
 
-### [MCP-001] Google Stitch - OAuth2 Token Expirado/Invalido
+### Google Stitch MCP - OAuth2 Token
 
-**Prioridade:** 🔴 URGENTE
-**Status:** PENDENTE (re-testado 2026-02-13, ainda expirado)
-**Erro:** `API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal.`
+**Status:** DESCARTADO
+**Motivo:** Decisao de abandonar Plano A (MCP automatico) e Plano C (Figma). Stitch Adapter passa a operar apenas em modo manual (HTML colado). MCP Stitch e Figma removidos de `settings.local.json`.
 
-#### Acoes
-- [ ] Re-autenticar com Google OAuth2 (gerar novo token)
-- [ ] Testar `list_projects` apos re-autenticacao
-- [ ] Documentar processo de refresh do token para futuras expiracoes
-
-#### Status dos MCPs (verificado 2026-02-13)
+#### Status dos MCPs (verificado 2026-02-17)
 | MCP | Status |
 |-----|--------|
 | Mongo | ✅ Ativo |
 | Perplexity | ✅ Ativo |
 | Context7 | ✅ Ativo |
 | IDE | ✅ Ativo |
-| Google Stitch | ❌ OAuth2 expirado |
+| ~~Google Stitch~~ | ❌ Removido (modo manual apenas) |
+| ~~Figma~~ | ❌ Removido (descartado) |
 
 ---
 

@@ -1,68 +1,40 @@
 ---
 name: stitch-adapter
-description: "Adaptador inteligente de UI gerada pelo Google Stitch. PLANO A de criacao de UI: via MCP Stitch (geracao automatica) ou via HTML colado (adaptacao manual). Avalia qualidade do HTML, separa HTML/CSS/JS, converte para variaveis CSS do design system, adapta a stack Vanilla JS do projeto e gera relatorio completo de conformidade."
+description: "Adaptador de UI externa para o projeto. Recebe HTML colado (do Google Stitch, AI Studio, ou qualquer fonte), avalia qualidade, separa HTML/CSS/JS, converte para variaveis CSS do design system, adapta a stack Vanilla JS do projeto e gera relatorio completo de conformidade."
 allowed-tools: Read, Grep, Edit, Write, Glob
-version: 2.0
+version: 3.0
 ---
 
-# Stitch Adapter Skill v2.0 (MCP-First + Avaliador de Qualidade)
+# Stitch Adapter Skill v3.0 (HTML Manual + Avaliador de Qualidade)
 
 ## Estrategia de Design-to-Code
 
 ```
-PLANO A (Automatico): Google Stitch MCP → Gera HTML → Avalia → Adapta → Production-Ready
-PLANO B (Manual):     HTML colado pelo usuario → Avalia → Adapta → Production-Ready
-PLANO C (Fallback):   Figma MCP → Exporta React → Transforma Vanilla → Adapta
+HTML colado pelo usuario → Avalia qualidade (score 0-100) → Adapta → Production-Ready
 ```
 
-**Por que Stitch > Figma?**
-- Stitch **gera UI a partir de texto** (poder de criacao autonomo)
-- Stitch **exporta HTML/CSS/JS nativo** (sem necessidade de transformer React → Vanilla)
-- Figma exige design manual e exporta React (precisa de transformer complexo)
-- Projeto ja usa Vanilla JS + TailwindCSS CDN (stack nativa do Stitch)
+**Fontes de HTML suportadas:**
+- Google Stitch (via browser em aistudio.google.com)
+- Google AI Studio
+- ChatGPT / Claude / qualquer LLM que gere HTML
+- HTML escrito manualmente
+- Qualquer exportacao HTML externa
 
 ---
 
-## 1. MODOS DE OPERACAO
+## 1. MODO DE OPERACAO
 
-### MODO A: Via MCP Stitch (Automatico)
-
-Quando o MCP `stitch` esta configurado em `.mcp.json`:
+### HTML Colado (Manual)
 
 ```
-1. Usuario descreve o que quer ("crie um card de ranking mobile")
-2. Skill monta prompt otimizado usando STITCH-DESIGN-PROMPT.md
-3. MCP Stitch gera HTML completo
-4. Avaliador de qualidade analisa output (score 0-100)
-5. Se score >= 70: adapta automaticamente
-6. Se score < 70: lista problemas e sugere correcoes
-7. Gera arquivos production-ready + relatorio
+1. Usuario gera HTML externamente (Google Stitch, AI Studio, outro LLM, etc.)
+2. Cola o HTML na conversa
+3. Avaliador de qualidade analisa (score 0-100)
+4. Adapta automaticamente para o design system do projeto
+5. Gera arquivos production-ready + relatorio
 ```
 
-**Deteccao automatica do MCP:**
-```javascript
-// Verificar se MCP Stitch esta disponivel
-const temMCPStitch = typeof mcp__stitch !== 'undefined';
-
-if (temMCPStitch) {
-    // MODO A: Gerar via MCP
-    console.log('Stitch MCP detectado - Modo automatico');
-} else {
-    // MODO B: Aguardar HTML colado
-    console.log('Stitch MCP nao disponivel - Modo manual (cole o HTML)');
-}
-```
-
-### MODO B: Via HTML Colado (Manual)
-
-Quando o MCP nao esta disponivel ou usuario ja tem o HTML:
-
-```
-1. Usuario cola HTML do Google Stitch
-2. Avaliador de qualidade analisa (score 0-100)
-3. Adapta automaticamente
-4. Gera arquivos + relatorio
-```
+**Dica:** Use o prompt padrao em `.claude/STITCH-DESIGN-PROMPT.md` ao solicitar HTML em qualquer ferramenta externa para obter resultados mais proximos do design system.
 
 ---
 
@@ -952,97 +924,11 @@ const INCOMPATIBILIDADES_MODERADAS = [
 
 ---
 
-## 8. CONFIGURACAO DO MCP STITCH
+## 8. ATALHOS RAPIDOS
 
-### Instalacao
-
-Pacote usado: **`@_davideast/stitch-mcp`** (David East, Google DevRel)
-Autenticacao via API Key do Google AI Studio (sem necessidade de gcloud CLI).
-
-```bash
-# Obter API Key: https://aistudio.google.com/apikey
-# Configuracao no .mcp.json:
+### Adaptar HTML completo
 ```
-
-```json
-{
-    "stitch": {
-        "command": "npx",
-        "args": ["-y", "@_davideast/stitch-mcp", "proxy"],
-        "env": {
-            "STITCH_API_KEY": "SUA_API_KEY_AQUI"
-        }
-    }
-}
-```
-
-### Metodos de Autenticacao
-
-| Metodo | Env Var | Quando Usar |
-|--------|---------|-------------|
-| **API Key** (recomendado) | `STITCH_API_KEY` | Replit, CI/CD, headless |
-| gcloud ADC | `STITCH_USE_SYSTEM_GCLOUD=1` | Maquina local com gcloud |
-| Access Token | `STITCH_ACCESS_TOKEN` | Token pre-existente |
-
-### Requisitos
-
-1. **Node.js v18+** instalado
-2. **API Key** do Google AI Studio (https://aistudio.google.com/apikey)
-
-### Verificacao
-
-```bash
-# Verificar se MCP esta registrado
-claude mcp list | grep stitch
-
-# Diagnostico completo
-npx @_davideast/stitch-mcp doctor --verbose
-```
-
-### Tools Disponiveis (@_davideast/stitch-mcp)
-
-| Tool | Funcao |
-|------|--------|
-| `create_app` | Gerar app/componente UI a partir de prompt |
-| `update_app` | Atualizar app existente |
-| `screenshot_app` | Capturar screenshot do app gerado |
-| `get_app` | Recuperar codigo de app salvo |
-| `list_apps` | Listar apps criados |
-
----
-
-## 9. PROMPT OTIMIZADO PARA STITCH (via MCP)
-
-Quando usando o MCP Stitch, a skill monta este prompt automaticamente baseado no `STITCH-DESIGN-PROMPT.md`:
-
-```
-Voce e designer do Super Cartola Manager.
-
-STACK: HTML5 + TailwindCSS CDN + Vanilla JS ES6+
-DARK MODE: bg-gray-900 (#121212), cards bg-gray-800 (#1a1a1a)
-FONTS: Russo One (titulos/stats), Inter (corpo), JetBrains Mono (numeros)
-CORES: Laranja #FF5500, Verde #22c55e, Roxo #8b5cf6, Dourado #ffd700
-ICONES: Material Icons (nao FontAwesome)
-
-RESTRICOES:
-- NUNCA: React/Vue, cores hardcoded, light mode, jQuery
-- SEMPRE: Variaveis CSS, acessibilidade, mobile-first, ES6 modules
-
-TAREFA: [DESCRICAO DO USUARIO]
-```
-
----
-
-## 10. ATALHOS RAPIDOS
-
-### Geracao Automatica (com MCP)
-```
-Crie no Stitch um card de ranking do modulo artilheiro para o app mobile
-```
-
-### Adaptacao Manual (sem MCP)
-```
-Recebi este codigo do Google Stitch, adapte para o projeto:
+Recebi este HTML, adapte para o projeto:
 [COLAR HTML]
 Tipo: [Admin/App]
 Nome: [nome-do-componente]
@@ -1050,7 +936,7 @@ Nome: [nome-do-componente]
 
 ### Apenas Avaliar Qualidade
 ```
-Avalie a qualidade deste HTML do Stitch (nao adapte ainda):
+Avalie a qualidade deste HTML (nao adapte ainda):
 [COLAR HTML]
 ```
 
@@ -1063,27 +949,33 @@ Destino: [Admin/App]
 
 ---
 
-## 11. REFERENCIAS
+## 9. REFERENCIAS
 
 - **Design System Admin:** `/css/_admin-tokens.css`
 - **Design System App:** `/participante/css/_app-tokens.css`
-- **Prompt Stitch:** `/.claude/STITCH-DESIGN-PROMPT.md`
+- **Prompt para gerar HTML:** `/.claude/STITCH-DESIGN-PROMPT.md`
 - **Frontend Crafter:** `docs/skills/02-specialists/frontend-crafter.md`
-- **MCP Config:** `/.mcp.json`
 - **Exemplos Admin:** `public/admin-*.html`
 - **Exemplos App:** `public/participante/fronts/*.html`
 - **Navigation App:** `public/participante/js/participante-navigation.js`
 
 ---
 
-**STATUS:** Stitch Adapter v2.0 - MCP-FIRST + AVALIADOR DE QUALIDADE
+**STATUS:** Stitch Adapter v3.0 - MODO MANUAL + AVALIADOR DE QUALIDADE
 
-**Versao:** 2.0
+**Versao:** 3.0
 
-**Ultima atualizacao:** 2026-02-10
+**Ultima atualizacao:** 2026-02-17
+
+**Changelog v3.0:**
+- Removido Plano A (MCP automatico) — OAuth2 nunca funcionou em producao
+- Removido Plano C (Figma) — descartado
+- Modo manual (HTML colado) passa a ser o unico modo
+- Aceita HTML de qualquer fonte (Stitch, AI Studio, ChatGPT, Claude, etc.)
+- Removida secao de configuracao MCP
+- Mantidos todos os mapas de conversao e avaliador de qualidade
 
 **Changelog v2.0:**
-- Adicionado suporte a MCP Stitch (Plano A automatico)
 - Adicionado avaliador de qualidade com score 0-100
 - Mapeamento completo de cores para ADMIN e APP tokens
 - Mapeamento de margin/gap (alem de padding)
@@ -1092,17 +984,14 @@ Destino: [Admin/App]
 - Mapeamento de tokens App Participante (--app-*)
 - Deteccao expandida de incompatibilidades
 - Template de integracao com navigation.js
-- Documentacao do MCP Stitch e suas tools
 
 **Keywords para ativacao:**
 - "adaptar codigo do stitch"
-- "codigo do google stitch"
 - "converter html externo"
-- "recebi codigo do stitch"
-- "html do stitch"
-- "processar stitch"
-- "gerar UI no stitch"
-- "criar componente no stitch"
-- "avaliar html do stitch"
-- "score do stitch"
+- "recebi html"
+- "adaptar html"
+- "processar html"
+- "avaliar html"
 - "qualidade do html"
+- "html do google stitch"
+- "html do ai studio"
