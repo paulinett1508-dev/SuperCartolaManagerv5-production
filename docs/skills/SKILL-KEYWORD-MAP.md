@@ -105,6 +105,16 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 | **NÃO confundir** | Gerar PRD (pesquisa) ≠ explicar sistema (system-scribe) |
 | **Localização** | `docs/skills/02-specialists/system-scribe.md` |
 
+#### anti-frankenstein
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `anti-frankenstein`, `blindar frontend`, `governança CSS`, `antes de criar CSS`, `já existe?`, `checar antes de criar`, `auditar CSS`, `duplicado CSS` |
+| **Frases PT-BR** | "já existe esse componente?", "antes de criar esse CSS", "tem algum CSS parecido?", "vou criar um novo arquivo CSS", "checar se já existe", "governança de frontend", "garantir que não vai duplicar", "blindar o CSS", "verificar antes de criar tela" |
+| **Contexto** | Checkpoint OBRIGATÓRIO antes de criar/modificar CSS, HTML ou componentes. Previne código duplicado, cores hardcoded, inline styles, keyframes repetidos, arquivos órfãos |
+| **Integração** | Roda ANTES de `frontend-crafter` e `code` quando há CSS envolvido |
+| **NÃO confundir** | Criar componente → `frontend-crafter` (anti-frankenstein valida ANTES); Auditoria pós-código → `code-inspector` |
+| **Localização** | `docs/skills/02-specialists/anti-frankenstein.md` |
+
 ---
 
 ### 03 - Utilities (Ferramentas Auxiliares)
@@ -297,6 +307,10 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | "como tá o visual do app" | `ux-auditor-app` | Estado do design do app |
 | "quais branches existem" | `analise-branches` | Análise git |
 | "executar auditoria mensal" | `context7-monthly-audit` | Auditoria preventiva |
+| "já existe esse CSS?" | `anti-frankenstein` | Checkpoint pré-criação |
+| "antes de criar esse componente" | `anti-frankenstein` | Governança de frontend |
+| "blindar o CSS do projeto" | `anti-frankenstein` | Prevenção de duplicidade |
+| "vou criar um arquivo CSS novo" | `anti-frankenstein` | Validação obrigatória |
 | "verificar mudanças api cartola" | `context7-monthly-audit` | Check mensal automático |
 | "criar uma skill nova" | `skill-creator` | Meta |
 | "instalar skill X" | `skill-installer` | Meta |
