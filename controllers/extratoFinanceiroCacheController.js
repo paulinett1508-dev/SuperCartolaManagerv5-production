@@ -59,6 +59,8 @@ import AjusteFinanceiro from "../models/AjusteFinanceiro.js";
 import mongoose from "mongoose";
 // ✅ v5.9: Import getFinancialSeason para pegar temporada correta durante pré-temporada
 import { CURRENT_SEASON, getFinancialSeason } from "../config/seasons.js";
+import { apiError, apiServerError } from '../utils/apiResponse.js';
+import logger from '../utils/logger.js';
 
 // ✅ v5.1: Buscar acertos financeiros do participante
 // ✅ v5.6 FIX: Default usa CURRENT_SEASON (dinâmico)
@@ -111,7 +113,7 @@ async function buscarAcertosFinanceiros(ligaId, timeId, temporada = CURRENT_SEAS
             },
         };
     } catch (error) {
-        console.error("[CACHE-CONTROLLER] Erro ao buscar acertos:", error);
+        logger.error("[CACHE-CONTROLLER] Erro ao buscar acertos:", error);
         return {
             lista: [],
             resumo: { totalPago: 0, totalRecebido: 0, saldo: 0 },
@@ -135,7 +137,7 @@ async function verificarTemporadaFinalizada(ligaId) {
         }
         return { finalizada: false };
     } catch (error) {
-        console.error('[CACHE-CONTROLLER] Erro ao verificar temporada:', error);
+        logger.error('[CACHE-CONTROLLER] Erro ao verificar temporada:', error);
         return { finalizada: false };
     }
 }
@@ -165,7 +167,7 @@ async function buscarStatusTime(ligaId, timeId) {
             rodada_desistencia: time.rodada_desistencia || null,
         };
     } catch (error) {
-        console.error(
+        logger.error(
             "[CACHE-CONTROLLER] Erro ao buscar status do time:",
             error,
         );
@@ -182,7 +184,7 @@ function filtrarRodadasParaInativo(rodadas, rodadaDesistencia) {
     const rodadaLimite = rodadaDesistencia - 1;
     const rodadasFiltradas = rodadas.filter((r) => r.rodada <= rodadaLimite);
 
-    console.log(
+    logger.log(
         `[CACHE-CONTROLLER] 🔒 Inativo: filtrando até R${rodadaLimite} | ${rodadas.length} → ${rodadasFiltradas.length}`,
     );
 
@@ -193,7 +195,7 @@ function filtrarRodadasParaInativo(rodadas, rodadaDesistencia) {
 // ✅ v6.1 FIX: Adicionar filtro de temporada para evitar retornar dados de temporada errada
 async function buscarExtratoDeSnapshots(ligaId, timeId, temporada = null) {
     try {
-        console.log(`[CACHE-CONTROLLER] 📸 Buscando extrato de snapshots para time ${timeId} | temporada ${temporada}`);
+        logger.log(`[CACHE-CONTROLLER] 📸 Buscando extrato de snapshots para time ${timeId} | temporada ${temporada}`);
 
         // ✅ v6.1 FIX: Filtrar por temporada se informada
         const filtro = { liga_id: String(ligaId) };
@@ -205,7 +207,7 @@ async function buscarExtratoDeSnapshots(ligaId, timeId, temporada = null) {
         const snapshots = await RodadaSnapshot.find(filtro).sort({ rodada: -1 }).limit(1).lean();
 
         if (!snapshots || snapshots.length === 0) {
-            console.log(`[CACHE-CONTROLLER] ⚠️ Nenhum snapshot encontrado para liga ${ligaId}`);
+            logger.log(`[CACHE-CONTROLLER] ⚠️ Nenhum snapshot encontrado para liga ${ligaId}`);
             return null;
         }
 

@@ -20,6 +20,8 @@ import {
     obterUltimaRodadaValida,
     ordenarRankingComInativos,
 } from "../utils/participanteHelper.js";
+import { apiError, apiServerError } from '../utils/apiResponse.js';
+import logger from '../utils/logger.js';
 
 // ========================================
 // MODELO MONGODB PARA GOLS CONSOLIDADOS
@@ -95,7 +97,7 @@ async function validarLigaArtilheiro(ligaId) {
  */
 async function getParticipantesLiga(liga) {
     if (!liga.times || liga.times.length === 0) {
-        console.warn(`[ARTILHEIRO] Liga ${liga._id} sem times cadastrados`);
+        logger.warn(`[ARTILHEIRO] Liga ${liga._id} sem times cadastrados`);
         return [];
     }
 
@@ -165,7 +167,7 @@ async function registrarAuditLog(db, { acao, ligaId, usuario, detalhes }) {
             timestamp: new Date(),
         });
     } catch (error) {
-        console.warn(`⚠️ [AUDIT] Erro ao registrar log:`, error.message);
+        logger.warn(`⚠️ [AUDIT] Erro ao registrar log:`, error.message);
     }
 }
 
@@ -223,14 +225,14 @@ class ArtilheiroCampeaoController {
             const { ligaId } = req.params;
             const { inicio, fim, forcar_coleta } = req.query;
 
-            console.log(
+            logger.log(
                 ` [ARTILHEIRO] Solicitação de ranking - Liga: ${ligaId}`,
             );
 
             // ✅ v5.0: Validar se liga tem módulo Artilheiro habilitado
             const { valid, liga, error } = await validarLigaArtilheiro(ligaId);
             if (!valid) {
-                console.warn(`[ARTILHEIRO] Liga inválida: ${error}`);
+                logger.warn(`[ARTILHEIRO] Liga inválida: ${error}`);
                 return res.status(liga ? 400 : 404).json({
                     success: false,
                     error,
@@ -247,7 +249,7 @@ class ArtilheiroCampeaoController {
                 });
             }
 
-            console.log(`[ARTILHEIRO] Liga "${liga.nome}" - ${participantes.length} participantes`);
+            logger.log(`[ARTILHEIRO] Liga "${liga.nome}" - ${participantes.length} participantes`);
 
             // ✅ v5.2: Buscar criterio_ranking do ModuleConfig
             let criterioRanking = 'saldo_gols';
@@ -257,7 +259,7 @@ class ArtilheiroCampeaoController {
                     criterioRanking = moduleConfig.wizard_respostas.criterio_ranking;
                 }
             } catch (e) {
-                console.warn(`[ARTILHEIRO] Erro ao buscar criterio_ranking:`, e.message);
+                logger.warn(`[ARTILHEIRO] Erro ao buscar criterio_ranking:`, e.message);
             }
 
             const rodadaInicio = inicio ? parseInt(inicio) : 1;
@@ -279,14 +281,14 @@ class ArtilheiroCampeaoController {
                 rodadaFim = parseInt(fim);
                 if (mercadoAberto && rodadaFim >= rodadaAtual && rodadaAtual < RODADA_FINAL) {
                     rodadaFim = rodadaAtual - 1;
-                    console.log(
+                    logger.log(
                         `⚠️ Corrigido: fim=${fim} → ${rodadaFim} (mercado aberto, sem scouts)`,
                     );
                 }
             } else {
                 if (rodadaAtual >= RODADA_FINAL) {
                     rodadaFim = RODADA_FINAL;
-                    console.log(`🏁 Temporada encerrada - usando R${RODADA_FINAL}`);
+                    logger.log(`🏁 Temporada encerrada - usando R${RODADA_FINAL}`);
                 } else if (mercadoAberto) {
                     rodadaFim = rodadaAtual - 1;
                 } else {
@@ -298,7 +300,7 @@ class ArtilheiroCampeaoController {
                 rodadaFim = rodadaInicio;
             }
 
-            console.log(
+            logger.log(
                 `📊 Rodada ${rodadaInicio}-${rodadaFim}, Mercado: ${mercadoAberto ? "Aberto" : "Fechado"}, Temporada: ${temporadaEncerrada ? "ENCERRADA" : "ATIVA"}, Rodada API: ${rodadaAtual}, Critério: ${criterioRanking}`,
             );
 
@@ -342,7 +344,7 @@ class ArtilheiroCampeaoController {
                 timestamp: new Date().toISOString(),
             });
         } catch (error) {
-            console.error("❌ [ARTILHEIRO] Erro ao obter ranking:", error);
+            logger.error("❌ [ARTILHEIRO] Erro ao obter ranking:", error);
             res.status(500).json({
                 success: false,
                 error: "Erro ao gerar ranking",
@@ -369,7 +371,7 @@ class ArtilheiroCampeaoController {
             const mercadoAberto = statusMercado === 1;
             const rodadaEmAndamento = !mercadoAberto && !temporadaEncerrada;
 
-            console.log(
+            logger.log(
                 `📊 [MERCADO] Status: ${statusMercado}, Rodada: ${data.rodada_atual}, Temporada: ${temporadaEncerrada ? "ENCERRADA" : "ATIVA"}`,
             );
 
@@ -387,11 +389,11 @@ class ArtilheiroCampeaoController {
 
             return resultado;
         } catch (error) {
-            console.warn("⚠️ Erro ao detectar mercado:", error.message);
+            logger.warn("⚠️ Erro ao detectar mercado:", error.message);
 
             // ✅ v5.2: Usar último status conhecido em vez de assumir encerrada
             if (_ultimoStatusMercado && (Date.now() - _ultimoStatusMercado.timestamp) < 30 * 60 * 1000) {
-                console.log(`📊 [MERCADO] Usando último status conhecido (${Math.round((Date.now() - _ultimoStatusMercado.timestamp) / 1000)}s atrás)`);
+                logger.log(`📊 [MERCADO] Usando último status conhecido (${Math.round((Date.now() - _ultimoStatusMercado.timestamp) / 1000)}s atrás)`);
                 return {
                     rodadaAtual: _ultimoStatusMercado.rodadaAtual,
                     rodadaTotal: _ultimoStatusMercado.rodadaTotal,
@@ -404,7 +406,7 @@ class ArtilheiroCampeaoController {
             }
 
             // Sem status conhecido - usar valores seguros (mercado aberto = não processa parciais)
-            console.warn("⚠️ [MERCADO] Sem status conhecido - usando fallback conservador (mercado aberto)");
+            logger.warn("⚠️ [MERCADO] Sem status conhecido - usando fallback conservador (mercado aberto)");
             return {
                 rodadaAtual: SEASON_CONFIG.rodadaFinal || 38,
                 rodadaTotal: SEASON_CONFIG.rodadaFinal || 38,
@@ -457,7 +459,7 @@ class ArtilheiroCampeaoController {
         participantes,
         criterioRanking = 'saldo_gols', // ✅ v5.2: Critério configurável
     ) {
-        console.log(
+        logger.log(
             `🔄 Processando ${participantes.length} participantes em PARALELO...`,
         );
 
@@ -465,7 +467,7 @@ class ArtilheiroCampeaoController {
         const timeIds = participantes.map((p) => p.timeId);
         const statusMap = await buscarStatusParticipantes(timeIds);
 
-        console.log(
+        logger.log(
             `📋 [ARTILHEIRO] Status dos participantes:`,
             Object.entries(statusMap)
                 .filter(([_, s]) => s.ativo === false)
@@ -478,13 +480,13 @@ class ArtilheiroCampeaoController {
         // ✅ Se mercado fechado (rodada parcial), buscar atletas pontuados ANTES
         let atletasPontuados = null;
         if (!mercadoAberto) {
-            console.log(
+            logger.log(
                 `🔴 Mercado FECHADO - buscando scouts em tempo real...`,
             );
             atletasPontuados =
                 await ArtilheiroCampeaoController.buscarAtletasPontuados();
             const totalAtletas = Object.keys(atletasPontuados).length;
-            console.log(`📊 ${totalAtletas} atletas com scouts em tempo real`);
+            logger.log(`📊 ${totalAtletas} atletas com scouts em tempo real`);
         }
 
         // ✅ v5.0: Processar TODOS os participantes em paralelo
@@ -502,7 +504,7 @@ class ArtilheiroCampeaoController {
                     rodadaFim,
                 );
 
-                console.log(
+                logger.log(
                     `📊 [${i + 1}/${participantes.length}] ${participante.nome}${!isAtivo ? ` (INATIVO até R${rodadaFimParticipante})` : ""}...`,
                 );
 
@@ -518,7 +520,7 @@ class ArtilheiroCampeaoController {
                             isAtivo ? atletasPontuados : null, // ✅ Inativos não usam parciais
                         );
 
-                    console.log(
+                    logger.log(
                         `✅ ${participante.nome}: ${dados.golsPro} GP, ${dados.golsContra} GC`,
                     );
 
@@ -538,7 +540,7 @@ class ArtilheiroCampeaoController {
                         rodada_desistencia: status.rodada_desistencia,
                     };
                 } catch (error) {
-                    console.error(
+                    logger.error(
                         `❌ Erro ${participante.nome}:`,
                         error.message,
                     );
@@ -573,10 +575,10 @@ class ArtilheiroCampeaoController {
                     const timeIdStr = String(item.timeId || item.time_id || item.id);
                     posicaoRankingMap[timeIdStr] = index + 1;
                 });
-                console.log(`📊 [ARTILHEIRO] Ranking geral carregado: ${Object.keys(posicaoRankingMap).length} posições`);
+                logger.log(`📊 [ARTILHEIRO] Ranking geral carregado: ${Object.keys(posicaoRankingMap).length} posições`);
             }
         } catch (error) {
-            console.warn(`⚠️ [ARTILHEIRO] Erro ao buscar ranking geral:`, error.message);
+            logger.warn(`⚠️ [ARTILHEIRO] Erro ao buscar ranking geral:`, error.message);
         }
 
         // ✅ v5.1: Adicionar posição no ranking geral a cada participante
@@ -640,7 +642,7 @@ class ArtilheiroCampeaoController {
 
         // ✅ v4.4: Coletar rodadas faltantes da API e salvar no MongoDB
         if (rodadasFaltantes.length > 0) {
-            console.log(
+            logger.log(
                 `  📥 Coletando ${rodadasFaltantes.length} rodadas faltantes para time ${timeId}: [${rodadasFaltantes.join(", ")}]`,
             );
 
@@ -665,11 +667,11 @@ class ArtilheiroCampeaoController {
                         fonte: "api_coletada",
                     });
 
-                    console.log(
+                    logger.log(
                         `    ✅ R${rodada}: ${dadosColetados.golsPro} GP, ${dadosColetados.golsContra} GC (salvo no MongoDB)`,
                     );
                 } catch (error) {
-                    console.warn(
+                    logger.warn(
                         `    ⚠️ Erro ao coletar R${rodada} para time ${timeId}:`,
                         error.message,
                     );
@@ -678,7 +680,7 @@ class ArtilheiroCampeaoController {
         }
 
         // ✅ Processar rodadas que já estavam no MongoDB
-        console.log(`  💾 ${rodadasDB.length} rodadas do MongoDB`);
+        logger.log(`  💾 ${rodadasDB.length} rodadas do MongoDB`);
 
         for (const rodada of rodadasDB) {
             golsPro += rodada.golsPro || 0;
@@ -749,7 +751,7 @@ class ArtilheiroCampeaoController {
             const data = await response.json();
             return data.atletas || {};
         } catch (error) {
-            console.warn("⚠️ Erro ao buscar atletas pontuados:", error.message);
+            logger.warn("⚠️ Erro ao buscar atletas pontuados:", error.message);
             return {};
         }
     }
@@ -795,7 +797,7 @@ class ArtilheiroCampeaoController {
 
             return { golsPro, golsContra, jogadores };
         } catch (error) {
-            console.warn(
+            logger.warn(
                 `⚠️ Erro ao calcular parcial time ${timeId}:`,
                 error.message,
             );
@@ -818,7 +820,7 @@ class ArtilheiroCampeaoController {
             const rodadaNum = parseInt(rodada);
             const usuario = req.session.usuario.email || req.session.usuario.nome || 'admin';
 
-            console.log(
+            logger.log(
                 `🔄 [ARTILHEIRO] Coletando rodada ${rodadaNum} para liga ${ligaId} por ${usuario}...`,
             );
 
@@ -1038,14 +1040,14 @@ class ArtilheiroCampeaoController {
             const { ligaId, rodada } = req.params;
             const usuario = req.session.usuario.email || req.session.usuario.nome || 'admin';
 
-            console.log(`🔒 [ARTILHEIRO] Consolidando rodada ${rodada} por ${usuario}...`);
+            logger.log(`🔒 [ARTILHEIRO] Consolidando rodada ${rodada} por ${usuario}...`);
 
             const result = await GolsConsolidados.updateMany(
                 { ligaId, rodada: parseInt(rodada), temporada: CURRENT_SEASON, parcial: true },
                 { $set: { parcial: false } },
             );
 
-            console.log(`✅ ${result.modifiedCount} registros consolidados`);
+            logger.log(`✅ ${result.modifiedCount} registros consolidados`);
 
             // ✅ v5.2: Audit log
             setImmediate(async () => {
@@ -1064,7 +1066,7 @@ class ArtilheiroCampeaoController {
                 registrosAtualizados: result.modifiedCount,
             });
         } catch (error) {
-            console.error("❌ Erro ao consolidar:", error);
+            logger.error("❌ Erro ao consolidar:", error);
             res.status(500).json({
                 success: false,
                 error: error.message,
@@ -1180,7 +1182,7 @@ class ArtilheiroCampeaoController {
             const { ligaId } = req.params;
             const usuario = req.session.usuario.email || req.session.usuario.nome || 'admin';
 
-            console.log(`🏆 [ARTILHEIRO] Consolidando premiação para liga ${ligaId} por ${usuario}...`);
+            logger.log(`🏆 [ARTILHEIRO] Consolidando premiação para liga ${ligaId} por ${usuario}...`);
 
             // Validar liga
             const { valid, liga, error } = await validarLigaArtilheiro(ligaId);
@@ -1199,7 +1201,7 @@ class ArtilheiroCampeaoController {
                     if (wr.valor_terceiro !== undefined) premios[3] = Number(wr.valor_terceiro) || 0;
                 }
             } catch (e) {
-                console.warn(`[ARTILHEIRO] Usando premiação default:`, e.message);
+                logger.warn(`[ARTILHEIRO] Usando premiação default:`, e.message);
             }
 
             // Gerar ranking atual
@@ -1276,7 +1278,7 @@ class ArtilheiroCampeaoController {
                 });
             });
 
-            console.log(`🏆 [ARTILHEIRO] ${lancamentos.length} premiações registradas`);
+            logger.log(`🏆 [ARTILHEIRO] ${lancamentos.length} premiações registradas`);
 
             res.json({
                 success: true,
@@ -1284,12 +1286,12 @@ class ArtilheiroCampeaoController {
                 lancamentos,
             });
         } catch (error) {
-            console.error("❌ [ARTILHEIRO] Erro ao consolidar premiação:", error);
+            logger.error("❌ [ARTILHEIRO] Erro ao consolidar premiação:", error);
             res.status(500).json({ success: false, error: error.message });
         }
     }
 }
 
-console.log("[ARTILHEIRO-CAMPEAO] ✅ v5.2.0 carregado (SaaS Dinâmico + Auditoria)");
+logger.log("[ARTILHEIRO-CAMPEAO] ✅ v5.2.0 carregado (SaaS Dinâmico + Auditoria)");
 
 export default ArtilheiroCampeaoController;
