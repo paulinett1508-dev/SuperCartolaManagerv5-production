@@ -273,11 +273,8 @@ async function carregarDadosERenderizar(ligaId, timeId, participante) {
         }
     }
 
-    // Carregar jogos ao vivo + Copa do Mundo em background
-    carregarJogosECopa();
-
-    // Carregar seção Tabelas Esportivas em background
-    carregarTabelasEsportes(participante);
+    // Carregar jogos ao vivo + Copa do Mundo + Meu Time em background
+    carregarJogosECopa(participante);
 
     // Carregar notícias do time do coração em background
     carregarNoticiasDoMeuTime(participante);
@@ -1476,6 +1473,50 @@ function toggleDestaquesRodada() {
 window.toggleDestaquesRodada = toggleDestaquesRodada;
 
 // =====================================================================
+// TOGGLE COPA DO MUNDO (Colapsável)
+// =====================================================================
+function toggleCopaHome() {
+    const section = document.getElementById('copa-home-section');
+    const content = document.getElementById('copa-home-content');
+
+    if (!section || !content) return;
+
+    const isExpanded = section.classList.contains('expanded');
+
+    if (isExpanded) {
+        section.classList.remove('expanded');
+        content.classList.add('collapsed');
+    } else {
+        section.classList.add('expanded');
+        content.classList.remove('collapsed');
+    }
+}
+
+window.toggleCopaHome = toggleCopaHome;
+
+// =====================================================================
+// TOGGLE JOGOS/AGENDA DO DIA (Colapsável)
+// =====================================================================
+function toggleJogosHome() {
+    const section = document.getElementById('jogos-home-section');
+    const content = document.getElementById('jogos-home-content');
+
+    if (!section || !content) return;
+
+    const isExpanded = section.classList.contains('expanded');
+
+    if (isExpanded) {
+        section.classList.remove('expanded');
+        content.classList.add('collapsed');
+    } else {
+        section.classList.add('expanded');
+        content.classList.remove('collapsed');
+    }
+}
+
+window.toggleJogosHome = toggleJogosHome;
+
+// =====================================================================
 // PAINEL DE AVISOS
 // =====================================================================
 function atualizarPainelAvisos(rodadaAtual, totalParticipantes, extras = {}) {
@@ -1796,20 +1837,30 @@ function atualizarSaldoProjetado(posicaoParcial) {
 }
 
 // =====================================================================
-// CARREGAR JOGOS AO VIVO + COPA DO MUNDO 2026
+// CARREGAR JOGOS AO VIVO + COPA DO MUNDO 2026 + MEU TIME
 // =====================================================================
-async function carregarJogosECopa() {
+async function carregarJogosECopa(participante) {
     try {
         if (window.Log) Log.info("PARTICIPANTE-HOME", "Carregando jogos ao vivo + Copa...");
 
         const mod = await import('./participante-jogos.js');
         const result = await mod.obterJogosAoVivo();
 
+        // Resolver clube do participante para seção "Meu Time"
+        const clubeId = participante?.clube_id || participante?.clubeId
+                     || window.participanteAuth?.participante?.participante?.clube_id
+                     || null;
+        const clubeNome = clubeId ? getNomeClubePorId(clubeId) : null;
+        const clubeInfo = clubeId && clubeNome && clubeNome !== 'Seu Time'
+            ? { clubeId, clubeNome }
+            : null;
+
         if (window.Log) Log.info("PARTICIPANTE-HOME", "Resultado jogos:", {
             quantidade: result.jogos?.length || 0,
             fonte: result.fonte,
             aoVivo: result.aoVivo,
-            copa: result.copa?.fase || 'inativa'
+            copa: result.copa?.fase || 'inativa',
+            meuTime: clubeNome || 'N/A'
         });
 
         // Copa do Mundo 2026 - Seção separada (ANTES dos jogos brasileiros)
@@ -1821,10 +1872,10 @@ async function carregarJogosECopa() {
             }
         }
 
-        // Jogos brasileiros do dia
+        // Jogos brasileiros do dia (com "Meu Time" se tiver clube)
         const jogosEl = document.getElementById('home-jogos-placeholder');
         if (result.jogos && result.jogos.length > 0) {
-            const html = mod.renderizarJogosAoVivo(result.jogos, result.fonte, result.aoVivo, result.atualizadoEm);
+            const html = mod.renderizarJogosAoVivo(result.jogos, result.fonte, result.aoVivo, result.atualizadoEm, clubeInfo);
             if (jogosEl) jogosEl.innerHTML = html;
 
             // Auto-refresh se tem jogos ao vivo
@@ -1832,7 +1883,7 @@ async function carregarJogosECopa() {
                 mod.iniciarAutoRefresh((novoResult) => {
                     const container = document.getElementById('home-jogos-placeholder');
                     if (container) {
-                        container.innerHTML = mod.renderizarJogosAoVivo(novoResult.jogos, novoResult.fonte, novoResult.aoVivo, novoResult.atualizadoEm);
+                        container.innerHTML = mod.renderizarJogosAoVivo(novoResult.jogos, novoResult.fonte, novoResult.aoVivo, novoResult.atualizadoEm, clubeInfo);
                     }
                     // Atualizar Copa também no refresh
                     if (novoResult.copa && novoResult.copa.fase) {
