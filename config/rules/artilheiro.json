@@ -7,10 +7,9 @@
   "versao": "4.4.0",
 
   "configuracao": {
-    "ligas_habilitadas": ["684d821cf1a7ae16d1f89572"],
     "modulo_ativo": true,
-    "temporada": 2025,
-    "restricao": "Apenas Liga Cartoleiros do Sobral"
+    "temporada": 2026,
+    "nota": "Habilitação por liga é controlada via ModuleConfig no MongoDB, não por este arquivo"
   },
 
   "regras": {
@@ -115,17 +114,6 @@
     "premiacao_fim_temporada": true,
     "moeda": "BRL",
     "precisao_decimal": 2
-  },
-
-  "participantes_hardcoded": {
-    "liga_sobral": [
-      { "timeId": 1926323, "nome": "Daniel Barbosa", "clubeId": 262 },
-      { "timeId": 13935277, "nome": "Paulinett Miranda", "clubeId": 262 },
-      { "timeId": 14747183, "nome": "Carlos Henrique", "clubeId": 276 },
-      { "timeId": 49149009, "nome": "Matheus Coutinho", "clubeId": 262 },
-      { "timeId": 49149388, "nome": "Junior Brasilino", "clubeId": 262 },
-      { "timeId": 50180257, "nome": "Hivisson", "clubeId": 267 }
-    ]
   },
 
   "ui": {
