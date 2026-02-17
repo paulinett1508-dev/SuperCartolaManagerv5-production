@@ -66,11 +66,12 @@ export async function obterJogosAoVivo() {
             aoVivo: data.aoVivo || false,
             estatisticas: data.estatisticas || {},
             mensagem: data.mensagem || null,
-            atualizadoEm: data.atualizadoEm || new Date().toISOString()
+            atualizadoEm: data.atualizadoEm || new Date().toISOString(),
+            copa: data.copa || null, // Copa do Mundo 2026 - seção separada
         };
     } catch (err) {
         console.error('[JOGOS] Erro ao buscar jogos:', err);
-        return { jogos: [], fonte: 'erro', aoVivo: false, estatisticas: {} };
+        return { jogos: [], fonte: 'erro', aoVivo: false, estatisticas: {}, copa: null };
     }
 }
 
@@ -424,6 +425,209 @@ function getStatusBadgeText(jogo) {
     if (isJogoAoVivo(jogo)) return jogo.tempo || 'Ao vivo';
     if (isJogoEncerrado(jogo)) return 'FIM';
     return jogo.horario || 'Agendado';
+}
+
+// =====================================================================
+// COPA DO MUNDO 2026 - Seção separada
+// =====================================================================
+
+/**
+ * Renderiza seção completa da Copa do Mundo (separada dos jogos brasileiros)
+ * @param {Object} copa - Dados da Copa retornados pela API { fase, jogosDoDia, proximosJogos, jogosBrasil, grupos }
+ * @returns {string} HTML da seção Copa ou '' se inativa
+ */
+export function renderizarSecaoCopa(copa) {
+    if (!copa || !copa.fase) return '';
+
+    const isPreTorneio = copa.fase === 'pre-torneio';
+    const jogosExibir = copa.jogosDoDia?.length > 0 ? copa.jogosDoDia : copa.proximosJogos || [];
+    const jogosBrasil = copa.jogosBrasil || [];
+
+    // Título baseado na fase
+    const faseTitulo = isPreTorneio ? 'Agenda'
+        : copa.fase === 'fase-grupos' ? 'Fase de Grupos'
+        : copa.fase === 'mata-mata' ? 'Fase Eliminatória'
+        : 'Copa do Mundo';
+
+    return `
+    <div class="copa-do-mundo-secao mx-4 mb-6">
+        <!-- Header Copa do Mundo -->
+        <div class="copa-header rounded-t-xl px-4 py-3" style="background: var(--app-copa-gradient);">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">🏆</span>
+                    <div>
+                        <h2 class="font-brand text-white text-sm tracking-wide">Copa do Mundo 2026</h2>
+                        <span class="text-[10px] text-white/70">${faseTitulo} · EUA/México/Canadá</span>
+                    </div>
+                </div>
+                ${copa.temAoVivo ? `
+                    <span class="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-400">
+                        <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
+                        AO VIVO
+                    </span>
+                ` : ''}
+            </div>
+        </div>
+
+        <div class="rounded-b-xl border border-t-0 border-gray-800/60 bg-gradient-to-br from-gray-800/80 to-gray-900 pb-3">
+            ${jogosBrasil.length > 0 ? renderizarJogosBrasilCopa(jogosBrasil) : ''}
+            ${jogosExibir.length > 0 ? renderizarJogosCopaLista(jogosExibir, copa.jogosDoDia?.length > 0 ? 'Jogos do Dia' : 'Próximos Jogos') : ''}
+            ${jogosExibir.length === 0 && jogosBrasil.length === 0 ? `
+                <div class="text-center py-6 text-white/30">
+                    <span class="text-2xl block mb-1">⚽</span>
+                    <p class="text-xs">Sem jogos da Copa hoje</p>
+                </div>
+            ` : ''}
+        </div>
+    </div>
+    `;
+}
+
+/**
+ * Renderiza subseção "Jogos do Brasil" na Copa
+ * @param {Array} jogos - Jogos do Brasil
+ */
+function renderizarJogosBrasilCopa(jogos) {
+    if (!jogos || !jogos.length) return '';
+
+    return `
+    <div class="px-3 pt-3 pb-1">
+        <div class="flex items-center gap-1.5 mb-2">
+            <span class="text-base">🇧🇷</span>
+            <h4 class="text-[11px] font-brand text-white/90 tracking-wide">Brasil no Grupo C</h4>
+        </div>
+        <div class="space-y-1.5">
+            ${jogos.map(j => renderizarCardJogoCopa(j)).join('')}
+        </div>
+    </div>
+    `;
+}
+
+/**
+ * Renderiza lista de jogos da Copa (genérica)
+ * @param {Array} jogos - Lista de jogos
+ * @param {string} titulo - Título da seção
+ */
+function renderizarJogosCopaLista(jogos, titulo) {
+    if (!jogos || !jogos.length) return '';
+
+    // Agrupar por data
+    const jogosPorData = jogos.reduce((acc, jogo) => {
+        const data = jogo.data || 'Hoje';
+        if (!acc[data]) acc[data] = [];
+        acc[data].push(jogo);
+        return acc;
+    }, {});
+
+    return `
+    <div class="px-3 pt-3">
+        <div class="flex items-center gap-1.5 mb-2">
+            <span class="material-icons text-sm" style="color: var(--app-copa-secondary);">calendar_today</span>
+            <h4 class="text-[11px] font-brand text-white/90 tracking-wide">${titulo}</h4>
+        </div>
+        ${Object.entries(jogosPorData).map(([data, lista]) => `
+            <div class="mb-2">
+                ${data !== 'Hoje' ? `<div class="text-[9px] text-white/40 mb-1 px-1">${formatarDataCopa(data)}</div>` : ''}
+                <div class="space-y-1.5">
+                    ${lista.map(j => renderizarCardJogoCopa(j)).join('')}
+                </div>
+            </div>
+        `).join('')}
+    </div>
+    `;
+}
+
+/**
+ * Renderiza card individual de jogo da Copa (com bandeiras emoji)
+ * @param {Object} jogo - Dados do jogo
+ */
+function renderizarCardJogoCopa(jogo) {
+    const aoVivo = isJogoAoVivo(jogo);
+    const encerrado = isJogoEncerrado(jogo);
+    const agendado = isJogoAgendado(jogo);
+
+    const containerClass = aoVivo
+        ? 'ring-1 ring-green-500/30 bg-gradient-to-r from-green-500/5 to-transparent'
+        : encerrado
+            ? 'bg-gray-700/30 opacity-80'
+            : 'bg-gray-700/50';
+
+    const bandeiraMandante = jogo.bandeirasMandante || '🏳️';
+    const bandeiraVisitante = jogo.bandeirasVisitante || '🏳️';
+
+    return `
+    <div class="flex flex-col py-1.5 px-2.5 rounded-lg ${containerClass}">
+        <!-- Header: Grupo + Status -->
+        <div class="flex items-center justify-between mb-1">
+            <span class="text-[9px] text-white/40 truncate">${jogo.liga || 'Copa do Mundo'}</span>
+            ${aoVivo ? `
+                <span class="flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full bg-green-500/20 text-green-400">
+                    <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
+                    ${jogo.tempo ? `${jogo.tempo}'` : 'AO VIVO'}
+                </span>
+            ` : encerrado ? `
+                <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-gray-500/20 text-gray-400">Encerrado</span>
+            ` : `
+                <span class="text-[9px] px-1.5 py-0.5 rounded-full" style="background: var(--app-copa-muted); color: var(--app-copa-secondary);">${jogo.horario}</span>
+            `}
+        </div>
+
+        <!-- Linha principal: Seleções e Placar -->
+        <div class="flex items-center">
+            <!-- Seleção Mandante -->
+            <div class="flex items-center gap-2 flex-1 min-w-0">
+                <span class="text-lg shrink-0">${bandeiraMandante}</span>
+                ${jogo.logoMandante ? `<img src="${jogo.logoMandante}" class="w-5 h-5 object-contain shrink-0" onerror="this.style.display='none'">` : ''}
+                <span class="text-white font-medium text-[11px] truncate">${jogo.mandante}</span>
+            </div>
+
+            <!-- Placar Central -->
+            <div class="flex flex-col items-center justify-center min-w-[60px] shrink-0 px-1.5">
+                ${agendado ? `
+                    <span class="font-brand text-base" style="color: var(--app-copa-secondary);">vs</span>
+                    <span class="text-white/50 text-[9px]">${jogo.horario}</span>
+                ` : `
+                    <span class="${aoVivo ? 'text-white' : 'text-white/70'} ${aoVivo ? 'text-lg' : 'text-base'} font-brand leading-tight tabular-nums">
+                        ${jogo.golsMandante ?? 0} - ${jogo.golsVisitante ?? 0}
+                    </span>
+                `}
+            </div>
+
+            <!-- Seleção Visitante -->
+            <div class="flex items-center gap-2 flex-1 min-w-0 justify-end">
+                <span class="text-white font-medium text-[11px] truncate text-right">${jogo.visitante}</span>
+                ${jogo.logoVisitante ? `<img src="${jogo.logoVisitante}" class="w-5 h-5 object-contain shrink-0" onerror="this.style.display='none'">` : ''}
+                <span class="text-lg shrink-0">${bandeiraVisitante}</span>
+            </div>
+        </div>
+
+        <!-- Footer: Estádio -->
+        ${jogo.estadio ? `
+            <div class="mt-1 text-center">
+                <span class="text-[8px] text-white/25">${jogo.estadio}${jogo.cidade ? `, ${jogo.cidade}` : ''}</span>
+            </div>
+        ` : ''}
+    </div>
+    `;
+}
+
+/**
+ * Formata data YYYY-MM-DD para exibição amigável
+ * @param {string} data - Data YYYY-MM-DD
+ * @returns {string} Data formatada (ex: "13 Jun, Sábado")
+ */
+function formatarDataCopa(data) {
+    if (!data) return '';
+    try {
+        const d = new Date(data + 'T12:00:00');
+        const dia = d.getDate();
+        const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        const diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+        return `${dia} ${meses[d.getMonth()]}, ${diasSemana[d.getDay()]}`;
+    } catch {
+        return data;
+    }
 }
 
 /**

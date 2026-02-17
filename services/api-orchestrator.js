@@ -15,6 +15,7 @@
 //   - Fixtures do dia (1x de manhã para enriquecer agenda)
 
 import apiFootball from './api-football-service.js';
+import copaDoMundo from '../config/copa-do-mundo-2026.js';
 
 // Status codes padrão
 const STATUS_AO_VIVO = ['1H', '2H', 'HT', 'ET', 'P', 'BT', 'LIVE'];
@@ -121,14 +122,35 @@ async function buscarLivescoresViaApiFootball() {
     return { jogos: [], temAoVivo: false, fonte: 'api-football-error' };
   }
 
-  // Filtrar jogos do Brasil
-  const jogosBrasil = result.data.filter(fixture => {
+  // Filtrar jogos do Brasil + Copa do Mundo (quando ativa)
+  const statusCopa = copaDoMundo.getStatusCopa();
+  const copaAtiva = statusCopa.ativo && statusCopa.fase !== 'pre-torneio';
+
+  const jogosFiltrados = result.data.filter(fixture => {
     const pais = (fixture.league?.country || '').toLowerCase();
-    return pais === 'brazil';
+    const ligaId = fixture.league?.id;
+    const ligaNome = fixture.league?.name || '';
+
+    // Sempre incluir jogos brasileiros
+    if (pais === 'brazil') return true;
+
+    // Incluir Copa do Mundo quando torneio ativo
+    if (copaAtiva && (ligaId === copaDoMundo.LEAGUE_IDS.apiFootball || pais === 'world' || copaDoMundo.isCopaDoMundo(ligaNome))) return true;
+
+    return false;
   });
 
   // Mapear para formato padrão do sistema
-  const jogos = jogosBrasil.map(fixture => mapearFixtureParaFormato(fixture));
+  const jogos = jogosFiltrados.map(fixture => {
+    const mapped = mapearFixtureParaFormato(fixture);
+    // Marcar jogos de Copa
+    if (copaDoMundo.isCopaDoMundo(fixture.league?.name) || fixture.league?.id === copaDoMundo.LEAGUE_IDS.apiFootball) {
+      mapped.isCopa = true;
+      mapped.bandeirasMandante = copaDoMundo.getBandeira(mapped.mandante);
+      mapped.bandeirasVisitante = copaDoMundo.getBandeira(mapped.visitante);
+    }
+    return mapped;
+  });
 
   const temAoVivo = jogos.some(j => STATUS_AO_VIVO.includes(j.statusRaw));
 
@@ -177,13 +199,30 @@ async function buscarFixturesDoDia() {
     return { jogos: [], fonte: 'api-football-error', cache: false };
   }
 
-  // Filtrar Brasil
-  const jogosBrasil = result.data.filter(fixture => {
+  // Filtrar Brasil + Copa do Mundo
+  const statusCopaFixtures = copaDoMundo.getStatusCopa();
+  const copaAtivaFixtures = statusCopaFixtures.ativo && statusCopaFixtures.fase !== 'pre-torneio';
+
+  const jogosFiltradosFixtures = result.data.filter(fixture => {
     const pais = (fixture.league?.country || '').toLowerCase();
-    return pais === 'brazil';
+    const ligaId = fixture.league?.id;
+    const ligaNome = fixture.league?.name || '';
+
+    if (pais === 'brazil') return true;
+    if (copaAtivaFixtures && (ligaId === copaDoMundo.LEAGUE_IDS.apiFootball || pais === 'world' || copaDoMundo.isCopaDoMundo(ligaNome))) return true;
+
+    return false;
   });
 
-  const jogos = jogosBrasil.map(fixture => mapearFixtureParaFormato(fixture));
+  const jogos = jogosFiltradosFixtures.map(fixture => {
+    const mapped = mapearFixtureParaFormato(fixture);
+    if (copaDoMundo.isCopaDoMundo(fixture.league?.name) || fixture.league?.id === copaDoMundo.LEAGUE_IDS.apiFootball) {
+      mapped.isCopa = true;
+      mapped.bandeirasMandante = copaDoMundo.getBandeira(mapped.mandante);
+      mapped.bandeirasVisitante = copaDoMundo.getBandeira(mapped.visitante);
+    }
+    return mapped;
+  });
 
   // Cachear
   orchestratorState.fixturesDoDia = jogos;

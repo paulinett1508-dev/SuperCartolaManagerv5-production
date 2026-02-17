@@ -29,6 +29,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import obterJogosGloboEsporte, { obterJogosGloboMultiDatas } from '../scripts/scraper-jogos-globo.js';
 import apiOrchestrator from '../services/api-orchestrator.js';
+import copaDoMundo from '../config/copa-do-mundo-2026.js';
 
 const router = express.Router();
 
@@ -48,6 +49,7 @@ const router = express.Router();
 // │   - Resultado: mapeamento quebra silenciosamente                     │
 // └──────────────────────────────────────────────────────────────────────┘
 const LIGAS_PRINCIPAIS = {
+  1: 'Copa do Mundo',           // ⚽ FIFA World Cup 2026
   71: 'Brasileirão A',
   72: 'Brasileirão B',
   73: 'Copa do Brasil',
@@ -70,6 +72,13 @@ function formatarNomeLiga(nome) {
 
   // Mapeamentos especiais de nome (prioridade maxima)
   const mapeamentos = {
+    // Copa do Mundo FIFA 2026
+    'FIFA World Cup': 'Copa do Mundo',
+    'World Cup': 'Copa do Mundo',
+    'FIFA World Cup 2026': 'Copa do Mundo',
+    'Copa do Mundo FIFA': 'Copa do Mundo',
+    'Copa do Mundo FIFA 2026': 'Copa do Mundo',
+    'Coupe du Monde': 'Copa do Mundo',
     // Copas e nomes em ingles
     'São Paulo Youth Cup': 'Copinha',
     'Copa Sao Paulo de Futebol Junior': 'Copinha',
@@ -463,20 +472,39 @@ async function buscarJogosSoccerDataAPI() {
     // A API retorna array de jogos ou objeto com 'data'
     const jogosRaw = Array.isArray(data) ? data : (data.data || []);
 
-    // Filtrar apenas jogos do Brasil
-    const jogosBrasil = jogosRaw.filter(jogo => {
+    // Filtrar jogos do Brasil + Copa do Mundo (quando ativa)
+    const statusCopa = copaDoMundo.getStatusCopa();
+    const copaAtiva = statusCopa.ativo && statusCopa.fase !== 'pre-torneio';
+
+    const jogosFiltrados = jogosRaw.filter(jogo => {
       const pais = (jogo.country || jogo.league_country || '').toLowerCase();
-      return pais === 'brazil' || pais === 'brasil';
+      const liga = jogo.league || jogo.league_name || '';
+
+      // Sempre incluir jogos brasileiros
+      if (pais === 'brazil' || pais === 'brasil') return true;
+
+      // Incluir Copa do Mundo quando torneio ativo
+      if (copaAtiva && (pais === 'world' || copaDoMundo.isCopaDoMundo(liga))) return true;
+
+      return false;
     });
 
-    console.log(`[JOGOS-DIA] SoccerDataAPI: ${jogosBrasil.length} jogos brasileiros`);
+    // Marcar jogos de Copa com flag isCopa
+    jogosFiltrados.forEach(jogo => {
+      const liga = jogo.league || jogo.league_name || '';
+      if (copaDoMundo.isCopaDoMundo(liga)) {
+        jogo._isCopa = true;
+      }
+    });
 
-    if (jogosBrasil.length === 0) {
+    console.log(`[JOGOS-DIA] SoccerDataAPI: ${jogosFiltrados.length} jogos (Brasil + Copa)`);
+
+    if (jogosFiltrados.length === 0) {
       return { jogos: [], temAoVivo: false };
     }
 
     // Mapear para formato padrão
-    const jogos = jogosBrasil.map(jogo => {
+    const jogos = jogosFiltrados.map(jogo => {
       const statusRaw = mapearStatusSoccerData(jogo.status || jogo.match_status);
 
       return {
@@ -501,7 +529,8 @@ async function buscarJogosSoccerDataAPI() {
         cidade: jogo.city || null,
         horario: jogo.time || jogo.match_time || '--:--',
         timestamp: jogo.timestamp ? jogo.timestamp * 1000 : Date.now(),
-        fonte: 'soccerdata'
+        fonte: 'soccerdata',
+        isCopa: !!jogo._isCopa,
       };
     });
 
@@ -591,6 +620,63 @@ router.delete('/cache', (req, res) => {
   });
 });
 
+// ════════════════════════════════════════════════════════════════
+// COPA DO MUNDO 2026 - Dados para seção separada
+// ════════════════════════════════════════════════════════════════
+
+/**
+ * Monta dados da Copa do Mundo para o frontend (seção separada).
+ * Retorna null se Copa não está ativa, ou objeto com jogos e metadados.
+ *
+ * Fontes:
+ *   - Pré-torneio: JSON estático (config/copa-do-mundo-2026.js)
+ *   - Durante torneio: Mesclagem de APIs ao vivo + estático como fallback
+ *
+ * @param {string} dataHoje - Data YYYY-MM-DD
+ * @param {Array} [jogosAoVivoAll] - Todos os jogos ao vivo (para extrair Copa live)
+ * @returns {Object|null}
+ */
+function montarDadosCopa(dataHoje, jogosAoVivoAll = []) {
+  const statusCopa = copaDoMundo.getStatusCopa(dataHoje);
+
+  if (!statusCopa.ativo) return null;
+
+  // Extrair jogos de Copa que vieram de APIs ao vivo
+  const jogosCopaLive = jogosAoVivoAll.filter(j => j.isCopa || copaDoMundo.isCopaDoMundo(j.liga || j.ligaOriginal));
+
+  // Jogos estáticos do dia (pré-torneio ou fallback)
+  const jogosCopaStatic = copaDoMundo.getJogosDoDia(dataHoje);
+
+  // Mesclar: ao vivo têm prioridade sobre estáticos
+  let jogosCopa;
+  if (jogosCopaLive.length > 0) {
+    // Marcar todos com isCopa e bandeiras
+    jogosCopaLive.forEach(j => {
+      j.isCopa = true;
+      if (!j.bandeirasMandante) j.bandeirasMandante = copaDoMundo.getBandeira(j.mandante);
+      if (!j.bandeirasVisitante) j.bandeirasVisitante = copaDoMundo.getBandeira(j.visitante);
+    });
+    jogosCopa = mesclarJogos(jogosCopaLive, jogosCopaStatic);
+  } else {
+    jogosCopa = jogosCopaStatic;
+  }
+
+  // Próximos jogos (para pré-torneio quando não há jogos hoje)
+  const proximosJogos = jogosCopa.length === 0 ? copaDoMundo.getProximosJogos(6) : [];
+
+  // Jogos do Brasil
+  const jogosBrasil = copaDoMundo.getJogosBrasil();
+
+  return {
+    fase: statusCopa.fase,
+    grupos: copaDoMundo.GRUPOS,
+    jogosDoDia: jogosCopa,
+    proximosJogos,
+    jogosBrasil,
+    temAoVivo: jogosCopa.some(j => STATUS_AO_VIVO.includes(j.statusRaw)),
+  };
+}
+
 // GET /api/jogos-ao-vivo
 router.get('/', async (req, res) => {
   try {
@@ -610,6 +696,9 @@ router.get('/', async (req, res) => {
     const cacheValido = cacheJogosDia && (agora - cacheTimestamp) < ttlAtual;
     const cacheStaleValido = cacheJogosDia && (agora - cacheTimestamp) < CACHE_STALE_MAX;
 
+    // Copa do Mundo 2026 - dados para seção separada (calculado sempre)
+    const copa = montarDadosCopa(dataHoje, cacheJogosDia || []);
+
     // 1º Cache válido (fresh)
     if (cacheValido) {
       const stats = calcularEstatisticas(cacheJogosDia);
@@ -620,7 +709,8 @@ router.get('/', async (req, res) => {
         estatisticas: stats,
         cache: true,
         ttl: ttlAtual / 1000,
-        atualizadoEm: new Date(cacheTimestamp).toISOString()
+        atualizadoEm: new Date(cacheTimestamp).toISOString(),
+        copa,
       });
     }
 
@@ -656,6 +746,9 @@ router.get('/', async (req, res) => {
 
       console.log(`[JOGOS-DIA] ✅ Mesclado: ${soccerData.jogos.length} ao vivo (${livescoreFonte}) + ${jogosAgenda.length} agenda = ${jogosMesclados.length} jogos`);
 
+      // Recalcular Copa com dados ao vivo mesclados
+      const copaFresh = montarDadosCopa(dataHoje, jogosMesclados);
+
       return res.json({
         jogos: jogosMesclados,
         fonte: fontePrincipal,
@@ -665,7 +758,8 @@ router.get('/', async (req, res) => {
         atualizadoEm: new Date(agora).toISOString(),
         mensagem: soccerData.jogos.length > 0
           ? `Livescores (${livescoreFonte}) + agenda (${soccerData.jogos.length} ao vivo, ${jogosMesclados.length - soccerData.jogos.length} agendados)`
-          : `Agenda do dia (${jogosMesclados.length} jogos programados)`
+          : `Agenda do dia (${jogosMesclados.length} jogos programados)`,
+        copa: copaFresh,
       });
     }
 
@@ -686,7 +780,8 @@ router.get('/', async (req, res) => {
         stale: true,
         idadeMinutos,
         mensagem: `Dados de ${idadeMinutos} min atrás (limite de requisições atingido)`,
-        atualizadoEm: new Date(cacheTimestamp).toISOString()
+        atualizadoEm: new Date(cacheTimestamp).toISOString(),
+        copa,
       });
     }
 
@@ -708,7 +803,8 @@ router.get('/', async (req, res) => {
       atualizadoEm: new Date().toISOString(),
       mensagem: jogosGlobo.length > 0
         ? 'Dados do arquivo Globo (agenda legada)'
-        : 'Sem jogos brasileiros hoje'
+        : 'Sem jogos brasileiros hoje',
+      copa,
     });
 
   } catch (err) {
