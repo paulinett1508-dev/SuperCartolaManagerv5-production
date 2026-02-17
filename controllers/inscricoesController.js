@@ -215,71 +215,78 @@ export async function criarTransacoesIniciais(ligaId, timeId, temporada, valores
  * @param {number} temporada - Nova temporada
  */
 export async function adicionarParticipanteNaLiga(ligaId, dadosParticipante, temporada) {
-    const liga = await Liga.findById(ligaId);
-    if (!liga) throw new Error("Liga não encontrada");
+    const session = await mongoose.startSession();
+    try {
+        await session.withTransaction(async () => {
+            const liga = await Liga.findById(ligaId).session(session);
+            if (!liga) throw new Error("Liga não encontrada");
 
-    // Verificar se já existe
-    const jaExiste = liga.participantes?.some(
-        p => Number(p.time_id) === Number(dadosParticipante.time_id)
-    );
+            // Verificar se já existe
+            const jaExiste = liga.participantes?.some(
+                p => Number(p.time_id) === Number(dadosParticipante.time_id)
+            );
 
-    if (!jaExiste) {
-        // Adicionar aos participantes
-        liga.participantes = liga.participantes || [];
-        liga.participantes.push({
-            time_id: Number(dadosParticipante.time_id),
-            nome_time: dadosParticipante.nome_time,
-            nome_cartola: dadosParticipante.nome_cartoleiro || dadosParticipante.nome_cartola,
-            // ✅ v2.15 FIX: Usar campos corretos para consistência com dados da API Cartola
-            // foto_time = escudo do time (URL da imagem)
-            foto_time: dadosParticipante.escudo || dadosParticipante.url_escudo_png || dadosParticipante.foto_time || "",
-            foto_perfil: dadosParticipante.foto_perfil || "",
-            assinante: dadosParticipante.assinante || false,
-            ativo: true,
-            // ✅ v2.12: Campos adicionais para WhatsApp e Time do Coração
-            contato: dadosParticipante.contato || "",
-            clube_id: dadosParticipante.time_coracao || dadosParticipante.clube_id || null,
-            // ✅ v2.13: Senha padrão para novos participantes (evita login bloqueado)
-            senha_acesso: dadosParticipante.senha_acesso || "acessocartola"
-        });
+            if (!jaExiste) {
+                // Adicionar aos participantes
+                liga.participantes = liga.participantes || [];
+                liga.participantes.push({
+                    time_id: Number(dadosParticipante.time_id),
+                    nome_time: dadosParticipante.nome_time,
+                    nome_cartola: dadosParticipante.nome_cartoleiro || dadosParticipante.nome_cartola,
+                    // ✅ v2.15 FIX: Usar campos corretos para consistência com dados da API Cartola
+                    // foto_time = escudo do time (URL da imagem)
+                    foto_time: dadosParticipante.escudo || dadosParticipante.url_escudo_png || dadosParticipante.foto_time || "",
+                    foto_perfil: dadosParticipante.foto_perfil || "",
+                    assinante: dadosParticipante.assinante || false,
+                    ativo: true,
+                    // ✅ v2.12: Campos adicionais para WhatsApp e Time do Coração
+                    contato: dadosParticipante.contato || "",
+                    clube_id: dadosParticipante.time_coracao || dadosParticipante.clube_id || null,
+                    // ✅ v2.13: Senha padrão para novos participantes (evita login bloqueado)
+                    senha_acesso: dadosParticipante.senha_acesso || "acessocartola"
+                });
 
-        // Adicionar ao array de times
-        if (!liga.times?.includes(Number(dadosParticipante.time_id))) {
-            liga.times = liga.times || [];
-            liga.times.push(Number(dadosParticipante.time_id));
-        }
+                // Adicionar ao array de times
+                if (!liga.times?.includes(Number(dadosParticipante.time_id))) {
+                    liga.times = liga.times || [];
+                    liga.times.push(Number(dadosParticipante.time_id));
+                }
 
-        await liga.save();
-    }
-
-    // Garantir que Time existe (busca apenas por id, que é único)
-    // Se existir: atualiza para nova temporada
-    // Se não existir: cria novo
-    await Time.findOneAndUpdate(
-        {
-            id: Number(dadosParticipante.time_id)
-        },
-        {
-            $set: {
-                nome_time: dadosParticipante.nome_time,
-                nome_cartoleiro: dadosParticipante.nome_cartoleiro || dadosParticipante.nome_cartola,
-                nome: dadosParticipante.nome_cartoleiro || dadosParticipante.nome_cartola,
-                // ✅ v2.14: Campos usados pelo frontend para exibição
-                nome_cartola: dadosParticipante.nome_cartoleiro || dadosParticipante.nome_cartola,
-                url_escudo_png: dadosParticipante.escudo || dadosParticipante.url_escudo_png || '',
-                escudo: dadosParticipante.escudo,
-                liga_id: ligaId,
-                temporada: Number(temporada),
-                ativo: true,
-                // ✅ v2.13: Senha padrão para novos participantes
-                senha_acesso: dadosParticipante.senha_acesso || "acessocartola"
-            },
-            $setOnInsert: {
-                id: Number(dadosParticipante.time_id)
+                await liga.save({ session });
             }
-        },
-        { upsert: true, new: true }
-    );
+
+            // Garantir que Time existe (busca apenas por id, que é único)
+            // Se existir: atualiza para nova temporada
+            // Se não existir: cria novo
+            await Time.findOneAndUpdate(
+                {
+                    id: Number(dadosParticipante.time_id)
+                },
+                {
+                    $set: {
+                        nome_time: dadosParticipante.nome_time,
+                        nome_cartoleiro: dadosParticipante.nome_cartoleiro || dadosParticipante.nome_cartola,
+                        nome: dadosParticipante.nome_cartoleiro || dadosParticipante.nome_cartola,
+                        // ✅ v2.14: Campos usados pelo frontend para exibição
+                        nome_cartola: dadosParticipante.nome_cartoleiro || dadosParticipante.nome_cartola,
+                        url_escudo_png: dadosParticipante.escudo || dadosParticipante.url_escudo_png || '',
+                        escudo: dadosParticipante.escudo,
+                        liga_id: ligaId,
+                        temporada: Number(temporada),
+                        ativo: true,
+                        // ✅ v2.13: Senha padrão para novos participantes
+                        senha_acesso: dadosParticipante.senha_acesso || "acessocartola"
+                    },
+                    $setOnInsert: {
+                        id: Number(dadosParticipante.time_id)
+                    }
+                },
+                { upsert: true, new: true, session }
+            );
+        });
+    } finally {
+        await session.endSession();
+    }
 }
 
 // =============================================================================

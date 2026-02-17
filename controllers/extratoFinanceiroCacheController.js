@@ -220,11 +220,11 @@ async function buscarExtratoDeSnapshots(ligaId, timeId, temporada = null) {
         const timeExtrato = extratosFinanceiros.find(t => t.time_id === Number(timeId));
 
         if (!timeStats) {
-            console.log(`[CACHE-CONTROLLER] ⚠️ Time ${timeId} não encontrado nos snapshots`);
+            logger.log(`[CACHE-CONTROLLER] ⚠️ Time ${timeId} não encontrado nos snapshots`);
             return null;
         }
 
-        console.log(`[CACHE-CONTROLLER] ✅ Encontrado nos snapshots: saldo=${timeStats.saldo_total}, ganhos=${timeStats.ganhos}`);
+        logger.log(`[CACHE-CONTROLLER] ✅ Encontrado nos snapshots: saldo=${timeStats.saldo_total}, ganhos=${timeStats.ganhos}`);
 
         // Construir array de rodadas baseado nas transações do extrato
         const rodadasArray = [];
@@ -298,7 +298,7 @@ async function buscarExtratoDeSnapshots(ligaId, timeId, temporada = null) {
 
         // Se não tem transações detalhadas, criar resumo básico
         if (rodadasSorted.length === 0 && timeStats.saldo_total) {
-            console.log(`[CACHE-CONTROLLER] 📊 Usando resumo geral (sem transações detalhadas)`);
+            logger.log(`[CACHE-CONTROLLER] 📊 Usando resumo geral (sem transações detalhadas)`);
         }
 
         return {
@@ -316,7 +316,7 @@ async function buscarExtratoDeSnapshots(ligaId, timeId, temporada = null) {
             }
         };
     } catch (error) {
-        console.error('[CACHE-CONTROLLER] ❌ Erro ao buscar de snapshots:', error);
+        logger.error('[CACHE-CONTROLLER] ❌ Erro ao buscar de snapshots:', error);
         return null;
     }
 }
@@ -450,7 +450,7 @@ function transformarTransacoesEmRodadas(transacoes, ligaId) {
 
     // ✅ v3.4: Se tem dados legados E consolidados zerados = reconstruir
     if (temDadosLegados && !temDadosConsolidadosReais) {
-        console.log(
+        logger.log(
             `[CACHE-CONTROLLER] ⚠️ Cache corrompido detectado - reconstruindo de dados legados`,
         );
     }
@@ -531,7 +531,7 @@ function transformarTransacoesEmRodadas(transacoes, ligaId) {
         r.saldoAcumulado = saldoAcumulado;
     });
 
-    console.log(
+    logger.log(
         `[CACHE-CONTROLLER] ✅ Dados reconstruídos: ${rodadasArray.length} rodadas | Saldo: R$ ${saldoAcumulado.toFixed(2)}`,
     );
     return rodadasArray;
@@ -646,7 +646,7 @@ export const getExtratoCache = async (req, res) => {
             time_id: Number(timeId),
             temporada: temporadaNum,
         });
-        console.log('[CACHE-CONTROLLER] Cache encontrado via query nativa:', cache ? 'SIM' : 'NÃO');
+        logger.log('[CACHE-CONTROLLER] Cache encontrado via query nativa:', cache ? 'SIM' : 'NÃO');
 
         // ✅ v5.1: Aguardar acertos, ajustes e liga
         const [acertos, ajustesInfo, ligaData] = await Promise.all([acertosPromise, ajustesPromise, ligaPromise]);
@@ -660,7 +660,7 @@ export const getExtratoCache = async (req, res) => {
         // ✅ v5.0: Se não tem cache, tentar buscar dos snapshots
         // ✅ v6.1 FIX: Passar temporada para evitar retornar snapshot de temporada errada
         if (!cache) {
-            console.log(`[CACHE-CONTROLLER] Cache não encontrado para time ${timeId}, tentando snapshots temporada ${temporadaNum}...`);
+            logger.log(`[CACHE-CONTROLLER] Cache não encontrado para time ${timeId}, tentando snapshots temporada ${temporadaNum}...`);
 
             const dadosSnapshot = await buscarExtratoDeSnapshots(ligaId, timeId, temporadaNum);
 
@@ -675,7 +675,7 @@ export const getExtratoCache = async (req, res) => {
                         rodada: { $gt: 0 }
                     });
                     if (rodadaExisteSnap) {
-                        console.log(`[CACHE-CONTROLLER] ⚡ Snapshot vazio mas rodadas existem para temporada ${temporadaNum} - forçando cálculo`);
+                        logger.log(`[CACHE-CONTROLLER] ⚡ Snapshot vazio mas rodadas existem para temporada ${temporadaNum} - forçando cálculo`);
                         return res.status(404).json({
                             cached: false,
                             message: "Snapshot vazio - rodadas existem, forçar cálculo",
@@ -731,7 +731,7 @@ export const getExtratoCache = async (req, res) => {
                 if (rodadaExiste) {
                     // Rodadas reais existem! Retornar 404 para forçar frontend a chamar
                     // endpoint de cálculo (getExtratoFinanceiro) que criará cache com dados
-                    console.log(`[CACHE-CONTROLLER] ⚡ Rodadas existem para temporada ${temporadaNum} liga ${ligaId} - forçando cálculo (não pré-temporada)`);
+                    logger.log(`[CACHE-CONTROLLER] ⚡ Rodadas existem para temporada ${temporadaNum} liga ${ligaId} - forçando cálculo (não pré-temporada)`);
                     return res.status(404).json({
                         cached: false,
                         message: "Cache não encontrado - rodadas existem, forçar cálculo",
@@ -742,7 +742,7 @@ export const getExtratoCache = async (req, res) => {
                     });
                 }
 
-                console.log(`[CACHE-CONTROLLER] 🆕 Criando extrato inicial para temporada ${temporadaNum}...`);
+                logger.log(`[CACHE-CONTROLLER] 🆕 Criando extrato inicial para temporada ${temporadaNum}...`);
                 
                 // Buscar inscrição do participante para a nova temporada
                 const InscricaoTemporada = mongoose.model('InscricaoTemporada');
@@ -803,7 +803,7 @@ export const getExtratoCache = async (req, res) => {
                         quantidadeAjustes: ajustesInfo.quantidade || 0,
                     };
 
-                    console.log(`[CACHE-CONTROLLER] ✅ Extrato inicial: taxa=${taxaInscricao}, saldoTransferido=${saldoTransferido}, saldoInicial=${saldoInicial}, acertos=${saldoAcertosIns}, saldoFinal=${saldoFinalComAcertos}, status=${statusInscricao}`);
+                    logger.log(`[CACHE-CONTROLLER] ✅ Extrato inicial: taxa=${taxaInscricao}, saldoTransferido=${saldoTransferido}, saldoInicial=${saldoInicial}, acertos=${saldoAcertosIns}, saldoFinal=${saldoFinalComAcertos}, status=${statusInscricao}`);
                     
                     return res.json({
                         cached: false,
@@ -877,7 +877,7 @@ export const getExtratoCache = async (req, res) => {
         const saldoLancamentosIniciais = lancamentosIniciais.reduce((acc, t) =>
             acc + (parseFloat(t.valor) || 0), 0
         );
-        console.log(`[CACHE-CONTROLLER] 📋 Lançamentos iniciais: ${lancamentosIniciais.length}, taxa=${taxaInscricaoValor}, saldoAnterior=${saldoAnteriorTransferidoValor}, total=${saldoLancamentosIniciais}`);
+        logger.log(`[CACHE-CONTROLLER] 📋 Lançamentos iniciais: ${lancamentosIniciais.length}, taxa=${taxaInscricaoValor}, saldoAnterior=${saldoAnteriorTransferidoValor}, total=${saldoLancamentosIniciais}`);
 
         let rodadasConsolidadas = transformarTransacoesEmRodadas(
             transacoesRaw,
@@ -922,7 +922,7 @@ export const getExtratoCache = async (req, res) => {
             }).lean();
             resumoCalculado.pagouInscricao = inscDoc?.pagou_inscricao === true;
         } catch (e) {
-            console.warn('[CACHE-CONTROLLER] ⚠️ Erro ao buscar pagouInscricao:', e.message);
+            logger.warn('[CACHE-CONTROLLER] ⚠️ Erro ao buscar pagouInscricao:', e.message);
             resumoCalculado.pagouInscricao = false;
         }
 
@@ -982,7 +982,7 @@ export const getExtratoCache = async (req, res) => {
             quitacao: cache.quitacao || null,
         });
     } catch (error) {
-        console.error("[CACHE-CONTROLLER] Erro:", error);
+        logger.error("[CACHE-CONTROLLER] Erro:", error);
         res.status(500).json({ error: "Erro interno" });
     }
 };
@@ -1021,7 +1021,7 @@ export const salvarExtratoCache = async (req, res) => {
             }).lean();
 
             if (cacheExistente && cacheExistente.historico_transacoes?.length > 0) {
-                console.warn(`[CACHE-CONTROLLER] ⚠️ BLOQUEADO: Tentativa de sobrescrever cache ${temporadaNum} do time ${timeId} com dados vazios`);
+                logger.warn(`[CACHE-CONTROLLER] ⚠️ BLOQUEADO: Tentativa de sobrescrever cache ${temporadaNum} do time ${timeId} com dados vazios`);
                 return res.status(400).json({
                     success: false,
                     error: "Não é permitido sobrescrever cache de temporada histórica com dados vazios",
@@ -1044,7 +1044,7 @@ export const salvarExtratoCache = async (req, res) => {
             });
 
             if (!rodadaExiste) {
-                console.warn(`[CACHE-CONTROLLER] ⚠️ BLOQUEADO: Tentativa de salvar rodadas fantasmas para temporada ${temporadaNum} (pré-temporada)`);
+                logger.warn(`[CACHE-CONTROLLER] ⚠️ BLOQUEADO: Tentativa de salvar rodadas fantasmas para temporada ${temporadaNum} (pré-temporada)`);
                 return res.status(400).json({
                     success: false,
                     error: `Temporada ${temporadaNum} ainda não iniciou. Não é possível salvar rodadas.`,
@@ -1096,7 +1096,7 @@ export const salvarExtratoCache = async (req, res) => {
                 r.saldoAcumulado = saldoAcumulado;
             });
 
-            console.log(`[CACHE-CONTROLLER] ✅ saldo e saldoAcumulado recalculados para ${rodadasArray.length} rodadas (final: ${saldoAcumulado.toFixed(2)})`);
+            logger.log(`[CACHE-CONTROLLER] ✅ saldo e saldoAcumulado recalculados para ${rodadasArray.length} rodadas (final: ${saldoAcumulado.toFixed(2)})`);
         }
 
         const resumoCalculado = calcularResumoDeRodadas(rodadasArray);
@@ -1135,7 +1135,7 @@ export const salvarExtratoCache = async (req, res) => {
             extratoTravado: isInativo && rodadaDesistencia,
         });
     } catch (error) {
-        console.error("[CACHE-CONTROLLER] Erro:", error);
+        logger.error("[CACHE-CONTROLLER] Erro:", error);
         res.status(500).json({ error: "Erro ao salvar cache" });
     }
 };
@@ -1217,7 +1217,7 @@ export const verificarCacheValido = async (req, res) => {
 
         // ✅ v4.0: Se temporada finalizada E cache permanente, retorna imediatamente
         if (statusTemporada.finalizada && cacheExistente.cache_permanente) {
-            console.log(`[CACHE-CONTROLLER] 🏁 Temporada finalizada - retornando cache permanente para time ${timeId}`);
+            logger.log(`[CACHE-CONTROLLER] 🏁 Temporada finalizada - retornando cache permanente para time ${timeId}`);
 
             let rodadasConsolidadas = transformarTransacoesEmRodadas(
                 cacheExistente.historico_transacoes || [],
@@ -1309,7 +1309,7 @@ export const verificarCacheValido = async (req, res) => {
                                      cacheExistente.historico_transacoes?.length > 0;
 
         if (isPreTemporadaCache) {
-            console.log(`[CACHE-CONTROLLER] ✅ PRÉ-TEMPORADA: Cache válido com ${cacheExistente.historico_transacoes.length} transações iniciais`);
+            logger.log(`[CACHE-CONTROLLER] ✅ PRÉ-TEMPORADA: Cache válido com ${cacheExistente.historico_transacoes.length} transações iniciais`);
 
             // Extrair lançamentos iniciais (inscrição, transferência)
             const transacoesRaw = cacheExistente.historico_transacoes || [];
@@ -1343,7 +1343,7 @@ export const verificarCacheValido = async (req, res) => {
             adicionarAcertosAoResumo(resumoCalculado);
             resumoCalculado.saldo_lancamentos_iniciais = saldoLancamentosIniciais; // ✅ v6.9: consistência
 
-            console.log(`[CACHE-CONTROLLER] ✅ PRÉ-TEMPORADA resumo: saldoInicial=${saldoLancamentosIniciais}, acertos=${saldoAcertosVal}, final=${resumoCalculado.saldo}`);
+            logger.log(`[CACHE-CONTROLLER] ✅ PRÉ-TEMPORADA resumo: saldoInicial=${saldoLancamentosIniciais}, acertos=${saldoAcertosVal}, final=${resumoCalculado.saldo}`);
 
             return res.json({
                 valido: true,
@@ -1379,7 +1379,7 @@ export const verificarCacheValido = async (req, res) => {
             });
             if (!rodadaExisteVal) {
                 rodadaEsperada = rodadaEsperada - 1;
-                console.log(`[CACHE-CONTROLLER] ⚠️ R${rodadaAtualInt} sem dados, ajustando rodadaEsperada para R${rodadaEsperada}`);
+                logger.log(`[CACHE-CONTROLLER] ⚠️ R${rodadaAtualInt} sem dados, ajustando rodadaEsperada para R${rodadaEsperada}`);
             }
         }
 
@@ -1424,7 +1424,7 @@ export const verificarCacheValido = async (req, res) => {
             rodadaDesistencia,
         });
     } catch (error) {
-        console.error("[CACHE-CONTROLLER] Erro:", error);
+        logger.error("[CACHE-CONTROLLER] Erro:", error);
         res.status(500).json({ error: "Erro na validação" });
     }
 };
@@ -1569,7 +1569,7 @@ export const lerCacheExtratoFinanceiro = async (req, res) => {
             resumoCalculado.totalPerdas = (resumoCalculado.totalPerdas || 0) + saldoAcertos;
         }
 
-        console.log(`[CACHE-EXTRATO] ✅ Extrato time ${timeId} temp=${temporadaNum}: Lanç.Iniciais=${saldoLancamentosIniciais.toFixed(2)} + Rodadas=${(resumoCalculado.saldo - saldoLancamentosIniciais - saldoAcertos).toFixed(2)} + Acertos=${saldoAcertos.toFixed(2)} = Final=${resumoCalculado.saldo.toFixed(2)}`);
+        logger.log(`[CACHE-EXTRATO] ✅ Extrato time ${timeId} temp=${temporadaNum}: Lanç.Iniciais=${saldoLancamentosIniciais.toFixed(2)} + Rodadas=${(resumoCalculado.saldo - saldoLancamentosIniciais - saldoAcertos).toFixed(2)} + Acertos=${saldoAcertos.toFixed(2)} = Final=${resumoCalculado.saldo.toFixed(2)}`);
 
         res.json({
             cached: true,
@@ -1591,7 +1591,7 @@ export const lerCacheExtratoFinanceiro = async (req, res) => {
             rodadaTravada: rodadaLimiteInativo,
         });
     } catch (error) {
-        console.error("[CACHE-EXTRATO] Erro:", error);
+        logger.error("[CACHE-EXTRATO] Erro:", error);
         res.status(500).json({ error: "Erro interno" });
     }
 };
@@ -1657,7 +1657,7 @@ export const estatisticasCache = async (req, res) => {
     }
 };
 
-console.log("[CACHE-CONTROLLER] ✅ v6.8 carregado (FIX: rodadas existentes forçam cálculo)");
+logger.log("[CACHE-CONTROLLER] ✅ v6.8 carregado (FIX: rodadas existentes forçam cálculo)");
 
 // ✅ v5.6: Exportar funções auxiliares para uso em outros módulos (tesouraria, etc.)
 export {
