@@ -4,11 +4,11 @@ Handover para nova sessao - carrega contexto do trabalho em andamento e instrui 
 
 ---
 
-## STATUS ATUAL: TODAS PENDENCIAS RESOLVIDAS - PRE-TEMPORADA 2026
+## STATUS ATUAL: VIRADA DE TEMPORADA EXECUTADA - SETUP 2026 PARCIAL
 
 **Data:** 18/02/2026
-**Ultima acao:** AUDIT-001 Fase 3 concluida + verificacao legado 2025→2026 + todas pendencias encerradas.
-**Sessao atual:** AUDIT-011..014 + Investigacao cache MM + AUDIT-001 Fase 3 + Verificacao pre-temporada 2026
+**Ultima acao:** Auditoria sincronismo 2025/2026 + fixes codigo + virada de liga + backfill DB. Commit `8323eab`.
+**Sessao atual:** AUDIT-011..014 + Investigacao cache MM + AUDIT-001 Fase 3 + Auditoria sincronismo + Virada temporada
 **Sessao 18/02/2026:** AUDIT-009 (mata-mata, 3 fixes) + AUDIT-010 (pontos corridos, 4 fixes)
 **Sessao 17/02/2026:** AUDIT-006 (artilheiro, 12 fixes) + AUDIT-007 (capitao, 4 fixes) + AUDIT-008 (luva, 5 fixes) + Stitch simplificado
 **Sessao 14/02/2026:** AUDIT-005: faixas dinamicas ranking, 3 bugs
@@ -510,11 +510,44 @@ node scripts/auditoria-financeira-completa.js --dry-run --temporada=2025
 - Brasileirao 2026 JA ESTA NA RODADA 4 (iniciou final de janeiro/2026)
 - Sistema ainda sem rodadas 2026 no banco (admin ainda nao rodou "popular" para R1-R4)
 
-**🔴 ACAO URGENTE — ANTES de popular qualquer rodada 2026:**
-1. Acionar o painel admin de inscricoes/renovacao para processar todos os participantes
-2. Isso cria `InscricaoTemporada 2026` + injeta `SALDO_TEMPORADA_ANTERIOR` (rodada 0) no extrato de cada um
-3. So entao popular as rodadas R1, R2, R3, R4 de 2026
-O painel existe e ja foi usado em 2025 com sucesso.
+## AUDITORIA SINCRONISMO 2025/2026 — EXECUTADA (18/02/2026)
 
-**Risco se popular rodadas antes da renovacao:** Extratos 2026 abrem com saldo R$0 (sem legado 2025).
-17 credores perdem crédito | 15 devedores perdem registro de divida.
+### Fixes de codigo aplicados (commit `8323eab`)
+
+| Fix | Arquivo | Mudanca |
+|-----|---------|---------|
+| B1 | `utils/saldo-calculator.js` | `>= 2026` → `>= CURRENT_SEASON` (1x) |
+| B2 | `routes/tesouraria-routes.js` | `>= 2026` → `>= CURRENT_SEASON` (20x) |
+| B4 | `utils/seasonGuard.js` | Remove propriedade LEAGUES hardcoded com IDs 2025 |
+
+### Fixes de banco executados
+
+| Fix | Script | Resultado |
+|-----|--------|-----------|
+| B3 | `backfill-rankingturnos-temporada.js --force` | 6 docs rankingturnos receberam `temporada:2025` |
+| Passo 3 | `virada-temporada-liga-2026.js --force` | Liga → nome "Super Cartola 2026", temporada:2026 |
+
+### Estado do banco apos fixes
+
+| Collection | 2025 | 2026 |
+|-----------|------|------|
+| ligas | 1 (Sobral, aposentada?) | 1 (Super Cartola - atualizada) |
+| rodadas | R1..R38 completo (1438 docs) | ZERO — popular via admin |
+| extratofinanceirocaches | 38 docs (saldos finais 2025) | ZERO |
+| rankingturnos | 6 docs CORRIGIDOS | ZERO |
+| inscricoestemporada | ZERO (nunca usada) | ZERO |
+| acertofinanceiros | 2 docs | ZERO |
+
+### Saldos 2025 aguardando transferencia
+
+- **17 credores:** R$19 a R$287 positivo
+- **15 devedores:** -R$61 a -R$401 negativo
+- Transferencia: via botao "Renovacao" na Tesouraria + acertos manuais (como feito em 2025)
+
+### 🔴 PENDENCIAS ADMIN (painel) — fazer ANTES de popular R1/2026
+
+1. Desativar 2-3 participantes que nao renovaram (ativo:false na liga)
+2. Adicionar 3 novatos na liga (time_id, nome, ativo:true)
+3. Processar renovacao financeira de cada participante (saldo 2025 → legado 2026)
+4. Popular rodadas R1, R2, R3 de 2026 via painel admin
+   — Apos o popular, `rodadaController` grava com `temporada: 2026` (CURRENT_SEASON) automaticamente
