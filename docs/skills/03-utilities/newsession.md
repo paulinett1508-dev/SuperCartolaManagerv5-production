@@ -501,17 +501,20 @@ node scripts/auditoria-financeira-completa.js --dry-run --temporada=2025
 
 ---
 
-## PRE-TEMPORADA 2026 — ESTADO ATUAL
+## TEMPORADA 2026 — ESTADO ATUAL (Rodada 4 em curso)
 
 **Diagnostico (18/02/2026):**
 - 32 caches 2025 auditados: 17 credores (R$19..R$287), 15 devedores (-R$61..-R$401), 0 divergencias
 - `quitacao`: 0/32 — temporada 2025 ainda nao encerrada formalmente
 - `InscricaoTemporada 2026`: zero registros — renovacao nao processada ainda
-- Brasileirao 2026 tipicamente abre em abril — ha tempo
+- Brasileirao 2026 JA ESTA NA RODADA 4 (iniciou final de janeiro/2026)
+- Sistema ainda sem rodadas 2026 no banco (admin ainda nao rodou "popular" para R1-R4)
 
-**Acao obrigatoria antes de abril:**
-Acionar o painel admin de inscricoes/renovacao para processar todos os participantes.
-Isso cria `InscricaoTemporada 2026` e injeta `SALDO_TEMPORADA_ANTERIOR` (rodada 0) no extrato de cada um.
+**🔴 ACAO URGENTE — ANTES de popular qualquer rodada 2026:**
+1. Acionar o painel admin de inscricoes/renovacao para processar todos os participantes
+2. Isso cria `InscricaoTemporada 2026` + injeta `SALDO_TEMPORADA_ANTERIOR` (rodada 0) no extrato de cada um
+3. So entao popular as rodadas R1, R2, R3, R4 de 2026
 O painel existe e ja foi usado em 2025 com sucesso.
 
-**Risco se nao fizer:** Quando R1/2026 popular, extratos abrem com saldo R$0 (sem legado 2025).
+**Risco se popular rodadas antes da renovacao:** Extratos 2026 abrem com saldo R$0 (sem legado 2025).
+17 credores perdem crédito | 15 devedores perdem registro de divida.
