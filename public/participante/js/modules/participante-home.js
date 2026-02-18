@@ -577,13 +577,18 @@ function processarDadosParaRender(liga, ranking, rodadas, extratoData, meuTimeId
         if (meuTimeAnterior) posicaoAnterior = meuTimeAnterior.posicao;
     }
 
-    // ✅ Calcular saldo baseado nas rodadas (fonte da verdade - mesma regra do modal)
+    // ✅ FIX: Usar saldo consolidado do backend (inclui rodadas + acertos + ajustes)
+    // O backend já calcula o saldo completo em resumo.saldo ou saldo_atual
+    // Fallback para cálculo manual apenas se não houver dados do extrato
+    const saldoConsolidado = extratoData?.resumo?.saldo ?? extratoData?.saldo_atual ?? extratoData?.resumo?.saldo_final ?? null;
+
+    // Cálculo manual apenas como último fallback (não inclui acertos/ajustes)
     const saldoCalculadoPorRodadas = minhasRodadas.reduce((total, rodada) => {
         return total + (parseFloat(rodada.valorFinanceiro || rodada.ganho_rodada || 0));
     }, 0);
 
-    // Usar saldo calculado das rodadas (prioridade) ou fallback para cache do extrato
-    const saldoFinanceiro = saldoCalculadoPorRodadas || (extratoData?.saldo_atual ?? extratoData?.resumo?.saldo_final ?? 0);
+    // Priorizar saldo consolidado do backend (inclui acertos/ajustes)
+    const saldoFinanceiro = saldoConsolidado !== null ? saldoConsolidado : saldoCalculadoPorRodadas;
 
     // ✅ v1.1 FIX: Buscar dados do participante com fallback robusto
     // A navegação passa camelCase (nomeTime, nomeCartola) mas outros módulos usam snake_case
