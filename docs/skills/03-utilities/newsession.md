@@ -4,11 +4,12 @@ Handover para nova sessao - carrega contexto do trabalho em andamento e instrui 
 
 ---
 
-## STATUS ATUAL: 2026 A PLENO VAPOR — BANCO CONSOLIDADO
+## STATUS ATUAL: 2026 A PLENO VAPOR — INSCRICOES CORRIGIDAS
 
-**Data:** 18/02/2026
-**Ultima acao:** Consolidacao banco unico (MONGO_URI_DEV descontinuada) + nome liga prod + commits `8323eab` + `84ce387`.
-**Sessao atual:** AUDIT-011..014 + Investigacao cache MM + AUDIT-001 Fase 3 + Auditoria sincronismo + Virada temporada
+**Data:** 18/02/2026 (tarde)
+**Ultima acao:** Fix bug inscricao 2026 — debitos faltantes inseridos + codigo corrigido + nao-renovantes inativos. Commit `5343052`.
+**Sessao atual (tarde):** Auditoria inscricoes 2026: 6 participantes sem INSCRICAO_TEMPORADA no cache, bug `=== false` em controller/calculator, 3 nao-renovantes com `ativo=true` incorreto.
+**Sessao 18/02/2026 (manha):** AUDIT-011..014 + Investigacao cache MM + AUDIT-001 Fase 3 + Auditoria sincronismo + Virada temporada
 **Sessao 18/02/2026:** AUDIT-009 (mata-mata, 3 fixes) + AUDIT-010 (pontos corridos, 4 fixes)
 **Sessao 17/02/2026:** AUDIT-006 (artilheiro, 12 fixes) + AUDIT-007 (capitao, 4 fixes) + AUDIT-008 (luva, 5 fixes) + Stitch simplificado
 **Sessao 14/02/2026:** AUDIT-005: faixas dinamicas ranking, 3 bugs
@@ -412,7 +413,7 @@ O wizard de modulos (`gerenciar-modulos.html`) salvava corretamente no `ModuleCo
 
 | Arquivo | Papel | Status |
 |---------|-------|--------|
-| `utils/saldo-calculator.js` | FONTE DA VERDADE financeira | Correto (v2.0) |
+| `utils/saldo-calculator.js` | FONTE DA VERDADE financeira | FIXADO (`!= false` → `=== true`, linhas 158+287) |
 | `routes/tesouraria-routes.js` | 4 endpoints financeiros | FIXADO v3.3 |
 | `controllers/fluxoFinanceiroController.js` | Calculo real-time | v8.12.0 OK |
 | `controllers/extratoFinanceiroCacheController.js` | Cache + funcoes compartilhadas | v6.9 (lancamentosIniciais fix aplicado) |
@@ -500,6 +501,8 @@ node scripts/auditoria-financeira-completa.js --dry-run --temporada=2025
 22. ~~AUDIT-001 Fase 3~~ ✅ RESOLVIDO (Fix A1 ja estava aplicado; CSS dead code -14 linhas)
 23. ~~Auditoria sincronismo 2025/2026~~ ✅ RESOLVIDO (commit `8323eab`)
 24. ~~Consolidacao banco unico~~ ✅ RESOLVIDO (commit `84ce387`, MONGO_URI_DEV deletada)
+25. ~~Fix bug inscricao 2026 (6 debitos faltantes + codigo)~~ ✅ RESOLVIDO (commit `5343052`)
+26. ~~3 nao-renovantes com times.ativo=true incorreto~~ ✅ RESOLVIDO (update direto no banco)
 
 ---
 
@@ -521,6 +524,7 @@ node scripts/auditoria-financeira-completa.js --dry-run --temporada=2025
 
 **Liga producao:** `temporada:2026`, `participantes:35`, `times:35`, `nome:"Super Cartola 2026"` ✅
 **Rodada atual Cartola:** R4 (mercado_status:1 aberto, fechamento 25/02/2026 18:59)
+**Inscricoes 2026:** 46 docs — 38 Super Cartola + 8 Os Fuleros. Todos os debitos corretos ✅
 
 ### Setup 2026 ja executado (confirmado no banco real)
 
@@ -534,6 +538,56 @@ node scripts/auditoria-financeira-completa.js --dry-run --temporada=2025
 - `cartola-manager-dev` — dados travados em dez/2025 (nao reflete realidade)
 - `MONGO_URI_DEV` deletada dos Replit Secrets pelo admin (18/02/2026)
 - Scripts que rodaram nele esta sessao (`backfill`, `virada`) eram no orfao — sem impacto (producao ja estava correta)
+
+## FIX INSCRICAO 2026 — EXECUTADO (18/02/2026 tarde)
+
+### Problema raiz
+`criarTransacoesIniciais` usava `ObjectId` para `liga_id` na query de `extratofinanceirocaches`, mas caches existentes armazenam `liga_id` como **String**. O `updateOne` nao encontrava o doc existente, o debito nunca era inserido.
+
+Bug secundario: `=== false` em `inscricoesController.js:74` e `!= false` em `saldo-calculator.js:158,287` falham silenciosamente quando `pagou_inscricao` e `undefined`.
+
+### DB corrigido diretamente
+
+| Participante | Liga | Taxa | Acao |
+|---|---|---|---|
+| Paulinett Miranda (13935277) | Os Fuleros | -R$100 | INSCRICAO_TEMPORADA inserida |
+| Pade Papito (9232824) | Os Fuleros | -R$100 | INSCRICAO_TEMPORADA inserida |
+| jhones Prado (25330294) | Os Fuleros | -R$100 | INSCRICAO_TEMPORADA inserida |
+| bruno (4223845) | Os Fuleros | -R$100 | INSCRICAO_TEMPORADA inserida |
+| Thyago Martins (4021507) | Os Fuleros | -R$100 | INSCRICAO_TEMPORADA inserida |
+| Lucas Sousa (476869) | Super Cartola | -R$180 | INSCRICAO_TEMPORADA inserida |
+| Emerson (22623329) | Super Cartola | — | `times.ativo` false (nao renovou) |
+| JB Oliveira (164131) | Super Cartola | — | `times.ativo` false (nao renovou) |
+| Wildemar Silva (1233737) | Super Cartola | — | `times.ativo` false (nao renovou) |
+
+### Codigo corrigido — commit `5343052`
+
+| Arquivo | Fix |
+|---------|-----|
+| `controllers/inscricoesController.js` | `=== false` → `!== true`; liga_id como String (nao ObjectId); `perdas_consolidadas` adicionado ao `$inc` |
+| `utils/saldo-calculator.js` | `!= false` → `=== true` em 2 pontos (linhas 158 e 287) |
+| `scripts/fix-inscricao-pendente-2026.js` | Script que aplicou os 6 debitos faltantes (keepable para auditoria futura) |
+
+### Descobertas de schema importantes
+
+| Collection | Campo liga | Tipo armazenado |
+|---|---|---|
+| `extratofinanceirocaches` | `liga_id` | String |
+| `inscricoestemporada` | `liga_id` | ObjectId |
+| `times` | `id` | Number |
+
+**Nunca usar ObjectId em queries de `extratofinanceirocaches`.** Sempre String.
+
+### Estado atual Os Fuleros (6977a62071dee12036bb163e)
+- 8 inscritos: 2 pagaram (Enderson, Erivaldo) + 6 devem (debitos inseridos) ✅
+- Paulinett Miranda e owner mas SEM isencao nesta liga (isenta apenas no Super Cartola)
+
+### Estado atual Super Cartola (684cb1c8af923da7c7df51de)
+- 38 inscritos: 17 pagaram + 21 devem — todos com INSCRICAO_TEMPORADA no cache ✅
+- 3 com `status: nao_participa` (encerraram 2025): `times.ativo=false` ✅
+- Paulinett Miranda: `pagou_inscricao=true` (isenta de taxa nesta liga) ✅
+
+---
 
 ## AUDITORIA SINCRONISMO 2025/2026 + BANCO UNICO — EXECUTADA (18/02/2026)
 
