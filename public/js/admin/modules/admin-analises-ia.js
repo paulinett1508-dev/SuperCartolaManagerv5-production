@@ -329,7 +329,7 @@ function rankingTable(items) {
                 <tr>
                     <td>${r.posicao}</td>
                     <td>${r.nome}</td>
-                    <td><strong>${(r.total_pontos || 0).toFixed(1)}</strong></td>
+                    <td><strong>${(Math.trunc((r.total_pontos || 0) * 10) / 10).toFixed(1)}</strong></td>
                     <td>${r.media_pontos}</td>
                     <td>${r.desvio_padrao}</td>
                     <td>${r.mitos || 0}</td>

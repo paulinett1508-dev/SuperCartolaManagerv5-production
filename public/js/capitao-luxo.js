@@ -381,7 +381,7 @@ const CapitaoLuxo = {
             const isPodio3 = posicao === 3;
 
             const escudoSrc = participante.escudo || `/escudos/${participante.clube_id || "default"}.png`;
-            const pontos = (participante.pontuacao_total || 0).toFixed(2);
+            const pontos = (Math.trunc((participante.pontuacao_total || 0) * 100) / 100).toFixed(2);
             const media = (participante.media_capitao || 0).toFixed(2);
             const rodadas = participante.rodadas_jogadas || 0;
             const melhor = participante.melhor_capitao?.pontuacao?.toFixed(2) || "-";

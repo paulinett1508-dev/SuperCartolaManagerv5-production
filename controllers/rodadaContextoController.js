@@ -12,6 +12,7 @@ import MelhorMesCache from "../models/MelhorMesCache.js";
 import mongoose from "mongoose";
 import { CURRENT_SEASON } from "../config/seasons.js";
 import * as disputasService from "../services/disputasService.js";
+import { truncarPontosNum } from "../utils/type-helpers.js";
 
 const LOG_PREFIX = "[RODADA-CONTEXTO]";
 
@@ -113,8 +114,8 @@ export const obterContextoRodada = async (req, res) => {
         if (pontosArray.length > 0) {
             const media = pontosArray.reduce((a, b) => a + b, 0) / pontosArray.length;
             const melhor = Math.max(...pontosArray);
-            contexto.performance.vs_media = parseFloat(((meuTime.pontos || 0) - media).toFixed(2));
-            contexto.performance.vs_melhor = parseFloat(((meuTime.pontos || 0) - melhor).toFixed(2));
+            contexto.performance.vs_media = truncarPontosNum((meuTime.pontos || 0) - media);
+            contexto.performance.vs_melhor = truncarPontosNum((meuTime.pontos || 0) - melhor);
         }
 
         // 5. Buscar dados de cada módulo ativo usando service

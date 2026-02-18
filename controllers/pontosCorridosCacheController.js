@@ -13,6 +13,7 @@ import {
 import { buscarConfigSimplificada } from "../utils/moduleConfigHelper.js";
 import { CURRENT_SEASON } from "../config/seasons.js";
 import logger from '../utils/logger.js';
+import { truncarPontosNum } from '../utils/type-helpers.js';
 
 // ✅ v3.0: Função para buscar configuração dinâmica do módulo
 async function buscarConfigPontosCorridos(ligaId, temporada = CURRENT_SEASON) {
@@ -424,6 +425,14 @@ export const obterConfrontosPontosCorridos = async (
             }
         }
 
+        // ✅ FIX: Atualizar caches permanentes com scores zerados usando dados reais da coleção rodadas.
+        // Isso ocorre quando o admin pré-gerou todas as rodadas antes dos jogos serem disputados.
+        if (dadosPorRodada.length > 0) {
+            dadosPorRodada = await atualizarCachesComScoresReais(
+                dadosPorRodada, ligaId, temporada, config, rodadaAtualBrasileirao, timesMap
+            );
+        }
+
         // 3. Se mercado fechado E rodada atual não está no cache (ou precisa atualização), calcular parciais ao vivo
         if (mercadoFechado && rodadaAtualLiga > 0) {
             const rodadaAtualNoCache = dadosPorRodada.find(
@@ -637,7 +646,7 @@ async function calcularRodadaComParciais(
                     nome: timesDataMap[tid1]?.nome || `Time ${tid1}`,
                     nome_cartola: timesDataMap[tid1]?.nome_cartola || "",
                     escudo: timesDataMap[tid1]?.escudo || "",
-                    pontos: Math.round(p1 * 100) / 100,
+                    pontos: truncarPontosNum(p1),
                     ativo: status1.ativo !== false,
                 },
                 time2: {
@@ -645,7 +654,7 @@ async function calcularRodadaComParciais(
                     nome: timesDataMap[tid2]?.nome || `Time ${tid2}`,
                     nome_cartola: timesDataMap[tid2]?.nome_cartola || "",
                     escudo: timesDataMap[tid2]?.escudo || "",
-                    pontos: Math.round(p2 * 100) / 100,
+                    pontos: truncarPontosNum(p2),
                     ativo: status2.ativo !== false,
                 },
                 pontos1: resultado.pontosA,
@@ -797,7 +806,7 @@ async function reconstruirCacheDeRodadas(ligaId, temporada, config, timesMap) {
                         nome: timesDataMap[tid1]?.nome || timesMap[tid1]?.nome || `Time ${tid1}`,
                         nome_cartola: timesDataMap[tid1]?.nome_cartola || timesMap[tid1]?.nome_cartola || '',
                         escudo: timesDataMap[tid1]?.escudo || timesMap[tid1]?.escudo || '',
-                        pontos: Math.round(p1 * 100) / 100,
+                        pontos: truncarPontosNum(p1),
                         ativo: true,
                     },
                     time2: {
@@ -805,7 +814,7 @@ async function reconstruirCacheDeRodadas(ligaId, temporada, config, timesMap) {
                         nome: timesDataMap[tid2]?.nome || timesMap[tid2]?.nome || `Time ${tid2}`,
                         nome_cartola: timesDataMap[tid2]?.nome_cartola || timesMap[tid2]?.nome_cartola || '',
                         escudo: timesDataMap[tid2]?.escudo || timesMap[tid2]?.escudo || '',
-                        pontos: Math.round(p2 * 100) / 100,
+                        pontos: truncarPontosNum(p2),
                         ativo: true,
                     },
                     pontos1: resultado.pontosA,
@@ -861,6 +870,139 @@ async function reconstruirCacheDeRodadas(ligaId, temporada, config, timesMap) {
         logger.error('[PONTOS-CORRIDOS] ❌ Erro ao reconstruir cache:', error.message);
         return [];
     }
+}
+
+// ✅ FIX: Detecta caches permanentes com scores zerados e os atualiza com dados reais da coleção rodadas.
+// Isso ocorre quando o admin pré-gerou rodadas antes dos jogos serem disputados.
+// A função preserva o bracket do admin (quem joga contra quem) e só preenche os scores.
+async function atualizarCachesComScoresReais(dadosPorRodada, ligaId, temporada, config, rodadaAtualBrasileirao, timesMap) {
+    const resultado = [...dadosPorRodada];
+    let houveAtualizacao = false;
+
+    for (let i = 0; i < resultado.length; i++) {
+        const d = resultado[i];
+
+        // Só processar caches permanentes
+        if (!d.permanent) continue;
+
+        // Calcular rodada BR correspondente
+        const rodadaBR = d.rodada + config.rodadaInicial - 1;
+
+        // Só atualizar se a rodada BR já foi jogada (antes da atual)
+        if (rodadaBR >= rodadaAtualBrasileirao) continue;
+
+        // Verificar se algum confronto tem score zerado
+        const temScoreZerado = (d.confrontos || []).some(
+            c => (Number(c.time1?.pontos) || 0) === 0 || (Number(c.time2?.pontos) || 0) === 0
+        );
+        if (!temScoreZerado) continue;
+
+        // Buscar scores reais da coleção rodadas para esta rodada BR
+        let rodadasBR;
+        try {
+            rodadasBR = await Rodada.find({
+                ligaId: ligaId,
+                temporada: temporada,
+                rodada: rodadaBR
+            }).lean();
+        } catch (e) {
+            logger.warn(`[PONTOS-CORRIDOS] ⚠️ Erro ao buscar Rodada BR ${rodadaBR}:`, e.message);
+            continue;
+        }
+
+        if (!rodadasBR || rodadasBR.length === 0) continue;
+
+        // Verificar se existem scores não-zero
+        const temScoresReais = rodadasBR.some(r => (r.pontos || 0) > 0);
+        if (!temScoresReais) continue;
+
+        // Mapear scores por timeId
+        const scoresMap = {};
+        rodadasBR.forEach(r => {
+            scoresMap[String(r.timeId)] = r.pontos || 0;
+        });
+
+        // Atualizar confrontos: preencher scores zerados com dados reais
+        const confrontosAtualizados = d.confrontos.map(c => {
+            const tid1 = String(c.time1?.id || c.time1?.timeId || '');
+            const tid2 = String(c.time2?.id || c.time2?.timeId || '');
+            const p1Atual = Number(c.time1?.pontos) || 0;
+            const p2Atual = Number(c.time2?.pontos) || 0;
+
+            // Preservar scores já preenchidos; só substituir os zerados
+            const novoP1 = p1Atual === 0 && scoresMap[tid1] != null ? scoresMap[tid1] : p1Atual;
+            const novoP2 = p2Atual === 0 && scoresMap[tid2] != null ? scoresMap[tid2] : p2Atual;
+
+            if (novoP1 === p1Atual && novoP2 === p2Atual) return c;
+
+            const res = calcularResultado(novoP1, novoP2, config);
+            return {
+                ...c,
+                time1: { ...c.time1, pontos: truncarPontosNum(novoP1) },
+                time2: { ...c.time2, pontos: truncarPontosNum(novoP2) },
+                pontos1: res.pontosA,
+                pontos2: res.pontosB,
+                financeiro1: Math.round(res.financeiroA),
+                financeiro2: Math.round(res.financeiroB),
+                tipo: res.tipo,
+            };
+        });
+
+        // Verificar se houve mudanças reais
+        const houveMudanca = confrontosAtualizados.some((c, idx) =>
+            Number(c.time1?.pontos) !== Number(d.confrontos[idx]?.time1?.pontos) ||
+            Number(c.time2?.pontos) !== Number(d.confrontos[idx]?.time2?.pontos)
+        );
+        if (!houveMudanca) continue;
+
+        logger.log(`[PONTOS-CORRIDOS] 🔄 Atualizando cache permanente R${d.rodada} (BR R${rodadaBR}) com scores reais (${rodadasBR.length} times encontrados)`);
+
+        // Recalcular classificação acumulada com os novos scores
+        const liga = await Liga.findById(ligaId).lean();
+        const times = liga?.participantes || [];
+        const statusMap = await buscarStatusParticipantes(times);
+
+        const classificacaoNova = calcularClassificacaoAcumulada(
+            times,
+            timesMap,
+            resultado.slice(0, i), // rodadas anteriores já processadas (correta sequência)
+            confrontosAtualizados,
+            d.rodada,
+            statusMap,
+            config,
+        );
+
+        // Atualizar in-memory
+        resultado[i] = {
+            ...d,
+            confrontos: confrontosAtualizados,
+            classificacao: classificacaoNova,
+            updatedAt: new Date(),
+        };
+
+        houveAtualizacao = true;
+
+        // Persistir no MongoDB para que próximas requisições sirvam dados corretos
+        try {
+            await PontosCorridosCache.findOneAndUpdate(
+                { liga_id: ligaId, rodada_consolidada: d.rodada, temporada: temporada },
+                { $set: {
+                    confrontos: confrontosAtualizados,
+                    classificacao: classificacaoNova,
+                    ultima_atualizacao: new Date(),
+                }}
+            );
+            logger.log(`[PONTOS-CORRIDOS] ✅ Cache permanente R${d.rodada} atualizado com scores reais no MongoDB`);
+        } catch (saveErr) {
+            logger.warn(`[PONTOS-CORRIDOS] ⚠️ Erro ao salvar cache atualizado R${d.rodada}:`, saveErr.message);
+        }
+    }
+
+    if (houveAtualizacao) {
+        logger.log(`[PONTOS-CORRIDOS] ✅ Scores zerados em caches permanentes foram corrigidos com dados reais da coleção rodadas`);
+    }
+
+    return resultado;
 }
 
 // ✅ FIX: Extrai a ordem original dos times a partir dos confrontos da rodada MAIS RECENTE salva pelo admin.

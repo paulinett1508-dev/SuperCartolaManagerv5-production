@@ -542,7 +542,7 @@ async function carregarClassificadosParciais(contentElement, ligaId, edicaoId, e
           </div>
         </td>
         <td class="pontos-cell valor-positivo">
-          <div class="pontos-valor">${t._pontosRodada?.toFixed(2).replace(".", ",") || "0,00"}</div>
+          <div class="pontos-valor">${(Math.trunc((t._pontosRodada||0) * 100) / 100).toFixed(2).replace(".", ",") || "0,00"}</div>
         </td>
       </tr>`).join("");
 
@@ -559,7 +559,7 @@ async function carregarClassificadosParciais(contentElement, ligaId, edicaoId, e
           </div>
         </td>
         <td class="pontos-cell">
-          <div class="pontos-valor">${t._pontosRodada?.toFixed(2).replace(".", ",") || "0,00"}</div>
+          <div class="pontos-valor">${(Math.trunc((t._pontosRodada||0) * 100) / 100).toFixed(2).replace(".", ",") || "0,00"}</div>
         </td>
       </tr>`).join("");
 

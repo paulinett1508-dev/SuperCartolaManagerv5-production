@@ -303,7 +303,7 @@ export async function exportarExtratoPDF(timeId) {
         // Processar cada rodada
         extrato.rodadas.forEach((r) => {
             const rod = `R${r.rodada}`;
-            const pts = r.pontos ? ` (${r.pontos.toFixed(2)} pts)` : "";
+            const pts = r.pontos ? ` (${(Math.trunc(r.pontos * 100) / 100).toFixed(2)} pts)` : "";
 
             // RANKING DE RODADAS (Bonus/Onus)
             if (r.bonusOnus > 0) {
@@ -330,10 +330,10 @@ export async function exportarExtratoPDF(timeId) {
 
             // TOP 10 - Detalhamento completo (posicao = posicao na rodada, nao global)
             if (r.top10 > 0) {
-                const ptsTop = r.pontos ? ` com ${r.pontos.toFixed(2)} pts` : "";
+                const ptsTop = r.pontos ? ` com ${(Math.trunc(r.pontos * 100) / 100).toFixed(2)} pts` : "";
                 ganhos.push({ modulo: "TOP 10 MITOS", desc: `${rod} - Melhor da rodada${ptsTop}`, valor: r.top10 });
             } else if (r.top10 < 0) {
-                const ptsTop = r.pontos ? ` com ${r.pontos.toFixed(2)} pts` : "";
+                const ptsTop = r.pontos ? ` com ${(Math.trunc(r.pontos * 100) / 100).toFixed(2)} pts` : "";
                 perdas.push({ modulo: "TOP 10 MICOS", desc: `${rod} - Pior da rodada${ptsTop}`, valor: r.top10 });
             }
         });

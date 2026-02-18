@@ -525,9 +525,9 @@ export function renderTabelaRodada(
             <!-- Placar e Financeiro - Centro -->
             <div style="text-align: center; margin: 0 20px; flex-shrink: 0;">
               <div style="font-size: 18px; font-weight: 700; font-family: 'JetBrains Mono', monospace; margin-bottom: 4px;">
-                <span style="${corPlacarA}">${pontosA !== null ? pontosA.toFixed(1) : "-"}</span>
+                <span style="${corPlacarA}">${pontosA !== null ? (Math.trunc(pontosA * 10) / 10).toFixed(1) : "-"}</span>
                 <span style="color: var(--text-muted); margin: 0 8px;">x</span>
-                <span style="${corPlacarB}">${pontosB !== null ? pontosB.toFixed(1) : "-"}</span>
+                <span style="${corPlacarB}">${pontosB !== null ? (Math.trunc(pontosB * 10) / 10).toFixed(1) : "-"}</span>
               </div>
               <div style="font-size: 10px; font-family: 'JetBrains Mono', monospace;">
                 <span style="${corFinanceiroA}">${financeiroA}</span>
@@ -547,7 +547,7 @@ export function renderTabelaRodada(
           </div>
         </td>
         <td style="text-align: center; padding: 16px; font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 16px;">
-          ${pontosA !== null && pontosB !== null ? Math.abs(pontosA - pontosB).toFixed(1) : "-"}
+          ${pontosA !== null && pontosB !== null ? (Math.trunc(Math.abs(pontosA - pontosB) * 10) / 10).toFixed(1) : "-"}
         </td>
       </tr>
     `;
@@ -784,7 +784,7 @@ export function renderTabelaClassificacao(
     const totalJogos = time.vitorias + time.empates + time.derrotas;
     const aproveitamento =
       totalJogos > 0
-        ? ((time.pontos / (totalJogos * 3)) * 100).toFixed(1)
+        ? ((Math.trunc((time.pontos / (totalJogos * 3)) * 1000) / 1000) * 100).toFixed(1)
         : "0.0";
 
     linhas += `

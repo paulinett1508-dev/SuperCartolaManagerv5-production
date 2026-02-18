@@ -229,7 +229,7 @@ function renderParticipanteCard(p) {
         <div style="margin-top: 8px;">
           <p class="text-muted" style="font-size: 10px; margin: 0;">Posição / Pontos</p>
           <p style="font-size: 14px; font-weight: 600; margin: 2px 0 0 0; font-family: var(--font-mono);">
-            ${p.posicao}º • ${p.pontos.toFixed(2)}
+            ${p.posicao}º • ${(Math.trunc((p.pontos||0) * 100) / 100).toFixed(2)}
           </p>
         </div>
       ` : ''}
@@ -262,7 +262,7 @@ function renderParticipanteListItem(p, idx) {
         </p>
         ${p.posicao ? `
           <p class="text-muted" style="font-size: 11px; margin: 2px 0 0 0;">
-            ${p.posicao}º • ${p.pontos.toFixed(1)} pts
+            ${p.posicao}º • ${(Math.trunc((p.pontos||0) * 10) / 10).toFixed(1)} pts
           </p>
         ` : ''}
       </div>

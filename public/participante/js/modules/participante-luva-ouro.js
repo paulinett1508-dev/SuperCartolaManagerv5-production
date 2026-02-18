@@ -572,7 +572,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                         <span style="font-size: 12px; width: 20px; color: #888;">${idx + 1}º</span>
                         <span style="color: var(--app-text-primary); font-size: 12px; font-weight: 500;">${g.nome}</span>
                     </div>
-                    <span style="color: var(--app-gold); font-weight: 800; font-size: 14px;">${g.pontos.toFixed(1)} pts</span>
+                    <span style="color: var(--app-gold); font-weight: 800; font-size: 14px;">${(Math.trunc((g.pontos||0) * 10) / 10).toFixed(1)} pts</span>
                 </div>
                 `,
                     )
@@ -607,7 +607,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                         return `
                     <div style="flex: 1; background: ${bgColor}; border-radius: 8px; padding: 8px 4px; text-align: center;">
                         <div style="font-size: 9px; color: #666; margin-bottom: 4px;">R${r.rodada}</div>
-                        <div style="font-size: 14px; font-weight: 800; color: ${textColor};">${pontos.toFixed(1)}</div>
+                        <div style="font-size: 14px; font-weight: 800; color: ${textColor};">${(Math.trunc((pontos||0) * 10) / 10).toFixed(1)}</div>
                     </div>
                     `;
                     })

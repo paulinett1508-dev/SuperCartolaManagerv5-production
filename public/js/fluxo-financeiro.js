@@ -37,9 +37,9 @@ function getTemporadaSelecionada() {
 }
 
 function obterLigaId() {
-    // ✅ MODO ADMIN: Verificar URL (detalhe-liga.html?id=XXX)
+    // ✅ MODO ADMIN: Verificar URL (detalhe-liga.html?id=XXX ou fluxo-financeiro.html?liga=XXX)
     const urlParams = new URLSearchParams(window.location.search);
-    const ligaIdFromUrl = urlParams.get("id") || urlParams.get("ligaId");
+    const ligaIdFromUrl = urlParams.get("liga") || urlParams.get("id") || urlParams.get("ligaId");
     if (ligaIdFromUrl) {
         return ligaIdFromUrl;
     }
@@ -417,7 +417,7 @@ function exportarRelatorioCSV() {
             p.time,
             p.bonus.toFixed(2),
             p.onus.toFixed(2),
-            p.pontosCorridos.toFixed(2),
+            (Math.trunc((p.pontosCorridos||0) * 100) / 100).toFixed(2),
             p.mataMata.toFixed(2),
             p.melhorMes.toFixed(2),
             p.ajustes.toFixed(2),

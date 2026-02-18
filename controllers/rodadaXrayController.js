@@ -7,6 +7,7 @@ import Rodada from "../models/Rodada.js";
 import Liga from "../models/Liga.js";
 import mongoose from "mongoose";
 import { CURRENT_SEASON } from "../config/seasons.js";
+import { truncarPontosNum } from "../utils/type-helpers.js";
 
 const LOG_PREFIX = "[RODADA-XRAY]";
 
@@ -125,7 +126,7 @@ export const obterRaioXRodada = async (req, res) => {
             analisePosPosicao[posId] = {
                 ...posInfo,
                 quantidade: atletasDaPosicao.length,
-                pontos_total: parseFloat(totalPontos.toFixed(2)),
+                pontos_total: truncarPontosNum(totalPontos),
                 atletas: atletasDaPosicao.map(a => a.apelido),
             };
         }
@@ -163,17 +164,17 @@ export const obterRaioXRodada = async (req, res) => {
 
             // Estatísticas da liga na rodada
             liga: {
-                media: parseFloat(mediaPontos.toFixed(2)),
-                melhor: parseFloat(melhorPontuacao.toFixed(2)),
-                pior: parseFloat(piorPontuacao.toFixed(2)),
+                media: truncarPontosNum(mediaPontos),
+                melhor: truncarPontosNum(melhorPontuacao),
+                pior: truncarPontosNum(piorPontuacao),
                 total_participantes: participantesAtivos.length,
                 melhor_da_rodada: {
                     nome_cartola: melhorDaRodada.nome_cartola || "N/D",
                     pontos: melhorDaRodada.pontos || 0,
                     timeId: melhorDaRodada.timeId,
                 },
-                diferenca_media: parseFloat(((meuTime.pontos || 0) - mediaPontos).toFixed(2)),
-                diferenca_melhor: parseFloat(((meuTime.pontos || 0) - melhorPontuacao).toFixed(2)),
+                diferenca_media: truncarPontosNum((meuTime.pontos || 0) - mediaPontos),
+                diferenca_melhor: truncarPontosNum((meuTime.pontos || 0) - melhorPontuacao),
             },
 
             // Atletas detalhados
@@ -188,7 +189,7 @@ export const obterRaioXRodada = async (req, res) => {
             capitao: atletaCapitao ? {
                 apelido: atletaCapitao.apelido,
                 pontos_base: atletaCapitao.pontos_base,
-                bonus: parseFloat(bonusCapitao.toFixed(2)),
+                bonus: truncarPontosNum(bonusCapitao),
                 posicao: atletaCapitao.posicao_nome,
                 impacto_percentual: (meuTime.pontos || 0) > 0
                     ? parseFloat(((bonusCapitao / (meuTime.pontos || 1)) * 100).toFixed(1))

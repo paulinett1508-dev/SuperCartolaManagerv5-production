@@ -495,7 +495,7 @@ function renderizarDisputas(disputas) {
                 <div class="rxray-disputa-confronto">
                     <span class="voce">Você ${pc.seu_confronto.voce.toFixed(1)}</span>
                     <span class="vs">×</span>
-                    <span class="adv">${pc.seu_confronto.adversario.pontos.toFixed(1)} ${escapeHtml(pc.seu_confronto.adversario.nome)}</span>
+                    <span class="adv">${(Math.trunc((pc.seu_confronto.adversario.pontos||0) * 10) / 10).toFixed(1)} ${escapeHtml(pc.seu_confronto.adversario.nome)}</span>
                     <span class="resultado ${resultadoClass}">${resultadoIcon}</span>
                 </div>
                 <div class="rxray-disputa-status">
@@ -538,7 +538,7 @@ function renderizarDisputas(disputas) {
             <div class="rxray-disputa-card">
                 <div class="rxray-disputa-header">👑 CAPITÃO DE LUXO</div>
                 <div class="rxray-disputa-status">
-                    ${cap.sua_posicao}º lugar • ${(cap.seus_pontos || 0).toFixed(1)} pts
+                    ${cap.sua_posicao}º lugar • ${(Math.trunc((cap.seus_pontos || 0) * 10) / 10).toFixed(1)} pts
                 </div>
             </div>
         `);
@@ -561,7 +561,7 @@ function renderizarPerformance(performance) {
         </div>
         <div class="stat-card">
             <div class="stat-label">Pontos</div>
-            <div class="stat-value">⭐ ${performance.pontos.toFixed(2)}</div>
+            <div class="stat-value">⭐ ${truncarPontos(performance.pontos)}</div>
         </div>
         <div class="stat-card ${positiveClass}">
             <div class="stat-label">vs Média</div>

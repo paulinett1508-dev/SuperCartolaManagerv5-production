@@ -1044,7 +1044,7 @@ function renderizarConfirmacao(time) {
                 </div>
                 <div class="pt-detalhe-item">
                     <div class="pt-detalhe-label">Pontos Campeonato</div>
-                    <div class="pt-detalhe-valor">${pontosCampeonato.toFixed(2)}</div>
+                    <div class="pt-detalhe-valor">${(Math.trunc((pontosCampeonato||0) * 100) / 100).toFixed(2)}</div>
                 </div>
                 <div class="pt-detalhe-item">
                     <div class="pt-detalhe-label">Assinante PRO</div>

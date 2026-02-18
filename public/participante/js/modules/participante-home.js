@@ -507,10 +507,10 @@ function atualizarCardsHomeUI(data) {
     if (variacaoRankingEl) {
         const pontosUltimaRodadaRank = ultimaRodada ? parseFloat(ultimaRodada.pontos || 0) : 0;
         if (pontosUltimaRodadaRank >= 0) {
-            variacaoRankingEl.textContent = `↑${pontosUltimaRodadaRank.toFixed(2)}`;
+            variacaoRankingEl.textContent = `↑${(Math.trunc(pontosUltimaRodadaRank * 100) / 100).toFixed(2)}`;
             variacaoRankingEl.className = 'home-stat-variacao positivo';
         } else {
-            variacaoRankingEl.textContent = `↓${Math.abs(pontosUltimaRodadaRank).toFixed(2)}`;
+            variacaoRankingEl.textContent = `↓${(Math.trunc(Math.abs(pontosUltimaRodadaRank) * 100) / 100).toFixed(2)}`;
             variacaoRankingEl.className = 'home-stat-variacao negativo';
         }
     }
@@ -1069,10 +1069,10 @@ function renderizarHome(container, data, ligaId) {
     if (variacaoRankingEl) {
         const pontosUltimaRodadaRank = ultimaRodada ? parseFloat(ultimaRodada.pontos || 0) : 0;
         if (pontosUltimaRodadaRank >= 0) {
-            variacaoRankingEl.textContent = `↑${pontosUltimaRodadaRank.toFixed(2)}`;
+            variacaoRankingEl.textContent = `↑${(Math.trunc(pontosUltimaRodadaRank * 100) / 100).toFixed(2)}`;
             variacaoRankingEl.className = 'home-stat-variacao positivo';
         } else {
-            variacaoRankingEl.textContent = `↓${Math.abs(pontosUltimaRodadaRank).toFixed(2)}`;
+            variacaoRankingEl.textContent = `↓${(Math.trunc(Math.abs(pontosUltimaRodadaRank) * 100) / 100).toFixed(2)}`;
             variacaoRankingEl.className = 'home-stat-variacao negativo';
         }
     }
@@ -1335,15 +1335,15 @@ function popularDestaqueCard(tipo, atleta, isCapitao = false) {
         if (isCapitao) {
             // Capitão: mostrar pontos x1.5
             const pontosCapitao = pontos * 1.5;
-            pontosEl.textContent = pontosCapitao.toFixed(2);
+            pontosEl.textContent = (Math.trunc((pontosCapitao||0) * 100) / 100).toFixed(2);
 
             // Pontos base
             const pontosBaseEl = document.getElementById('home-pontos-base-capitao');
             if (pontosBaseEl) {
-                pontosBaseEl.textContent = pontos.toFixed(2);
+                pontosBaseEl.textContent = (Math.trunc((pontos||0) * 100) / 100).toFixed(2);
             }
         } else {
-            pontosEl.textContent = pontos.toFixed(2);
+            pontosEl.textContent = (Math.trunc((pontos||0) * 100) / 100).toFixed(2);
         }
     }
 
@@ -1391,7 +1391,7 @@ function popularCardModulos(atletas, capitao) {
         if (artNomeEl) artNomeEl.textContent = artilheiro.apelido || artilheiro.nome || '--';
         if (artStatsEl) {
             const gols = parseInt(artilheiro.scout?.G || artilheiro.scouts?.G || 0);
-            const pts = parseFloat(artilheiro.pontos_num || 0).toFixed(1);
+            const pts = (Math.trunc(parseFloat(artilheiro.pontos_num || 0) * 10) / 10).toFixed(1);
             artStatsEl.textContent = gols > 0 ? `${gols} gol${gols > 1 ? 's' : ''} • ${pts} pts` : `${pts} pts`;
         }
     } else {
@@ -1409,7 +1409,7 @@ function popularCardModulos(atletas, capitao) {
             const gs = parseInt(goleiro.scout?.GS || goleiro.scouts?.GS || 0);
             const dd = parseInt(goleiro.scout?.DD || goleiro.scouts?.DD || 0);
             const sg = parseInt(goleiro.scout?.SG || goleiro.scouts?.SG || 0);
-            const pts = parseFloat(goleiro.pontos_num || 0).toFixed(1);
+            const pts = (Math.trunc(parseFloat(goleiro.pontos_num || 0) * 10) / 10).toFixed(1);
             let info = '';
             if (sg > 0) info = `SG • ${pts} pts`;
             else if (gs > 0) info = `${gs} gol${gs > 1 ? 's' : ''} sofrido${gs > 1 ? 's' : ''} • ${pts} pts`;
@@ -1806,7 +1806,7 @@ function atualizarCardsHomeComParciais() {
 
     if (ultimaPontuacaoEl) {
         const pontosParciais = minhaPosicao.pontos || 0;
-        ultimaPontuacaoEl.textContent = pontosParciais.toFixed(2);
+        ultimaPontuacaoEl.textContent = (Math.trunc((pontosParciais||0) * 100) / 100).toFixed(2);
     }
 
     if (variacaoPontosEl) {
@@ -1820,7 +1820,7 @@ function atualizarCardsHomeComParciais() {
         avisoTitulo.innerHTML = 'JOGOS AO VIVO <span class="live-badge-mini">LIVE</span>';
     }
     if (avisoSubtitulo) {
-        avisoSubtitulo.textContent = `Posição ${minhaPosicao.posicao}º • ${minhaPosicao.pontos?.toFixed(1) || 0} pts parciais`;
+        avisoSubtitulo.textContent = `Posição ${minhaPosicao.posicao}º • ${minhaPosicao.pontos ? (Math.trunc(minhaPosicao.pontos * 10) / 10).toFixed(1) : 0 || 0} pts parciais`;
     }
 
     // Atualizar saldo projetado

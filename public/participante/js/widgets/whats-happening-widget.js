@@ -1283,7 +1283,7 @@ function renderRankingSection() {
                 <div class="wh-rank-pos">${i + 1}</div>
                 <img class="wh-rank-escudo" src="${r.escudo}" onerror="this.src='/escudos/default.png'" alt="">
                 <div class="wh-rank-nome">${r.nome_time}</div>
-                <div class="wh-rank-pontos">${r.pontos.toFixed(1)}</div>
+                <div class="wh-rank-pontos">${(Math.trunc((r.pontos||0) * 10) / 10).toFixed(1)}</div>
             </div>
         `;
     }).join('');
@@ -1297,7 +1297,7 @@ function renderRankingSection() {
                 <div class="wh-rank-pos">${minhaPosicao}o</div>
                 <img class="wh-rank-escudo" src="${meuTime.escudo}" onerror="this.src='/escudos/default.png'" alt="">
                 <div class="wh-rank-nome">${meuTime.nome_time}</div>
-                <div class="wh-rank-pontos">${meuTime.pontos.toFixed(1)}</div>
+                <div class="wh-rank-pontos">${(Math.trunc((meuTime.pontos||0) * 10) / 10).toFixed(1)}</div>
             </div>
         `;
     }
@@ -1458,13 +1458,13 @@ function renderPontosCorridosSection() {
                         <div class="wh-time-info">
                             <div class="wh-time-nome">${t1.nome || t1.nome_cartola || "Time 1"}</div>
                         </div>
-                        <div class="wh-time-pontos">${pontosA.toFixed(1)}</div>
+                        <div class="wh-time-pontos">${(Math.trunc((pontosA||0) * 10) / 10).toFixed(1)}</div>
                     </div>
                     <div class="wh-vs">
                         <span class="wh-vs-text">VS</span>
                     </div>
                     <div class="wh-time wh-time--away ${bWinning ? "winning" : aWinning ? "losing" : ""}">
-                        <div class="wh-time-pontos">${pontosB.toFixed(1)}</div>
+                        <div class="wh-time-pontos">${(Math.trunc((pontosB||0) * 10) / 10).toFixed(1)}</div>
                         <div class="wh-time-info">
                             <div class="wh-time-nome">${t2.nome || t2.nome_cartola || "Time 2"}</div>
                         </div>
@@ -1632,14 +1632,14 @@ function renderMataMataSection() {
                             <div class="wh-time-nome">${c.timeA?.nome_time || c.timeA?.nome || "Time A"}</div>
                             ${c.timeA?.nome_cartola ? `<div class="wh-time-cartola">${c.timeA.nome_cartola}</div>` : ''}
                         </div>
-                        <div class="wh-time-pontos">${pontosA.toFixed(1)}</div>
+                        <div class="wh-time-pontos">${(Math.trunc((pontosA||0) * 10) / 10).toFixed(1)}</div>
                     </div>
                     <div class="wh-vs">
                         <span class="wh-vs-text">VS</span>
                         <span class="wh-vs-diff">${diff.toFixed(1)}</span>
                     </div>
                     <div class="wh-time wh-time--away ${bWinning ? "winning" : aWinning ? "losing" : ""}">
-                        <div class="wh-time-pontos">${pontosB.toFixed(1)}</div>
+                        <div class="wh-time-pontos">${(Math.trunc((pontosB||0) * 10) / 10).toFixed(1)}</div>
                         <div class="wh-time-info">
                             <div class="wh-time-nome">${c.timeB?.nome_time || c.timeB?.nome || "Time B"}</div>
                             ${c.timeB?.nome_cartola ? `<div class="wh-time-cartola">${c.timeB.nome_cartola}</div>` : ''}
@@ -1780,7 +1780,7 @@ function renderLuvaOuroSection() {
         icon: 'sports_handball',
         sectionClass: 'luva-ouro',
         navigateTo: 'luva-de-ouro',
-        getValue: (r) => `${(r.pontosTotais || r.pontos || 0).toFixed(1)} pts`,
+        getValue: (r) => `${(Math.trunc((r.pontosTotais || r.pontos || 0) * 10) / 10).toFixed(1)} pts`,
         getLabel: (r) => r.participanteNome || r.nome_cartola || r.nomeCartola || 'Jogador'
     });
 }
@@ -1843,7 +1843,7 @@ function renderMeuConfrontoPontosCorridos() {
                                 <div class="wh-mc-label">VOCÊ</div>
                                 <div class="wh-mc-nome">${eu?.nome || 'Meu Time'}</div>
                             </div>
-                            <div class="wh-mc-pontos ${vencendo ? 'winning' : ''}">${meusPontos.toFixed(1)}</div>
+                            <div class="wh-mc-pontos ${vencendo ? 'winning' : ''}">${(Math.trunc((meusPontos||0) * 10) / 10).toFixed(1)}</div>
                         </div>
 
                         <div class="wh-mc-vs">
@@ -1857,7 +1857,7 @@ function renderMeuConfrontoPontosCorridos() {
                                 <div class="wh-mc-label">ADVERSÁRIO</div>
                                 <div class="wh-mc-nome">${adversario?.nome || adversario?.nome_cartola || 'Rival'}</div>
                             </div>
-                            <div class="wh-mc-pontos ${perdendo ? 'winning' : ''}">${pontosAdv.toFixed(1)}</div>
+                            <div class="wh-mc-pontos ${perdendo ? 'winning' : ''}">${(Math.trunc((pontosAdv||0) * 10) / 10).toFixed(1)}</div>
                         </div>
                     </div>
 
@@ -1924,7 +1924,7 @@ function renderMeuConfrontoMataMata() {
                                 <div class="wh-mc-label">VOCÊ</div>
                                 <div class="wh-mc-nome">${eu?.nome_time || eu?.nome_cartola || 'Meu Time'}</div>
                             </div>
-                            <div class="wh-mc-pontos ${vencendo ? 'winning' : ''}">${meusPontos.toFixed(1)}</div>
+                            <div class="wh-mc-pontos ${vencendo ? 'winning' : ''}">${(Math.trunc((meusPontos||0) * 10) / 10).toFixed(1)}</div>
                         </div>
 
                         <div class="wh-mc-vs">
@@ -1938,7 +1938,7 @@ function renderMeuConfrontoMataMata() {
                                 <div class="wh-mc-label">ADVERSÁRIO</div>
                                 <div class="wh-mc-nome">${adversario?.nome_time || adversario?.nome_cartola || 'Rival'}</div>
                             </div>
-                            <div class="wh-mc-pontos ${perdendo ? 'winning' : ''}">${pontosAdv.toFixed(1)}</div>
+                            <div class="wh-mc-pontos ${perdendo ? 'winning' : ''}">${(Math.trunc((pontosAdv||0) * 10) / 10).toFixed(1)}</div>
                         </div>
                     </div>
 

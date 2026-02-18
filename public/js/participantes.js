@@ -1320,7 +1320,7 @@ function renderizarAtletasCards(atletas) {
                     <span class="jv-atleta-clube">${atleta.clube?.nome || ''}</span>
                 </div>
                 <div class="jv-atleta-stats">
-                    <span class="jv-atleta-pontos ${pontosClasse}">${atleta.pontos_num?.toFixed(1) || '-'}</span>
+                    <span class="jv-atleta-pontos ${pontosClasse}">${atleta.pontos_num ? (Math.trunc(atleta.pontos_num * 10) / 10).toFixed(1) : '-'}</span>
                     <span class="jv-atleta-preco">C$ ${atleta.preco_num?.toFixed(1) || '-'}</span>
                 </div>
             </div>
@@ -1638,7 +1638,7 @@ function renderizarConteudoRodada(rawJson, verificacao, rodada, timeId = null, r
             <div class="rodada-header-info">
                 <div class="rodada-pontos">
                     <span class="pontos-label">Pontuação</span>
-                    <span class="pontos-valor">${pontos?.toFixed(2) || 'N/D'}</span>
+                    <span class="pontos-valor">${pontos ? (Math.trunc(pontos * 100) / 100).toFixed(2) : 'N/D'}</span>
                 </div>
                 <div class="rodada-meta">
                     <span><span class="material-symbols-outlined">person</span> ${time.nome_cartola || time.nome || 'N/D'}</span>
@@ -1850,7 +1850,7 @@ function criarModalApiCartola(timeId, nomeCartoleiro, nomeTime, data) {
                             <span class="api-card-label">Patrimônio</span>
                         </div>
                         <div class="api-card ${pontosCampeonato > 0 ? 'api-card-destaque' : ''}">
-                            <span class="api-card-value">${pontosCampeonato > 0 ? pontosCampeonato.toFixed(2) : "0.00"}</span>
+                            <span class="api-card-value">${pontosCampeonato > 0 ? (Math.trunc(pontosCampeonato * 100) / 100).toFixed(2) : "0.00"}</span>
                             <span class="api-card-label">Pontos Campeonato</span>
                         </div>
                     </div>
@@ -2092,7 +2092,7 @@ function criarModalDadosGlobo(timeId, nomeCartoleiro, nomeTime, data) {
                     <span class="resumo-icon material-symbols-outlined">emoji_events</span>
                     <div class="resumo-info">
                         <span class="resumo-label">Pontos Total (${rodadasCount} rodadas)</span>
-                        <span class="resumo-value">${pontosTotal.toFixed(2)}</span>
+                        <span class="resumo-value">${(Math.trunc((pontosTotal||0) * 100) / 100).toFixed(2)}</span>
                     </div>
                 </div>
                 ` : ""}
@@ -2115,7 +2115,7 @@ function criarModalDadosGlobo(timeId, nomeCartoleiro, nomeTime, data) {
                         <div class="atleta-card">
                             <img src="${a.foto || '/escudos/placeholder.png'}" alt="${a.apelido}" onerror="this.onerror=null;this.src='/escudos/placeholder.png'">
                             <span class="atleta-nome">${a.apelido || a.nome}</span>
-                            <span class="atleta-pontos">${a.pontos_num?.toFixed(1) || '-'} pts</span>
+                            <span class="atleta-pontos">${a.pontos_num ? (Math.trunc(a.pontos_num * 10) / 10).toFixed(1) : '-'} pts</span>
                         </div>
                     `).join("")}
                 </div>

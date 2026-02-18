@@ -5,6 +5,7 @@
  */
 
 import mongoose from 'mongoose';
+import { truncarPontosNum } from '../utils/type-helpers.js';
 import ExtratoFinanceiroCache from '../models/ExtratoFinanceiroCache.js';
 import AcertoFinanceiro from '../models/AcertoFinanceiro.js';
 import AjusteFinanceiro from '../models/AjusteFinanceiro.js';
@@ -203,12 +204,12 @@ export async function performanceRanking(ligaId, temporada = CURRENT_SEASON) {
       nome: s.nome_cartola || s.nome_time,
       escudo: s.escudo,
       total_pontos: s.total_pontos,
-      media_pontos: parseFloat(media.toFixed(2)),
+      media_pontos: truncarPontosNum(media),
       rodadas_jogadas: s.rodadas_jogadas,
       melhor_rodada: s.melhor_rodada,
       pior_rodada: s.pior_rodada,
-      desvio_padrao: parseFloat(Math.sqrt(variancia).toFixed(2)),
-      amplitude: parseFloat(((s.melhor_rodada || 0) - (s.pior_rodada || 0)).toFixed(2))
+      desvio_padrao: truncarPontosNum(Math.sqrt(variancia)),
+      amplitude: truncarPontosNum((s.melhor_rodada || 0) - (s.pior_rodada || 0))
     };
   });
 
@@ -241,7 +242,7 @@ export async function performanceRanking(ligaId, temporada = CURRENT_SEASON) {
     resumo: {
       total_participantes: ranking.length,
       media_geral: ranking.length > 0
-        ? parseFloat((ranking.reduce((s, r) => s + r.media_pontos, 0) / ranking.length).toFixed(2))
+        ? truncarPontosNum(ranking.reduce((s, r) => s + r.media_pontos, 0) / ranking.length)
         : 0,
       total_rodadas: ranking.length > 0 ? ranking[0].rodadas_jogadas : 0
     },

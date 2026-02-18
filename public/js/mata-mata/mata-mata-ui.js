@@ -380,7 +380,7 @@ export function renderBannerCampeao(
           <div class="campeao-detalhes">
             <div class="campeao-time-nome">${esc(campeao.nome_time)}</div>
             <div class="campeao-cartoleiro">${esc(campeao.nome_cartoleiro || campeao.nome_cartola) || "—"}</div>
-            <div class="campeao-pontos">${campeao.pontos.toFixed(2).replace(".", ",")} pts</div>
+            <div class="campeao-pontos">${(Math.trunc((campeao.pontos||0) * 100) / 100).toFixed(2).replace(".", ",")} pts</div>
             ${timeCoracaoHTML}
           </div>
         </div>
@@ -392,7 +392,7 @@ export function renderBannerCampeao(
                  class="vice-escudo" 
                  onerror="this.onerror=null;this.src='/escudos/default.png'">
             <span class="vice-nome">${esc(viceCampeao.nome_time)}</span>
-            <span class="vice-pontos">${viceCampeao.pontos.toFixed(2).replace(".", ",")} pts</span>
+            <span class="vice-pontos">${(Math.trunc((viceCampeao.pontos||0) * 100) / 100).toFixed(2).replace(".", ",")} pts</span>
           </div>
         </div>
       </div>

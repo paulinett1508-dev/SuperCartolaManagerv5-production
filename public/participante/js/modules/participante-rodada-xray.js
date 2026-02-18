@@ -283,7 +283,7 @@ async function renderizarPerformanceGeral(disputas) {
                 <div class="xray-perf-info">
                     <div class="xray-perf-title">Capitão de Luxo</div>
                     <div class="xray-perf-value">${cap.sua_posicao}º</div>
-                    <div class="xray-perf-sub">${cap.seus_pontos.toFixed(1)} pts acumulados</div>
+                    <div class="xray-perf-sub">${(Math.trunc((cap.seus_pontos||0) * 10) / 10).toFixed(1)} pts acumulados</div>
                 </div>
             </div>
         `);
@@ -313,7 +313,7 @@ async function renderizarPerformanceGeral(disputas) {
                 <div class="xray-perf-info">
                     <div class="xray-perf-title">Luva de Ouro</div>
                     <div class="xray-perf-value">${luva.sua_posicao}º</div>
-                    <div class="xray-perf-sub">${luva.seus_pontos?.toFixed(1) || 0} pts</div>
+                    <div class="xray-perf-sub">${luva.seus_pontos ? (Math.trunc(luva.seus_pontos * 10) / 10).toFixed(1) : 0} pts</div>
                 </div>
             </div>
         `);
@@ -361,7 +361,7 @@ async function buscarTop10Card() {
                     <div class="xray-perf-info">
                         <div class="xray-perf-title">TOP 10 - Mito</div>
                         <div class="xray-perf-value">${meuMito.posicao}º</div>
-                        <div class="xray-perf-sub">${meuMito.pontos?.toFixed(1) || 0} pts</div>
+                        <div class="xray-perf-sub">${meuMito.pontos ? (Math.trunc(meuMito.pontos * 10) / 10).toFixed(1) : 0} pts</div>
                     </div>
                 </div>
             `;
@@ -376,7 +376,7 @@ async function buscarTop10Card() {
                     <div class="xray-perf-info">
                         <div class="xray-perf-title">TOP 10 - Mico</div>
                         <div class="xray-perf-value">${meuMico.posicao}º</div>
-                        <div class="xray-perf-sub">${meuMico.pontos?.toFixed(1) || 0} pts</div>
+                        <div class="xray-perf-sub">${meuMico.pontos ? (Math.trunc(meuMico.pontos * 10) / 10).toFixed(1) : 0} pts</div>
                     </div>
                 </div>
             `;
@@ -419,7 +419,7 @@ function renderizarUpcoming(disputas) {
                             ${pc.minha_posicao}º lugar • ${pc.zona}
                         </div>
                         <div class="xray-upcoming-meta" style="margin-top:2px;">
-                            ${resultIcon} Última: ${pc.seu_confronto.voce.toFixed(1)} × ${pc.seu_confronto.adversario.pontos.toFixed(1)} ${escapeHtml(pc.seu_confronto.adversario.nome)}
+                            ${resultIcon} Última: ${(Math.trunc((pc.seu_confronto.voce||0) * 10) / 10).toFixed(1)} × ${(Math.trunc((pc.seu_confronto.adversario.pontos||0) * 10) / 10).toFixed(1)} ${escapeHtml(pc.seu_confronto.adversario.nome)}
                         </div>
                     </div>
                     <span class="xray-upcoming-badge posicao">${pc.minha_posicao}º</span>
@@ -466,7 +466,7 @@ function renderizarUpcoming(disputas) {
                         ${statusIcon} ${statusText} — vs ${escapeHtml(mm.seu_confronto.adversario.nome)}
                     </div>
                     <div class="xray-upcoming-meta">
-                        Você ${mm.seu_confronto.voce.toFixed(1)} × ${mm.seu_confronto.adversario.pontos.toFixed(1)} ${escapeHtml(mm.seu_confronto.adversario.nome)}
+                        Você ${(Math.trunc((mm.seu_confronto.voce||0) * 10) / 10).toFixed(1)} × ${(Math.trunc((mm.seu_confronto.adversario.pontos||0) * 10) / 10).toFixed(1)} ${escapeHtml(mm.seu_confronto.adversario.nome)}
                     </div>
                     ${descExtra}
                 </div>
@@ -485,7 +485,7 @@ function renderizarUpcoming(disputas) {
                 <div class="xray-upcoming-info">
                     <div class="xray-upcoming-title">MELHOR DO MÊS (${nomesMes[mes.mes]}/${mes.ano})</div>
                     <div class="xray-upcoming-desc">
-                        ${mes.sua_posicao}º lugar • ${mes.seus_pontos.toFixed(1)} pts
+                        ${mes.sua_posicao}º lugar • ${(Math.trunc((mes.seus_pontos||0) * 10) / 10).toFixed(1)} pts
                     </div>
                     ${mes.rodadas_restantes > 0 ? `<div class="xray-upcoming-meta">${mes.rodadas_restantes} rodada(s) restante(s) no mês</div>` : ''}
                 </div>

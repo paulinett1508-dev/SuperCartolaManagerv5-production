@@ -1514,7 +1514,7 @@ export function renderizarProjecaoFinanceira(projecaoData) {
                         ${time?.nome_time || 'Meu Time'}
                     </div>
                     <div style="font-size: 11px; color: var(--app-text-dim, #6b7280);">
-                        ${(time?.pontos_parciais || 0).toFixed(2).replace('.', ',')} pts parciais
+                        ${(Math.trunc((time?.pontos_parciais || 0) * 100) / 100).toFixed(2).replace('.', ',')} pts parciais
                         &middot; ${time?.total_times || '?'} times
                     </div>
                 </div>

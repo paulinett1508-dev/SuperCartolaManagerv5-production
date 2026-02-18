@@ -355,7 +355,7 @@ export function renderizarRanking(dados) {
 
       const escudoId =
         ESCUDOS[item.participanteId] || item.clubeId || "default";
-      const pontosTotais = parseFloat(item.pontosTotais || 0).toFixed(2);
+      const pontosTotais = (Math.trunc(parseFloat(item.pontosTotais || 0) * 100) / 100).toFixed(2);
 
       // Criar mapa de pontos por rodada
       const pontosPorRodada = {};
@@ -395,7 +395,7 @@ export function renderizarRanking(dados) {
                 : pontosValidos < 0
                   ? "negativo"
                   : "zero";
-            const pontosTexto = semGoleiro ? "—" : pontosValidos.toFixed(2);
+            const pontosTexto = semGoleiro ? "—" : (Math.trunc((pontosValidos||0) * 100) / 100).toFixed(2);
             const parcialClass = isParcial ? " parcial" : "";
 
             return `<td class="col-rodada-pts ${pontosClass}${parcialClass}">
@@ -547,7 +547,7 @@ function renderizarEstatisticas(ranking, rodadasExibir, dados) {
         <span class="stat-icon"><span class="material-symbols-outlined" style="color: #ffd700;">emoji_events</span></span>
         <span class="stat-label">Líder</span>
         <span class="stat-value">${lider.participanteNome}</span>
-        <span class="stat-detail">${parseFloat(lider.pontosTotais || 0).toFixed(2)} pts</span>
+        <span class="stat-detail">${(Math.trunc(parseFloat(lider.pontosTotais || 0) * 100) / 100).toFixed(2)} pts</span>
       </div>
       <div class="stat-card">
         <span class="stat-icon"><span class="material-symbols-outlined" style="color: #ffd700;">star</span></span>
@@ -643,7 +643,7 @@ export function mostrarModalDetalhes(dados) {
         <div class="detalhes-resumo">
           <div class="resumo-item">
             <span class="resumo-label">Pontos Totais</span>
-            <span class="resumo-valor ${isInativo ? "valor-inativo" : ""}">${(participante.pontosTotais || 0).toFixed(2)}</span>
+            <span class="resumo-valor ${isInativo ? "valor-inativo" : ""}">${(Math.trunc((participante.pontosTotais || 0) * 100) / 100).toFixed(2)}</span>
           </div>
           <div class="resumo-item">
             <span class="resumo-label">Rodadas Jogadas</span>
@@ -673,7 +673,7 @@ export function mostrarModalDetalhes(dados) {
                 <div class="historico-item">
                   <span class="hist-rodada">R${h.rodada}</span>
                   <span class="hist-goleiro">${h.goleiroNome || "Sem goleiro"}</span>
-                  <span class="hist-pontos ${(h.pontos || 0) >= 0 ? "positivo" : "negativo"}">${(h.pontos || 0).toFixed(2)}</span>
+                  <span class="hist-pontos ${(h.pontos || 0) >= 0 ? "positivo" : "negativo"}">${(Math.trunc((h.pontos || 0) * 100) / 100).toFixed(2)}</span>
                 </div>
               `,
                   )
@@ -728,7 +728,7 @@ export function renderizarSecaoInativos(dados, rodadasExibir, rodadaParcial) {
     .map((item) => {
       const escudoId =
         ESCUDOS[item.participanteId] || item.clubeId || "default";
-      const pontosTotais = parseFloat(item.pontosTotais || 0).toFixed(2);
+      const pontosTotais = (Math.trunc(parseFloat(item.pontosTotais || 0) * 100) / 100).toFixed(2);
 
       const pontosPorRodada = {};
       if (item.rodadas && Array.isArray(item.rodadas)) {
@@ -760,7 +760,7 @@ export function renderizarSecaoInativos(dados, rodadasExibir, rodadaParcial) {
                 : pontosValidos < 0
                   ? "negativo"
                   : "zero";
-            const pontosTexto = semGoleiro ? "—" : pontosValidos.toFixed(2);
+            const pontosTexto = semGoleiro ? "—" : (Math.trunc((pontosValidos||0) * 100) / 100).toFixed(2);
             const parcialClass = isParcial ? " parcial" : "";
 
             return `<td class="col-rodada-pts ${pontosClass}${parcialClass}">
