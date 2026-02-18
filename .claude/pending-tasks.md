@@ -1,16 +1,45 @@
 # Tarefas Pendentes - Super Cartola Manager
 
-> Atualizado: 2026-02-18
-> Sessao 18/02: AUDIT-009 (mata-mata) + AUDIT-010 (pontos corridos) concluidos. Exploracao de Top10, Melhor Mes, Campinho e Dicas feita (resultados abaixo).
+> Atualizado: 2026-02-18 (sessao tarde)
+> Sessao 18/02 manha: AUDIT-009..014 concluidos (todos modulos auditados).
+> Sessao 18/02 tarde: Auditoria sincronismo 2025/2026 (commit 8323eab) + Consolidacao banco unico MongoDB (commit 84ce387).
 
 ---
 
-## ~~AUDITORIAS PENDENTES~~ ✅ CONCLUIDAS (18/02/2026)
+## ~~AUDITORIAS PENDENTES~~ ✅ TODAS CONCLUIDAS (18/02/2026)
 
 ### ~~AUDIT-011: TOP 10~~ ✅ (4 fixes)
 ### ~~AUDIT-012: MELHOR MES~~ ✅ (4 fixes)
 ### ~~AUDIT-013: CAMPINHO~~ ✅ (0 fixes — modulo visualizacao)
 ### ~~AUDIT-014: DICAS PREMIUM~~ ✅ (0 fixes — modulo API stateless)
+
+---
+
+## ~~AUDITORIA SINCRONISMO + BANCO UNICO~~ ✅ CONCLUIDA (18/02/2026)
+
+**Resultado:** Sistema estava sincronizado em producao — banco real `cartola-manager` tem R1-R3 2026, 35 participantes, 43 caches 2026, 46 inscricoes 2026. Scripts e MCP apontavam para banco orfao `cartola-manager-dev` (dados ate dez/2025).
+
+**Fixes de codigo (commit `8323eab`):**
+- `utils/saldo-calculator.js` + `routes/tesouraria-routes.js`: 21x `>= 2026` → `>= CURRENT_SEASON`
+- `utils/seasonGuard.js`: remove LEAGUES hardcoded com IDs 2025
+
+**Consolidacao banco unico (commit `84ce387`):**
+- `mongo-server.js` (MCP) + 9 scripts: removida logica MONGO_URI_DEV
+- Todos usam exclusivamente `MONGO_URI` (cartola-manager)
+- `MONGO_URI_DEV` deletada dos Replit Secrets pelo admin
+- Liga producao: `nome` atualizado para "Super Cartola 2026"
+- `CLAUDE.md`: documenta banco unico e stack dev/prod
+
+**Estado MCP Mongo:** Agora conecta ao banco real `cartola-manager` ✅
+
+| MCP | Status |
+|-----|--------|
+| Mongo | ✅ Ativo — banco cartola-manager (real) |
+| Perplexity | ✅ Ativo |
+| Context7 | ✅ Ativo |
+| IDE | ✅ Ativo |
+| ~~Google Stitch~~ | ❌ Removido |
+| ~~Figma~~ | ❌ Removido |
 
 ---
 
@@ -149,10 +178,10 @@
 **Status:** DESCARTADO
 **Motivo:** Decisao de abandonar Plano A (MCP automatico) e Plano C (Figma). Stitch Adapter passa a operar apenas em modo manual (HTML colado). MCP Stitch e Figma removidos de `settings.local.json`.
 
-#### Status dos MCPs (verificado 2026-02-17)
+#### Status dos MCPs (atualizado 2026-02-18)
 | MCP | Status |
 |-----|--------|
-| Mongo | ✅ Ativo |
+| Mongo | ✅ Ativo — agora conecta ao banco real cartola-manager |
 | Perplexity | ✅ Ativo |
 | Context7 | ✅ Ativo |
 | IDE | ✅ Ativo |
