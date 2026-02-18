@@ -550,11 +550,11 @@
                 <div class="logo-box logo-glow">
                     <div class="logo-float">
                         <img
-                            src="/escudos/default.png"
+                            src="/img/newlogo-supercartola.png"
                             alt="Super Cartola"
                             style="
-                                width: 72px;
-                                height: 72px;
+                                width: 100px;
+                                height: 100px;
                                 object-fit: contain;
                             "
                         />
@@ -744,16 +744,69 @@
                         >verified</span
                     >
                     <span class="footer-brand-name">Super Cartola Manager</span>
-                    <span class="footer-version">v2.0</span>
+                    <span class="footer-version" id="footerVersion">v2.0</span>
                 </div>
                 <div class="footer-copy">
-                    <span class="footer-badge">ANO XI</span>
-                    <span>© 2025 Todos os direitos reservados</span>
+                    <span class="footer-badge" id="footerAno">ANO XII</span>
+                    <span id="footerCopyright">© 2026 Todos os direitos reservados</span>
                 </div>
             </div>
         </div>
 
         <script>
+            // =====================================================================
+            // RODAPÉ DINÂMICO - Calcula ANO, Copyright e Versão automaticamente
+            // =====================================================================
+            (function() {
+                const ANO_BASE = 2015; // Ano I do Super Cartola
+                const VERSAO_MAJOR = '2.0'; // Versão de produto (atualizar em 2027 para 3.0)
+                const anoAtual = new Date().getFullYear();
+                const numeroAno = anoAtual - ANO_BASE + 1;
+
+                // Converter para numeral romano
+                const romanos = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX'];
+                const anoRomano = romanos[numeroAno - 1] || numeroAno;
+
+                // Atualizar elementos quando DOM estiver pronto
+                const atualizarRodape = () => {
+                    const footerAno = document.getElementById('footerAno');
+                    const footerCopyright = document.getElementById('footerCopyright');
+
+                    if (footerAno) footerAno.textContent = `ANO ${anoRomano}`;
+                    if (footerCopyright) footerCopyright.textContent = `© ${anoAtual} Todos os direitos reservados`;
+                };
+
+                // Buscar build do servidor e atualizar versão
+                const atualizarVersao = async () => {
+                    const footerVersion = document.getElementById('footerVersion');
+                    if (!footerVersion) return;
+
+                    try {
+                        const response = await fetch('/api/app/check-version', {
+                            headers: { 'x-client-type': 'participante' }
+                        });
+                        if (response.ok) {
+                            const data = await response.json();
+                            // Formato: v2.0 (build 2026.02.18)
+                            footerVersion.textContent = `v${VERSAO_MAJOR} (build ${data.version})`;
+                        }
+                    } catch (e) {
+                        // Fallback: manter apenas versão major
+                        footerVersion.textContent = `v${VERSAO_MAJOR}`;
+                    }
+                };
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', () => {
+                        atualizarRodape();
+                        atualizarVersao();
+                    });
+                } else {
+                    atualizarRodape();
+                    atualizarVersao();
+                }
+            })();
+
             // ✅ Guards para evitar dupla inicialização
             if (!window.__participante_login_state) {
                 window.__participante_login_state = {
