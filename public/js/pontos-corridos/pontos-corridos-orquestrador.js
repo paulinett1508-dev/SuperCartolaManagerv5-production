@@ -1,4 +1,5 @@
-// PONTOS CORRIDOS ORQUESTRADOR - v3.2 Coordenador Principal
+// PONTOS CORRIDOS ORQUESTRADOR - v3.3 Coordenador Principal
+// ✅ v3.3: Importa RODADA_FINAL_CAMPEONATO de season-config.js (elimina hardcode 38)
 // ✅ v3.2: Configuração dinâmica via API (sem hardcodes)
 // ✅ v3.1: FIX CRÍTICO - Verifica temporada da API antes de assumir dados anteriores
 // ✅ v3.0: MODO SOMENTE LEITURA - Temporada encerrada, dados consolidados do cache
@@ -36,6 +37,8 @@ import {
   atualizarContainer,
   configurarBotaoVoltar,
 } from "./pontos-corridos-ui.js";
+
+import { RODADA_FINAL_CAMPEONATO } from "../core/season-config.js";
 
 import {
   getStatusMercadoCache,
@@ -220,7 +223,7 @@ export async function carregarPontosCorridos() {
     const mercadoAberto = status.status_mercado === 1;
     const temporadaAPI = status.temporada || new Date().getFullYear();
     const anoAtual = new Date().getFullYear();
-    const RODADA_FINAL_CAMPEONATO = status.rodada_final || 38;
+    const rodadaFinalDinamica = status.rodada_final || RODADA_FINAL_CAMPEONATO;
 
     // ✅ v3.1: DETECÇÃO DE TEMPORADA COM VERIFICAÇÃO DO ANO
     // Só assumir "temporada anterior" se API retornar ano < atual

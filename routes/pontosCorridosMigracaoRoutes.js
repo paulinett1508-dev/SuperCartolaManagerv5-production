@@ -1,8 +1,10 @@
-// routes/pontosCorridosMigracaoRoutes.js
+// routes/pontosCorridosMigracaoRoutes.js v1.1
+// v1.1: verificarAdmin em rotas de migração (expunha escrita sem auth)
 // Endpoint para popular cache histórico do Pontos Corridos
 
 import express from "express";
 import mongoose from "mongoose";
+import { verificarAdmin } from "../middleware/auth.js";
 import PontosCorridosCache from "../models/PontosCorridosCache.js";
 import Rodada from "../models/Rodada.js";
 import Liga from "../models/Liga.js";
@@ -27,7 +29,7 @@ const CONFIG = {
  * POST /api/pontos-corridos/migrar/:ligaId
  * Popula o cache MongoDB com todas as rodadas históricas
  */
-router.post("/migrar/:ligaId", async (req, res) => {
+router.post("/migrar/:ligaId", verificarAdmin, async (req, res) => {
     const { ligaId } = req.params;
     const { forcarRecalculo } = req.body;
 

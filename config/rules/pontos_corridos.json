@@ -322,6 +322,8 @@
     ]
   },
 
+  "nota": "Habilitação por liga é controlada via ModuleConfig no MongoDB, não por este arquivo",
+
   "metadados": {
     "criado_em": "2025-12-14",
     "autor": "Sistema",

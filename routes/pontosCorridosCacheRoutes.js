@@ -1,11 +1,13 @@
 
-// routes/pontosCorridosCacheRoutes.js
+// routes/pontosCorridosCacheRoutes.js v1.1
+// v1.1: verificarAdmin na rota POST cache (expunha escrita sem auth)
 import express from "express";
 import {
     salvarCachePontosCorridos,
     lerCachePontosCorridos,
     obterConfrontosPontosCorridos
 } from "../controllers/pontosCorridosCacheController.js";
+import { verificarAdmin } from "../middleware/auth.js";
 import { buscarConfigSimplificada } from "../utils/moduleConfigHelper.js";
 import { CURRENT_SEASON } from "../config/seasons.js";
 
@@ -77,7 +79,7 @@ router.get("/:ligaId", async (req, res) => {
 
 // Rota para SALVAR o snapshot (POST)
 // Ex: POST /api/pontos-corridos/cache/684d821cf1a7ae16d1f89572
-router.post("/cache/:ligaId", salvarCachePontosCorridos);
+router.post("/cache/:ligaId", verificarAdmin, salvarCachePontosCorridos);
 
 // Rota para LER o snapshot (GET)
 // Ex: GET /api/pontos-corridos/cache/684d821cf1a7ae16d1f89572?rodada=5

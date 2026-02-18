@@ -1,6 +1,17 @@
 /**
- * PONTOS CORRIDOS MANAGER v1.0.0
- * Módulo OPCIONAL - Liga em formato pontos corridos
+ * PONTOS CORRIDOS MANAGER v1.1.0
+ * Módulo OPCIONAL - Liga em formato pontos corridos (round-robin)
+ *
+ * STATUS: STUBS — Hooks registrados mas NÃO executam cálculos automaticamente.
+ *
+ * FLUXO ATUAL (manual via admin):
+ *   1. Admin abre tela Pontos Corridos → Frontend calcula confrontos via orquestrador
+ *   2. Frontend salva cache → POST /api/pontos-corridos/cache/:ligaId
+ *   Controller: pontosCorridosCacheController.js (v3.0)
+ *   Frontend: pontos-corridos-orquestrador.js (coordena módulos)
+ *
+ * FUTURO: Quando o orchestrator for implementado end-to-end, estes hooks
+ * devem delegar ao controller via chamadas internas.
  */
 import BaseManager from './BaseManager.js';
 
@@ -19,12 +30,10 @@ export default class PontosCorridosManager extends BaseManager {
     }
 
     async onRoundFinalize(ctx) {
-        console.log(`[PONTOS-CORRIDOS] Atualizando tabela R${ctx.rodada}`);
-        return { pronto: true };
+        return { pronto: false, stub: true, rodada: ctx.rodada };
     }
 
     async onConsolidate(ctx) {
-        console.log(`[PONTOS-CORRIDOS] Consolidando tabela R${ctx.rodada}`);
-        return { consolidado: true };
+        return { consolidado: false, stub: true, rodada: ctx.rodada };
     }
 }
