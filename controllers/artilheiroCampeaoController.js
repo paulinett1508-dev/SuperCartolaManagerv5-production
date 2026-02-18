@@ -300,6 +300,25 @@ class ArtilheiroCampeaoController {
                 rodadaFim = rodadaInicio;
             }
 
+            // ✅ v5.3: Expandir rodadaFim com última rodada consolidada no DB
+            // Garante que coletas manuais do admin sejam sempre exibidas,
+            // mesmo que a API Cartola ainda indique um rodadaAtual menor.
+            try {
+                const ultimaConsolidadaDB = await GolsConsolidados.findOne(
+                    { ligaId, temporada: CURRENT_SEASON, parcial: false },
+                    { rodada: 1 },
+                ).sort({ rodada: -1 }).lean();
+
+                if (ultimaConsolidadaDB?.rodada > rodadaFim) {
+                    logger.log(
+                        `📦 [ARTILHEIRO] rodadaFim expandido: API=${rodadaFim} → DB=${ultimaConsolidadaDB.rodada} (consolidação manual detectada)`,
+                    );
+                    rodadaFim = ultimaConsolidadaDB.rodada;
+                }
+            } catch (e) {
+                logger.warn(`⚠️ [ARTILHEIRO] Erro ao verificar última rodada consolidada no DB:`, e.message);
+            }
+
             logger.log(
                 `📊 Rodada ${rodadaInicio}-${rodadaFim}, Mercado: ${mercadoAberto ? "Aberto" : "Fechado"}, Temporada: ${temporadaEncerrada ? "ENCERRADA" : "ATIVA"}, Rodada API: ${rodadaAtual}, Critério: ${criterioRanking}`,
             );

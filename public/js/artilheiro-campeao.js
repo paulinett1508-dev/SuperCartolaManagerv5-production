@@ -649,6 +649,16 @@ const ArtilheiroCampeao = {
             this.estado.temporadaEncerrada =
                 data.data.temporadaEncerrada || false;
 
+            // ✅ v5.3: Sincronizar rodadaFim com backend (pode ter sido expandido por coleta manual)
+            if (data.data.rodadaFim && data.data.rodadaFim > this.estado.rodadaFim) {
+                console.log(`📦 [ARTILHEIRO] rodadaFim expandido pelo backend: ${this.estado.rodadaFim} → ${data.data.rodadaFim}`);
+                this.estado.rodadaFim = data.data.rodadaFim;
+                this.estado.rodadaNavInicio = Math.max(
+                    1,
+                    this.estado.rodadaFim - this.config.RODADAS_VISIVEIS + 1,
+                );
+            }
+
             // Buscar status de inatividade
             const timeIds = ranking.map((p) => p.timeId);
             let statusMap = {};
