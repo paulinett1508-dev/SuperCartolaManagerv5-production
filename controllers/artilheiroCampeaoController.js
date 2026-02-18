@@ -1,4 +1,4 @@
-// controllers/artilheiroCampeaoController.js - VERSÃO 5.2.0 (SaaS DINÂMICO)
+// controllers/artilheiroCampeaoController.js - VERSÃO 5.3.0 (SaaS DINÂMICO)
 // ✅ PERSISTÊNCIA MONGODB + LÓGICA DE RODADA PARCIAL (igual Luva de Ouro)
 // ✅ SUPORTE A PARTICIPANTES INATIVOS - FILTRO INTEGRADO
 // ✅ CORREÇÃO v4.1: Não incluir rodada atual quando mercado aberto (sem scouts válidos)
@@ -8,6 +8,9 @@
 // ✅ v5.0.0: MULTI-TENANT - Busca participantes e configurações do banco (liga.configuracoes)
 // ✅ v5.2.0: Campo temporada no GolsConsolidados, validação de sessão, criterio_ranking,
 //            RODADA_FINAL dinâmico, rate limiting, audit logging, fallback melhorado
+// ✅ v5.3.0: coletarDadosRodada aceita atletasPontuados (scouts ao vivo têm prioridade),
+//            re-coleta automática de rodadas zeradas quando mercado fechado,
+//            coletarRodada admin busca /atletas/pontuados se rodada em andamento
 
 import mongoose from "mongoose";
 import Liga from "../models/Liga.js";
@@ -650,6 +653,23 @@ class ArtilheiroCampeaoController {
         // ✅ v4.4: Identificar rodadas que já existem
         const rodadasExistentes = new Set(rodadasDB.map((r) => r.rodada));
 
+        // ✅ v5.3: Re-coletar rodadas com dados zerados quando scouts ao vivo disponíveis
+        // Ocorre quando a rodada foi coletada via /time/id sem scouts válidos (histórico vazio)
+        if (!mercadoAberto && atletasPontuados && Object.keys(atletasPontuados).length > 0) {
+            for (const rodadaDB of rodadasDB) {
+                if (
+                    rodadaDB.golsPro === 0 &&
+                    rodadaDB.golsContra === 0 &&
+                    (!rodadaDB.jogadores || rodadaDB.jogadores.length === 0)
+                ) {
+                    logger.log(
+                        `  🔄 R${rodadaDB.rodada} com dados zerados - re-coletando com scouts ao vivo`,
+                    );
+                    rodadasExistentes.delete(rodadaDB.rodada);
+                }
+            }
+        }
+
         // ✅ v4.4: Identificar rodadas faltantes (consolidadas, não parciais)
         const rodadasFaltantes = [];
 
@@ -672,6 +692,7 @@ class ArtilheiroCampeaoController {
                             ligaId,
                             timeId,
                             rodada,
+                            atletasPontuados, // ✅ v5.3: Passa scouts ao vivo se disponíveis
                         );
 
                     // Adicionar aos dados coletados
@@ -856,6 +877,28 @@ class ArtilheiroCampeaoController {
                 });
             }
 
+            // ✅ v5.3: Buscar scouts ao vivo se mercado fechado para esta rodada
+            // Permite capturar gols da rodada em andamento sem depender de atleta.scout histórico
+            let atletasPontuadosLive = null;
+            try {
+                const statusCheck = await ArtilheiroCampeaoController.detectarStatusMercado();
+                if (statusCheck.rodadaEmAndamento && statusCheck.rodadaAtual === rodadaNum) {
+                    logger.log(
+                        `🔴 [ARTILHEIRO] Mercado FECHADO para R${rodadaNum} - usando scouts ao vivo`,
+                    );
+                    atletasPontuadosLive = await ArtilheiroCampeaoController.buscarAtletasPontuados();
+                    logger.log(
+                        `📊 [ARTILHEIRO] ${Object.keys(atletasPontuadosLive).length} atletas pontuados`,
+                    );
+                } else {
+                    logger.log(
+                        `📋 [ARTILHEIRO] R${rodadaNum} não está em andamento (rodadaAtual=${statusCheck.rodadaAtual}, mercadoAberto=${statusCheck.mercadoAberto}) - usando scouts históricos`,
+                    );
+                }
+            } catch (e) {
+                logger.warn(`⚠️ [ARTILHEIRO] Erro ao verificar status para scouts ao vivo:`, e.message);
+            }
+
             const resultados = [];
 
             for (const participante of participantes) {
@@ -865,6 +908,7 @@ class ArtilheiroCampeaoController {
                             ligaId,
                             participante.timeId,
                             rodadaNum,
+                            atletasPontuadosLive, // ✅ v5.3: Scouts ao vivo se disponíveis
                         );
 
                     resultados.push({
@@ -907,8 +951,9 @@ class ArtilheiroCampeaoController {
 
     /**
      * ✅ Coletar dados de uma rodada específica para um time
+     * ✅ v5.3: Aceita atletasPontuados para priorizar scouts ao vivo
      */
-    static async coletarDadosRodada(ligaId, timeId, rodada) {
+    static async coletarDadosRodada(ligaId, timeId, rodada, atletasPontuados = null) {
         try {
             // ✅ v5.2: Usa rate limiter para API Cartola
             const response = await fetchCartolaComRateLimit(
@@ -924,9 +969,23 @@ class ArtilheiroCampeaoController {
             const jogadores = [];
 
             for (const atleta of atletas) {
-                const scout = atleta.scout || {};
-                const gols = scout.G || 0;
-                const gc = scout.GC || 0;
+                let gols = 0;
+                let gc = 0;
+
+                // ✅ v5.3: Prioridade 1 - scouts ao vivo (/atletas/pontuados)
+                // Resolve o caso de rodadas históricas onde atleta.scout está vazio
+                if (atletasPontuados && atletasPontuados[atleta.atleta_id]?.scout) {
+                    const s = atletasPontuados[atleta.atleta_id].scout;
+                    gols = s.G || 0;
+                    gc = s.GC || 0;
+                }
+
+                // Prioridade 2: scouts históricos (atleta.scout da lineup)
+                if (gols === 0 && gc === 0) {
+                    const scout = atleta.scout || {};
+                    gols = scout.G || 0;
+                    gc = scout.GC || 0;
+                }
 
                 if (gols > 0 || gc > 0) {
                     golsPro += gols;
@@ -1311,6 +1370,6 @@ class ArtilheiroCampeaoController {
     }
 }
 
-logger.log("[ARTILHEIRO-CAMPEAO] ✅ v5.2.0 carregado (SaaS Dinâmico + Auditoria)");
+logger.log("[ARTILHEIRO-CAMPEAO] ✅ v5.3.0 carregado (SaaS Dinâmico + Scouts ao Vivo)");
 
 export default ArtilheiroCampeaoController;
