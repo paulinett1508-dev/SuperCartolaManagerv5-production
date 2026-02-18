@@ -4,14 +4,80 @@ Handover para nova sessao - carrega contexto do trabalho em andamento e instrui 
 
 ---
 
-## STATUS ATUAL: AUDIT-010 COMPLETO - 5 MODULOS AUDITADOS
+## STATUS ATUAL: AUDIT-014 COMPLETO - 9 MODULOS AUDITADOS
 
 **Data:** 18/02/2026
-**Ultima acao:** AUDIT-010 (pontos corridos) concluido. Score 82→93. Auth em 2 rotas POST, stubs documentados, RODADA_FINAL centralizado.
-**Sessao atual:** AUDIT-009 (mata-mata, 3 fixes) + AUDIT-010 (pontos corridos, 4 fixes)
+**Ultima acao:** AUDIT-011 a 014 concluidos (Top10, Melhor Mes, Campinho, Dicas). Campinho e Dicas sem fixes. Total: 9 modulos auditados.
+**Sessao atual (cont.):** AUDIT-011 (top10, 4 fixes) + AUDIT-012 (melhor mes, 4 fixes) + AUDIT-013 (campinho, 0) + AUDIT-014 (dicas, 0)
+**Sessao 18/02/2026:** AUDIT-009 (mata-mata, 3 fixes) + AUDIT-010 (pontos corridos, 4 fixes)
 **Sessao 17/02/2026:** AUDIT-006 (artilheiro, 12 fixes) + AUDIT-007 (capitao, 4 fixes) + AUDIT-008 (luva, 5 fixes) + Stitch simplificado
 **Sessao 14/02/2026:** AUDIT-005: faixas dinamicas ranking, 3 bugs
 **Sessao 13/02/2026:** AUDIT-004: 4 bugs ranking corrigidos + AUDIT-001/002/003 financeiras + cache stale resolvido
+
+---
+
+## AUDIT-011: MODULO TOP 10 (18/02/2026)
+
+**Problema:** Auditoria completa do modulo Top 10 revelou score 82/100. Config com `ligas_habilitadas` hardcoded (Super Cartola + Sobral) e `temporada: 2025` stale. Financeiro per-liga hardcoded (deveria vir do ModuleConfig). Manager sem docs de stub.
+
+### Fixes aplicados
+
+| # | Bug | Severidade | Arquivo | Fix |
+|---|-----|-----------|---------|-----|
+| 1 | `ligas_habilitadas` hardcoded + `temporada: 2025` stale | **CRITICAL** | `config/rules/top_10.json` | Removido ligas_habilitadas, removido temporada |
+| 2 | Financeiro per-liga hardcoded (Super Cartola + Sobral) | **MODERATE** | `config/rules/top_10.json` | Substituido por valores_defaults de referencia |
+| 3 | Top10Manager hooks sem `stub: true`, com console.logs | **MODERATE** | `services/orchestrator/managers/Top10Manager.js` | v1.1.0: JSDoc, `stub: true`, removidos console.logs |
+| 4 | Config sem nota ModuleConfig | **LOW** | `config/rules/top_10.json` | Adicionada nota |
+
+### O que ja estava correto
+
+| Item | Detalhe |
+|------|---------|
+| `verificarAdmin` em POST/DELETE | Rotas protegidas |
+| CURRENT_SEASON no backend | Importado de `config/seasons.js` |
+| Config dinamica via wizard | Valores reais por liga do ModuleConfig |
+
+### Resultado final
+- **Score:** 82/100 → ~92/100
+
+---
+
+## AUDIT-012: MODULO MELHOR MES (18/02/2026)
+
+**Problema:** Auditoria completa do modulo Melhor Mes revelou score 78/100. Config com `ligas_habilitadas` hardcoded e `temporada: 2025` stale. Manager sem docs de stub. Fallback `|| 38` no core frontend.
+
+### Fixes aplicados
+
+| # | Bug | Severidade | Arquivo | Fix |
+|---|-----|-----------|---------|-----|
+| 1 | `ligas_habilitadas` hardcoded + `temporada: 2025` stale | **CRITICAL** | `config/rules/melhor_mes.json` | Removido ligas_habilitadas, removido temporada |
+| 2 | MelhorMesManager hooks sem `stub: true`, com console.logs | **MODERATE** | `services/orchestrator/managers/MelhorMesManager.js` | v1.1.0: JSDoc, `stub: true`, removidos console.logs, removido _estimarProximaRodadaMes |
+| 3 | `mercadoStatus.rodada_final \|\| 38` hardcoded no core | **MODERATE** | `public/js/melhor-mes/melhor-mes-core.js` | v1.5: import `RODADA_FINAL_CAMPEONATO` de `season-config.js` |
+| 4 | Config sem nota ModuleConfig | **LOW** | `config/rules/melhor_mes.json` | Adicionada nota |
+
+### O que ja estava correto
+
+| Item | Detalhe |
+|------|---------|
+| CURRENT_SEASON no backend | Model e Service importam de `config/seasons.js` |
+| Pre-temporada no core v1.4 | Detecta se API retorna ano anterior |
+| Segregacao temporal completa | Cache por liga/temporada |
+| Sem rotas proprias de escrita expostas | Usa service interno |
+
+### Resultado final
+- **Score:** 78/100 → ~90/100
+
+---
+
+## AUDIT-013: MODULO CAMPINHO (18/02/2026) — SEM FIXES
+
+**Score:** 88/100. Modulo de visualizacao puro (participant-only). Consome dados existentes (Rodada, Cartola API, Data Lake). Sem Manager (correto), sem rotas de escrita, CSS usa tokens, offline fallback v2.1, XSS prevention. Nenhuma acao necessaria.
+
+---
+
+## AUDIT-014: MODULO DICAS PREMIUM (18/02/2026) — SEM FIXES
+
+**Score:** 87/100. Modulo API-only stateless. Consulta Cartola API em tempo real. Auth propria (`verificarParticipantePremium`). Sem RODADA_FINAL hardcoded, sem temporada stale, zero debug logs. Nenhuma acao necessaria.
 
 ---
 
@@ -376,6 +442,9 @@ O wizard de modulos (`gerenciar-modulos.html`) salvava corretamente no `ModuleCo
 | `routes/pontosCorridosMigracaoRoutes.js` | Rota migracao PC | FIXADO v1.1 (verificarAdmin POST, AUDIT-010) |
 | `public/js/pontos-corridos/pontos-corridos-orquestrador.js` | Orquestrador frontend PC | v3.3 (RODADA_FINAL centralizado, AUDIT-010) |
 | `config/rules/pontos_corridos.json` | Regras pontos corridos | LIMPO (nota ModuleConfig, AUDIT-010) |
+| `config/rules/top_10.json` | Regras top 10 | LIMPO (sem hardcodes, nota ModuleConfig, AUDIT-011) |
+| `config/rules/melhor_mes.json` | Regras melhor mes | LIMPO (sem hardcodes, nota ModuleConfig, AUDIT-012) |
+| `public/js/melhor-mes/melhor-mes-core.js` | Core business logic melhor mes | v1.5 (RODADA_FINAL centralizado, AUDIT-012) |
 
 ---
 
@@ -433,5 +502,9 @@ Apos invalidacao, o proximo acesso ao extrato de cada participante recalculara a
 13. ~~Auditoria modulo luva de ouro~~ ✅ AUDIT-008 (5 fixes, 1 commit)
 14. ~~Auditoria modulo mata-mata~~ ✅ AUDIT-009 (3 fixes, 1 commit)
 15. ~~Auditoria modulo pontos corridos~~ ✅ AUDIT-010 (4 fixes, 1 commit)
-16. AUDIT-001 Fase 3 se houver tempo (cosmetico)
+16. ~~Auditoria modulo top 10~~ ✅ AUDIT-011 (4 fixes)
+17. ~~Auditoria modulo melhor mes~~ ✅ AUDIT-012 (4 fixes)
+18. ~~Auditoria modulo campinho~~ ✅ AUDIT-013 (0 fixes — modulo de visualizacao)
+19. ~~Auditoria modulo dicas~~ ✅ AUDIT-014 (0 fixes — modulo API stateless)
+20. AUDIT-001 Fase 3 se houver tempo (cosmetico)
 17. Verificar temporada 2025 caches (formato antigo, reconciliacao nao suporta)

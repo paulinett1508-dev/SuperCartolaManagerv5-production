@@ -1,6 +1,17 @@
 /**
- * MELHOR MES MANAGER v1.0.0
- * Módulo OPCIONAL - Prêmio melhor do mês
+ * MELHOR MES MANAGER v1.1.0
+ * Módulo OPCIONAL - Prêmio melhor do mês (competição mensal por edições)
+ *
+ * STATUS: STUBS — Hooks registrados mas NÃO executam cálculos automaticamente.
+ *
+ * FLUXO ATUAL (manual via admin):
+ *   1. Admin abre tela Melhor do Mês → Frontend calcula rankings via orquestrador
+ *   2. Frontend salva cache → via melhorMesService.js
+ *   Service: melhorMesService.js
+ *   Frontend: melhor-mes-orquestrador.js (coordena módulos core/ui/config)
+ *
+ * FUTURO: Quando o orchestrator for implementado end-to-end, estes hooks
+ * devem delegar ao service via chamadas internas.
  */
 import BaseManager from './BaseManager.js';
 
@@ -19,25 +30,10 @@ export default class MelhorMesManager extends BaseManager {
     }
 
     async onRoundFinalize(ctx) {
-        // Só processa se for última rodada do mês
-        const agora = new Date();
-        const proximaRodadaMes = this._estimarProximaRodadaMes(agora);
-
-        if (proximaRodadaMes) {
-            console.log(`[MELHOR-MES] Verificando se R${ctx.rodada} é última do mês`);
-        }
-        return { pronto: true };
+        return { pronto: false, stub: true, rodada: ctx.rodada };
     }
 
     async onConsolidate(ctx) {
-        console.log(`[MELHOR-MES] Consolidando melhor do mês R${ctx.rodada}`);
-        return { consolidado: true };
-    }
-
-    _estimarProximaRodadaMes(data) {
-        const diaDoMes = data.getDate();
-        const diasNoMes = new Date(data.getFullYear(), data.getMonth() + 1, 0).getDate();
-        // Se estamos nos últimos 5 dias do mês, pode ser última rodada
-        return diaDoMes >= diasNoMes - 5;
+        return { consolidado: false, stub: true, rodada: ctx.rodada };
     }
 }

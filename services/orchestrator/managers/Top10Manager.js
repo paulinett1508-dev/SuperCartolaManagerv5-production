@@ -1,6 +1,17 @@
 /**
- * TOP 10 MANAGER v1.0.0
- * Módulo OPCIONAL - Mito/Mico da rodada
+ * TOP 10 MANAGER v1.1.0
+ * Módulo OPCIONAL - Mito/Mico da rodada (ranking extremos históricos)
+ *
+ * STATUS: STUBS — Hooks registrados mas NÃO executam cálculos automaticamente.
+ *
+ * FLUXO ATUAL (manual via admin):
+ *   1. Admin abre tela Top 10 → Frontend calcula mitos/micos via fluxoFinanceiroController
+ *   2. Frontend salva cache → POST /api/top10/cache/:ligaId
+ *   Controller: top10CacheController.js
+ *   Frontend: artilheiro-campeao.js (seção Top 10 integrada)
+ *
+ * FUTURO: Quando o orchestrator for implementado end-to-end, estes hooks
+ * devem delegar ao controller via chamadas internas.
  */
 import BaseManager from './BaseManager.js';
 
@@ -19,12 +30,10 @@ export default class Top10Manager extends BaseManager {
     }
 
     async onRoundFinalize(ctx) {
-        console.log(`[TOP10] Calculando mito/mico R${ctx.rodada}`);
-        return { pronto: true };
+        return { pronto: false, stub: true, rodada: ctx.rodada };
     }
 
     async onConsolidate(ctx) {
-        console.log(`[TOP10] Consolidando premiações mito/mico R${ctx.rodada}`);
-        return { consolidado: true };
+        return { consolidado: false, stub: true, rodada: ctx.rodada };
     }
 }
