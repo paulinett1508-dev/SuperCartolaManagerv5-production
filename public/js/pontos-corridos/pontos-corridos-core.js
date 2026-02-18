@@ -85,7 +85,9 @@ async function salvarCacheRodada(
 
 async function buscarTodosOsCaches(ligaId) {
     try {
-        const response = await fetch(`/api/pontos-corridos/${ligaId}`);
+        // ✅ FIX: incluir temporada obrigatória (sem ela a rota retorna 400)
+        const temporada = PONTOS_CORRIDOS_CONFIG.temporada || new Date().getFullYear();
+        const response = await fetch(`/api/pontos-corridos/${ligaId}?temporada=${temporada}`);
         if (!response.ok) return [];
         return await response.json();
     } catch (error) {

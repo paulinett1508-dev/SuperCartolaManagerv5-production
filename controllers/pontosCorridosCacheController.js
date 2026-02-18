@@ -448,6 +448,7 @@ export const obterConfrontosPontosCorridos = async (
                     rodadaAtualBrasileirao,
                     dadosPorRodada,
                     config,
+                    dadosPorRodada, // ✅ FIX: passa caches existentes para extração do bracket admin
                 );
 
                 if (rodadaAoVivo) {
@@ -475,12 +476,15 @@ export const obterConfrontosPontosCorridos = async (
 };
 
 // 🔥 CALCULAR RODADA COM PARCIAIS AO VIVO
+// ✅ FIX: Aceita dadosExistentes para extrair o bracket salvo pelo admin.
+//         NUNCA gera confrontos independentes — usa o chaveamento do admin como verdade absoluta.
 async function calcularRodadaComParciais(
     ligaId,
     rodadaLiga,
     rodadaBrasileirao,
     dadosAnteriores,
     config,
+    dadosExistentes = [],
 ) {
     try {
         // 1. Buscar liga e times
@@ -502,9 +506,34 @@ async function calcularRodadaComParciais(
             `[PONTOS-CORRIDOS] 📋 Status de ${times.length} times carregado`,
         );
 
-        // 2. Gerar confrontos da rodada
-        const confrontosBase = gerarConfrontos(times);
-        const jogosDaRodada = confrontosBase[rodadaLiga - 1];
+        // ✅ FIX: Determinar chaveamento da rodada.
+        // PRIORIDADE 1: Usar bracket extraído do cache salvo pelo admin (fonte da verdade absoluta).
+        // PRIORIDADE 2: Fallback para liga.participantes APENAS se não há nenhum cache anterior.
+        let jogosDaRodada;
+        const listaIdsDoCache = extrairOrdemDoCache(dadosExistentes);
+
+        if (listaIdsDoCache) {
+            // ✅ Usa o bracket do admin — garante que os confrontos do app = confrontos do admin
+            const bracket = gerarBracketFromIds(listaIdsDoCache);
+            const rodadaBracket = bracket[rodadaLiga - 1];
+            if (!rodadaBracket) {
+                logger.warn(`[PONTOS-CORRIDOS] ⚠️ Rodada ${rodadaLiga} fora do bracket (${bracket.length} rodadas no cache)`);
+                return null;
+            }
+            // Converter {timeAId, timeBId} para o formato esperado pelo restante da função
+            jogosDaRodada = rodadaBracket.map(j => ({
+                timeA: { time_id: j.timeAId, id: j.timeAId },
+                timeB: { time_id: j.timeBId, id: j.timeBId },
+            }));
+            logger.log(`[PONTOS-CORRIDOS] ✅ Chaveamento R${rodadaLiga} extraído do cache admin (${jogosDaRodada.length} jogos)`);
+        } else {
+            // ⚠️ Fallback: nenhum cache disponível — gera a partir de liga.participantes
+            // Isso só ocorre se o admin ainda não salvou nenhuma rodada
+            logger.warn(`[PONTOS-CORRIDOS] ⚠️ Nenhum cache do admin disponível — usando liga.participantes como fallback para R${rodadaLiga}`);
+            const confrontosBase = gerarConfrontos(times);
+            jogosDaRodada = confrontosBase[rodadaLiga - 1];
+        }
+
         if (!jogosDaRodada) {
             logger.warn(
                 `[PONTOS-CORRIDOS] ⚠️ Rodada ${rodadaLiga} não existe nos confrontos`,
@@ -696,8 +725,37 @@ async function reconstruirCacheDeRodadas(ligaId, temporada, config, timesMap) {
 
         logger.log(`[PONTOS-CORRIDOS] 🔄 Reconstruindo ${rodadasLiga.length} rodadas de dados históricos...`);
 
-        // Gerar confrontos base (round-robin)
-        const confrontosBase = gerarConfrontos(times);
+        // ✅ FIX: Verificar se já existe algum cache de outra temporada ou do mesmo que
+        //          o admin tenha gerado anteriormente. Se sim, extrai ordem canônica.
+        //          Se não (liga completamente nova), ordena times por ID para ser determinístico.
+        const cachesExistentes = await PontosCorridosCache.find({ liga_id: ligaId })
+            .sort({ rodada_consolidada: 1 })
+            .lean();
+
+        const listaIdsDoCache = extrairOrdemDoCache(
+            cachesExistentes.map(c => ({ rodada: c.rodada_consolidada, confrontos: c.confrontos }))
+        );
+
+        let confrontosBase;
+        if (listaIdsDoCache) {
+            // Usa a ordem estabelecida pelo admin
+            logger.log(`[PONTOS-CORRIDOS] ✅ Usando bracket do admin para reconstrução`);
+            confrontosBase = gerarBracketFromIds(listaIdsDoCache).map(rodada =>
+                rodada.map(j => ({
+                    timeA: { time_id: j.timeAId, id: j.timeAId },
+                    timeB: { time_id: j.timeBId, id: j.timeBId },
+                }))
+            );
+        } else {
+            // Liga nova sem histórico: ordena por ID para garantir determinismo
+            const timesOrdenados = [...times].sort((a, b) => {
+                const idA = Number(a.time_id || a.id || 0);
+                const idB = Number(b.time_id || b.id || 0);
+                return idA - idB;
+            });
+            logger.log(`[PONTOS-CORRIDOS] ℹ️ Sem cache do admin — usando liga.participantes ordenado por ID`);
+            confrontosBase = gerarConfrontos(timesOrdenados);
+        }
 
         // Buscar status dos participantes
         const statusMap = await buscarStatusParticipantes(times);
@@ -803,6 +861,52 @@ async function reconstruirCacheDeRodadas(ligaId, temporada, config, timesMap) {
         logger.error('[PONTOS-CORRIDOS] ❌ Erro ao reconstruir cache:', error.message);
         return [];
     }
+}
+
+// ✅ FIX: Extrai a ordem original dos times a partir dos confrontos da Rodada 1 salva pelo admin.
+// O round-robin posiciona: lista[i] = time1[i], lista[n-1-i] = time2[i]
+// Isso garante que calcularRodadaComParciais use o mesmo chaveamento que o admin gerou.
+function extrairOrdemDoCache(caches) {
+    const rodada1 = [...caches].sort((a, b) => a.rodada - b.rodada)
+        .find(c => c.rodada === 1 && c.confrontos?.length > 0);
+
+    if (!rodada1) {
+        logger.warn('[CACHE-PC] ⚠️ extrairOrdemDoCache: Rodada 1 não encontrada no cache. Chaveamento pode divergir do admin.');
+        return null;
+    }
+
+    const confrontos = rodada1.confrontos;
+    const n = confrontos.length * 2;
+    const listaIds = new Array(n);
+
+    for (let i = 0; i < confrontos.length; i++) {
+        listaIds[i] = String(confrontos[i].time1?.id || confrontos[i].time1);
+        listaIds[n - 1 - i] = String(confrontos[i].time2?.id || confrontos[i].time2);
+    }
+
+    logger.log(`[CACHE-PC] 📐 Ordem canônica extraída da Rodada 1 (admin): [${listaIds.join(', ')}]`);
+    return listaIds;
+}
+
+// ✅ FIX: Gera bracket completo usando apenas IDs (sem objetos completos de time).
+// Algoritmo idêntico ao gerarConfrontos, mas trabalha com IDs simples.
+function gerarBracketFromIds(listaIds) {
+    const rodadas = [];
+    const lista = [...listaIds];
+    if (lista.length % 2 !== 0) lista.push(null);
+
+    const total = lista.length - 1;
+    for (let rodada = 0; rodada < total; rodada++) {
+        const jogos = [];
+        for (let i = 0; i < lista.length / 2; i++) {
+            const tidA = lista[i];
+            const tidB = lista[lista.length - 1 - i];
+            if (tidA && tidB) jogos.push({ timeAId: tidA, timeBId: tidB });
+        }
+        rodadas.push(jogos);
+        lista.splice(1, 0, lista.pop());
+    }
+    return rodadas;
 }
 
 // Gerar confrontos round-robin
