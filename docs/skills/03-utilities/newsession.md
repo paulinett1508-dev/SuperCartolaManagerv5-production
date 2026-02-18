@@ -40,6 +40,7 @@ Handover para nova sessao - carrega contexto do trabalho em andamento e instrui 
 
 ### Resultado final
 - **Score:** 82/100 → ~92/100
+- **Commit:** `fd14c11`
 
 ---
 
@@ -67,6 +68,7 @@ Handover para nova sessao - carrega contexto do trabalho em andamento e instrui 
 
 ### Resultado final
 - **Score:** 78/100 → ~90/100
+- **Commit:** `fd14c11`
 
 ---
 
