@@ -597,17 +597,29 @@ export async function getConfrontosLigaPontosCorridos(ligaId, rodadaAtualLiga) {
         // Ordenar por rodada
         todosConfrontos.sort((a, b) => a.rodada - b.rodada);
 
-        const classificacaoFinal =
-            todosConfrontos.find((c) => c.rodada === rodadaAtualLiga)
-                ?.classificacao || [];
+        // Fallback: quando a rodada alvo ainda não tem scores (skippada),
+        // usar classificação da última rodada com dados disponíveis
+        const rodadaAlvo = todosConfrontos.find((c) => c.rodada === rodadaAtualLiga);
+        const classificacaoFinal = rodadaAlvo?.classificacao?.length > 0
+            ? rodadaAlvo.classificacao
+            : ([...todosConfrontos]
+                .sort((a, b) => b.rodada - a.rodada)
+                .find((c) => c.classificacao?.length > 0)?.classificacao || []);
+
+        const ultimaRodadaUsada = rodadaAlvo?.classificacao?.length > 0
+            ? rodadaAtualLiga
+            : (todosConfrontos.filter(c => c.classificacao?.length > 0).length > 0
+                ? Math.max(...todosConfrontos.filter(c => c.classificacao?.length > 0).map(c => c.rodada))
+                : 0);
 
         console.log(
-            `[CORE] ✅ Processamento concluído: ${todosConfrontos.length} rodadas`,
+            `[CORE] ✅ Processamento concluído: ${todosConfrontos.length} rodadas (classificação de R${ultimaRodadaUsada})`,
         );
 
         return {
             confrontos: todosConfrontos,
             classificacao: classificacaoFinal,
+            ultimaRodadaComDados: ultimaRodadaUsada,
         };
     } catch (error) {
         console.error("[CORE] ❌ Erro fatal:", error);
@@ -673,10 +685,15 @@ export async function calcularClassificacao(
     // Calcular usando função principal
     const resultado = await getConfrontosLigaPontosCorridos(ligaId, rodadaLiga);
 
+    // Usar ultimaRodadaComDados do resultado quando a rodada alvo não tinha dados
+    const ultimaRodada = resultado.ultimaRodadaComDados
+        ? PONTOS_CORRIDOS_CONFIG.rodadaInicial + resultado.ultimaRodadaComDados - 1
+        : rodadaAtualBrasileirao;
+
     return {
         classificacao: resultado.classificacao,
         confrontos: resultado.confrontos,
-        ultimaRodadaComDados: rodadaAtualBrasileirao,
+        ultimaRodadaComDados: ultimaRodada,
         houveErro: false,
         fromCache: false,
     };
