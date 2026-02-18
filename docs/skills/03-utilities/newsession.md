@@ -4,13 +4,46 @@ Handover para nova sessao - carrega contexto do trabalho em andamento e instrui 
 
 ---
 
-## STATUS ATUAL: AUDIT-008 COMPLETO - 3 MODULOS AUDITADOS NA SESSAO
+## STATUS ATUAL: AUDIT-009 COMPLETO - 4 MODULOS AUDITADOS
 
-**Data:** 17/02/2026
-**Ultima acao:** AUDIT-008 (luva de ouro) concluido. Score 73→91. Config stale corrigido, auth na rota diagnostico, debug logs removidos.
-**Sessao atual:** AUDIT-006 (artilheiro, 12 fixes) + AUDIT-007 (capitao, 4 fixes) + AUDIT-008 (luva, 5 fixes) + Stitch simplificado
-**Sessao anterior:** 14/02/2026 (AUDIT-005: faixas dinamicas ranking, 3 bugs)
+**Data:** 18/02/2026
+**Ultima acao:** AUDIT-009 (mata-mata) concluido. Score 91→95. Manager documentado como stub, RODADA_FINAL centralizado, nota ModuleConfig.
+**Sessao atual:** AUDIT-009 (mata-mata, 3 fixes)
+**Sessao 17/02/2026:** AUDIT-006 (artilheiro, 12 fixes) + AUDIT-007 (capitao, 4 fixes) + AUDIT-008 (luva, 5 fixes) + Stitch simplificado
+**Sessao 14/02/2026:** AUDIT-005: faixas dinamicas ranking, 3 bugs
 **Sessao 13/02/2026:** AUDIT-004: 4 bugs ranking corrigidos + AUDIT-001/002/003 financeiras + cache stale resolvido
+
+---
+
+## AUDIT-009: MODULO MATA-MATA (18/02/2026)
+
+**Problema:** Auditoria completa do modulo mata-mata revelou score 91/100 — significativamente mais maduro que os outros 3 modulos auditados. Ja tinha verificarAdmin em todas rotas mutantes, rate limiter, validacao de input, CURRENT_SEASON no backend. Restavam: Manager sem docs de stub, fallbacks `= 38` hardcoded no orquestrador frontend, config sem nota ModuleConfig.
+
+### Fixes aplicados (commit `21d8e5d`)
+
+| # | Bug | Severidade | Arquivo | Fix |
+|---|-----|-----------|---------|-----|
+| 1 | MataMataManager hooks sem `stub: true` e com console.logs | **MODERATE** | `services/orchestrator/managers/MataMataManager.js` | v1.1.0: JSDoc completo, `stub: true`, removidos console.logs |
+| 2 | 4x fallback `= 38` hardcoded no orquestrador | **MODERATE** | `public/js/mata-mata/mata-mata-orquestrador.js` | v1.5: import `RODADA_FINAL_CAMPEONATO` de `season-config.js` |
+| 3 | Config sem nota ModuleConfig | **LOW** | `config/rules/mata_mata.json` | Adicionada nota sobre habilitacao via ModuleConfig |
+
+### O que ja estava correto (nao precisou fix)
+
+| Item | Detalhe |
+|------|---------|
+| `verificarAdmin` em POST/DELETE | Todas rotas mutantes protegidas |
+| Rate limiter escrita | 30 req/min por IP customizado |
+| Validacao de params | `validarLigaIdParam` + `validarEdicaoParam` |
+| `CURRENT_SEASON` no backend | Importado de `config/seasons.js` |
+| Rota debug protegida | `verificarAdmin` ja presente |
+| Zero `[DEBUG-*]` no participante | Nenhum debug log encontrado |
+| Zero `ligas_habilitadas` no config | Usa ModuleConfig corretamente |
+| Config JSON completo | Wizard, regras, calendario, financeiro — tudo estruturado |
+
+### Resultado final
+- **Score:** 91/100 → ~95/100
+- **Modulo mais maduro** dos 4 auditados (artilheiro 70→90, capitao 80→92, luva 73→91, mata-mata 91→95)
+- **Commit:** `21d8e5d`
 
 ---
 
@@ -303,6 +336,9 @@ O wizard de modulos (`gerenciar-modulos.html`) salvava corretamente no `ModuleCo
 | `services/goleirosService.js` | Service goleiros (API Cartola) | v3.0.0 OK |
 | `routes/luva-de-ouro-routes.js` | Rotas luva com verificarAdmin | FIXADO v2.1 (diagnostico auth, AUDIT-008) |
 | `config/rules/luva_ouro.json` | Regras luva | LIMPO (sem hardcodes, temporada 2026) |
+| `routes/mataMataCacheRoutes.js` | Rotas mata-mata cache CRUD | OK (verificarAdmin, rate limiter, validacao) |
+| `public/js/mata-mata/mata-mata-orquestrador.js` | Orquestrador frontend mata-mata | v1.5 (RODADA_FINAL centralizado, AUDIT-009) |
+| `config/rules/mata_mata.json` | Regras mata-mata | LIMPO (nota ModuleConfig, AUDIT-009) |
 
 ---
 
@@ -358,5 +394,6 @@ Apos invalidacao, o proximo acesso ao extrato de cada participante recalculara a
 11. ~~Auditoria modulo artilheiro~~ ✅ AUDIT-006 (12 fixes, 3 commits)
 12. ~~Auditoria modulo capitao de luxo~~ ✅ AUDIT-007 (4 fixes, 2 commits)
 13. ~~Auditoria modulo luva de ouro~~ ✅ AUDIT-008 (5 fixes, 1 commit)
-14. AUDIT-001 Fase 3 se houver tempo (cosmetico)
-13. Verificar temporada 2025 caches (formato antigo, reconciliacao nao suporta)
+14. ~~Auditoria modulo mata-mata~~ ✅ AUDIT-009 (3 fixes, 1 commit)
+15. AUDIT-001 Fase 3 se houver tempo (cosmetico)
+16. Verificar temporada 2025 caches (formato antigo, reconciliacao nao suporta)
