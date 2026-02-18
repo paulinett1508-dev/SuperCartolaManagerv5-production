@@ -142,6 +142,24 @@ Cada módulo possui sua paleta de cores padronizada. **Sempre use variáveis CSS
 
 **⚠️ Regra:** NUNCA use cores hardcoded (`#22c55e`) diretamente. Sempre use as variáveis CSS para manter consistência e facilitar manutenção futura.
 
+### Ícones (REGRA CRÍTICA)
+**NUNCA use emojis no código.** Sempre use Material Icons com cores tematizadas via variáveis CSS.
+
+| Contexto | Errado | Correto |
+|----------|--------|---------|
+| Indicador ganho | `🟢` | `<span class="material-icons" style="color: var(--app-success)">check_circle</span>` |
+| Indicador perda | `🔴` | `<span class="material-icons" style="color: var(--app-danger)">cancel</span>` |
+| Estrela/MITO | `⭐` | `<span class="material-icons" style="color: var(--app-warning)">star</span>` |
+| Troféu | `🏆` | `<span class="material-icons" style="color: var(--app-danger)">emoji_events</span>` |
+| Futebol | `⚽` | `<span class="material-icons" style="color: var(--app-indigo)">sports_soccer</span>` |
+| Alvo/Posição | `🎯` | `<span class="material-icons" style="color: var(--app-primary)">casino</span>` |
+
+**Motivos:**
+1. Emojis renderizam diferente em cada OS/browser
+2. Material Icons são vetoriais (escaláveis sem perda)
+3. Cores podem ser tematizadas via CSS variables
+4. Consistência visual em todo o sistema
+
 ## 🛡️ Coding Standards
 - **Idempotency:** Financial functions MUST be idempotent (prevent double-charging)
 - **Safety:** Always validate `req.session.usuario` before sensitive actions

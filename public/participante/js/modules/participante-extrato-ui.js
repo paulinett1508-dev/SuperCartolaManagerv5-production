@@ -103,6 +103,23 @@ function getPosicaoZonaLabel(posicao, faixas) {
     return { label: null, tipo: "neutro" };
 }
 
+/**
+ * Retorna indicador visual de zona (Material Icon)
+ * Verde = zona de ganho (crédito)
+ * Cinza = zona neutra
+ * Vermelho = zona de perda (débito)
+ */
+function getZonaIndicator(posicao, faixas) {
+    if (!posicao || !faixas) return '<span class="material-icons extrato-tl__zona-icon extrato-tl__zona-icon--neutral">radio_button_unchecked</span>';
+    const tipo = classificarPosicao(posicao, faixas);
+    const icons = {
+        'credito': '<span class="material-icons extrato-tl__zona-icon extrato-tl__zona-icon--credito">check_circle</span>',
+        'neutro': '<span class="material-icons extrato-tl__zona-icon extrato-tl__zona-icon--neutral">radio_button_unchecked</span>',
+        'debito': '<span class="material-icons extrato-tl__zona-icon extrato-tl__zona-icon--debito">cancel</span>'
+    };
+    return icons[tipo] || icons['neutro'];
+}
+
 // ===== HELPERS =====
 function calcularPosicaoTop10(valor, ligaId) {
     const absValor = Math.abs(valor);
@@ -258,7 +275,7 @@ function renderQuickStatsRow(resumo, rodadas, acertos) {
                 <span class="material-icons extrato-stat-pill__icon">star</span>
                 <div class="extrato-stat-pill__content">
                     <span class="extrato-stat-pill__label">Melhor</span>
-                    <span class="extrato-stat-pill__value" style="color: var(--app-success-light)">R${melhorRodada} +${melhorSaldo.toFixed(0)}</span>
+                    <span class="extrato-stat-pill__value" style="color: ${melhorSaldo >= 0 ? 'var(--app-success-light)' : 'var(--app-danger-light)'}">R${melhorRodada} ${melhorSaldo >= 0 ? '+' : ''}${melhorSaldo.toFixed(0)}</span>
                 </div>
             </div>` : ''}
         </div>
@@ -353,7 +370,7 @@ function renderTransactionTimeline(rodadas, acertos, lancamentosIniciais, ligaId
         });
     }
 
-    // 2. Rodadas
+    // 2. Rodadas - NOVO DESIGN: Timeline Vertical (estilo banco digital)
     const rodadasCompletas = preencherTodasRodadas(rodadas);
     const rodadasOrdenadas = [...rodadasCompletas].sort((a, b) => a.rodada - b.rodada);
 
@@ -368,106 +385,82 @@ function renderTransactionTimeline(rodadas, acertos, lancamentosIniciais, ligaId
         saldoAcumulado += saldoRodada;
 
         const faixas = getFaixasParaRodada(ligaId, r.rodada);
-        const { label: zonaLabel, tipo: tipoZona } = getPosicaoZonaLabel(r.posicao, faixas);
+        const { label: zonaLabel } = getPosicaoZonaLabel(r.posicao, faixas);
+        const zonaIndicator = getZonaIndicator(r.posicao, faixas);
         const isMito = r.posicao === 1;
         const isMico = r.posicao === (faixas.debito?.fim || faixas.totalTimes);
 
-        // Subitems (breakdown)
-        const subitems = [];
+        // Detalhes (Material Icons com cores dos módulos)
+        const detalhes = [];
 
         if (bonusOnus !== 0) {
-            let bancoLabel = bonusOnus > 0 ? 'Bônus de posição' : 'Ônus de posição';
+            let bancoLabel = bonusOnus > 0 ? 'Bônus posição' : 'Ônus posição';
             if (isMito) bancoLabel = 'MITO da Rodada';
             else if (isMico) bancoLabel = 'MICO da Rodada';
             else if (zonaLabel) bancoLabel = `${bonusOnus > 0 ? 'Bônus' : 'Ônus'} (${zonaLabel})`;
-            const bancoColor = isMito ? 'var(--app-gold)' : isMico ? 'var(--app-danger)' : 'var(--app-pos-tec)';
-            subitems.push({ icon: 'casino', label: bancoLabel, valor: bonusOnus, color: bancoColor });
+            // Material Icon + cor baseada em MITO/MICO/normal
+            const iconName = isMito ? 'star' : isMico ? 'sentiment_very_dissatisfied' : 'casino';
+            const iconColor = isMito ? 'var(--app-warning)' : isMico ? 'var(--app-danger)' : 'var(--app-primary)';
+            detalhes.push({ icon: iconName, iconColor, label: bancoLabel, valor: bonusOnus });
         }
-        if (pontosCorridos !== 0) subitems.push({ icon: 'sports_soccer', label: 'Pontos Corridos', valor: pontosCorridos, color: 'var(--app-indigo)' });
-        if (mataMata !== 0) subitems.push({ icon: 'emoji_events', label: 'Mata-Mata', valor: mataMata, color: 'var(--app-danger)' });
+        if (pontosCorridos !== 0) {
+            detalhes.push({ icon: 'sports_soccer', iconColor: 'var(--app-indigo, #6366f1)', label: 'Pontos Corridos', valor: pontosCorridos });
+        }
+        if (mataMata !== 0) {
+            detalhes.push({ icon: 'emoji_events', iconColor: 'var(--app-danger)', label: 'Mata-Mata', valor: mataMata });
+        }
         if (top10 !== 0) {
             const posTop10 = calcularPosicaoTop10(top10, ligaId);
             const labelTop10 = top10 > 0 ? `${posTop10}º Melhor Mito` : `${posTop10}º Pior Mico`;
-            subitems.push({ icon: top10 > 0 ? 'military_tech' : 'sentiment_sad', label: labelTop10, valor: top10, color: 'var(--app-warning)' });
+            const iconName = top10 > 0 ? 'military_tech' : 'thumb_down';
+            const iconColor = top10 > 0 ? 'var(--app-warning)' : 'var(--app-danger)';
+            detalhes.push({ icon: iconName, iconColor, label: labelTop10, valor: top10 });
         }
 
-        // Módulos extras = tudo exceto o ranking base (Banco/Bônus/Ônus de posição)
-        const modulosExtras = subitems.filter(si => si.icon !== 'casino').length;
-        const hasSubitems = subitems.length > 0;
-        const expandableClass = hasSubitems ? 'extrato-timeline__expandable' : '';
-        const expandClick = hasSubitems ? `onclick="window.toggleTimelineGroup(this)"` : '';
-        const expandIcon = hasSubitems ? `<span class="material-icons extrato-timeline__expand-icon">expand_more</span>` : '';
+        // Contar módulos extras (exclui bônus/ônus de posição base)
+        const modulosExtras = detalhes.filter(d => !['casino', 'star', 'sentiment_very_dissatisfied'].includes(d.icon)).length;
 
-        // Net icon based on result
-        const iconType = saldoRodada > 0 ? 'credit' : saldoRodada < 0 ? 'debit' : 'credit';
-        const iconName = isMito ? 'star' : isMico ? 'thumb_down' : (saldoRodada >= 0 ? 'trending_up' : 'trending_down');
+        const saldoRodadaZero = saldoRodada === 0 && detalhes.length === 0;
 
-        // Badge text
-        let badgeText = '';
-        if (isMito) badgeText = ' · MITO';
-        else if (isMico) badgeText = ' · MICO';
-        else if (zonaLabel) badgeText = ` · ${zonaLabel}`;
+        // Cor do saldo da rodada
+        const saldoRodadaColor = saldoRodada > 0 ? 'var(--app-success-light)' : saldoRodada < 0 ? 'var(--app-danger-light)' : 'var(--app-text-dim)';
+        const saldoRodadaFormatado = saldoRodada === 0 ? '—' : sinalMoeda(saldoRodada);
 
-        // Subitems HTML (sempre renderiza se há subitems)
-        const subitemsHtml = hasSubitems ? `
-            <div class="extrato-timeline__subitems">
-                ${subitems.map(si => `
-                    <div class="extrato-timeline__subitem">
-                        <span class="material-icons extrato-timeline__subitem-icon" style="color: ${si.color || 'var(--app-text-dim)'}">${si.icon}</span>
-                        <span class="extrato-timeline__subitem-label" style="color: ${si.color || 'var(--app-text-dim)'}">${si.label}</span>
-                        <span class="extrato-timeline__subitem-value" style="color: ${si.valor >= 0 ? 'var(--app-success-light)' : 'var(--app-danger-light)'}">
-                            ${si.valor > 0 ? '+' : ''}${si.valor.toFixed(2).replace('.', ',')}
-                        </span>
-                    </div>
-                `).join('')}
+        // Gerar HTML dos detalhes (oculto por padrão, expande ao clicar)
+        const detalhesHtml = detalhes.length > 0 ? `
+            <div class="extrato-tl__details">
+                ${detalhes.map((d, idx) => {
+                    const isLast = idx === detalhes.length - 1;
+                    const valorColor = d.valor >= 0 ? 'var(--app-success-light)' : 'var(--app-danger-light)';
+                    const valorFormatado = d.valor > 0 ? `+${d.valor.toFixed(2).replace('.', ',')}` : d.valor.toFixed(2).replace('.', ',');
+                    return `
+                        <div class="extrato-tl__detail-row">
+                            <span class="extrato-tl__detail-tree">${isLast ? '└─' : '├─'}</span>
+                            <span class="extrato-tl__detail-bullet">•</span>
+                            <span class="material-icons extrato-tl__detail-icon" style="color: ${d.iconColor}">${d.icon}</span>
+                            <span class="extrato-tl__detail-label">${d.label}</span>
+                            <span class="extrato-tl__detail-value" style="color: ${valorColor}">${valorFormatado}</span>
+                        </div>
+                    `;
+                }).join('')}
             </div>
         ` : '';
 
-        const saldoRodadaZero = saldoRodada === 0 && subitems.length === 0;
-
+        // DESIGN COMPACTO: Uma linha por rodada, expande ao clicar
         items.push({
             order: r.rodada,
             html: `
-                <div class="extrato-timeline__group">
-                    <div class="extrato-timeline__group-header">
-                        <span class="extrato-timeline__group-label">Rodada ${r.rodada}${badgeText}</span>
-                        <span class="extrato-timeline__group-total" style="color: ${saldoRodada > 0 ? 'var(--app-success-light)' : saldoRodada < 0 ? 'var(--app-danger-light)' : 'var(--app-text-dim)'}">
-                            ${saldoRodada === 0 ? '—' : sinalMoeda(saldoRodada)}
-                        </span>
-                    </div>
-                    ${saldoRodadaZero ? `
-                        <div class="extrato-timeline__item" style="opacity: 0.4">
-                            <div class="extrato-timeline__item-icon" style="background: var(--app-glass-hover); color: var(--app-text-dim)">
-                                <span class="material-icons">remove</span>
-                            </div>
-                            <div class="extrato-timeline__item-content">
-                                <div class="extrato-timeline__item-title" style="color: var(--app-text-dim)">Sem movimentação</div>
-                            </div>
-                        </div>
-                    ` : `
-                        <div class="extrato-timeline__item ${expandableClass}" ${expandClick}>
-                            <div class="extrato-timeline__item-icon extrato-timeline__item-icon--${iconType}">
-                                <span class="material-icons">${iconName}</span>
-                            </div>
-                            <div class="extrato-timeline__item-content">
-                                <div class="extrato-timeline__item-title">
-                                    ${r.posicao ? r.posicao + 'º lugar' : 'Rodada ' + r.rodada}
-                                </div>
-                                <div class="extrato-timeline__item-subtitle">${modulosExtras} ${modulosExtras === 1 ? 'módulo' : 'módulos'}</div>
-                            </div>
-                            <div class="extrato-timeline__item-value" style="color: ${saldoRodada >= 0 ? 'var(--app-success-light)' : 'var(--app-danger-light)'}">
-                                ${sinalMoeda(saldoRodada)}
-                            </div>
-                            ${expandIcon}
-                        </div>
-                        ${subitemsHtml}
-                    `}
-                    <div class="extrato-timeline__accumulated">
-                        <span class="extrato-timeline__accumulated-label">Saldo:</span>
-                        <span class="extrato-timeline__accumulated-value" style="color: ${saldoAcumulado >= 0 ? 'var(--app-success-light)' : 'var(--app-danger-light)'}">
-                            ${sinalMoeda(saldoAcumulado)}
-                        </span>
-                    </div>
+                <div class="extrato-tl__row ${saldoRodadaZero ? 'extrato-tl__row--empty' : ''}" data-rodada="${r.rodada}" data-saldo="${saldoRodada}" onclick="window.toggleExtratoRow(this)">
+                    <span class="extrato-tl__row-rodada">R${r.rodada}</span>
+                    <span class="extrato-tl__row-pos">${r.posicao ? r.posicao + 'º' : '—'}</span>
+                    <span class="extrato-tl__row-zona">${zonaIndicator}</span>
+                    <span class="extrato-tl__row-valor" style="color: ${saldoRodadaColor}">${saldoRodadaFormatado}</span>
+                    <span class="extrato-tl__row-saldo" style="color: ${saldoAcumulado >= 0 ? 'var(--app-success-light)' : 'var(--app-danger-light)'}">${sinalMoeda(saldoAcumulado)}</span>
+                    <span class="material-icons extrato-tl__row-expand">expand_more</span>
+                </div>
+                <div class="extrato-tl__row-details">
+                    ${detalhesHtml || '<span class="extrato-tl__empty-text">Sem movimentação</span>'}
+                    ${modulosExtras > 0 ? `<span class="extrato-tl__modules-badge">${modulosExtras} módulo${modulosExtras > 1 ? 's' : ''}</span>` : ''}
                 </div>
             `
         });
@@ -550,7 +543,7 @@ function renderTransactionTimeline(rodadas, acertos, lancamentosIniciais, ligaId
     `;
 }
 
-// Expand/collapse timeline groups
+// Expand/collapse timeline groups (legacy)
 window.toggleTimelineGroup = function(el) {
     const subitems = el.parentElement.querySelector('.extrato-timeline__subitems');
     const icon = el.querySelector('.extrato-timeline__expand-icon');
@@ -559,6 +552,36 @@ window.toggleTimelineGroup = function(el) {
     }
     if (icon) {
         icon.classList.toggle('extrato-timeline__expand-icon--open');
+    }
+};
+
+// Expand/collapse compacto - apenas UMA rodada expandida por vez
+window.toggleExtratoRow = function(rowEl) {
+    const isExpanded = rowEl.classList.contains('extrato-tl__row--expanded');
+    const container = rowEl.closest('.extrato-timeline') || rowEl.closest('#timelineContent');
+
+    // Colapsar TODAS as outras linhas primeiro
+    if (container) {
+        container.querySelectorAll('.extrato-tl__row--expanded').forEach(row => {
+            row.classList.remove('extrato-tl__row--expanded');
+            const details = row.nextElementSibling;
+            if (details && details.classList.contains('extrato-tl__row-details')) {
+                details.classList.remove('extrato-tl__row-details--open');
+            }
+            const icon = row.querySelector('.extrato-tl__row-expand');
+            if (icon) icon.style.transform = '';
+        });
+    }
+
+    // Se não estava expandida, expandir esta
+    if (!isExpanded) {
+        rowEl.classList.add('extrato-tl__row--expanded');
+        const details = rowEl.nextElementSibling;
+        if (details && details.classList.contains('extrato-tl__row-details')) {
+            details.classList.add('extrato-tl__row-details--open');
+        }
+        const icon = rowEl.querySelector('.extrato-tl__row-expand');
+        if (icon) icon.style.transform = 'rotate(180deg)';
     }
 };
 
@@ -584,9 +607,13 @@ function renderPerformanceCard(rodadas, ligaId) {
         if (saldo < piorRodada.saldo) piorRodada = { rodada: r.rodada, saldo };
     });
 
+    // Cor baseada no VALOR real (nao no fato de ser "melhor" ou "pior")
+    const melhorRodadaCor = melhorRodada.saldo >= 0 ? 'var(--app-success-light)' : 'var(--app-danger-light)';
+    const piorRodadaCor = piorRodada.saldo >= 0 ? 'var(--app-success-light)' : 'var(--app-danger-light)';
+
     return `
         <div class="extrato-performance">
-            <div class="extrato-performance__title">Seu Desempenho</div>
+            <div class="extrato-performance__title">Meu Desempenho</div>
             <div class="extrato-performance__grid">
                 <div class="extrato-performance__stat">
                     <div class="extrato-performance__stat-value" style="color: var(--app-warning)">${totalMito}</div>
@@ -608,13 +635,13 @@ function renderPerformanceCard(rodadas, ligaId) {
             <div class="extrato-performance__best-worst">
                 <div class="extrato-performance__best-worst-item">
                     <div class="extrato-performance__bw-label">Melhor Rodada</div>
-                    <div class="extrato-performance__bw-value" style="color: var(--app-success-light)">
+                    <div class="extrato-performance__bw-value" style="color: ${melhorRodadaCor}">
                         R${melhorRodada.rodada} (${sinalMoeda(melhorRodada.saldo)})
                     </div>
                 </div>
                 <div class="extrato-performance__best-worst-item">
                     <div class="extrato-performance__bw-label">Pior Rodada</div>
-                    <div class="extrato-performance__bw-value" style="color: var(--app-danger-light)">
+                    <div class="extrato-performance__bw-value" style="color: ${piorRodadaCor}">
                         R${piorRodada.rodada} (${sinalMoeda(piorRodada.saldo)})
                     </div>
                 </div>
@@ -914,7 +941,7 @@ function renderizarConteudoRenovadoPreTemporada(container, extrato) {
 
         <!-- Card Aguardando -->
         <div class="extrato-performance">
-            <div class="extrato-performance__title">Seu Desempenho</div>
+            <div class="extrato-performance__title">Meu Desempenho</div>
             <div class="extrato-performance__grid">
                 <div class="extrato-performance__stat">
                     <div class="extrato-performance__stat-value" style="color: var(--app-text-dim)">0</div>
