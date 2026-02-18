@@ -4,10 +4,10 @@ Handover para nova sessao - carrega contexto do trabalho em andamento e instrui 
 
 ---
 
-## STATUS ATUAL: VIRADA DE TEMPORADA EXECUTADA - SETUP 2026 PARCIAL
+## STATUS ATUAL: 2026 A PLENO VAPOR — BANCO CONSOLIDADO
 
 **Data:** 18/02/2026
-**Ultima acao:** Auditoria sincronismo 2025/2026 + fixes codigo + virada de liga + backfill DB. Commit `8323eab`.
+**Ultima acao:** Consolidacao banco unico (MONGO_URI_DEV descontinuada) + nome liga prod + commits `8323eab` + `84ce387`.
 **Sessao atual:** AUDIT-011..014 + Investigacao cache MM + AUDIT-001 Fase 3 + Auditoria sincronismo + Virada temporada
 **Sessao 18/02/2026:** AUDIT-009 (mata-mata, 3 fixes) + AUDIT-010 (pontos corridos, 4 fixes)
 **Sessao 17/02/2026:** AUDIT-006 (artilheiro, 12 fixes) + AUDIT-007 (capitao, 4 fixes) + AUDIT-008 (luva, 5 fixes) + Stitch simplificado
@@ -475,7 +475,7 @@ node scripts/auditoria-financeira-completa.js --dry-run --temporada=2025
 **Investigacao:** Nao havia caches de 2026 para invalidar. Todos os 38 caches sao de 2025 e estao balanceados (mataMata = R$0 liquido para Paullinett). O codigo fix `5cbf001` ja resolveu o calculo ao vivo.
 **Nota tecnica:** Script `invalidar-cache-mata-mata.js` tinha bug (buscava `tipo: 'MATA_MATA'` mas o schema usa campo `mataMata` numerico) — irrelevante pois nao ha caches a invalidar.
 
-### Pendencias restantes
+### Pendencias resolvidas (historico)
 1. ~~Investigar e corrigir bug cache stale financeiro~~ ✅ RESOLVIDO
 2. ~~Rodar script reconciliacao~~ ✅ EXECUTADO (15/15 corrigidos)
 3. ~~Decidir sobre trabalho nao commitado~~ ✅ Resolvido
@@ -496,23 +496,48 @@ node scripts/auditoria-financeira-completa.js --dry-run --temporada=2025
 18. ~~Auditoria modulo campinho~~ ✅ AUDIT-013 (0 fixes — modulo de visualizacao)
 19. ~~Auditoria modulo dicas~~ ✅ AUDIT-014 (0 fixes — modulo API stateless)
 20. ~~Invalidar cache Mata-Mata~~ ✅ RESOLVIDO (nao havia caches 2026)
-21. ~~Verificar temporada 2025 caches~~ ✅ RESOLVIDO (18/02/2026 — 49 auditados, 0 divergencias, formato 2025 suportado)
-22. ~~AUDIT-001 Fase 3~~ ✅ RESOLVIDO (18/02/2026 — Fix A1 ja estava aplicado; CSS footer v2 morto removido: -14 linhas)
+21. ~~Verificar temporada 2025 caches~~ ✅ RESOLVIDO (49 auditados, 0 divergencias)
+22. ~~AUDIT-001 Fase 3~~ ✅ RESOLVIDO (Fix A1 ja estava aplicado; CSS dead code -14 linhas)
+23. ~~Auditoria sincronismo 2025/2026~~ ✅ RESOLVIDO (commit `8323eab`)
+24. ~~Consolidacao banco unico~~ ✅ RESOLVIDO (commit `84ce387`, MONGO_URI_DEV deletada)
 
 ---
 
-## TEMPORADA 2026 — ESTADO ATUAL (Rodada 4 em curso)
+## TEMPORADA 2026 — ESTADO REAL DO BANCO (18/02/2026)
 
-**Diagnostico (18/02/2026):**
-- 32 caches 2025 auditados: 17 credores (R$19..R$287), 15 devedores (-R$61..-R$401), 0 divergencias
-- `quitacao`: 0/32 — temporada 2025 ainda nao encerrada formalmente
-- `InscricaoTemporada 2026`: zero registros — renovacao nao processada ainda
-- Brasileirao 2026 JA ESTA NA RODADA 4 (iniciou final de janeiro/2026)
-- Sistema ainda sem rodadas 2026 no banco (admin ainda nao rodou "popular" para R1-R4)
+**IMPORTANTE:** Esta sessao descobriu que havia 2 bancos MongoDB. Os fixes de DB da sessao anterior rodaram no banco ORFAO (`cartola-manager-dev`). O banco real do app e scripts agora e exclusivamente `cartola-manager`.
 
-## AUDITORIA SINCRONISMO 2025/2026 — EXECUTADA (18/02/2026)
+### Banco real: cartola-manager (producao)
 
-### Fixes de codigo aplicados (commit `8323eab`)
+| Collection | 2025 | 2026 | Observacao |
+|-----------|------|------|------------|
+| ligas | 1 (Sobral) | 1 (Super Cartola) | nome "Super Cartola 2026" ✅ |
+| rodadas | 1438 (R1..R38) | 141 (R1=49, R2=49, R3=43) | R4 em andamento |
+| extratofinanceirocaches | 38 | 43 | Caches 2026 existem |
+| inscricoestemporada | 0 | 46 | Sistema de inscricao em uso |
+| acertofinanceiros | 25 | 5 | Pagamentos registrados |
+| times | 2 | 42 | 35 participantes ativos |
+| rankingturnos | 4 | 5 | 0 sem temporada (ok) |
+
+**Liga producao:** `temporada:2026`, `participantes:35`, `times:35`, `nome:"Super Cartola 2026"` ✅
+**Rodada atual Cartola:** R4 (mercado_status:1 aberto, fechamento 25/02/2026 18:59)
+
+### Setup 2026 ja executado (confirmado no banco real)
+
+✅ Participantes: 35 na liga (32 renovados + 3 novatos)
+✅ Financeiro: renovacoes processadas via Tesouraria + acertos manuais
+✅ Rodadas: R1, R2, R3 populadas e consolidadas
+✅ Inscricoes: 46 docs InscricaoTemporada 2026
+
+### Banco orfao descontinuado
+
+- `cartola-manager-dev` — dados travados em dez/2025 (nao reflete realidade)
+- `MONGO_URI_DEV` deletada dos Replit Secrets pelo admin (18/02/2026)
+- Scripts que rodaram nele esta sessao (`backfill`, `virada`) eram no orfao — sem impacto (producao ja estava correta)
+
+## AUDITORIA SINCRONISMO 2025/2026 + BANCO UNICO — EXECUTADA (18/02/2026)
+
+### Fixes de codigo — commit `8323eab`
 
 | Fix | Arquivo | Mudanca |
 |-----|---------|---------|
@@ -520,34 +545,18 @@ node scripts/auditoria-financeira-completa.js --dry-run --temporada=2025
 | B2 | `routes/tesouraria-routes.js` | `>= 2026` → `>= CURRENT_SEASON` (20x) |
 | B4 | `utils/seasonGuard.js` | Remove propriedade LEAGUES hardcoded com IDs 2025 |
 
-### Fixes de banco executados
+### Consolidacao banco unico — commit `84ce387`
 
-| Fix | Script | Resultado |
-|-----|--------|-----------|
-| B3 | `backfill-rankingturnos-temporada.js --force` | 6 docs rankingturnos receberam `temporada:2025` |
-| Passo 3 | `virada-temporada-liga-2026.js --force` | Liga → nome "Super Cartola 2026", temporada:2026 |
-
-### Estado do banco apos fixes
-
-| Collection | 2025 | 2026 |
-|-----------|------|------|
-| ligas | 1 (Sobral, aposentada?) | 1 (Super Cartola - atualizada) |
-| rodadas | R1..R38 completo (1438 docs) | ZERO — popular via admin |
-| extratofinanceirocaches | 38 docs (saldos finais 2025) | ZERO |
-| rankingturnos | 6 docs CORRIGIDOS | ZERO |
-| inscricoestemporada | ZERO (nunca usada) | ZERO |
-| acertofinanceiros | 2 docs | ZERO |
-
-### Saldos 2025 aguardando transferencia
-
-- **17 credores:** R$19 a R$287 positivo
-- **15 devedores:** -R$61 a -R$401 negativo
-- Transferencia: via botao "Renovacao" na Tesouraria + acertos manuais (como feito em 2025)
-
-### 🔴 PENDENCIAS ADMIN (painel) — fazer ANTES de popular R1/2026
-
-1. Desativar 2-3 participantes que nao renovaram (ativo:false na liga)
-2. Adicionar 3 novatos na liga (time_id, nome, ativo:true)
-3. Processar renovacao financeira de cada participante (saldo 2025 → legado 2026)
-4. Popular rodadas R1, R2, R3 de 2026 via painel admin
-   — Apos o popular, `rodadaController` grava com `temporada: 2026` (CURRENT_SEASON) automaticamente
+| Arquivo | Mudanca |
+|---------|---------|
+| `mongo-server.js` (MCP) | Removida logica dev/prod, sempre usa MONGO_URI |
+| `scripts/virada-temporada-liga-2026.js` | MONGO_URI_DEV removido |
+| `scripts/backfill-rankingturnos-temporada.js` | MONGO_URI_DEV removido |
+| `scripts/invalidar-cache-mata-mata.js` | MONGO_URI_DEV removido |
+| `scripts/invalidar-cache-time.js` | MONGO_URI_DEV removido |
+| `scripts/limpar-dumps-invalidos.js` | MONGO_URI_DEV removido |
+| `scripts/applied-fixes/fix-acertos-tipo.js` | MONGO_URI_DEV removido |
+| `scripts/backupJson.js` | Logica IS_PRODUCTION removida, banco unico |
+| `scripts/migrar-temporada-2025.js` | Logica IS_PRODUCTION removida, banco unico |
+| `CLAUDE.md` | Documenta banco unico, stack dev/prod, padrao correto |
+| Liga producao | nome "Super Cartola" → "Super Cartola 2026" (update direto) |
