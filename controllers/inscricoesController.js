@@ -71,13 +71,13 @@ export async function criarTransacoesIniciais(ligaId, timeId, temporada, valores
     // Se pagouInscricao = false e gerar_debito_inscricao_renovacao = true, cria débito no extrato
     const ligaRules = await LigaRules.buscarPorLiga(ligaId, temporada);
     const gerarDebitoInscricao = ligaRules?.inscricao?.gerar_debito_inscricao_renovacao !== false;
-    if (valores.taxa > 0 && valores.pagouInscricao === false && gerarDebitoInscricao) {
-        // ✅ v1.2: Usar ObjectId para liga_id (compatível com schema Mongoose)
-        const ligaObjId = new mongoose.Types.ObjectId(ligaId);
+    if (valores.taxa > 0 && valores.pagouInscricao !== true && gerarDebitoInscricao) {
+        // liga_id armazenado como String nos caches existentes — usar String diretamente
+        const ligaIdStr = String(ligaId);
 
-        // ✅ v1.1: Verificar se já existe transação de inscrição (evitar duplicação)
+        // Verificar se já existe transação de inscrição (evitar duplicação)
         const extratoExistente = await db.collection('extratofinanceirocaches').findOne({
-            liga_id: ligaObjId,
+            liga_id: ligaIdStr,
             time_id: Number(timeId),
             temporada: Number(temporada),
             'historico_transacoes.tipo': 'INSCRICAO_TEMPORADA'
@@ -86,23 +86,12 @@ export async function criarTransacoesIniciais(ligaId, timeId, temporada, valores
         if (extratoExistente) {
             logger.log(`[INSCRICOES] ⚠️ Transação INSCRICAO_TEMPORADA já existe para time ${timeId} em ${temporada}. Pulando...`);
         } else {
-            const txInscricao = {
-                liga_id: ligaObjId,
-                time_id: Number(timeId),
-                temporada: Number(temporada),
-                rodada: 0, // Rodada 0 = pré-temporada
-                tipo: 'INSCRICAO_TEMPORADA',
-                descricao: `Taxa de inscrição temporada ${temporada} (pendente)`,
-                valor: -valores.taxa, // Negativo = débito
-                data: agora,
-                criado_em: agora,
-                origem: 'sistema_renovacao'
-            };
+            const descricao = `Taxa de inscrição temporada ${temporada} (pendente)`;
 
             // Inserir no histórico do cache de extrato
             await db.collection('extratofinanceirocaches').updateOne(
                 {
-                    liga_id: ligaObjId,
+                    liga_id: ligaIdStr,
                     time_id: Number(timeId),
                     temporada: Number(temporada)
                 },
@@ -112,23 +101,23 @@ export async function criarTransacoesIniciais(ligaId, timeId, temporada, valores
                             rodada: 0,
                             tipo: 'INSCRICAO_TEMPORADA',
                             valor: -valores.taxa,
-                            descricao: txInscricao.descricao,
+                            descricao,
                             data: agora
                         }
                     },
                     $inc: {
-                        saldo_consolidado: -valores.taxa
+                        saldo_consolidado: -valores.taxa,
+                        perdas_consolidadas: valores.taxa
                     },
                     $setOnInsert: {
-                        liga_id: ligaObjId,
+                        liga_id: ligaIdStr,
                         time_id: Number(timeId),
                         temporada: Number(temporada),
                         criado_em: agora,
-                        // ✅ v1.3 FIX: Campos obrigatórios para verificarCacheValido funcionar
                         ultima_rodada_consolidada: 0,
                         ganhos_consolidados: 0,
                         perdas_consolidadas: 0,
-                        versao_calculo: '1.3.0-inscricao'
+                        versao_calculo: '1.4.0-inscricao'
                     }
                 },
                 { upsert: true }

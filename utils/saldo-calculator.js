@@ -155,7 +155,7 @@ export async function calcularSaldoParticipante(ligaId, timeId, temporada = CURR
             }
 
             if (inscricao) {
-                pagouInscricao = inscricao.pagou_inscricao !== false;
+                pagouInscricao = inscricao.pagou_inscricao === true;
                 taxaInscricaoValor = inscricao.taxa_inscricao || 0;
                 saldoAnteriorTransferido = inscricao.saldo_transferido || 0;
                 dividaAnterior = inscricao.divida_anterior || 0;
@@ -284,7 +284,7 @@ export function aplicarAjusteInscricaoBulk(saldoConsolidado, inscricaoData, hist
     );
 
     if (!inscricaoJaNoCache) {
-        pagouInscricao = inscricaoData.pagou_inscricao !== false;
+        pagouInscricao = inscricaoData.pagou_inscricao === true;
         taxaInscricao = inscricaoData.taxa_inscricao || 0;
         saldoAnteriorTransferido = inscricaoData.saldo_transferido || 0;
         dividaAnterior = inscricaoData.divida_anterior || 0;
