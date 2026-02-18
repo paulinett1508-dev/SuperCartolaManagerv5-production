@@ -4,32 +4,13 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// =========================================================================
-// SELEÇÃO DE AMBIENTE (Prod vs Dev)
-// =========================================================================
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-
-const getMongoURI = () => {
-  if (IS_PRODUCTION) {
-    const uri = process.env.MONGO_URI;
-    if (!uri) {
-      console.error('❌ ERRO: MONGO_URI não configurada para produção!');
-      process.exit(1);
-    }
-    console.log('🔴 BACKUP: Conectando ao banco de PRODUÇÃO');
-    return uri;
-  } else {
-    const uri = process.env.MONGO_URI_DEV;
-    if (!uri) {
-      console.error('❌ ERRO: MONGO_URI_DEV não configurada para desenvolvimento!');
-      process.exit(1);
-    }
-    console.log('🟢 BACKUP: Conectando ao banco de DESENVOLVIMENTO');
-    return uri;
-  }
-};
-
-const uri = getMongoURI();
+// Banco único — cartola-manager
+const uri = process.env.MONGO_URI;
+if (!uri) {
+  console.error('❌ ERRO: MONGO_URI não configurada!');
+  process.exit(1);
+}
+console.log('BACKUP: Conectando ao banco cartola-manager');
 
 async function exportCollection(collectionName) {
   const Model = mongoose.model(

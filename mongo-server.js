@@ -21,31 +21,17 @@ import { MongoClient } from 'mongodb';
 import { z } from 'zod';
 
 // =========================================================================
-// 🔐 SELEÇÃO DE AMBIENTE DE BANCO DE DADOS (Prod vs Dev)
+// 🔐 BANCO DE DADOS ÚNICO — cartola-manager
 // =========================================================================
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+// Projeto usa apenas MONGO_URI (banco único para dev e prod).
+// MONGO_URI_DEV era um banco órfão e foi descontinuado.
 
-const getMongoURI = () => {
-  if (IS_PRODUCTION) {
-    const uri = process.env.MONGO_URI;
-    if (!uri) {
-      console.error('❌ [MCP MongoDB] ERRO: MONGO_URI não configurada para produção!');
-      process.exit(1);
-    }
-    console.error('🔴 [MCP MongoDB] Modo: PRODUÇÃO');
-    return uri;
-  } else {
-    const uri = process.env.MONGO_URI_DEV;
-    if (!uri) {
-      console.error('❌ [MCP MongoDB] ERRO: MONGO_URI_DEV não configurada para desenvolvimento!');
-      process.exit(1);
-    }
-    console.error('🟢 [MCP MongoDB] Modo: DESENVOLVIMENTO (SAFE)');
-    return uri;
-  }
-};
-
-const MONGODB_URI = getMongoURI();
+const MONGODB_URI = process.env.MONGO_URI;
+if (!MONGODB_URI) {
+  console.error('❌ [MCP MongoDB] ERRO: MONGO_URI não configurada!');
+  process.exit(1);
+}
+console.error('✅ [MCP MongoDB] Conectando ao banco: cartola-manager');
 
 // Cliente MongoDB (conexão lazy)
 let client = null;

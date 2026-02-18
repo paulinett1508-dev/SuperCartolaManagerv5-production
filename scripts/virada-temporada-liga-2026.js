@@ -30,7 +30,7 @@ const TEMP_NOVO = 2026;
 
 async function run() {
     console.log(`🔧 Modo: ${isDryRun ? 'DRY-RUN (nada será alterado)' : 'FORCE (execução real)'}`);
-    await mongoose.connect(process.env.MONGO_URI_DEV || process.env.MONGO_URI);
+    await mongoose.connect(process.env.MONGO_URI);
     console.log('✅ Conectado ao MongoDB\n');
 
     const col = mongoose.connection.db.collection('ligas');
