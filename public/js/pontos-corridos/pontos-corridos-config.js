@@ -24,7 +24,7 @@ const CONFIG_FALLBACK = {
     empateTolerancia: 0.3,
     goleadaMinima: 50.0,
   },
-  desempate: ["pontos", "vitorias", "pontosGoleada", "saldoPontos", "pontosPro", "nomeCartola"],
+  desempate: ["pontos", "gols_pro", "saldo_gols", "vitorias", "pontosGoleada"],
   ui: {
     maxWidth: "1000px",
     fontSize: {

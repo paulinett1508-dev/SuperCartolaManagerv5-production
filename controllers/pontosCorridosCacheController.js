@@ -1284,9 +1284,11 @@ function calcularClassificacaoAcumulada(
     const inativos = todos.filter((t) => t.ativo === false);
 
     const sortFn = (a, b) => {
-        if (b.pontos !== a.pontos) return b.pontos - a.pontos;
-        if (b.saldo_gols !== a.saldo_gols) return b.saldo_gols - a.saldo_gols;
-        return b.vitorias - a.vitorias;
+        if (b.pontos !== a.pontos) return b.pontos - a.pontos;                // 1º: Pts tabela
+        if (b.gols_pro !== a.gols_pro) return b.gols_pro - a.gols_pro;        // 2º: Pts Ranking Geral
+        if (b.saldo_gols !== a.saldo_gols) return b.saldo_gols - a.saldo_gols; // 3º: Saldo
+        if (b.vitorias !== a.vitorias) return b.vitorias - a.vitorias;        // 4º: Vitórias
+        return b.pontosGoleada - a.pontosGoleada;                              // 5º: Pts Goleada
     };
 
     ativos.sort(sortFn);
