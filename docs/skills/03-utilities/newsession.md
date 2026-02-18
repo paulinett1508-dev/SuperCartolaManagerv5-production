@@ -4,13 +4,41 @@ Handover para nova sessao - carrega contexto do trabalho em andamento e instrui 
 
 ---
 
-## STATUS ATUAL: AUDIT-007 COMPLETO - MODULO CAPITAO DE LUXO AUDITADO
+## STATUS ATUAL: AUDIT-008 COMPLETO - 3 MODULOS AUDITADOS NA SESSAO
 
 **Data:** 17/02/2026
-**Ultima acao:** AUDIT-007 (modulo capitao de luxo) concluido. Score 80→92. ranking-live reescrito, config limpo, stubs documentados.
-**Sessao atual:** AUDIT-006 (artilheiro, 12 fixes) + AUDIT-007 (capitao, 4 fixes) + Stitch simplificado
+**Ultima acao:** AUDIT-008 (luva de ouro) concluido. Score 73→91. Config stale corrigido, auth na rota diagnostico, debug logs removidos.
+**Sessao atual:** AUDIT-006 (artilheiro, 12 fixes) + AUDIT-007 (capitao, 4 fixes) + AUDIT-008 (luva, 5 fixes) + Stitch simplificado
 **Sessao anterior:** 14/02/2026 (AUDIT-005: faixas dinamicas ranking, 3 bugs)
 **Sessao 13/02/2026:** AUDIT-004: 4 bugs ranking corrigidos + AUDIT-001/002/003 financeiras + cache stale resolvido
+
+---
+
+## AUDIT-008: MODULO LUVA DE OURO (17/02/2026)
+
+**Problema:** Auditoria completa do modulo luva de ouro revelou score 73/100. Config apontava para liga Sobral com temporada 2025 (stale), rota diagnostico sem auth, debug logs em producao, stubs sem documentacao.
+
+### Fixes aplicados (commit `012ede2`)
+
+| # | Bug | Severidade | Arquivo | Fix |
+|---|-----|-----------|---------|-----|
+| 1 | Config: `ligas_habilitadas` Sobral + `temporada: 2025` + `restricao` | **CRITICAL** | `config/rules/luva_ouro.json` | Removido tudo, temporada→2026, nota ModuleConfig |
+| 2 | LuvaOuroManager hooks sem `stub: true` | **HIGH** | `services/orchestrator/managers/LuvaOuroManager.js` | v1.1.0: JSDoc completo, `stub: true`, removidos 5 console.logs |
+| 3 | `RODADA_FINAL = 38` hardcoded no admin UI | **HIGH** | `public/js/luva-de-ouro/luva-de-ouro-ui.js` | v4.2.0: import de `season-config.js` |
+| 4 | 4x `[DEBUG-LUVA]` console.logs em producao | **MODERATE** | `participante-luva-ouro.js` | Removidos (~30 linhas debug) |
+| 5 | Rota `diagnostico` sem auth | **MODERATE** | `routes/luva-de-ouro-routes.js` | v2.1: `verificarAdmin` adicionado |
+
+### Issues reclassificados como nao-issues
+
+| Issue | Motivo |
+|-------|--------|
+| `obterEstatisticas` stub | Feature gap, endpoint existe mas retorna placeholder (LOW) |
+| `RODADA_FINAL = 38` em participante-luva-ouro.js | Padrao projeto, cross-dir import arriscado |
+
+### Resultado final
+- **Score:** 73/100 → ~91/100
+- **Bug seguranca:** Rota diagnostico agora protegida com verificarAdmin
+- **Commit:** `012ede2`
 
 ---
 
@@ -271,6 +299,10 @@ O wizard de modulos (`gerenciar-modulos.html`) salvava corretamente no `ModuleCo
 | `services/capitaoService.js` | Service capitao (API Cartola) | OK |
 | `public/js/capitao-luxo.js` | Admin UI capitao | v1.1.0 (RODADA_FINAL centralizado) |
 | `config/rules/capitao_luxo.json` | Regras capitao | LIMPO (sem ligas_habilitadas hardcoded) |
+| `controllers/luvaDeOuroController.js` | Controller luva de ouro | v3.0.0 SaaS OK |
+| `services/goleirosService.js` | Service goleiros (API Cartola) | v3.0.0 OK |
+| `routes/luva-de-ouro-routes.js` | Rotas luva com verificarAdmin | FIXADO v2.1 (diagnostico auth, AUDIT-008) |
+| `config/rules/luva_ouro.json` | Regras luva | LIMPO (sem hardcodes, temporada 2026) |
 
 ---
 
@@ -325,5 +357,6 @@ Apos invalidacao, o proximo acesso ao extrato de cada participante recalculara a
 10. ~~Stitch simplificado para modo manual~~ ✅ FEITO (commit d6674b2)
 11. ~~Auditoria modulo artilheiro~~ ✅ AUDIT-006 (12 fixes, 3 commits)
 12. ~~Auditoria modulo capitao de luxo~~ ✅ AUDIT-007 (4 fixes, 2 commits)
-13. AUDIT-001 Fase 3 se houver tempo (cosmetico)
+13. ~~Auditoria modulo luva de ouro~~ ✅ AUDIT-008 (5 fixes, 1 commit)
+14. AUDIT-001 Fase 3 se houver tempo (cosmetico)
 13. Verificar temporada 2025 caches (formato antigo, reconciliacao nao suporta)
