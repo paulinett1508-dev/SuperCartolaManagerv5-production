@@ -1,7 +1,88 @@
 # Tarefas Pendentes - Super Cartola Manager
 
-> Atualizado: 2026-02-13
-> Auditado: Sessao 2026-02-13 — AUDIT-001, AUDIT-002 e AUDIT-003 concluidas. MCP Stitch re-testado.
+> Atualizado: 2026-02-18
+> Sessao 18/02: AUDIT-009 (mata-mata) + AUDIT-010 (pontos corridos) concluidos. Exploracao de Top10, Melhor Mes, Campinho e Dicas feita (resultados abaixo).
+
+---
+
+## 🔴 PROXIMA SESSAO: AUDITORIAS PENDENTES (EXPLORACOES JA FEITAS)
+
+Os 4 modulos abaixo ja foram explorados. Basta ler os resultados, apresentar relatório ao usuario, e executar fixes apos aprovacao.
+
+### AUDIT-011: TOP 10 (exploracao completa)
+
+**Arquivos:** ~209 linhas backend (controller 100L, routes 25L, model 54L, manager 30L)
+**Score estimado:** ~85/100
+
+**Issues identificados:**
+| # | Issue | Severidade | Arquivo |
+|---|-------|------------|---------|
+| 1 | Top10Manager sem `stub: true`, com console.logs | MODERATE | `services/orchestrator/managers/Top10Manager.js` |
+| 2 | Config sem nota ModuleConfig | LOW | (verificar se existe `config/rules/top10.json`) |
+
+**O que ja esta bem:** Top10 nao tem rotas proprias de escrita (calculado pelo fluxoFinanceiroController), CURRENT_SEASON usado no model, config dinamica via liga.configuracoes.top10.
+
+### AUDIT-012: MELHOR MES (exploracao completa)
+
+**Arquivos:** ~4.031 linhas (service 479L, model 201L, core 558L, orquestrador 331L, ui 307L, participante 709L, manager 44L, config 203L, main 324L)
+**Score estimado:** ~78/100
+
+**Issues identificados:**
+| # | Issue | Severidade | Arquivo |
+|---|-------|------------|---------|
+| 1 | `ligas_habilitadas` hardcoded + `temporada: 2025` stale | **CRITICAL** | `config/rules/melhor_mes.json` |
+| 2 | MelhorMesManager stubs sem `stub: true` | MODERATE | `services/orchestrator/managers/MelhorMesManager.js` |
+| 3 | `RODADA_FINAL = 38` hardcoded em edicao 7 (model + config frontend) | MODERATE | `models/MelhorMesCache.js` L17, `melhor-mes-config.js` L35, `melhor-mes.js` L103 |
+| 4 | Config sem nota ModuleConfig | LOW | `config/rules/melhor_mes.json` |
+
+**O que ja esta bem:** CURRENT_SEASON no model, verificarAdmin em POST/DELETE, deteccao pre-temporada no core v1.4, segregacao por temporada, cache-first IndexedDB.
+
+### AUDIT-013: CAMPINHO (exploracao completa)
+
+**Arquivos:** ~2.342 linhas (participante-campinho 849L, CSS 1461L, HTML 32L)
+**Score estimado:** ~88/100
+
+**Issues identificados:**
+| # | Issue | Severidade | Arquivo |
+|---|-------|------------|---------|
+| 1 | Sem orchestrator manager (nao tem `CampinhoManager.js`) | INFO | N/A — modulo participant-only, sem hooks orchestrator |
+
+**O que ja esta bem:** Nao tem rotas proprias de escrita (usa rotas de cartola/rodadas existentes), CURRENT_SEASON via ParticipanteConfig, CSS usa tokens (zero hardcoded), offline fallback v2.1, XSS prevention. Modulo self-contained, sem config rules proprio.
+
+**Nota:** Campinho nao precisa de Manager nem config rules — e um modulo de visualizacao puro que consome dados existentes (Rodada, Cartola API, Data Lake).
+
+### AUDIT-014: DICAS PREMIUM (exploracao completa)
+
+**Arquivos:** ~1.600+ linhas (controller, service, routes 60L, participante JS, HTML, CSS)
+**Score estimado:** ~87/100
+
+**Issues identificados:**
+| # | Issue | Severidade | Arquivo |
+|---|-------|------------|---------|
+| 1 | Sem orchestrator manager (nao tem `DicasManager.js`) | INFO | N/A — modulo API-only (Cartola API), sem hooks orchestrator |
+
+**O que ja esta bem:** Rotas protegidas com verificarPremium (middleware proprio), sem RODADA_FINAL hardcoded, sem temporada stale, zero [DEBUG-*] patterns. Auth diferente: usa `verificarParticipantePremium` em vez de `verificarAdmin` (correto — e modulo de participante premium, nao admin).
+
+**Nota:** Dicas Premium nao precisa de Manager — e um modulo stateless que consulta API Cartola em tempo real (mercado, jogadores, confrontos, MPV). Sem cache persistente, sem config rules.
+
+---
+
+## RESUMO DAS AUDITORIAS CONCLUIDAS (AUDIT-006 a AUDIT-010)
+
+| # | Modulo | Score Antes→Depois | Fixes | Commits | Bug Seguranca |
+|---|--------|-------------------|-------|---------|---------------|
+| AUDIT-006 | Artilheiro | 70→90 | 12 | 3 | Auth 4 rotas |
+| AUDIT-007 | Capitao | 80→92 | 4 | 2 | - |
+| AUDIT-008 | Luva de Ouro | 73→91 | 5 | 1 | Auth diagnostico |
+| AUDIT-009 | Mata-Mata | 91→95 | 3 | 1 | - |
+| AUDIT-010 | Pontos Corridos | 82→93 | 4 | 1 | Auth 2 rotas POST |
+
+**Padrao recorrente corrigido em todos:**
+1. Manager hooks sem `stub: true` → Documentado v1.1.0
+2. `RODADA_FINAL = 38` hardcoded → Import de `season-config.js`
+3. Config JSON com `ligas_habilitadas` / `temporada` stale → Limpo + nota ModuleConfig
+4. `[DEBUG-*]` console.logs → Removidos
+5. Rotas POST/DELETE sem `verificarAdmin` → Middleware adicionado
 
 ---
 
