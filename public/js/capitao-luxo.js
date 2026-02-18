@@ -463,7 +463,7 @@ const CapitaoLuxo = {
             window.CapitaoHistoricoModal.abrir(participante);
         } else {
             console.error('❌ [CAPITAO-LUXO] Modal de histórico não carregado');
-            alert('Erro ao carregar histórico. Atualize a página.');
+            SuperModal.toast.error('Erro ao carregar histórico. Atualize a página.');
         }
     },
 

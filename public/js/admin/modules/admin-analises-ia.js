@@ -59,7 +59,7 @@ async function handleAnalise(card) {
     const ligaId = document.getElementById('selectLiga').value;
 
     if (requerLiga && !ligaId) {
-        alert('Selecione uma liga para esta análise');
+        SuperModal.toast.warning('Selecione uma liga para esta análise');
         return;
     }
 

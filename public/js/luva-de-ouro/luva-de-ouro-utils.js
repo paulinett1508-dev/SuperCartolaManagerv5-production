@@ -697,7 +697,7 @@ const LuvaDeOuroUtils = {
    */
   exportarCSV: function (dados) {
     if (!dados || !dados.ranking) {
-      alert("Nenhum dado para exportar");
+      SuperModal.toast.warning("Nenhum dado para exportar");
       return;
     }
 

@@ -294,71 +294,56 @@
 
 ---
 
-## FEATURES - Alta Prioridade
+## ~~FEATURES - Alta Prioridade~~ ✅ AUDITADAS E FECHADAS (18/02/2026)
 
-### [FEAT-026] Polling Inteligente para Modulo Rodadas
+### ~~[FEAT-026] Polling Inteligente para Modulo Rodadas~~ ✅ JA IMPLEMENTADO
 
-**Prioridade:** Alta
-**Contexto:** Modulo Rodadas faz refresh a cada 30s independente de haver jogos, desperdicando recursos.
+**Auditoria 18/02/2026:** `participante-rodadas-polling.js` (310 linhas) implementa polling inteligente completo — pausa quando nao ha jogos, reativa antes do proximo, feedback visual de estado. Admin usa refresh manual (comportamento correto para admin).
 
-**Objetivo:** Criar gerenciador de polling que:
-- Pausa quando nao ha jogos em andamento
-- Reativa ~10min antes do proximo jogo
-- Mostra feedback visual do estado (ao vivo / aguardando / pausado)
+### ~~[FEAT-027] Enriquecer Listagem de Participantes no Modulo Rodadas~~ ✅ JA IMPLEMENTADO
 
-**Arquivos a criar/modificar:**
-- `public/js/rodadas/rodadas-polling-manager.js` (novo)
-- `public/js/rodadas.js` (integrar)
-- Possivel modelo `CalendarioRodada` no MongoDB
-
----
-
-### [FEAT-027] Enriquecer Listagem de Participantes no Modulo Rodadas
-
-**Prioridade:** Alta
-**Objetivo:** Tornar lista de participantes mais informativa:
-- Contador de atletas que ja jogaram (`X/12`)
-- Escudo do time do coracao
-- Valores financeiros da liga (bonus G10/Z10 baseado em `ModuleConfig`)
+**Auditoria 18/02/2026:** `rodadas-ui.js` ja tem os 3 itens: atletas que jogaram (X/12) L353-358, escudo com fallback L340-342, valores financeiros async via ModuleConfig L252-274.
 
 ---
 
 ## ADMIN MOBILE
 
-### [MOBILE-001] Remover emojis e alinhar visual
+### ~~[MOBILE-001] Remover emojis e alinhar visual~~ ✅ IMPLEMENTADO (18/02/2026)
 
-**Prioridade:** Baixa
-**Descricao:** Remover todos os emojis do admin-mobile e alinhar com padrao visual do app participante.
+**Fixes aplicados em `login.html`:**
+- Adicionado Material Icons CDN (ausente na page de login)
+- `🏆` → `<span class="material-icons">emoji_events</span>`
+- `🔐` → `<span class="material-icons">lock</span>`
 
 ---
 
-### [MOBILE-004] Implementar Fases 5 e 6 do App Admin
+### ~~[MOBILE-004] Implementar Fases 5 e 6 do App Admin~~ ✅ JA IMPLEMENTADO
 
-**Prioridade:** Media
-**Descricao:** Implementar fases finais do roadmap do app admin mobile.
+**Auditoria 18/02/2026:** `consolidacao.js` (417 linhas) e `financeiro.js` (315 linhas) estao completamente implementados — form, progress bar, historico, validacao, handlers, API calls. Todos os endpoints backend em `admin-mobile-routes.js` tambem existem.
 
 ---
 
 ## UX
 
-### [UX-002] Substituir 4 alert() restantes por SuperModal
+### ~~[UX-002] Substituir alert() por SuperModal~~ ✅ IMPLEMENTADO (18/02/2026)
 
-**Prioridade:** Baixa
-
-| Arquivo | Linha | Contexto |
-|---------|-------|----------|
-| `public/js/luva-de-ouro/luva-de-ouro-utils.js` | 700 | "Nenhum dado para exportar" |
-| `public/js/navigation.js` | 5 | Alert generico |
-| `public/js/modules/module-config-modal.js` | 1245 | Erro |
-| `public/js/modules/module-config-modal.js` | 1260 | Sucesso |
+**Fixes aplicados (6 ocorrencias em 5 arquivos):**
+- `navigation.js:5` — SuperModal.toast.error + setTimeout redirect 3s
+- `module-config-modal.js:1294` — removido fallback alert (SuperModal ja no else anterior)
+- `module-config-modal.js:1309` — removido fallback alert
+- `luva-de-ouro-utils.js:700` — SuperModal.toast.warning
+- `capitao-luxo.js:466` — SuperModal.toast.error
+- `admin-analises-ia.js:62` — SuperModal.toast.warning
 
 ---
 
 ## DOCUMENTACAO
 
-### [DOC-001] Migrar Skills do Codebase para docs/
+### ~~[DOC-001] Migrar Skills do Codebase para docs/~~ ✅ JA IMPLEMENTADO
 
-**Prioridade:** Media
+**Auditoria 18/02/2026:** `docs/skills/` tem 30 skills em 5 categorias + SKILL-KEYWORD-MAP.md + README.md. CLAUDE.md referencia corretamente `docs/skills/`. Sem arquivos orfaos em locais antigos.
+
+**Prioridade:** Media (FECHADO)
 
 ---
 

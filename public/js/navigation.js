@@ -2,10 +2,12 @@ const urlParams = new URLSearchParams(window.location.search);
 const ligaId = urlParams.get("id");
 document.addEventListener("DOMContentLoaded", () => {
   if (!ligaId) {
-    alert(
-      "Erro: ID da liga não encontrado na URL. Você será redirecionado para a página de gerenciamento.",
-    );
-    window.location.href = "gerenciar.html";
+    if (typeof SuperModal !== 'undefined' && SuperModal.toast) {
+      SuperModal.toast.error("Erro: ID da liga não encontrado na URL. Redirecionando para gerenciamento...");
+      setTimeout(() => { window.location.href = "gerenciar.html"; }, 3000);
+    } else {
+      window.location.href = "gerenciar.html";
+    }
     return;
   }
   const navButtons = document.querySelectorAll(".nav-menu button");
