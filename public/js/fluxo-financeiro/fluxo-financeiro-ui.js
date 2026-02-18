@@ -487,14 +487,16 @@ export class FluxoFinanceiroUI {
                     <div class="extrato-quitado-banner-content">
                         <div class="extrato-quitado-item">
                             <label>Status</label>
-                            <span style="color: ${insc.status === 'renovado' ? 'var(--color-success)' : insc.status === 'pendente' ? 'var(--color-warning)' : 'var(--color-danger)'};">
-                                ${insc.status === 'renovado' ? '✓ Renovado' : insc.status === 'pendente' ? '⏳ Pendente' : '✗ Não Participa'}
+                            <span style="color: ${insc.status === 'renovado' ? 'var(--color-success)' : insc.status === 'pendente' ? 'var(--color-warning)' : 'var(--color-danger)'}; display: flex; align-items: center; gap: 4px;">
+                                <span class="material-icons" style="font-size: 14px;">${insc.status === 'renovado' ? 'check_circle' : insc.status === 'pendente' ? 'schedule' : 'cancel'}</span>
+                                ${insc.status === 'renovado' ? 'Renovado' : insc.status === 'pendente' ? 'Pendente' : 'Não Participa'}
                             </span>
                         </div>
                         <div class="extrato-quitado-item">
                             <label>Inscrição</label>
-                            <span style="color: ${insc.pagou_inscricao ? 'var(--color-success)' : 'var(--color-warning)'};">
-                                ${insc.pagou_inscricao ? '✓ Pago' : '⏳ Pendente'}
+                            <span style="color: ${insc.pagou_inscricao ? 'var(--color-success)' : 'var(--color-warning)'}; display: flex; align-items: center; gap: 4px;">
+                                <span class="material-icons" style="font-size: 14px;">${insc.pagou_inscricao ? 'check_circle' : 'schedule'}</span>
+                                ${insc.pagou_inscricao ? 'Pago' : 'Pendente'}
                             </span>
                         </div>
                         ${insc.taxa_inscricao ? `
