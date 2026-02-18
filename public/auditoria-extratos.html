@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Auditoria de Extratos - Super Cartola Manager</title>
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <!-- Design Tokens (SEMPRE PRIMEIRO) -->
     <link rel="stylesheet" href="css/_admin-tokens.css" />
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="css/modules/dashboard-redesign.css" />
@@ -13,54 +14,85 @@
     <link rel="stylesheet" href="css/modules/super-modal.css" />
     <script src="js/super-modal.js"></script>
     <style>
-        .audit-page { background: #121212; min-height: 100vh; }
-        .audit-content { padding: 20px 16px; max-width: 1200px; margin: 0 auto; }
+        .audit-page {
+            background: var(--surface-bg);
+            min-height: 100vh;
+        }
+
+        .audit-content {
+            padding: 20px 16px;
+        }
 
         .audit-header {
             background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
-            border-radius: 10px;
+            border-radius: var(--radius-md);
             padding: 18px 20px;
             margin-bottom: 24px;
-            border: 1px solid #f59e0b;
+            border: 1px solid var(--color-primary);
             position: relative;
+            overflow: hidden;
         }
+
         .audit-header::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0;
+            top: 0;
+            left: 0;
+            right: 0;
             height: 3px;
-            background: linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b);
+            background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light), var(--color-primary));
         }
+
         .audit-header h1 {
             display: flex;
             align-items: center;
             gap: 12px;
             font-size: 1.5rem;
             font-weight: 700;
-            color: #ffffff;
+            color: var(--text-primary);
             margin: 0 0 8px 0;
         }
-        .audit-header h1 .material-icons { font-size: 28px; color: #f59e0b; }
-        .audit-header p { color: #9ca3af; font-size: 0.9rem; margin: 0; }
+
+        .audit-header h1 .material-icons {
+            font-size: 28px;
+            color: var(--color-primary);
+        }
+
+        .audit-header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin: 0;
+        }
 
         .liga-selector {
-            background: #1a1a1a;
-            border-radius: 8px;
+            background: var(--surface-card);
+            border-radius: var(--radius-md);
             padding: 16px;
             margin-bottom: 24px;
-            border: 1px solid #333;
+            border: 1px solid var(--border-color);
         }
-        .liga-selector label { color: #9ca3af; font-size: 0.9rem; margin-bottom: 8px; display: block; }
+
+        .liga-selector label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
         .liga-selector select {
             width: 100%;
             padding: 12px;
-            background: #252525;
+            background: var(--surface-card-elevated);
             border: 1px solid #444;
             border-radius: 6px;
-            color: #fff;
+            color: var(--text-primary);
             font-size: 1rem;
         }
-        .liga-selector select:focus { border-color: #f59e0b; outline: none; }
+
+        .liga-selector select:focus {
+            border-color: var(--color-primary);
+            outline: none;
+        }
 
         .stats-grid {
             display: grid;
@@ -68,53 +100,69 @@
             gap: 12px;
             margin-bottom: 24px;
         }
+
         .stat-card {
-            background: #1a1a1a;
-            border-radius: 8px;
+            background: var(--surface-card);
+            border-radius: var(--radius-md);
             padding: 16px;
             text-align: center;
-            border: 1px solid #333;
+            border: 1px solid var(--border-color);
         }
-        .stat-card.ok { border-color: #10b981; }
-        .stat-card.error { border-color: #ef4444; }
-        .stat-card.warning { border-color: #f59e0b; }
-        .stat-value { font-size: 2rem; font-weight: 700; color: #fff; }
-        .stat-label { color: #9ca3af; font-size: 0.8rem; margin-top: 4px; }
-        .stat-card.ok .stat-value { color: #10b981; }
-        .stat-card.error .stat-value { color: #ef4444; }
-        .stat-card.warning .stat-value { color: #f59e0b; }
+
+        .stat-card.ok { border-color: var(--color-success); }
+        .stat-card.error { border-color: var(--color-danger); }
+        .stat-card.warning { border-color: var(--color-warning); }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+
+        .stat-card.ok .stat-value { color: var(--color-success); }
+        .stat-card.error .stat-value { color: var(--color-danger); }
+        .stat-card.warning .stat-value { color: var(--color-warning); }
 
         .problems-section {
-            background: #1a1a1a;
-            border-radius: 8px;
+            background: var(--surface-card);
+            border-radius: var(--radius-md);
             padding: 16px;
-            border: 1px solid #333;
+            border: 1px solid var(--border-color);
         }
+
         .problems-section h3 {
-            color: #fff;
+            color: var(--text-primary);
             font-size: 1.1rem;
             margin: 0 0 16px 0;
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .problems-section h3 .material-icons { color: #ef4444; }
+
+        .problems-section h3 .material-icons { color: var(--color-danger); }
 
         .problem-item {
-            background: #252525;
+            background: var(--surface-card-elevated);
             border-radius: 6px;
             padding: 12px;
             margin-bottom: 8px;
-            border-left: 3px solid #ef4444;
+            border-left: 3px solid var(--color-danger);
         }
+
         .problem-item:last-child { margin-bottom: 0; }
-        .problem-name { color: #fff; font-weight: 600; margin-bottom: 4px; }
-        .problem-errors { color: #9ca3af; font-size: 0.85rem; }
+        .problem-name { color: var(--text-primary); font-weight: 600; margin-bottom: 4px; }
+        .problem-errors { color: var(--text-muted); font-size: 0.85rem; }
         .problem-errors li { margin: 4px 0; }
 
         .btn-audit {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: #000;
+            background: var(--gradient-primary);
+            color: var(--text-primary);
             border: none;
             padding: 12px 24px;
             border-radius: 6px;
@@ -124,17 +172,26 @@
             align-items: center;
             gap: 8px;
             margin-top: 16px;
+            transition: var(--transition-normal);
         }
-        .btn-audit:hover { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
+
+        .btn-audit:hover {
+            background: var(--gradient-primary-hover);
+            box-shadow: var(--shadow-primary);
+        }
+
         .btn-audit:disabled { opacity: 0.6; cursor: not-allowed; }
         .btn-audit .material-icons { font-size: 20px; }
 
         .btn-fix {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: #fff;
+            background: linear-gradient(135deg, var(--color-success), var(--color-success-light));
+            color: var(--text-primary);
             margin-left: 8px;
         }
-        .btn-fix:hover { background: linear-gradient(135deg, #34d399, #10b981); }
+
+        .btn-fix:hover {
+            background: linear-gradient(135deg, var(--color-success-light), var(--color-success));
+        }
 
         .loading {
             display: flex;
@@ -142,10 +199,10 @@
             justify-content: center;
             gap: 12px;
             padding: 40px;
-            color: #9ca3af;
+            color: var(--text-muted);
         }
-        .loading .material-icons { animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading .material-icons { animation: admin-spin 1s linear infinite; }
 
         .status-badge {
             display: inline-flex;
@@ -156,14 +213,16 @@
             font-size: 0.85rem;
             font-weight: 600;
         }
-        .status-badge.ok { background: rgba(16, 185, 129, 0.2); color: #10b981; }
-        .status-badge.error { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+
+        .status-badge.ok { background: var(--color-success-muted); color: var(--color-success); }
+        .status-badge.error { background: var(--color-danger-muted); color: var(--color-danger); }
 
         .empty-state {
             text-align: center;
             padding: 40px;
-            color: #666;
+            color: var(--text-disabled);
         }
+
         .empty-state .material-icons { font-size: 48px; margin-bottom: 12px; }
 
         .actions-bar {
@@ -171,25 +230,119 @@
             gap: 8px;
             flex-wrap: wrap;
         }
+
+        /* Seção de correção */
+        .fix-section {
+            margin-top: 16px;
+            padding: 16px;
+            background: var(--surface-card);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .fix-section h3 {
+            color: var(--text-primary);
+            margin: 0 0 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .fix-section p {
+            color: var(--text-muted);
+            margin: 0 0 12px 0;
+            font-size: 0.9rem;
+        }
+
+        /* Seção de acertos */
+        .acertos-section {
+            margin-top: 16px;
+            padding: 16px;
+            background: var(--surface-card);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .acertos-section h3 {
+            color: var(--text-primary);
+            margin: 0 0 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .acertos-section p {
+            color: var(--text-muted);
+            margin: 4px 0;
+        }
+
+        .acertos-section strong {
+            color: var(--text-primary);
+        }
+
+        /* Results header */
+        .results-header {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .results-header h2 {
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        /* Fix results */
+        .fix-results {
+            margin-top: 12px;
+        }
+
+        .fix-result-box {
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        .fix-result-box.dry-run {
+            background: var(--surface-card-elevated);
+            border: 1px solid #444;
+        }
+
+        .fix-result-box.success {
+            background: var(--color-success-muted);
+            border: 1px solid var(--color-success);
+        }
+
+        .fix-result-box.error {
+            background: var(--color-danger-muted);
+            border: 1px solid var(--color-danger);
+        }
+
+        .fix-result-box p {
+            margin: 0;
+        }
+
+        .fix-result-box p:first-child {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 <body>
-    <!-- Botão Toggle Mobile -->
-    <button class="mobile-sidebar-toggle" id="mobileSidebarToggle" onclick="toggleMobileSidebar()">
-        <span class="material-icons">menu</span>
-    </button>
-
-    <div class="audit-page">
+    <div class="app-container">
+        <!-- Sidebar sera injetado -->
         <div id="sidebar-placeholder"></div>
-        <main class="main-content">
+
+        <!-- Main Content -->
+        <main class="app-main audit-page">
             <div class="audit-content">
-                <div class="audit-header">
+                <header class="audit-header">
                     <h1>
                         <span class="material-icons">fact_check</span>
                         Auditoria de Extratos Financeiros
                     </h1>
                     <p>Verificar integridade dos caches de extrato financeiro</p>
-                </div>
+                </header>
 
                 <div class="liga-selector">
                     <label for="ligaSelect">Selecione a Liga:</label>
@@ -210,17 +363,19 @@
     </div>
 
     <script>
-        // Carregar sidebar
+        // Carregar sidebar (mesmo padrao das outras paginas)
         async function carregarLayout() {
             try {
                 const response = await fetch('layout.html');
                 const layoutHtml = await response.text();
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(layoutHtml, 'text/html');
+
                 const sidebar = doc.querySelector('.app-sidebar');
                 if (sidebar) {
                     document.getElementById('sidebar-placeholder')?.replaceWith(sidebar);
                 }
+
                 const scripts = doc.querySelectorAll('script');
                 scripts.forEach(script => {
                     if (script.textContent.trim()) {
@@ -229,8 +384,12 @@
                         document.head.appendChild(newScript);
                     }
                 });
-                // Carregar dados do admin após scripts
+
+                // Inicializar AccordionManager apos scripts carregados
                 setTimeout(() => {
+                    if (window.AccordionManager && !window.AccordionManager._initialized) {
+                        window.AccordionManager.init();
+                    }
                     if (typeof window.verificarMenuSuperAdmin === 'function') {
                         window.verificarMenuSuperAdmin();
                     }
@@ -239,6 +398,7 @@
                 console.error('Erro ao carregar layout:', error);
             }
         }
+
         // Obter ligaId da URL
         function obterLigaIdUrl() {
             const params = new URLSearchParams(window.location.search);
@@ -322,8 +482,8 @@
                 : '<span class="status-badge error"><span class="material-icons">error</span>Problemas Encontrados</span>';
 
             let html = `
-                <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 16px;">
-                    <h2 style="color: #fff; margin: 0;">${liga.nome}</h2>
+                <div class="results-header">
+                    <h2>${liga.nome}</h2>
                     ${statusHtml}
                 </div>
 
@@ -387,14 +547,12 @@
                 // Botao de fix se tiver saldos errados
                 if (stats.saldoErrado > 0) {
                     html += `
-                        <div style="margin-top: 16px; padding: 16px; background: #1a1a1a; border-radius: 8px; border: 1px solid #333;">
-                            <h3 style="color: #fff; margin: 0 0 12px 0; display: flex; align-items: center; gap: 8px;">
-                                <span class="material-icons" style="color: #10b981;">build</span>
+                        <div class="fix-section">
+                            <h3>
+                                <span class="material-icons" style="color: var(--color-success);">build</span>
                                 Correcao Automatica
                             </h3>
-                            <p style="color: #9ca3af; margin: 0 0 12px 0; font-size: 0.9rem;">
-                                Corrige campos t.saldo corrompidos recalculando: bonusOnus + pontosCorridos + mataMata + top10
-                            </p>
+                            <p>Corrige campos t.saldo corrompidos recalculando: bonusOnus + pontosCorridos + mataMata + top10</p>
                             <div class="actions-bar">
                                 <button class="btn-audit" onclick="executarFixSaldo('${ligaId}', true)">
                                     <span class="material-icons">preview</span>
@@ -405,7 +563,7 @@
                                     Executar Correcao
                                 </button>
                             </div>
-                            <div id="fixResults" style="margin-top: 12px;"></div>
+                            <div id="fixResults" class="fix-results"></div>
                         </div>
                     `;
                 }
@@ -413,14 +571,14 @@
 
             // Acertos financeiros
             html += `
-                <div style="margin-top: 16px; padding: 16px; background: #1a1a1a; border-radius: 8px; border: 1px solid #333;">
-                    <h3 style="color: #fff; margin: 0 0 12px 0; display: flex; align-items: center; gap: 8px;">
-                        <span class="material-icons" style="color: #f59e0b;">receipt_long</span>
+                <div class="acertos-section">
+                    <h3>
+                        <span class="material-icons" style="color: var(--color-primary);">receipt_long</span>
                         Acertos Financeiros
                     </h3>
-                    <p style="color: #9ca3af; margin: 0;">Total: <strong style="color: #fff;">${acertos.total}</strong></p>
+                    <p>Total: <strong>${acertos.total}</strong></p>
                     ${Object.entries(acertos.porTipo || {}).map(([tipo, count]) =>
-                        `<p style="color: #9ca3af; margin: 4px 0;">- ${tipo}: <strong style="color: #fff;">${count}</strong></p>`
+                        `<p>- ${tipo}: <strong>${count}</strong></p>`
                     ).join('')}
                 </div>
             `;
@@ -448,13 +606,16 @@
                     throw new Error(data.message || 'Erro ao corrigir');
                 }
 
+                const boxClass = dryRun ? 'dry-run' : 'success';
+                const statusColor = dryRun ? 'var(--color-warning)' : 'var(--color-success)';
+
                 fixResults.innerHTML = `
-                    <div style="padding: 12px; background: ${dryRun ? '#252525' : 'rgba(16, 185, 129, 0.1)'}; border-radius: 6px; border: 1px solid ${dryRun ? '#444' : '#10b981'};">
-                        <p style="color: ${dryRun ? '#f59e0b' : '#10b981'}; margin: 0 0 8px 0; font-weight: 600;">
+                    <div class="fix-result-box ${boxClass}">
+                        <p style="color: ${statusColor};">
                             ${dryRun ? 'Simulacao concluida' : 'Correcao aplicada com sucesso!'}
                         </p>
-                        <p style="color: #9ca3af; margin: 0;">Caches corrigidos: <strong style="color: #fff;">${data.cachesCorrigidos}</strong></p>
-                        <p style="color: #9ca3af; margin: 4px 0 0 0;">Transacoes fixadas: <strong style="color: #fff;">${data.transacoesFixadas}</strong></p>
+                        <p>Caches corrigidos: <strong>${data.cachesCorrigidos}</strong></p>
+                        <p>Transacoes fixadas: <strong>${data.transacoesFixadas}</strong></p>
                     </div>
                 `;
 
@@ -465,8 +626,8 @@
             } catch (error) {
                 console.error('Erro no fix:', error);
                 fixResults.innerHTML = `
-                    <div style="padding: 12px; background: rgba(239, 68, 68, 0.1); border-radius: 6px; border: 1px solid #ef4444;">
-                        <p style="color: #ef4444; margin: 0;">Erro: ${error.message}</p>
+                    <div class="fix-result-box error">
+                        <p style="color: var(--color-danger);">Erro: ${error.message}</p>
                     </div>
                 `;
             }
@@ -478,7 +639,6 @@
                 initRunning: false,
                 spaBound: false,
                 eventsBound: false,
-                mobileBound: false,
                 initChecked: false
             };
         }
@@ -521,28 +681,6 @@
                 if (pageName === 'auditoria-extratos.html') {
                     console.log('[AUDITORIA-EXTRATOS] Reinicializando após navegação SPA...');
                     await initAuditoriaExtratos();
-                }
-            });
-        }
-
-        // Toggle Sidebar Mobile
-        function toggleMobileSidebar() {
-            const sidebar = document.querySelector('.app-sidebar');
-            if (sidebar) {
-                sidebar.classList.toggle('mobile-open');
-            }
-        }
-
-        // Fechar sidebar ao clicar fora (mobile)
-        if (!window.__auditoria_extratos_state.mobileBound) {
-            window.__auditoria_extratos_state.mobileBound = true;
-            document.addEventListener('click', function(e) {
-                const sidebar = document.querySelector('.app-sidebar');
-                const toggleBtn = document.getElementById('mobileSidebarToggle');
-                if (sidebar && sidebar.classList.contains('mobile-open')) {
-                    if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
-                        sidebar.classList.remove('mobile-open');
-                    }
                 }
             });
         }
