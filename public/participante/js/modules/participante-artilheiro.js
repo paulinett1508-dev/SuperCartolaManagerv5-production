@@ -1,10 +1,10 @@
 // =====================================================================
-// PARTICIPANTE-ARTILHEIRO.JS - v4.0 (Auditoria Completa)
+// PARTICIPANTE-ARTILHEIRO.JS - v4.1
 // =====================================================================
+// ✅ v4.1: Reordenação - RODADA X → Seu Desempenho → Seus Artilheiros
 // ✅ v4.0: Skeleton loading, pull-to-refresh, MutationObserver
 // ✅ v3.7: Cache-first com IndexedDB para carregamento instantâneo
 // ✅ v3.5: Detecção de temporada encerrada (R38 + mercado fechado)
-// ✅ v3.4: Card Desempenho ao final
 // =====================================================================
 
 if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Carregando módulo v4.0...");
@@ -548,10 +548,42 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
         ${
             meusDados
                 ? `
+        ${
+            ultimaRodada
+                ? `
+        <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 12px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="color: var(--app-info); font-size: 11px; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 14px;">calendar_today</span> Rodada ${ultimaRodada.rodada}</span>
+                <span style="color: #666; font-size: 10px;">Última atualização</span>
+            </div>
+            <div style="display: flex; gap: 8px; justify-content: center;">
+                <div style="background: rgba(34, 197, 94, 0.15); padding: 10px 16px; border-radius: 8px; text-align: center; flex: 1;">
+                    <div style="font-size: 22px; font-weight: 800; color: var(--app-success-light);">${ultimaRodada.golsPro || 0}</div>
+                    <div style="font-size: 9px; color: #888;">GP</div>
+                </div>
+                <div style="background: rgba(239, 68, 68, 0.15); padding: 10px 16px; border-radius: 8px; text-align: center; flex: 1;">
+                    <div style="font-size: 22px; font-weight: 800; color: var(--app-danger);">${ultimaRodada.golsContra || 0}</div>
+                    <div style="font-size: 9px; color: #888;">GC</div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 10px 16px; border-radius: 8px; text-align: center; flex: 1;">
+                    ${(() => {
+                        const saldo =
+                            (ultimaRodada.golsPro || 0) -
+                            (ultimaRodada.golsContra || 0);
+                        return `<div style="font-size: 22px; font-weight: 800; color: ${saldo >= 0 ? "var(--app-success-light)" : "var(--app-danger)"};">${saldo >= 0 ? "+" : ""}${saldo}</div>`;
+                    })()}
+                    <div style="font-size: 9px; color: #888;">SG</div>
+                </div>
+            </div>
+        </div>
+        `
+                : ""
+        }
+
         <div style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%); border: 2px solid rgba(34, 197, 94, 0.4); border-radius: 16px; padding: 16px; margin-bottom: 16px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <div>
-                    <div style="font-size: 10px; color: var(--app-success-light); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Sua Posição</div>
+                    <div style="font-size: 10px; color: var(--app-success-light); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Seu Desempenho</div>
                     <div style="font-size: 28px; font-weight: 900; color: var(--app-text-primary);">${minhaColocacao}º</div>
                 </div>
                 <div style="display: flex; gap: 16px; text-align: center;">
@@ -585,38 +617,6 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
             `
             }
         </div>
-
-        ${
-            ultimaRodada
-                ? `
-        <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 12px; margin-bottom: 16px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="color: var(--app-info); font-size: 11px; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 14px;">calendar_today</span> Rodada ${ultimaRodada.rodada}</span>
-                <span style="color: #666; font-size: 10px;">Última atualização</span>
-            </div>
-            <div style="display: flex; gap: 8px; justify-content: center;">
-                <div style="background: rgba(34, 197, 94, 0.15); padding: 10px 16px; border-radius: 8px; text-align: center; flex: 1;">
-                    <div style="font-size: 22px; font-weight: 800; color: var(--app-success-light);">${ultimaRodada.golsPro || 0}</div>
-                    <div style="font-size: 9px; color: #888;">GP</div>
-                </div>
-                <div style="background: rgba(239, 68, 68, 0.15); padding: 10px 16px; border-radius: 8px; text-align: center; flex: 1;">
-                    <div style="font-size: 22px; font-weight: 800; color: var(--app-danger);">${ultimaRodada.golsContra || 0}</div>
-                    <div style="font-size: 9px; color: #888;">GC</div>
-                </div>
-                <div style="background: rgba(255, 255, 255, 0.05); padding: 10px 16px; border-radius: 8px; text-align: center; flex: 1;">
-                    ${(() => {
-                        const saldo =
-                            (ultimaRodada.golsPro || 0) -
-                            (ultimaRodada.golsContra || 0);
-                        return `<div style="font-size: 22px; font-weight: 800; color: ${saldo >= 0 ? "var(--app-success-light)" : "var(--app-danger)"};">${saldo >= 0 ? "+" : ""}${saldo}</div>`;
-                    })()}
-                    <div style="font-size: 9px; color: #888;">SG</div>
-                </div>
-            </div>
-        </div>
-        `
-                : ""
-        }
 
         ${
             meusArtilheiros.length > 0
@@ -781,34 +781,6 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
     `;
 
     container.innerHTML = html;
-
-    // ✅ v4.0: Mover card usando requestAnimationFrame (substitui setTimeout hack)
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            const cardDesempenhoContainer = document.getElementById(
-                "artilheiro-card-desempenho",
-            );
-            const cardMeusDados = container.querySelector(
-                '[style*="linear-gradient(135deg, rgba(34, 197, 94, 0.15)"]',
-            );
-
-            if (cardDesempenhoContainer && cardMeusDados) {
-                const wrapper = document.createElement("div");
-                wrapper.innerHTML = `
-                    <div style="background: linear-gradient(135deg, var(--app-surface) 0%, #262626 100%); border-radius: 16px; padding: 16px; border: 1px solid rgba(34, 197, 94, 0.3);">
-                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; color: var(--app-success-light); font-weight: 600; font-size: 14px;">
-                            <span class="material-icons" style="font-size: 20px;">insights</span>
-                            <span>Seu Desempenho</span>
-                        </div>
-                        ${cardMeusDados.innerHTML}
-                    </div>
-                `;
-                cardDesempenhoContainer.innerHTML = "";
-                cardDesempenhoContainer.appendChild(wrapper);
-                cardMeusDados.remove();
-            }
-        });
-    });
 }
 
 // =====================================================================
@@ -911,4 +883,4 @@ function setupPullToRefresh(container) {
     }, { passive: true });
 }
 
-if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Módulo v4.0 carregado (Skeleton + Pull-to-Refresh)");
+if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Módulo v4.1 carregado (Reordenação + Skeleton + Pull-to-Refresh)");
