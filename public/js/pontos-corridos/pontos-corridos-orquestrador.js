@@ -1,4 +1,5 @@
-// PONTOS CORRIDOS ORQUESTRADOR - v3.3 Coordenador Principal
+// PONTOS CORRIDOS ORQUESTRADOR - v3.4 Coordenador Principal
+// ✅ v3.4: FIX CRÍTICO - Bracket gerado da ordem canônica do admin (extrairOrdemDoCacheLocal + gerarBracketDeIDs)
 // ✅ v3.3: Importa RODADA_FINAL_CAMPEONATO de season-config.js (elimina hardcode 38)
 // ✅ v3.2: Configuração dinâmica via API (sem hardcodes)
 // ✅ v3.1: FIX CRÍTICO - Verifica temporada da API antes de assumir dados anteriores
@@ -307,8 +308,36 @@ export async function carregarPontosCorridos() {
 
       estadoOrquestrador.times = timesValidos;
 
-      // ✅ GERAR CONFRONTOS APÓS VALIDAR TIMES
-      estadoOrquestrador.confrontos = gerarConfrontos(estadoOrquestrador.times);
+      // ✅ GERAR CONFRONTOS: Usar ordem canônica do admin como fonte da verdade.
+      // Garante que o app exibe os mesmos confrontos que o admin (sem divergência de pairings).
+      let confrontosGerados = null;
+      try {
+        const temporada = PONTOS_CORRIDOS_CONFIG.temporada;
+        const urlCache = temporada
+          ? `/api/pontos-corridos/${estadoOrquestrador.ligaId}?temporada=${temporada}`
+          : `/api/pontos-corridos/${estadoOrquestrador.ligaId}`;
+        const respCache = await fetch(urlCache);
+        if (respCache.ok) {
+          const caches = await respCache.json();
+          if (Array.isArray(caches) && caches.length > 0) {
+            const idsCanonicos = extrairOrdemDoCacheLocal(caches);
+            if (idsCanonicos) {
+              const timesMap = {};
+              estadoOrquestrador.times.forEach(t => { timesMap[String(t.id)] = t; });
+              confrontosGerados = gerarBracketDeIDs(idsCanonicos, timesMap);
+              console.log("[PONTOS-CORRIDOS-ORQUESTRADOR] ✅ Bracket gerado a partir da ordem canônica do admin");
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("[PONTOS-CORRIDOS-ORQUESTRADOR] Não foi possível buscar cache para ordem canônica:", e.message);
+      }
+      // Fallback: apenas se o admin ainda não salvou nenhuma rodada
+      if (!confrontosGerados) {
+        console.warn("[PONTOS-CORRIDOS-ORQUESTRADOR] ⚠️ Sem cache do admin — usando ordem atual da API (fallback)");
+        confrontosGerados = gerarConfrontos(estadoOrquestrador.times);
+      }
+      estadoOrquestrador.confrontos = confrontosGerados;
 
       // ✅ AGORA VALIDAR COM CONFRONTOS GERADOS
       try {
@@ -363,6 +392,61 @@ export async function carregarPontosCorridos() {
     );
     renderErrorState("pontos-corridos", error);
   }
+}
+
+// ✅ FIX: Extrai a ordem canônica dos times do cache salvo pelo admin.
+// Algoritmo idêntico ao backend (pontosCorridosCacheController.extrairOrdemDoCache).
+function extrairOrdemDoCacheLocal(caches) {
+  if (!caches || caches.length === 0) return null;
+
+  // Rodada mais recente com confrontos reflete a composição atual da liga
+  const cacheBase = [...caches]
+    .sort((a, b) => (b.rodada || 0) - (a.rodada || 0))
+    .find(c => c.confrontos?.length > 0);
+
+  if (!cacheBase) return null;
+
+  const rodadaNum = cacheBase.rodada;
+  const confrontos = cacheBase.confrontos;
+  const n = confrontos.length * 2;
+
+  // Passo 1: reconstruir a lista na posição da rodada R
+  const listaRodada = new Array(n);
+  for (let i = 0; i < confrontos.length; i++) {
+    listaRodada[i] = String(confrontos[i].time1?.id || confrontos[i].time1);
+    listaRodada[n - 1 - i] = String(confrontos[i].time2?.id || confrontos[i].time2);
+  }
+
+  // Passo 2: desfazer (R-1) rotações para obter a lista original
+  const lista = [...listaRodada];
+  for (let r = 0; r < rodadaNum - 1; r++) {
+    const x = lista.splice(1, 1)[0];
+    lista.push(x);
+  }
+
+  console.log(`[PONTOS-CORRIDOS-ORQUESTRADOR] Ordem canônica extraída da R${rodadaNum} (admin): ${lista.length} IDs`);
+  return lista;
+}
+
+// ✅ FIX: Gera bracket usando a ordem canônica do admin, mapeando IDs para objetos time.
+// Idêntico ao backend (gerarBracketFromIds) mas mapeia de volta para objetos completos.
+function gerarBracketDeIDs(listaIds, timesMap) {
+  const lista = listaIds.map(id => timesMap[String(id)] || { id: Number(id) });
+  if (lista.length % 2 !== 0) lista.push(null);
+
+  const rodadas = [];
+  const total = lista.length - 1;
+  for (let rodada = 0; rodada < total; rodada++) {
+    const jogos = [];
+    for (let i = 0; i < lista.length / 2; i++) {
+      const timeA = lista[i];
+      const timeB = lista[lista.length - 1 - i];
+      if (timeA && timeB) jogos.push({ timeA, timeB });
+    }
+    rodadas.push(jogos);
+    lista.splice(1, 0, lista.pop());
+  }
+  return rodadas;
 }
 
 // ✅ v3.0: CARREGAR DADOS CONSOLIDADOS DO CACHE
