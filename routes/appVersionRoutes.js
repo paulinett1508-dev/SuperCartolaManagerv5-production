@@ -102,6 +102,10 @@ function detectClientType(req) {
  *   { version, build, deployedAt, area, releaseNotes, lastModifiedFile, clientDetected }
  */
 router.get("/check-version", (req, res) => {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+
     const clientType = detectClientType(req);
 
     let versionData;
@@ -131,16 +135,19 @@ router.get("/check-version", (req, res) => {
 
 // GET /api/app/versao - Retorna versão do PARTICIPANTE (compatibilidade v1/v2)
 router.get("/versao", (req, res) => {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.json({ ...PARTICIPANTE_VERSION, serverBoot: SERVER_BOOT });
 });
 
 // GET /api/app/versao/participante - Versão específica do app mobile
 router.get("/versao/participante", (req, res) => {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.json({ ...PARTICIPANTE_VERSION, serverBoot: SERVER_BOOT });
 });
 
 // GET /api/app/versao/admin - Versão específica do painel admin
 router.get("/versao/admin", (req, res) => {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.json({ ...ADMIN_VERSION, serverBoot: SERVER_BOOT });
 });
 

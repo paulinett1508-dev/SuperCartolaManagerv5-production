@@ -3,7 +3,7 @@
  * Cache Strategy: Network-first para API, Cache-first para assets
  */
 
-const CACHE_NAME = 'scm-admin-v1.1.0';
+const CACHE_NAME = 'scm-admin-v1.2.0';
 const RUNTIME_CACHE = 'scm-admin-runtime';
 
 // Arquivos para cache no install
@@ -20,10 +20,8 @@ const STATIC_ASSETS = [
   '/admin-mobile/js/api.js',
   '/admin-mobile/icons/icon-192x192.png',
   '/admin-mobile/icons/icon-512x512.png',
-  // Fontes e CDNs
-  'https://cdn.tailwindcss.com',
-  'https://fonts.googleapis.com/css2?family=Russo+One&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap',
-  'https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined'
+  // Nota: CDNs externas (Tailwind, Google Fonts) NÃO são cacheadas no install
+  // pois cache.addAll() falha em CORS sem credenciais — elas são buscadas em runtime
 ];
 
 // ========== INSTALL ========== //
@@ -77,6 +75,12 @@ self.addEventListener('fetch', (event) => {
 
   // Ignora requisições não-GET
   if (request.method !== 'GET') {
+    return;
+  }
+
+  // Navegação HTML - sempre network-first para evitar cache de página stale
+  if (request.mode === 'navigate' || request.headers.get('Accept')?.includes('text/html')) {
+    event.respondWith(networkFirst(request));
     return;
   }
 
