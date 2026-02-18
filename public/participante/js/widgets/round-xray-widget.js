@@ -4,7 +4,7 @@
  * Widget flutuante pós-rodada com análise de disputas internas
  * Aparece quando rodada encerra (consolidada + mercado aberto)
  *
- * @version 1.0.0 - Lançamento inicial
+ * @version 1.1.0 - Botão refresh no modal compacto
  *   - FAB bola estática (sem animações)
  *   - Modal com narrativa inteligente
  *   - Foco em disputas (PC, MM, Artilheiro, Luva, Capitão)
@@ -16,7 +16,7 @@
  * - Mercado fecha (nova rodada) → Widget desaparece, foguinho volta
  */
 
-if (window.Log) Log.info("[ROUND-XRAY] ⚽ Widget v1.0 carregando...");
+if (window.Log) Log.info("[ROUND-XRAY] ⚽ Widget v1.1 carregando...");
 
 // ============================================
 // ESTADO DO WIDGET
@@ -327,7 +327,12 @@ function criarModal() {
             <!-- Header -->
             <div class="rxray-modal-header">
                 <h3>⚽ Raio-X da Rodada <span id="rxrayModalRodada"></span></h3>
-                <button id="rxrayCloseBtn" class="rxray-close-btn">✕</button>
+                <div class="rxray-header-actions">
+                    <button id="rxrayRefreshBtn" class="rxray-refresh-btn" title="Atualizar dados">
+                        <span class="material-icons">refresh</span>
+                    </button>
+                    <button id="rxrayCloseBtn" class="rxray-close-btn">✕</button>
+                </div>
             </div>
 
             <!-- Loading -->
@@ -376,20 +381,51 @@ function criarModal() {
     // Event listeners
     modal.querySelector(".rxray-modal-overlay").addEventListener("click", fecharModal);
     modal.querySelector("#rxrayCloseBtn").addEventListener("click", fecharModal);
+    modal.querySelector("#rxrayRefreshBtn").addEventListener("click", atualizarContextoForce);
     modal.querySelector("#rxrayVerCompleto").addEventListener("click", navegarParaAnaliseCompleta);
 
     return modal;
 }
 
 // ============================================
+// REFRESH FORÇADO
+// ============================================
+async function atualizarContextoForce() {
+    const btn = document.getElementById("rxrayRefreshBtn");
+    if (btn) {
+        btn.disabled = true;
+        btn.classList.add("spinning");
+    }
+    try {
+        // Limpar cache localStorage para forçar nova busca
+        try {
+            localStorage.removeItem(`${RXRAY_CACHE_KEY}-${RXrayState.rodadaConsolidada}`);
+        } catch (e) { /* ignore */ }
+
+        await carregarContexto(true);
+
+        if (RXrayState.contexto) {
+            renderizarModal(RXrayState.contexto);
+        }
+    } finally {
+        if (btn) {
+            btn.classList.remove("spinning");
+            btn.disabled = false;
+        }
+    }
+}
+
+// ============================================
 // DADOS
 // ============================================
-async function carregarContexto() {
-    // Verificar cache primeiro
-    const cached = getCachedContexto();
-    if (cached) {
-        RXrayState.contexto = cached;
-        return;
+async function carregarContexto(forceRefresh = false) {
+    // Verificar cache primeiro (apenas quando não é refresh forçado)
+    if (!forceRefresh) {
+        const cached = getCachedContexto();
+        if (cached) {
+            RXrayState.contexto = cached;
+            return;
+        }
     }
 
     // Mostrar loading
@@ -398,7 +434,8 @@ async function carregarContexto() {
 
     try {
         const url = `/api/rodada-contexto/${RXrayState.ligaId}/${RXrayState.rodadaConsolidada}/${RXrayState.timeId}?temporada=${RXrayState.temporada}`;
-        const response = await fetch(url);
+        const fetchOptions = forceRefresh ? { cache: 'no-store' } : {};
+        const response = await fetch(url, fetchOptions);
 
         if (!response.ok) {
             throw new Error(`Erro ${response.status}`);
