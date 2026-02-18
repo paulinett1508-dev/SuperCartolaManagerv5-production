@@ -835,7 +835,7 @@ class ParticipanteAuth {
             sessionStorage.clear();
 
             // ✅ Limpar localStorage SELETIVAMENTE (preservar chaves de sistema)
-            const chavesPreservadas = ['app_version', 'sw_emergency_clean_v8'];
+            const chavesPreservadas = ['app_version', 'sw_emergency_clean_v11'];
             const keysToRemove = [];
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
