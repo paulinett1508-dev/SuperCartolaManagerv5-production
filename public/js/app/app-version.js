@@ -210,9 +210,13 @@ const AppVersion = {
                         window.ManutencaoScreen.desativar();
                     }
 
-                    // Modo modulos: será tratado no participante-navigation.js
+                    // Modo modulos: setar lista e desativar splash global se ativa por race condition
                     if (modo === 'modulos') {
                         window.participanteModulosBloqueados = servidor.manutencao.modulos_bloqueados || [];
+                        if (window.ManutencaoScreen && window.ManutencaoScreen.estaAtivo()) {
+                            if (window.Log) Log.info('APP-VERSION', `Modo modulos: desativando splash global (race condition fix)`);
+                            window.ManutencaoScreen.desativar();
+                        }
                     }
                 }
             } else {

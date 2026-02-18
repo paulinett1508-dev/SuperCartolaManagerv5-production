@@ -85,10 +85,24 @@ router.get("/status", async (req, res) => {
             });
         }
 
-        // Bloqueado - retornar config da splash
+        // Verificar modo de operação
+        const modo = estado.modo || 'global';
+
+        // Modo módulos: NÃO bloquear globalmente, apenas informar quais módulos estão bloqueados
+        if (modo === 'modulos') {
+            return res.json({
+                ativo: true,
+                bloqueado: false,
+                modo: 'modulos',
+                modulos_bloqueados: estado.modulos_bloqueados || []
+            });
+        }
+
+        // Modo global ou usuarios: bloqueio total - retornar config da splash
         return res.json({
             ativo: true,
             bloqueado: true,
+            modo,
             customizacao: estado.customizacao || {}
         });
     } catch (error) {

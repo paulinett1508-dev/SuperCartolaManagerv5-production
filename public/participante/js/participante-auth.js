@@ -207,11 +207,17 @@ class ParticipanteAuth {
                 return true;
             }
 
-            // Dev bypass ou whitelist - desativar splash se estava ativa
+            // Dev bypass, whitelist ou modo módulos - desativar splash se estava ativa
             if (data.ativo && !data.bloqueado) {
+                // Modo módulos: propagar lista de módulos bloqueados para navegação
+                if (data.modo === 'modulos' && data.modulos_bloqueados) {
+                    window.participanteModulosBloqueados = data.modulos_bloqueados;
+                    if (window.Log) Log.info('PARTICIPANTE-AUTH', `🔧 Modo módulos: ${data.modulos_bloqueados.length} módulo(s) bloqueado(s):`, data.modulos_bloqueados);
+                }
+
                 if (window.ManutencaoScreen && ManutencaoScreen.estaAtivo()) {
                     ManutencaoScreen.desativar();
-                    if (window.Log) Log.info('PARTICIPANTE-AUTH', '🔓 Manutenção: acesso liberado (devBypass ou whitelist)');
+                    if (window.Log) Log.info('PARTICIPANTE-AUTH', '🔓 Manutenção: acesso liberado (devBypass, whitelist ou modo módulos)');
                 }
             }
 
