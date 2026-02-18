@@ -145,10 +145,15 @@
 
 /* === ESTADOS DOS MINI-CARDS === */
 .rodada-card.futura {
-  background: rgba(42, 42, 42, 0.3);
-  border-color: rgba(255, 255, 255, 0.05);
-  opacity: 0.5;
-  cursor: not-allowed;
+  background: rgba(42, 42, 42, 0.35);
+  border-color: rgba(255, 255, 255, 0.1);
+  opacity: 0.65;
+  cursor: pointer; /* ✅ Clicável — mostra bracket even sem scores */
+}
+
+.rodada-card.futura:hover {
+  opacity: 0.85;
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .rodada-card.passada {
