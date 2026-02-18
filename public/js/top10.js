@@ -165,9 +165,9 @@ function obterLigaId() {
     if (window.participanteData && window.participanteData.ligaId) {
         return window.participanteData.ligaId;
     }
-    // Fallback para modo admin (URL)
+    // Fallback para modo admin (URL) — suporta ?id=, ?liga= e ?ligaId=
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get("id") || urlParams.get("ligaId");
+    return urlParams.get("id") || urlParams.get("liga") || urlParams.get("ligaId") || window._fluxoLigaId || null;
 }
 
 // ==============================

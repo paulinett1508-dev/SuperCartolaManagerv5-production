@@ -75,9 +75,9 @@ export class MelhorMesOrquestrador {
       // Carregar módulos primeiro
       await this.carregarModulos();
 
-      // Obter ligaId
+      // Obter ligaId — suporta ?id=, ?liga= e ?ligaId=
       const urlParams = new URLSearchParams(window.location.search);
-      this.ligaId = urlParams.get("id");
+      this.ligaId = urlParams.get("id") || urlParams.get("liga") || urlParams.get("ligaId") || window._fluxoLigaId;
 
       if (!this.ligaId) {
         throw new Error("ID da liga não encontrado na URL");

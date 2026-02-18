@@ -548,9 +548,9 @@ export class FluxoFinanceiroUI {
         const container = document.getElementById(this.buttonsContainerId);
         if (!container) return;
 
-        // Obter ligaId da URL
+        // Obter ligaId da URL — suporta ?id=, ?liga= e ?ligaId=
         const urlParams = new URLSearchParams(window.location.search);
-        const ligaId = urlParams.get("id");
+        const ligaId = urlParams.get("id") || urlParams.get("liga") || urlParams.get("ligaId") || window._fluxoLigaId;
 
         // Mostrar loading enquanto busca dados de saldo
         container.innerHTML = `

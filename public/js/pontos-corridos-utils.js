@@ -270,9 +270,9 @@ export function obterLigaId() {
         return window.participanteData.ligaId;
     }
 
-    // Fallback para modo admin (URL)
+    // Fallback para modo admin (URL) — suporta ?id=, ?liga= e ?ligaId=
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get("id");
+    return urlParams.get("id") || urlParams.get("liga") || urlParams.get("ligaId") || window._fluxoLigaId || null;
 }
 
 console.log("[PONTOS-CORRIDOS-UTILS] ✅ Módulo carregado");
