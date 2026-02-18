@@ -863,29 +863,53 @@ async function reconstruirCacheDeRodadas(ligaId, temporada, config, timesMap) {
     }
 }
 
-// ✅ FIX: Extrai a ordem original dos times a partir dos confrontos da Rodada 1 salva pelo admin.
-// O round-robin posiciona: lista[i] = time1[i], lista[n-1-i] = time2[i]
-// Isso garante que calcularRodadaComParciais use o mesmo chaveamento que o admin gerou.
+// ✅ FIX: Extrai a ordem original dos times a partir dos confrontos da rodada MAIS RECENTE salva pelo admin.
+//
+// ESTRATÉGIA: usa a rodada mais recente (não necessariamente rodada 1) porque:
+//   - Times podem entrar/sair da liga entre rodadas
+//   - A rodada mais recente reflete a composição atual da liga
+//   - Rodadas futuras (ao vivo) devem usar o mesmo conjunto de times
+//
+// MATEMÁTICA do round-robin:
+//   Para QUALQUER rodada R, a posição do bracket é:
+//     lista_R[i] = time1[i], lista_R[n-1-i] = time2[i]
+//   Para recuperar a lista ORIGINAL (rodada 1), aplica-se R-1 rotações reversas:
+//     Rotação direta:  lista.splice(1, 0, lista.pop())  ← [a,b,c,d,e] → [a,e,b,c,d]
+//     Rotação reversa: x = lista.splice(1,1)[0]; lista.push(x) ← [a,e,b,c,d] → [a,b,c,d,e]
+//
 function extrairOrdemDoCache(caches) {
-    const rodada1 = [...caches].sort((a, b) => a.rodada - b.rodada)
-        .find(c => c.rodada === 1 && c.confrontos?.length > 0);
+    if (!caches || caches.length === 0) return null;
 
-    if (!rodada1) {
-        logger.warn('[CACHE-PC] ⚠️ extrairOrdemDoCache: Rodada 1 não encontrada no cache. Chaveamento pode divergir do admin.');
+    // Usar a rodada MAIS RECENTE com confrontos (reflete composição atual da liga)
+    const cacheBase = [...caches]
+        .sort((a, b) => b.rodada - a.rodada) // decrescente → mais recente primeiro
+        .find(c => c.confrontos?.length > 0);
+
+    if (!cacheBase) {
+        logger.warn('[CACHE-PC] ⚠️ extrairOrdemDoCache: Nenhum cache com confrontos encontrado.');
         return null;
     }
 
-    const confrontos = rodada1.confrontos;
+    const rodadaNum = cacheBase.rodada;
+    const confrontos = cacheBase.confrontos;
     const n = confrontos.length * 2;
-    const listaIds = new Array(n);
 
+    // Passo 1: reconstruir a lista na posição da rodada R
+    const listaRodada = new Array(n);
     for (let i = 0; i < confrontos.length; i++) {
-        listaIds[i] = String(confrontos[i].time1?.id || confrontos[i].time1);
-        listaIds[n - 1 - i] = String(confrontos[i].time2?.id || confrontos[i].time2);
+        listaRodada[i] = String(confrontos[i].time1?.id || confrontos[i].time1);
+        listaRodada[n - 1 - i] = String(confrontos[i].time2?.id || confrontos[i].time2);
     }
 
-    logger.log(`[CACHE-PC] 📐 Ordem canônica extraída da Rodada 1 (admin): [${listaIds.join(', ')}]`);
-    return listaIds;
+    // Passo 2: desfazer (R-1) rotações para obter a lista original
+    const lista = [...listaRodada];
+    for (let r = 0; r < rodadaNum - 1; r++) {
+        const x = lista.splice(1, 1)[0]; // remove da posição 1
+        lista.push(x);                   // envia para o final
+    }
+
+    logger.log(`[CACHE-PC] 📐 Ordem canônica extraída da Rodada ${rodadaNum} (admin): ${lista.length} times`);
+    return lista;
 }
 
 // ✅ FIX: Gera bracket completo usando apenas IDs (sem objetos completos de time).
