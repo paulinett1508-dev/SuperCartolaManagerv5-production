@@ -545,6 +545,8 @@ router.get("/liga/:ligaId", verificarAdmin, async (req, res) => {
         // Bug anterior: sort crescente + forEach sobrescrevia com temporada maior (ex: 2026)
         // Correção: primeiro adiciona temporadas anteriores, depois a solicitada (que sobrescreve)
         const extratoMap = new Map();
+        // ✅ B3-FIX: Mapa separado para extratos do ano anterior (fallback de saldoAnteriorTransferido)
+        const extratoAnteriorMap = new Map();
         // Ordenar: temporadas menores primeiro, temporada solicitada por último (para sobrescrever)
         const extratosOrdenados = [...todosExtratos].sort((a, b) => {
             // Prioridade: temporada solicitada = maior prioridade (vem por último para sobrescrever)
@@ -554,7 +556,13 @@ router.get("/liga/:ligaId", verificarAdmin, async (req, res) => {
             if (!aIsSolicitada && bIsSolicitada) return -1; // b vem depois
             return (a.temporada || 0) - (b.temporada || 0); // ordem crescente para o resto
         });
-        extratosOrdenados.forEach(e => extratoMap.set(String(e.time_id), e));
+        extratosOrdenados.forEach(e => {
+            extratoMap.set(String(e.time_id), e);
+            // ✅ B3-FIX: Também mapear extratos do ano anterior separadamente
+            if (e.temporada === temporadaNum - 1) {
+                extratoAnteriorMap.set(String(e.time_id), e);
+            }
+        });
         console.log(`[TESOURARIA] Extratos carregados: ${todosExtratos.length} (temporadas: ${[...new Set(todosExtratos.map(e => e.temporada))].join(', ')}) | Prioridade: ${temporadaNum}`);
 
         // ✅ v2.25 FIX: Priorizar temporada SOLICITADA (não a anterior)
@@ -653,12 +661,39 @@ router.get("/liga/:ligaId", verificarAdmin, async (req, res) => {
             }
 
             // ✅ v3.0: Aplicar ajuste de inscrição usando dados pré-carregados (sem N+1)
-            let inscricaoInfo = { taxaInscricao: 0, pagouInscricao: true, saldoAnteriorTransferido: 0 };
+            let inscricaoInfo = { taxaInscricao: 0, pagouInscricao: true, saldoAnteriorTransferido: 0, dividaAnterior: 0 };
             if (temporadaNum >= CURRENT_SEASON) {
                 const inscricaoData = inscricoesMap.get(timeId);
                 const ajusteInsc = aplicarAjusteInscricaoBulk(saldoConsolidado, inscricaoData, historico);
                 saldoConsolidado = ajusteInsc.saldoAjustado;
                 inscricaoInfo = ajusteInsc;
+
+                // ✅ B3-FIX: Fallback de saldoAnteriorTransferido usando extrato do ano anterior
+                // Caso: InscricaoTemporada não possui saldo_transferido preenchido (novo participante ou migração)
+                // Solução: calcular o saldo final de (temporadaNum-1) a partir do extrato histórico já carregado
+                if ((inscricaoInfo.saldoAnteriorTransferido === 0 || inscricaoInfo.saldoAnteriorTransferido == null)) {
+                    const extratoAnt = extratoAnteriorMap.get(timeId);
+                    if (extratoAnt) {
+                        const histAnt = extratoAnt.historico_transacoes || [];
+                        const camposAnt = camposMap.get(timeId)?.campos?.filter(c => c.valor !== 0) || [];
+                        const rodadasAnt = transformarTransacoesEmRodadas(histAnt, ligaIdStr);
+                        const resumoAnt = calcularResumoDeRodadas(rodadasAnt, camposAnt);
+                        // Incluir acertos de 2025 no cálculo do saldo anterior
+                        const acertosAntList = acertosMap.get(timeId) || [];
+                        const acertos2025 = acertosAntList.filter(a => Number(a.temporada) === temporadaNum - 1);
+                        let totalPago2025 = 0, totalRecebido2025 = 0;
+                        acertos2025.forEach(a => {
+                            if (a.tipo === 'pagamento') totalPago2025 += a.valor || 0;
+                            else if (a.tipo === 'recebimento') totalRecebido2025 += a.valor || 0;
+                        });
+                        const saldoAcertos2025 = totalPago2025 - totalRecebido2025;
+                        const saldoFinal2025 = resumoAnt.saldo + saldoAcertos2025;
+                        if (Math.abs(saldoFinal2025) > 0.01) {
+                            inscricaoInfo.saldoAnteriorTransferido = parseFloat(saldoFinal2025.toFixed(2));
+                            console.log(`[TESOURARIA] B3-FALLBACK time=${timeId}: saldoAnterior2025=${saldoFinal2025.toFixed(2)} (InscricaoTemporada ausente/zerada)`);
+                        }
+                    }
+                }
             }
 
             // ✅ v3.2 FIX BUG-001: Aplicar AjusteFinanceiro (ajustes dinâmicos 2026+)
@@ -680,6 +715,12 @@ router.get("/liga/:ligaId", verificarAdmin, async (req, res) => {
                 luvaOuro: 0,
                 ajustes: saldoAjustes,
                 acertos: 0, // Será preenchido abaixo
+                // ✅ B3-FIX: Incluir dados de inscrição no breakdown (ausentes desde v2.0)
+                // Necessário para colunas "Saldo Anterior", "Taxa Inscrição", "Status Pago" na UI 2026
+                taxaInscricao: inscricaoInfo.taxaInscricao || 0,
+                pagouInscricao: inscricaoInfo.pagouInscricao ?? true,
+                saldoAnteriorTransferido: inscricaoInfo.saldoAnteriorTransferido || 0,
+                dividaAnterior: inscricaoInfo.dividaAnterior || 0,
             };
 
             // Calcular campos especiais do histórico legado se houver
@@ -752,6 +793,7 @@ router.get("/liga/:ligaId", verificarAdmin, async (req, res) => {
                 quantidadeAcertos: acertosTemporada.length,
                 // ✅ v2.0: Breakdown por módulo financeiro
                 // ✅ v2.9: Adicionado 'acertos' ao breakdown
+                // ✅ B3-FIX: Adicionado dados de inscrição (taxaInscricao, pagouInscricao, saldoAnteriorTransferido, dividaAnterior)
                 breakdown: {
                     banco: parseFloat(breakdown.banco.toFixed(2)),
                     pontosCorridos: parseFloat(breakdown.pontosCorridos.toFixed(2)),
@@ -763,6 +805,10 @@ router.get("/liga/:ligaId", verificarAdmin, async (req, res) => {
                     campos: parseFloat(saldoCampos.toFixed(2)),
                     ajustes: parseFloat((breakdown.ajustes || 0).toFixed(2)),
                     acertos: parseFloat(breakdown.acertos.toFixed(2)),
+                    taxaInscricao: parseFloat((breakdown.taxaInscricao || 0).toFixed(2)),
+                    pagouInscricao: breakdown.pagouInscricao ?? true,
+                    saldoAnteriorTransferido: parseFloat((breakdown.saldoAnteriorTransferido || 0).toFixed(2)),
+                    dividaAnterior: parseFloat((breakdown.dividaAnterior || 0).toFixed(2)),
                 },
                 // ✅ v2.5 FIX: Incluir modulosAtivos para renderizar badges
                 modulosAtivos,

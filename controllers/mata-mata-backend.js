@@ -273,11 +273,23 @@ async function calcularResultadosEdicao(ligaId, edicao, rodadaAtual, config) {
     const resultadosFinanceiros = [];
 
     try {
-        // 1. Contar participantes ativos na liga (filtrado por temporada)
-        const totalParticipantes = await Time.countDocuments({ liga_id: ligaId, ativo: true, temporada: CURRENT_SEASON });
+        // ✅ FIX #4: Buscar ranking histórico PRIMEIRO para determinar participantes elegíveis
+        // Usar rankingBase.length em vez de Time.countDocuments() (contagem atual)
+        // Razão: participantes que ingressaram APÓS rodadaDefinicao não estavam no mata-mata original
+        // e não devem ser classificados mesmo que seus dados históricos tenham sido preenchidos depois
+        const rankingBase = await getRankingRodada(
+            ligaId,
+            edicao.rodadaDefinicao,
+        );
 
-        // 2. Calcular tamanho ideal do torneio
-        let tamanhoTorneio = calcularTamanhoIdealMataMata(totalParticipantes);
+        if (!rankingBase || rankingBase.length === 0) {
+            logger.warn(`[MATA-BACKEND] Sem dados de ranking para rodada de definição R${edicao.rodadaDefinicao} de ${edicao.nome}.`);
+            return [];
+        }
+
+        // 2. Calcular tamanho ideal baseado em participantes HISTÓRICOS (quem jogou na rodada de definição)
+        const totalParticipantesHistorico = rankingBase.length;
+        let tamanhoTorneio = calcularTamanhoIdealMataMata(totalParticipantesHistorico);
 
         // ✅ FIX #1: Respeitar total_times configurado no wizard como teto
         // Se o admin configurou 16 times no wizard, não usar 32 mesmo que haja 35 participantes
@@ -287,20 +299,14 @@ async function calcularResultadosEdicao(ligaId, edicao, rodadaAtual, config) {
         }
 
         if (tamanhoTorneio === 0) {
-            logger.warn(`[MATA-BACKEND] Número de participantes (${totalParticipantes}) insuficiente para o mata-mata.`);
+            logger.warn(`[MATA-BACKEND] Participantes históricos na R${edicao.rodadaDefinicao} (${totalParticipantesHistorico}) insuficientes para o mata-mata.`);
             return [];
         }
 
-        // Buscar ranking da rodada de definição
-        const rankingBase = await getRankingRodada(
-            ligaId,
-            edicao.rodadaDefinicao,
-        );
-
-        // Exigir número de times do torneio para a 1ª fase
-        if (!rankingBase || rankingBase.length < tamanhoTorneio) {
+        // Verificar se ranking base tem participantes suficientes para o tamanho calculado
+        if (rankingBase.length < tamanhoTorneio) {
             logger.warn(
-                `[MATA-BACKEND] Ranking base insuficiente para ${edicao.nome}: ${rankingBase?.length || 0} times (esperado: ${tamanhoTorneio})`,
+                `[MATA-BACKEND] Ranking base insuficiente para ${edicao.nome}: ${rankingBase.length} times históricos (esperado: ${tamanhoTorneio})`,
             );
             return [];
         }
