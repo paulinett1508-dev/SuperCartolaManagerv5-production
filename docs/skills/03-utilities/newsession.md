@@ -4,14 +4,47 @@ Handover para nova sessao - carrega contexto do trabalho em andamento e instrui 
 
 ---
 
-## STATUS ATUAL: AUDIT-009 COMPLETO - 4 MODULOS AUDITADOS
+## STATUS ATUAL: AUDIT-010 COMPLETO - 5 MODULOS AUDITADOS
 
 **Data:** 18/02/2026
-**Ultima acao:** AUDIT-009 (mata-mata) concluido. Score 91→95. Manager documentado como stub, RODADA_FINAL centralizado, nota ModuleConfig.
-**Sessao atual:** AUDIT-009 (mata-mata, 3 fixes)
+**Ultima acao:** AUDIT-010 (pontos corridos) concluido. Score 82→93. Auth em 2 rotas POST, stubs documentados, RODADA_FINAL centralizado.
+**Sessao atual:** AUDIT-009 (mata-mata, 3 fixes) + AUDIT-010 (pontos corridos, 4 fixes)
 **Sessao 17/02/2026:** AUDIT-006 (artilheiro, 12 fixes) + AUDIT-007 (capitao, 4 fixes) + AUDIT-008 (luva, 5 fixes) + Stitch simplificado
 **Sessao 14/02/2026:** AUDIT-005: faixas dinamicas ranking, 3 bugs
 **Sessao 13/02/2026:** AUDIT-004: 4 bugs ranking corrigidos + AUDIT-001/002/003 financeiras + cache stale resolvido
+
+---
+
+## AUDIT-010: MODULO PONTOS CORRIDOS (18/02/2026)
+
+**Problema:** Auditoria completa do modulo pontos corridos revelou score 82/100. Duas rotas POST (cache e migracao) sem verificarAdmin — qualquer participante logado podia salvar cache ou executar migracao. Manager sem docs de stub, fallback hardcoded no orquestrador.
+
+### Fixes aplicados (commit `ec2a48f`)
+
+| # | Bug | Severidade | Arquivo | Fix |
+|---|-----|-----------|---------|-----|
+| 1 | POST `/cache/:ligaId` e POST `/migrar/:ligaId` sem auth | **CRITICAL** | `routes/pontosCorridosCacheRoutes.js`, `routes/pontosCorridosMigracaoRoutes.js` | v1.1: `verificarAdmin` adicionado em ambas |
+| 2 | PontosCorridosManager hooks sem `stub: true` | **MODERATE** | `services/orchestrator/managers/PontosCorridosManager.js` | v1.1.0: JSDoc completo, `stub: true`, removidos console.logs |
+| 3 | `status.rodada_final \|\| 38` hardcoded no orquestrador | **MODERATE** | `public/js/pontos-corridos/pontos-corridos-orquestrador.js` | v3.3: import `RODADA_FINAL_CAMPEONATO` de `season-config.js` |
+| 4 | Config sem nota ModuleConfig | **LOW** | `config/rules/pontos_corridos.json` | Adicionada nota |
+
+### O que ja estava correto (nao precisou fix)
+
+| Item | Detalhe |
+|------|---------|
+| Zero `ligas_habilitadas` no config | Usa ModuleConfig corretamente |
+| Zero `temporada` stale | Sem campo hardcoded |
+| `CURRENT_SEASON` no backend | Model e Controller importam de `config/seasons.js` |
+| Validacao temporada nas rotas GET | Range 2020-2030 obrigatorio |
+| Config dinamica via wizard | `buscarConfigSimplificada()` do ModuleConfig |
+| Zero `[DEBUG-*]` em participante | Nenhum debug log |
+| Segregacao temporal completa | Caches indexados por `{liga_id, rodada, temporada}` |
+| 6 modulos frontend bem organizados | config, core, orquestrador, ui, cache, utils |
+
+### Resultado final
+- **Score:** 82/100 → ~93/100
+- **Bug seguranca:** 2 rotas POST agora protegidas com verificarAdmin
+- **Commit:** `ec2a48f`
 
 ---
 
@@ -339,6 +372,10 @@ O wizard de modulos (`gerenciar-modulos.html`) salvava corretamente no `ModuleCo
 | `routes/mataMataCacheRoutes.js` | Rotas mata-mata cache CRUD | OK (verificarAdmin, rate limiter, validacao) |
 | `public/js/mata-mata/mata-mata-orquestrador.js` | Orquestrador frontend mata-mata | v1.5 (RODADA_FINAL centralizado, AUDIT-009) |
 | `config/rules/mata_mata.json` | Regras mata-mata | LIMPO (nota ModuleConfig, AUDIT-009) |
+| `routes/pontosCorridosCacheRoutes.js` | Rotas PC cache + config | FIXADO v1.1 (verificarAdmin POST, AUDIT-010) |
+| `routes/pontosCorridosMigracaoRoutes.js` | Rota migracao PC | FIXADO v1.1 (verificarAdmin POST, AUDIT-010) |
+| `public/js/pontos-corridos/pontos-corridos-orquestrador.js` | Orquestrador frontend PC | v3.3 (RODADA_FINAL centralizado, AUDIT-010) |
+| `config/rules/pontos_corridos.json` | Regras pontos corridos | LIMPO (nota ModuleConfig, AUDIT-010) |
 
 ---
 
@@ -395,5 +432,6 @@ Apos invalidacao, o proximo acesso ao extrato de cada participante recalculara a
 12. ~~Auditoria modulo capitao de luxo~~ ✅ AUDIT-007 (4 fixes, 2 commits)
 13. ~~Auditoria modulo luva de ouro~~ ✅ AUDIT-008 (5 fixes, 1 commit)
 14. ~~Auditoria modulo mata-mata~~ ✅ AUDIT-009 (3 fixes, 1 commit)
-15. AUDIT-001 Fase 3 se houver tempo (cosmetico)
-16. Verificar temporada 2025 caches (formato antigo, reconciliacao nao suporta)
+15. ~~Auditoria modulo pontos corridos~~ ✅ AUDIT-010 (4 fixes, 1 commit)
+16. AUDIT-001 Fase 3 se houver tempo (cosmetico)
+17. Verificar temporada 2025 caches (formato antigo, reconciliacao nao suporta)
