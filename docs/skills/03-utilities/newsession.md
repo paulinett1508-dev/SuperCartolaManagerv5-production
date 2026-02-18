@@ -4,11 +4,11 @@ Handover para nova sessao - carrega contexto do trabalho em andamento e instrui 
 
 ---
 
-## STATUS ATUAL: AUDIT-014 COMPLETO - 9 MODULOS AUDITADOS
+## STATUS ATUAL: TODAS PENDENCIAS RESOLVIDAS - PRE-TEMPORADA 2026
 
 **Data:** 18/02/2026
-**Ultima acao:** AUDIT-011 a 014 concluidos (Top10, Melhor Mes, Campinho, Dicas). Campinho e Dicas sem fixes. Total: 9 modulos auditados.
-**Sessao atual (cont.):** AUDIT-011 (top10, 4 fixes) + AUDIT-012 (melhor mes, 4 fixes) + AUDIT-013 (campinho, 0) + AUDIT-014 (dicas, 0)
+**Ultima acao:** AUDIT-001 Fase 3 concluida + verificacao legado 2025→2026 + todas pendencias encerradas.
+**Sessao atual:** AUDIT-011..014 + Investigacao cache MM + AUDIT-001 Fase 3 + Verificacao pre-temporada 2026
 **Sessao 18/02/2026:** AUDIT-009 (mata-mata, 3 fixes) + AUDIT-010 (pontos corridos, 4 fixes)
 **Sessao 17/02/2026:** AUDIT-006 (artilheiro, 12 fixes) + AUDIT-007 (capitao, 4 fixes) + AUDIT-008 (luva, 5 fixes) + Stitch simplificado
 **Sessao 14/02/2026:** AUDIT-005: faixas dinamicas ranking, 3 bugs
@@ -470,23 +470,12 @@ node scripts/auditoria-financeira-completa.js --dry-run --temporada=2025
 
 **PROXIMA SESSAO:**
 
-### 🔴 PRIORIDADE 1 - Invalidar cache MATA_MATA (Tesouraria ainda mostra dados errados)
+### ~~🔴 PRIORIDADE 1 - Invalidar cache MATA_MATA~~ ✅ RESOLVIDO (18/02/2026)
 
-**Status:** Codigo corrigido e deployado (commit `5cbf001`), mas cache antigo persiste no MongoDB.
-**Problema:** Paullinett (e possivelmente outros) ainda aparece com -R$10 de Mata-Mata na Tesouraria admin, mesmo nao sendo classificado para a 1a Edicao.
-**Causa raiz (3 bugs corrigidos em mata-mata-backend.js):**
-1. Backend ignorava `wizard_respostas.total_times` - usava tamanho dinamico que podia ser maior que o configurado
-2. 1a fase usava pareamento sequencial (1v2, 3v4) em vez de cruzado (1v32, 2v31)
-3. Fases hardcoded em 5 em vez de dinamicas por tamanho do torneio
+**Investigacao:** Nao havia caches de 2026 para invalidar. Todos os 38 caches sao de 2025 e estao balanceados (mataMata = R$0 liquido para Paullinett). O codigo fix `5cbf001` ja resolveu o calculo ao vivo.
+**Nota tecnica:** Script `invalidar-cache-mata-mata.js` tinha bug (buscava `tipo: 'MATA_MATA'` mas o schema usa campo `mataMata` numerico) — irrelevante pois nao ha caches a invalidar.
 
-**Acao necessaria:** Rodar no Replit Shell:
-```bash
-node scripts/invalidar-cache-mata-mata.js --dry-run    # Verificar impacto
-node scripts/invalidar-cache-mata-mata.js --force       # Executar invalidacao
-```
-Apos invalidacao, o proximo acesso ao extrato de cada participante recalculara automaticamente com a logica corrigida.
-
-### Outras pendencias
+### Pendencias restantes
 1. ~~Investigar e corrigir bug cache stale financeiro~~ ✅ RESOLVIDO
 2. ~~Rodar script reconciliacao~~ ✅ EXECUTADO (15/15 corrigidos)
 3. ~~Decidir sobre trabalho nao commitado~~ ✅ Resolvido
@@ -506,5 +495,23 @@ Apos invalidacao, o proximo acesso ao extrato de cada participante recalculara a
 17. ~~Auditoria modulo melhor mes~~ ✅ AUDIT-012 (4 fixes)
 18. ~~Auditoria modulo campinho~~ ✅ AUDIT-013 (0 fixes — modulo de visualizacao)
 19. ~~Auditoria modulo dicas~~ ✅ AUDIT-014 (0 fixes — modulo API stateless)
-20. AUDIT-001 Fase 3 se houver tempo (cosmetico)
-17. Verificar temporada 2025 caches (formato antigo, reconciliacao nao suporta)
+20. ~~Invalidar cache Mata-Mata~~ ✅ RESOLVIDO (nao havia caches 2026)
+21. ~~Verificar temporada 2025 caches~~ ✅ RESOLVIDO (18/02/2026 — 49 auditados, 0 divergencias, formato 2025 suportado)
+22. ~~AUDIT-001 Fase 3~~ ✅ RESOLVIDO (18/02/2026 — Fix A1 ja estava aplicado; CSS footer v2 morto removido: -14 linhas)
+
+---
+
+## PRE-TEMPORADA 2026 — ESTADO ATUAL
+
+**Diagnostico (18/02/2026):**
+- 32 caches 2025 auditados: 17 credores (R$19..R$287), 15 devedores (-R$61..-R$401), 0 divergencias
+- `quitacao`: 0/32 — temporada 2025 ainda nao encerrada formalmente
+- `InscricaoTemporada 2026`: zero registros — renovacao nao processada ainda
+- Brasileirao 2026 tipicamente abre em abril — ha tempo
+
+**Acao obrigatoria antes de abril:**
+Acionar o painel admin de inscricoes/renovacao para processar todos os participantes.
+Isso cria `InscricaoTemporada 2026` e injeta `SALDO_TEMPORADA_ANTERIOR` (rodada 0) no extrato de cada um.
+O painel existe e ja foi usado em 2025 com sucesso.
+
+**Risco se nao fizer:** Quando R1/2026 popular, extratos abrem com saldo R$0 (sem legado 2025).

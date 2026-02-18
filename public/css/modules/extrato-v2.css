@@ -955,21 +955,6 @@
     .extrato-performance-v2__grid {
         grid-template-columns: repeat(2, 1fr);
     }
-
-    .extrato-footer-v2 {
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .extrato-footer-v2__actions-left,
-    .extrato-footer-v2__actions-right {
-        width: 100%;
-    }
-
-    .extrato-footer-v2__btn {
-        flex: 1;
-        justify-content: center;
-    }
 }
 
 /* ========================================
