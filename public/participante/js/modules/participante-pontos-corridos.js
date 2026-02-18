@@ -1,4 +1,5 @@
-// PARTICIPANTE PONTOS CORRIDOS - v5.5
+// PARTICIPANTE PONTOS CORRIDOS - v5.6
+// ✅ v5.6: Rodadas futuras navegáveis (bracket a partir da ordem canônica do admin)
 // ✅ v5.5: Auto-refresh 60s para parciais ao vivo (mercado fechado)
 // ✅ v5.3: FIX - totalRodadas calculado a partir do número de times (N-1), não dados.length
 // ✅ v5.2: FIX - Double RAF para garantir container no DOM após refresh
@@ -6,7 +7,7 @@
 // ✅ v4.9: Emojis substituídos por Material Icons + Card "Seu Desempenho"
 // ✅ v5.0: Posição na liga integrada no card + card ao final da página
 
-if (window.Log) Log.info("[PONTOS-CORRIDOS] 📊 Módulo v5.5 carregando...");
+if (window.Log) Log.info("[PONTOS-CORRIDOS] 📊 Módulo v5.6 carregando...");
 
 const estadoPC = {
     ligaId: null,
@@ -26,6 +27,128 @@ const estadoPC = {
     _refreshAtivo: false,
 };
 
+// ============================================
+// ✅ v5.6: BRACKET CANÔNICO — RODADAS FUTURAS
+// ============================================
+
+// Extrai a ordem canônica dos times do cache do admin (mesmo algoritmo do backend).
+function _extrairOrdemDoCache(dados, allTeamIds) {
+    if (!dados || dados.length === 0) return null;
+    const cacheBase = [...dados]
+        .sort((a, b) => (b.rodada || 0) - (a.rodada || 0))
+        .find(r => r.confrontos?.length > 0);
+    if (!cacheBase) return null;
+
+    const rodadaNum = cacheBase.rodada;
+    const confrontos = cacheBase.confrontos;
+
+    const teamsInConfrontos = new Set();
+    confrontos.forEach(c => {
+        if (c.time1?.id) teamsInConfrontos.add(String(c.time1.id));
+        if (c.time2?.id) teamsInConfrontos.add(String(c.time2.id));
+    });
+    const byeTeamId = allTeamIds
+        ? (allTeamIds.find(id => !teamsInConfrontos.has(String(id))) || null)
+        : null;
+    const isOdd = byeTeamId !== null;
+
+    let listaRodada, N;
+    if (!isOdd) {
+        N = confrontos.length * 2;
+        listaRodada = new Array(N);
+        for (let i = 0; i < confrontos.length; i++) {
+            listaRodada[i] = String(confrontos[i].time1?.id);
+            listaRodada[N - 1 - i] = String(confrontos[i].time2?.id);
+        }
+    } else {
+        const nTeams = confrontos.length * 2 + 1;
+        N = nTeams + 1;
+        const nullPos = rodadaNum === 1 ? nTeams : rodadaNum - 1;
+        const byePos = N - 1 - nullPos;
+        const skipI = Math.min(nullPos, N - 1 - nullPos);
+        listaRodada = new Array(N).fill(null);
+        listaRodada[nullPos] = null;
+        listaRodada[byePos] = String(byeTeamId);
+        for (let j = 0; j < confrontos.length; j++) {
+            const actualI = j < skipI ? j : j + 1;
+            listaRodada[actualI] = String(confrontos[j].time1?.id);
+            listaRodada[N - 1 - actualI] = String(confrontos[j].time2?.id);
+        }
+    }
+
+    const lista = [...listaRodada];
+    for (let r = 0; r < rodadaNum - 1; r++) {
+        const x = lista.splice(1, 1)[0];
+        lista.push(x);
+    }
+    return lista.filter(x => x !== null);
+}
+
+// Gera bracket round-robin a partir de lista de IDs canônicos.
+function _gerarBracket(listaIds) {
+    const lista = [...listaIds];
+    if (lista.length % 2 !== 0) lista.push(null);
+    const rodadas = [];
+    const total = lista.length - 1;
+    for (let r = 0; r < total; r++) {
+        const jogos = [];
+        for (let i = 0; i < lista.length / 2; i++) {
+            const idA = lista[i];
+            const idB = lista[lista.length - 1 - i];
+            if (idA !== null && idB !== null) jogos.push({ idA: String(idA), idB: String(idB) });
+        }
+        rodadas.push(jogos);
+        lista.splice(1, 0, lista.pop());
+    }
+    return rodadas;
+}
+
+// Completa dados com entradas sintéticas para rodadas futuras (pairings sem scores).
+function completarComRodadasFuturas(dados, totalRodadas) {
+    if (!dados || dados.length === 0) return dados;
+
+    // Construir timesMap a partir de todos os confrontos conhecidos
+    const timesMap = {};
+    dados.forEach(r => {
+        (r.confrontos || []).forEach(c => {
+            if (c.time1?.id) timesMap[String(c.time1.id)] = c.time1;
+            if (c.time2?.id) timesMap[String(c.time2.id)] = c.time2;
+        });
+    });
+
+    const allTeamIds = Object.keys(timesMap);
+    if (allTeamIds.length === 0) return dados;
+
+    const idsCanonicos = _extrairOrdemDoCache(dados, allTeamIds);
+    if (!idsCanonicos) return dados;
+
+    const bracket = _gerarBracket(idsCanonicos);
+    const rodadasExistentes = new Set(dados.map(r => r.rodada));
+    const dadosCompletos = [...dados];
+
+    const maxRodadas = Math.max(totalRodadas, bracket.length);
+    for (let i = 1; i <= maxRodadas; i++) {
+        if (rodadasExistentes.has(i)) continue;
+        const jogosRodada = bracket[i - 1];
+        if (!jogosRodada) continue;
+
+        const confrontosSinteticos = jogosRodada.map(j => ({
+            time1: { ...(timesMap[j.idA] || { id: Number(j.idA) }), pontos: undefined },
+            time2: { ...(timesMap[j.idB] || { id: Number(j.idB) }), pontos: undefined },
+            pontos1: null,
+            pontos2: null,
+            diferenca: null,
+        }));
+
+        dadosCompletos.push({ rodada: i, confrontos: confrontosSinteticos, classificacao: [], pendente: true });
+    }
+
+    dadosCompletos.sort((a, b) => (a.rodada || 0) - (b.rodada || 0));
+    if (window.Log) Log.info(`[PONTOS-CORRIDOS] ✅ v5.6: ${dadosCompletos.length} rodadas (${dados.length} com dados + ${dadosCompletos.length - dados.length} futuras)`);
+    return dadosCompletos;
+}
+
+// ============================================
 // ✅ v5.3: Calcula total de rodadas real baseado no número de times (N-1 para par, N para ímpar)
 function calcularTotalRodadas(dados) {
     const rodadaComClassificacao = dados.find(r => r.classificacao?.length > 0);
@@ -79,7 +202,6 @@ export async function inicializarPontosCorridosParticipante(params = {}) {
             if (pcCache && Array.isArray(pcCache) && pcCache.length > 0) {
                 usouCache = true;
                 dadosCache = pcCache;
-                estadoPC.dados = pcCache;
 
                 // Processar dados do cache
                 const rodadasComConfrontos = pcCache.filter((r) => r.confrontos?.length > 0);
@@ -88,6 +210,8 @@ export async function inicializarPontosCorridosParticipante(params = {}) {
                     ? Math.max(...rodadasComConfrontos.map((r) => r.rodada))
                     : 1;
                 estadoPC.rodadaSelecionada = estadoPC.rodadaAtual;
+                // ✅ v5.6: Completar com rodadas futuras (bracket canônico)
+                estadoPC.dados = completarComRodadasFuturas(pcCache, estadoPC.totalRodadas);
 
                 const ultimaRodadaPossivel = estadoPC.totalRodadas;
                 const ultimaRodadaDisputada = pcCache.find((r) => r.rodada === ultimaRodadaPossivel);
@@ -116,17 +240,18 @@ export async function inicializarPontosCorridosParticipante(params = {}) {
         const dados = await carregarDados();
 
         if (dados.length > 0) {
-            estadoPC.dados = dados;
-
+            estadoPC.totalRodadas = calcularTotalRodadas(dados);
             const rodadasComConfrontos = dados.filter(
                 (r) => r.confrontos?.length > 0,
             );
-            estadoPC.totalRodadas = calcularTotalRodadas(dados);
             estadoPC.rodadaAtual =
                 rodadasComConfrontos.length > 0
                     ? Math.max(...rodadasComConfrontos.map((r) => r.rodada))
                     : 1;
             estadoPC.rodadaSelecionada = estadoPC.rodadaAtual;
+
+            // ✅ v5.6: Completar com rodadas futuras (bracket canônico do admin, sem scores)
+            estadoPC.dados = completarComRodadasFuturas(dados, estadoPC.totalRodadas);
 
             const ultimaRodadaPossivel = estadoPC.totalRodadas;
             const ultimaRodadaDisputada = dados.find(
@@ -696,6 +821,7 @@ function atualizarSeletorRodadas() {
     for (let i = 1; i <= totalRodadas; i++) {
         const rodadaData = dados.find((r) => r.rodada === i);
         const temDados = rodadaData?.confrontos?.length > 0;
+        const isPendente = rodadaData?.pendente === true; // ✅ v5.6: rodada futura com bracket
         const isAtual = i === rodadaAtual;
         const isSelecionada = i === rodadaSelecionada;
         const isUltima = i === totalRodadas && ligaEncerrou;
@@ -706,8 +832,9 @@ function atualizarSeletorRodadas() {
             isAtual,
             temDados,
             isUltima,
+            isPendente,
         );
-        btn.disabled = !temDados;
+        btn.disabled = !temDados; // temDados=true para todas (inclusive futuras com bracket)
         btn.onclick = () => selecionarRodada(i);
 
         btn.innerHTML = `
@@ -725,6 +852,7 @@ function buildClassesBotaoRodada(
     atual,
     temDados,
     isUltima = false,
+    isPendente = false,
 ) {
     let classes =
         "flex flex-col items-center justify-center rounded-lg px-4 py-2 text-[10px] flex-shrink-0 cursor-pointer transition-all ";
@@ -732,6 +860,9 @@ function buildClassesBotaoRodada(
     else if (isUltima && temDados)
         classes += "bg-yellow-500/20 border border-yellow-500";
     else if (atual) classes += "bg-green-500/20 border border-green-500";
+    else if (isPendente)
+        // ✅ v5.6: rodada futura com bracket — clicável mas visual distinto
+        classes += "bg-surface-dark/40 border border-zinc-700/60 opacity-60 hover:opacity-80 hover:border-zinc-500";
     else if (temDados)
         classes +=
             "bg-surface-dark border border-zinc-700 hover:border-zinc-500";
@@ -814,7 +945,8 @@ function renderizarConfrontos() {
 
     // ✅ v5.3: Cálculo dinâmico da rodada do Brasileirão (era hardcoded +6)
     const rodadaBrasileirao = rodadaSelecionada + (estadoPC.rodadaInicial - 1);
-    let isEmAndamento = !ligaEncerrou && rodadaBrasileirao >= mercadoRodada;
+    const isPendente = rodadaData?.pendente === true; // ✅ v5.6: rodada futura
+    let isEmAndamento = !ligaEncerrou && !isPendente && rodadaBrasileirao >= mercadoRodada;
     const isRodadaFinal = rodadaSelecionada === totalRodadas && ligaEncerrou;
 
     setTexto(
@@ -836,7 +968,11 @@ function renderizarConfrontos() {
 
     const statusEl = document.getElementById("pc-rodada-status");
     if (statusEl) {
-        if (isRodadaFinal) {
+        if (isPendente) {
+            // ✅ v5.6: Rodada futura — mostra quem vai enfrentar quem
+            statusEl.className = "flex items-center space-x-1.5 bg-blue-500/10 text-blue-400 px-2.5 py-1.5 rounded-full text-[10px] font-semibold";
+            statusEl.innerHTML = `<span class="material-symbols-outlined" style="font-size: 14px;">schedule</span><span>A REALIZAR</span>`;
+        } else if (isRodadaFinal) {
             statusEl.className =
                 "flex items-center space-x-1.5 bg-yellow-500/20 text-yellow-400 px-2.5 py-1.5 rounded-full text-[10px] font-semibold";
             statusEl.innerHTML = `<span class="material-symbols-outlined" style="font-size: 14px;">emoji_events</span><span>ENCERRADA</span>`;

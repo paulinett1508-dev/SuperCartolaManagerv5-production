@@ -320,7 +320,8 @@ export async function carregarPontosCorridos() {
         if (respCache.ok) {
           const caches = await respCache.json();
           if (Array.isArray(caches) && caches.length > 0) {
-            const idsCanonicos = extrairOrdemDoCacheLocal(caches);
+            const allTeamIds = estadoOrquestrador.times.map(t => String(t.id));
+            const idsCanonicos = extrairOrdemDoCacheLocal(caches, allTeamIds);
             if (idsCanonicos) {
               const timesMap = {};
               estadoOrquestrador.times.forEach(t => { timesMap[String(t.id)] = t; });
@@ -396,7 +397,8 @@ export async function carregarPontosCorridos() {
 
 // ✅ FIX: Extrai a ordem canônica dos times do cache salvo pelo admin.
 // Algoritmo idêntico ao backend (pontosCorridosCacheController.extrairOrdemDoCache).
-function extrairOrdemDoCacheLocal(caches) {
+// allTeamIds: array de IDs (string) de todos os times — necessário para detectar o time com bye em ligas ímpares.
+function extrairOrdemDoCacheLocal(caches, allTeamIds) {
   if (!caches || caches.length === 0) return null;
 
   // Rodada mais recente com confrontos reflete a composição atual da liga
@@ -408,24 +410,60 @@ function extrairOrdemDoCacheLocal(caches) {
 
   const rodadaNum = cacheBase.rodada;
   const confrontos = cacheBase.confrontos;
-  const n = confrontos.length * 2;
 
-  // Passo 1: reconstruir a lista na posição da rodada R
-  const listaRodada = new Array(n);
-  for (let i = 0; i < confrontos.length; i++) {
-    listaRodada[i] = String(confrontos[i].time1?.id || confrontos[i].time1);
-    listaRodada[n - 1 - i] = String(confrontos[i].time2?.id || confrontos[i].time2);
+  // Detectar liga com número ímpar de times (um time fica sem jogo = bye)
+  const teamsInConfrontos = new Set();
+  confrontos.forEach(c => {
+    if (c.time1?.id) teamsInConfrontos.add(String(c.time1.id));
+    if (c.time2?.id) teamsInConfrontos.add(String(c.time2.id));
+  });
+  const byeTeamId = allTeamIds
+    ? (allTeamIds.find(id => !teamsInConfrontos.has(String(id))) || null)
+    : null;
+  const isOdd = byeTeamId !== null;
+
+  let listaRodada, N;
+
+  if (!isOdd) {
+    // Número par de times: reconstrução direta (índices i e n-1-i)
+    N = confrontos.length * 2;
+    listaRodada = new Array(N);
+    for (let i = 0; i < confrontos.length; i++) {
+      listaRodada[i] = String(confrontos[i].time1?.id || confrontos[i].time1);
+      listaRodada[N - 1 - i] = String(confrontos[i].time2?.id || confrontos[i].time2);
+    }
+  } else {
+    // Número ímpar de times: null (slot de bye) ocupa uma posição na lista.
+    // Posição do null na rodada R: R=1 → nTeams (último), R≥2 → R-1
+    const nTeams = confrontos.length * 2 + 1;
+    N = nTeams + 1; // lista com null
+    const nullPos = rodadaNum === 1 ? nTeams : rodadaNum - 1;
+    const byePos = N - 1 - nullPos; // time com bye fica no espelho do null
+    const skipI = Math.min(nullPos, N - 1 - nullPos); // índice i que foi ignorado (null pair)
+
+    listaRodada = new Array(N).fill(null);
+    listaRodada[nullPos] = null;
+    listaRodada[byePos] = String(byeTeamId);
+
+    // Preencher os demais times: confronto[j] → posições (actualI, N-1-actualI)
+    for (let j = 0; j < confrontos.length; j++) {
+      const actualI = j < skipI ? j : j + 1; // pular o índice do null
+      listaRodada[actualI] = String(confrontos[j].time1?.id || confrontos[j].time1);
+      listaRodada[N - 1 - actualI] = String(confrontos[j].time2?.id || confrontos[j].time2);
+    }
   }
 
-  // Passo 2: desfazer (R-1) rotações para obter a lista original
+  // Passo 2: desfazer (R-1) rotações para obter a lista original (canônica)
   const lista = [...listaRodada];
   for (let r = 0; r < rodadaNum - 1; r++) {
     const x = lista.splice(1, 1)[0];
     lista.push(x);
   }
 
-  console.log(`[PONTOS-CORRIDOS-ORQUESTRADOR] Ordem canônica extraída da R${rodadaNum} (admin): ${lista.length} IDs`);
-  return lista;
+  // Filtrar null (slot de bye) — retornar apenas IDs reais de times
+  const result = lista.filter(x => x !== null);
+  console.log(`[PONTOS-CORRIDOS-ORQUESTRADOR] Ordem canônica extraída da R${rodadaNum} (admin): ${result.length} IDs`);
+  return result;
 }
 
 // ✅ FIX: Gera bracket usando a ordem canônica do admin, mapeando IDs para objetos time.
