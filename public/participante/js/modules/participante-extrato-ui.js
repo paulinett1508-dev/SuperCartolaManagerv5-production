@@ -1110,7 +1110,7 @@ function configurarBotaoRefresh() {
 }
 
 // =====================================================================
-// TIMELINE FILTERS
+// TIMELINE FILTERS (v3 - compativel com layout compacto)
 // =====================================================================
 function configurarFiltrosTimeline() {
     const btns = document.querySelectorAll('[data-tl-filter]');
@@ -1120,21 +1120,49 @@ function configurarFiltrosTimeline() {
             btn.classList.add('extrato-timeline__filter-btn--active');
 
             const filter = btn.dataset.tlFilter;
-            const groups = document.querySelectorAll('.extrato-timeline__group');
 
-            groups.forEach(group => {
-                const label = group.querySelector('.extrato-timeline__group-label')?.textContent?.toLowerCase() || '';
+            // Seleciona tanto layout antigo quanto novo
+            const rows = document.querySelectorAll('.extrato-tl__row, .extrato-timeline__group');
+            const rowDetails = document.querySelectorAll('.extrato-tl__row-details');
+
+            rows.forEach((row, idx) => {
                 let show = true;
-                if (filter === 'credito') {
-                    const total = group.querySelector('.extrato-timeline__group-total');
-                    show = total && total.textContent.includes('+');
-                } else if (filter === 'debito') {
-                    const total = group.querySelector('.extrato-timeline__group-total');
-                    show = total && total.textContent.includes('-');
-                } else if (filter === 'acertos') {
-                    show = label.includes('acerto');
+
+                // Novo layout compacto: usa data-saldo
+                if (row.classList.contains('extrato-tl__row')) {
+                    const saldo = parseFloat(row.dataset.saldo) || 0;
+                    const rodada = row.dataset.rodada;
+
+                    if (filter === 'credito') {
+                        show = saldo > 0;
+                    } else if (filter === 'debito') {
+                        show = saldo < 0;
+                    } else if (filter === 'acertos') {
+                        show = !rodada; // Acertos nao tem rodada
+                    }
+
+                    row.style.display = show ? '' : 'none';
+                    // Esconder tambem os detalhes correspondentes
+                    const details = row.nextElementSibling;
+                    if (details && details.classList.contains('extrato-tl__row-details')) {
+                        details.style.display = show ? '' : 'none';
+                        if (!show) details.classList.remove('extrato-tl__row-details--open');
+                    }
                 }
-                group.style.display = show ? '' : 'none';
+                // Layout antigo (fallback)
+                else {
+                    const label = row.querySelector('.extrato-timeline__group-label')?.textContent?.toLowerCase() || '';
+                    if (filter === 'credito') {
+                        const total = row.querySelector('.extrato-timeline__group-total');
+                        show = total && total.textContent.includes('+');
+                    } else if (filter === 'debito') {
+                        const total = row.querySelector('.extrato-timeline__group-total');
+                        show = total && total.textContent.includes('-');
+                    } else if (filter === 'acertos') {
+                        show = label.includes('acerto');
+                    }
+                    row.style.display = show ? '' : 'none';
+                }
             });
         });
     });
