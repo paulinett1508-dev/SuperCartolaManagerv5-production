@@ -530,7 +530,12 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
         ${
             meusDados
                 ? `
-        <div style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.05) 100%); border: 2px solid rgba(255, 215, 0, 0.4); border-radius: 16px; padding: 16px; margin-bottom: 16px;">
+        <div style="background: linear-gradient(135deg, var(--app-surface) 0%, #262626 100%); border-radius: 16px; padding: 16px; margin-bottom: 16px; border: 1px solid rgba(255, 215, 0, 0.3);">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; color: var(--app-gold); font-weight: 600; font-size: 14px;">
+                <span class="material-icons" style="font-size: 20px;">insights</span>
+                <span>Seu Desempenho</span>
+            </div>
+            <div style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.05) 100%); border: 2px solid rgba(255, 215, 0, 0.4); border-radius: 16px; padding: 16px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <div>
                     <div style="font-size: 10px; color: var(--app-gold); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Sua Posição</div>
@@ -556,6 +561,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
             </div>
             `
             }
+            </div>
         </div>
 
         ${
@@ -713,35 +719,6 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
     `;
 
     container.innerHTML = html;
-
-    // ✅ v3.7: Mover o card "Meus Dados" para o container externo ao final
-    setTimeout(() => {
-        const cardDesempenhoContainer = document.getElementById(
-            "luva-ouro-card-desempenho",
-        );
-        const cardMeusDados = container.querySelector(
-            '[style*="linear-gradient(135deg, rgba(255, 215, 0, 0.15)"]',
-        );
-
-        if (cardDesempenhoContainer && cardMeusDados) {
-            // Criar wrapper com estilos do card Seu Desempenho
-            const wrapper = document.createElement("div");
-            wrapper.innerHTML = `
-                <div style="background: linear-gradient(135deg, var(--app-surface) 0%, #262626 100%); border-radius: 16px; padding: 16px; border: 1px solid rgba(255, 215, 0, 0.3);">
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; color: var(--app-gold); font-weight: 600; font-size: 14px;">
-                        <span class="material-icons" style="font-size: 20px;">insights</span>
-                        <span>Seu Desempenho</span>
-                    </div>
-                    ${cardMeusDados.innerHTML}
-                </div>
-            `;
-            cardDesempenhoContainer.innerHTML = "";
-            cardDesempenhoContainer.appendChild(wrapper);
-
-            // Remover o card original
-            cardMeusDados.remove();
-        }
-    }, 100);
 }
 
 if (window.Log) Log.info("[PARTICIPANTE-LUVA-OURO] Módulo v4.0 carregado (Cache-First IndexedDB)");
