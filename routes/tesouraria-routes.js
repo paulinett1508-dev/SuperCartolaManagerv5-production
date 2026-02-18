@@ -31,7 +31,7 @@
  * ✅ v2.20.0: AUTO-QUITAÇÃO para temporadas anteriores
  *   - Quando saldo zera após acerto em temporada < CURRENT_SEASON, marca como quitado
  *   - Resposta inclui flag autoQuitacao com mensagem para o admin
- * ✅ v2.19.0: Filtrar participantes por inscrição para temporadas >= 2026
+ * ✅ v2.19.0: Filtrar participantes por inscrição para temporadas >= CURRENT_SEASON
  *   - Para 2026+, exibe apenas participantes com status 'renovado' ou 'novo'
  *   - Temporadas anteriores (2025) mantêm comportamento histórico (todos)
  * ✅ v2.18.0: Dados históricos de 2025 preservados (campos + extratos)
@@ -133,11 +133,11 @@ router.get("/participantes", verificarAdmin, async (req, res) => {
             ExtratoFinanceiroCache.find({ time_id: { $in: allTimeIds }, temporada: temporadaNum }).lean(),
             FluxoFinanceiroCampos.find({ timeId: { $in: allTimeIds.map(String) }, temporada: temporadaNum }).lean(),
             AcertoFinanceiro.find({ temporada: temporadaNum, ativo: true }).lean(),
-            temporadaNum >= 2026
+            temporadaNum >= CURRENT_SEASON
                 ? InscricaoTemporada.find({ temporada: temporadaNum }).lean()
                 : Promise.resolve([]),
             // ✅ v3.2 FIX BUG-001: Buscar ajustes dinâmicos (2026+)
-            temporadaNum >= 2026
+            temporadaNum >= CURRENT_SEASON
                 ? AjusteFinanceiro.find({ temporada: temporadaNum, ativo: true }).lean()
                 : Promise.resolve([])
         ]);
@@ -234,7 +234,7 @@ router.get("/participantes", verificarAdmin, async (req, res) => {
                 if (apenasTransacoesEspeciais) {
                     // ✅ v3.3 FIX BUG-002: Para 2026+, NÃO usar saldo_consolidado direto
                     // saldo_consolidado já inclui inscrição/legado; aplicarAjusteInscricaoBulk reaplicaria
-                    if (temporadaNum >= 2026) {
+                    if (temporadaNum >= CURRENT_SEASON) {
                         saldoConsolidado = 0;
                         // Somar transações que aplicarAjusteInscricaoBulk NÃO trata
                         historico.forEach(t => {
@@ -260,7 +260,7 @@ router.get("/participantes", verificarAdmin, async (req, res) => {
                 let saldoAnteriorTransferido = 0;
                 let dividaAnterior = 0;
 
-                if (temporadaNum >= 2026) {
+                if (temporadaNum >= CURRENT_SEASON) {
                     const inscricaoData = inscricoesMapAll.get(key);
                     const ajusteInsc = aplicarAjusteInscricaoBulk(saldoConsolidado, inscricaoData, historico);
                     saldoConsolidado = ajusteInsc.saldoAjustado;
@@ -272,7 +272,7 @@ router.get("/participantes", verificarAdmin, async (req, res) => {
 
                 // ✅ v3.2 FIX BUG-001: Aplicar AjusteFinanceiro (ajustes dinâmicos 2026+)
                 let saldoAjustes = 0;
-                if (temporadaNum >= 2026) {
+                if (temporadaNum >= CURRENT_SEASON) {
                     const ajustesList = ajustesFinMap.get(key) || [];
                     saldoAjustes = ajustesList.reduce((acc, a) => acc + (a.valor || 0), 0);
                     saldoConsolidado += saldoAjustes;
@@ -445,14 +445,14 @@ router.get("/liga/:ligaId", verificarAdmin, async (req, res) => {
         const temporadaNum = Number(temporada);
         const ligaIdStr = String(ligaId);
 
-        // ✅ v2.20 FIX: Para temporadas >= 2026, usar dados de inscricoestemporada como fonte OFICIAL
+        // ✅ v2.20 FIX: Para temporadas >= CURRENT_SEASON, usar dados de inscricoestemporada como fonte OFICIAL
         // Isso sincroniza com o módulo Participantes (que também usa inscricoestemporada)
         // Temporadas anteriores (2025) usam liga.participantes (comportamento histórico)
         let participantesFiltrados = liga.participantes || [];
         let totalParticipantesLiga = participantesFiltrados.length;
         let inscricoesMap = new Map(); // Mapa para acessar dados completos das inscrições
 
-        if (temporadaNum >= 2026) {
+        if (temporadaNum >= CURRENT_SEASON) {
             const inscricoesAtivas = await InscricaoTemporada.find({
                 liga_id: new mongoose.Types.ObjectId(ligaId),
                 temporada: temporadaNum,
@@ -531,7 +531,7 @@ router.get("/liga/:ligaId", verificarAdmin, async (req, res) => {
             }).lean(),
 
             // 4. ✅ v3.2 FIX BUG-001: Todos os ajustes dinâmicos da liga (2026+)
-            temporadaNum >= 2026
+            temporadaNum >= CURRENT_SEASON
                 ? AjusteFinanceiro.find({
                     liga_id: ligaIdStr,
                     temporada: temporadaNum,
@@ -634,7 +634,7 @@ router.get("/liga/:ligaId", verificarAdmin, async (req, res) => {
 
             if (apenasTransacoesEspeciais) {
                 // ✅ v3.3 FIX BUG-002: Para 2026+, NÃO usar saldo_consolidado direto
-                if (temporadaNum >= 2026) {
+                if (temporadaNum >= CURRENT_SEASON) {
                     saldoConsolidado = 0;
                     historico.forEach(t => {
                         if (t.tipo && t.tipo !== 'INSCRICAO_TEMPORADA' && t.tipo !== 'SALDO_TEMPORADA_ANTERIOR') {
@@ -654,7 +654,7 @@ router.get("/liga/:ligaId", verificarAdmin, async (req, res) => {
 
             // ✅ v3.0: Aplicar ajuste de inscrição usando dados pré-carregados (sem N+1)
             let inscricaoInfo = { taxaInscricao: 0, pagouInscricao: true, saldoAnteriorTransferido: 0 };
-            if (temporadaNum >= 2026) {
+            if (temporadaNum >= CURRENT_SEASON) {
                 const inscricaoData = inscricoesMap.get(timeId);
                 const ajusteInsc = aplicarAjusteInscricaoBulk(saldoConsolidado, inscricaoData, historico);
                 saldoConsolidado = ajusteInsc.saldoAjustado;
@@ -663,7 +663,7 @@ router.get("/liga/:ligaId", verificarAdmin, async (req, res) => {
 
             // ✅ v3.2 FIX BUG-001: Aplicar AjusteFinanceiro (ajustes dinâmicos 2026+)
             let saldoAjustes = 0;
-            if (temporadaNum >= 2026) {
+            if (temporadaNum >= CURRENT_SEASON) {
                 const ajustesList = ajustesFinMap.get(timeId) || [];
                 saldoAjustes = ajustesList.reduce((acc, a) => acc + (a.valor || 0), 0);
                 saldoConsolidado += saldoAjustes;
@@ -868,7 +868,7 @@ router.get("/participante/:ligaId/:timeId", verificarAdmin, async (req, res) => 
                 temporada: tempNum + 1
             }).lean(),
             // ✅ v2.15: Buscar ajustes dinâmicos (para 2026+)
-            tempNum >= 2026
+            tempNum >= CURRENT_SEASON
                 ? AjusteFinanceiro.listarPorParticipante(ligaId, timeId, tempNum)
                 : Promise.resolve([])
         ]);
@@ -1025,7 +1025,7 @@ router.get("/participante/:ligaId/:timeId", verificarAdmin, async (req, res) => 
                 legado_manual: inscricaoProxima.legado_manual
             } : null,
             // ✅ v2.15: Ajustes dinâmicos (2026+)
-            ajustes: tempNum >= 2026 ? ajustes : [],
+            ajustes: tempNum >= CURRENT_SEASON ? ajustes : [],
             ajustes_total: saldo.saldoAjustes || 0
         });
     } catch (error) {
@@ -1176,7 +1176,7 @@ router.post("/acerto", verificarAdmin, async (req, res) => {
         // Quando admin registra pagamento de inscrição, atualizar flag pagou_inscricao
         // =========================================================================
         const tempNum = parseInt(temporada);
-        if (tipo === "pagamento" && tempNum >= 2026) {
+        if (tipo === "pagamento" && tempNum >= CURRENT_SEASON) {
             // ✅ v3.1 FIX: Usar APENAS flag explícito ehPagamentoInscricao
             // Bug anterior: detecção por texto na descrição causava falso-positivos
             // (ex: "Ajuste referente à inscrição anterior" triggava atualização indevida)
@@ -1385,11 +1385,11 @@ router.get("/resumo", verificarAdmin, async (req, res) => {
             ExtratoFinanceiroCache.find({ time_id: { $in: allTimeIds }, temporada: temporadaNum }).lean(),
             FluxoFinanceiroCampos.find({ timeId: { $in: allTimeIds.map(String) }, temporada: temporadaNum }).lean(),
             AcertoFinanceiro.find({ temporada: temporadaNum, ativo: true }).lean(),
-            temporadaNum >= 2026
+            temporadaNum >= CURRENT_SEASON
                 ? InscricaoTemporada.find({ temporada: temporadaNum }).lean()
                 : Promise.resolve([]),
             // ✅ v3.2 FIX BUG-001: Buscar ajustes dinâmicos (2026+)
-            temporadaNum >= 2026
+            temporadaNum >= CURRENT_SEASON
                 ? AjusteFinanceiro.find({ temporada: temporadaNum, ativo: true }).lean()
                 : Promise.resolve([])
         ]);
@@ -1458,7 +1458,7 @@ router.get("/resumo", verificarAdmin, async (req, res) => {
 
                 if (apenasTransacoesEspeciais) {
                     // ✅ v3.3 FIX BUG-002: Para 2026+, NÃO usar saldo_consolidado direto
-                    if (temporadaNum >= 2026) {
+                    if (temporadaNum >= CURRENT_SEASON) {
                         saldoConsolidado = 0;
                         historico.forEach(t => {
                             if (t.tipo && t.tipo !== 'INSCRICAO_TEMPORADA' && t.tipo !== 'SALDO_TEMPORADA_ANTERIOR') {
@@ -1475,14 +1475,14 @@ router.get("/resumo", verificarAdmin, async (req, res) => {
                 }
 
                 // Aplicar inscrição (2026+)
-                if (temporadaNum >= 2026) {
+                if (temporadaNum >= CURRENT_SEASON) {
                     const inscricaoData = inscricoesMap.get(key);
                     const ajusteInsc = aplicarAjusteInscricaoBulk(saldoConsolidado, inscricaoData, historico);
                     saldoConsolidado = ajusteInsc.saldoAjustado;
                 }
 
                 // ✅ v3.2 FIX BUG-001: Aplicar AjusteFinanceiro (ajustes dinâmicos 2026+)
-                if (temporadaNum >= 2026) {
+                if (temporadaNum >= CURRENT_SEASON) {
                     const ajustesList = ajustesFinMap.get(key) || [];
                     const saldoAjustes = ajustesList.reduce((acc, a) => acc + (a.valor || 0), 0);
                     saldoConsolidado += saldoAjustes;

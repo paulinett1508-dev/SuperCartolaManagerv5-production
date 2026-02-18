@@ -122,7 +122,7 @@ export async function calcularSaldoParticipante(ligaId, timeId, temporada = CURR
 
     // =========================================================================
     // ✅ v2.0.0: INTEGRAR InscricaoTemporada (inscrição não paga + saldo anterior)
-    // Para temporada >= 2026, se a inscrição não foi paga E não está já no
+    // Para temporada >= CURRENT_SEASON, se a inscrição não foi paga E não está já no
     // historico_transacoes, deduzir a taxa e somar saldo transferido.
     // =========================================================================
     let taxaInscricaoValor = 0;
@@ -131,7 +131,7 @@ export async function calcularSaldoParticipante(ligaId, timeId, temporada = CURR
     let dividaAnterior = 0;
 
     const tempNum = Number(temporada);
-    if (tempNum >= 2026) {
+    if (tempNum >= CURRENT_SEASON) {
         const inscricaoJaNoCache = cache?.historico_transacoes?.some(
             t => t.tipo === 'INSCRICAO_TEMPORADA'
         );
