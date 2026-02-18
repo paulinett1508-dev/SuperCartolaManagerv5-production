@@ -78,7 +78,6 @@ export const PAGINAS_ADMIN = [
   "/dashboard-saude.html",
   "/dashboard-analytics.html",
   "/admin-analises-ia.html",
-  "/admin-validacao-migracao.html",
   "/modo-manutencao-avancado.html",
   "/migrar-localstorage-mongodb.html",
   "/wizard-primeira-liga.html",

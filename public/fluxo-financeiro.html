@@ -9,11 +9,12 @@
         <link rel="stylesheet" href="css/_admin-tokens.css" />
         <link rel="stylesheet" href="style.css" />
         <link rel="stylesheet" href="css/modules/dashboard-redesign.css" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Russo+One&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" href="css/modules/fluxo-financeiro.css" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Russo+One&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
         <style>
             .fluxo-page {
-                background: #121212;
+                background: var(--surface-bg);
                 min-height: 100vh;
             }
 
@@ -21,12 +22,13 @@
                 padding: 20px 16px;
             }
 
+            /* ===== HEADER LISTA DE LIGAS ===== */
             .fluxo-header {
                 background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
-                border-radius: 10px;
+                border-radius: var(--radius-md);
                 padding: 18px 20px;
                 margin-bottom: 24px;
-                border: 1px solid #10b981;
+                border: 1px solid var(--color-success);
                 position: relative;
                 overflow: hidden;
             }
@@ -38,7 +40,7 @@
                 left: 0;
                 right: 0;
                 height: 3px;
-                background: linear-gradient(90deg, #10b981, #34d399, #10b981);
+                background: linear-gradient(90deg, var(--color-success), var(--color-success-light), var(--color-success));
             }
 
             .fluxo-header h1 {
@@ -47,21 +49,22 @@
                 gap: 12px;
                 font-size: 1.5rem;
                 font-weight: 700;
-                color: #ffffff;
+                color: var(--text-primary);
                 margin: 0 0 8px 0;
             }
 
             .fluxo-header h1 .material-icons {
                 font-size: 28px;
-                color: #10b981;
+                color: var(--color-success);
             }
 
             .fluxo-header p {
-                color: #9ca3af;
+                color: var(--text-muted);
                 font-size: 0.9rem;
                 margin: 0;
             }
 
+            /* ===== GRID DE LIGAS ===== */
             .ligas-grid {
                 display: grid;
                 grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -72,7 +75,7 @@
                 background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
                 border-radius: 12px;
                 padding: 20px;
-                border: 1px solid #333;
+                border: 1px solid var(--border-color);
                 cursor: pointer;
                 transition: all 0.3s ease;
                 text-decoration: none;
@@ -82,7 +85,7 @@
             }
 
             .liga-card:hover {
-                border-color: #10b981;
+                border-color: var(--color-success);
                 transform: translateY(-2px);
                 box-shadow: 0 8px 20px rgba(16, 185, 129, 0.15);
             }
@@ -91,7 +94,7 @@
                 width: 56px;
                 height: 56px;
                 border-radius: 12px;
-                background: #2a2a2a;
+                background: var(--surface-card-elevated);
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -107,7 +110,7 @@
 
             .liga-card-logo .material-icons {
                 font-size: 28px;
-                color: #10b981;
+                color: var(--color-success);
             }
 
             .liga-card-info {
@@ -117,7 +120,7 @@
             .liga-card-name {
                 font-size: 1.1rem;
                 font-weight: 600;
-                color: #ffffff;
+                color: var(--text-primary);
                 margin-bottom: 4px;
             }
 
@@ -125,7 +128,7 @@
                 display: flex;
                 gap: 12px;
                 font-size: 0.8rem;
-                color: #9ca3af;
+                color: var(--text-muted);
             }
 
             .liga-card-stats span {
@@ -139,21 +142,22 @@
             }
 
             .liga-card-arrow {
-                color: #6b7280;
+                color: var(--text-disabled);
                 transition: color 0.3s ease;
             }
 
             .liga-card:hover .liga-card-arrow {
-                color: #10b981;
+                color: var(--color-success);
             }
 
+            /* ===== ESTADOS ===== */
             .loading-state {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
                 padding: 60px 20px;
-                color: #9ca3af;
+                color: var(--text-muted);
             }
 
             .loading-state .material-icons {
@@ -168,14 +172,87 @@
                 align-items: center;
                 justify-content: center;
                 padding: 60px 20px;
-                color: #9ca3af;
+                color: var(--text-muted);
                 text-align: center;
             }
 
             .empty-state .material-icons {
                 font-size: 48px;
                 margin-bottom: 16px;
-                color: #6b7280;
+                color: var(--text-disabled);
+            }
+
+            /* ===== HEADER LIGA ESPECÍFICA ===== */
+            .liga-header {
+                background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
+                border-radius: var(--radius-md);
+                padding: 16px 20px;
+                margin-bottom: 20px;
+                border: 1px solid var(--color-success);
+                display: flex;
+                align-items: center;
+                gap: 16px;
+            }
+
+            .liga-header-back {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                border-radius: 8px;
+                background: var(--surface-card-elevated);
+                color: var(--text-muted);
+                cursor: pointer;
+                transition: all 0.2s ease;
+                text-decoration: none;
+            }
+
+            .liga-header-back:hover {
+                background: var(--color-success);
+                color: var(--text-primary);
+            }
+
+            .liga-header-info {
+                flex: 1;
+            }
+
+            .liga-header-info h1 {
+                font-size: 1.3rem;
+                font-weight: 700;
+                color: var(--text-primary);
+                margin: 0 0 4px 0;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .liga-header-info h1 .material-icons {
+                font-size: 24px;
+                color: var(--color-success);
+            }
+
+            .liga-header-info p {
+                color: var(--text-muted);
+                font-size: 0.85rem;
+                margin: 0;
+            }
+
+            /* ===== MÓDULO FLUXO FINANCEIRO ===== */
+            #fluxo-financeiro-module {
+                display: none;
+            }
+
+            #fluxo-financeiro-module.active {
+                display: block;
+            }
+
+            #ligas-list-view {
+                display: block;
+            }
+
+            #ligas-list-view.hidden {
+                display: none;
             }
         </style>
     </head>
@@ -187,26 +264,63 @@
             <!-- Main Content -->
             <main class="app-main fluxo-page">
                 <div class="fluxo-content">
-                    <header class="fluxo-header">
-                        <h1>
-                            <span class="material-icons">account_balance_wallet</span>
-                            Fluxo Financeiro
-                        </h1>
-                        <p>Selecione uma liga para gerenciar os saldos financeiros dos participantes.</p>
-                    </header>
+                    <!-- VISÃO 1: Lista de Ligas -->
+                    <div id="ligas-list-view">
+                        <header class="fluxo-header">
+                            <h1>
+                                <span class="material-icons">account_balance_wallet</span>
+                                Fluxo Financeiro
+                            </h1>
+                            <p>Selecione uma liga para gerenciar os saldos financeiros dos participantes.</p>
+                        </header>
 
-                    <div id="ligasGrid" class="ligas-grid">
-                        <div class="loading-state">
-                            <span class="material-icons">sync</span>
-                            <span>Carregando ligas...</span>
+                        <div id="ligasGrid" class="ligas-grid">
+                            <div class="loading-state">
+                                <span class="material-icons">sync</span>
+                                <span>Carregando ligas...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VISÃO 2: Módulo Fluxo Financeiro de Liga Específica -->
+                    <div id="fluxo-financeiro-module">
+                        <!-- Header com botão voltar -->
+                        <div class="liga-header">
+                            <a href="fluxo-financeiro.html" class="liga-header-back" title="Voltar para lista de ligas">
+                                <span class="material-icons">arrow_back</span>
+                            </a>
+                            <div class="liga-header-info">
+                                <h1>
+                                    <span class="material-icons">account_balance_wallet</span>
+                                    <span id="liga-nome">Carregando...</span>
+                                </h1>
+                                <p>Gestão financeira dos participantes</p>
+                            </div>
+                        </div>
+
+                        <!-- Container do módulo (mesmo do fronts/fluxo-financeiro.html) -->
+                        <div id="fluxo-financeiro" class="module-content module-dashboard" data-admin-mode="true">
+                            <div id="fluxoFinanceiroButtons" class="fluxo-financeiro-selector"></div>
+                            <div id="fluxoFinanceiroContent" class="fluxo-financeiro-content"></div>
+                            <div id="fluxoFinanceiroInicial" class="fluxo-financeiro-inicial" style="display: none">
+                                <div class="fluxo-financeiro-loading">
+                                    <div class="loading-spinner"></div>
+                                    <p>Carregando sistema financeiro...</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </main>
         </div>
 
-        <script>
-            // Carregar sidebar (mesmo padrao das outras paginas)
+        <script type="module">
+            // ===== ESTADO GLOBAL =====
+            const urlParams = new URLSearchParams(window.location.search);
+            const ligaId = urlParams.get('liga');
+            const modoLigaEspecifica = !!ligaId;
+
+            // ===== CARREGAR SIDEBAR =====
             async function carregarLayout() {
                 try {
                     const response = await fetch('layout.html');
@@ -228,7 +342,6 @@
                         }
                     });
 
-                    // Inicializar AccordionManager apos scripts carregados
                     setTimeout(() => {
                         if (window.AccordionManager && !window.AccordionManager._initialized) {
                             window.AccordionManager.init();
@@ -242,11 +355,7 @@
                 }
             }
 
-            carregarLayout();
-
-            // Logos das ligas - dinâmico via campo liga.logo (sem hardcode)
-
-            // Carregar ligas
+            // ===== MODO LISTA DE LIGAS =====
             async function carregarLigas() {
                 const grid = document.getElementById('ligasGrid');
 
@@ -265,8 +374,8 @@
                     }
 
                     grid.innerHTML = ligas.map(liga => {
-                        const ligaId = liga._id || liga.id;
-                        const logoUrl = liga.logo || null;  // ✅ Dinâmico via banco
+                        const id = liga._id || liga.id;
+                        const logoUrl = liga.logo || null;
                         const timesCount = liga.times?.length || 0;
 
                         const logoHtml = logoUrl
@@ -274,7 +383,7 @@
                             : `<span class="material-icons">emoji_events</span>`;
 
                         return `
-                            <a href="detalhe-liga.html?id=${ligaId}&section=fluxo-financeiro" class="liga-card">
+                            <a href="fluxo-financeiro.html?liga=${id}" class="liga-card">
                                 <div class="liga-card-logo">
                                     ${logoHtml}
                                 </div>
@@ -295,12 +404,12 @@
                     console.error('Erro ao carregar ligas:', error);
                     grid.innerHTML = `
                         <div class="empty-state">
-                            <span class="material-icons" style="color: #ef4444;">error</span>
+                            <span class="material-icons" style="color: var(--color-danger);">error</span>
                             <p>Erro ao carregar ligas</p>
-                            <button onclick="carregarLigas()" style="
+                            <button onclick="location.reload()" style="
                                 margin-top: 12px;
                                 padding: 8px 16px;
-                                background: #10b981;
+                                background: var(--color-success);
                                 color: white;
                                 border: none;
                                 border-radius: 6px;
@@ -312,42 +421,68 @@
                 }
             }
 
-            // ✅ Guards SPA para evitar dupla inicialização
-            if (!window.__fluxo_financeiro_state) {
-                window.__fluxo_financeiro_state = {
-                    domBound: false,
-                    spaBound: false,
-                    readyChecked: false
-                };
-            }
-
-            // Inicializar
-            if (!window.__fluxo_financeiro_state.domBound) {
-                window.__fluxo_financeiro_state.domBound = true;
-                document.addEventListener('DOMContentLoaded', () => {
-                    if (!window.location.pathname.includes('fluxo-financeiro.html')) return;
-                    carregarLigas();
-                });
-            }
-
-            // ✅ FIX: Reinicializar após navegação SPA
-            if (!window.__fluxo_financeiro_state.spaBound) {
-                window.__fluxo_financeiro_state.spaBound = true;
-                window.addEventListener('spa:navigated', (e) => {
-                    const { pageName } = e.detail || {};
-                    if (pageName === 'fluxo-financeiro.html') {
-                        console.log('[FLUXO-FINANCEIRO] Reinicializando após navegação SPA...');
-                        carregarLigas();
-                    }
-                });
-            }
-
-            // ✅ FIX: Inicializar se DOM já pronto (navegação SPA)
-            if (!window.__fluxo_financeiro_state.readyChecked) {
-                window.__fluxo_financeiro_state.readyChecked = true;
-                if (document.readyState !== 'loading' && window.location.pathname.includes('fluxo-financeiro.html')) {
-                    carregarLigas();
+            // ===== MODO LIGA ESPECÍFICA =====
+            async function carregarNomeLiga(id) {
+                try {
+                    const response = await fetch(`/api/ligas/${id}`);
+                    const liga = await response.json();
+                    document.getElementById('liga-nome').textContent = liga.nome || 'Liga';
+                    document.title = `Fluxo Financeiro - ${liga.nome}`;
+                } catch (error) {
+                    console.error('Erro ao carregar nome da liga:', error);
+                    document.getElementById('liga-nome').textContent = 'Liga';
                 }
+            }
+
+            async function inicializarModuloFluxo() {
+                console.log('[FLUXO-STANDALONE] Carregando módulo para liga:', ligaId);
+
+                // Carregar nome da liga
+                carregarNomeLiga(ligaId);
+
+                // Importar módulo fluxo-financeiro
+                try {
+                    const fluxoModule = await import('./js/fluxo-financeiro.js?v8.0');
+                    console.log('[FLUXO-STANDALONE] ✅ Módulo carregado');
+
+                    // Inicializar o módulo
+                    if (typeof window.inicializarFluxoFinanceiro === 'function') {
+                        await window.inicializarFluxoFinanceiro();
+                    } else if (typeof fluxoModule.inicializarFluxoFinanceiro === 'function') {
+                        await fluxoModule.inicializarFluxoFinanceiro();
+                    }
+                } catch (error) {
+                    console.error('[FLUXO-STANDALONE] Erro ao carregar módulo:', error);
+                    document.getElementById('fluxoFinanceiroContent').innerHTML = `
+                        <div class="empty-state">
+                            <span class="material-icons" style="color: var(--color-danger);">error</span>
+                            <p>Erro ao carregar módulo financeiro</p>
+                            <p style="font-size: 0.8rem; color: var(--text-disabled);">${error.message}</p>
+                        </div>
+                    `;
+                }
+            }
+
+            // ===== INICIALIZAÇÃO =====
+            async function init() {
+                await carregarLayout();
+
+                if (modoLigaEspecifica) {
+                    // Modo: Liga Específica
+                    document.getElementById('ligas-list-view').classList.add('hidden');
+                    document.getElementById('fluxo-financeiro-module').classList.add('active');
+                    await inicializarModuloFluxo();
+                } else {
+                    // Modo: Lista de Ligas
+                    await carregarLigas();
+                }
+            }
+
+            // Iniciar
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
             }
         </script>
     </body>
