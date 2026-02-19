@@ -1148,21 +1148,43 @@ _Reavaliar periodicamente - Ideias interessantes mas sem cronograma_
   - **Complexidade:** Média (~12h total)
   - **Status:** Backlog - Avaliar API primeiro
 
-- [ ] [FEAT-019] **Tabelas de Competições Oficiais 2026** 🏆
-  - **Descrição:** Implementar tabelas de classificação e jogos das competições foco da temporada 2026
+- [ ] [FEAT-019] **Landing Pages de Competições 2026** 🏆
+  - **Descrição:** Landing pages dedicadas por competição, acessíveis via botão "Ver mais" nas faixas da Home
+  - **Arquitetura - Faixa na Home + Landing Page:**
+    ```
+    HOME (widgets permanentes na Home)
+     ├─ Faixa "Copa do Mundo 2026" (colapsável, jogos/agenda)
+     │    └─ [Ver mais] → Landing Page Copa do Mundo
+     │
+     ├─ Faixa "Libertadores 2026" (colapsável, notícias RSS) ← JÁ IMPLEMENTADO
+     │    └─ [Ver mais] → Landing Page Libertadores
+     │
+     └─ Faixa "Jogos do Dia" (colapsável, ao vivo)
+    ```
+    - As faixas na Home **permanecem como widgets resumidos** (já existem)
+    - Cada competição ganha **sua landing page própria** (não uma genérica)
+    - Botão "Ver mais" na faixa navega via SPA para a landing page
   - **Competições:**
-    - 🇧🇷 **Brasileirão Série A** - Tabela de classificação, rodadas, artilharia
     - 🌎 **Copa Libertadores** - Fase de grupos, mata-mata, classificação
     - 🏆 **Copa do Mundo de Seleções** - Grupos, mata-mata, calendário completo
-  - **Funcionalidades por competição:**
-    - Tabela de classificação atualizada
+    - 🇧🇷 **Brasileirão Série A** - Tabela de classificação, rodadas, artilharia
+  - **Funcionalidades por landing page:**
+    - Tabela de classificação/grupos atualizada
     - Próximos jogos e resultados
     - Artilheiros da competição
+    - Notícias em tempo real (Google News RSS - já integrado para Libertadores)
     - Destaque de times com jogadores escalados na liga
-    - Filtro por time favorito
-  
+  - **Status atual (fev/2026):**
+    - [x] Faixa Libertadores na Home com notícias Google News RSS clicáveis
+    - [x] Faixa Copa do Mundo na Home (jogos/agenda)
+    - [x] Faixa Jogos do Dia na Home (ao vivo)
+    - [ ] Landing page Libertadores (pós-sorteio dos grupos)
+    - [ ] Landing page Copa do Mundo
+    - [ ] Landing page Brasileirão
+    - [ ] Botão "Ver mais" nas faixas da Home
+
   - **🛠️ ROADMAP DE IMPLEMENTAÇÃO:**
-  
+
     **FASE 1: Modelo de Dados** (~2h)
     - [ ] Criar `models/Competicao.js`:
       ```javascript
@@ -1196,16 +1218,16 @@ _Reavaliar periodicamente - Ideias interessantes mas sem cronograma_
         atualizado_em: Date
       }
       ```
-    
+
     **FASE 2: Service de Dados** (~3h)
     - [ ] Criar `services/competicoesService.js`
     - [ ] Integrar com API-Football (mesma do FEAT-018):
-      - Brasileirão: `league_id = 71`
       - Libertadores: `league_id = 13`
       - Copa do Mundo: `league_id = 1` (quando disponível)
+      - Brasileirão: `league_id = 71`
     - [ ] Cache agressivo: tabelas mudam 1x por rodada
     - [ ] Cron job para atualizar tabelas a cada 6h
-    
+
     **FASE 3: Backend Routes** (~2h)
     - [ ] Criar `routes/competicoes-routes.js`:
       - `GET /api/competicoes` - Lista competições ativas
@@ -1213,83 +1235,74 @@ _Reavaliar periodicamente - Ideias interessantes mas sem cronograma_
       - `GET /api/competicoes/:id/jogos` - Jogos da competição
       - `GET /api/competicoes/:id/artilheiros` - Top 10 artilheiros
       - `GET /api/competicoes/:id/rodada/:numero` - Jogos de uma rodada
-    
-    **FASE 4: Frontend - Brasileirão** (~4h)
-    - [ ] Criar `public/participante/fronts/competicoes.html`
-    - [ ] Criar `public/participante/js/modules/participante-competicoes.js`
-    - [ ] Tabela de classificação estilo GE/ESPN:
-      ```
-      ┌────┬─────────────────┬───┬───┬───┬───┬────┐
-      │ #  │ Time            │ P │ J │ V │ SG │ %  │
-      ├────┼─────────────────┼───┼───┼───┼───┼────┤
-      │ 1  │ 🔴 Flamengo     │ 45│ 20│ 14│ +18│ 75%│
-      │ 2  │ 🟢 Palmeiras    │ 42│ 20│ 13│ +15│ 70%│
-      │ ...│                 │   │   │   │    │    │
-      └────┴─────────────────┴───┴───┴───┴───┴────┘
-      ```
-    - [ ] Cores por zona: G4 (verde), rebaixamento (vermelho), Libertadores (azul)
-    - [ ] Clicar no time → ver jogos e detalhes
-    
-    **FASE 5: Frontend - Copa do Mundo** (~4h)
-    - [ ] Layout especial para grupos + mata-mata:
-      ```
-      ┌─────────────────────────────────────────┐
-      │ 🏆 COPA DO MUNDO 2026                   │
-      ├─────────────────────────────────────────┤
-      │ GRUPO A          │ GRUPO B              │
-      │ 1. 🇧🇷 Brasil    │ 1. 🇫🇷 França       │
-      │ 2. 🇩🇪 Alemanha  │ 2. 🇪🇸 Espanha      │
-      │ ...              │ ...                  │
-      ├─────────────────────────────────────────┤
-      │ MATA-MATA (quando disponível)           │
-      │ [Bracket visual tipo NCAA]              │
-      └─────────────────────────────────────────┘
-      ```
+
+    **FASE 4: Landing Page - Libertadores** (~4h)
+    - [ ] Criar `public/participante/fronts/libertadores.html`
+    - [ ] Criar `public/participante/js/modules/participante-libertadores.js`
+    - [ ] Registrar rota `libertadores` em `participante-navigation.js`
+    - [ ] Tabela de grupos (8 grupos x 4 times)
+    - [ ] Próximos jogos e resultados
+    - [ ] Bracket interativo para mata-mata
+    - [ ] Seção de notícias (reutilizar RSS já implementado)
+    - [ ] Adicionar botão "Ver mais" na faixa Libertadores da Home
+    - [ ] Usar tokens `--app-liberta-*` (já existem em `_app-tokens.css`)
+
+    **FASE 5: Landing Page - Copa do Mundo** (~4h)
+    - [ ] Criar `public/participante/fronts/copa-mundo.html`
+    - [ ] Criar `public/participante/js/modules/participante-copa-mundo.js`
+    - [ ] Registrar rota `copa-mundo` em `participante-navigation.js`
+    - [ ] Layout de grupos (12 grupos x 4 seleções)
     - [ ] Bracket interativo para mata-mata
     - [ ] Calendário de jogos com fuso horário local
-    
-    **FASE 6: Integração com Liga Cartola** (~2h)
+    - [ ] Adicionar botão "Ver mais" na faixa Copa do Mundo da Home
+
+    **FASE 6: Landing Page - Brasileirão** (~4h)
+    - [ ] Criar `public/participante/fronts/brasileirao.html`
+    - [ ] Criar `public/participante/js/modules/participante-brasileirao.js`
+    - [ ] Registrar rota `brasileirao` em `participante-navigation.js`
+    - [ ] Tabela de classificação estilo GE/ESPN (20 times)
+    - [ ] Cores por zona: G4 (verde), rebaixamento (vermelho), Libertadores (azul), Sul-Americana (laranja)
+    - [ ] Clicar no time → ver jogos e detalhes
+    - [ ] Artilharia do campeonato
+
+    **FASE 7: Integração com Liga Cartola** (~2h)
     - [ ] Destacar times que têm jogadores escalados na liga
     - [ ] Cruzar `clube_id` dos jogadores escalados com times da tabela
     - [ ] "Flamengo tem 5 jogadores escalados na sua liga"
     - [ ] Filtro "Mostrar apenas times relevantes"
-    
-    **FASE 7: Widget na Sidebar** (~1h)
-    - [ ] Mini-tabela na sidebar do painel
-    - [ ] Top 4 + time favorito do participante
-    - [ ] Atualização automática
-  
+
   - **⚽ INTEGRAÇÃO CARTOLA FC:**
     - **Mapeamento Clube/Time:** Relacionar `clube_id` do Cartola com times das competições
-    - **Destaque inteligente:** 
+    - **Destaque inteligente:**
       - Mostrar quantos jogadores de cada time estão escalados na liga
       - "Você tem interesse no jogo Flamengo x Palmeiras - 8 jogadores escalados!"
     - **Artilheiros do Cartola vs Artilheiros do Brasileirão:**
       - Comparar top artilheiros do fantasy com artilheiros reais
       - "Gabigol: 15 gols no Brasileirão, 45 gols no Cartola da liga"
-    - **Impacto na rodada:** 
+    - **Impacto na rodada:**
       - "Se o Flamengo vencer, 3 participantes ganham bônus de SG"
-  
+
   - **Tecnologias:**
     - **API-Football** (mesmo do FEAT-018 - compartilhar quota)
     - **MongoDB** para cache persistente de tabelas
     - **Cron jobs** (node-cron já usado no projeto)
     - **CSS Grid** para layouts de tabela
-  
+    - **Google News RSS** (já integrado para notícias Libertadores)
+
   - **IDs das Competições (API-Football):**
-    - Brasileirão Série A: `71`
     - Copa Libertadores: `13`
     - Copa do Mundo: `1` (verificar quando houver dados 2026)
-  
+    - Brasileirão Série A: `71`
+
   - **Custos:**
     - Compartilha quota com FEAT-018
     - ~20-30 requests/dia para manter tabelas atualizadas
-  
+
   - **🤖 MCPs RECOMENDADOS:**
-    - **Perplexity MCP** ⭐ - Consultas atualizadas sobre competições:
-      - "tabela atualizada do brasileirão 2026"
-      - "grupos da copa do mundo 2026"
+    - **Perplexity MCP** - Consultas atualizadas sobre competições:
       - "classificação da libertadores 2026"
+      - "grupos da copa do mundo 2026"
+      - "tabela atualizada do brasileirão 2026"
     - **@anthropic/fetch** - Integração com API-Football para dados estruturados
     - **@anthropic/brave-search** - Buscar informações de artilheiros, estatísticas
     - **@anthropic/puppeteer** - Scraping de tabelas do GE/ESPN/Flashscore como backup
@@ -1297,10 +1310,9 @@ _Reavaliar periodicamente - Ideias interessantes mas sem cronograma_
       - `react-brackets`, `tournament-bracket`, `bracket-generator`
     - **Context7** - Documentação de CSS Grid para tabelas responsivas
     - **21st-dev/magic** - Gerar UI de tabelas de classificação e brackets
-    - **@anthropic/filesystem** - Salvar cache de tabelas localmente para dev
-  
+
   - **Dependências:** FEAT-018 (compartilha service de API)
-  - **Complexidade:** Alta (~18h total)
+  - **Complexidade:** Alta (~21h total)
   - **Status:** Backlog - Implementar junto com FEAT-018
 
 ### ⚙️ Infraestrutura/Performance
