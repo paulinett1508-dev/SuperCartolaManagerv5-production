@@ -1032,8 +1032,8 @@ router.get("/participante/:ligaId/:timeId", verificarAdmin, async (req, res) => 
             },
             financeiro: {
                 temporada: tempNum,
-                saldoConsolidado: saldo.saldoConsolidado,
-                saldoCampos: saldo.saldoCampos,
+                saldoConsolidado: parseFloat(((saldo.saldoTemporada || 0) - (saldo.saldoAjustes || 0)).toFixed(2)),
+                saldoCampos: saldo.saldoAjustes || 0,
                 saldoTemporada: saldo.saldoTemporada,
                 saldoAcertos: saldo.saldoAcertos,
                 totalPago: saldo.totalPago,

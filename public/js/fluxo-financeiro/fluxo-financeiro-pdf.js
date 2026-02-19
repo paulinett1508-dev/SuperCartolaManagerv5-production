@@ -148,9 +148,10 @@ function renderizarConteudoAuditoria(data, container, subtitulo) {
     }
 
     // Formatar valores
-    const fmt = (v) => Math.abs(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmt = (v) => Math.abs(parseFloat(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const fmtClass = (v) => v > 0 ? 'val-positivo' : v < 0 ? 'val-negativo' : 'val-neutro';
     const fmtSinal = (v) => v > 0 ? '+' : v < 0 ? '-' : '';
+    const is2026 = financeiro.temporada >= 2026;
 
     // Historico de acertos HTML
     let acertosHtml = '';
@@ -205,10 +206,11 @@ function renderizarConteudoAuditoria(data, container, subtitulo) {
                         <td>Saldo das Rodadas (Banco)</td>
                         <td class="${fmtClass(financeiro.saldoConsolidado)}">${fmtSinal(financeiro.saldoConsolidado)}R$ ${fmt(financeiro.saldoConsolidado)}</td>
                     </tr>
+                    ${!is2026 ? `
                     <tr>
                         <td>Campos Manuais (Premios)</td>
                         <td class="${fmtClass(financeiro.saldoCampos)}">${fmtSinal(financeiro.saldoCampos)}R$ ${fmt(financeiro.saldoCampos)}</td>
-                    </tr>
+                    </tr>` : ''}
                     <tr class="separator-row"><td colspan="2"></td></tr>
                     <tr>
                         <td><strong>Credito/Debito Base</strong></td>
