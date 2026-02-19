@@ -22,6 +22,7 @@ export const MODULOS_DEFAULTS = {
     luvaOuro: false,        // Prêmio luva de ouro - OPCIONAL
     campinho: false,        // Campinho virtual - OPCIONAL
     dicas: false,           // Dicas de escalação - OPCIONAL
+    restaUm: false,         // Resta Um (eliminação progressiva) - OPCIONAL
 };
 
 /**
@@ -41,6 +42,7 @@ export function aplicarDefaults(modulosAtivos = {}) {
         luvaOuro: modulosAtivos.luvaOuro ?? MODULOS_DEFAULTS.luvaOuro,
         campinho: modulosAtivos.campinho ?? MODULOS_DEFAULTS.campinho,
         dicas: modulosAtivos.dicas ?? MODULOS_DEFAULTS.dicas,
+        restaUm: modulosAtivos.restaUm ?? MODULOS_DEFAULTS.restaUm,
     };
 }
 
@@ -70,6 +72,7 @@ export function normalizarModulos(modulos = {}) {
         'pontos-corridos': 'pontosCorridos',
         'melhor-mes': 'melhorMes',
         'luva-ouro': 'luvaOuro',
+        'resta-um': 'restaUm',
     };
 
     for (const [key, value] of Object.entries(modulos)) {

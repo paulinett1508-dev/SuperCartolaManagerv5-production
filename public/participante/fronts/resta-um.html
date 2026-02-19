@@ -1,0 +1,47 @@
+<!-- PARTICIPANTE RESTA UM - Interface v1.1 (Anti-Frank Compliant) -->
+<!-- v1.1: CSS extraído para resta-um.css, tokens via _app-tokens.css, zero inline styles -->
+<div class="resta-um-participante">
+    <div id="resta-um-content">
+        <!-- Loading State -->
+        <div id="restaUmLoading" class="loading-participante text-center py-10">
+            <div class="spinner-resta-um"></div>
+            <p class="resta-um-loading-text">Carregando Resta Um...</p>
+        </div>
+
+        <!-- Disputa não iniciada -->
+        <div id="restaUmNaoIniciado" class="resta-um-state-container" style="display: none;">
+            <div class="resta-um-state-card">
+                <span class="material-icons resta-um-state-icon">person_off</span>
+                <h3 class="resta-um-state-title">Resta Um</h3>
+                <p id="restaUmNaoIniciadoMsg" class="resta-um-state-msg">
+                    A disputa ainda n&atilde;o foi iniciada. Aguarde o in&iacute;cio da pr&oacute;xima edi&ccedil;&atilde;o.
+                </p>
+                <div class="resta-um-state-hint">
+                    <span class="material-icons resta-um-state-hint-icon">schedule</span>
+                    <span id="restaUmProximaEdicao" class="resta-um-state-hint-text">Aguardando configura&ccedil;&atilde;o do admin</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State (módulo não configurado) -->
+        <div id="restaUmEmpty" class="resta-um-state-container" style="display: none;">
+            <span class="material-icons resta-um-empty-icon">person_off</span>
+            <h3 class="resta-um-empty-title">Resta Um n&atilde;o configurado</h3>
+            <p class="resta-um-empty-msg">O administrador da liga precisa configurar este m&oacute;dulo.</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="restaUmError" class="resta-um-state-container" style="display: none;">
+            <span class="material-icons resta-um-error-icon">warning</span>
+            <h3 class="resta-um-error-title">Erro ao carregar Resta Um</h3>
+            <p id="restaUmErrorMsg" class="resta-um-error-msg">Tente novamente em instantes</p>
+            <button onclick="window.participanteNav?.navegarPara('resta-um', true)" class="resta-um-retry-btn">
+                <span class="material-icons" style="font-size: 16px; vertical-align: middle; margin-right: 4px;">refresh</span>
+                Tentar novamente
+            </button>
+        </div>
+
+        <!-- Container para conteúdo dinâmico (ranking de sobreviventes, etc.) -->
+        <div id="restaUmDados" style="display: none;"></div>
+    </div>
+</div>

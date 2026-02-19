@@ -57,6 +57,7 @@ class ParticipanteNavigation {
             configuracoes: "/participante/fronts/configuracoes.html",
             "copa-times-sc": "/participante/fronts/copa-times-sc.html",
             "tiro-certo": "/participante/fronts/tiro-certo.html",
+            "resta-um": "/participante/fronts/resta-um.html",
             regras: "/participante/fronts/regras.html",
             "rodada-xray": "/participante/fronts/rodada-xray.html",
         };
@@ -507,6 +508,7 @@ class ParticipanteNavigation {
             'melhor-mes': 'melhorMes',
             'luva-ouro': 'luvaOuro',
             'capitao': 'capitaoLuxo',
+            'resta-um': 'restaUm',
         };
         const configKey = configKeyMap[moduloId] || moduloId;
 
@@ -956,6 +958,7 @@ class ParticipanteNavigation {
             artilheiro: "Artilheiro Campeão",
             "luva-ouro": "Luva de Ouro",
             capitao: "Capitão de Luxo",
+            "resta-um": "Resta Um",
             regras: "Regras",
             configuracoes: "Configurações",
         };
@@ -1010,6 +1013,7 @@ class ParticipanteNavigation {
             "copa-times-sc": "/participante/js/modules/participante-copa-sc.js",
             regras: "/participante/js/modules/participante-regras.js",
             "rodada-xray": "/participante/js/modules/participante-rodada-xray.js",
+            "resta-um": "/participante/js/modules/participante-resta-um.js",
         };
 
         const jsPath = modulosPaths[modulo];

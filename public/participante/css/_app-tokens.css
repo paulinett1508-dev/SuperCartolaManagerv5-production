@@ -108,6 +108,18 @@
     --app-agenda-border: rgba(26, 107, 53, 0.35);
     --app-agenda-gradient: linear-gradient(135deg, #1a6b35 0%, #0d3d1e 50%, #2d9a4e 100%);
 
+    /* Resta Um (Eliminação Progressiva) */
+    --app-restaum-primary: #f43f5e;                    /* Rose-500 — Perigo/Eliminação */
+    --app-restaum-primary-dark: #e11d48;               /* Rose-600 — Hover/Active */
+    --app-restaum-muted: rgba(244, 63, 94, 0.10);     /* Background sutil */
+    --app-restaum-border: rgba(244, 63, 94, 0.25);    /* Borda padrão */
+    --app-restaum-gradient: linear-gradient(135deg, rgba(244, 63, 94, 0.15) 0%, rgba(244, 63, 94, 0.05) 100%);
+    --app-restaum-gradient-subtle: linear-gradient(135deg, rgba(244, 63, 94, 0.08) 0%, transparent 100%);
+    --app-restaum-vivo: var(--app-success-light);      /* Verde sobrevivente */
+    --app-restaum-eliminado: var(--app-danger);        /* Vermelho eliminado */
+    --app-restaum-perigo: var(--app-warning);          /* Amarelo zona de perigo */
+    --app-restaum-campeao: var(--app-gold);            /* Dourado campeão */
+
     /* Notícias do Time (gradient dinâmico via inline style) */
     --app-noticias-border: rgba(255, 255, 255, 0.15);
     --app-noticias-fallback-gradient: linear-gradient(135deg, #374151 0%, #1f2937 50%, #4b5563 100%);
@@ -767,6 +779,15 @@
 .campinho-title-block h1,
 .campinho-lineup-header h3,
 .campinho-header-info h2 {
+    font-family: 'Russo One', sans-serif !important;
+    font-weight: 400 !important;
+}
+
+/* RESTA UM */
+.resta-um-header-title,
+.resta-um-lista-title,
+.resta-um-state-title,
+.resta-um-stat-value {
     font-family: 'Russo One', sans-serif !important;
     font-weight: 400 !important;
 }

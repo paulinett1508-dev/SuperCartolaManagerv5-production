@@ -4,7 +4,7 @@
   "descricao": "Eliminação progressiva baseada em pontuação Cartola. Os piores de cada rodada são eliminados até restar apenas um.",
   "categoria": "survival",
   "obrigatorio": false,
-  "status": "planejado",
+  "status": "ativo",
   "versao": "1.0.0",
 
   "restricoes": {

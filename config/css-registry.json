@@ -311,6 +311,12 @@
         "path": "public/participante/css/matchday.css",
         "loadedBy": ["participante/index.html (module)"],
         "description": "Modo matchday com pulsing headers e live"
+      },
+      {
+        "path": "public/participante/css/resta-um.css",
+        "loadedBy": ["participante/index.html"],
+        "description": "Modulo Resta Um (eliminacao progressiva) com tema rose",
+        "moduleColor": "--app-restaum-*"
       }
     ]
   },

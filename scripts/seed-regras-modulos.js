@@ -139,16 +139,29 @@ const REGRAS_SEED = [
         icone: 'person_off',
         cor: '#f43f5e',
         ordem: 15,
-        conteudo_html: `<h3>🎯 Como funciona o Resta Um?</h3>
+        conteudo_html: `<h3><span class="material-icons" style="color: var(--app-danger); vertical-align: middle; margin-right: 4px;">person_off</span> Como funciona o Resta Um?</h3>
 <p>Uma competição de sobrevivência! A cada rodada, o <strong>pior colocado é eliminado</strong> até restar apenas um.</p>
 <h4>Regras:</h4>
 <ul>
-<li>Todos começam participando</li>
+<li>Todos os participantes inscritos começam como <strong>sobreviventes</strong></li>
 <li>A cada rodada, quem fizer a <strong>menor pontuação</strong> entre os sobreviventes é eliminado</li>
-<li>Eliminações se acumulam até restar o campeão</li>
-<li>Em caso de empate na pior pontuação, critérios de desempate se aplicam</li>
+<li>Uma vez eliminado, <strong>não pode retornar</strong> à competição</li>
+<li>Eliminações se acumulam até restar apenas o campeão</li>
 </ul>
-<p>O último sobrevivente é o <strong>campeão do Resta Um</strong> e leva o prêmio!</p>
+<h4>Desempate na eliminação:</h4>
+<ol>
+<li>Menor pontuação acumulada na edição</li>
+<li>Mais vezes na zona de eliminação</li>
+<li>Pior posição no ranking geral da temporada</li>
+</ol>
+<h4>Edições:</h4>
+<p>Pode haver até <strong>2 edições por temporada</strong> (configurável pelo admin). Cada edição é uma disputa independente.</p>
+<h4>Premiação:</h4>
+<ul>
+<li><span class="material-icons" style="color: var(--app-gold); font-size: 16px; vertical-align: middle;">emoji_events</span> <strong>Campeão (último sobrevivente)</strong> — Prêmio principal</li>
+<li><span class="material-icons" style="color: var(--app-silver, #c0c0c0); font-size: 16px; vertical-align: middle;">emoji_events</span> <strong>Vice (último eliminado)</strong> — Prêmio secundário</li>
+<li><span class="material-icons" style="color: var(--app-bronze, #cd7f32); font-size: 16px; vertical-align: middle;">emoji_events</span> <strong>3º lugar (penúltimo eliminado)</strong> — Prêmio de consolação</li>
+</ul>
 <p><em>Cada rodada é uma final. Não dá pra relaxar nunca!</em></p>`
     },
     {
