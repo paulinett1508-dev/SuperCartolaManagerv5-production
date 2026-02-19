@@ -338,6 +338,11 @@ class QuickAccessBar {
                         <span class="menu-card-label">Copa de Times SC</span>
                         <span class="badge-aguarde" style="background:rgba(255,215,0,0.2);color:var(--app-gold);border:1px solid var(--app-gold);padding:2px 8px;border-radius:12px;font-size:10px;font-weight:bold;">EM BREVE</span>
                     </div>
+                    <div class="menu-card" data-module="tiro-certo">
+                        <span class="material-icons" style="color: #f97316;">gps_fixed</span>
+                        <span class="menu-card-label">Tiro Certo</span>
+                        <span class="badge-aguarde" style="background:rgba(249,115,22,0.2);color:#f97316;border:1px solid #f97316;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:bold;">EM BREVE</span>
+                    </div>
                     <div class="menu-card disabled" data-action="em-breve">
                         <span class="material-icons">sports</span>
                         <span class="menu-card-label">Bolão Copa</span>
