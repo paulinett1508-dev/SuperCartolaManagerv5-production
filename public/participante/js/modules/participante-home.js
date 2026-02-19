@@ -1921,11 +1921,26 @@ async function carregarJogosECopa(participante) {
             }
         }
 
-        // Libertadores 2026 - Faixa de notícias (entre Copa e Jogos)
+        // Libertadores 2026 - Faixa de notícias dinâmicas (Google News RSS)
         const libertaEl = document.getElementById('home-liberta-placeholder');
         if (libertaEl) {
-            libertaEl.innerHTML = mod.renderizarSecaoLibertadores();
-            if (window.Log) Log.info("PARTICIPANTE-HOME", "Libertadores 2026 faixa renderizada");
+            // Renderiza imediatamente com fallback estático enquanto busca API
+            libertaEl.innerHTML = mod.renderizarSecaoLibertadores(null);
+
+            // Buscar notícias reais em paralelo (não bloqueia o resto da home)
+            fetch('/api/noticias/libertadores')
+                .then(r => r.ok ? r.json() : null)
+                .then(data => {
+                    if (data && data.success && data.noticias && data.noticias.length > 0) {
+                        libertaEl.innerHTML = mod.renderizarSecaoLibertadores(data.noticias);
+                        if (window.Log) Log.info("PARTICIPANTE-HOME", `Libertadores: ${data.noticias.length} notícias via RSS`);
+                    } else {
+                        if (window.Log) Log.info("PARTICIPANTE-HOME", "Libertadores: usando fallback estático");
+                    }
+                })
+                .catch(err => {
+                    if (window.Log) Log.warn("PARTICIPANTE-HOME", "Libertadores RSS falhou, mantendo fallback:", err.message);
+                });
         }
 
         // Jogos brasileiros do dia (com "Meu Time" se tiver clube)

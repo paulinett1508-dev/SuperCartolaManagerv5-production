@@ -704,60 +704,67 @@ export function renderizarJogosDoDia(jogos, isMock = false) {
 // =====================================================================
 
 /**
- * Notícias prévias estáticas da Libertadores 2026
- * Será substituído por dados dinâmicos quando o sorteio acontecer
+ * Notícias estáticas da Libertadores (fallback se API falhar)
  */
-const LIBERTA_NOTICIAS = [
+const LIBERTA_NOTICIAS_FALLBACK = [
     {
         icone: 'calendar_today',
-        titulo: 'Libertadores 2026 começa em abril com fase preliminar',
+        titulo: 'Libertadores 2026 come\u00e7a em abril com fase preliminar',
         meta: 'CONMEBOL',
         badge: 'AGENDA'
     },
     {
         icone: 'groups',
-        titulo: 'Fase de grupos terá 32 times - veja os classificados até agora',
+        titulo: 'Fase de grupos ter\u00e1 32 times - veja os classificados at\u00e9 agora',
         meta: 'CONMEBOL',
         badge: 'CLASSIFICADOS'
     },
     {
         icone: 'stadium',
-        titulo: 'Final única será em novembro - sede ainda será definida',
+        titulo: 'Final \u00fanica ser\u00e1 em novembro - sede ainda ser\u00e1 definida',
         meta: 'CONMEBOL',
         badge: 'FINAL'
     },
     {
         icone: 'emoji_events',
-        titulo: 'Campeão garante vaga no Mundial de Clubes 2027',
+        titulo: 'Campe\u00e3o garante vaga no Mundial de Clubes 2027',
         meta: 'CONMEBOL',
         badge: 'MUNDIAL'
     }
 ];
 
 /**
- * Renderiza faixa de notícias da Libertadores (estilo Copa do Mundo)
- * @returns {string} HTML da seção ou '' se desativada
+ * Renderiza faixa de notícias da Libertadores
+ * @param {Array|null} noticiasApi - Notícias vindas da API (ou null para fallback estático)
+ * @returns {string} HTML da seção
  */
-export function renderizarSecaoLibertadores() {
-    const noticias = LIBERTA_NOTICIAS;
+export function renderizarSecaoLibertadores(noticiasApi) {
+    const usandoApi = Array.isArray(noticiasApi) && noticiasApi.length > 0;
 
-    return `
-    <section id="liberta-home-section" class="liberta-home-section mx-4 mb-6">
-        <!-- Header Colapsável Libertadores -->
-        <button class="liberta-home-header" onclick="window.toggleLibertaHome && window.toggleLibertaHome()">
-            <div class="liberta-home-header-left">
-                <span class="material-icons" style="font-size:22px;color:var(--app-liberta-secondary);">emoji_events</span>
-                <div>
-                    <h2 class="font-brand text-white text-sm tracking-wide">Libertadores 2026</h2>
-                    <span class="text-[10px] text-white/70">CONMEBOL Libertadores da Am\u00e9rica</span>
-                </div>
-            </div>
-            <span class="material-icons liberta-home-chevron">expand_more</span>
-        </button>
-
-        <!-- Conteúdo Colapsável -->
-        <div class="liberta-home-content collapsed" id="liberta-home-content">
-            ${noticias.map(n => `
+    // Renderiza cards dinâmicos (API) ou estáticos (fallback)
+    const cardsHtml = usandoApi
+        ? noticiasApi.map(n => {
+            const linkSafe = n.link ? n.link.replace(/"/g, '&quot;') : '';
+            const tituloSafe = (n.titulo || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const fonteTxt = n.fonte || 'Fonte';
+            const tempoTxt = n.tempoRelativo || '';
+            return `
+                <div class="liberta-news-card liberta-news-card--clickable"
+                     onclick="window.open('${linkSafe}', '_blank')" role="link" tabindex="0">
+                    <div class="liberta-news-icon">
+                        <span class="material-icons">article</span>
+                    </div>
+                    <div class="liberta-news-text">
+                        <p class="liberta-news-title">${tituloSafe}</p>
+                        <div class="liberta-news-meta">
+                            <span class="liberta-news-fonte">${fonteTxt}</span>
+                            ${tempoTxt ? `<span class="liberta-news-tempo">${tempoTxt}</span>` : ''}
+                        </div>
+                    </div>
+                    <span class="material-icons liberta-news-chevron">chevron_right</span>
+                </div>`;
+        }).join('')
+        : LIBERTA_NOTICIAS_FALLBACK.map(n => `
                 <div class="liberta-news-card">
                     <div class="liberta-news-icon">
                         <span class="material-icons">${n.icone}</span>
@@ -769,10 +776,29 @@ export function renderizarSecaoLibertadores() {
                             ${n.meta}
                         </div>
                     </div>
+                </div>`).join('');
+
+    return `
+    <section id="liberta-home-section" class="liberta-home-section mx-4 mb-6">
+        <!-- Header Colaps\u00e1vel Libertadores -->
+        <button class="liberta-home-header" onclick="window.toggleLibertaHome && window.toggleLibertaHome()">
+            <div class="liberta-home-header-left">
+                <span class="material-icons" style="font-size:22px;color:var(--app-liberta-secondary);">emoji_events</span>
+                <div>
+                    <h2 class="font-brand text-white text-sm tracking-wide">Libertadores 2026</h2>
+                    <span class="text-[10px] text-white/70">CONMEBOL Libertadores da Am\u00e9rica</span>
                 </div>
-            `).join('')}
+            </div>
+            <span class="material-icons liberta-home-chevron">expand_more</span>
+        </button>
+
+        <!-- Conte\u00fado Colaps\u00e1vel -->
+        <div class="liberta-home-content collapsed" id="liberta-home-content">
+            ${cardsHtml}
             <div style="text-align:center;padding:8px 0 4px;">
-                <span class="text-[10px] text-white/30" style="font-style:italic;">Sorteio dos grupos em breve</span>
+                <span class="text-[10px] text-white/30" style="font-style:italic;">
+                    ${usandoApi ? 'Not\u00edcias via Google News' : 'Sorteio dos grupos em breve'}
+                </span>
             </div>
         </div>
     </section>
