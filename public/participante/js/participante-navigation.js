@@ -56,6 +56,7 @@ class ParticipanteNavigation {
             capitao: "/participante/fronts/capitao.html",
             configuracoes: "/participante/fronts/configuracoes.html",
             "copa-times-sc": "/participante/fronts/copa-times-sc.html",
+            "copa-2026-mundo": "/participante/fronts/copa-2026-mundo.html",
             regras: "/participante/fronts/regras.html",
             "rodada-xray": "/participante/fronts/rodada-xray.html",
         };
@@ -957,6 +958,7 @@ class ParticipanteNavigation {
             capitao: "Capitão de Luxo",
             regras: "Regras",
             configuracoes: "Configurações",
+            "copa-2026-mundo": "Copa do Mundo 2026",
         };
         return nomes[moduloId] || moduloId;
     }
@@ -1007,6 +1009,7 @@ class ParticipanteNavigation {
             capitao: "/participante/js/modules/participante-capitao.js",
             configuracoes: "/participante/js/modules/participante-notifications.js",
             "copa-times-sc": "/participante/js/modules/participante-copa-sc.js",
+            "copa-2026-mundo": "/participante/js/modules/participante-copa-2026-mundo.js",
             regras: "/participante/js/modules/participante-regras.js",
             "rodada-xray": "/participante/js/modules/participante-rodada-xray.js",
         };

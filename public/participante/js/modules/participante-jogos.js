@@ -479,6 +479,13 @@ export function renderizarSecaoCopa(copa) {
                     <p class="text-xs">Sem jogos da Copa hoje</p>
                 </div>
             ` : ''}
+
+            <!-- Link para Hub completo -->
+            <div class="text-center py-2 border-t border-gray-700/40 mt-2 mx-3">
+                <button onclick="window.participanteNav && window.participanteNav.navegarPara('copa-2026-mundo')" class="text-[11px] font-medium tracking-wide" style="color: var(--app-copa-secondary, #D4AF37); background: none; border: none; cursor: pointer;">
+                    Ver tabela completa, notícias e mais &#8250;
+                </button>
+            </div>
         </div>
     </div>
     `;

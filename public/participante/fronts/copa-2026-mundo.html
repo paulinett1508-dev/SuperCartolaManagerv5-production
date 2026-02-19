@@ -1,0 +1,127 @@
+<!-- COPA DO MUNDO 2026 - Landing Page / Hub -->
+<!-- Fragmento HTML para inserção via navegação SPA -->
+<div id="copa-2026-mundo-container" class="copa-mundo-page">
+
+    <!-- ═══════════════════════════════════════════════════
+         HERO / COUNTDOWN
+         ═══════════════════════════════════════════════════ -->
+    <section class="copa-hero">
+        <div class="copa-hero-bg"></div>
+        <div class="copa-hero-content">
+            <div class="copa-hero-flags">
+                <span class="copa-host-flag">🇺🇸</span>
+                <span class="copa-host-flag">🇲🇽</span>
+                <span class="copa-host-flag">🇨🇦</span>
+            </div>
+            <h1 class="copa-hero-title">COPA DO MUNDO</h1>
+            <p class="copa-hero-subtitle">2026</p>
+            <p class="copa-hero-local">Estados Unidos, México & Canadá</p>
+
+            <!-- Countdown -->
+            <div id="copa-countdown" class="copa-countdown">
+                <div class="copa-countdown-item">
+                    <span id="copa-countdown-dias" class="copa-countdown-value">---</span>
+                    <span class="copa-countdown-label">dias</span>
+                </div>
+                <div class="copa-countdown-sep">:</div>
+                <div class="copa-countdown-item">
+                    <span id="copa-countdown-horas" class="copa-countdown-value">--</span>
+                    <span class="copa-countdown-label">horas</span>
+                </div>
+                <div class="copa-countdown-sep">:</div>
+                <div class="copa-countdown-item">
+                    <span id="copa-countdown-min" class="copa-countdown-value">--</span>
+                    <span class="copa-countdown-label">min</span>
+                </div>
+            </div>
+
+            <p class="copa-hero-abertura">
+                <span class="copa-hero-abertura-icon">&#9917;</span>
+                Abertura: 11 de junho &bull; MetLife Stadium
+            </p>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         JOGOS DO BRASIL (Destaque)
+         ═══════════════════════════════════════════════════ -->
+    <section class="copa-section" id="copa-brasil-section">
+        <div class="copa-section-header">
+            <span class="copa-section-icon">🇧🇷</span>
+            <h2 class="copa-section-title">Jogos do Brasil</h2>
+            <span class="copa-section-badge">Grupo C</span>
+        </div>
+        <div id="copa-brasil-jogos" class="copa-brasil-jogos">
+            <!-- Preenchido via JS -->
+            <div class="copa-loading-placeholder">Carregando...</div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         NOTÍCIAS DA COPA (Carousel)
+         ═══════════════════════════════════════════════════ -->
+    <section class="copa-section" id="copa-noticias-section">
+        <div class="copa-section-header">
+            <span class="copa-section-icon">&#128240;</span>
+            <h2 class="copa-section-title">Notícias da Copa</h2>
+        </div>
+
+        <!-- Tabs de categorias -->
+        <div class="copa-noticias-tabs" id="copa-noticias-tabs">
+            <button class="copa-tab copa-tab-active" data-categoria="geral">Copa 2026</button>
+            <button class="copa-tab" data-categoria="brasil">Seleção</button>
+        </div>
+
+        <!-- Lista de notícias -->
+        <div id="copa-noticias-lista" class="copa-noticias-lista">
+            <div class="copa-loading-placeholder">Carregando notícias...</div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         TABELA DE GRUPOS (Accordion)
+         ═══════════════════════════════════════════════════ -->
+    <section class="copa-section" id="copa-grupos-section">
+        <div class="copa-section-header">
+            <span class="copa-section-icon">&#127942;</span>
+            <h2 class="copa-section-title">Fase de Grupos</h2>
+            <span class="copa-section-badge">12 grupos &bull; 48 seleções</span>
+        </div>
+        <div id="copa-grupos-container" class="copa-grupos-container">
+            <!-- Preenchido via JS: details/summary para cada grupo -->
+            <div class="copa-loading-placeholder">Carregando grupos...</div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         FASE ELIMINATÓRIA (Timeline)
+         ═══════════════════════════════════════════════════ -->
+    <section class="copa-section" id="copa-eliminatoria-section">
+        <div class="copa-section-header">
+            <span class="copa-section-icon">&#9876;&#65039;</span>
+            <h2 class="copa-section-title">Fase Eliminatória</h2>
+        </div>
+        <div id="copa-eliminatoria-timeline" class="copa-timeline">
+            <!-- Preenchido via JS -->
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         SEDES E ESTÁDIOS
+         ═══════════════════════════════════════════════════ -->
+    <section class="copa-section" id="copa-sedes-section">
+        <div class="copa-section-header">
+            <span class="copa-section-icon">&#127967;&#65039;</span>
+            <h2 class="copa-section-title">Sedes e Estádios</h2>
+            <span class="copa-section-badge">16 estádios &bull; 3 países</span>
+        </div>
+        <div id="copa-sedes-grid" class="copa-sedes-grid">
+            <!-- Preenchido via JS -->
+        </div>
+    </section>
+
+    <!-- Bottom padding para bottom nav -->
+    <div class="pb-24"></div>
+</div>
+
+<link rel="stylesheet" href="/participante/css/copa-mundo-2026.css">
