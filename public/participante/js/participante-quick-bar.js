@@ -310,6 +310,7 @@ class QuickAccessBar {
                     ${renderCard('mata-mata', 'mataMata', 'military_tech', 'Mata-Mata')}
                     ${renderCard('top10', 'top10', 'leaderboard', 'TOP 10')}
                     ${renderCard('campinho', 'campinho', 'sports_soccer', 'Meu Time da Rodada')}
+                    ${renderCard('resta-um', 'restaUm', 'person_off', 'Resta Um')}
                 </div>
             </div>
 
@@ -607,7 +608,8 @@ class QuickAccessBar {
             'artilheiro': 'Artilheiro',
             'luva-ouro': 'Luva de Ouro',
             'campinho': 'Meu Time da Rodada',
-            'dicas': 'Dicas'
+            'dicas': 'Dicas',
+            'resta-um': 'Resta Um'
         };
 
         const nomeModulo = nomesModulos[moduloId] || moduloId;

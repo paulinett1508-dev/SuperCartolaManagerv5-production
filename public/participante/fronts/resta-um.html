@@ -1,0 +1,283 @@
+<!-- PARTICIPANTE RESTA UM - Interface v1.0 -->
+<!-- v1.0: Tela inicial com estados: loading, disputa ativa, não iniciada, eliminado, campeão -->
+<div class="resta-um-participante">
+    <div id="resta-um-content">
+        <!-- Loading State -->
+        <div id="restaUmLoading" class="loading-participante text-center py-10">
+            <div class="spinner-resta-um"></div>
+            <p class="loading-text">Carregando Resta Um...</p>
+        </div>
+
+        <!-- Disputa não iniciada -->
+        <div id="restaUmNaoIniciado" style="display: none; text-align: center; padding: 40px 20px;">
+            <div style="background: linear-gradient(135deg, rgba(244, 63, 94, 0.1), rgba(244, 63, 94, 0.05)); border-radius: 16px; padding: 32px 20px; border: 1px solid rgba(244, 63, 94, 0.2); max-width: 400px; margin: 0 auto;">
+                <span class="material-icons" style="font-size: 56px; color: var(--app-danger); margin-bottom: 16px; display: block;">person_off</span>
+                <h3 style="color: var(--app-text-primary); font-family: 'Russo One', sans-serif; font-size: 18px; margin-bottom: 8px;">Resta Um</h3>
+                <p id="restaUmNaoIniciadoMsg" style="color: var(--app-text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 16px;">
+                    A disputa ainda não foi iniciada. Aguarde o início da próxima edição.
+                </p>
+                <div style="background: rgba(255,255,255,0.05); border-radius: 10px; padding: 12px; display: flex; align-items: center; gap: 8px; justify-content: center;">
+                    <span class="material-icons" style="color: var(--app-warning); font-size: 18px;">schedule</span>
+                    <span id="restaUmProximaEdicao" style="color: var(--app-text-dim); font-size: 12px;">Aguardando configuração do admin</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State (módulo não configurado) -->
+        <div id="restaUmEmpty" style="display: none; text-align: center; padding: 60px 20px;">
+            <span class="material-icons" style="font-size: 64px; color: var(--app-text-disabled, #404040); margin-bottom: 16px; display: block;">person_off</span>
+            <h3 style="color: var(--app-text-muted); font-size: 18px; margin-bottom: 8px;">Resta Um não configurado</h3>
+            <p style="color: var(--app-text-dim); font-size: 14px;">O administrador da liga precisa configurar este módulo.</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="restaUmError" style="display: none; text-align: center; padding: 60px 20px;">
+            <span class="material-icons" style="font-size: 64px; color: var(--app-warning); margin-bottom: 16px; display: block;">warning</span>
+            <h3 style="color: var(--app-text-muted); font-size: 18px; margin-bottom: 8px;">Erro ao carregar Resta Um</h3>
+            <p id="restaUmErrorMsg" style="color: var(--app-text-dim); font-size: 13px; margin-bottom: 20px;">Tente novamente em instantes</p>
+            <button onclick="window.participanteNav?.navegarPara('resta-um', true)"
+                    style="padding: 10px 20px; background: var(--app-gradient-primary); color: var(--app-text-primary); border: none; border-radius: var(--app-radius-md); font-weight: 600; cursor: pointer;">
+                <span class="material-icons" style="font-size: 16px; vertical-align: middle; margin-right: 4px;">refresh</span>
+                Tentar novamente
+            </button>
+        </div>
+
+        <!-- Container para conteúdo dinâmico (ranking de sobreviventes, etc.) -->
+        <div id="restaUmDados" style="display: none;"></div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --resta-um-font-brand: var(--app-font-brand, 'Russo One', sans-serif);
+        --resta-um-font-body: 'Inter', -apple-system, sans-serif;
+        --resta-um-primary: #f43f5e;
+        --resta-um-primary-muted: rgba(244, 63, 94, 0.1);
+        --resta-um-card: var(--app-surface, #1a1a1a);
+        --resta-um-border: var(--participante-border, #333);
+        --resta-um-vivo: var(--app-success-light, #22c55e);
+        --resta-um-eliminado: var(--app-danger, #ef4444);
+        --resta-um-perigo: var(--app-warning, #f59e0b);
+        --resta-um-campeao: var(--app-gold, #ffd700);
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .spinner-resta-um {
+        border: 4px solid var(--app-surface-elevated, #2a2a2a);
+        border-top: 4px solid var(--resta-um-primary);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+
+    .loading-text {
+        margin-top: 20px;
+        color: var(--app-text-muted, #888);
+    }
+
+    .resta-um-participante {
+        padding: 10px 0;
+        font-family: var(--resta-um-font-body);
+    }
+
+    /* Header da edição */
+    .resta-um-header {
+        background: linear-gradient(135deg, rgba(244, 63, 94, 0.15), rgba(244, 63, 94, 0.05));
+        border: 1px solid rgba(244, 63, 94, 0.25);
+        border-radius: 14px;
+        padding: 16px;
+        margin: 0 12px 12px;
+        text-align: center;
+    }
+
+    .resta-um-header-title {
+        font-family: var(--resta-um-font-brand);
+        font-size: 18px;
+        color: var(--app-text-primary);
+        margin-bottom: 4px;
+    }
+
+    .resta-um-header-subtitle {
+        font-size: 12px;
+        color: var(--app-text-muted);
+    }
+
+    /* Stats grid */
+    .resta-um-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin: 12px 12px 16px;
+    }
+
+    .resta-um-stat {
+        background: var(--resta-um-card);
+        border: 1px solid var(--resta-um-border);
+        border-radius: 10px;
+        padding: 12px 8px;
+        text-align: center;
+    }
+
+    .resta-um-stat-value {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--app-text-primary);
+    }
+
+    .resta-um-stat-label {
+        font-size: 10px;
+        color: var(--app-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 2px;
+    }
+
+    /* Card de status pessoal */
+    .resta-um-meu-status {
+        background: var(--resta-um-card);
+        border: 1px solid var(--resta-um-border);
+        border-radius: 12px;
+        padding: 14px;
+        margin: 0 12px 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .resta-um-meu-status.vivo {
+        border-color: rgba(34, 197, 94, 0.3);
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), transparent);
+    }
+
+    .resta-um-meu-status.eliminado {
+        border-color: rgba(239, 68, 68, 0.3);
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.08), transparent);
+    }
+
+    .resta-um-meu-status.campeao {
+        border-color: rgba(255, 215, 0, 0.4);
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), transparent);
+    }
+
+    /* Lista de sobreviventes */
+    .resta-um-lista {
+        margin: 0 12px;
+    }
+
+    .resta-um-lista-title {
+        font-family: var(--resta-um-font-brand);
+        font-size: 14px;
+        color: var(--app-text-primary);
+        margin-bottom: 8px;
+        padding: 0 4px;
+    }
+
+    .resta-um-row {
+        background: var(--resta-um-card);
+        border: 1px solid var(--resta-um-border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .resta-um-row.eliminado {
+        opacity: 0.5;
+        filter: grayscale(0.4);
+    }
+
+    .resta-um-row.lanterna {
+        background: linear-gradient(90deg, rgba(239, 68, 68, 0.3) 0%, rgba(239, 68, 68, 0.1) 100%);
+        border: 2px solid var(--resta-um-eliminado);
+        border-radius: 12px;
+    }
+
+    .resta-um-row.meu-time {
+        border-color: var(--app-primary);
+        background: linear-gradient(90deg, rgba(255, 85, 0, 0.1), transparent);
+    }
+
+    .resta-um-pos {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--app-text-muted);
+        min-width: 24px;
+        text-align: center;
+    }
+
+    .resta-um-escudo {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        object-fit: contain;
+    }
+
+    .resta-um-nome {
+        flex: 1;
+        font-size: 13px;
+        color: var(--app-text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .resta-um-pontos {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--app-text-primary);
+    }
+
+    .resta-um-status-badge {
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .resta-um-status-badge.vivo {
+        background: rgba(34, 197, 94, 0.15);
+        color: var(--resta-um-vivo);
+    }
+
+    .resta-um-status-badge.eliminado {
+        background: rgba(239, 68, 68, 0.15);
+        color: var(--resta-um-eliminado);
+    }
+
+    .resta-um-status-badge.campeao {
+        background: rgba(255, 215, 0, 0.2);
+        color: var(--resta-um-campeao);
+    }
+
+    .resta-um-status-badge.perigo {
+        background: rgba(245, 158, 11, 0.15);
+        color: var(--resta-um-perigo);
+    }
+
+    /* Seção de eliminados */
+    .resta-um-eliminados-section {
+        margin: 16px 12px 0;
+        padding-top: 12px;
+        border-top: 1px solid var(--resta-um-border);
+    }
+
+    @media (max-width: 768px) {
+        .resta-um-participante {
+            padding: 8px 0;
+        }
+    }
+</style>

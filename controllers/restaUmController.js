@@ -1,0 +1,221 @@
+/**
+ * RESTA UM CONTROLLER v1.0
+ *
+ * Endpoints para o módulo Resta Um (eliminação progressiva).
+ * - GET status da disputa (participante)
+ * - POST iniciar edição (admin)
+ * - POST processar eliminação (admin/orchestrator)
+ */
+import RestaUmCache from '../models/RestaUmCache.js';
+import Liga from '../models/Liga.js';
+import { CURRENT_SEASON } from '../config/seasons.js';
+import logger from '../utils/logger.js';
+
+/**
+ * GET /:ligaId/status
+ * Retorna o estado atual da disputa para o participante
+ */
+export async function obterStatus(req, res) {
+    try {
+        const { ligaId } = req.params;
+        const temporada = parseInt(req.query.temporada) || CURRENT_SEASON;
+
+        const edicao = await RestaUmCache.findOne({
+            liga_id: ligaId,
+            temporada,
+            status: { $in: ['em_andamento', 'finalizada'] },
+        }).sort({ edicao: -1 }).lean();
+
+        if (!edicao) {
+            // Tentar buscar edição pendente
+            const pendente = await RestaUmCache.findOne({
+                liga_id: ligaId,
+                temporada,
+                status: 'pendente',
+            }).sort({ edicao: -1 }).lean();
+
+            if (pendente) {
+                return res.json({
+                    edicao: {
+                        id: pendente.edicao,
+                        nome: pendente.nome,
+                        status: pendente.status,
+                        rodadaInicial: pendente.rodadaInicial,
+                    },
+                    participantes: pendente.participantes || [],
+                    rodadaAtual: null,
+                    eliminadosDaRodada: [],
+                });
+            }
+
+            return res.status(404).json({ error: 'Nenhuma edição encontrada' });
+        }
+
+        // Separar vivos e eliminados, ordenar por pontos
+        const participantes = (edicao.participantes || []).map(p => ({
+            ...p,
+            pontosRodada: p.pontosRodada || null,
+        }));
+
+        const vivos = participantes
+            .filter(p => p.status === 'vivo' || p.status === 'campeao')
+            .sort((a, b) => (b.pontosAcumulados || 0) - (a.pontosAcumulados || 0));
+
+        const eliminados = participantes
+            .filter(p => p.status === 'eliminado')
+            .sort((a, b) => (b.rodadaEliminacao || 0) - (a.rodadaEliminacao || 0));
+
+        return res.json({
+            edicao: {
+                id: edicao.edicao,
+                nome: edicao.nome,
+                status: edicao.status,
+                rodadaInicial: edicao.rodadaInicial,
+                rodadaFinal: edicao.rodadaFinal,
+                eliminadosPorRodada: edicao.eliminadosPorRodada,
+            },
+            participantes: [...vivos, ...eliminados],
+            rodadaAtual: edicao.rodadaAtual,
+            historicoEliminacoes: edicao.historicoEliminacoes || [],
+            premiacao: edicao.premiacao,
+        });
+
+    } catch (error) {
+        logger.error('[RESTA-UM] Erro ao obter status:', error);
+        return res.status(500).json({ error: 'Erro interno ao buscar status do Resta Um' });
+    }
+}
+
+/**
+ * POST /:ligaId/iniciar
+ * Admin inicia uma nova edição do Resta Um
+ */
+export async function iniciarEdicao(req, res) {
+    try {
+        const { ligaId } = req.params;
+        const {
+            edicao = 1,
+            rodadaInicial,
+            rodadaFinal,
+            eliminadosPorRodada = 1,
+            protecaoPrimeiraRodada = false,
+            premiacao = {},
+            bonusSobrevivencia = {},
+        } = req.body;
+
+        // Validar liga
+        const liga = await Liga.findById(ligaId).lean();
+        if (!liga) {
+            return res.status(404).json({ error: 'Liga não encontrada' });
+        }
+
+        // Validar mínimo de participantes
+        const participantesAtivos = (liga.participantes || []).filter(p => p.ativo !== false);
+        if (participantesAtivos.length < 8) {
+            return res.status(400).json({
+                error: `Mínimo de 8 participantes necessário. Liga tem ${participantesAtivos.length}.`,
+            });
+        }
+
+        // Verificar se já existe edição ativa
+        const edicaoExistente = await RestaUmCache.findOne({
+            liga_id: ligaId,
+            temporada: CURRENT_SEASON,
+            edicao,
+            status: { $in: ['em_andamento', 'pendente'] },
+        });
+
+        if (edicaoExistente) {
+            return res.status(409).json({
+                error: `Já existe edição ${edicao} ${edicaoExistente.status} para esta temporada.`,
+            });
+        }
+
+        // Criar participantes iniciais (todos vivos)
+        const participantesRestaUm = participantesAtivos.map(p => ({
+            timeId: p.time_id,
+            nomeTime: p.nome_time || p.nome_cartola,
+            nomeCartoleiro: p.nome_cartola,
+            escudoId: p.escudo_id || null,
+            status: 'vivo',
+            pontosAcumulados: 0,
+            rodadaEliminacao: null,
+            rodadasSobrevividas: 0,
+            vezesNaZona: 0,
+        }));
+
+        // Criar edição
+        const novaEdicao = await RestaUmCache.create({
+            liga_id: ligaId,
+            edicao,
+            temporada: CURRENT_SEASON,
+            nome: `${edicao}a Edição`,
+            rodadaInicial: rodadaInicial || 1,
+            rodadaFinal: rodadaFinal || 38,
+            eliminadosPorRodada,
+            protecaoPrimeiraRodada,
+            status: 'pendente',
+            participantes: participantesRestaUm,
+            premiacao: {
+                campeao: premiacao.campeao || 100,
+                vice: premiacao.vice || 50,
+                terceiro: premiacao.terceiro || 25,
+            },
+            bonusSobrevivencia: {
+                habilitado: bonusSobrevivencia.habilitado !== false,
+                valorBase: bonusSobrevivencia.valorBase || 2,
+                incremento: bonusSobrevivencia.incremento || 0.5,
+            },
+        });
+
+        logger.log(`[RESTA-UM] Edição ${edicao} criada para liga ${ligaId} com ${participantesRestaUm.length} participantes`);
+
+        return res.status(201).json({
+            success: true,
+            edicao: novaEdicao.edicao,
+            participantes: novaEdicao.participantes.length,
+            rodadaInicial: novaEdicao.rodadaInicial,
+        });
+
+    } catch (error) {
+        logger.error('[RESTA-UM] Erro ao iniciar edição:', error);
+        return res.status(500).json({ error: 'Erro interno ao iniciar edição' });
+    }
+}
+
+/**
+ * GET /:ligaId/edicoes
+ * Lista todas as edições de uma liga na temporada
+ */
+export async function listarEdicoes(req, res) {
+    try {
+        const { ligaId } = req.params;
+        const temporada = parseInt(req.query.temporada) || CURRENT_SEASON;
+
+        const edicoes = await RestaUmCache.find({
+            liga_id: ligaId,
+            temporada,
+        }).sort({ edicao: 1 }).lean();
+
+        return res.json(edicoes.map(e => ({
+            edicao: e.edicao,
+            nome: e.nome,
+            status: e.status,
+            rodadaInicial: e.rodadaInicial,
+            rodadaFinal: e.rodadaFinal,
+            totalParticipantes: (e.participantes || []).length,
+            vivosRestantes: (e.participantes || []).filter(p => p.status === 'vivo').length,
+            rodadaAtual: e.rodadaAtual,
+        })));
+
+    } catch (error) {
+        logger.error('[RESTA-UM] Erro ao listar edições:', error);
+        return res.status(500).json({ error: 'Erro interno' });
+    }
+}
+
+export default {
+    obterStatus,
+    iniciarEdicao,
+    listarEdicoes,
+};
