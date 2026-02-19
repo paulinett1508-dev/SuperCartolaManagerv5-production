@@ -1,6 +1,17 @@
 /**
- * MATA-MATA MANAGER v1.0.0
+ * MATA-MATA MANAGER v1.1.0
  * Módulo OPCIONAL - Confrontos eliminatórios
+ *
+ * STATUS: STUBS — Hooks registrados mas NÃO executam cálculos automaticamente.
+ *
+ * FLUXO ATUAL (manual via admin):
+ *   1. Admin abre tela Mata-Mata → Frontend calcula fases via orquestrador
+ *   2. Frontend salva cache → POST /api/mata-mata/cache/:ligaId/:edicao
+ *   Controller: mataMataCacheController.js
+ *   Frontend: mata-mata-orquestrador.js (coordena módulos)
+ *
+ * FUTURO: Quando o orchestrator for implementado end-to-end, estes hooks
+ * devem delegar ao controller via chamadas internas.
  */
 import BaseManager from './BaseManager.js';
 
@@ -19,12 +30,10 @@ export default class MataMataManager extends BaseManager {
     }
 
     async onRoundFinalize(ctx) {
-        console.log(`[MATA-MATA] Calculando confrontos R${ctx.rodada}`);
-        return { pronto: true };
+        return { pronto: false, stub: true, rodada: ctx.rodada };
     }
 
     async onConsolidate(ctx) {
-        console.log(`[MATA-MATA] Consolidando confrontos R${ctx.rodada}`);
-        return { consolidado: true };
+        return { consolidado: false, stub: true, rodada: ctx.rodada };
     }
 }

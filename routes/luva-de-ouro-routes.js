@@ -1,4 +1,5 @@
-// routes/luva-de-ouro-routes.js v2.0
+// routes/luva-de-ouro-routes.js v2.1
+// v2.1: verificarAdmin na rota diagnostico (expunha internals sem auth)
 // v2.0: verificarAdmin em rotas admin, endpoints ranking-live e consolidar
 import express from "express";
 import LuvaDeOuroController from "../controllers/luvaDeOuroController.js";
@@ -27,8 +28,8 @@ router.get("/:ligaId/estatisticas", LuvaDeOuroController.obterEstatisticas);
 // Rota para listar participantes válidos
 router.get("/:ligaId/participantes", LuvaDeOuroController.listarParticipantes);
 
-// GET /api/luva-de-ouro/:ligaId/diagnostico - Diagnóstico do sistema
-router.get("/:ligaId/diagnostico", LuvaDeOuroController.diagnostico);
+// GET /api/luva-de-ouro/:ligaId/diagnostico - Diagnóstico do sistema (admin only)
+router.get("/:ligaId/diagnostico", verificarAdmin, LuvaDeOuroController.diagnostico);
 
 // GET /api/luva-de-ouro/:ligaId/participante/:participanteId/detalhes
 router.get("/:ligaId/participante/:participanteId/detalhes", LuvaDeOuroController.obterDetalhesParticipante);

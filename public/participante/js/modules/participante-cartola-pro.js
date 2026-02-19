@@ -1171,7 +1171,7 @@ async function carregarMeuTime(container) {
                 <p class="text-xs text-white/50">${time.nomeCartola || ''}</p>
                 <div class="flex items-center justify-center gap-4 mt-3">
                     <div>
-                        <p class="text-2xl font-bold text-yellow-400">${data.pontosParciais?.toFixed(1) || '0.0'}</p>
+                        <p class="text-2xl font-bold text-yellow-400">${data.pontosParciais ? (Math.trunc(data.pontosParciais * 10) / 10).toFixed(1) : '0.0'}</p>
                         <p class="text-[10px] text-white/40">parcial</p>
                     </div>
                     <div class="w-px h-8 bg-white/10"></div>
@@ -1198,7 +1198,7 @@ async function carregarMeuTime(container) {
                                 <p class="text-xs text-white/50">${atleta.posicao} • ${atleta.clubeAbreviacao || atleta.clube}</p>
                             </div>
                             <div class="text-right">
-                                <p class="text-sm font-bold ${atleta.pontosRodada >= 0 ? 'text-green-400' : 'text-red-400'}">${atleta.pontosRodada?.toFixed(1) || '0.0'}</p>
+                                <p class="text-sm font-bold ${atleta.pontosRodada >= 0 ? 'text-green-400' : 'text-red-400'}">${atleta.pontosRodada ? (Math.trunc(atleta.pontosRodada * 10) / 10).toFixed(1) : '0.0'}</p>
                                 <p class="text-[10px] text-white/40">pts</p>
                             </div>
                         </div>

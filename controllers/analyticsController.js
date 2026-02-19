@@ -9,6 +9,7 @@ import https from 'https';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import logger from '../utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -177,7 +178,7 @@ async function buscarBranchesGitHub(desde = null, ate = null) {
 
     return branches;
   } catch (erro) {
-    console.error('[Analytics] Erro ao buscar branches do GitHub:', erro.message);
+    logger.error('[Analytics] Erro ao buscar branches do GitHub:', erro.message);
     return [];
   }
 }
@@ -229,7 +230,7 @@ async function buscarCommitsGitHub(nomeBranch, desde = null, ate = null) {
 
     return commits;
   } catch (erro) {
-    console.error(`[Analytics] Erro ao buscar commits de ${nomeBranch}:`, erro.message);
+    logger.error(`[Analytics] Erro ao buscar commits de ${nomeBranch}:`, erro.message);
     return [];
   }
 }
@@ -335,7 +336,7 @@ async function buscarPullRequestsGitHub(desde = null, ate = null) {
 
     return prs;
   } catch (erro) {
-    console.error('[Analytics] Erro ao buscar PRs do GitHub:', erro.message);
+    logger.error('[Analytics] Erro ao buscar PRs do GitHub:', erro.message);
     return [];
   }
 }
@@ -431,14 +432,19 @@ export async function getAnalyticsResumo(req, res) {
 
     // Estatísticas enriquecidas
     const stats = {
+      // Branch stats (para painel de limpeza)
       totalBranches: branchesDetalhadas.length,
-      branchesAcativas: branchesDetalhadas.filter(b => !b.mergeada).length,
+      branchesAtivas: branchesDetalhadas.filter(b => !b.mergeada).length,
       branchesMergeadas: branchesDetalhadas.filter(b => b.mergeada).length,
       branchesDesatualizadas: branchesDetalhadas.filter(b => b.desatualizada).length,
       branchesOrfas: branchesDetalhadas.filter(b => b.orfa).length,
       branchesPassivDeletacao: branchesDetalhadas.filter(b => b.passivDeletacao).length,
       totalCommits: branchesDetalhadas.reduce((sum, b) => sum + b.totalCommits, 0),
-      prsEmRevisao: prs.filter(p => p.estado === 'open').length,
+      // PR stats (para KPIs)
+      totalPRs: prs.length,
+      prsAbertos: prs.filter(p => p.estado === 'open').length,
+      prsMergeados: prs.filter(p => p.mergeado).length,
+      prsFechados: prs.filter(p => p.estado === 'closed' && !p.mergeado).length,
       prsDraft: prs.filter(p => p.isDraft).length,
       prsEmRevisaoHaTempo: prs.filter(p => p.emRevisaoHaTempo).length,
       periodo: periodo || 'tudo',
@@ -458,7 +464,7 @@ export async function getAnalyticsResumo(req, res) {
       branches: branchesDetalhadas
     });
   } catch (erro) {
-    console.error('[Analytics] Erro em getAnalyticsResumo:', erro.message);
+    logger.error('[Analytics] Erro em getAnalyticsResumo:', erro.message);
     res.status(500).json({
       success: false,
       error: 'Erro ao gerar analytics',
@@ -502,7 +508,7 @@ export async function getAnatyticsBranchDetalhes(req, res) {
       }
     });
   } catch (erro) {
-    console.error('[Analytics] Erro em getAnatyticsBranchDetalhes:', erro.message);
+    logger.error('[Analytics] Erro em getAnatyticsBranchDetalhes:', erro.message);
     res.status(500).json({
       success: false,
       error: 'Erro ao buscar detalhes',
@@ -570,7 +576,7 @@ export async function getAnalyticsMerges(req, res) {
       ate: ateData
     });
   } catch (erro) {
-    console.error('[Analytics] Erro em getAnalyticsMerges:', erro.message);
+    logger.error('[Analytics] Erro em getAnalyticsMerges:', erro.message);
     res.status(500).json({
       success: false,
       error: 'Erro ao buscar merges',
@@ -624,10 +630,83 @@ export async function getAnalyticsFuncionalidades(req, res) {
       funcionalidades
     });
   } catch (erro) {
-    console.error('[Analytics] Erro em getAnalyticsFuncionalidades:', erro.message);
+    logger.error('[Analytics] Erro em getAnalyticsFuncionalidades:', erro.message);
     res.status(500).json({
       success: false,
       error: 'Erro ao buscar funcionalidades',
+      message: erro.message
+    });
+  }
+}
+
+// =====================================================================
+// CONTROLLER: GET All Pull Requests (dados completos)
+// =====================================================================
+export async function getAnalyticsPullRequests(req, res) {
+  try {
+    const { desde, ate, periodo } = req.query;
+
+    let desdeData = desde;
+    let ateData = ate;
+
+    if (periodo) {
+      const hoje = new Date();
+      const ultimoDia = new Date(hoje);
+      ultimoDia.setDate(ultimoDia.getDate() + 1);
+
+      switch (periodo.toLowerCase()) {
+        case 'dia':
+        case 'hoje':
+          desdeData = hoje.toISOString().split('T')[0];
+          ateData = ultimoDia.toISOString().split('T')[0];
+          break;
+        case 'semana':
+          const seteDias = new Date(hoje);
+          seteDias.setDate(seteDias.getDate() - 7);
+          desdeData = seteDias.toISOString().split('T')[0];
+          ateData = ultimoDia.toISOString().split('T')[0];
+          break;
+        case 'mes':
+        case 'mês':
+          const trintaDias = new Date(hoje);
+          trintaDias.setDate(trintaDias.getDate() - 30);
+          desdeData = trintaDias.toISOString().split('T')[0];
+          ateData = ultimoDia.toISOString().split('T')[0];
+          break;
+      }
+    }
+
+    const prs = await buscarPullRequestsGitHub(desdeData, ateData);
+
+    const stats = {
+      total: prs.length,
+      abertos: prs.filter(p => p.estado === 'open').length,
+      mergeados: prs.filter(p => p.mergeado).length,
+      fechados: prs.filter(p => p.estado === 'closed' && !p.mergeado).length,
+      drafts: prs.filter(p => p.isDraft).length,
+      emRevisaoHaTempo: prs.filter(p => p.emRevisaoHaTempo).length
+    };
+
+    // Abertos primeiro, depois por data decrescente
+    const ordenados = prs.sort((a, b) => {
+      if (a.estado === 'open' && b.estado !== 'open') return -1;
+      if (a.estado !== 'open' && b.estado === 'open') return 1;
+      return new Date(b.dataCriacao) - new Date(a.dataCriacao);
+    });
+
+    res.json({
+      success: true,
+      stats,
+      pullRequests: ordenados,
+      periodo: periodo || 'tudo',
+      desde: desdeData,
+      ate: ateData
+    });
+  } catch (erro) {
+    logger.error('[Analytics] Erro em getAnalyticsPullRequests:', erro.message);
+    res.status(500).json({
+      success: false,
+      error: 'Erro ao buscar pull requests',
       message: erro.message
     });
   }
@@ -724,7 +803,7 @@ export async function getAnalyticsEstatisticas(req, res) {
       stats
     });
   } catch (erro) {
-    console.error('[Analytics] Erro em getAnalyticsEstatisticas:', erro.message);
+    logger.error('[Analytics] Erro em getAnalyticsEstatisticas:', erro.message);
     res.status(500).json({
       success: false,
       error: 'Erro ao buscar estatísticas',
@@ -765,7 +844,7 @@ function executeGitCommand(command) {
       stdio: ['pipe', 'pipe', 'ignore']
     }).trim();
   } catch (error) {
-    console.error(`[Analytics] Erro ao executar comando: ${command}`, error.message);
+    logger.error(`[Analytics] Erro ao executar comando: ${command}`, error.message);
     return '';
   }
 }
@@ -810,7 +889,7 @@ export async function getGitSyncStatus(req, res) {
     res.json(status);
 
   } catch (erro) {
-    console.error('[Analytics] Erro em getGitSyncStatus:', erro.message);
+    logger.error('[Analytics] Erro em getGitSyncStatus:', erro.message);
     res.status(500).json({
       success: false,
       error: 'Erro ao verificar status de sincronização',
@@ -841,7 +920,7 @@ export async function postGitSyncTrigger(req, res) {
     });
 
   } catch (erro) {
-    console.error('[Analytics] Erro em postGitSyncTrigger:', erro.message);
+    logger.error('[Analytics] Erro em postGitSyncTrigger:', erro.message);
     res.status(500).json({
       success: false,
       error: 'Erro ao sincronizar',
@@ -854,6 +933,7 @@ export default {
   getAnalyticsResumo,
   getAnatyticsBranchDetalhes,
   getAnalyticsMerges,
+  getAnalyticsPullRequests,
   getAnalyticsFuncionalidades,
   getAnalyticsEstatisticas,
   getGitSyncStatus,

@@ -1,8 +1,10 @@
-# 🎨 PLANO DE IMPLEMENTAÇÃO: Figma MCP
+# ~~🎨 PLANO DE IMPLEMENTAÇÃO: Figma MCP~~ ABANDONADO
+
+> **ABANDONADO em 2026-02-17.** Decisão: Figma MCP descartado. Stitch Adapter opera apenas em modo manual (HTML colado). Este documento é mantido apenas como histórico.
 
 **Data de criação:** 2026-02-09
 **Autor:** Claude Code
-**Decisão:** Integrar Figma como ferramenta principal de design (Stitch → fallback)
+**~~Decisão:~~ Status:** ~~Integrar Figma como ferramenta principal de design~~ **ABANDONADO**
 
 ---
 

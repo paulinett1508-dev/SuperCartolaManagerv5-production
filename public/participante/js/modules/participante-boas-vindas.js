@@ -623,13 +623,6 @@ function formatarPontos(valor) {
     });
 }
 
-// Trunca valor para 2 casas decimais sem arredondar e retorna string formatada pt-BR
-function truncarPontos(valor) {
-    const num = Number(valor) || 0;
-    const truncated = Math.trunc(num * 100) / 100;
-    return truncated.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
 function getZonaInfo(posicao, total) {
     if (!posicao || !total)
         return {
@@ -929,12 +922,8 @@ function renderizarBoasVindas(container, data, ligaRules) {
                     </div>
                 </div>
 
-                    <div id="copa-do-mundo-placeholder"></div>
-                <div id="jogos-do-dia-placeholder"></div>
             </div>
         `;
-        // ✅ v10.9: Carregar e renderizar jogos ao vivo (API-Football) para todos
-        carregarEExibirJogos();
     } else {
         // ✅ PARTICIPANTE NÃO RENOVOU - Mostrar dados da temporada anterior normalmente
         // ✅ v10.18: Mostra botão Atualizar (temporada 2025 encerrada, pode querer atualizar cache)
@@ -1080,100 +1069,10 @@ function renderizarBoasVindas(container, data, ligaRules) {
                     </div>
                 </div>
 
-                <!-- Jogos ao Vivo -->
-                <div id="copa-do-mundo-placeholder"></div>
-                <div id="jogos-do-dia-placeholder"></div>
             </div>
         `;
-        // ✅ v10.9: Carregar e renderizar jogos ao vivo (API-Football) para todos
-        carregarEExibirJogos();
     }
 }
-
-// =====================================================================
-// ✅ v11.0: FUNÇÃO PARA CARREGAR E EXIBIR JOGOS AO VIVO + AUTO-REFRESH
-// =====================================================================
-async function carregarEExibirJogos() {
-    try {
-        if (window.Log) Log.info("PARTICIPANTE-BOAS-VINDAS", "Carregando jogos ao vivo...");
-
-        const mod = await import('./participante-jogos.js');
-        const result = await mod.obterJogosAoVivo();
-
-        if (window.Log) Log.info("PARTICIPANTE-BOAS-VINDAS", "Resultado jogos:", {
-            quantidade: result.jogos?.length || 0,
-            fonte: result.fonte,
-            aoVivo: result.aoVivo,
-            copa: result.copa?.fase || 'inativa'
-        });
-
-        // Armazenar jogos em cache global para modal
-        window._jogosCache = result.jogos || [];
-        console.log('[BOAS-VINDAS-DEBUG] _jogosCache populado com', window._jogosCache.length, 'jogos');
-
-        // ✅ Copa do Mundo 2026 - Seção separada (ANTES dos jogos brasileiros)
-        if (result.copa && result.copa.fase) {
-            const copaEl = document.getElementById('copa-do-mundo-placeholder');
-            if (copaEl) {
-                const copaHtml = mod.renderizarSecaoCopa(result.copa);
-                copaEl.innerHTML = copaHtml;
-                if (window.Log) Log.info("PARTICIPANTE-BOAS-VINDAS", `🏆 Copa do Mundo renderizada (fase: ${result.copa.fase})`);
-            }
-        }
-
-        if (result.jogos && result.jogos.length > 0) {
-            const html = mod.renderizarJogosAoVivo(result.jogos, result.fonte, result.aoVivo, result.atualizadoEm);
-            const el = document.getElementById('jogos-do-dia-placeholder');
-            if (el) {
-                el.innerHTML = html;
-                if (window.Log) Log.info("PARTICIPANTE-BOAS-VINDAS", "Card de jogos renderizado!");
-            }
-
-            // v11.0: Iniciar auto-refresh se tem jogos ao vivo
-            if (result.aoVivo) {
-                mod.iniciarAutoRefresh((novoResult) => {
-                    window._jogosCache = novoResult.jogos || [];
-                    const novoHtml = mod.renderizarJogosAoVivo(novoResult.jogos, novoResult.fonte, novoResult.aoVivo, novoResult.atualizadoEm);
-                    const container = document.getElementById('jogos-do-dia-placeholder');
-                    if (container) {
-                        container.innerHTML = novoHtml;
-                        if (window.Log) Log.debug("PARTICIPANTE-BOAS-VINDAS", "Jogos atualizados via auto-refresh");
-                    }
-                    // Atualizar Copa também no refresh
-                    if (novoResult.copa && novoResult.copa.fase) {
-                        const copaContainer = document.getElementById('copa-do-mundo-placeholder');
-                        if (copaContainer) {
-                            copaContainer.innerHTML = mod.renderizarSecaoCopa(novoResult.copa);
-                        }
-                    }
-                });
-            }
-        } else {
-            if (window.Log) Log.debug("PARTICIPANTE-BOAS-VINDAS", "Sem jogos para exibir no momento");
-            const el = document.getElementById('jogos-do-dia-placeholder');
-            if (el) {
-                const mensagem = result.mensagem || 'Sem jogos brasileiros hoje';
-                el.innerHTML = `
-                    <div class="mx-4 mb-6 rounded-xl bg-gray-800/50 border border-gray-700/50 p-4 text-center">
-                        <div class="flex items-center justify-center gap-2 text-white/70">
-                            <span class="material-icons text-base text-primary">sports_soccer</span>
-                            <span class="text-xs font-medium">${mensagem}</span>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-    } catch (err) {
-        if (window.Log) Log.error("PARTICIPANTE-BOAS-VINDAS", "Erro ao carregar jogos:", err);
-    }
-}
-
-// Parar auto-refresh quando sair da tela
-window.addEventListener('participante-nav-change', () => {
-    import('./participante-jogos.js').then(mod => {
-        mod.pararAutoRefresh();
-    }).catch(() => {});
-});
 
 // =====================================================================
 // ✅ v11.1: FUNÇÃO GLOBAL PARA ABRIR CARTOLA PRO

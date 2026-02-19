@@ -487,14 +487,16 @@ export class FluxoFinanceiroUI {
                     <div class="extrato-quitado-banner-content">
                         <div class="extrato-quitado-item">
                             <label>Status</label>
-                            <span style="color: ${insc.status === 'renovado' ? '#10b981' : insc.status === 'pendente' ? '#f59e0b' : '#ef4444'};">
-                                ${insc.status === 'renovado' ? '✓ Renovado' : insc.status === 'pendente' ? '⏳ Pendente' : '✗ Não Participa'}
+                            <span style="color: ${insc.status === 'renovado' ? 'var(--color-success)' : insc.status === 'pendente' ? 'var(--color-warning)' : 'var(--color-danger)'}; display: flex; align-items: center; gap: 4px;">
+                                <span class="material-icons" style="font-size: 14px;">${insc.status === 'renovado' ? 'check_circle' : insc.status === 'pendente' ? 'schedule' : 'cancel'}</span>
+                                ${insc.status === 'renovado' ? 'Renovado' : insc.status === 'pendente' ? 'Pendente' : 'Não Participa'}
                             </span>
                         </div>
                         <div class="extrato-quitado-item">
                             <label>Inscrição</label>
-                            <span style="color: ${insc.pagou_inscricao ? '#10b981' : '#f59e0b'};">
-                                ${insc.pagou_inscricao ? '✓ Pago' : '⏳ Pendente'}
+                            <span style="color: ${insc.pagou_inscricao ? 'var(--color-success)' : 'var(--color-warning)'}; display: flex; align-items: center; gap: 4px;">
+                                <span class="material-icons" style="font-size: 14px;">${insc.pagou_inscricao ? 'check_circle' : 'schedule'}</span>
+                                ${insc.pagou_inscricao ? 'Pago' : 'Pendente'}
                             </span>
                         </div>
                         ${insc.taxa_inscricao ? `
@@ -546,9 +548,9 @@ export class FluxoFinanceiroUI {
         const container = document.getElementById(this.buttonsContainerId);
         if (!container) return;
 
-        // Obter ligaId da URL
+        // Obter ligaId da URL — suporta ?id=, ?liga= e ?ligaId=
         const urlParams = new URLSearchParams(window.location.search);
-        const ligaId = urlParams.get("id");
+        const ligaId = urlParams.get("id") || urlParams.get("liga") || urlParams.get("ligaId") || window._fluxoLigaId;
 
         // Mostrar loading enquanto busca dados de saldo
         container.innerHTML = `
@@ -760,9 +762,9 @@ export class FluxoFinanceiroUI {
             </div>
 
             <!-- Tabela Financeira v4.2 - Layout Condicional por Temporada + Sticky Header -->
-            <div class="fluxo-tabela-container" style="max-height: calc(100vh - 300px); overflow-y: auto; overflow-x: auto; position: relative;">
-                <table class="fluxo-participantes-tabela tabela-financeira" style="border-collapse: separate; border-spacing: 0;">
-                    <thead style="position: sticky; top: 0; z-index: 100;">
+            <div class="fluxo-tabela-container">
+                <table class="fluxo-participantes-tabela tabela-financeira">
+                    <thead>
                         ${temporadaNum >= 2026 && !this._temRodadasConsolidadas ? `
                         <!-- Header Temporada Atual (>= 2026) SEM rodadas: Colunas simplificadas de inscrição -->
                         <tr>
@@ -1165,16 +1167,23 @@ export class FluxoFinanceiroUI {
         const inscricao = window.fluxoFinanceiroCache?.inscricoes2026?.get(String(timeId)) || {};
 
         // Dados financeiros de inscrição (com fallback seguro)
+        // ✅ B3-FIX: Prioridade — cache local → breakdown da API → campo direto → default
+        // breakdown.saldoAnteriorTransferido é calculado pelo backend incluindo fallback de extrato 2025
         const saldoAnterior = (typeof inscricao.saldo_transferido === 'number')
             ? inscricao.saldo_transferido
-            : (typeof p.saldo_transferido === 'number' ? p.saldo_transferido : 0);
-        const taxaInscricao = (typeof inscricao.taxa_inscricao === 'number')
+            : (typeof p.breakdown?.saldoAnteriorTransferido === 'number' ? p.breakdown.saldoAnteriorTransferido
+            : (typeof p.saldo_transferido === 'number' ? p.saldo_transferido : 0));
+        // ✅ L3-FIX: taxaInscricao vem da API (breakdown.taxaInscricao). Fallback 0 = desconhecida (backend é fonte de verdade)
+        const taxaInscricao = (typeof inscricao.taxa_inscricao === 'number' && inscricao.taxa_inscricao > 0)
             ? inscricao.taxa_inscricao
-            : (typeof p.taxa_inscricao === 'number' ? p.taxa_inscricao : 180);
+            : (typeof p.breakdown?.taxaInscricao === 'number' && p.breakdown.taxaInscricao > 0 ? p.breakdown.taxaInscricao
+            : (typeof p.taxa_inscricao === 'number' && p.taxa_inscricao > 0 ? p.taxa_inscricao : 0));
         const saldoInicial = (typeof inscricao.saldo_inicial_temporada === 'number')
             ? inscricao.saldo_inicial_temporada
             : null;
-        const pagouFlag = inscricao.pagou_inscricao === true || p.pagou_inscricao === true;
+        // ✅ B3-FIX: pagouFlag também lê de breakdown.pagouInscricao (agora enviado pela API)
+        const pagouFlag = inscricao.pagou_inscricao === true || p.pagou_inscricao === true
+            || p.breakdown?.pagouInscricao === true;
         // ✅ v2.2.1: Se saldo_inicial_temporada não desconta a taxa, considerar pago
         const saldoIndicouPago = saldoInicial !== null && taxaInscricao > 0 && Math.abs(saldoInicial - saldoAnterior) < 0.01;
         const pagouDiretamente = pagouFlag || saldoIndicouPago;
@@ -1186,11 +1195,11 @@ export class FluxoFinanceiroUI {
         const inscricaoQuitada = pagouDiretamente || saldoCobriuTaxa || quitadoPorSaldoFinal;
 
         // Calcular saldo final
-        let saldoFinal = saldoFinalApi !== null ? saldoFinalApi : saldoInicial;
-        if (saldoFinal === undefined || saldoFinal === null) {
-            // Calcular: saldo anterior - taxa (se não pagou diretamente)
-            saldoFinal = pagouDiretamente ? saldoAnterior : (saldoAnterior - taxaInscricao);
-        }
+        // ✅ L2-FIX: API é fonte de verdade (inclui saldo anterior + taxa + acertos calculados pelo backend)
+        // Fallback calculado localmente apenas se API não retornar valor
+        const saldoFinal = saldoFinalApi !== null
+            ? saldoFinalApi
+            : (pagouDiretamente ? saldoAnterior : saldoAnterior - taxaInscricao);
         const deltaIntegracoes = typeof p.deltaIntegracoesExtrato === 'number'
             ? p.deltaIntegracoesExtrato
             : 0;
@@ -1357,7 +1366,7 @@ export class FluxoFinanceiroUI {
                 <div class="modal-content-fluxo">
                     <div class="modal-header-fluxo">
                         <h3>
-                            <span class="material-icons" style="color: #10b981;">payments</span>
+                            <span class="material-icons" style="color: var(--color-success);">payments</span>
                             Registrar Acerto
                         </h3>
                         <button class="modal-close-fluxo" onclick="window.fecharModalAcerto()">
@@ -1664,10 +1673,16 @@ export class FluxoFinanceiroUI {
             });
 
             // Re-renderizar tbody
+            // ✅ L1-FIX: Usar render correto baseado no modo atual (pré-temporada vs temporada com rodadas)
             const tbody = document.getElementById('participantesTableBody');
             if (tbody && window._fluxoUI) {
+                const ui = window._fluxoUI;
+                const temporadaNum = window.temporadaAtual || 2026;
+                const isPreTemporada2026 = temporadaNum >= 2026 && !ui._temRodadasConsolidadas;
                 tbody.innerHTML = ordenados.map((p, idx) =>
-                    window._fluxoUI._renderizarLinhaTabela(p, idx, window._fluxoLigaId)
+                    isPreTemporada2026
+                        ? ui._renderizarLinhaTabela2026(p, idx, window._fluxoLigaId, temporadaNum)
+                        : ui._renderizarLinhaTabela(p, idx, window._fluxoLigaId)
                 ).join('');
             }
 
@@ -1939,7 +1954,7 @@ export class FluxoFinanceiroUI {
             );
             container.innerHTML = `
                 <div class="estado-inicial">
-                    <div class="estado-inicial-icon"><span class="material-icons" style="font-size: 48px; color: #f59e0b;">warning</span></div>
+                    <div class="estado-inicial-icon"><span class="material-icons" style="font-size: 48px; color: var(--color-warning);">warning</span></div>
                     <h2 class="estado-inicial-titulo">Erro ao carregar extrato</h2>
                     <p class="estado-inicial-subtitulo">Dados corrompidos. Tente atualizar.</p>
                     <button onclick="window.forcarRefreshExtrato('${participante?.time_id || participante?.id}')" class="btn-modern btn-primary-gradient">
@@ -3527,10 +3542,10 @@ window.mostrarDetalhamentoGanhos = function () {
         <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 10000;">
             <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 16px; padding: 24px; max-width: 400px; width: 90%; max-height: 80vh; overflow-y: auto; border: 1px solid rgba(34,197,94,0.3);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3 style="color: #22c55e; margin: 0; display: flex; align-items: center; gap: 8px;">
+                    <h3 style="color: var(--color-success-light); margin: 0; display: flex; align-items: center; gap: 8px;">
                         <span class="material-icons">trending_up</span> TUDO QUE GANHOU
                     </h3>
-                    <button onclick="document.getElementById('modal-detalhamento').remove()" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 24px;">&times;</button>
+                    <button onclick="document.getElementById('modal-detalhamento').remove()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 24px;">&times;</button>
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -3539,20 +3554,20 @@ window.mostrarDetalhamentoGanhos = function () {
                             ? itens
                                   .map(
                                       (item) => `
-                        <div style="display: flex; justify-content: space-between; padding: 12px; background: rgba(34,197,94,0.1); border-radius: 8px; border-left: 3px solid #22c55e;">
-                            <span style="color: #e2e8f0;">${item.nome}</span>
-                            <span style="color: #22c55e; font-weight: 600;">+${formatarMoedaBR(item.valor)}</span>
+                        <div style="display: flex; justify-content: space-between; padding: 12px; background: var(--color-success-muted); border-radius: 8px; border-left: 3px solid var(--color-success-light);">
+                            <span style="color: var(--text-secondary);">${item.nome}</span>
+                            <span style="color: var(--color-success-light); font-weight: 600;">+${formatarMoedaBR(item.valor)}</span>
                         </div>
                     `,
                                   )
                                   .join("")
-                            : '<p style="color: #94a3b8; text-align: center;">Nenhum ganho registrado</p>'
+                            : '<p style="color: var(--text-muted); text-align: center;">Nenhum ganho registrado</p>'
                     }
                 </div>
 
                 <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between;">
-                    <span style="color: #94a3b8; font-weight: 600;">TOTAL GANHOS:</span>
-                    <span style="color: #22c55e; font-weight: 700; font-size: 18px;">+${formatarMoedaBR(total)}</span>
+                    <span style="color: var(--text-muted); font-weight: 600;">TOTAL GANHOS:</span>
+                    <span style="color: var(--color-success-light); font-weight: 700; font-size: 18px;">+${formatarMoedaBR(total)}</span>
                 </div>
             </div>
         </div>
@@ -3642,10 +3657,10 @@ window.mostrarDetalhamentoPerdas = function () {
         <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 10000;">
             <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 16px; padding: 24px; max-width: 400px; width: 90%; max-height: 80vh; overflow-y: auto; border: 1px solid rgba(239,68,68,0.3);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3 style="color: #ef4444; margin: 0; display: flex; align-items: center; gap: 8px;">
+                    <h3 style="color: var(--color-danger); margin: 0; display: flex; align-items: center; gap: 8px;">
                         <span class="material-icons">trending_down</span> TUDO QUE PERDEU
                     </h3>
-                    <button onclick="document.getElementById('modal-detalhamento').remove()" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 24px;">&times;</button>
+                    <button onclick="document.getElementById('modal-detalhamento').remove()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 24px;">&times;</button>
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -3654,20 +3669,20 @@ window.mostrarDetalhamentoPerdas = function () {
                             ? itens
                                   .map(
                                       (item) => `
-                        <div style="display: flex; justify-content: space-between; padding: 12px; background: rgba(239,68,68,0.1); border-radius: 8px; border-left: 3px solid #ef4444;">
-                            <span style="color: #e2e8f0;">${item.nome}</span>
-                            <span style="color: #ef4444; font-weight: 600;">-${formatarMoedaBR(item.valor)}</span>
+                        <div style="display: flex; justify-content: space-between; padding: 12px; background: var(--color-danger-muted); border-radius: 8px; border-left: 3px solid var(--color-danger);">
+                            <span style="color: var(--text-secondary);">${item.nome}</span>
+                            <span style="color: var(--color-danger); font-weight: 600;">-${formatarMoedaBR(item.valor)}</span>
                         </div>
                     `,
                                   )
                                   .join("")
-                            : '<p style="color: #94a3b8; text-align: center;">Nenhuma perda registrada</p>'
+                            : '<p style="color: var(--text-muted); text-align: center;">Nenhuma perda registrada</p>'
                     }
                 </div>
 
                 <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between;">
-                    <span style="color: #94a3b8; font-weight: 600;">TOTAL PERDAS:</span>
-                    <span style="color: #ef4444; font-weight: 700; font-size: 18px;">-${formatarMoedaBR(total)}</span>
+                    <span style="color: var(--text-muted); font-weight: 600;">TOTAL PERDAS:</span>
+                    <span style="color: var(--color-danger); font-weight: 700; font-size: 18px;">-${formatarMoedaBR(total)}</span>
                 </div>
             </div>
         </div>
@@ -4217,7 +4232,7 @@ window.abrirNovoParticipante = function() {
         <div class="modal-content-fluxo" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
             <div class="modal-header-fluxo">
                 <h3>
-                    <span class="material-icons" style="color: #3b82f6;">person_add</span>
+                    <span class="material-icons" style="color: var(--color-info);">person_add</span>
                     Novo Participante ${temporada}
                 </h3>
                 <button class="modal-close-fluxo" onclick="window.fecharModalNovoParticipante()">
@@ -4249,7 +4264,7 @@ window.abrirNovoParticipante = function() {
                                placeholder="Digite o nome do time ou cartoleiro (min 3 letras)..."
                                style="flex: 1; background: #252525; border: 1px solid #333; border-radius: 6px; padding: 10px 12px; color: #fff;">
                         <button onclick="window.buscarTimeNovoParticipante('nome')" class="btn-buscar-novo"
-                                style="background: #3b82f6; color: #fff; border: none; border-radius: 6px; padding: 10px 16px; cursor: pointer;">
+                                style="background: var(--color-info); color: var(--text-primary); border: none; border-radius: 6px; padding: 10px 16px; cursor: pointer;">
                             <span class="material-icons" style="font-size: 18px; vertical-align: middle;">search</span>
                         </button>
                     </div>
@@ -4266,11 +4281,11 @@ window.abrirNovoParticipante = function() {
                                placeholder="Ex: 12345678"
                                style="flex: 1; background: #252525; border: 1px solid #333; border-radius: 6px; padding: 10px 12px; color: #fff;">
                         <button onclick="window.buscarTimeNovoParticipante('id')" class="btn-buscar-novo"
-                                style="background: #3b82f6; color: #fff; border: none; border-radius: 6px; padding: 10px 16px; cursor: pointer;">
+                                style="background: var(--color-info); color: var(--text-primary); border: none; border-radius: 6px; padding: 10px 16px; cursor: pointer;">
                             <span class="material-icons" style="font-size: 18px; vertical-align: middle;">search</span>
                         </button>
                     </div>
-                    <div style="background: #1e293b; border-radius: 6px; padding: 10px; font-size: 0.8rem; color: #94a3b8;">
+                    <div style="background: var(--surface-card-elevated); border-radius: 6px; padding: 10px; font-size: 0.8rem; color: var(--text-muted);">
                         <span class="material-icons" style="font-size: 16px; vertical-align: middle;">info</span>
                         O participante encontra seu ID no app Cartola FC > Perfil > "ID do Time"
                     </div>
@@ -4345,10 +4360,10 @@ window.abrirNovoParticipante = function() {
                     <div style="display: flex; align-items: center; padding: 12px; background: #1a1a1a; border-radius: 8px; margin-bottom: 16px;">
                         <img id="escudoSelecionadoNovo" src="" alt="Escudo" style="width: 48px; height: 48px; border-radius: 6px; margin-right: 12px;">
                         <div style="flex: 1;">
-                            <h6 id="nomeTimeSelecionadoNovo" style="margin: 0; color: #fff;"></h6>
-                            <small id="nomeCartoleiroSelecionadoNovo" style="color: #888;"></small>
+                            <h6 id="nomeTimeSelecionadoNovo" style="margin: 0; color: var(--text-primary);"></h6>
+                            <small id="nomeCartoleiroSelecionadoNovo" style="color: var(--text-muted);"></small>
                         </div>
-                        <button onclick="window.limparSelecaoNovoParticipante()" style="background: transparent; border: 1px solid #ef4444; color: #ef4444; border-radius: 6px; padding: 6px 10px; cursor: pointer;">
+                        <button onclick="window.limparSelecaoNovoParticipante()" style="background: transparent; border: 1px solid var(--color-danger); color: var(--color-danger); border-radius: 6px; padding: 6px 10px; cursor: pointer;">
                             <span class="material-icons" style="font-size: 18px; vertical-align: middle;">close</span>
                         </button>
                     </div>
@@ -4381,7 +4396,7 @@ window.abrirNovoParticipante = function() {
             <div class="modal-footer-fluxo">
                 <button class="btn-cancelar-fluxo" onclick="window.fecharModalNovoParticipante()">Cancelar</button>
                 <button id="btnCadastrarNovoParticipante" class="btn-confirmar-fluxo" onclick="window.confirmarNovoParticipante()" disabled
-                        style="background: #10b981;">
+                        style="background: var(--color-success);">
                     <span class="material-icons">person_add</span>
                     Cadastrar
                 </button>
@@ -4530,7 +4545,7 @@ window.abrirNovoParticipante = function() {
             if (!data.success && !data.times) {
                 resultados.innerHTML = `
                     <div style="text-align: center; padding: 20px; color: #888;">
-                        <span class="material-icons" style="font-size: 36px; color: #ef4444;">search_off</span>
+                        <span class="material-icons" style="font-size: 36px; color: var(--color-danger);">search_off</span>
                         <p style="margin-top: 8px;">Nenhum resultado encontrado</p>
                     </div>`;
                 return;
@@ -4541,7 +4556,7 @@ window.abrirNovoParticipante = function() {
             if (times.length === 0) {
                 resultados.innerHTML = `
                     <div style="text-align: center; padding: 20px; color: #888;">
-                        <span class="material-icons" style="font-size: 36px; color: #ef4444;">search_off</span>
+                        <span class="material-icons" style="font-size: 36px; color: var(--color-danger);">search_off</span>
                         <p style="margin-top: 8px;">Nenhum resultado encontrado</p>
                     </div>`;
                 return;
@@ -4555,17 +4570,17 @@ window.abrirNovoParticipante = function() {
                          style="width: 36px; height: 36px; border-radius: 4px; margin-right: 12px;"
                          onerror="this.onerror=null;this.src='/escudos/default.png'">
                     <div style="flex: 1;">
-                        <div style="color: #fff; font-weight: 600;">${escapeHtml(time.nome_time || time.nome || 'Time sem nome')}</div>
-                        <small style="color: #888;">${escapeHtml(time.nome_cartoleiro || time.nome_cartola || '')}</small>
+                        <div style="color: var(--text-primary); font-weight: 600;">${escapeHtml(time.nome_time || time.nome || 'Time sem nome')}</div>
+                        <small style="color: var(--text-muted);">${escapeHtml(time.nome_cartoleiro || time.nome_cartola || '')}</small>
                     </div>
-                    <small style="color: #555;">ID: ${time.time_id || time.id}</small>
+                    <small style="color: var(--text-disabled);">ID: ${time.time_id || time.id}</small>
                 </div>
             `).join('');
 
         } catch (error) {
             console.error('[NOVO-PARTICIPANTE] Erro na busca:', error);
             resultados.innerHTML = `
-                <div style="text-align: center; padding: 20px; color: #ef4444;">
+                <div style="text-align: center; padding: 20px; color: var(--color-danger);">
                     <span class="material-icons" style="font-size: 36px;">error</span>
                     <p style="margin-top: 8px;">Erro ao buscar: ${error.message}</p>
                 </div>`;

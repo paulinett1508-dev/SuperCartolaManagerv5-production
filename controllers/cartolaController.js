@@ -9,6 +9,7 @@ import cartolaApiService from "../services/cartolaApiService.js";
 import Time from "../models/Time.js";
 import InscricaoTemporada from "../models/InscricaoTemporada.js";
 import { CURRENT_SEASON } from "../config/seasons.js";
+import logger from '../utils/logger.js';
 
 // Retorna todos os clubes disponíveis
 export async function listarClubes(req, res) {
@@ -16,7 +17,7 @@ export async function listarClubes(req, res) {
     const clubes = await buscarClubes();
     res.status(200).json(clubes);
   } catch (error) {
-    console.error("Erro ao listar clubes:", error.message);
+    logger.error("Erro ao listar clubes:", error.message);
     res.status(500).json({ error: `Erro ao buscar clubes: ${error.message}` });
   }
 }
@@ -48,7 +49,7 @@ export async function obterTimePorId(req, res) {
       clube_id: time.clube_id,
     });
   } catch (error) {
-    console.error(
+    logger.error(
       `Erro ao buscar time com ID ${req.params.id}:`,
       error.message,
     );
@@ -65,7 +66,7 @@ export async function obterPontuacao(req, res) {
     const dados = await buscarPontuacaoPorRodada(id, rodada);
     res.status(200).json(dados);
   } catch (error) {
-    console.error(
+    logger.error(
       `Erro ao buscar pontuação do time ${id} na rodada ${rodada}:`,
       error.message,
     );
@@ -116,7 +117,7 @@ export async function obterEscalacao(req, res) {
       variacao_patrimonio: data.variacao_patrimonio,
     });
   } catch (error) {
-    console.error(
+    logger.error(
       `Erro ao buscar escalação do time ${id} na rodada ${rodada}:`,
       error.message,
     );
@@ -145,7 +146,7 @@ export async function getMercadoStatus(req, res) {
   }
 
   try {
-    console.log("[CARTOLA-CONTROLLER] Buscando status do mercado...");
+    logger.log("[CARTOLA-CONTROLLER] Buscando status do mercado...");
     const response = await fetch(
       "https://api.cartola.globo.com/mercado/status",
       {
@@ -166,7 +167,7 @@ export async function getMercadoStatus(req, res) {
     }
 
     const data = await response.json();
-    console.log("[CARTOLA-CONTROLLER] Status recebido:", data);
+    logger.log("[CARTOLA-CONTROLLER] Status recebido:", data);
 
     res.status(200).json({
       rodada_atual: data.rodada_atual,
@@ -176,13 +177,13 @@ export async function getMercadoStatus(req, res) {
       temporada: data.temporada, // ✅ Passar temporada para o frontend
     });
   } catch (error) {
-    console.error(
+    logger.error(
       "[CARTOLA-CONTROLLER] Erro ao buscar status do mercado:",
       error.message,
     );
 
     // Retornar dados de fallback em vez de erro 503
-    console.log("[CARTOLA-CONTROLLER] Retornando fallback (temporada 2026)");
+    logger.log("[CARTOLA-CONTROLLER] Retornando fallback (temporada 2026)");
     res.status(200).json({
       rodada_atual: 1, // ✅ Início da temporada 2026
       status_mercado: 2,
@@ -219,7 +220,7 @@ export async function getParciais(req, res) {
     const data = await response.json();
     res.status(200).json(data);
   } catch (error) {
-    console.error("Erro ao buscar parciais:", error.message);
+    logger.error("Erro ao buscar parciais:", error.message);
     res
       .status(500)
       .json({ error: `Erro ao buscar parciais: ${error.message}` });
@@ -249,7 +250,7 @@ export async function sincronizarDadosCartola(req, res) {
   const { salvar, ligaId } = req.query; // ?salvar=true&ligaId=xxx para persistir no banco e na liga
 
   try {
-    console.log(`[CARTOLA-SYNC] Buscando dados completos do time ${id}...`);
+    logger.log(`[CARTOLA-SYNC] Buscando dados completos do time ${id}...`);
 
     // Buscar dados COMPLETOS da API Cartola (sem normalização)
     const dadosCompletos = await cartolaApiService.buscarTimePorIdCompleto(id);
@@ -302,7 +303,7 @@ export async function sincronizarDadosCartola(req, res) {
 
     // Se solicitado, salvar no banco de dados
     if (salvar === "true") {
-      console.log(`[CARTOLA-SYNC] Salvando dados do time ${id} no banco...`);
+      logger.log(`[CARTOLA-SYNC] Salvando dados do time ${id} no banco...`);
 
       // ✅ v2.1: Extrair clube_id com fallback (API pode retornar só o ID direto)
       const clubeIdExtraido = time.clube?.id || time.clube_id || null;
@@ -350,11 +351,11 @@ export async function sincronizarDadosCartola(req, res) {
 
         resposta.salvo_no_banco = true;
         resposta.mensagem = "Dados sincronizados e salvos com sucesso";
-        console.log(`[CARTOLA-SYNC] Time ${id} atualizado com sucesso`);
+        logger.log(`[CARTOLA-SYNC] Time ${id} atualizado com sucesso`);
       } else {
         resposta.salvo_no_banco = false;
         resposta.mensagem = `Time ${id} não encontrado no banco local. Use o cadastro de participantes para adicioná-lo primeiro.`;
-        console.log(`[CARTOLA-SYNC] Time ${id} não existe no banco local`);
+        logger.log(`[CARTOLA-SYNC] Time ${id} não existe no banco local`);
       }
 
       // Se ligaId foi passado, atualizar inscrição E liga.participantes
@@ -381,9 +382,9 @@ export async function sincronizarDadosCartola(req, res) {
           if (inscricaoAtualizada) {
             resposta.atualizado_inscricao = true;
             resposta.mensagem += ` Inscrição ${CURRENT_SEASON} atualizada.`;
-            console.log(`[CARTOLA-SYNC] Inscrição ${CURRENT_SEASON} do time ${id} atualizada`);
+            logger.log(`[CARTOLA-SYNC] Inscrição ${CURRENT_SEASON} do time ${id} atualizada`);
           } else {
-            console.log(`[CARTOLA-SYNC] Inscrição ${CURRENT_SEASON} não encontrada para time ${id}`);
+            logger.log(`[CARTOLA-SYNC] Inscrição ${CURRENT_SEASON} não encontrada para time ${id}`);
           }
 
           // ✅ v2.1: Também atualizar liga.participantes (fonte da listagem)
@@ -408,10 +409,10 @@ export async function sincronizarDadosCartola(req, res) {
           if (ligaAtualizada) {
             resposta.atualizado_liga = true;
             resposta.mensagem += ` Participante na liga atualizado.`;
-            console.log(`[CARTOLA-SYNC] Participante ${id} atualizado na liga ${ligaId}`);
+            logger.log(`[CARTOLA-SYNC] Participante ${id} atualizado na liga ${ligaId}`);
           }
         } catch (inscError) {
-          console.error(`[CARTOLA-SYNC] Erro ao atualizar inscrição/liga:`, inscError.message);
+          logger.error(`[CARTOLA-SYNC] Erro ao atualizar inscrição/liga:`, inscError.message);
         }
       }
     }
@@ -419,7 +420,7 @@ export async function sincronizarDadosCartola(req, res) {
     res.status(200).json(resposta);
 
   } catch (error) {
-    console.error(`[CARTOLA-SYNC] Erro ao sincronizar time ${id}:`, error.message);
+    logger.error(`[CARTOLA-SYNC] Erro ao sincronizar time ${id}:`, error.message);
     res.status(500).json({
       success: false,
       erro: `Erro ao sincronizar dados: ${error.message}`
@@ -435,7 +436,7 @@ export async function obterDadosCompletosCartola(req, res) {
   const { id } = req.params;
 
   try {
-    console.log(`[CARTOLA-API] Buscando dados completos do time ${id}...`);
+    logger.log(`[CARTOLA-API] Buscando dados completos do time ${id}...`);
 
     const dadosCompletos = await cartolaApiService.buscarTimePorIdCompleto(id);
 
@@ -462,7 +463,7 @@ export async function obterDadosCompletosCartola(req, res) {
     });
 
   } catch (error) {
-    console.error(`[CARTOLA-API] Erro ao buscar time ${id}:`, error.message);
+    logger.error(`[CARTOLA-API] Erro ao buscar time ${id}:`, error.message);
     res.status(500).json({
       success: false,
       erro: `Erro ao buscar dados: ${error.message}`

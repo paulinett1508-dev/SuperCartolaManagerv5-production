@@ -36,8 +36,13 @@
 
 /* === HEADER === */
 .xray-header {
-    text-align: center;
     margin-bottom: 20px;
+}
+
+.xray-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .xray-header-title {
@@ -45,6 +50,7 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
+    flex: 1;
 }
 
 .xray-header-title .material-icons {
@@ -64,6 +70,48 @@
     font-size: 13px;
     color: var(--xray-text-muted);
     margin-top: 4px;
+    text-align: center;
+}
+
+/* === REFRESH BUTTON === */
+.xray-refresh-btn {
+    background: none;
+    border: none;
+    color: var(--xray-text-muted);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s, background 0.2s;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+}
+
+.xray-refresh-btn:hover {
+    color: var(--xray-primary);
+    background: rgba(255, 69, 0, 0.1);
+}
+
+.xray-refresh-btn .material-icons {
+    font-size: 20px;
+}
+
+.xray-refresh-btn.spinning .material-icons {
+    animation: xray-spin 0.7s linear infinite;
+}
+
+.xray-refresh-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Spacer to balance the refresh button on the right */
+.xray-header-spacer {
+    width: 36px;
+    flex-shrink: 0;
 }
 
 /* === BACK BUTTON === */
@@ -729,9 +777,15 @@
 
         <!-- Header -->
         <div class="xray-header">
-            <div class="xray-header-title">
-                <span class="material-icons">biotech</span>
-                <h2>Raio-X da Rodada</h2>
+            <div class="xray-header-row">
+                <div class="xray-header-spacer"></div>
+                <div class="xray-header-title">
+                    <span class="material-icons">biotech</span>
+                    <h2>Raio-X da Rodada</h2>
+                </div>
+                <button class="xray-refresh-btn" id="xrayRefreshBtn" title="Atualizar dados">
+                    <span class="material-icons">refresh</span>
+                </button>
             </div>
             <div class="xray-header-sub" id="xraySubtitulo">Rodada --</div>
         </div>

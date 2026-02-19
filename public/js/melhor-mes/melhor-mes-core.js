@@ -1,10 +1,12 @@
-// MELHOR DO MÊS - CORE BUSINESS LOGIC v1.4
+// MELHOR DO MÊS - CORE BUSINESS LOGIC v1.5
 // public/js/melhor-mes/melhor-mes-core.js
 // v1.2: Detecção dinâmica de temporada (R1 + mercado aberto = temporada anterior)
 // v1.3: Propagação de temporada para getRankingRodadaEspecifica (fix pré-temporada 2026)
 // v1.4: FIX CRÍTICO - Verifica se API já retorna ano atual antes de buscar dados
+// v1.5: Import RODADA_FINAL_CAMPEONATO de season-config.js (AUDIT-012)
 
 import { getRankingRodadaEspecifica } from "../rodadas.js";
+import { RODADA_FINAL_CAMPEONATO } from "../core/season-config.js";
 import {
   MELHOR_MES_CONFIG,
   getPremiosLiga,
@@ -142,15 +144,15 @@ export class MelhorMesCore {
       const mercadoAberto = mercadoStatus.status_mercado === 1;
       const temporadaAPI = mercadoStatus.temporada || new Date().getFullYear();
       const anoAtual = new Date().getFullYear();
-      const RODADA_FINAL_CAMPEONATO = mercadoStatus.rodada_final || 38;
+      const rodadaFinalDinamica = mercadoStatus.rodada_final || RODADA_FINAL_CAMPEONATO;
 
       if (rodadaAtual === 1 && mercadoAberto) {
         // v1.4: Verificar se API retorna ano ANTERIOR ao atual (pré-temporada real)
         if (temporadaAPI < anoAtual) {
           // Pré-temporada: API ainda retorna 2025, podemos buscar dados de 2025
           this.temporadaParaBusca = temporadaAPI;
-          console.log(`[MELHOR-MES-CORE] Pré-temporada ${anoAtual}: usando dados da temporada ${this.temporadaParaBusca} (38 rodadas)`);
-          this.ultimaRodadaCompleta = RODADA_FINAL_CAMPEONATO;
+          console.log(`[MELHOR-MES-CORE] Pré-temporada ${anoAtual}: usando dados da temporada ${this.temporadaParaBusca} (${rodadaFinalDinamica} rodadas)`);
+          this.ultimaRodadaCompleta = rodadaFinalDinamica;
           this.temporadaAnterior = true;
         } else {
           // Nova temporada iniciando: API já retorna ano atual, mas sem rodadas ainda

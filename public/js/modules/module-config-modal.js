@@ -1289,9 +1289,7 @@ class ModuleConfigModal {
         } else if (typeof SuperModal !== 'undefined' && SuperModal.toast) {
             SuperModal.toast.error(message);
         } else {
-            // Fallback absoluto: alert
             console.error('[MODULE-CONFIG-MODAL]', message);
-            alert('Erro: ' + message);
         }
     }
 
@@ -1304,9 +1302,7 @@ class ModuleConfigModal {
         } else if (typeof SuperModal !== 'undefined' && SuperModal.toast) {
             SuperModal.toast.success(message);
         } else {
-            // Fallback absoluto: alert
             console.log('[MODULE-CONFIG-MODAL]', message);
-            alert('Sucesso: ' + message);
         }
     }
 }

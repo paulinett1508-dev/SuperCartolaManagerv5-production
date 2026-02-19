@@ -538,7 +538,7 @@ class CacheManager {
       // Cachear cada time individualmente para uso futuro
       for (const time of times) {
         const cacheKey = `time_${time.id}`;
-        await this.save(cacheKey, time, 300000); // 5 minutos
+        await this.set('participantes', cacheKey, time); // 5 minutos (TTL via CACHE_CONFIG)
       }
 
       return times;

@@ -295,17 +295,14 @@ function renderizarRanking(ranking) {
 // RENDER: CARD DESEMPENHO INDIVIDUAL
 // =============================================
 function renderizarCardDesempenho(ranking) {
-    const cardContainer = document.getElementById('capitao-card-desempenho');
-    if (!cardContainer || !estadoCapitao.timeId) return;
+    const mainContainer = document.getElementById('capitaoContent');
+    if (!mainContainer || !estadoCapitao.timeId) return;
 
     const meusDados = ranking.find(
         p => String(p.timeId) === String(estadoCapitao.timeId)
     );
 
-    if (!meusDados) {
-        cardContainer.innerHTML = '';
-        return;
-    }
+    if (!meusDados) return;
 
     const posicao = meusDados.posicao_final || (ranking.indexOf(meusDados) + 1);
     const pontos = typeof truncarPontos === 'function' ? truncarPontos(meusDados.pontuacao_total || 0) : (meusDados.pontuacao_total || 0).toFixed(2);
@@ -315,7 +312,7 @@ function renderizarCardDesempenho(ranking) {
     const pior = meusDados.pior_capitao;
     const distintos = meusDados.capitaes_distintos || 0;
 
-    cardContainer.innerHTML = `
+    mainContainer.insertAdjacentHTML('afterbegin', `
         <div class="capitao-card" style="border-color: var(--capitao-primary); background: rgba(139, 92, 246, 0.08);">
             <div style="width: 100%;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">

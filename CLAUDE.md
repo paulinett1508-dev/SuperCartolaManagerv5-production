@@ -142,12 +142,38 @@ Cada módulo possui sua paleta de cores padronizada. **Sempre use variáveis CSS
 
 **⚠️ Regra:** NUNCA use cores hardcoded (`#22c55e`) diretamente. Sempre use as variáveis CSS para manter consistência e facilitar manutenção futura.
 
+### Ícones (REGRA CRÍTICA)
+**NUNCA use emojis no código.** Sempre use Material Icons com cores tematizadas via variáveis CSS.
+
+| Contexto | Errado | Correto |
+|----------|--------|---------|
+| Indicador ganho | `🟢` | `<span class="material-icons" style="color: var(--app-success)">check_circle</span>` |
+| Indicador perda | `🔴` | `<span class="material-icons" style="color: var(--app-danger)">cancel</span>` |
+| Estrela/MITO | `⭐` | `<span class="material-icons" style="color: var(--app-warning)">star</span>` |
+| Troféu | `🏆` | `<span class="material-icons" style="color: var(--app-danger)">emoji_events</span>` |
+| Futebol | `⚽` | `<span class="material-icons" style="color: var(--app-indigo)">sports_soccer</span>` |
+| Alvo/Posição | `🎯` | `<span class="material-icons" style="color: var(--app-primary)">casino</span>` |
+
+**Motivos:**
+1. Emojis renderizam diferente em cada OS/browser
+2. Material Icons são vetoriais (escaláveis sem perda)
+3. Cores podem ser tematizadas via CSS variables
+4. Consistência visual em todo o sistema
+
 ## 🛡️ Coding Standards
 - **Idempotency:** Financial functions MUST be idempotent (prevent double-charging)
 - **Safety:** Always validate `req.session.usuario` before sensitive actions
 - **Error Handling:** Use `try/catch` in async controllers
 - **No React/Vue:** Pure JavaScript for frontend
 - **Nomenclatura em Português:** Use `autorizado` (not `authorized`), `usuario` (not `user`), `senha` (not `password`)
+- **SPA Init Pattern:** Páginas em `supportedPages` (layout.html) NUNCA devem usar `DOMContentLoaded` sozinho. O evento só dispara uma vez — na navegação SPA o DOM já está pronto e o listener nunca executa. Sempre usar:
+```javascript
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init(); // SPA: DOM já pronto, executar imediatamente
+}
+```
 
 ## 🤖 Skills com Ativação por Keywords
 
@@ -174,6 +200,7 @@ Documentação das skills: [`docs/skills/`](docs/skills/) (agnóstico, Markdown 
 | "regra de negócio", "cálculo", "config liga" | **league-architect** | Specialist |
 | "script DB", "backup", "migration", "limpeza" | **db-guardian** | Specialist |
 | "auditar código", "security review", "OWASP" | **code-inspector** | Specialist |
+| "já existe esse CSS?", "anti-frank", "ative modo anti-frank", "antes de criar CSS", "blindar frontend" | **anti-frankenstein** | Specialist |
 | "git push", "commit", "suba mudanças" | **git-commit-push** | Utility |
 | "reiniciar servidor", "restart" | **restart-server** | Utility |
 | "pull no replit", "deploy", "sincronizar" | **replit-pull** | Utility |
@@ -181,7 +208,7 @@ Documentação das skills: [`docs/skills/`](docs/skills/) (agnóstico, Markdown 
 | "verifique se", "confirme que", "é verdade?" | **fact-checker** | Utility |
 | "tá complexo", "duplicado", "antes de codar" | **ai-problems-detection** | Utility |
 | "refatorar arquivo grande", "separar módulos" | **Refactor-Monolith** | Utility |
-| "adaptar código do stitch", "html do google stitch" | **stitch-adapter** | Utility |
+| "adaptar html", "converter html externo", "html do stitch" | **stitch-adapter** | Utility |
 | "API Cartola", "endpoint", "scout", "mercado" | **cartola-api** | Project |
 | "auditar cache", "cache lento", "Service Worker" | **cache-auditor** | Project |
 | "auditar módulo", "checklist módulo" | **auditor-module** | Project |
@@ -195,8 +222,23 @@ Documentação das skills: [`docs/skills/`](docs/skills/) (agnóstico, Markdown 
 ```
 workflow → FASE 1: pesquisa → PRD.md
          → FASE 2: spec → SPEC.md
-         → FASE 3: code → Implementado
+         → FASE 3: [anti-frankenstein se frontend] → code → Implementado
 ```
+
+### Anti-Frankenstein Protocol (Governança Frontend)
+```
+Qualquer criação/modificação CSS/HTML
+    ↓
+CHECK 1: Já existe? (consultar css-registry.json)
+CHECK 2: Onde vive? (diretório correto)
+CHECK 3: Usa tokens? (zero hardcoded)
+CHECK 4: Segue convenções? (naming, escopo, header)
+CHECK 5: É necessário? (editar existente vs criar novo)
+    ↓
+Todos passaram? → Prosseguir
+Algum falhou? → PARAR e corrigir
+```
+**Arquivos:** `config/css-registry.json`, `docs/rules/audit-frontend.md`
 
 **Diretório:** `.claude/docs/PRD-[nome].md` e `SPEC-[nome].md`
 
@@ -244,6 +286,7 @@ As keywords ativam a mesma skill automaticamente (ver tabela acima).
 | `/auditor-module [modulo]` | "audite o módulo X", "checklist módulo" |
 | `/cache-auditor [modo]` | "auditar cache", "cache desatualizado" |
 | `/ux-auditor-app` | "auditar UX do app", "revisar design participante", "visual do app tá ok?" |
+| `/anti-frankenstein` | "anti-frank", "ative modo anti-frank", "antes de criar CSS", "já existe?", "blindar frontend", "HTMLs no modo anti-frank" |
 | `/newsession` | "nova sessão", "salvar contexto" |
 | `/liste-pr-github [período]` | "listar PRs", "PRs de hoje", "merges da semana" |
 
@@ -346,15 +389,30 @@ Fallback: `onerror="this.src='/escudos/default.png'"`
 ## 🔌 Estratégia de Banco de Dados
 
 ### Configuração
-- **Ambiente único:** DEV e PROD = mesmo banco MongoDB
-- **Diferenciação:** Via `NODE_ENV` (logs e proteções)
-- **Razão:** Dados consolidados são perpétuos
+- **Banco único:** `cartola-manager` (MongoDB Atlas) — mesmo banco para dev e prod
+- **Variável:** Apenas `MONGO_URI` — `MONGO_URI_DEV` foi descontinuada e deletada
+- **NODE_ENV:** Diferencia apenas logs e labels (`[🔵 DEV]` vs `[🔴 PROD]`), NÃO o banco
+- **Razão:** Micro SaaS — dados perpétuos, time pequeno, sem necessidade de ambientes separados
+
+### Stack de Desenvolvimento
+- `npm run dev` → `NODE_ENV=development` → conecta ao mesmo banco real
+- Replit link temporário → admin valida mudanças sem afetar usuários
+- Replit Republish → usuários em `supercartolamanager.com.br` recebem as mudanças
+
+### Scripts — Padrão Correto
+```javascript
+// ✅ CORRETO — todos os scripts devem usar apenas MONGO_URI
+const MONGO_URI = process.env.MONGO_URI;
+
+// ❌ ERRADO — MONGO_URI_DEV foi descontinuada
+// const MONGO_URI = process.env.MONGO_URI_DEV || process.env.MONGO_URI;
+```
 
 ### Proteções em Scripts
 ```javascript
-const isProd = process.env.NODE_ENV === 'production';
-if (isProd && !isForced && !isDryRun) {
-    console.error('❌ PROD requer --force ou --dry-run');
+// Para scripts destrutivos: sempre exigir --dry-run ou --force
+if (!isDryRun && !isForce) {
+    console.error('❌ Use --dry-run para simular ou --force para executar');
     process.exit(1);
 }
 ```
@@ -362,7 +420,7 @@ if (isProd && !isForced && !isDryRun) {
 ### Comandos
 ```bash
 node scripts/[script].js --dry-run  # Validar
-NODE_ENV=production node scripts/[script].js --force  # Executar
+node scripts/[script].js --force    # Executar
 ```
 
 ## ⚽ Jogos do Dia (API-Football + Fallbacks)
@@ -417,7 +475,93 @@ node scripts/backlog-helper.js search "termo"  # Buscar
 ### IDs no BACKLOG
 `BUG-XXX`, `SEC-XXX`, `FEAT-XXX`, `PERF-XXX`, `UX-XXX`, `REFACTOR-XXX`, `IDEA-XXX`, `NICE-XXX`, `FUTURE-XXX`
 
+## 🚫 Regra Absoluta: Zero Arredondamento de Pontos
+
+**PONTOS DE PARTICIPANTES NUNCA DEVEM SER ARREDONDADOS. SEMPRE TRUNCAR.**
+
+### Por que truncar, não arredondar?
+- `93.78569` arredondado → `93.79` (ERRADO — o participante não fez esse ponto)
+- `93.78569` truncado → `93.78` (CORRETO — apenas o que foi conquistado)
+
+### Funções Canônicas Obrigatórias
+
+**Backend (Node.js) — retorna `number`:**
+```javascript
+import { truncarPontosNum } from '../utils/type-helpers.js';
+// Ex: truncarPontosNum(93.78569) → 93.78
+```
+
+**Frontend participante — retorna `string` formatada pt-BR:**
+```javascript
+// truncarPontos() já está disponível via window.truncarPontos (participante-utils.js)
+// Ex: truncarPontos(93.78569) → "93,78"
+```
+
+**Frontend admin (sem truncarPontos no escopo) — inline:**
+```javascript
+// 2 casas decimais:
+(Math.trunc(valor * 100) / 100).toFixed(2)
+// 1 casa decimal:
+(Math.trunc(valor * 10) / 10).toFixed(1)
+```
+
+### O que é PROIBIDO
+```javascript
+// NUNCA — arredonda: 93.785 → 93.79
+pontos.toFixed(2)
+
+// NUNCA — arredonda: 93.785 → 93.79
+parseFloat(pontos.toFixed(2))
+
+// NUNCA — arredonda: Math.round(93.785 * 100) / 100 → 93.79
+Math.round(pontos * 100) / 100
+```
+
+### O que é OBRIGATÓRIO
+```javascript
+// Backend → number
+truncarPontosNum(pontos)              // 93.785 → 93.78
+
+// Frontend com truncarPontos disponível → string pt-BR
+truncarPontos(pontos)                 // 93.785 → "93,78"
+
+// Frontend sem truncarPontos (inline) → string
+(Math.trunc(pontos * 100) / 100).toFixed(2)  // 93.785 → "93.78"
+```
+
+### Implementação de `truncarPontosNum`
+```javascript
+// utils/type-helpers.js
+export function truncarPontosNum(valor) {
+    const num = parseFloat(valor) || 0;
+    return Math.trunc(num * 100) / 100;
+}
+```
+
+### Implementação canônica de `truncarPontos` (frontend)
+```javascript
+// Usar Math.trunc — trunca em direção ao zero (correto para negativos)
+function truncarPontos(valor) {
+    const num = parseFloat(valor) || 0;
+    const truncado = Math.trunc(num * 100) / 100;
+    return truncado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+```
+
+### Escopo da Regra
+Aplica-se a **qualquer valor de pontuação de participante**, incluindo:
+- Pontos da rodada (`pontos`, `pontos_rodada`)
+- Pontos acumulados (`pontos_total`, `pontuacao_total`)
+- Médias de pontos (`media_pontos`, `media_capitao`)
+- Diferenças (`diferenca_media`, `diferenca_melhor`, `vs_media`)
+- Pontos de módulos (Artilheiro, Luva de Ouro, Pontos Corridos, Mata-Mata, etc.)
+
+**NÃO se aplica** a valores financeiros (R$), percentuais (%), tempos (ms/s), tamanhos (MB), contagens inteiras.
+
+---
+
 ## ⚠️ Critical Rules
 1. NEVER remove `gemini_audit.py`
 2. NEVER break "Follow the Money" audit trail in financial controllers
 3. Always check variable existence before accessing properties (avoid `undefined`)
+4. NEVER round participant points — always TRUNCATE using `truncarPontosNum()` (backend) or `truncarPontos()` (frontend)

@@ -4,7 +4,7 @@
 // v2.1: Exibe período (1º T/2º T) quando minutos não disponíveis
 //       Auto-refresh reduzido de 60s para 30s para jogos ao vivo
 // v2.0: "Jogos do Dia" com sub-categorias por liga + "Jogos do Mês" no Meu Time
-// Componente com abas: Meu Time | Jogos do Dia | Copa BR | Libertadores | Copa do Mundo
+// Componente com abas: Meu Time | Jogos do Dia | Copa BR | Copa do Mundo
 // Exibe dados internamente (sem links externos)
 // =====================================================================
 
@@ -106,10 +106,6 @@ const TabelasEsportes = {
                             <span class="material-icons" style="font-size:14px;">flag</span>
                             <span>Copa do Brasil</span>
                         </button>
-                        <button class="tabelas-tab" data-tab="libertadores">
-                            <span class="material-icons" style="font-size:14px;">public</span>
-                            <span>Libertadores</span>
-                        </button>
                         <button class="tabelas-tab" data-tab="copa-mundo">
                             <span class="material-icons" style="font-size:14px;">language</span>
                             <span>Copa do Mundo</span>
@@ -177,9 +173,6 @@ const TabelasEsportes = {
                 break;
             case 'copa-brasil':
                 this._renderAguarde(conteudo, 'Copa do Brasil', 'flag', 'var(--app-success-light)');
-                break;
-            case 'libertadores':
-                this._renderAguarde(conteudo, 'Libertadores', 'public', 'var(--app-gold)');
                 break;
             case 'copa-mundo':
                 this._renderAguarde(conteudo, 'Copa do Mundo', 'language', 'var(--app-info)');

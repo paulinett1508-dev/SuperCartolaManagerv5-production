@@ -110,7 +110,7 @@ export async function buscarDadosRodadas(
             time: dadosInfo.time?.nome || "N/D",
             escudo: dadosInfo.time?.url_escudo_png || "",
             timeDoCoracao: time.timeDoCoracao || "",
-            pontos: pontos.toFixed(2),
+            pontos: (Math.trunc(pontos * 100) / 100).toFixed(2),
             rodadaNaoJogada,
           };
         } catch (err) {

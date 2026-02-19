@@ -1,6 +1,16 @@
 /**
- * CAPITAO MANAGER v1.0.0
- * Módulo OPCIONAL - Capitão de Luxo
+ * CAPITAO MANAGER v1.1.0
+ * Módulo OPCIONAL - Capitão de Luxo (ranking de pontuação dos capitães)
+ *
+ * STATUS: STUBS — Hooks registrados mas NÃO executam coleta automaticamente.
+ *
+ * FLUXO ATUAL (manual via admin):
+ *   1. Admin clica "Consolidar" → POST /api/capitao/:ligaId/consolidar
+ *   Controller: capitaoController.js (v1.1.0)
+ *   Service: capitaoService.js (busca dados da API Cartola por rodada)
+ *
+ * FUTURO: Quando o orchestrator for implementado end-to-end, estes hooks
+ * devem delegar ao controller via chamadas internas (fetch localhost).
  */
 import BaseManager from './BaseManager.js';
 
@@ -20,31 +30,32 @@ export default class CapitaoManager extends BaseManager {
         this._coletaAtiva = false;
     }
 
+    // STUB: Coleta real é feita manualmente pelo admin via POST /:ligaId/consolidar
     async onMarketClose(ctx) {
-        console.log(`[CAPITAO] Mercado fechou - coletando capitães R${ctx.rodada}`);
         this._coletaAtiva = true;
-        return { coletaIniciada: true };
+        return { coletaIniciada: false, stub: true, rodada: ctx.rodada };
     }
 
+    // STUB: Parciais são calculadas pelo controller via ranking-live endpoint
     async onLiveUpdate(ctx) {
         if (!this._coletaAtiva) return null;
-        console.log(`[CAPITAO] Atualizando pontuação capitães R${ctx.rodada}`);
-        return { coletando: true };
+        return { coletando: false, stub: true };
     }
 
+    // STUB: Não há ação automática ao abrir mercado
     async onMarketOpen(ctx) {
         this._coletaAtiva = false;
-        return { coletaEncerrada: true };
+        return { coletaEncerrada: true, stub: true };
     }
 
+    // STUB: Consolidação é feita pelo admin via POST /:ligaId/consolidar
     async onRoundFinalize(ctx) {
         this._coletaAtiva = false;
-        console.log(`[CAPITAO] Finalizando capitão R${ctx.rodada}`);
-        return { pronto: true };
+        return { pronto: false, stub: true };
     }
 
+    // STUB: Premiação é aplicada durante consolidação manual
     async onConsolidate(ctx) {
-        console.log(`[CAPITAO] Consolidando ranking capitão R${ctx.rodada}`);
-        return { consolidado: true };
+        return { consolidado: false, stub: true };
     }
 }

@@ -1,9 +1,13 @@
-// ✅ ARTILHEIRO-CAMPEAO.JS v4.6.0 SaaS
+// ✅ ARTILHEIRO-CAMPEAO.JS v4.7.0 SaaS
 // Tabela com Rodadas em Colunas - DESTAQUE 1º LUGAR + RODADA FINAL + Material Icons
+// v4.7.0: Import RODADA_FINAL centralizado de season-config.js
 // v4.6.0: FIX CRÍTICO - Removido fallback || 38 que causava loop de requisições
 // v4.5.0: Removido liga ID hardcoded - usa URL dinamicamente
 // v4.4.1: Fix temporada encerrada (não mostrar como parcial após R38)
-console.log("🏆 [ARTILHEIRO] Sistema v4.6.0 SaaS carregando...");
+
+import { RODADA_FINAL_CAMPEONATO } from './core/season-config.js';
+
+console.log("🏆 [ARTILHEIRO] Sistema v4.7.0 SaaS carregando...");
 
 const ArtilheiroCampeao = {
     // Configurações
@@ -13,8 +17,8 @@ const ArtilheiroCampeao = {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get("id");
         },
-        RODADAS_VISIVEIS: 38,
-        RODADA_FINAL: 38, // ✅ v4.3: Constante da rodada final
+        RODADAS_VISIVEIS: RODADA_FINAL_CAMPEONATO,
+        RODADA_FINAL: RODADA_FINAL_CAMPEONATO,
         API: {
             RANKING: (ligaId) => `/api/artilheiro-campeao/${ligaId}/ranking`,
             DETECTAR_RODADA: (ligaId) =>
@@ -644,6 +648,16 @@ const ArtilheiroCampeao = {
             // ✅ v4.4.1: Capturar temporadaEncerrada da resposta
             this.estado.temporadaEncerrada =
                 data.data.temporadaEncerrada || false;
+
+            // ✅ v5.3: Sincronizar rodadaFim com backend (pode ter sido expandido por coleta manual)
+            if (data.data.rodadaFim && data.data.rodadaFim > this.estado.rodadaFim) {
+                console.log(`📦 [ARTILHEIRO] rodadaFim expandido pelo backend: ${this.estado.rodadaFim} → ${data.data.rodadaFim}`);
+                this.estado.rodadaFim = data.data.rodadaFim;
+                this.estado.rodadaNavInicio = Math.max(
+                    1,
+                    this.estado.rodadaFim - this.config.RODADAS_VISIVEIS + 1,
+                );
+            }
 
             // Buscar status de inatividade
             const timeIds = ranking.map((p) => p.timeId);

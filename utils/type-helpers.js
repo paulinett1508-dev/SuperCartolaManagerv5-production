@@ -65,10 +65,28 @@ export function ligaIdQuery(ligaId) {
     }
 }
 
+/**
+ * Trunca pontos para 2 casas decimais SEM arredondar.
+ * REGRA ABSOLUTA: pontos de participantes NUNCA devem ser arredondados.
+ * Ex: 93.78569 → 93.78 (nunca 93.79)
+ * Ex: 105.456  → 105.45 (nunca 105.46)
+ *
+ * Use esta função em QUALQUER operação backend que envolva pontos de participantes.
+ * NUNCA use toFixed(), Math.round() ou parseFloat(x.toFixed(N)) em pontos.
+ *
+ * @param {number|string} valor - Pontuação a truncar
+ * @returns {number} Valor truncado com 2 casas decimais (tipo Number)
+ */
+export function truncarPontosNum(valor) {
+    const num = parseFloat(valor) || 0;
+    return Math.trunc(num * 100) / 100;
+}
+
 export default {
     toLigaId,
     toTimeId,
     toTemporada,
     toLigaObjectId,
     ligaIdQuery,
+    truncarPontosNum,
 };

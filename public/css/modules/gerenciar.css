@@ -1125,10 +1125,7 @@ input:checked + .toggle-slider:before {
     animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
+/* @keyframes spin → centralizado em _admin-tokens.css */
 
 /* === MODAL PREMIUM (Design System Black & Orange) === */
 .modal-overlay {

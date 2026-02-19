@@ -50,11 +50,8 @@ export const SEASON_CONFIG = {
         return `Temporada ${this.SEASON_YEAR} encerrada. Dados servidos do banco de dados local.`;
     },
 
-    // IDs das ligas ativas
-    LEAGUES: {
-        SUPER_CARTOLA: '684cb1c8af923da7c7df51de',
-        CARTOLEIROS_SOBRAL: '684d821cf1a7ae16d1f89572'
-    }
+    // IDs das ligas — não hardcodar aqui; buscar via Liga.find({ ativa: true })
+    // LEAGUES removido: era 2025-específico e não era usado por nenhum consumidor
 };
 
 /**

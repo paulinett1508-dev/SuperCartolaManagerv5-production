@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const MONGO_URI = process.env.MONGO_URI_DEV || process.env.MONGO_URI;
+const MONGO_URI = process.env.MONGO_URI;
 const TIME_ID = parseInt(process.argv[2]) || 3300583;
 
 async function invalidarCache() {

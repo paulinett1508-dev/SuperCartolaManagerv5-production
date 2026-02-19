@@ -358,7 +358,7 @@ function renderizarCardApp(rank, index, posLabel, banco, isParcial = false) {
   const totalPlayers = 12;
 
   // Pontuação
-  const scoreParcial = parseFloat(rank.pontos || 0).toFixed(2);
+  const scoreParcial = (Math.trunc((parseFloat(rank.pontos || 0)) * 100) / 100).toFixed(2);
   const scoreTotal = rank.totalPontos ? parseFloat(rank.totalPontos).toFixed(2) : null;
   
   // Patrimônio (se disponível)
@@ -496,7 +496,7 @@ export async function exibirRanking(rankingsDaRodada, rodadaSelecionada, ligaId)
                </div>
             </div>
             <div class="rc-stats">
-               <div class="rc-score-main">${parseFloat(rank.pontos || 0).toFixed(2)}</div>
+               <div class="rc-score-main">${(Math.trunc((parseFloat(rank.pontos || 0)) * 100) / 100).toFixed(2)}</div>
             </div>
           </div>
         `;
@@ -941,7 +941,7 @@ function renderizarConteudoRelatorio(dados, filtro) {
             <div>${mito.nome_cartola || "N/D"}</div>
             <div style="font-size: 9px; color: var(--text-muted);">${mito.nome_time || "N/D"}</div>
           </div>
-          <div class="resultado-pontos">${parseFloat(mito.pontos || 0).toFixed(2)}</div>
+          <div class="resultado-pontos">${(Math.trunc((parseFloat(mito.pontos || 0)) * 100) / 100).toFixed(2)}</div>
         </div>
       `;
     }
@@ -954,7 +954,7 @@ function renderizarConteudoRelatorio(dados, filtro) {
             <div>${mico.nome_cartola || "N/D"}</div>
             <div style="font-size: 9px; color: var(--text-muted);">${mico.nome_time || "N/D"}</div>
           </div>
-          <div class="resultado-pontos">${parseFloat(mico.pontos || 0).toFixed(2)}</div>
+          <div class="resultado-pontos">${(Math.trunc((parseFloat(mico.pontos || 0)) * 100) / 100).toFixed(2)}</div>
         </div>
       `;
     }

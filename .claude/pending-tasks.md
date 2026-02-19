@@ -1,7 +1,68 @@
 # Tarefas Pendentes - Super Cartola Manager
 
-> Atualizado: 2026-02-13
-> Auditado: Sessao 2026-02-13 — AUDIT-001, AUDIT-002 e AUDIT-003 concluidas. MCP Stitch re-testado.
+> Atualizado: 2026-02-18 (sessao tarde)
+> Sessao 18/02 manha: AUDIT-009..014 concluidos (todos modulos auditados).
+> Sessao 18/02 tarde: Auditoria sincronismo 2025/2026 (commit 8323eab) + Consolidacao banco unico MongoDB (commit 84ce387).
+
+---
+
+## ~~AUDITORIAS PENDENTES~~ ✅ TODAS CONCLUIDAS (18/02/2026)
+
+### ~~AUDIT-011: TOP 10~~ ✅ (4 fixes)
+### ~~AUDIT-012: MELHOR MES~~ ✅ (4 fixes)
+### ~~AUDIT-013: CAMPINHO~~ ✅ (0 fixes — modulo visualizacao)
+### ~~AUDIT-014: DICAS PREMIUM~~ ✅ (0 fixes — modulo API stateless)
+
+---
+
+## ~~AUDITORIA SINCRONISMO + BANCO UNICO~~ ✅ CONCLUIDA (18/02/2026)
+
+**Resultado:** Sistema estava sincronizado em producao — banco real `cartola-manager` tem R1-R3 2026, 35 participantes, 43 caches 2026, 46 inscricoes 2026. Scripts e MCP apontavam para banco orfao `cartola-manager-dev` (dados ate dez/2025).
+
+**Fixes de codigo (commit `8323eab`):**
+- `utils/saldo-calculator.js` + `routes/tesouraria-routes.js`: 21x `>= 2026` → `>= CURRENT_SEASON`
+- `utils/seasonGuard.js`: remove LEAGUES hardcoded com IDs 2025
+
+**Consolidacao banco unico (commit `84ce387`):**
+- `mongo-server.js` (MCP) + 9 scripts: removida logica MONGO_URI_DEV
+- Todos usam exclusivamente `MONGO_URI` (cartola-manager)
+- `MONGO_URI_DEV` deletada dos Replit Secrets pelo admin
+- Liga producao: `nome` atualizado para "Super Cartola 2026"
+- `CLAUDE.md`: documenta banco unico e stack dev/prod
+
+**Estado MCP Mongo:** Agora conecta ao banco real `cartola-manager` ✅
+
+| MCP | Status |
+|-----|--------|
+| Mongo | ✅ Ativo — banco cartola-manager (real) |
+| Perplexity | ✅ Ativo |
+| Context7 | ✅ Ativo |
+| IDE | ✅ Ativo |
+| ~~Google Stitch~~ | ❌ Removido |
+| ~~Figma~~ | ❌ Removido |
+
+---
+
+## RESUMO DAS AUDITORIAS CONCLUIDAS (AUDIT-006 a AUDIT-010)
+
+| # | Modulo | Score Antes→Depois | Fixes | Commits | Bug Seguranca |
+|---|--------|-------------------|-------|---------|---------------|
+| AUDIT-006 | Artilheiro | 70→90 | 12 | 3 | Auth 4 rotas |
+| AUDIT-007 | Capitao | 80→92 | 4 | 2 | - |
+| AUDIT-008 | Luva de Ouro | 73→91 | 5 | 1 | Auth diagnostico |
+| AUDIT-009 | Mata-Mata | 91→95 | 3 | 1 | - |
+| AUDIT-010 | Pontos Corridos | 82→93 | 4 | 1 | Auth 2 rotas POST |
+| AUDIT-011 | Top 10 | 82→92 | 4 | 1 | - |
+| AUDIT-012 | Melhor Mes | 78→90 | 4 | 1 | - |
+| AUDIT-013 | Campinho | 88 (sem fixes) | 0 | 0 | - |
+| AUDIT-014 | Dicas Premium | 87 (sem fixes) | 0 | 0 | - |
+
+**Padrao recorrente corrigido em todos:**
+1. Manager hooks sem `stub: true` → Documentado v1.1.0
+2. `RODADA_FINAL = 38` hardcoded → Import de `season-config.js`
+3. Config JSON com `ligas_habilitadas` / `temporada` stale → Limpo + nota ModuleConfig
+4. `[DEBUG-*]` console.logs → Removidos
+5. Rotas POST/DELETE sem `verificarAdmin` → Middleware adicionado
 
 ---
 
@@ -110,27 +171,22 @@
 
 ---
 
-## 🚨 URGENTE - Resolver Autenticacao Google Stitch MCP
+## ~~[MCP-001]~~ DESCARTADO (2026-02-17)
 
-### [MCP-001] Google Stitch - OAuth2 Token Expirado/Invalido
+### Google Stitch MCP - OAuth2 Token
 
-**Prioridade:** 🔴 URGENTE
-**Status:** PENDENTE (re-testado 2026-02-13, ainda expirado)
-**Erro:** `API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal.`
+**Status:** DESCARTADO
+**Motivo:** Decisao de abandonar Plano A (MCP automatico) e Plano C (Figma). Stitch Adapter passa a operar apenas em modo manual (HTML colado). MCP Stitch e Figma removidos de `settings.local.json`.
 
-#### Acoes
-- [ ] Re-autenticar com Google OAuth2 (gerar novo token)
-- [ ] Testar `list_projects` apos re-autenticacao
-- [ ] Documentar processo de refresh do token para futuras expiracoes
-
-#### Status dos MCPs (verificado 2026-02-13)
+#### Status dos MCPs (atualizado 2026-02-18)
 | MCP | Status |
 |-----|--------|
-| Mongo | ✅ Ativo |
+| Mongo | ✅ Ativo — agora conecta ao banco real cartola-manager |
 | Perplexity | ✅ Ativo |
 | Context7 | ✅ Ativo |
 | IDE | ✅ Ativo |
-| Google Stitch | ❌ OAuth2 expirado |
+| ~~Google Stitch~~ | ❌ Removido (modo manual apenas) |
+| ~~Figma~~ | ❌ Removido (descartado) |
 
 ---
 
@@ -238,71 +294,56 @@
 
 ---
 
-## FEATURES - Alta Prioridade
+## ~~FEATURES - Alta Prioridade~~ ✅ AUDITADAS E FECHADAS (18/02/2026)
 
-### [FEAT-026] Polling Inteligente para Modulo Rodadas
+### ~~[FEAT-026] Polling Inteligente para Modulo Rodadas~~ ✅ JA IMPLEMENTADO
 
-**Prioridade:** Alta
-**Contexto:** Modulo Rodadas faz refresh a cada 30s independente de haver jogos, desperdicando recursos.
+**Auditoria 18/02/2026:** `participante-rodadas-polling.js` (310 linhas) implementa polling inteligente completo — pausa quando nao ha jogos, reativa antes do proximo, feedback visual de estado. Admin usa refresh manual (comportamento correto para admin).
 
-**Objetivo:** Criar gerenciador de polling que:
-- Pausa quando nao ha jogos em andamento
-- Reativa ~10min antes do proximo jogo
-- Mostra feedback visual do estado (ao vivo / aguardando / pausado)
+### ~~[FEAT-027] Enriquecer Listagem de Participantes no Modulo Rodadas~~ ✅ JA IMPLEMENTADO
 
-**Arquivos a criar/modificar:**
-- `public/js/rodadas/rodadas-polling-manager.js` (novo)
-- `public/js/rodadas.js` (integrar)
-- Possivel modelo `CalendarioRodada` no MongoDB
-
----
-
-### [FEAT-027] Enriquecer Listagem de Participantes no Modulo Rodadas
-
-**Prioridade:** Alta
-**Objetivo:** Tornar lista de participantes mais informativa:
-- Contador de atletas que ja jogaram (`X/12`)
-- Escudo do time do coracao
-- Valores financeiros da liga (bonus G10/Z10 baseado em `ModuleConfig`)
+**Auditoria 18/02/2026:** `rodadas-ui.js` ja tem os 3 itens: atletas que jogaram (X/12) L353-358, escudo com fallback L340-342, valores financeiros async via ModuleConfig L252-274.
 
 ---
 
 ## ADMIN MOBILE
 
-### [MOBILE-001] Remover emojis e alinhar visual
+### ~~[MOBILE-001] Remover emojis e alinhar visual~~ ✅ IMPLEMENTADO (18/02/2026)
 
-**Prioridade:** Baixa
-**Descricao:** Remover todos os emojis do admin-mobile e alinhar com padrao visual do app participante.
+**Fixes aplicados em `login.html`:**
+- Adicionado Material Icons CDN (ausente na page de login)
+- `🏆` → `<span class="material-icons">emoji_events</span>`
+- `🔐` → `<span class="material-icons">lock</span>`
 
 ---
 
-### [MOBILE-004] Implementar Fases 5 e 6 do App Admin
+### ~~[MOBILE-004] Implementar Fases 5 e 6 do App Admin~~ ✅ JA IMPLEMENTADO
 
-**Prioridade:** Media
-**Descricao:** Implementar fases finais do roadmap do app admin mobile.
+**Auditoria 18/02/2026:** `consolidacao.js` (417 linhas) e `financeiro.js` (315 linhas) estao completamente implementados — form, progress bar, historico, validacao, handlers, API calls. Todos os endpoints backend em `admin-mobile-routes.js` tambem existem.
 
 ---
 
 ## UX
 
-### [UX-002] Substituir 4 alert() restantes por SuperModal
+### ~~[UX-002] Substituir alert() por SuperModal~~ ✅ IMPLEMENTADO (18/02/2026)
 
-**Prioridade:** Baixa
-
-| Arquivo | Linha | Contexto |
-|---------|-------|----------|
-| `public/js/luva-de-ouro/luva-de-ouro-utils.js` | 700 | "Nenhum dado para exportar" |
-| `public/js/navigation.js` | 5 | Alert generico |
-| `public/js/modules/module-config-modal.js` | 1245 | Erro |
-| `public/js/modules/module-config-modal.js` | 1260 | Sucesso |
+**Fixes aplicados (6 ocorrencias em 5 arquivos):**
+- `navigation.js:5` — SuperModal.toast.error + setTimeout redirect 3s
+- `module-config-modal.js:1294` — removido fallback alert (SuperModal ja no else anterior)
+- `module-config-modal.js:1309` — removido fallback alert
+- `luva-de-ouro-utils.js:700` — SuperModal.toast.warning
+- `capitao-luxo.js:466` — SuperModal.toast.error
+- `admin-analises-ia.js:62` — SuperModal.toast.warning
 
 ---
 
 ## DOCUMENTACAO
 
-### [DOC-001] Migrar Skills do Codebase para docs/
+### ~~[DOC-001] Migrar Skills do Codebase para docs/~~ ✅ JA IMPLEMENTADO
 
-**Prioridade:** Media
+**Auditoria 18/02/2026:** `docs/skills/` tem 30 skills em 5 categorias + SKILL-KEYWORD-MAP.md + README.md. CLAUDE.md referencia corretamente `docs/skills/`. Sem arquivos orfaos em locais antigos.
+
+**Prioridade:** Media (FECHADO)
 
 ---
 

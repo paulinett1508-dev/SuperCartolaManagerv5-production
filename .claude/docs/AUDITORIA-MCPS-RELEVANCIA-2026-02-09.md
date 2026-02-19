@@ -11,13 +11,15 @@
 | MCP | Status | Relevância | Score | Recomendação |
 |-----|--------|------------|-------|--------------|
 | **Context7** | ✅ Configurado | 🟢 CRÍTICA | **10/10** | Manter e expandir uso |
-| **Figma MCP** | ✅ Configurado | 🟡 MÉDIA | **6/10** | Manter como Plano B (fallback do Stitch) |
-| **Stitch MCP** | ✅ Configurado | 🟢 CRÍTICA | **9/10** | PLANO A - Geração automática de UI |
+| ~~**Figma MCP**~~ | ❌ DESCARTADO | ⚫ N/A | **N/A** | Removido (2026-02-17) |
+| ~~**Stitch MCP**~~  | ❌ DESCARTADO | ⚫ N/A | **N/A** | Removido — skill opera em modo manual (2026-02-17) |
 | **Playwright MCP** | ❌ Não configurado | 🟠 MÉDIA | **5/10** | Considerar futuramente |
 
 **ATUALIZAÇÃO 2026-02-09:** Decisão de integrar Figma como ferramenta principal de design. Stitch passa a ser opção B (fallback manual).
 
-**ATUALIZAÇÃO 2026-02-10:** INVERSÃO DE ESTRATÉGIA. Google Stitch MCP passa a ser PLANO A (geração automática de UI). Figma passa a PLANO B (fallback). Motivo: Stitch tem poder de criação autônomo (gera UI a partir de texto), exporta HTML/CSS/JS nativo (sem necessidade de transformer React→Vanilla). Skill stitch-adapter atualizada para v2.0 com avaliador de qualidade e suporte MCP.
+**ATUALIZAÇÃO 2026-02-10:** INVERSÃO DE ESTRATÉGIA. Google Stitch MCP passa a ser PLANO A (geração automática de UI). Figma passa a PLANO B (fallback).
+
+**ATUALIZAÇÃO 2026-02-17:** SIMPLIFICAÇÃO FINAL. Stitch MCP e Figma MCP removidos. Stitch Adapter opera apenas em modo manual (HTML colado). OAuth2 nunca funcionou em produção. Figma nunca foi implementado. Skill stitch-adapter atualizada para v3.0 — aceita HTML de qualquer fonte.
 
 ---
 

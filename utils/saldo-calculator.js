@@ -122,7 +122,7 @@ export async function calcularSaldoParticipante(ligaId, timeId, temporada = CURR
 
     // =========================================================================
     // ✅ v2.0.0: INTEGRAR InscricaoTemporada (inscrição não paga + saldo anterior)
-    // Para temporada >= 2026, se a inscrição não foi paga E não está já no
+    // Para temporada >= CURRENT_SEASON, se a inscrição não foi paga E não está já no
     // historico_transacoes, deduzir a taxa e somar saldo transferido.
     // =========================================================================
     let taxaInscricaoValor = 0;
@@ -131,7 +131,7 @@ export async function calcularSaldoParticipante(ligaId, timeId, temporada = CURR
     let dividaAnterior = 0;
 
     const tempNum = Number(temporada);
-    if (tempNum >= 2026) {
+    if (tempNum >= CURRENT_SEASON) {
         const inscricaoJaNoCache = cache?.historico_transacoes?.some(
             t => t.tipo === 'INSCRICAO_TEMPORADA'
         );
@@ -155,7 +155,7 @@ export async function calcularSaldoParticipante(ligaId, timeId, temporada = CURR
             }
 
             if (inscricao) {
-                pagouInscricao = inscricao.pagou_inscricao !== false;
+                pagouInscricao = inscricao.pagou_inscricao === true;
                 taxaInscricaoValor = inscricao.taxa_inscricao || 0;
                 saldoAnteriorTransferido = inscricao.saldo_transferido || 0;
                 dividaAnterior = inscricao.divida_anterior || 0;
@@ -284,7 +284,7 @@ export function aplicarAjusteInscricaoBulk(saldoConsolidado, inscricaoData, hist
     );
 
     if (!inscricaoJaNoCache) {
-        pagouInscricao = inscricaoData.pagou_inscricao !== false;
+        pagouInscricao = inscricaoData.pagou_inscricao === true;
         taxaInscricao = inscricaoData.taxa_inscricao || 0;
         saldoAnteriorTransferido = inscricaoData.saldo_transferido || 0;
         dividaAnterior = inscricaoData.divida_anterior || 0;

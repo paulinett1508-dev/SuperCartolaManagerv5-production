@@ -5,6 +5,7 @@ import CartolaOficialDump from "../models/CartolaOficialDump.js";
 import Time from "../models/Time.js";
 import { CURRENT_SEASON } from "../config/seasons.js";
 import { isSeasonFinished, logBlockedOperation, SEASON_CONFIG } from "../utils/seasonGuard.js";
+import logger from '../utils/logger.js';
 
 // =============================================================================
 // CONFIGURAÇÕES
@@ -47,7 +48,7 @@ async function fetchWithTimeout(url, timeout = FETCH_TIMEOUT) {
  */
 async function buscarTimesNaAPI(query) {
   const url = `${API_CARTOLA_BASE}/times?q=${encodeURIComponent(query)}`;
-  console.log(`[DATA-LAKE] Buscando times: ${url}`);
+  logger.log(`[DATA-LAKE] Buscando times: ${url}`);
 
   const response = await fetchWithTimeout(url);
 
@@ -69,7 +70,7 @@ async function buscarDadosCompletosTime(timeId, rodada = null) {
     ? `${API_CARTOLA_BASE}/time/id/${timeId}/${rodada}`
     : `${API_CARTOLA_BASE}/time/id/${timeId}`;
 
-  console.log(`[DATA-LAKE] Buscando dados completos: ${url}`);
+  logger.log(`[DATA-LAKE] Buscando dados completos: ${url}`);
 
   const response = await fetchWithTimeout(url);
 
@@ -100,7 +101,7 @@ async function buscarDadosCompletosTime(timeId, rodada = null) {
 export async function sincronizarComGlobo(nomeTime, opcoes = {}) {
   const { ligaId = null, rodada = null, origemTrigger = 'manual' } = opcoes;
 
-  console.log(`[DATA-LAKE] Iniciando sincronização: "${nomeTime}"`);
+  logger.log(`[DATA-LAKE] Iniciando sincronização: "${nomeTime}"`);
 
   // ⛔ SEASON GUARD: Verificar se temporada está ativa
   if (isSeasonFinished()) {
@@ -128,14 +129,14 @@ export async function sincronizarComGlobo(nomeTime, opcoes = {}) {
     const timeEncontrado = resultadoBusca[0];
     const timeId = timeEncontrado.time_id;
 
-    console.log(`[DATA-LAKE] Time encontrado: ${timeEncontrado.nome} (ID: ${timeId})`);
+    logger.log(`[DATA-LAKE] Time encontrado: ${timeEncontrado.nome} (ID: ${timeId})`);
 
     // PASSO 2: Buscar dados COMPLETOS do time
     const dadosCompletos = await buscarDadosCompletosTime(timeId, rodada);
 
     // ⚠️ Verificar se a API retornou dados válidos do time
     if (dadosCompletos.game_over === true && !dadosCompletos.time) {
-      console.log(`[DATA-LAKE] ⚠️ API Globo com game_over=true, sem dados do time`);
+      logger.log(`[DATA-LAKE] ⚠️ API Globo com game_over=true, sem dados do time`);
       return {
         success: false,
         error: 'season_ended',
@@ -160,7 +161,7 @@ export async function sincronizarComGlobo(nomeTime, opcoes = {}) {
       },
     });
 
-    console.log(`[DATA-LAKE] Dump salvo: ${dump._id} (${dump.meta.payload_size} bytes)`);
+    logger.log(`[DATA-LAKE] Dump salvo: ${dump._id} (${dump.meta.payload_size} bytes)`);
 
     // PASSO 4: Atualizar ou criar Time (Participante) com dados básicos
     const timeData = dadosCompletos.time || dadosCompletos;
@@ -190,7 +191,7 @@ export async function sincronizarComGlobo(nomeTime, opcoes = {}) {
       }
     );
 
-    console.log(`[DATA-LAKE] Time atualizado: ${timeAtualizado.nome_time}`);
+    logger.log(`[DATA-LAKE] Time atualizado: ${timeAtualizado.nome_time}`);
 
     return {
       success: true,
@@ -213,7 +214,7 @@ export async function sincronizarComGlobo(nomeTime, opcoes = {}) {
     };
 
   } catch (error) {
-    console.error(`[DATA-LAKE] Erro na sincronização:`, error.message);
+    logger.error(`[DATA-LAKE] Erro na sincronização:`, error.message);
 
     return {
       success: false,
@@ -235,7 +236,7 @@ export async function sincronizarComGlobo(nomeTime, opcoes = {}) {
 export async function sincronizarPorId(timeId, opcoes = {}) {
   const { ligaId = null, rodada = null, origemTrigger = 'manual' } = opcoes;
 
-  console.log(`[DATA-LAKE] Sincronizando por ID: ${timeId}`);
+  logger.log(`[DATA-LAKE] Sincronizando por ID: ${timeId}`);
 
   // ⛔ SEASON GUARD
   if (isSeasonFinished()) {
@@ -253,7 +254,7 @@ export async function sincronizarPorId(timeId, opcoes = {}) {
 
     // ⚠️ Verificar se a API retornou dados válidos do time
     if (dadosCompletos.game_over === true && !dadosCompletos.time) {
-      console.log(`[DATA-LAKE] ⚠️ API Globo com game_over=true, sem dados do time`);
+      logger.log(`[DATA-LAKE] ⚠️ API Globo com game_over=true, sem dados do time`);
       return {
         success: false,
         error: 'season_ended',
@@ -263,7 +264,7 @@ export async function sincronizarPorId(timeId, opcoes = {}) {
 
     // Verificar se há dados do time na resposta
     if (!dadosCompletos.time && !dadosCompletos.nome && !dadosCompletos.time_id) {
-      console.log(`[DATA-LAKE] ⚠️ Resposta da API não contém dados do time`);
+      logger.log(`[DATA-LAKE] ⚠️ Resposta da API não contém dados do time`);
       return {
         success: false,
         error: 'no_team_data',
@@ -329,7 +330,7 @@ export async function sincronizarPorId(timeId, opcoes = {}) {
     };
 
   } catch (error) {
-    console.error(`[DATA-LAKE] Erro:`, error.message);
+    logger.error(`[DATA-LAKE] Erro:`, error.message);
     return {
       success: false,
       error: 'api_error',
@@ -354,7 +355,7 @@ export async function sincronizarPorId(timeId, opcoes = {}) {
 export async function buscarDadosRaw(timeId, opcoes = {}) {
   const { temporada = CURRENT_SEASON, incluirHistorico = false, rodada = null, limit = 10 } = opcoes;
 
-  console.log(`[DATA-LAKE] Buscando dados raw: time=${timeId}, temporada=${temporada}, rodada=${rodada || 'mais recente'}`);
+  logger.log(`[DATA-LAKE] Buscando dados raw: time=${timeId}, temporada=${temporada}, rodada=${rodada || 'mais recente'}`);
 
   try {
     let dumpSelecionado;
@@ -427,7 +428,7 @@ export async function buscarDadosRaw(timeId, opcoes = {}) {
     return resultado;
 
   } catch (error) {
-    console.error(`[DATA-LAKE] Erro ao buscar dados raw:`, error.message);
+    logger.error(`[DATA-LAKE] Erro ao buscar dados raw:`, error.message);
     return {
       success: false,
       error: 'database_error',
@@ -443,7 +444,7 @@ export async function estatisticasDataLake(temporada = CURRENT_SEASON) {
   try {
     return await CartolaOficialDump.estatisticas(temporada);
   } catch (error) {
-    console.error(`[DATA-LAKE] Erro nas estatísticas:`, error.message);
+    logger.error(`[DATA-LAKE] Erro nas estatísticas:`, error.message);
     return { error: error.message };
   }
 }
@@ -478,7 +479,7 @@ export async function httpSincronizarComGlobo(req, res) {
     return res.status(statusCode).json(resultado);
 
   } catch (error) {
-    console.error('[DATA-LAKE HTTP] Erro:', error);
+    logger.error('[DATA-LAKE HTTP] Erro:', error);
     return res.status(500).json({
       success: false,
       error: 'server_error',
@@ -515,7 +516,7 @@ export async function httpSincronizarPorId(req, res) {
     return res.status(statusCode).json(resultado);
 
   } catch (error) {
-    console.error('[DATA-LAKE HTTP] Erro:', error);
+    logger.error('[DATA-LAKE HTTP] Erro:', error);
     return res.status(500).json({
       success: false,
       error: 'server_error',
@@ -559,7 +560,7 @@ export async function httpBuscarDadosRaw(req, res) {
     return res.status(statusCode).json(resultado);
 
   } catch (error) {
-    console.error('[DATA-LAKE HTTP] Erro:', error);
+    logger.error('[DATA-LAKE HTTP] Erro:', error);
     return res.status(500).json({
       success: false,
       error: 'server_error',
@@ -578,7 +579,7 @@ export async function httpEstatisticas(req, res) {
     const stats = await estatisticasDataLake(temporada);
     return res.status(200).json(stats);
   } catch (error) {
-    console.error('[DATA-LAKE HTTP] Erro:', error);
+    logger.error('[DATA-LAKE HTTP] Erro:', error);
     return res.status(500).json({ error: error.message });
   }
 }

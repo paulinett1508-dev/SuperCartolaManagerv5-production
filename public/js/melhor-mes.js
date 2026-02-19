@@ -265,7 +265,7 @@ function renderTabelaFallback(ranking, edicao) {
         <td style="text-align:center;">
           ${t.clube_id ? `<img src="/escudos/${t.clube_id}.png" alt="Escudo" style="width:24px; height:24px; border-radius:50%; background:#fff; border:1px solid #eee;" onerror="this.style.display='none'"/>` : "—"}
         </td>
-        <td style="text-align:center; padding:8px 2px;"><span style="font-weight:600;">${t.pontos.toFixed(2)}</span></td>
+        <td style="text-align:center; padding:8px 2px;"><span style="font-weight:600;">${(Math.trunc((t.pontos||0) * 100) / 100).toFixed(2)}</span></td>
         ${hasPremios ? premioHtml : ""}
       </tr>
     `;

@@ -1,53 +1,35 @@
-# Guia Rapido: Stitch Adapter Skill v2.0
+# Guia Rapido: Stitch Adapter Skill v3.0
 
-> PLANO A de criacao de UI. MCP-First + Avaliador de Qualidade.
+> Adaptador de HTML externo. Modo manual com Avaliador de Qualidade.
 
 ---
 
 ## Estrategia
 
 ```
-PLANO A (Automatico): Google Stitch MCP → Gera HTML → Avalia → Adapta → Production-Ready
-PLANO B (Manual):     HTML colado pelo usuario → Avalia → Adapta → Production-Ready
-PLANO C (Fallback):   Figma MCP → Exporta React → Transforma Vanilla → Adapta
+HTML externo (Stitch, AI Studio, outro LLM) → Avalia → Adapta → Production-Ready
 ```
 
 ---
 
 ## O que a skill faz?
 
-1. **Gera** UI automaticamente via MCP Stitch (se configurado)
-2. **Avalia** qualidade do HTML com score 0-100 em 8 dimensoes
-3. **Separa** HTML, CSS e JavaScript em arquivos distintos
-4. **Converte** cores/espacamentos/fontes para variaveis CSS do projeto
-5. **Adapta** JS para ES6 Module com try/catch
-6. **Converte** icones FontAwesome para Material Icons
-7. **Sugere** onde colocar cada arquivo (admin vs app, pagina vs fragmento)
-8. **Gera** relatorio completo com instrucoes de integracao
+1. **Avalia** qualidade do HTML com score 0-100 em 8 dimensoes
+2. **Separa** HTML, CSS e JavaScript em arquivos distintos
+3. **Converte** cores/espacamentos/fontes para variaveis CSS do projeto
+4. **Adapta** JS para ES6 Module com try/catch
+5. **Converte** icones FontAwesome para Material Icons
+6. **Sugere** onde colocar cada arquivo (admin vs app, pagina vs fragmento)
+7. **Gera** relatorio completo com instrucoes de integracao
 
 ---
 
 ## Como usar
 
-### Metodo 1: Geracao Automatica (MCP Stitch - Plano A)
-
-Quando o MCP Stitch esta configurado:
+### Metodo 1: Adaptar HTML completo
 
 ```
-Crie no Stitch um card de ranking do modulo artilheiro para o app mobile
-```
-
-A skill:
-1. Monta prompt otimizado com design system do projeto
-2. MCP Stitch gera HTML
-3. Avaliador analisa qualidade (score 0-100)
-4. Adapta automaticamente
-5. Gera arquivos + relatorio
-
-### Metodo 2: HTML Colado (Plano B)
-
-```
-Recebi este codigo do Google Stitch, adapte para o projeto:
+Recebi este HTML, adapte para o projeto:
 
 [COLAR CODIGO HTML AQUI]
 
@@ -55,10 +37,10 @@ Tipo: App Participante
 Nome: ranking-card
 ```
 
-### Metodo 3: Apenas Avaliar (sem adaptar)
+### Metodo 2: Apenas Avaliar (sem adaptar)
 
 ```
-Avalie a qualidade deste HTML do Stitch:
+Avalie a qualidade deste HTML:
 
 [COLAR CODIGO HTML AQUI]
 ```
@@ -131,39 +113,11 @@ Avalie a qualidade deste HTML do Stitch:
 
 ---
 
-## Configurar MCP Stitch
+## Dica: Prompt para gerar HTML externamente
 
-### Pacote: `@_davideast/stitch-mcp` (David East, Google DevRel)
-
-### 1. Obter API Key
-
-Acessar https://aistudio.google.com/apikey → Create API Key → Copiar
-
-### 2. Configurar .mcp.json
-
-Ja configurado no projeto:
-
-```json
-"stitch": {
-    "command": "npx",
-    "args": ["-y", "@_davideast/stitch-mcp", "proxy"],
-    "env": {
-        "STITCH_API_KEY": "SUA_API_KEY"
-    }
-}
-```
-
-### 3. Verificar
-
-```bash
-claude mcp list | grep stitch
-npx @_davideast/stitch-mcp doctor --verbose
-```
-
-### Requisitos
-
-- Node.js v18+
-- API Key do Google AI Studio
+Ao usar Google Stitch, AI Studio ou outro LLM para gerar HTML, cole o prompt padrao do projeto:
+- **Arquivo:** `.claude/STITCH-DESIGN-PROMPT.md`
+- Isso garante que o HTML gerado ja venha proximo do design system
 
 ---
 
@@ -188,12 +142,11 @@ public/participante/modules/[nome]/[nome].js
 ## Links Uteis
 
 - **Skill Completa:** `docs/skills/03-utilities/stitch-adapter.md`
-- **Prompt Stitch:** `.claude/STITCH-DESIGN-PROMPT.md`
+- **Prompt para gerar HTML:** `.claude/STITCH-DESIGN-PROMPT.md`
 - **Tokens Admin:** `public/css/_admin-tokens.css`
 - **Tokens App:** `public/participante/css/_app-tokens.css`
-- **MCP Config:** `.mcp.json`
 - **Frontend Crafter:** `docs/skills/02-specialists/frontend-crafter.md`
 
 ---
 
-**Versao:** 2.0 | **Atualizado:** 2026-02-10
+**Versao:** 3.0 | **Atualizado:** 2026-02-17

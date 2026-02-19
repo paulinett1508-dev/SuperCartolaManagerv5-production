@@ -116,6 +116,7 @@ import calendarioRodadasRoutes from "./routes/calendario-rodadas-routes.js";
 import golsRoutes from "./routes/gols.js";
 import artilheiroCampeaoRoutes from "./routes/artilheiro-campeao-routes.js";
 import luvaDeOuroRoutes from "./routes/luva-de-ouro-routes.js";
+import restaUmRoutes from "./routes/resta-um-routes.js";
 import configuracaoRoutes from "./routes/configuracao-routes.js";
 import fluxoFinanceiroRoutes from "./routes/fluxoFinanceiroRoutes.js";
 import extratoFinanceiroCacheRoutes from "./routes/extratoFinanceiroCacheRoutes.js";
@@ -182,8 +183,8 @@ import manutencaoParticipanteRoutes from "./routes/manutencao-participante-route
 import avisosAdminRoutes from "./routes/avisos-admin-routes.js";
 import avisosParticipanteRoutes from "./routes/avisos-participante-routes.js";
 
-// 🤖 Análises IA - Interface Admin
-import iaAnalysisRoutes from "./routes/iaAnalysisRoutes.js";
+// 📊 Raio-X Analytics (análises internas via MongoDB)
+import raioXAnalyticsRoutes from "./routes/raioXAnalyticsRoutes.js";
 
 // 📦 Versionamento do App
 import appVersionRoutes from "./routes/appVersionRoutes.js";
@@ -523,6 +524,7 @@ app.use("/api/pontos-corridos", pontosCorridosCacheRoutes);
 app.use("/api/pontos-corridos", pontosCorridosMigracaoRoutes);
 app.use("/api/top10", top10CacheRoutes);
 app.use("/api/mata-mata", mataMataCacheRoutes);
+app.use("/api/resta-um", restaUmRoutes);
 app.use("/api/times-admin", timesAdminRoutes);
 app.use("/api/analisar-participantes", analisarParticipantesRoutes);
 app.use("/api/renovacoes", renovacoesRoutes);
@@ -561,6 +563,7 @@ console.log("[SERVER] 🔔 Rotas de Push Notifications registradas em /api/notif
 app.get("/api/admin/analytics/resumo", analyticsController.getAnalyticsResumo);
 app.get("/api/admin/analytics/branch/:nomeBranch", analyticsController.getAnatyticsBranchDetalhes);
 app.get("/api/admin/analytics/merges", analyticsController.getAnalyticsMerges);
+app.get("/api/admin/analytics/pull-requests", analyticsController.getAnalyticsPullRequests);
 app.get("/api/admin/analytics/funcionalidades", analyticsController.getAnalyticsFuncionalidades);
 app.get("/api/admin/analytics/estatisticas", analyticsController.getAnalyticsEstatisticas);
 app.get("/api/admin/analytics/sync-status", analyticsController.getGitSyncStatus);
@@ -573,9 +576,9 @@ console.log("[SERVER] 📢 Rotas de avisos admin registradas em /api/admin/aviso
 app.use("/api/avisos", avisosParticipanteRoutes);
 console.log("[SERVER] 📢 Rotas de avisos participante registradas em /api/avisos");
 
-// 🤖 Análises IA (Claude LLM)
-app.use("/api/admin/ia-analysis", iaAnalysisRoutes);
-console.log("[SERVER] 🤖 Rotas de Análises IA registradas em /api/admin/ia-analysis");
+// 📊 Raio-X Analytics (análises internas)
+app.use("/api/admin/raio-x", raioXAnalyticsRoutes);
+console.log("[SERVER] 📊 Rotas de Raio-X Analytics registradas em /api/admin/raio-x");
 
 // 🎯 Dicas Premium
 app.use("/api/dicas-premium", dicasPremiumRoutes);
@@ -887,6 +890,25 @@ async function gracefulShutdown(signal) {
 process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
 process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 process.on("SIGQUIT", () => gracefulShutdown("SIGQUIT"));
+
+// ====================================================================
+// 🛡️ GLOBAL ERROR HANDLERS - Captura erros não tratados
+// ====================================================================
+process.on("unhandledRejection", (reason, promise) => {
+  const logError = IS_PRODUCTION ? originalConsole.error : console.error;
+  logError("[UNHANDLED_REJECTION] Promise rejeitada sem catch:", reason?.message || reason);
+  if (reason?.stack && !IS_PRODUCTION) {
+    logError("[UNHANDLED_REJECTION] Stack:", reason.stack);
+  }
+});
+
+process.on("uncaughtException", (error) => {
+  const logError = IS_PRODUCTION ? originalConsole.error : console.error;
+  logError("[UNCAUGHT_EXCEPTION] Erro nao capturado:", error.message);
+  logError("[UNCAUGHT_EXCEPTION] Stack:", error.stack);
+  // Encerrar gracefully - uncaughtException deixa o processo em estado instavel
+  gracefulShutdown("UNCAUGHT_EXCEPTION");
+});
 
 export default app;
 

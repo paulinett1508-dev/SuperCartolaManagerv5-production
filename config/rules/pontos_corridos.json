@@ -57,9 +57,11 @@
 
     "classificacao": {
       "ordenacao": [
-        { "campo": "pontos", "direcao": "DESC" },
-        { "campo": "saldo_gols", "direcao": "DESC" },
-        { "campo": "vitorias", "direcao": "DESC" }
+        { "campo": "pontos",        "direcao": "DESC", "descricao": "1º: Pontos da tabela (3V/1E/0D)" },
+        { "campo": "gols_pro",      "direcao": "DESC", "descricao": "2º: Pontos do Ranking Geral (total Cartola acumulado)" },
+        { "campo": "saldo_gols",    "direcao": "DESC", "descricao": "3º: Saldo de pontos" },
+        { "campo": "vitorias",      "direcao": "DESC", "descricao": "4º: Vitórias" },
+        { "campo": "pontosGoleada", "direcao": "DESC", "descricao": "5º: Pontos Goleada (bônus por goleadas aplicadas)" }
       ],
       "campos_calculados": [
         "jogos",
@@ -321,6 +323,8 @@
       }
     ]
   },
+
+  "nota": "Habilitação por liga é controlada via ModuleConfig no MongoDB, não por este arquivo",
 
   "metadados": {
     "criado_em": "2025-12-14",

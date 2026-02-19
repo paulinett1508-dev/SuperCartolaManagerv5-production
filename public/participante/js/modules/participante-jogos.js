@@ -123,13 +123,14 @@ function formatarTimestamp(isoString) {
 }
 
 /**
- * Renderiza card de jogos do dia - v5.7 (Campeonatos expandíveis + timestamp)
+ * Renderiza card de jogos do dia - v5.8 (Colapsável + Meu Time)
  * @param {Array} jogos - Lista de jogos
  * @param {string} fonte - Fonte dos dados (soccerdata, cache-stale, globo)
  * @param {boolean} aoVivo - Se ha jogos ao vivo
  * @param {string} atualizadoEm - ISO timestamp da última atualização
+ * @param {Object|null} clubeInfo - { clubeId, clubeNome } do participante (opcional)
  */
-export function renderizarJogosAoVivo(jogos, fonte = 'soccerdata', aoVivo = false, atualizadoEm = null) {
+export function renderizarJogosAoVivo(jogos, fonte = 'soccerdata', aoVivo = false, atualizadoEm = null, clubeInfo = null) {
     if (!jogos || !jogos.length) return '';
 
     // ✅ v5.6: Agenda do dia (agendados) em bloco separado
@@ -153,43 +154,104 @@ export function renderizarJogosAoVivo(jogos, fonte = 'soccerdata', aoVivo = fals
         : fonte?.includes('+') ? fonte.replace('soccerdata', 'SoccerData').replace('api-football', 'API-Football').replace('globo', 'Globo')
         : fonte || 'Fonte desconhecida';
 
+    // ✅ v5.8: Seção "Meu Time" - jogos do clube do participante
+    const meuTimeHtml = clubeInfo ? _renderizarMeuTime(jogos, clubeInfo) : '';
+
+    // Contagem para badge no header
+    const totalJogos = jogos.length;
+    const jogosAoVivoCount = jogos.filter(j => isJogoAoVivo(j)).length;
+
     return `
-    <div class="jogos-ao-vivo mx-4 mb-8 space-y-3">
-        ${jogosAgendados.length > 0
-            ? renderizarSecaoJogos(jogosAgendados, 'Agenda do Dia', 'agendados')
-            : ''}
-        ${Object.entries(jogosPorLiga).map(([liga, lista]) => {
-            const jogosAoVivo = lista.filter(j => isJogoAoVivo(j));
-            const jogosEncerrados = lista.filter(j => isJogoEncerrado(j));
-
-            if (jogosAoVivo.length === 0 && jogosEncerrados.length === 0) return '';
-
-            const total = jogosAoVivo.length + jogosEncerrados.length;
-            const abertoPorPadrao = jogosAoVivo.length > 0 ? 'open' : '';
-
-            return `
-            <details class="rounded-xl border border-gray-800/60 bg-gradient-to-br from-gray-800 to-gray-900 shadow-lg" ${abertoPorPadrao}>
-                <summary class="list-none cursor-pointer select-none px-3 py-2 flex items-center justify-between">
-                    <div class="flex items-center gap-2 min-w-0">
-                        <span class="material-icons text-primary text-base">sports_soccer</span>
-                        <h3 class="text-xs font-brand text-white tracking-wide truncate">${liga}</h3>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        ${jogosAoVivo.length > 0 ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-green-500/20 text-green-400">${jogosAoVivo.length} ao vivo</span>` : ''}
-                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-500/20 text-gray-300">${total} jogos</span>
-                        <span class="material-icons text-white/40 text-base">expand_more</span>
-                    </div>
-                </summary>
-                <div class="px-3 pb-3 space-y-2">
-                    ${renderizarSecaoJogos(jogosAoVivo, 'Ao Vivo', 'aoVivo')}
-                    ${renderizarSecaoJogos(jogosEncerrados, 'Encerrados', 'encerrados')}
+    <section id="jogos-home-section" class="jogos-home-section mx-4 mb-6">
+        <!-- Header Colapsável Agenda do Dia (Padrão Copa) -->
+        <button class="jogos-home-header" onclick="window.toggleJogosHome && window.toggleJogosHome()">
+            <div class="jogos-home-header-left">
+                <span class="text-xl">⚽</span>
+                <div>
+                    <h2 class="font-brand text-white text-sm tracking-wide" style="margin:0;line-height:1.2;">Agenda do Dia</h2>
+                    <span class="text-[10px] text-white/70">${totalJogos} jogos · Brasileirão e mais</span>
                 </div>
-            </details>
-            `;
-        }).join('')}
-        <div class="text-center flex flex-col gap-0.5">
-            <span class="text-[10px] text-white/30">Dados: ${fonteTexto}</span>
-            ${atualizadoEm ? `<span class="text-[9px] text-white/20">Atualizado: ${formatarTimestamp(atualizadoEm)}</span>` : ''}
+                ${jogosAoVivoCount > 0 ? `
+                    <span class="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 ml-2">
+                        <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
+                        ${jogosAoVivoCount} AO VIVO
+                    </span>
+                ` : ''}
+            </div>
+            <span class="material-icons jogos-home-chevron">expand_more</span>
+        </button>
+
+        <!-- Conteúdo Colapsável -->
+        <div class="jogos-home-content collapsed" id="jogos-home-content">
+            <div class="space-y-3 p-3">
+                ${meuTimeHtml}
+                ${jogosAgendados.length > 0
+                    ? renderizarSecaoJogos(jogosAgendados, 'Próximos Jogos', 'agendados')
+                    : ''}
+                ${Object.entries(jogosPorLiga).map(([liga, lista]) => {
+                    const ligaAoVivo = lista.filter(j => isJogoAoVivo(j));
+                    const ligaEncerrados = lista.filter(j => isJogoEncerrado(j));
+
+                    if (ligaAoVivo.length === 0 && ligaEncerrados.length === 0) return '';
+
+                    const total = ligaAoVivo.length + ligaEncerrados.length;
+                    const abertoPorPadrao = ligaAoVivo.length > 0 ? 'open' : '';
+
+                    return `
+                    <details class="rounded-xl border border-gray-800/60 bg-gradient-to-br from-gray-800 to-gray-900 shadow-lg" ${abertoPorPadrao}>
+                        <summary class="list-none cursor-pointer select-none px-3 py-2 flex items-center justify-between">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="material-icons text-primary text-base">sports_soccer</span>
+                                <h3 class="text-xs font-brand text-white tracking-wide truncate">${liga}</h3>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                ${ligaAoVivo.length > 0 ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-green-500/20 text-green-400">${ligaAoVivo.length} ao vivo</span>` : ''}
+                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-500/20 text-gray-300">${total} jogos</span>
+                                <span class="material-icons text-white/40 text-base">expand_more</span>
+                            </div>
+                        </summary>
+                        <div class="px-3 pb-3 space-y-2">
+                            ${renderizarSecaoJogos(ligaAoVivo, 'Ao Vivo', 'aoVivo')}
+                            ${renderizarSecaoJogos(ligaEncerrados, 'Encerrados', 'encerrados')}
+                        </div>
+                    </details>
+                    `;
+                }).join('')}
+                <div class="text-center flex flex-col gap-0.5">
+                    <span class="text-[10px] text-white/30">Dados: ${fonteTexto}</span>
+                    ${atualizadoEm ? `<span class="text-[9px] text-white/20">Atualizado: ${formatarTimestamp(atualizadoEm)}</span>` : ''}
+                </div>
+            </div>
+        </div>
+    </section>
+    `;
+}
+
+/**
+ * Renderiza seção "Meu Time" com jogos do clube do participante
+ * @param {Array} jogos - Todos os jogos do dia
+ * @param {Object} clubeInfo - { clubeId, clubeNome }
+ */
+function _renderizarMeuTime(jogos, clubeInfo) {
+    if (!clubeInfo?.clubeNome) return '';
+
+    const nomeClube = clubeInfo.clubeNome.toLowerCase();
+    const jogosMeuTime = jogos.filter(j => {
+        const mandante = (j.mandante || '').toLowerCase();
+        const visitante = (j.visitante || '').toLowerCase();
+        return mandante.includes(nomeClube) || visitante.includes(nomeClube);
+    });
+
+    if (jogosMeuTime.length === 0) return '';
+
+    return `
+    <div class="meu-time-section rounded-xl border border-orange-500/20 bg-gradient-to-br from-orange-500/5 to-transparent p-3 mb-2">
+        <div class="flex items-center gap-2 mb-2">
+            <img src="/escudos/${clubeInfo.clubeId}.png" class="w-5 h-5 object-contain" onerror="this.style.display='none'" alt="">
+            <span class="text-[11px] font-brand text-white/90 tracking-wide">Jogos do ${clubeInfo.clubeNome}</span>
+        </div>
+        <div class="space-y-1.5">
+            ${jogosMeuTime.map(j => renderizarCardJogo(j)).join('')}
         </div>
     </div>
     `;
@@ -450,27 +512,27 @@ export function renderizarSecaoCopa(copa) {
         : 'Copa do Mundo';
 
     return `
-    <div class="copa-do-mundo-secao mx-4 mb-6">
-        <!-- Header Copa do Mundo -->
-        <div class="copa-header rounded-t-xl px-4 py-3" style="background: var(--app-copa-gradient);">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">🏆</span>
-                    <div>
-                        <h2 class="font-brand text-white text-sm tracking-wide">Copa do Mundo 2026</h2>
-                        <span class="text-[10px] text-white/70">${faseTitulo} · EUA/México/Canadá</span>
-                    </div>
+    <section id="copa-home-section" class="copa-home-section mx-4 mb-6">
+        <!-- Header Colapsável Copa do Mundo -->
+        <button class="copa-home-header" onclick="window.toggleCopaHome && window.toggleCopaHome()">
+            <div class="copa-home-header-left">
+                <span class="text-xl">🏆</span>
+                <div>
+                    <h2 class="font-brand text-white text-sm tracking-wide">Copa do Mundo 2026</h2>
+                    <span class="text-[10px] text-white/70">${faseTitulo} · EUA/México/Canadá</span>
                 </div>
                 ${copa.temAoVivo ? `
-                    <span class="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-400">
+                    <span class="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 ml-2">
                         <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
                         AO VIVO
                     </span>
                 ` : ''}
             </div>
-        </div>
+            <span class="material-icons copa-home-chevron">expand_more</span>
+        </button>
 
-        <div class="rounded-b-xl border border-t-0 border-gray-800/60 bg-gradient-to-br from-gray-800/80 to-gray-900 pb-3">
+        <!-- Conteúdo Colapsável -->
+        <div class="copa-home-content collapsed" id="copa-home-content">
             ${jogosBrasil.length > 0 ? renderizarJogosBrasilCopa(jogosBrasil) : ''}
             ${jogosExibir.length > 0 ? renderizarJogosCopaLista(jogosExibir, copa.jogosDoDia?.length > 0 ? 'Jogos do Dia' : 'Próximos Jogos') : ''}
             ${jogosExibir.length === 0 && jogosBrasil.length === 0 ? `
@@ -487,7 +549,7 @@ export function renderizarSecaoCopa(copa) {
                 </button>
             </div>
         </div>
-    </div>
+    </section>
     `;
 }
 
@@ -642,6 +704,112 @@ function formatarDataCopa(data) {
  */
 export function renderizarJogosDoDia(jogos, isMock = false) {
     return renderizarJogosAoVivo(jogos, isMock ? 'mock' : 'globo', false);
+}
+
+// =====================================================================
+// LIBERTADORES 2026 - Faixa de Notícias
+// =====================================================================
+
+/**
+ * Notícias estáticas da Libertadores (fallback se API falhar)
+ */
+const LIBERTA_NOTICIAS_FALLBACK = [
+    {
+        icone: 'calendar_today',
+        titulo: 'Libertadores 2026 come\u00e7a em abril com fase preliminar',
+        meta: 'CONMEBOL',
+        badge: 'AGENDA'
+    },
+    {
+        icone: 'groups',
+        titulo: 'Fase de grupos ter\u00e1 32 times - veja os classificados at\u00e9 agora',
+        meta: 'CONMEBOL',
+        badge: 'CLASSIFICADOS'
+    },
+    {
+        icone: 'stadium',
+        titulo: 'Final \u00fanica ser\u00e1 em novembro - sede ainda ser\u00e1 definida',
+        meta: 'CONMEBOL',
+        badge: 'FINAL'
+    },
+    {
+        icone: 'emoji_events',
+        titulo: 'Campe\u00e3o garante vaga no Mundial de Clubes 2027',
+        meta: 'CONMEBOL',
+        badge: 'MUNDIAL'
+    }
+];
+
+/**
+ * Renderiza faixa de notícias da Libertadores
+ * @param {Array|null} noticiasApi - Notícias vindas da API (ou null para fallback estático)
+ * @returns {string} HTML da seção
+ */
+export function renderizarSecaoLibertadores(noticiasApi) {
+    const usandoApi = Array.isArray(noticiasApi) && noticiasApi.length > 0;
+
+    // Renderiza cards dinâmicos (API) ou estáticos (fallback)
+    const cardsHtml = usandoApi
+        ? noticiasApi.map(n => {
+            const linkSafe = n.link ? n.link.replace(/"/g, '&quot;') : '';
+            const tituloSafe = (n.titulo || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const fonteTxt = n.fonte || 'Fonte';
+            const tempoTxt = n.tempoRelativo || '';
+            return `
+                <div class="liberta-news-card liberta-news-card--clickable"
+                     onclick="window.open('${linkSafe}', '_blank')" role="link" tabindex="0">
+                    <div class="liberta-news-icon">
+                        <span class="material-icons">article</span>
+                    </div>
+                    <div class="liberta-news-text">
+                        <p class="liberta-news-title">${tituloSafe}</p>
+                        <div class="liberta-news-meta">
+                            <span class="liberta-news-fonte">${fonteTxt}</span>
+                            ${tempoTxt ? `<span class="liberta-news-tempo">${tempoTxt}</span>` : ''}
+                        </div>
+                    </div>
+                    <span class="material-icons liberta-news-chevron">chevron_right</span>
+                </div>`;
+        }).join('')
+        : LIBERTA_NOTICIAS_FALLBACK.map(n => `
+                <div class="liberta-news-card">
+                    <div class="liberta-news-icon">
+                        <span class="material-icons">${n.icone}</span>
+                    </div>
+                    <div class="liberta-news-text">
+                        <p class="liberta-news-title">${n.titulo}</p>
+                        <div class="liberta-news-meta">
+                            <span class="liberta-news-badge">${n.badge}</span>
+                            ${n.meta}
+                        </div>
+                    </div>
+                </div>`).join('');
+
+    return `
+    <section id="liberta-home-section" class="liberta-home-section mx-4 mb-6">
+        <!-- Header Colaps\u00e1vel Libertadores -->
+        <button class="liberta-home-header" onclick="window.toggleLibertaHome && window.toggleLibertaHome()">
+            <div class="liberta-home-header-left">
+                <span class="material-icons" style="font-size:22px;color:var(--app-liberta-secondary);">emoji_events</span>
+                <div>
+                    <h2 class="font-brand text-white text-sm tracking-wide">Libertadores 2026</h2>
+                    <span class="text-[10px] text-white/70">CONMEBOL Libertadores da Am\u00e9rica</span>
+                </div>
+            </div>
+            <span class="material-icons liberta-home-chevron">expand_more</span>
+        </button>
+
+        <!-- Conte\u00fado Colaps\u00e1vel -->
+        <div class="liberta-home-content collapsed" id="liberta-home-content">
+            ${cardsHtml}
+            <div style="text-align:center;padding:8px 0 4px;">
+                <span class="text-[10px] text-white/30" style="font-style:italic;">
+                    ${usandoApi ? 'Not\u00edcias via Google News' : 'Sorteio dos grupos em breve'}
+                </span>
+            </div>
+        </div>
+    </section>
+    `;
 }
 
 // =====================================================================

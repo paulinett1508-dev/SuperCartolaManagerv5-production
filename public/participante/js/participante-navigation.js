@@ -507,6 +507,7 @@ class ParticipanteNavigation {
             'melhor-mes': 'melhorMes',
             'luva-ouro': 'luvaOuro',
             'capitao': 'capitaoLuxo',
+            'resta-um': 'restaUm',
         };
         const configKey = configKeyMap[moduloId] || moduloId;
 
@@ -956,6 +957,7 @@ class ParticipanteNavigation {
             artilheiro: "Artilheiro Campeão",
             "luva-ouro": "Luva de Ouro",
             capitao: "Capitão de Luxo",
+            "resta-um": "Resta Um",
             regras: "Regras",
             configuracoes: "Configurações",
             "copa-2026-mundo": "Copa do Mundo 2026",
@@ -1012,6 +1014,7 @@ class ParticipanteNavigation {
             "copa-2026-mundo": "/participante/js/modules/participante-copa-2026-mundo.js",
             regras: "/participante/js/modules/participante-regras.js",
             "rodada-xray": "/participante/js/modules/participante-rodada-xray.js",
+            "resta-um": "/participante/js/modules/participante-resta-um.js",
         };
 
         const jsPath = modulosPaths[modulo];

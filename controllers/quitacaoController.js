@@ -17,6 +17,7 @@ import mongoose from "mongoose";
 import ExtratoFinanceiroCache from "../models/ExtratoFinanceiroCache.js";
 import InscricaoTemporada from "../models/InscricaoTemporada.js";
 import { CURRENT_SEASON, getFinancialSeason } from "../config/seasons.js";
+import logger from '../utils/logger.js';
 
 /**
  * Busca dados do participante para exibir no modal de quitação
@@ -97,7 +98,7 @@ export async function buscarDadosParaQuitacao(req, res) {
                 saldoRodadas += (r.bonus || 0) - (r.onus || 0);
             });
 
-            console.log(`[QUITACAO] Cache não encontrado para time ${timeId}/temporada ${temporada}. Calculado diretamente: saldoRodadas=${saldoRodadas}`);
+            logger.log(`[QUITACAO] Cache não encontrado para time ${timeId}/temporada ${temporada}. Calculado diretamente: saldoRodadas=${saldoRodadas}`);
         }
 
         // Calcular saldo final
@@ -142,7 +143,7 @@ export async function buscarDadosParaQuitacao(req, res) {
                 saldoRemanescente = saldoFinal - creditoComprometido;
             }
 
-            console.log(`[QUITACAO] Participante ${timeId} já renovou para ${proximaTemporada}:
+            logger.log(`[QUITACAO] Participante ${timeId} já renovou para ${proximaTemporada}:
                 - Saldo 2025: ${saldoFinal}
                 - Taxa inscrição: ${taxaInscricao}
                 - Pagou inscrição: ${pagouInscricao}
@@ -188,7 +189,7 @@ export async function buscarDadosParaQuitacao(req, res) {
         });
 
     } catch (error) {
-        console.error('[QUITACAO] Erro ao buscar dados:', error);
+        logger.error('[QUITACAO] Erro ao buscar dados:', error);
         return res.status(500).json({
             success: false,
             error: 'Erro ao buscar dados para quitação',
@@ -247,130 +248,144 @@ export async function quitarTemporada(req, res) {
             });
         }
 
-        // 1. Marcar extrato da temporada origem como quitado (se existir cache)
-        if (cacheOrigem) {
-            cacheOrigem.quitacao = {
-                quitado: true,
-                data_quitacao: new Date(),
-                admin_responsavel: admin,
-                saldo_no_momento: saldo_original,
-                tipo: tipo_quitacao,
-                valor_legado: tipo_quitacao === 'zerado' ? 0 : (tipo_quitacao === 'integral' ? saldo_original : valor_legado),
-                observacao: observacao.trim()
-            };
-            await cacheOrigem.save();
-            console.log(`[QUITACAO] Extrato ${temporada_origem} marcado como quitado para time ${timeId}`);
-        } else {
-            // v1.1: Se não há cache, criar um registro mínimo de quitação
-            await ExtratoFinanceiroCache.create({
-                liga_id: String(ligaId), // ✅ v6.10 FIX: Usar String para consistência
-                time_id: Number(timeId),
-                temporada: Number(temporada_origem),
-                saldo_consolidado: saldo_original,
-                quitacao: {
+        // ✅ v3.0.0: Transação MongoDB para atomicidade
+        const session = await mongoose.startSession();
+        try {
+            session.startTransaction();
+
+            // 1. Marcar extrato da temporada origem como quitado (se existir cache)
+            if (cacheOrigem) {
+                cacheOrigem.quitacao = {
                     quitado: true,
                     data_quitacao: new Date(),
                     admin_responsavel: admin,
                     saldo_no_momento: saldo_original,
                     tipo: tipo_quitacao,
                     valor_legado: tipo_quitacao === 'zerado' ? 0 : (tipo_quitacao === 'integral' ? saldo_original : valor_legado),
-                    observacao: observacao.trim(),
-                    criado_sem_cache: true // Flag para auditoria
-                }
-            });
-            console.log(`[QUITACAO] Cache criado e marcado como quitado para time ${timeId}/temporada ${temporada_origem} (sem cache anterior)`);
-        }
-
-        // 2. Criar/atualizar inscrição na temporada destino com legado manual
-        const valorLegadoFinal = tipo_quitacao === 'zerado' ? 0 :
-                                 (tipo_quitacao === 'integral' ? saldo_original : valor_legado);
-
-        const inscricaoUpdate = {
-            liga_id: String(ligaId),
-            time_id: Number(timeId),
-            temporada: Number(temporada_destino),
-            temporada_anterior: {
-                temporada: Number(temporada_origem),
-                saldo_final: saldo_original,
-                status_quitacao: 'quitado'  // Sempre quitado após esta ação
-            },
-            legado_manual: {
-                origem: 'quitacao_admin',
-                valor_original: saldo_original,
-                valor_definido: valorLegadoFinal,
-                tipo_quitacao: tipo_quitacao,
-                observacao: observacao.trim(),
-                admin_responsavel: admin,
-                data_quitacao: new Date()
-            }
-        };
-
-        // Se valor_legado != 0, definir como saldo_transferido ou divida_anterior
-        if (valorLegadoFinal !== 0) {
-            if (valorLegadoFinal > 0) {
-                // Crédito a carregar
-                inscricaoUpdate.saldo_transferido = valorLegadoFinal;
-                inscricaoUpdate.divida_anterior = 0;
+                    observacao: observacao.trim()
+                };
+                await cacheOrigem.save({ session });
+                logger.log(`[QUITACAO] Extrato ${temporada_origem} marcado como quitado para time ${timeId}`);
             } else {
-                // Dívida a carregar
-                inscricaoUpdate.saldo_transferido = 0;
-                inscricaoUpdate.divida_anterior = Math.abs(valorLegadoFinal);
+                // v1.1: Se não há cache, criar um registro mínimo de quitação
+                await ExtratoFinanceiroCache.create([{
+                    liga_id: String(ligaId), // ✅ v6.10 FIX: Usar String para consistência
+                    time_id: Number(timeId),
+                    temporada: Number(temporada_origem),
+                    saldo_consolidado: saldo_original,
+                    quitacao: {
+                        quitado: true,
+                        data_quitacao: new Date(),
+                        admin_responsavel: admin,
+                        saldo_no_momento: saldo_original,
+                        tipo: tipo_quitacao,
+                        valor_legado: tipo_quitacao === 'zerado' ? 0 : (tipo_quitacao === 'integral' ? saldo_original : valor_legado),
+                        observacao: observacao.trim(),
+                        criado_sem_cache: true // Flag para auditoria
+                    }
+                }], { session });
+                logger.log(`[QUITACAO] Cache criado e marcado como quitado para time ${timeId}/temporada ${temporada_origem} (sem cache anterior)`);
             }
-        } else {
-            inscricaoUpdate.saldo_transferido = 0;
-            inscricaoUpdate.divida_anterior = 0;
-        }
 
-        await InscricaoTemporada.findOneAndUpdate(
-            {
+            // 2. Criar/atualizar inscrição na temporada destino com legado manual
+            const valorLegadoFinal = tipo_quitacao === 'zerado' ? 0 :
+                                     (tipo_quitacao === 'integral' ? saldo_original : valor_legado);
+
+            const inscricaoUpdate = {
                 liga_id: String(ligaId),
                 time_id: Number(timeId),
-                temporada: Number(temporada_destino)
-            },
-            { $set: inscricaoUpdate },
-            { upsert: true, new: true }
-        );
-        console.log(`[QUITACAO] Inscricao ${temporada_destino} atualizada com legado manual para time ${timeId}`);
+                temporada: Number(temporada_destino),
+                temporada_anterior: {
+                    temporada: Number(temporada_origem),
+                    saldo_final: saldo_original,
+                    status_quitacao: 'quitado'  // Sempre quitado após esta ação
+                },
+                legado_manual: {
+                    origem: 'quitacao_admin',
+                    valor_original: saldo_original,
+                    valor_definido: valorLegadoFinal,
+                    tipo_quitacao: tipo_quitacao,
+                    observacao: observacao.trim(),
+                    admin_responsavel: admin,
+                    data_quitacao: new Date()
+                }
+            };
 
-        // 3. Registrar log de atividade
-        try {
-            const UserActivity = mongoose.model('UserActivity');
-            await UserActivity.create({
-                usuario: admin,
-                tipo: 'quitacao_temporada',
-                descricao: `Quitação ${temporada_origem}: ${tipo_quitacao} | Original: R$${saldo_original} | Legado: R$${valorLegadoFinal}`,
-                detalhes: {
-                    liga_id: ligaId,
-                    time_id: timeId,
+            // Se valor_legado != 0, definir como saldo_transferido ou divida_anterior
+            if (valorLegadoFinal !== 0) {
+                if (valorLegadoFinal > 0) {
+                    // Crédito a carregar
+                    inscricaoUpdate.saldo_transferido = valorLegadoFinal;
+                    inscricaoUpdate.divida_anterior = 0;
+                } else {
+                    // Dívida a carregar
+                    inscricaoUpdate.saldo_transferido = 0;
+                    inscricaoUpdate.divida_anterior = Math.abs(valorLegadoFinal);
+                }
+            } else {
+                inscricaoUpdate.saldo_transferido = 0;
+                inscricaoUpdate.divida_anterior = 0;
+            }
+
+            await InscricaoTemporada.findOneAndUpdate(
+                {
+                    liga_id: String(ligaId),
+                    time_id: Number(timeId),
+                    temporada: Number(temporada_destino)
+                },
+                { $set: inscricaoUpdate },
+                { upsert: true, new: true, session }
+            );
+            logger.log(`[QUITACAO] Inscricao ${temporada_destino} atualizada com legado manual para time ${timeId}`);
+
+            // 3. Registrar log de atividade
+            try {
+                const UserActivity = mongoose.model('UserActivity');
+                await UserActivity.create([{
+                    usuario: admin,
+                    tipo: 'quitacao_temporada',
+                    descricao: `Quitação ${temporada_origem}: ${tipo_quitacao} | Original: R$${saldo_original} | Legado: R$${valorLegadoFinal}`,
+                    detalhes: {
+                        liga_id: ligaId,
+                        time_id: timeId,
+                        temporada_origem,
+                        temporada_destino,
+                        saldo_original,
+                        tipo_quitacao,
+                        valor_legado: valorLegadoFinal,
+                        observacao
+                    },
+                    ip: req.ip
+                }], { session });
+            } catch (logError) {
+                logger.warn('[QUITACAO] Erro ao registrar log (não crítico):', logError.message);
+            }
+
+            await session.commitTransaction();
+
+            return res.json({
+                success: true,
+                message: `Temporada ${temporada_origem} quitada com sucesso`,
+                quitacao: {
                     temporada_origem,
                     temporada_destino,
                     saldo_original,
                     tipo_quitacao,
                     valor_legado: valorLegadoFinal,
-                    observacao
-                },
-                ip: req.ip
+                    admin: admin,
+                    data: new Date()
+                }
             });
-        } catch (logError) {
-            console.warn('[QUITACAO] Erro ao registrar log (não crítico):', logError.message);
+
+        } catch (txError) {
+            await session.abortTransaction();
+            throw txError;
+        } finally {
+            session.endSession();
         }
 
-        return res.json({
-            success: true,
-            message: `Temporada ${temporada_origem} quitada com sucesso`,
-            quitacao: {
-                temporada_origem,
-                temporada_destino,
-                saldo_original,
-                tipo_quitacao,
-                valor_legado: valorLegadoFinal,
-                admin: admin,
-                data: new Date()
-            }
-        });
-
     } catch (error) {
-        console.error('[QUITACAO] Erro ao quitar temporada:', error);
+        logger.error('[QUITACAO] Erro ao quitar temporada:', error);
         return res.status(500).json({
             success: false,
             error: 'Erro ao processar quitação',
@@ -409,7 +424,7 @@ export async function verificarStatusQuitacao(req, res) {
         });
 
     } catch (error) {
-        console.error('[QUITACAO] Erro ao verificar status:', error);
+        logger.error('[QUITACAO] Erro ao verificar status:', error);
         return res.status(500).json({
             success: false,
             error: 'Erro ao verificar status',

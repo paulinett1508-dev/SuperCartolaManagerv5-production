@@ -207,11 +207,17 @@ class ParticipanteAuth {
                 return true;
             }
 
-            // Dev bypass ou whitelist - desativar splash se estava ativa
+            // Dev bypass, whitelist ou modo módulos - desativar splash se estava ativa
             if (data.ativo && !data.bloqueado) {
+                // Modo módulos: propagar lista de módulos bloqueados para navegação
+                if (data.modo === 'modulos' && data.modulos_bloqueados) {
+                    window.participanteModulosBloqueados = data.modulos_bloqueados;
+                    if (window.Log) Log.info('PARTICIPANTE-AUTH', `🔧 Modo módulos: ${data.modulos_bloqueados.length} módulo(s) bloqueado(s):`, data.modulos_bloqueados);
+                }
+
                 if (window.ManutencaoScreen && ManutencaoScreen.estaAtivo()) {
                     ManutencaoScreen.desativar();
-                    if (window.Log) Log.info('PARTICIPANTE-AUTH', '🔓 Manutenção: acesso liberado (devBypass ou whitelist)');
+                    if (window.Log) Log.info('PARTICIPANTE-AUTH', '🔓 Manutenção: acesso liberado (devBypass, whitelist ou modo módulos)');
                 }
             }
 
@@ -829,7 +835,7 @@ class ParticipanteAuth {
             sessionStorage.clear();
 
             // ✅ Limpar localStorage SELETIVAMENTE (preservar chaves de sistema)
-            const chavesPreservadas = ['app_version', 'sw_emergency_clean_v8'];
+            const chavesPreservadas = ['app_version', 'sw_emergency_clean_v11', 'liga_splash_inicial_concluida'];
             const keysToRemove = [];
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
@@ -879,6 +885,11 @@ class ParticipanteAuth {
         this.participante = null;
         this.ligaId = null;
         this.timeId = null;
+
+        // ✅ v3.3: Resetar splash para próximo login mostrar logo correta
+        if (window.LigaLogos && window.LigaLogos.resetarSplash) {
+            window.LigaLogos.resetarSplash();
+        }
     }
 
     getDados() {

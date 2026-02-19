@@ -14,10 +14,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Conexão com MongoDB
-const MONGO_URI = process.env.NODE_ENV === 'production'
-    ? process.env.MONGO_URI
-    : (process.env.MONGO_URI_DEV || process.env.MONGO_URI);
+// Conexão com MongoDB (banco único)
+const MONGO_URI = process.env.MONGO_URI;
 
 // Schema simplificado para query direta
 const DumpSchema = new mongoose.Schema({

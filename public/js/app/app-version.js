@@ -30,7 +30,7 @@ const AppVersion = {
 
         try {
             // Limpar apenas caches com nomes antigos (não o atual do SW)
-            const CURRENT_SW_CACHE = 'super-cartola-v21-ttl-dinamico';
+            const CURRENT_SW_CACHE = 'super-cartola-v22-logo-ano12';
             const cacheNames = await caches.keys();
             const obsoletos = cacheNames.filter(name => name !== CURRENT_SW_CACHE);
 
@@ -210,9 +210,13 @@ const AppVersion = {
                         window.ManutencaoScreen.desativar();
                     }
 
-                    // Modo modulos: será tratado no participante-navigation.js
+                    // Modo modulos: setar lista e desativar splash global se ativa por race condition
                     if (modo === 'modulos') {
                         window.participanteModulosBloqueados = servidor.manutencao.modulos_bloqueados || [];
+                        if (window.ManutencaoScreen && window.ManutencaoScreen.estaAtivo()) {
+                            if (window.Log) Log.info('APP-VERSION', `Modo modulos: desativando splash global (race condition fix)`);
+                            window.ManutencaoScreen.desativar();
+                        }
                     }
                 }
             } else {
@@ -265,116 +269,6 @@ const AppVersion = {
         if (badge) {
             badge.textContent = `v${version}`;
         }
-    },
-
-    // ✅ Mostrar modal de atualização
-    mostrarModalAtualizacao(novaVersao) {
-        // Evitar múltiplos modais
-        if (document.getElementById('update-modal-overlay')) return;
-
-        const overlay = document.createElement('div');
-        overlay.id = 'update-modal-overlay';
-        overlay.innerHTML = `
-            <div class="update-modal">
-                <div class="update-modal-icon">
-                    <span class="material-symbols-outlined">system_update</span>
-                </div>
-                <h3>Nova versão disponível!</h3>
-                <p>Uma atualização está disponível${novaVersao ? ` (v${novaVersao})` : ''}.</p>
-                <p class="update-modal-sub">Clique em atualizar para carregar a versão mais recente.</p>
-                <div class="update-modal-buttons">
-                    <button class="update-btn-now" onclick="AppVersion.atualizarAgora()">Atualizar</button>
-                </div>
-            </div>
-        `;
-
-        // Adicionar estilos inline
-        overlay.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 999999;
-            backdrop-filter: blur(5px);
-        `;
-
-        const modal = overlay.querySelector('.update-modal');
-        modal.style.cssText = `
-            background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
-            border-radius: 16px;
-            padding: 24px;
-            max-width: 320px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 69, 0, 0.3);
-        `;
-
-        const icon = overlay.querySelector('.update-modal-icon');
-        icon.style.cssText = `
-            width: 64px;
-            height: 64px;
-            background: linear-gradient(135deg, #ff4500, #ff6b35);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 16px;
-        `;
-
-        const iconSpan = overlay.querySelector('.update-modal-icon span');
-        iconSpan.style.cssText = `
-            font-size: 32px;
-            color: white;
-        `;
-
-        const h3 = overlay.querySelector('h3');
-        h3.style.cssText = `
-            color: #fff;
-            font-size: 1.25rem;
-            margin: 0 0 8px;
-        `;
-
-        const p = overlay.querySelector('p');
-        p.style.cssText = `
-            color: #ccc;
-            font-size: 0.95rem;
-            margin: 0 0 4px;
-        `;
-
-        const subP = overlay.querySelector('.update-modal-sub');
-        subP.style.cssText = `
-            color: #888;
-            font-size: 0.85rem;
-            margin: 0 0 20px;
-        `;
-
-        const buttons = overlay.querySelector('.update-modal-buttons');
-        buttons.style.cssText = `
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-        `;
-
-        const nowBtn = overlay.querySelector('.update-btn-now');
-        nowBtn.style.cssText = `
-            padding: 12px 32px;
-            border-radius: 8px;
-            border: none;
-            background: linear-gradient(135deg, #ff4500, #ff6b35);
-            color: white;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        `;
-
-        document.body.appendChild(overlay);
     },
 
     iniciarAutoCheck() {
@@ -491,7 +385,7 @@ const AppVersion = {
     },
 
     // ✅ Atualizar agora
-    atualizarAgora() {
+    async atualizarAgora() {
         // Limpar versão local para forçar recarga limpa
         localStorage.removeItem(this.LOCAL_KEY);
         localStorage.removeItem(this.LOCAL_BOOT_KEY);
@@ -501,17 +395,18 @@ const AppVersion = {
             navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
         }
 
-        // Limpar cache do SW
+        // Limpar cache do SW (aguardar conclusão antes de recarregar)
         if ('caches' in window) {
-            caches.keys().then(names => {
-                names.forEach(name => caches.delete(name));
-            });
+            try {
+                const names = await caches.keys();
+                await Promise.all(names.map(name => caches.delete(name)));
+            } catch (e) {
+                // Ignorar erros de cache — prosseguir com reload de qualquer forma
+            }
         }
 
-        // Recarregar página
-        setTimeout(() => {
-            window.location.reload(true);
-        }, 500);
+        // Recarregar página (sem race condition com deleção de caches)
+        window.location.reload(true);
     }
 };
 
@@ -525,4 +420,4 @@ if (document.readyState === "loading") {
     AppVersion.init();
 }
 
-if (window.Log) Log.info('APP-VERSION', '✅ Sistema de versionamento v5.1 carregado (modal obrigatório)');
+if (window.Log) Log.info('APP-VERSION', '✅ Sistema de versionamento v5.2 carregado (modal obrigatório)');

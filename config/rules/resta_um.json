@@ -3,13 +3,13 @@
   "nome": "Resta Um",
   "descricao": "Competição de eliminação progressiva. A cada rodada, o time com menor pontuação é eliminado até restar apenas um campeão.",
   "tipo": "competicao_eliminatoria",
-  "status": "planejado",
+  "status": "ativo",
   "versao": "1.0.0",
 
   "configuracao": {
     "ligas_habilitadas": ["684cb1c8af923da7c7df51de"],
     "modulo_ativo": true,
-    "temporada": 2025,
+    "temporada": 2026,
     "minimo_participantes": 8
   },
 

@@ -149,10 +149,26 @@ Garantir conformidade com os padrões visuais do projeto: **Dark Mode First**, *
      onerror="this.src='/escudos/default.png'">
 ```
 
-#### Ícones
-- [ ] SVG inline ou biblioteca consistente (Font Awesome, Heroicons)
-- [ ] Cores alinhadas com tema dark
-- [ ] Tamanho proporcional ao contexto
+#### Ícones (REGRA CRÍTICA)
+**NUNCA use emojis no código.** Sempre use Material Icons.
+
+- [ ] Usa Material Icons (não emojis)
+- [ ] Cores via variáveis CSS (não hardcoded)
+- [ ] Tamanho proporcional ao contexto (14-24px)
+
+| Emoji Proibido | Material Icon | Cor |
+|----------------|---------------|-----|
+| `🟢` | `check_circle` | `var(--app-success)` |
+| `🔴` | `cancel` | `var(--app-danger)` |
+| `⭐` | `star` | `var(--app-warning)` |
+| `🏆` | `emoji_events` | `var(--app-danger)` |
+| `⚽` | `sports_soccer` | `var(--app-indigo)` |
+| `🎯` | `casino` | `var(--app-primary)` |
+
+**Motivos:**
+1. Emojis renderizam diferente em cada OS/browser
+2. Material Icons são vetoriais (escaláveis)
+3. Cores tematizáveis via CSS variables
 
 ---
 

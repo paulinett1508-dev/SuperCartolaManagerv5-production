@@ -105,6 +105,17 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 | **NÃO confundir** | Gerar PRD (pesquisa) ≠ explicar sistema (system-scribe) |
 | **Localização** | `docs/skills/02-specialists/system-scribe.md` |
 
+#### anti-frankenstein
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `anti-frankenstein`, `anti-frank`, `modo anti-frank`, `ative modo anti-frank`, `blindar frontend`, `governança CSS`, `validar CSS`, `antes de criar CSS`, `já existe?`, `checar antes de criar`, `auditar CSS`, `duplicado CSS`, `prevenir duplicação`, `css registry`, `HTMLs no modo anti-frank` |
+| **Frases PT-BR** | "ative modo anti-frank", "sempre pensando no modo anti-frank", "anti-frank", "HTMLs ativado no modo anti-frank", "modo anti-frankenstein ativo", "já existe esse componente?", "antes de criar esse CSS", "tem algum CSS parecido?", "vou criar um novo arquivo CSS", "checar se já existe", "posso criar arquivo CSS?", "validar criação frontend", "governança de frontend", "garantir que não vai duplicar", "blindar o CSS", "revisar antes de criar tela", "governança de código visual", "anti-frankstein" |
+| **Contexto** | Checkpoint PREVENTIVO obrigatório antes de criar/modificar CSS, HTML, inline styles ou componentes visuais. Previne código duplicado, cores hardcoded, keyframes repetidos, arquivos órfãos |
+| **Ativação automática** | Deve rodar ANTES de qualquer criação de CSS/HTML. Complementa `frontend-crafter` (que cria) e `code-inspector` (que audita pós-facto) |
+| **NÃO confundir** | Criar tela nova → `frontend-crafter` (mas anti-frankenstein roda ANTES); Auditar código → `code-inspector`; Auditar UX → `ux-auditor-app` |
+| **Localização** | `docs/skills/02-specialists/anti-frankenstein.md` |
+| **Referências** | `config/css-registry.json`, `docs/rules/audit-frontend.md` |
+
 ---
 
 ### 03 - Utilities (Ferramentas Auxiliares)
@@ -172,11 +183,11 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 #### stitch-adapter
 | Tipo | Keywords |
 |------|----------|
-| **Primárias** | `stitch`, `google stitch`, `adaptar código`, `converter html`, `código externo`, `html do stitch`, `gerar UI`, `criar componente stitch`, `avaliar html`, `score stitch`, `qualidade html` |
-| **Frases PT-BR** | "adaptar código do stitch", "recebi código do stitch", "converter html externo", "processar stitch", "código gerado pelo stitch", "html do google stitch", "adaptar design do stitch", "gerar UI no stitch", "criar componente no stitch", "avaliar qualidade do html", "score do html do stitch", "crie no stitch" |
-| **Contexto** | PLANO A de criação de UI: via MCP Stitch (geração automática) ou HTML colado (adaptação manual). Avalia qualidade, separa HTML/CSS/JS, converte para variáveis CSS, adapta à stack Vanilla JS |
-| **Versão** | 2.0 (MCP-First + Avaliador de Qualidade) |
-| **NÃO confundir** | Criar componente do zero sem Stitch → `frontend-crafter`; Apenas estilizar → `frontend-crafter` |
+| **Primárias** | `adaptar html`, `converter html`, `html externo`, `html do stitch`, `avaliar html`, `qualidade html`, `stitch` |
+| **Frases PT-BR** | "adaptar esse html", "recebi html externo", "converter html para o projeto", "processar html do stitch", "html do ai studio", "avaliar qualidade do html", "adaptar codigo externo" |
+| **Contexto** | Recebe HTML colado (de qualquer fonte: Stitch, AI Studio, ChatGPT, etc.), avalia qualidade, separa HTML/CSS/JS, converte para variáveis CSS, adapta à stack Vanilla JS |
+| **Versão** | 3.0 (Modo Manual + Avaliador de Qualidade) |
+| **NÃO confundir** | Criar componente do zero → `frontend-crafter`; Apenas estilizar → `frontend-crafter` |
 | **Localização** | `docs/skills/03-utilities/stitch-adapter.md` |
 
 ---
@@ -273,6 +284,8 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | "especifique as mudanças" | `spec` | Planejamento técnico |
 | "implemente isso" | `code` | Execução de mudanças |
 | "crie uma tela de ranking" | `frontend-crafter` | Criação de UI |
+| "antes de criar CSS, valide" | `anti-frankenstein` | Governança preventiva |
+| "já existe esse componente?" | `anti-frankenstein` | Check de duplicação |
 | "como funciona o mata-mata?" | `system-scribe` | Explicação do sistema |
 | "qual a regra de desempate?" | `league-architect` | Regra de negócio |
 | "limpe os dados antigos" | `db-guardian` | Operação no banco |
@@ -284,11 +297,9 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | "tem certeza disso?" | `fact-checker` | Validação de fatos |
 | "antes de codar, verifique" | `ai-problems-detection` | Pré-check |
 | "esse arquivo tá enorme" | `Refactor-Monolith` | Decomposição |
-| "adaptar código do stitch" | `stitch-adapter` | Conversão HTML externo |
-| "recebi html do google stitch" | `stitch-adapter` | Adaptação de código |
-| "crie no stitch um card de..." | `stitch-adapter` | Geração via MCP Stitch |
+| "adaptar esse html pro projeto" | `stitch-adapter` | Conversão HTML externo |
+| "recebi html externo" | `stitch-adapter` | Adaptação de código |
 | "avalie qualidade deste html" | `stitch-adapter` | Avaliação score 0-100 |
-| "gerar UI no stitch" | `stitch-adapter` | Geração automática via MCP |
 | "endpoint do cartola" | `cartola-api` | API externa |
 | "cache tá lento" | `cache-auditor` | Performance de cache |
 | "audite o módulo top 10" | `auditor-module` | Auditoria de módulo |
@@ -297,6 +308,14 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | "como tá o visual do app" | `ux-auditor-app` | Estado do design do app |
 | "quais branches existem" | `analise-branches` | Análise git |
 | "executar auditoria mensal" | `context7-monthly-audit` | Auditoria preventiva |
+| "já existe esse CSS?" | `anti-frankenstein` | Checkpoint pré-criação |
+| "antes de criar esse componente" | `anti-frankenstein` | Governança de frontend |
+| "blindar o CSS do projeto" | `anti-frankenstein` | Prevenção de duplicidade |
+| "vou criar um arquivo CSS novo" | `anti-frankenstein` | Validação obrigatória |
+| "anti-frank" | `anti-frankenstein` | Alias curto |
+| "ative modo anti-frank" | `anti-frankenstein` | Ativação direta por alias |
+| "sempre pensando no modo anti-frank" | `anti-frankenstein` | Modo persistente de governança |
+| "HTMLs ativado no modo anti-frank" | `anti-frankenstein` | Checkpoint em criação de HTML |
 | "verificar mudanças api cartola" | `context7-monthly-audit` | Check mensal automático |
 | "criar uma skill nova" | `skill-creator` | Meta |
 | "instalar skill X" | `skill-installer` | Meta |
@@ -308,15 +327,14 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | Cenário | Sequência de Skills |
 |---------|---------------------|
 | Feature nova completa | `workflow` → `pesquisa` → `spec` → `ai-problems-detection` → `code` → `git-commit-push` |
+| Feature com frontend | `workflow` → `pesquisa` → `spec` → `anti-frankenstein` → `frontend-crafter` → `code` → `git-commit-push` |
 | Bug report | `fact-checker` → `code-inspector` → `code` → `git-commit-push` |
 | Refatoração | `Refactor-Monolith` → `code-inspector` → `git-commit-push` |
 | Deploy completo | `git-commit-push` → `replit-pull` → `restart-server` |
 | Auditoria de módulo | `auditor-module` → `code-inspector` → `cache-auditor` |
 | Auditoria UX pré-release | `ux-auditor-app` → `cache-auditor` → `code-inspector` |
 | Auditoria UX + correção | `ux-auditor-app` → `frontend-crafter` |
-| Design Stitch → Código (MCP) | `stitch-adapter` (Plano A: MCP gera + adapta automaticamente) |
-| Design Stitch → Código (Manual) | `stitch-adapter` → `frontend-crafter` (ajustes) |
-| Design Figma → Código (Fallback) | Figma MCP → `stitch-adapter` (transformer React → Vanilla) |
+| HTML externo → Código | `stitch-adapter` → `frontend-crafter` (ajustes se necessário) |
 | Documentação | `system-scribe` |
 | Deploy completo | `git-commit-push` → `replit-pull` |
 | Consulta API Cartola | `cartola-api` → `fact-checker` |

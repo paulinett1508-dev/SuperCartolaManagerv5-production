@@ -4,7 +4,7 @@
  * Widget flutuante pós-rodada com análise de disputas internas
  * Aparece quando rodada encerra (consolidada + mercado aberto)
  *
- * @version 1.0.0 - Lançamento inicial
+ * @version 1.1.0 - Botão refresh no modal compacto
  *   - FAB bola estática (sem animações)
  *   - Modal com narrativa inteligente
  *   - Foco em disputas (PC, MM, Artilheiro, Luva, Capitão)
@@ -16,7 +16,7 @@
  * - Mercado fecha (nova rodada) → Widget desaparece, foguinho volta
  */
 
-if (window.Log) Log.info("[ROUND-XRAY] ⚽ Widget v1.0 carregando...");
+if (window.Log) Log.info("[ROUND-XRAY] ⚽ Widget v1.1 carregando...");
 
 // ============================================
 // ESTADO DO WIDGET
@@ -39,6 +39,7 @@ const RXrayState = {
 const RXRAY_STORAGE_KEY = "rxray-fab-position";
 const RXRAY_CACHE_KEY = "rxray-cache-v2";
 const RXRAY_CACHE_DURATION = 30 * 60 * 1000; // 30 minutos
+const RXRAY_SEEN_KEY = "rxray-seen-rodada";
 
 // ============================================
 // INICIALIZAÇÃO
@@ -109,6 +110,9 @@ async function mostrarWidget() {
     // Mostrar
     fab.style.display = "flex";
     RXrayState.isVisible = true;
+
+    // Esconder badge se rodada já foi vista
+    atualizarBadgeVisto(fab);
 
     if (window.Log) Log.info("[ROUND-XRAY] Widget visível");
 }
@@ -276,7 +280,41 @@ function fecharModal() {
     }
     RXrayState.isModalOpen = false;
 
+    // Marcar rodada como vista e esconder badge
+    marcarRodadaComoVista();
+
     if (window.Log) Log.info("[ROUND-XRAY] Modal fechado");
+}
+
+/**
+ * Marca rodada atual como vista no localStorage
+ */
+function marcarRodadaComoVista() {
+    try {
+        localStorage.setItem(RXRAY_SEEN_KEY, String(RXrayState.rodadaConsolidada));
+    } catch (e) { /* ignore */ }
+
+    const fab = document.getElementById("rxrayFab");
+    if (fab) atualizarBadgeVisto(fab);
+}
+
+/**
+ * Esconde badge se rodada já foi vista, mostra se é nova
+ */
+function atualizarBadgeVisto(fab) {
+    const badge = fab.querySelector(".rxray-fab-badge");
+    if (!badge) return;
+
+    try {
+        const rodadaVista = localStorage.getItem(RXRAY_SEEN_KEY);
+        if (rodadaVista === String(RXrayState.rodadaConsolidada)) {
+            badge.style.display = "none";
+        } else {
+            badge.style.display = "";
+        }
+    } catch (e) {
+        badge.style.display = "";
+    }
 }
 
 function criarModal() {
@@ -289,7 +327,12 @@ function criarModal() {
             <!-- Header -->
             <div class="rxray-modal-header">
                 <h3>⚽ Raio-X da Rodada <span id="rxrayModalRodada"></span></h3>
-                <button id="rxrayCloseBtn" class="rxray-close-btn">✕</button>
+                <div class="rxray-header-actions">
+                    <button id="rxrayRefreshBtn" class="rxray-refresh-btn" title="Atualizar dados">
+                        <span class="material-icons">refresh</span>
+                    </button>
+                    <button id="rxrayCloseBtn" class="rxray-close-btn">✕</button>
+                </div>
             </div>
 
             <!-- Loading -->
@@ -338,20 +381,51 @@ function criarModal() {
     // Event listeners
     modal.querySelector(".rxray-modal-overlay").addEventListener("click", fecharModal);
     modal.querySelector("#rxrayCloseBtn").addEventListener("click", fecharModal);
+    modal.querySelector("#rxrayRefreshBtn").addEventListener("click", atualizarContextoForce);
     modal.querySelector("#rxrayVerCompleto").addEventListener("click", navegarParaAnaliseCompleta);
 
     return modal;
 }
 
 // ============================================
+// REFRESH FORÇADO
+// ============================================
+async function atualizarContextoForce() {
+    const btn = document.getElementById("rxrayRefreshBtn");
+    if (btn) {
+        btn.disabled = true;
+        btn.classList.add("spinning");
+    }
+    try {
+        // Limpar cache localStorage para forçar nova busca
+        try {
+            localStorage.removeItem(`${RXRAY_CACHE_KEY}-${RXrayState.rodadaConsolidada}`);
+        } catch (e) { /* ignore */ }
+
+        await carregarContexto(true);
+
+        if (RXrayState.contexto) {
+            renderizarModal(RXrayState.contexto);
+        }
+    } finally {
+        if (btn) {
+            btn.classList.remove("spinning");
+            btn.disabled = false;
+        }
+    }
+}
+
+// ============================================
 // DADOS
 // ============================================
-async function carregarContexto() {
-    // Verificar cache primeiro
-    const cached = getCachedContexto();
-    if (cached) {
-        RXrayState.contexto = cached;
-        return;
+async function carregarContexto(forceRefresh = false) {
+    // Verificar cache primeiro (apenas quando não é refresh forçado)
+    if (!forceRefresh) {
+        const cached = getCachedContexto();
+        if (cached) {
+            RXrayState.contexto = cached;
+            return;
+        }
     }
 
     // Mostrar loading
@@ -360,7 +434,8 @@ async function carregarContexto() {
 
     try {
         const url = `/api/rodada-contexto/${RXrayState.ligaId}/${RXrayState.rodadaConsolidada}/${RXrayState.timeId}?temporada=${RXrayState.temporada}`;
-        const response = await fetch(url);
+        const fetchOptions = forceRefresh ? { cache: 'no-store' } : {};
+        const response = await fetch(url, fetchOptions);
 
         if (!response.ok) {
             throw new Error(`Erro ${response.status}`);
@@ -414,9 +489,20 @@ function renderizarModal(contexto) {
     // Rodada no header
     document.getElementById("rxrayModalRodada").textContent = contexto.rodada;
 
-    // 1. Narrativa
+    // 1. Narrativa (com bullet points por assunto)
     const narrativaEl = document.getElementById("rxrayNarrativa");
-    narrativaEl.innerHTML = `<p>${escapeHtml(contexto.narrativa.resumida)}</p>`;
+    if (contexto.narrativa.eventos && contexto.narrativa.eventos.length > 0) {
+        const abertura = escapeHtml(contexto.narrativa.abertura || "");
+        const bullets = contexto.narrativa.eventos
+            .map(ev => `<li>${escapeHtml(ev)}</li>`)
+            .join("");
+        narrativaEl.innerHTML = `
+            <p style="margin-bottom:8px;">${abertura}</p>
+            <ul class="rxray-narrative-list">${bullets}</ul>
+        `;
+    } else {
+        narrativaEl.innerHTML = `<p>${escapeHtml(contexto.narrativa.resumida)}</p>`;
+    }
 
     // 2. Disputas
     renderizarDisputas(contexto.disputas);
@@ -446,7 +532,7 @@ function renderizarDisputas(disputas) {
                 <div class="rxray-disputa-confronto">
                     <span class="voce">Você ${pc.seu_confronto.voce.toFixed(1)}</span>
                     <span class="vs">×</span>
-                    <span class="adv">${pc.seu_confronto.adversario.pontos.toFixed(1)} ${escapeHtml(pc.seu_confronto.adversario.nome)}</span>
+                    <span class="adv">${(Math.trunc((pc.seu_confronto.adversario.pontos||0) * 10) / 10).toFixed(1)} ${escapeHtml(pc.seu_confronto.adversario.nome)}</span>
                     <span class="resultado ${resultadoClass}">${resultadoIcon}</span>
                 </div>
                 <div class="rxray-disputa-status">
@@ -489,7 +575,7 @@ function renderizarDisputas(disputas) {
             <div class="rxray-disputa-card">
                 <div class="rxray-disputa-header">👑 CAPITÃO DE LUXO</div>
                 <div class="rxray-disputa-status">
-                    ${cap.sua_posicao}º lugar • ${(cap.seus_pontos || 0).toFixed(1)} pts
+                    ${cap.sua_posicao}º lugar • ${(Math.trunc((cap.seus_pontos || 0) * 10) / 10).toFixed(1)} pts
                 </div>
             </div>
         `);
@@ -512,7 +598,7 @@ function renderizarPerformance(performance) {
         </div>
         <div class="stat-card">
             <div class="stat-label">Pontos</div>
-            <div class="stat-value">⭐ ${performance.pontos.toFixed(2)}</div>
+            <div class="stat-value">⭐ ${truncarPontos(performance.pontos)}</div>
         </div>
         <div class="stat-card ${positiveClass}">
             <div class="stat-label">vs Média</div>

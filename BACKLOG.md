@@ -56,23 +56,20 @@ _Resolver ASAP - Bloqueia funcionalidades ou compromete segurança_
 
 _Próximas sprints - Impacto significativo no sistema_
 
-- [ ] [PERF-003] **Adicionar timeout (AbortController) nos fetches do frontend de parciais**
+- [x] [PERF-003] **Adicionar timeout (AbortController) nos fetches do frontend de parciais** ✅ IMPLEMENTADO 17/02/2026
   - **Arquivo:** `public/participante/js/modules/participante-rodada-parcial.js`
-  - **Contexto:** Fetches para API Cartola não têm timeout no frontend. Se a API demorar, a UI trava sem recovery
-  - **Solução:** Usar AbortController com timeout de ~8s nos fetches de `/api/cartola-proxy/atletas/pontuados` e escalações
-  - **Impacto:** Estabilidade do Ao Vivo durante rodadas
+  - **Solução:** Função `fetchComTimeout()` com AbortController + timeout de 8s em todos os 4 fetch calls
+  - **Impacto:** UI não trava mais se API Cartola demorar; log distingue timeout de erro genérico
 
-- [ ] [PERF-004] **Implementar retry com backoff em caso de 429 no parciaisRankingService**
+- [x] [PERF-004] **Implementar retry com backoff em caso de 429 no parciaisRankingService** ✅ IMPLEMENTADO 17/02/2026
   - **Arquivo:** `services/parciaisRankingService.js`
-  - **Contexto:** API Cartola pode retornar 429 (rate limit) durante picos (fechamento de mercado). Sem retry, parciais falham silenciosamente
-  - **Solução:** Exponential backoff (1s, 2s, 4s) com max 3 retries em respostas 429
-  - **Impacto:** Resiliência do backend durante picos de acesso
+  - **Solução:** Função `retryComBackoff()` com exponential backoff (1s, 2s, 4s), max 3 retries em 429 e erros de rede
+  - **Impacto:** Backend resiliente durante picos de acesso (fechamento de mercado)
 
-- [ ] [BUG-002] **Corrigir timezone no calendário de polling**
-  - **Arquivo:** `public/participante/js/modules/participante-rodadas-calendar.js:78-94`
-  - **Contexto:** Mistura UTC (`toISOString().split('T')[0]`) com timezone local (`getHours()`). Em horário noturno (BRT UTC-3), a data pode virar para o dia seguinte em UTC, perdendo jogos agendados
-  - **Solução:** Usar `toLocaleDateString('en-CA')` para manter timezone local consistente
-  - **Impacto:** Polling pode não ativar para jogos noturnos
+- [x] [BUG-002] **Corrigir timezone no calendário de polling** ✅ IMPLEMENTADO 17/02/2026
+  - **Arquivo:** `models/CalendarioRodada.js` (~~não~~ `participante-rodadas-calendar.js` como constava antes)
+  - **Solução:** `toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' })` + hora/minuto timezone-aware nos 3 métodos (`temJogosAoVivo`, `obterProximoJogo`, `calcularProximoDisparo`)
+  - **Impacto:** Polling agora ativa corretamente para jogos noturnos (após 21h UTC / 18h BRT)
 
 - [x] [FEAT-003] **Notificações Push (Web Push API)** 🔔 ✅ IMPLEMENTADO 25/01/2026
   - **Descrição:** Sistema completo de notificações push para alertar participantes sobre eventos importantes da liga
@@ -1686,4 +1683,4 @@ _Scripts e ferramentas para análise, debug e gestão do projeto_
 
 ---
 
-_Última atualização: 04/02/2026 - SKILL-001 Análise de Branches adicionada_
+_Última atualização: 17/02/2026 - PERF-003, PERF-004, BUG-002 implementados_

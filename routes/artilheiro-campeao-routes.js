@@ -1,13 +1,15 @@
-// routes/artilheiro-campeao-routes.js - VERSÃO 5.2
+// routes/artilheiro-campeao-routes.js - VERSÃO 5.3
 // Rotas do módulo Artilheiro Campeão com persistência MongoDB
 // ✅ v5.2: Session validation, audit logging, premiação endpoint
+// ✅ v5.3: verificarAdmin middleware nas rotas mutantes (fix auth bug)
 
 import express from "express";
+import { verificarAdmin } from "../middleware/auth.js";
 import ArtilheiroCampeaoController from "../controllers/artilheiroCampeaoController.js";
 
 const router = express.Router();
 
-console.log("🚀 [ROUTES] Carregando rotas do Artilheiro Campeão v5.2...");
+console.log("[ROUTES] Carregando rotas do Artilheiro Campeao v5.3...");
 
 // ========================================
 // ROTAS PÚBLICAS (GET)
@@ -34,23 +36,22 @@ router.get("/:ligaId/time/:timeId", async (req, res) => {
 });
 
 // ========================================
-// ROTAS ADMIN (POST/DELETE - requerem sessão)
+// ROTAS ADMIN (POST/DELETE - requerem autenticação admin)
 // ========================================
 
-router.post("/:ligaId/consolidar/:rodada", async (req, res) => {
+router.post("/:ligaId/consolidar/:rodada", verificarAdmin, async (req, res) => {
     await ArtilheiroCampeaoController.consolidarRodada(req, res);
 });
 
-router.post("/:ligaId/coletar/:rodada", async (req, res) => {
+router.post("/:ligaId/coletar/:rodada", verificarAdmin, async (req, res) => {
     await ArtilheiroCampeaoController.coletarRodada(req, res);
 });
 
-// ✅ v5.2: Endpoint de premiação no extrato financeiro
-router.post("/:ligaId/premiar", async (req, res) => {
+router.post("/:ligaId/premiar", verificarAdmin, async (req, res) => {
     await ArtilheiroCampeaoController.consolidarPremiacao(req, res);
 });
 
-router.delete("/:ligaId/cache", async (req, res) => {
+router.delete("/:ligaId/cache", verificarAdmin, async (req, res) => {
     await ArtilheiroCampeaoController.limparCache(req, res);
 });
 
@@ -62,6 +63,6 @@ router.get("/:ligaId/acumulado", async (req, res) => {
     await ArtilheiroCampeaoController.obterRanking(req, res);
 });
 
-console.log("✅ [ROUTES] Rotas do Artilheiro Campeão v5.2 carregadas!");
+console.log("[ROUTES] Rotas do Artilheiro Campeao v5.3 carregadas");
 
 export default router;

@@ -148,9 +148,10 @@ function renderizarConteudoAuditoria(data, container, subtitulo) {
     }
 
     // Formatar valores
-    const fmt = (v) => Math.abs(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmt = (v) => Math.abs(parseFloat(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const fmtClass = (v) => v > 0 ? 'val-positivo' : v < 0 ? 'val-negativo' : 'val-neutro';
     const fmtSinal = (v) => v > 0 ? '+' : v < 0 ? '-' : '';
+    const is2026 = financeiro.temporada >= 2026;
 
     // Historico de acertos HTML
     let acertosHtml = '';
@@ -205,10 +206,11 @@ function renderizarConteudoAuditoria(data, container, subtitulo) {
                         <td>Saldo das Rodadas (Banco)</td>
                         <td class="${fmtClass(financeiro.saldoConsolidado)}">${fmtSinal(financeiro.saldoConsolidado)}R$ ${fmt(financeiro.saldoConsolidado)}</td>
                     </tr>
+                    ${!is2026 ? `
                     <tr>
                         <td>Campos Manuais (Premios)</td>
                         <td class="${fmtClass(financeiro.saldoCampos)}">${fmtSinal(financeiro.saldoCampos)}R$ ${fmt(financeiro.saldoCampos)}</td>
-                    </tr>
+                    </tr>` : ''}
                     <tr class="separator-row"><td colspan="2"></td></tr>
                     <tr>
                         <td><strong>Credito/Debito Base</strong></td>
@@ -303,7 +305,7 @@ export async function exportarExtratoPDF(timeId) {
         // Processar cada rodada
         extrato.rodadas.forEach((r) => {
             const rod = `R${r.rodada}`;
-            const pts = r.pontos ? ` (${r.pontos.toFixed(2)} pts)` : "";
+            const pts = r.pontos ? ` (${(Math.trunc(r.pontos * 100) / 100).toFixed(2)} pts)` : "";
 
             // RANKING DE RODADAS (Bonus/Onus)
             if (r.bonusOnus > 0) {
@@ -330,10 +332,10 @@ export async function exportarExtratoPDF(timeId) {
 
             // TOP 10 - Detalhamento completo (posicao = posicao na rodada, nao global)
             if (r.top10 > 0) {
-                const ptsTop = r.pontos ? ` com ${r.pontos.toFixed(2)} pts` : "";
+                const ptsTop = r.pontos ? ` com ${(Math.trunc(r.pontos * 100) / 100).toFixed(2)} pts` : "";
                 ganhos.push({ modulo: "TOP 10 MITOS", desc: `${rod} - Melhor da rodada${ptsTop}`, valor: r.top10 });
             } else if (r.top10 < 0) {
-                const ptsTop = r.pontos ? ` com ${r.pontos.toFixed(2)} pts` : "";
+                const ptsTop = r.pontos ? ` com ${(Math.trunc(r.pontos * 100) / 100).toFixed(2)} pts` : "";
                 perdas.push({ modulo: "TOP 10 MICOS", desc: `${rod} - Pior da rodada${ptsTop}`, valor: r.top10 });
             }
         });

@@ -522,9 +522,9 @@ function renderizarCardDesempenho(rodadas) {
     setEl("tempPosicaoMedia", posicaoMedia ? `${posicaoMedia.toFixed(1)}º` : "-");
 
     setEl("tempMelhorRodada", `R${String(melhorRodada.numero).padStart(2, '0')}`);
-    setEl("tempMelhorPontos", `${melhorRodada.pontos.toFixed(2)} pts`);
+    setEl("tempMelhorPontos", `${(Math.trunc((melhorRodada.pontos||0) * 100) / 100).toFixed(2)} pts`);
     setEl("tempPiorRodada", `R${String(piorRodada.numero).padStart(2, '0')}`);
-    setEl("tempPiorPontos", `${piorRodada.pontos.toFixed(2)} pts`);
+    setEl("tempPiorPontos", `${(Math.trunc((piorRodada.pontos||0) * 100) / 100).toFixed(2)} pts`);
 
     setEl("tempVezesTop3", vezesTop3);
     setEl("tempVezesAcimaMedia", vezesAcimaMedia);
@@ -824,7 +824,7 @@ function renderizarMinhaEscalacao(rodadaData, isParcial) {
     function renderAtleta(a, isReserva = false, subInfo = null) {
         const pos = POSICOES[a.posicao_id] || { nome: '???', cor: '#6b7280' };
         const pontosRaw = a.pontos_num ?? 0;
-        const pontosAtl = Number(pontosRaw).toFixed(1);
+        const pontosAtl = (Math.trunc(Number(pontosRaw) * 10) / 10).toFixed(1);
         const pontosClass = pontosRaw > 0 ? 'color:var(--app-success-light)' : pontosRaw < 0 ? 'color:var(--app-danger)' : 'color:var(--app-text-muted)';
         
         // Status do jogo baseado em data/hora
@@ -1058,7 +1058,7 @@ function renderizarGraficoEvolutivo(rodadas, rodadaSelecionadaNum) {
         barsHTML += `<div class="me-chart-bar ${cls} ${isActive ? 'active' : ''}"
             style="height:${height}px"
             data-rodada="${d.rodada}"
-            title="R${d.rodada}: ${d.jogou ? d.pontos.toFixed(1) + ' pts' : 'Não jogou'}"
+            title="R${d.rodada}: ${d.jogou ? (Math.trunc((d.pontos||0) * 10) / 10).toFixed(1) + ' pts' : 'Não jogou'}"
             onclick="window.selecionarRodadaMini(${d.rodada}, false)"></div>`;
     });
 
@@ -1812,7 +1812,7 @@ function abrirCampinhoModal(targetTimeId, rodada, rodadaData = null) {
     function renderAtleta(a, isReserva = false, subInfo = null) {
         const pos = POSICOES[a.posicao_id] || { nome: '???', cor: '#6b7280' };
         const pontosRaw = a.pontos_efetivos ?? a.pontos_num ?? 0;
-        const pontosAtl = Number(pontosRaw).toFixed(1);
+        const pontosAtl = (Math.trunc(Number(pontosRaw) * 10) / 10).toFixed(1);
         const pontosClass = pontosRaw > 0 ? 'color:var(--app-success-light)' : pontosRaw < 0 ? 'color:var(--app-danger)' : 'color:var(--app-text-muted)';
         
         // Status do jogo baseado em data/hora

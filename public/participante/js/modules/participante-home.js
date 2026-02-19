@@ -1,5 +1,5 @@
 // =====================================================================
-// PARTICIPANTE-HOME.JS - v1.3 (Correção Rodada Disputada)
+// PARTICIPANTE-HOME.JS - v1.4 (Integração Copa do Mundo + Jogos ao Vivo)
 // =====================================================================
 import { getZonaInfo } from "./zona-utils.js";
 import * as ParciaisModule from "./participante-rodada-parcial.js";
@@ -15,8 +15,12 @@ import { getClubesNomeMap } from "/js/shared/clubes-data.js";
 // v1.0: Nova Home com componentes premium baseados no SKILL.md v3.2
 // =====================================================================
 
+// v1.4: Integração Copa do Mundo 2026 + Jogos ao Vivo na Home
+//       - Import dinâmico de participante-jogos.js
+//       - Seção Copa do Mundo (pré-torneio / ao vivo)
+//       - Jogos brasileiros do dia com auto-refresh
 if (window.Log)
-    Log.info("PARTICIPANTE-HOME", "Carregando modulo v1.3 (Correção Rodada Disputada)...");
+    Log.info("PARTICIPANTE-HOME", "Carregando modulo v1.4 (Copa do Mundo + Jogos ao Vivo)...");
 
 // Configuracao de temporada
 const TEMPORADA_ATUAL = window.ParticipanteConfig?.CURRENT_SEASON || 2026;
@@ -269,8 +273,8 @@ async function carregarDadosERenderizar(ligaId, timeId, participante) {
         }
     }
 
-    // Carregar seção Tabelas Esportivas em background
-    carregarTabelasEsportes(participante);
+    // Carregar jogos ao vivo + Copa do Mundo + Meu Time em background
+    carregarJogosECopa(participante);
 
     // Carregar notícias do time do coração em background
     carregarNoticiasDoMeuTime(participante);
@@ -310,6 +314,11 @@ function pararAutoRefreshHome() {
     if (ParciaisModule?.pararAutoRefresh) {
         ParciaisModule.pararAutoRefresh();
     }
+
+    // Parar auto-refresh de jogos ao vivo
+    import('./participante-jogos.js').then(mod => {
+        mod.pararAutoRefresh();
+    }).catch(() => {});
 
     // Limpar estado de parciais
     dadosParciais = null;
@@ -498,10 +507,10 @@ function atualizarCardsHomeUI(data) {
     if (variacaoRankingEl) {
         const pontosUltimaRodadaRank = ultimaRodada ? parseFloat(ultimaRodada.pontos || 0) : 0;
         if (pontosUltimaRodadaRank >= 0) {
-            variacaoRankingEl.textContent = `↑${pontosUltimaRodadaRank.toFixed(2)}`;
+            variacaoRankingEl.textContent = `↑${(Math.trunc(pontosUltimaRodadaRank * 100) / 100).toFixed(2)}`;
             variacaoRankingEl.className = 'home-stat-variacao positivo';
         } else {
-            variacaoRankingEl.textContent = `↓${Math.abs(pontosUltimaRodadaRank).toFixed(2)}`;
+            variacaoRankingEl.textContent = `↓${(Math.trunc(Math.abs(pontosUltimaRodadaRank) * 100) / 100).toFixed(2)}`;
             variacaoRankingEl.className = 'home-stat-variacao negativo';
         }
     }
@@ -568,13 +577,18 @@ function processarDadosParaRender(liga, ranking, rodadas, extratoData, meuTimeId
         if (meuTimeAnterior) posicaoAnterior = meuTimeAnterior.posicao;
     }
 
-    // ✅ Calcular saldo baseado nas rodadas (fonte da verdade - mesma regra do modal)
+    // ✅ FIX: Usar saldo consolidado do backend (inclui rodadas + acertos + ajustes)
+    // O backend já calcula o saldo completo em resumo.saldo ou saldo_atual
+    // Fallback para cálculo manual apenas se não houver dados do extrato
+    const saldoConsolidado = extratoData?.resumo?.saldo ?? extratoData?.saldo_atual ?? extratoData?.resumo?.saldo_final ?? null;
+
+    // Cálculo manual apenas como último fallback (não inclui acertos/ajustes)
     const saldoCalculadoPorRodadas = minhasRodadas.reduce((total, rodada) => {
         return total + (parseFloat(rodada.valorFinanceiro || rodada.ganho_rodada || 0));
     }, 0);
 
-    // Usar saldo calculado das rodadas (prioridade) ou fallback para cache do extrato
-    const saldoFinanceiro = saldoCalculadoPorRodadas || (extratoData?.saldo_atual ?? extratoData?.resumo?.saldo_final ?? 0);
+    // Priorizar saldo consolidado do backend (inclui acertos/ajustes)
+    const saldoFinanceiro = saldoConsolidado !== null ? saldoConsolidado : saldoCalculadoPorRodadas;
 
     // ✅ v1.1 FIX: Buscar dados do participante com fallback robusto
     // A navegação passa camelCase (nomeTime, nomeCartola) mas outros módulos usam snake_case
@@ -1055,10 +1069,10 @@ function renderizarHome(container, data, ligaId) {
     if (variacaoRankingEl) {
         const pontosUltimaRodadaRank = ultimaRodada ? parseFloat(ultimaRodada.pontos || 0) : 0;
         if (pontosUltimaRodadaRank >= 0) {
-            variacaoRankingEl.textContent = `↑${pontosUltimaRodadaRank.toFixed(2)}`;
+            variacaoRankingEl.textContent = `↑${(Math.trunc(pontosUltimaRodadaRank * 100) / 100).toFixed(2)}`;
             variacaoRankingEl.className = 'home-stat-variacao positivo';
         } else {
-            variacaoRankingEl.textContent = `↓${Math.abs(pontosUltimaRodadaRank).toFixed(2)}`;
+            variacaoRankingEl.textContent = `↓${(Math.trunc(Math.abs(pontosUltimaRodadaRank) * 100) / 100).toFixed(2)}`;
             variacaoRankingEl.className = 'home-stat-variacao negativo';
         }
     }
@@ -1321,15 +1335,15 @@ function popularDestaqueCard(tipo, atleta, isCapitao = false) {
         if (isCapitao) {
             // Capitão: mostrar pontos x1.5
             const pontosCapitao = pontos * 1.5;
-            pontosEl.textContent = pontosCapitao.toFixed(2);
+            pontosEl.textContent = (Math.trunc((pontosCapitao||0) * 100) / 100).toFixed(2);
 
             // Pontos base
             const pontosBaseEl = document.getElementById('home-pontos-base-capitao');
             if (pontosBaseEl) {
-                pontosBaseEl.textContent = pontos.toFixed(2);
+                pontosBaseEl.textContent = (Math.trunc((pontos||0) * 100) / 100).toFixed(2);
             }
         } else {
-            pontosEl.textContent = pontos.toFixed(2);
+            pontosEl.textContent = (Math.trunc((pontos||0) * 100) / 100).toFixed(2);
         }
     }
 
@@ -1377,7 +1391,7 @@ function popularCardModulos(atletas, capitao) {
         if (artNomeEl) artNomeEl.textContent = artilheiro.apelido || artilheiro.nome || '--';
         if (artStatsEl) {
             const gols = parseInt(artilheiro.scout?.G || artilheiro.scouts?.G || 0);
-            const pts = parseFloat(artilheiro.pontos_num || 0).toFixed(1);
+            const pts = (Math.trunc(parseFloat(artilheiro.pontos_num || 0) * 10) / 10).toFixed(1);
             artStatsEl.textContent = gols > 0 ? `${gols} gol${gols > 1 ? 's' : ''} • ${pts} pts` : `${pts} pts`;
         }
     } else {
@@ -1395,7 +1409,7 @@ function popularCardModulos(atletas, capitao) {
             const gs = parseInt(goleiro.scout?.GS || goleiro.scouts?.GS || 0);
             const dd = parseInt(goleiro.scout?.DD || goleiro.scouts?.DD || 0);
             const sg = parseInt(goleiro.scout?.SG || goleiro.scouts?.SG || 0);
-            const pts = parseFloat(goleiro.pontos_num || 0).toFixed(1);
+            const pts = (Math.trunc(parseFloat(goleiro.pontos_num || 0) * 10) / 10).toFixed(1);
             let info = '';
             if (sg > 0) info = `SG • ${pts} pts`;
             else if (gs > 0) info = `${gs} gol${gs > 1 ? 's' : ''} sofrido${gs > 1 ? 's' : ''} • ${pts} pts`;
@@ -1462,6 +1476,94 @@ function toggleDestaquesRodada() {
 
 // Expor função globalmente
 window.toggleDestaquesRodada = toggleDestaquesRodada;
+
+// =====================================================================
+// TOGGLE COPA DO MUNDO (Colapsável)
+// =====================================================================
+function toggleCopaHome() {
+    const section = document.getElementById('copa-home-section');
+    const content = document.getElementById('copa-home-content');
+
+    if (!section || !content) return;
+
+    const isExpanded = section.classList.contains('expanded');
+
+    if (isExpanded) {
+        section.classList.remove('expanded');
+        content.classList.add('collapsed');
+    } else {
+        section.classList.add('expanded');
+        content.classList.remove('collapsed');
+    }
+}
+
+window.toggleCopaHome = toggleCopaHome;
+
+// =====================================================================
+// TOGGLE LIBERTADORES (Colapsável)
+// =====================================================================
+function toggleLibertaHome() {
+    const section = document.getElementById('liberta-home-section');
+    const content = document.getElementById('liberta-home-content');
+
+    if (!section || !content) return;
+
+    const isExpanded = section.classList.contains('expanded');
+
+    if (isExpanded) {
+        section.classList.remove('expanded');
+        content.classList.add('collapsed');
+    } else {
+        section.classList.add('expanded');
+        content.classList.remove('collapsed');
+    }
+}
+
+window.toggleLibertaHome = toggleLibertaHome;
+
+// =====================================================================
+// TOGGLE JOGOS/AGENDA DO DIA (Colapsável)
+// =====================================================================
+function toggleJogosHome() {
+    const section = document.getElementById('jogos-home-section');
+    const content = document.getElementById('jogos-home-content');
+
+    if (!section || !content) return;
+
+    const isExpanded = section.classList.contains('expanded');
+
+    if (isExpanded) {
+        section.classList.remove('expanded');
+        content.classList.add('collapsed');
+    } else {
+        section.classList.add('expanded');
+        content.classList.remove('collapsed');
+    }
+}
+
+window.toggleJogosHome = toggleJogosHome;
+
+// =====================================================================
+// TOGGLE NOTÍCIAS DO TIME (Colapsável)
+// =====================================================================
+function toggleNoticiasHome() {
+    const section = document.getElementById('noticias-home-section');
+    const content = document.getElementById('noticias-home-content');
+
+    if (!section || !content) return;
+
+    const isExpanded = section.classList.contains('expanded');
+
+    if (isExpanded) {
+        section.classList.remove('expanded');
+        content.classList.add('collapsed');
+    } else {
+        section.classList.add('expanded');
+        content.classList.remove('collapsed');
+    }
+}
+
+window.toggleNoticiasHome = toggleNoticiasHome;
 
 // =====================================================================
 // PAINEL DE AVISOS
@@ -1726,7 +1828,7 @@ function atualizarCardsHomeComParciais() {
 
     if (ultimaPontuacaoEl) {
         const pontosParciais = minhaPosicao.pontos || 0;
-        ultimaPontuacaoEl.textContent = pontosParciais.toFixed(2);
+        ultimaPontuacaoEl.textContent = (Math.trunc((pontosParciais||0) * 100) / 100).toFixed(2);
     }
 
     if (variacaoPontosEl) {
@@ -1740,7 +1842,7 @@ function atualizarCardsHomeComParciais() {
         avisoTitulo.innerHTML = 'JOGOS AO VIVO <span class="live-badge-mini">LIVE</span>';
     }
     if (avisoSubtitulo) {
-        avisoSubtitulo.textContent = `Posição ${minhaPosicao.posicao}º • ${minhaPosicao.pontos?.toFixed(1) || 0} pts parciais`;
+        avisoSubtitulo.textContent = `Posição ${minhaPosicao.posicao}º • ${minhaPosicao.pontos ? (Math.trunc(minhaPosicao.pontos * 10) / 10).toFixed(1) : 0 || 0} pts parciais`;
     }
 
     // Atualizar saldo projetado
@@ -1780,6 +1882,102 @@ function atualizarSaldoProjetado(posicaoParcial) {
         } else {
             variacaoEl.innerHTML = `<span class="projected-badge">${impacto.toFixed(0)} proj.</span>`;
         }
+    }
+}
+
+// =====================================================================
+// CARREGAR JOGOS AO VIVO + COPA DO MUNDO 2026 + MEU TIME
+// =====================================================================
+async function carregarJogosECopa(participante) {
+    try {
+        if (window.Log) Log.info("PARTICIPANTE-HOME", "Carregando jogos ao vivo + Copa...");
+
+        const mod = await import('./participante-jogos.js');
+        const result = await mod.obterJogosAoVivo();
+
+        // Resolver clube do participante para seção "Meu Time"
+        const clubeId = participante?.clube_id || participante?.clubeId
+                     || window.participanteAuth?.participante?.participante?.clube_id
+                     || null;
+        const clubeNome = clubeId ? getNomeClubePorId(clubeId) : null;
+        const clubeInfo = clubeId && clubeNome && clubeNome !== 'Seu Time'
+            ? { clubeId, clubeNome }
+            : null;
+
+        if (window.Log) Log.info("PARTICIPANTE-HOME", "Resultado jogos:", {
+            quantidade: result.jogos?.length || 0,
+            fonte: result.fonte,
+            aoVivo: result.aoVivo,
+            copa: result.copa?.fase || 'inativa',
+            meuTime: clubeNome || 'N/A'
+        });
+
+        // Copa do Mundo 2026 - Seção separada (ANTES dos jogos brasileiros)
+        if (result.copa && result.copa.fase) {
+            const copaEl = document.getElementById('home-copa-placeholder');
+            if (copaEl) {
+                copaEl.innerHTML = mod.renderizarSecaoCopa(result.copa);
+                if (window.Log) Log.info("PARTICIPANTE-HOME", `Copa do Mundo renderizada (fase: ${result.copa.fase})`);
+            }
+        }
+
+        // Libertadores 2026 - Faixa de notícias dinâmicas (Google News RSS)
+        const libertaEl = document.getElementById('home-liberta-placeholder');
+        if (libertaEl) {
+            // Renderiza imediatamente com fallback estático enquanto busca API
+            libertaEl.innerHTML = mod.renderizarSecaoLibertadores(null);
+
+            // Buscar notícias reais em paralelo (não bloqueia o resto da home)
+            fetch('/api/noticias/libertadores')
+                .then(r => r.ok ? r.json() : null)
+                .then(data => {
+                    if (data && data.success && data.noticias && data.noticias.length > 0) {
+                        libertaEl.innerHTML = mod.renderizarSecaoLibertadores(data.noticias);
+                        if (window.Log) Log.info("PARTICIPANTE-HOME", `Libertadores: ${data.noticias.length} notícias via RSS`);
+                    } else {
+                        if (window.Log) Log.info("PARTICIPANTE-HOME", "Libertadores: usando fallback estático");
+                    }
+                })
+                .catch(err => {
+                    if (window.Log) Log.warn("PARTICIPANTE-HOME", "Libertadores RSS falhou, mantendo fallback:", err.message);
+                });
+        }
+
+        // Jogos brasileiros do dia (com "Meu Time" se tiver clube)
+        const jogosEl = document.getElementById('home-jogos-placeholder');
+        if (result.jogos && result.jogos.length > 0) {
+            const html = mod.renderizarJogosAoVivo(result.jogos, result.fonte, result.aoVivo, result.atualizadoEm, clubeInfo);
+            if (jogosEl) jogosEl.innerHTML = html;
+
+            // Auto-refresh se tem jogos ao vivo
+            if (result.aoVivo) {
+                mod.iniciarAutoRefresh((novoResult) => {
+                    const container = document.getElementById('home-jogos-placeholder');
+                    if (container) {
+                        container.innerHTML = mod.renderizarJogosAoVivo(novoResult.jogos, novoResult.fonte, novoResult.aoVivo, novoResult.atualizadoEm, clubeInfo);
+                    }
+                    // Atualizar Copa também no refresh
+                    if (novoResult.copa && novoResult.copa.fase) {
+                        const copaContainer = document.getElementById('home-copa-placeholder');
+                        if (copaContainer) {
+                            copaContainer.innerHTML = mod.renderizarSecaoCopa(novoResult.copa);
+                        }
+                    }
+                });
+            }
+        } else if (jogosEl) {
+            const mensagem = result.mensagem || 'Sem jogos brasileiros hoje';
+            jogosEl.innerHTML = `
+                <div class="mx-4 mb-6 rounded-xl bg-gray-800/50 border border-gray-700/50 p-4 text-center">
+                    <div class="flex items-center justify-center gap-2 text-white/70">
+                        <span class="material-icons text-base" style="color: var(--app-primary);">sports_soccer</span>
+                        <span class="text-xs font-medium">${mensagem}</span>
+                    </div>
+                </div>
+            `;
+        }
+    } catch (err) {
+        if (window.Log) Log.error("PARTICIPANTE-HOME", "Erro ao carregar jogos:", err);
     }
 }
 
@@ -1899,4 +2097,4 @@ async function buscarCartoletasTime(timeId) {
 }
 
 if (window.Log)
-    Log.info("PARTICIPANTE-HOME", "Modulo v1.0 carregado");
+    Log.info("PARTICIPANTE-HOME", "Modulo v1.4 carregado");

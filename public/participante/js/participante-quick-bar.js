@@ -310,6 +310,7 @@ class QuickAccessBar {
                     ${renderCard('mata-mata', 'mataMata', 'military_tech', 'Mata-Mata')}
                     ${renderCard('top10', 'top10', 'leaderboard', 'TOP 10')}
                     ${renderCard('campinho', 'campinho', 'sports_soccer', 'Meu Time da Rodada')}
+                    ${renderCard('resta-um', 'restaUm', 'person_off', 'Resta Um')}
                 </div>
             </div>
 
@@ -338,13 +339,14 @@ class QuickAccessBar {
                         <span class="menu-card-label">Copa de Times SC</span>
                         <span class="badge-aguarde" style="background:rgba(255,215,0,0.2);color:var(--app-gold);border:1px solid var(--app-gold);padding:2px 8px;border-radius:12px;font-size:10px;font-weight:bold;">EM BREVE</span>
                     </div>
+                    <div class="menu-card tiro-certo-card" data-module="tiro-certo">
+                        <span class="material-icons" style="color: var(--app-primary);">gps_fixed</span>
+                        <span class="menu-card-label">Tiro Certo</span>
+                        <span class="badge-aguarde tc-badge-turno">EM BREVE</span>
+                    </div>
                     <div class="menu-card disabled" data-action="em-breve">
                         <span class="material-icons">sports</span>
                         <span class="menu-card-label">Bolão Copa</span>
-                    </div>
-                    <div class="menu-card disabled" data-action="em-breve">
-                        <span class="material-icons">stadium</span>
-                        <span class="menu-card-label">Bolão Libertadores</span>
                     </div>
                 </div>
             </div>
@@ -606,7 +608,8 @@ class QuickAccessBar {
             'artilheiro': 'Artilheiro',
             'luva-ouro': 'Luva de Ouro',
             'campinho': 'Meu Time da Rodada',
-            'dicas': 'Dicas'
+            'dicas': 'Dicas',
+            'resta-um': 'Resta Um'
         };
 
         const nomeModulo = nomesModulos[moduloId] || moduloId;

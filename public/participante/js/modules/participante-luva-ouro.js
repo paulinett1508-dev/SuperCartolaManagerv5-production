@@ -95,16 +95,7 @@ export async function inicializarLuvaOuroParticipante({
         if (!response.ok) throw new Error("Dados não disponíveis");
 
         const responseData = await response.json();
-        
-        // DEBUG: Ver estrutura da resposta
-        console.log('[DEBUG-LUVA] Response da API:', {
-            hasRanking: !!responseData.ranking,
-            rankingLength: responseData.ranking?.length || 0,
-            firstItem: responseData.ranking?.[0] || null,
-            responseKeys: Object.keys(responseData),
-            fullResponse: responseData
-        });
-        
+
         if (window.Log) Log.info(
             "[PARTICIPANTE-LUVA-OURO] 📦 Dados recebidos da API",
         );
@@ -403,15 +394,6 @@ function renderizarBannerRodadaFinal(
 async function renderizarLuvaOuro(container, response, meuTimeId) {
     const data = response.data || response;
 
-    console.log('[DEBUG-LUVA] Renderizar - dados recebidos:', {
-        hasData: !!data,
-        hasRanking: !!data.ranking,
-        rankingLength: data.ranking?.length || 0,
-        isArray: Array.isArray(data),
-        dataKeys: Object.keys(data),
-        fullData: data
-    });
-
     let ranking = [];
     let rodadaInicio = 1;
     let rodadaFim = 36;
@@ -428,11 +410,6 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
     } else if (Array.isArray(data)) {
         ranking = data;
     }
-    
-    console.log('[DEBUG-LUVA] Ranking extraído:', {
-        rankingLength: ranking.length,
-        firstItem: ranking[0]
-    });
 
     // ✅ v3.8: BUSCAR STATUS DO MERCADO PARA DETECTAR TEMPORADA ENCERRADA
     try {
@@ -477,13 +454,6 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
     const rankingAtivos = ranking.filter((time) => {
         const isInativo = time.ativo === false || time.status === "inativo";
         return !isInativo;
-    });
-    
-    console.log('[DEBUG-LUVA] Ranking após filtro:', {
-        rankingAtivosLength: rankingAtivos.length,
-        rankingOriginalLength: ranking.length,
-        firstAtivo: rankingAtivos[0],
-        todosItens: rankingAtivos
     });
 
     if (rankingAtivos.length === 0) {
@@ -560,7 +530,12 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
         ${
             meusDados
                 ? `
-        <div style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.05) 100%); border: 2px solid rgba(255, 215, 0, 0.4); border-radius: 16px; padding: 16px; margin-bottom: 16px;">
+        <div style="background: linear-gradient(135deg, var(--app-surface) 0%, #262626 100%); border-radius: 16px; padding: 16px; margin-bottom: 16px; border: 1px solid rgba(255, 215, 0, 0.3);">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; color: var(--app-gold); font-weight: 600; font-size: 14px;">
+                <span class="material-icons" style="font-size: 20px;">insights</span>
+                <span>Seu Desempenho</span>
+            </div>
+            <div style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.05) 100%); border: 2px solid rgba(255, 215, 0, 0.4); border-radius: 16px; padding: 16px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <div>
                     <div style="font-size: 10px; color: var(--app-gold); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Sua Posição</div>
@@ -586,6 +561,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
             </div>
             `
             }
+            </div>
         </div>
 
         ${
@@ -602,7 +578,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                         <span style="font-size: 12px; width: 20px; color: #888;">${idx + 1}º</span>
                         <span style="color: var(--app-text-primary); font-size: 12px; font-weight: 500;">${g.nome}</span>
                     </div>
-                    <span style="color: var(--app-gold); font-weight: 800; font-size: 14px;">${g.pontos.toFixed(1)} pts</span>
+                    <span style="color: var(--app-gold); font-weight: 800; font-size: 14px;">${(Math.trunc((g.pontos||0) * 10) / 10).toFixed(1)} pts</span>
                 </div>
                 `,
                     )
@@ -637,7 +613,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                         return `
                     <div style="flex: 1; background: ${bgColor}; border-radius: 8px; padding: 8px 4px; text-align: center;">
                         <div style="font-size: 9px; color: #666; margin-bottom: 4px;">R${r.rodada}</div>
-                        <div style="font-size: 14px; font-weight: 800; color: ${textColor};">${pontos.toFixed(1)}</div>
+                        <div style="font-size: 14px; font-weight: 800; color: ${textColor};">${(Math.trunc((pontos||0) * 10) / 10).toFixed(1)}</div>
                     </div>
                     `;
                     })
@@ -743,35 +719,6 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
     `;
 
     container.innerHTML = html;
-
-    // ✅ v3.7: Mover o card "Meus Dados" para o container externo ao final
-    setTimeout(() => {
-        const cardDesempenhoContainer = document.getElementById(
-            "luva-ouro-card-desempenho",
-        );
-        const cardMeusDados = container.querySelector(
-            '[style*="linear-gradient(135deg, rgba(255, 215, 0, 0.15)"]',
-        );
-
-        if (cardDesempenhoContainer && cardMeusDados) {
-            // Criar wrapper com estilos do card Seu Desempenho
-            const wrapper = document.createElement("div");
-            wrapper.innerHTML = `
-                <div style="background: linear-gradient(135deg, var(--app-surface) 0%, #262626 100%); border-radius: 16px; padding: 16px; border: 1px solid rgba(255, 215, 0, 0.3);">
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; color: var(--app-gold); font-weight: 600; font-size: 14px;">
-                        <span class="material-icons" style="font-size: 20px;">insights</span>
-                        <span>Seu Desempenho</span>
-                    </div>
-                    ${cardMeusDados.innerHTML}
-                </div>
-            `;
-            cardDesempenhoContainer.innerHTML = "";
-            cardDesempenhoContainer.appendChild(wrapper);
-
-            // Remover o card original
-            cardMeusDados.remove();
-        }
-    }, 100);
 }
 
 if (window.Log) Log.info("[PARTICIPANTE-LUVA-OURO] Módulo v4.0 carregado (Cache-First IndexedDB)");

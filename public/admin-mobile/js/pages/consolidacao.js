@@ -373,7 +373,7 @@ function renderHistoricoItem(item) {
             <p class="text-muted" style="font-size: 11px; margin: 0;"><span class="material-icons mi-inline">emoji_events</span> Campeão</p>
             <p style="font-size: 13px; font-weight: 600; margin: 2px 0 0 0;">${campeaoRodada.nome}</p>
             <p class="text-success" style="font-size: 12px; font-weight: 600; margin: 0; font-family: var(--font-mono);">
-              ${campeaoRodada.pontos.toFixed(2)} pts
+              ${(Math.trunc((campeaoRodada.pontos||0) * 100) / 100).toFixed(2)} pts
             </p>
           </div>
         ` : '<div></div>'}
@@ -383,7 +383,7 @@ function renderHistoricoItem(item) {
             <p class="text-muted" style="font-size: 11px; margin: 0;"><span class="material-icons mi-inline">military_tech</span> Líder Geral</p>
             <p style="font-size: 13px; font-weight: 600; margin: 2px 0 0 0;">${liderGeral.nome}</p>
             <p class="text-primary" style="font-size: 12px; font-weight: 600; margin: 0; font-family: var(--font-mono);">
-              ${liderGeral.pontos.toFixed(2)} pts
+              ${(Math.trunc((liderGeral.pontos||0) * 100) / 100).toFixed(2)} pts
             </p>
           </div>
         ` : '<div></div>'}

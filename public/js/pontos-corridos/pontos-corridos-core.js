@@ -85,7 +85,9 @@ async function salvarCacheRodada(
 
 async function buscarTodosOsCaches(ligaId) {
     try {
-        const response = await fetch(`/api/pontos-corridos/${ligaId}`);
+        // ✅ FIX: incluir temporada obrigatória (sem ela a rota retorna 400)
+        const temporada = PONTOS_CORRIDOS_CONFIG.temporada || new Date().getFullYear();
+        const response = await fetch(`/api/pontos-corridos/${ligaId}?temporada=${temporada}`);
         if (!response.ok) return [];
         return await response.json();
     } catch (error) {
@@ -567,10 +569,11 @@ export async function getConfrontosLigaPontosCorridos(ligaId, rodadaAtualLiga) {
             // Ordenar classificação
             const classificacaoOrdenada = Object.values(classificacaoAcumulada)
                 .sort((a, b) => {
-                    if (b.pontos !== a.pontos) return b.pontos - a.pontos;
-                    if (b.saldo_gols !== a.saldo_gols)
-                        return b.saldo_gols - a.saldo_gols;
-                    return b.vitorias - a.vitorias;
+                    if (b.pontos !== a.pontos) return b.pontos - a.pontos;           // 1º: Pts tabela
+                    if (b.gols_pro !== a.gols_pro) return b.gols_pro - a.gols_pro;  // 2º: Pts Ranking Geral
+                    if (b.saldo_gols !== a.saldo_gols) return b.saldo_gols - a.saldo_gols; // 3º: Saldo
+                    if (b.vitorias !== a.vitorias) return b.vitorias - a.vitorias;  // 4º: Vitórias
+                    return b.pontosGoleada - a.pontosGoleada;                        // 5º: Pts Goleada
                 })
                 .map((t, idx) => ({ ...t, posicao: idx + 1 }));
 
@@ -595,17 +598,29 @@ export async function getConfrontosLigaPontosCorridos(ligaId, rodadaAtualLiga) {
         // Ordenar por rodada
         todosConfrontos.sort((a, b) => a.rodada - b.rodada);
 
-        const classificacaoFinal =
-            todosConfrontos.find((c) => c.rodada === rodadaAtualLiga)
-                ?.classificacao || [];
+        // Fallback: quando a rodada alvo ainda não tem scores (skippada),
+        // usar classificação da última rodada com dados disponíveis
+        const rodadaAlvo = todosConfrontos.find((c) => c.rodada === rodadaAtualLiga);
+        const classificacaoFinal = rodadaAlvo?.classificacao?.length > 0
+            ? rodadaAlvo.classificacao
+            : ([...todosConfrontos]
+                .sort((a, b) => b.rodada - a.rodada)
+                .find((c) => c.classificacao?.length > 0)?.classificacao || []);
+
+        const ultimaRodadaUsada = rodadaAlvo?.classificacao?.length > 0
+            ? rodadaAtualLiga
+            : (todosConfrontos.filter(c => c.classificacao?.length > 0).length > 0
+                ? Math.max(...todosConfrontos.filter(c => c.classificacao?.length > 0).map(c => c.rodada))
+                : 0);
 
         console.log(
-            `[CORE] ✅ Processamento concluído: ${todosConfrontos.length} rodadas`,
+            `[CORE] ✅ Processamento concluído: ${todosConfrontos.length} rodadas (classificação de R${ultimaRodadaUsada})`,
         );
 
         return {
             confrontos: todosConfrontos,
             classificacao: classificacaoFinal,
+            ultimaRodadaComDados: ultimaRodadaUsada,
         };
     } catch (error) {
         console.error("[CORE] ❌ Erro fatal:", error);
@@ -671,10 +686,15 @@ export async function calcularClassificacao(
     // Calcular usando função principal
     const resultado = await getConfrontosLigaPontosCorridos(ligaId, rodadaLiga);
 
+    // Usar ultimaRodadaComDados do resultado quando a rodada alvo não tinha dados
+    const ultimaRodada = resultado.ultimaRodadaComDados
+        ? PONTOS_CORRIDOS_CONFIG.rodadaInicial + resultado.ultimaRodadaComDados - 1
+        : rodadaAtualBrasileirao;
+
     return {
         classificacao: resultado.classificacao,
         confrontos: resultado.confrontos,
-        ultimaRodadaComDados: rodadaAtualBrasileirao,
+        ultimaRodadaComDados: ultimaRodada,
         houveErro: false,
         fromCache: false,
     };

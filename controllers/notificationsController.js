@@ -7,6 +7,7 @@
 
 import webpush from 'web-push';
 import PushSubscription from '../models/PushSubscription.js';
+import logger from '../utils/logger.js';
 
 // ============================================
 // CONFIGURAÇÃO VAPID
@@ -23,9 +24,9 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
     VAPID_PUBLIC_KEY,
     VAPID_PRIVATE_KEY
   );
-  console.log('[PUSH] VAPID configurado com sucesso');
+  logger.log('[PUSH] VAPID configurado com sucesso');
 } else {
-  console.warn('[PUSH] ⚠️ VAPID keys não configuradas. Push notifications desabilitadas.');
+  logger.warn('[PUSH] ⚠️ VAPID keys não configuradas. Push notifications desabilitadas.');
 }
 
 // ============================================
@@ -105,7 +106,7 @@ export const subscribe = async (req, res) => {
       existing.lastUsed = new Date();
       await existing.save();
 
-      console.log(`[PUSH] Subscription atualizada para timeId ${timeId}`);
+      logger.log(`[PUSH] Subscription atualizada para timeId ${timeId}`);
 
       return res.json({
         sucesso: true,
@@ -134,7 +135,7 @@ export const subscribe = async (req, res) => {
 
     await newSubscription.save();
 
-    console.log(`[PUSH] Nova subscription criada para timeId ${timeId}`);
+    logger.log(`[PUSH] Nova subscription criada para timeId ${timeId}`);
 
     res.json({
       sucesso: true,
@@ -147,7 +148,7 @@ export const subscribe = async (req, res) => {
     });
 
   } catch (erro) {
-    console.error('[PUSH] Erro ao salvar subscription:', erro);
+    logger.error('[PUSH] Erro ao salvar subscription:', erro);
 
     // Tratar erro de duplicidade (endpoint já existe)
     if (erro.code === 11000) {
@@ -184,12 +185,12 @@ export const unsubscribe = async (req, res) => {
       return res.status(404).json({ erro: 'Subscription não encontrada' });
     }
 
-    console.log(`[PUSH] Subscription desativada para timeId ${timeId}`);
+    logger.log(`[PUSH] Subscription desativada para timeId ${timeId}`);
 
     res.json({ sucesso: true, mensagem: 'Notificações desativadas' });
 
   } catch (erro) {
-    console.error('[PUSH] Erro ao remover subscription:', erro);
+    logger.error('[PUSH] Erro ao remover subscription:', erro);
     res.status(500).json({ erro: 'Erro ao desativar notificações' });
   }
 };
@@ -225,7 +226,7 @@ export const getStatus = async (req, res) => {
     });
 
   } catch (erro) {
-    console.error('[PUSH] Erro ao verificar status:', erro);
+    logger.error('[PUSH] Erro ao verificar status:', erro);
     res.status(500).json({ erro: 'Erro ao verificar status' });
   }
 };
@@ -289,7 +290,7 @@ export const sendManual = async (req, res) => {
     });
 
   } catch (erro) {
-    console.error('[PUSH] Erro ao enviar manual:', erro);
+    logger.error('[PUSH] Erro ao enviar manual:', erro);
     res.status(500).json({ erro: 'Erro ao enviar notificações' });
   }
 };
@@ -306,7 +307,7 @@ export const sendManual = async (req, res) => {
  */
 export const sendPushNotification = async (timeId, payload) => {
   if (!isPushConfigured()) {
-    console.warn('[PUSH] Sistema não configurado, ignorando envio');
+    logger.warn('[PUSH] Sistema não configurado, ignorando envio');
     return { enviadas: 0, erros: 0 };
   }
 
@@ -317,7 +318,7 @@ export const sendPushNotification = async (timeId, payload) => {
     });
 
     if (subscriptions.length === 0) {
-      console.log(`[PUSH] Nenhuma subscription ativa para timeId ${timeId}`);
+      logger.log(`[PUSH] Nenhuma subscription ativa para timeId ${timeId}`);
       return { enviadas: 0, erros: 0 };
     }
 
@@ -342,11 +343,11 @@ export const sendPushNotification = async (timeId, payload) => {
           return { sucesso: true };
 
         } catch (erro) {
-          console.error(`[PUSH] Erro ao enviar para endpoint:`, erro.statusCode || erro.message);
+          logger.error(`[PUSH] Erro ao enviar para endpoint:`, erro.statusCode || erro.message);
 
           // Se subscription expirou ou foi revogada (410 Gone, 404 Not Found)
           if (erro.statusCode === 410 || erro.statusCode === 404) {
-            console.log(`[PUSH] Subscription inválida (${erro.statusCode}), desativando...`);
+            logger.log(`[PUSH] Subscription inválida (${erro.statusCode}), desativando...`);
             sub.active = false;
             await sub.save();
           }
@@ -368,11 +369,11 @@ export const sendPushNotification = async (timeId, payload) => {
       { enviadas: 0, erros: 0 }
     );
 
-    console.log(`[PUSH] Enviado para timeId ${timeId}:`, stats);
+    logger.log(`[PUSH] Enviado para timeId ${timeId}:`, stats);
     return stats;
 
   } catch (erro) {
-    console.error('[PUSH] Erro ao enviar notificação:', erro);
+    logger.error('[PUSH] Erro ao enviar notificação:', erro);
     return { enviadas: 0, erros: 1 };
   }
 };
@@ -385,7 +386,7 @@ export const sendPushNotification = async (timeId, payload) => {
  */
 export const sendBulkNotifications = async (timeIds, payloadOrFn) => {
   if (!isPushConfigured()) {
-    console.warn('[PUSH] Sistema não configurado, ignorando envio em lote');
+    logger.warn('[PUSH] Sistema não configurado, ignorando envio em lote');
     return { enviadas: 0, erros: 0 };
   }
 
@@ -419,11 +420,11 @@ export const sendBulkNotifications = async (timeIds, payloadOrFn) => {
       { enviadas: 0, erros: 0 }
     );
 
-    console.log('[PUSH] Total em lote:', totalStats);
+    logger.log('[PUSH] Total em lote:', totalStats);
     return totalStats;
 
   } catch (erro) {
-    console.error('[PUSH] Erro ao enviar lote:', erro);
+    logger.error('[PUSH] Erro ao enviar lote:', erro);
     return { enviadas: 0, erros: timeIds.length };
   }
 };
@@ -453,11 +454,11 @@ export const cleanExpiredSubscriptions = async () => {
       ]
     });
 
-    console.log(`[PUSH] Limpeza: ${result.deletedCount} subscriptions removidas`);
+    logger.log(`[PUSH] Limpeza: ${result.deletedCount} subscriptions removidas`);
     return result.deletedCount;
 
   } catch (erro) {
-    console.error('[PUSH] Erro ao limpar subscriptions:', erro);
+    logger.error('[PUSH] Erro ao limpar subscriptions:', erro);
     return 0;
   }
 };
@@ -498,7 +499,7 @@ export const getSubscriptionStats = async () => {
     };
 
   } catch (erro) {
-    console.error('[PUSH] Erro ao obter stats:', erro);
+    logger.error('[PUSH] Erro ao obter stats:', erro);
     return null;
   }
 };

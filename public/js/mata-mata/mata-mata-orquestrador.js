@@ -1,4 +1,5 @@
-// MATA-MATA ORQUESTRADOR - Coordenador Principal v1.4
+// MATA-MATA ORQUESTRADOR - Coordenador Principal v1.5
+// ✅ v1.5: Importa RODADA_FINAL_CAMPEONATO de season-config.js (elimina hardcode 38)
 // Responsável por: coordenação de módulos, carregamento dinâmico, cache
 // ✅ v1.4: FIX CRÍTICO - Verifica temporada da API antes de assumir dados anteriores
 // ✅ v1.3: Detecção dinâmica de temporada (R1 + mercado aberto = temporada anterior)
@@ -38,6 +39,7 @@ import {
   renderFaseBloqueada,
 } from "./mata-mata-ui.js";
 import { cacheManager } from "../core/cache-manager.js";
+import { RODADA_FINAL_CAMPEONATO } from "../core/season-config.js";
 
 // Variáveis dinâmicas para rodadas
 let getRankingRodadaEspecifica = null;
@@ -395,7 +397,7 @@ export async function carregarMataMata() {
       const mercadoAberto = data.status_mercado === 1;
       const temporadaAPI = data.temporada || new Date().getFullYear();
       const anoAtual = new Date().getFullYear();
-      const RODADA_FINAL_CAMPEONATO = data.rodada_final || 38;
+      const RODADA_FINAL_CAMPEONATO = data.rodada_final || RODADA_FINAL_CAMPEONATO;
 
       // v1.4: Detecção dinâmica de temporada com verificação do ano
       if (rodadaAtual === 1 && mercadoAberto) {
@@ -421,7 +423,7 @@ export async function carregarMataMata() {
       });
     } else {
       // Fallback: ativar todas as edições para temporada anterior
-      rodadaAtualGlobal = 38;
+      rodadaAtualGlobal = RODADA_FINAL_CAMPEONATO;
       edicoes.forEach((edicao) => {
         edicao.ativo = true;
       });
@@ -431,7 +433,7 @@ export async function carregarMataMata() {
       "[MATA-ORQUESTRADOR] Erro ao verificar status do mercado:",
       error.message,
     );
-    rodadaAtualGlobal = 38;
+    rodadaAtualGlobal = RODADA_FINAL_CAMPEONATO;
     edicoes.forEach((edicao) => {
       edicao.ativo = true;
     });
@@ -540,7 +542,7 @@ async function carregarClassificadosParciais(contentElement, ligaId, edicaoId, e
           </div>
         </td>
         <td class="pontos-cell valor-positivo">
-          <div class="pontos-valor">${t._pontosRodada?.toFixed(2).replace(".", ",") || "0,00"}</div>
+          <div class="pontos-valor">${(Math.trunc((t._pontosRodada||0) * 100) / 100).toFixed(2).replace(".", ",") || "0,00"}</div>
         </td>
       </tr>`).join("");
 
@@ -557,7 +559,7 @@ async function carregarClassificadosParciais(contentElement, ligaId, edicaoId, e
           </div>
         </td>
         <td class="pontos-cell">
-          <div class="pontos-valor">${t._pontosRodada?.toFixed(2).replace(".", ",") || "0,00"}</div>
+          <div class="pontos-valor">${(Math.trunc((t._pontosRodada||0) * 100) / 100).toFixed(2).replace(".", ",") || "0,00"}</div>
         </td>
       </tr>`).join("");
 
@@ -869,7 +871,7 @@ async function carregarFase(fase, ligaId) {
         const mercadoAberto = data.status_mercado === 1;
         const temporadaAPI = data.temporada || new Date().getFullYear();
         const anoAtual = new Date().getFullYear();
-        const RODADA_FINAL_CAMPEONATO = data.rodada_final || 38;
+        const RODADA_FINAL_CAMPEONATO = data.rodada_final || RODADA_FINAL_CAMPEONATO;
 
         // v1.4: Detecção dinâmica de temporada com verificação do ano
         if (rodada_atual === 1 && mercadoAberto) {

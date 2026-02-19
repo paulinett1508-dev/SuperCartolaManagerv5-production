@@ -563,7 +563,7 @@
     else if (isLuxo) badgeHtml = '<div class="dl-esc-badge badge-l"><span>L</span></div>';
 
     const multHtml = multiplicador && pontos !== 0
-      ? `<span class="dl-esc-multiplicador ${isCapitao ? 'cap' : 'lux'}">(${pontos.toFixed(2)} x${multiplicador.replace('x', '')})</span>`
+      ? `<span class="dl-esc-multiplicador ${isCapitao ? 'cap' : 'lux'}">(${(Math.trunc((pontos||0) * 100) / 100).toFixed(2)} x${multiplicador.replace('x', '')})</span>`
       : '';
 
     return `
@@ -577,7 +577,7 @@
           <span class="dl-esc-pos">${pos.abreviacao}${isCapitao ? ' - Capitao (1.5x)' : ''}${isLuxo ? ' - Luxo (1.5x)' : ''}</span>
         </div>
         <div class="dl-esc-pontos">
-          <span class="dl-esc-pontos-valor ${scoreClass}">${pontosExibir.toFixed(2)}</span>
+          <span class="dl-esc-pontos-valor ${scoreClass}">${(Math.trunc((pontosExibir||0) * 100) / 100).toFixed(2)}</span>
           ${multHtml}
         </div>
       </div>
@@ -781,7 +781,7 @@
           </div>
           <div class="dl-desemp-main">
             <div class="dl-desemp-pontos-box">
-              <span class="dl-desemp-pontos-valor">${typeof pontos === 'number' ? pontos.toFixed(2) : (pontos || '0.00')}</span>
+              <span class="dl-desemp-pontos-valor">${typeof pontos === 'number' ? (Math.trunc(pontos * 100) / 100).toFixed(2) : (pontos || '0.00')}</span>
               <span class="dl-desemp-pontos-label">Pontos na Rodada</span>
             </div>
           </div>
@@ -798,7 +798,7 @@
             </div>` : ''}
             ${pontosTotal !== undefined && pontosTotal !== pontos ? `
             <div class="dl-desemp-stat">
-              <span class="dl-desemp-stat-valor">${typeof pontosTotal === 'number' ? pontosTotal.toFixed(2) : pontosTotal}</span>
+              <span class="dl-desemp-stat-valor">${typeof pontosTotal === 'number' ? (Math.trunc(pontosTotal * 100) / 100).toFixed(2) : pontosTotal}</span>
               <span class="dl-desemp-stat-label">Total Temp.</span>
             </div>` : ''}
           </div>

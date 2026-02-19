@@ -1,9 +1,9 @@
 // =====================================================
-// MÓDULO: RAIO-X DA RODADA - v1.0
-// Análise detalhada de performance por rodada
+// MÓDULO: RAIO-X DA RODADA - v1.1
+// v1.1: Botão refresh — refaz ambas as APIs
 // =====================================================
 
-if (window.Log) Log.info('PARTICIPANTE-XRAY', 'Módulo v1.0 carregando...');
+if (window.Log) Log.info('PARTICIPANTE-XRAY', 'Módulo v1.1 carregando...');
 
 // Estado do módulo
 let _ligaId = null;
@@ -11,6 +11,7 @@ let _timeId = null;
 let _rodada = null;
 let _temporada = null;
 let _dados = null;
+let _refreshBtn = null;
 
 /**
  * Inicializa o módulo Raio-X da Rodada
@@ -39,9 +40,17 @@ export async function inicializarRodadaXrayParticipante(payload) {
         const backBtn = document.getElementById('xrayBackBtn');
         if (backBtn) {
             backBtn.addEventListener('click', () => {
-                // Limpar params
                 delete window.xrayParams;
                 window.participanteNav?.navegarPara('rodadas');
+            });
+        }
+
+        // Setup refresh button
+        _refreshBtn = document.getElementById('xrayRefreshBtn');
+        if (_refreshBtn) {
+            _refreshBtn.addEventListener('click', async () => {
+                if (_refreshBtn.disabled) return;
+                await carregarRaioX(true);
             });
         }
 
@@ -56,13 +65,20 @@ export async function inicializarRodadaXrayParticipante(payload) {
 
 /**
  * Busca dados do backend e renderiza
+ * @param {boolean} isRefresh - true quando disparado pelo botão refresh
  */
-async function carregarRaioX() {
-    mostrarLoading(true);
+async function carregarRaioX(isRefresh = false) {
+    // Animar botão refresh
+    if (_refreshBtn) {
+        _refreshBtn.disabled = true;
+        _refreshBtn.classList.add('spinning');
+    }
+
+    if (!isRefresh) mostrarLoading(true);
 
     try {
         const url = `/api/rodada-xray/${_ligaId}/${_rodada}/${_timeId}${_temporada ? `?temporada=${_temporada}` : ''}`;
-        const response = await fetch(url);
+        const response = await fetch(url, { cache: 'no-store' });
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
@@ -76,26 +92,43 @@ async function carregarRaioX() {
             return;
         }
 
-        renderizar(_dados);
+        renderizar(_dados, isRefresh);
         mostrarLoading(false);
+
+        // Atualizar subtitle com timestamp após refresh
+        if (isRefresh) {
+            const sub = document.getElementById('xraySubtitulo');
+            if (sub) {
+                const hora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                const textoAtual = sub.textContent.replace(/ • Atualizado.*$/, '');
+                sub.textContent = `${textoAtual} • Atualizado às ${hora}`;
+            }
+        }
 
     } catch (error) {
         if (window.Log) Log.error('PARTICIPANTE-XRAY', 'Erro ao carregar:', error);
         mostrarEstadoVazio(error.message);
+    } finally {
+        if (_refreshBtn) {
+            _refreshBtn.classList.remove('spinning');
+            _refreshBtn.disabled = false;
+        }
     }
 }
 
 /**
  * Renderiza todos os componentes do raio-x
+ * @param {Object} dados
+ * @param {boolean} forceRefresh - força bypass de cache no upcoming
  */
-function renderizar(dados) {
+function renderizar(dados, forceRefresh = false) {
     renderizarSubtitulo(dados);
     renderizarScoreCard(dados);
     renderizarComparacao(dados);
     renderizarCapitao(dados);
     renderizarPosicoes(dados);
     renderizarDistribuicao(dados);
-    carregarEExibirUpcoming();
+    carregarEExibirUpcoming(forceRefresh);
 }
 
 function renderizarSubtitulo(dados) {
@@ -242,11 +275,12 @@ function renderizarDistribuicao(dados) {
 
 /**
  * Busca dados de contexto/disputas e renderiza Performance Geral + O que vem por aí
+ * @param {boolean} forceRefresh - quando true, bypassa cache do browser
  */
-async function carregarEExibirUpcoming() {
+async function carregarEExibirUpcoming(forceRefresh = false) {
     try {
         const url = `/api/rodada-contexto/${_ligaId}/${_rodada}/${_timeId}${_temporada ? `?temporada=${_temporada}` : ''}`;
-        const response = await fetch(url);
+        const response = await fetch(url, forceRefresh ? { cache: 'no-store' } : {});
 
         if (!response.ok) return;
 
@@ -283,7 +317,7 @@ async function renderizarPerformanceGeral(disputas) {
                 <div class="xray-perf-info">
                     <div class="xray-perf-title">Capitão de Luxo</div>
                     <div class="xray-perf-value">${cap.sua_posicao}º</div>
-                    <div class="xray-perf-sub">${cap.seus_pontos.toFixed(1)} pts acumulados</div>
+                    <div class="xray-perf-sub">${(Math.trunc((cap.seus_pontos||0) * 10) / 10).toFixed(1)} pts acumulados</div>
                 </div>
             </div>
         `);
@@ -313,7 +347,7 @@ async function renderizarPerformanceGeral(disputas) {
                 <div class="xray-perf-info">
                     <div class="xray-perf-title">Luva de Ouro</div>
                     <div class="xray-perf-value">${luva.sua_posicao}º</div>
-                    <div class="xray-perf-sub">${luva.seus_pontos?.toFixed(1) || 0} pts</div>
+                    <div class="xray-perf-sub">${luva.seus_pontos ? (Math.trunc(luva.seus_pontos * 10) / 10).toFixed(1) : 0} pts</div>
                 </div>
             </div>
         `);
@@ -361,7 +395,7 @@ async function buscarTop10Card() {
                     <div class="xray-perf-info">
                         <div class="xray-perf-title">TOP 10 - Mito</div>
                         <div class="xray-perf-value">${meuMito.posicao}º</div>
-                        <div class="xray-perf-sub">${meuMito.pontos?.toFixed(1) || 0} pts</div>
+                        <div class="xray-perf-sub">${meuMito.pontos ? (Math.trunc(meuMito.pontos * 10) / 10).toFixed(1) : 0} pts</div>
                     </div>
                 </div>
             `;
@@ -376,7 +410,7 @@ async function buscarTop10Card() {
                     <div class="xray-perf-info">
                         <div class="xray-perf-title">TOP 10 - Mico</div>
                         <div class="xray-perf-value">${meuMico.posicao}º</div>
-                        <div class="xray-perf-sub">${meuMico.pontos?.toFixed(1) || 0} pts</div>
+                        <div class="xray-perf-sub">${meuMico.pontos ? (Math.trunc(meuMico.pontos * 10) / 10).toFixed(1) : 0} pts</div>
                     </div>
                 </div>
             `;
@@ -419,7 +453,7 @@ function renderizarUpcoming(disputas) {
                             ${pc.minha_posicao}º lugar • ${pc.zona}
                         </div>
                         <div class="xray-upcoming-meta" style="margin-top:2px;">
-                            ${resultIcon} Última: ${pc.seu_confronto.voce.toFixed(1)} × ${pc.seu_confronto.adversario.pontos.toFixed(1)} ${escapeHtml(pc.seu_confronto.adversario.nome)}
+                            ${resultIcon} Última: ${(Math.trunc((pc.seu_confronto.voce||0) * 10) / 10).toFixed(1)} × ${(Math.trunc((pc.seu_confronto.adversario.pontos||0) * 10) / 10).toFixed(1)} ${escapeHtml(pc.seu_confronto.adversario.nome)}
                         </div>
                     </div>
                     <span class="xray-upcoming-badge posicao">${pc.minha_posicao}º</span>
@@ -466,7 +500,7 @@ function renderizarUpcoming(disputas) {
                         ${statusIcon} ${statusText} — vs ${escapeHtml(mm.seu_confronto.adversario.nome)}
                     </div>
                     <div class="xray-upcoming-meta">
-                        Você ${mm.seu_confronto.voce.toFixed(1)} × ${mm.seu_confronto.adversario.pontos.toFixed(1)} ${escapeHtml(mm.seu_confronto.adversario.nome)}
+                        Você ${(Math.trunc((mm.seu_confronto.voce||0) * 10) / 10).toFixed(1)} × ${(Math.trunc((mm.seu_confronto.adversario.pontos||0) * 10) / 10).toFixed(1)} ${escapeHtml(mm.seu_confronto.adversario.nome)}
                     </div>
                     ${descExtra}
                 </div>
@@ -485,7 +519,7 @@ function renderizarUpcoming(disputas) {
                 <div class="xray-upcoming-info">
                     <div class="xray-upcoming-title">MELHOR DO MÊS (${nomesMes[mes.mes]}/${mes.ano})</div>
                     <div class="xray-upcoming-desc">
-                        ${mes.sua_posicao}º lugar • ${mes.seus_pontos.toFixed(1)} pts
+                        ${mes.sua_posicao}º lugar • ${(Math.trunc((mes.seus_pontos||0) * 10) / 10).toFixed(1)} pts
                     </div>
                     ${mes.rodadas_restantes > 0 ? `<div class="xray-upcoming-meta">${mes.rodadas_restantes} rodada(s) restante(s) no mês</div>` : ''}
                 </div>

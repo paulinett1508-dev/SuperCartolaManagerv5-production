@@ -13,6 +13,10 @@ const router = express.Router();
 const cacheNoticias = {};
 const CACHE_TTL = 30 * 60 * 1000; // 30 minutos
 
+// Cache separado para Libertadores (TTL maior - notícias menos frequentes)
+let cacheLibertadores = null;
+const CACHE_TTL_LIBERTA = 60 * 60 * 1000; // 1 hora
+
 /**
  * Extrai texto limpo de um possível CDATA ou HTML
  */
@@ -167,6 +171,55 @@ async function buscarNoticiasClube(clubeId) {
     }
 }
 
+/**
+ * Busca notícias da Libertadores via Google News RSS
+ */
+async function buscarNoticiasLibertadores() {
+    // Verificar cache
+    if (cacheLibertadores && (Date.now() - cacheLibertadores.timestamp) < CACHE_TTL_LIBERTA) {
+        return { noticias: cacheLibertadores.noticias, cache: true };
+    }
+
+    try {
+        const query = encodeURIComponent('CONMEBOL Libertadores 2026');
+        const url = `https://news.google.com/rss/search?q=${query}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
+
+        console.log('[NOTICIAS] Buscando notícias da Libertadores 2026...');
+
+        const response = await fetch(url, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (compatible; SuperCartolaManager/1.0)',
+                'Accept': 'application/rss+xml, application/xml, text/xml'
+            },
+            timeout: 10000
+        });
+
+        if (!response.ok) {
+            console.error(`[NOTICIAS] Erro HTTP ${response.status} ao buscar Libertadores`);
+            if (cacheLibertadores) {
+                return { noticias: cacheLibertadores.noticias, cache: true, stale: true };
+            }
+            return { noticias: [], erro: 'Falha ao buscar notícias' };
+        }
+
+        const xml = await response.text();
+        const noticias = parseRSSItems(xml).slice(0, 6); // Máximo 6 notícias
+
+        console.log(`[NOTICIAS] ${noticias.length} notícias da Libertadores encontradas`);
+
+        // Atualizar cache
+        cacheLibertadores = { noticias, timestamp: Date.now() };
+
+        return { noticias, cache: false };
+    } catch (error) {
+        console.error('[NOTICIAS] Erro ao buscar Libertadores:', error.message);
+        if (cacheLibertadores) {
+            return { noticias: cacheLibertadores.noticias, cache: true, stale: true };
+        }
+        return { noticias: [], erro: error.message };
+    }
+}
+
 // ┌──────────────────────────────────────────────────────────────────────┐
 // │ ROTAS                                                                │
 // └──────────────────────────────────────────────────────────────────────┘
@@ -198,6 +251,28 @@ router.get('/time/:clubeId', async (req, res) => {
     } catch (error) {
         console.error('[NOTICIAS] Erro na rota:', error);
         res.status(500).json({ success: false, erro: 'Erro ao buscar notícias' });
+    }
+});
+
+/**
+ * GET /api/noticias/libertadores
+ * Retorna notícias da Libertadores 2026 via Google News RSS
+ */
+router.get('/libertadores', async (req, res) => {
+    try {
+        const resultado = await buscarNoticiasLibertadores();
+
+        res.json({
+            success: true,
+            noticias: resultado.noticias,
+            total: resultado.noticias.length,
+            cache: resultado.cache || false,
+            stale: resultado.stale || false,
+            atualizadoEm: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('[NOTICIAS] Erro na rota libertadores:', error);
+        res.status(500).json({ success: false, erro: 'Erro ao buscar notícias da Libertadores' });
     }
 });
 

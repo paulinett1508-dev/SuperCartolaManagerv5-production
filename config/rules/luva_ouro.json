@@ -7,10 +7,9 @@
   "versao": "1.0.0",
 
   "configuracao": {
-    "ligas_habilitadas": ["684d821cf1a7ae16d1f89572"],
     "modulo_ativo": true,
-    "temporada": 2025,
-    "restricao": "Apenas Liga Cartoleiros do Sobral"
+    "temporada": 2026,
+    "nota": "Habilitação por liga é controlada via ModuleConfig no MongoDB, não por este arquivo"
   },
 
   "regras": {

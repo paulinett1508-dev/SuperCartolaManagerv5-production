@@ -147,7 +147,7 @@ function isTemporadaHistorica() {
  * Módulos que NUNCA existiram em 2025 (em nenhuma liga)
  * Estes são sempre ocultados em temporadas históricas
  */
-const MODULOS_2026_ONLY = ['tiro-certo', 'bolao-copa', 'resta-um'];
+const MODULOS_2026_ONLY = ['tiro-certo', 'bolao-copa'];
 
 /**
  * Mapeamento de chave de modulos_ativos -> data-module do card HTML
@@ -169,7 +169,9 @@ const MODULO_TO_CARD_MAP = {
     'mataMata': 'mata-mata',
     'mata_mata': 'mata-mata',
     'fluxoFinanceiro': 'fluxo-financeiro',
-    'fluxo_financeiro': 'fluxo-financeiro'
+    'fluxo_financeiro': 'fluxo-financeiro',
+    'restaUm': 'resta-um',
+    'resta_um': 'resta-um'
 };
 
 /**

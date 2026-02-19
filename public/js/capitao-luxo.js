@@ -1,9 +1,13 @@
 // =============================================
-// CAPITÃO DE LUXO - Admin JS v1.0.0
+// CAPITÃO DE LUXO - Admin JS v1.1.0
 // Tabela detalhada de ranking de capitães
 // Padrão: ArtilheiroCampeao (single-file admin module)
+// v1.1.0: Import RODADA_FINAL centralizado de season-config.js
 // =============================================
-console.log("🎖️ [CAPITAO-LUXO] Sistema v1.0.0 carregando...");
+
+import { RODADA_FINAL_CAMPEONATO } from './core/season-config.js';
+
+console.log("🎖️ [CAPITAO-LUXO] Sistema v1.1.0 carregando...");
 
 const CapitaoLuxo = {
     // Configurações
@@ -12,7 +16,7 @@ const CapitaoLuxo = {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get("id");
         },
-        RODADA_FINAL: 38,
+        RODADA_FINAL: RODADA_FINAL_CAMPEONATO,
         API: {
             RANKING: (ligaId) => `/api/capitao/${ligaId}/ranking`,
             RANKING_LIVE: (ligaId) => `/api/capitao/${ligaId}/ranking-live`,
@@ -377,7 +381,7 @@ const CapitaoLuxo = {
             const isPodio3 = posicao === 3;
 
             const escudoSrc = participante.escudo || `/escudos/${participante.clube_id || "default"}.png`;
-            const pontos = (participante.pontuacao_total || 0).toFixed(2);
+            const pontos = (Math.trunc((participante.pontuacao_total || 0) * 100) / 100).toFixed(2);
             const media = (participante.media_capitao || 0).toFixed(2);
             const rodadas = participante.rodadas_jogadas || 0;
             const melhor = participante.melhor_capitao?.pontuacao?.toFixed(2) || "-";
@@ -459,7 +463,7 @@ const CapitaoLuxo = {
             window.CapitaoHistoricoModal.abrir(participante);
         } else {
             console.error('❌ [CAPITAO-LUXO] Modal de histórico não carregado');
-            alert('Erro ao carregar histórico. Atualize a página.');
+            SuperModal.toast.error('Erro ao carregar histórico. Atualize a página.');
         }
     },
 

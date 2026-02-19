@@ -165,9 +165,9 @@ function obterLigaId() {
     if (window.participanteData && window.participanteData.ligaId) {
         return window.participanteData.ligaId;
     }
-    // Fallback para modo admin (URL)
+    // Fallback para modo admin (URL) — suporta ?id=, ?liga= e ?ligaId=
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get("id") || urlParams.get("ligaId");
+    return urlParams.get("id") || urlParams.get("liga") || urlParams.get("ligaId") || window._fluxoLigaId || null;
 }
 
 // ==============================
@@ -540,7 +540,7 @@ function gerarTabelaHTML(dados, tipo, valoresBonusOnus) {
                             <td style="text-align: center;">
                                 ${item.clube_id ? `<img src="/escudos/${item.clube_id}.png" alt="" class="time-escudo" onerror="this.style.display='none'"/>` : '<span class="material-symbols-outlined" style="color: var(--color-mico);">favorite</span>'}
                             </td>
-                            <td style="text-align: center;" class="pontos-destaque">${(item.pontos ?? 0).toFixed(2)}</td>
+                            <td style="text-align: center;" class="pontos-destaque">${(Math.trunc((item.pontos ?? 0) * 100) / 100).toFixed(2)}</td>
                             <td style="text-align: center;">R${item.rodada ?? "?"}</td>
                             <td style="text-align: center;" class="${valorClass}">${valorFormatado}</td>
                         </tr>`;

@@ -194,7 +194,7 @@ export class MelhorMesUI {
     const posicao = index + 1;
     const isPrimeiro = posicao === 1;
     const pontos =
-      typeof time.pontos === "number" ? time.pontos.toFixed(2) : "0.00";
+      typeof time.pontos === "number" ? (Math.trunc(time.pontos * 100) / 100).toFixed(2) : "0.00";
 
     return `
       <tr>
