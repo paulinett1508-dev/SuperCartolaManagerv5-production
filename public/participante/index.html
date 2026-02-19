@@ -89,6 +89,9 @@
         <!-- ✅ Copa de Times Super Cartola -->
         <link rel="stylesheet" href="css/copa-sc.css" />
 
+        <!-- ✅ Tiro Certo Survival (teaser 2º turno) -->
+        <link rel="stylesheet" href="css/tiro-certo.css" />
+
         <!-- ✅ Extrato Bank (redesign banco digital) -->
         <link rel="stylesheet" href="css/extrato-bank.css" />
 
@@ -1152,7 +1155,7 @@
                         <div class="space-y-2">
                             <div class="flex items-center gap-3 p-3 rounded bg-black/40 hover:bg-black/60 transition border border-white/5 group/item">
                                 <i class="ph-fill ph-crosshair text-lg text-[var(--app-primary)]"></i>
-                                <div><span class="block text-white text-xs font-bold uppercase">Liga Tiro Certo</span><span class="block text-[10px] text-gray-400">Modo Survival: Errou, caiu.</span></div>
+                                <div><span class="block text-white text-xs font-bold uppercase">Liga Tiro Certo</span><span class="block text-[10px] text-gray-400">Escolha 1 time/rodada — o último sobrevivente leva tudo.</span></div>
                             </div>
                             <div class="flex items-center gap-3 p-3 rounded bg-black/40 hover:bg-black/60 transition border border-white/5 group/item">
                                 <i class="ph-fill ph-globe-hemisphere-west text-lg text-[var(--app-primary)]"></i>
@@ -1863,10 +1866,18 @@
                         </button>
                         <div class="accordion-content hidden bg-black/30 p-3 space-y-3">
                             <!-- Liga Tiro Certo -->
-                            <div class="p-2 rounded-lg bg-white/5">
+                            <div class="p-3 rounded-lg bg-white/5 border border-orange-500/20">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="material-icons text-sm" style="color: var(--app-primary);">gps_fixed</span>
+                                        <span class="text-xs font-bold text-white">Liga Tiro Certo</span>
+                                    </div>
+                                    <span class="tc-badge-turno">2º TURNO</span>
+                                </div>
+                                <p class="text-[10px] text-gray-400 mb-2 leading-relaxed">Escolha 1 time por rodada para vencer. Se vencer, avança. Se empatar ou perder, eliminado. Não repita times — o último sobrevivente leva o prêmio!</p>
                                 <div class="flex items-center justify-between">
-                                    <span class="text-xs text-white/70">Liga Tiro Certo</span>
-                                    <span class="text-xs font-bold text-green-400">R$ 50,00 /edição</span>
+                                    <span class="text-[10px] text-gray-500">Prêmio por edição</span>
+                                    <span class="text-xs font-bold text-green-400">R$ 50,00</span>
                                 </div>
                             </div>
                             <!-- Bolões -->

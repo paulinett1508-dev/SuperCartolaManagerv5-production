@@ -56,6 +56,7 @@ class ParticipanteNavigation {
             capitao: "/participante/fronts/capitao.html",
             configuracoes: "/participante/fronts/configuracoes.html",
             "copa-times-sc": "/participante/fronts/copa-times-sc.html",
+            "tiro-certo": "/participante/fronts/tiro-certo.html",
             regras: "/participante/fronts/regras.html",
             "rodada-xray": "/participante/fronts/rodada-xray.html",
         };

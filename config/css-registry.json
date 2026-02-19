@@ -267,6 +267,12 @@
         "description": "Tema Copa Super Cartola (dourado/trofeu)"
       },
       {
+        "path": "public/participante/css/tiro-certo.css",
+        "loadedBy": ["participante/index.html"],
+        "description": "Tema Tiro Certo Survival (laranja/mira) — teaser 2º turno",
+        "moduleColor": "--tc-primary (mapeia var(--app-primary))"
+      },
+      {
         "path": "public/participante/css/extrato-bank.css",
         "loadedBy": ["participante/index.html"],
         "description": "Extrato estilo banco digital (Nubank/Inter)"

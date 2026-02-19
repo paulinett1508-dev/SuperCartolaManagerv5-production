@@ -287,19 +287,23 @@ const MODULOS_DEFAULT = [
     {
         modulo: 'tiro_certo',
         titulo: 'Tiro Certo',
-        icone: 'ads_click',
-        cor: '#6366f1',
+        icone: 'gps_fixed',
+        cor: '#f97316',
         ordem: 16,
-        conteudo_html: `<h3>🎯 Como funciona o Tiro Certo?</h3>
-<p>Aqui a estratégia é diferente! Antes de cada rodada, você define uma <strong>meta de pontuação</strong> para o seu time.</p>
-<h4>Como pontua:</h4>
+        conteudo_html: `<h3>Como funciona o Tiro Certo?</h3>
+<p><strong>Modo Survival</strong> — disponível no segundo turno do Brasileirão. Escolha um time por rodada e sobreviva o máximo possível!</p>
+<h4>Duração</h4>
+<p>Até sobrar apenas um jogador!</p>
+<h4>Como jogar:</h4>
 <ul>
-<li>Quanto <strong>mais perto da meta</strong> você chegar, mais pontos ganha</li>
-<li>Acertou a meta exata (ou muito próximo)? Pontuação máxima!</li>
-<li>Passou muito ou ficou muito abaixo? Pontuação menor</li>
+<li>Em cada rodada, escolha apenas <strong>1 time</strong> para vencer</li>
+<li>Se ele <strong>vencer</strong>, você avança para a próxima rodada</li>
+<li>Se <strong>empatar ou perder</strong>, você está eliminado</li>
+<li>Você <strong>não pode repetir times</strong> — use cada um só uma vez por edição</li>
 </ul>
-<p>O ranking é pela soma dos pontos de precisão ao longo da temporada.</p>
-<p><em>Não basta pontuar alto — tem que saber prever o próprio desempenho!</em></p>`
+<h4>Estratégia</h4>
+<p>Pense bem antes de escolher! Guarde os grandes favoritos para as rodadas finais e tente avançar com times menores no início.</p>
+<p><em>O último sobrevivente leva o prêmio sozinho!</em></p>`
     }
 ];
 
