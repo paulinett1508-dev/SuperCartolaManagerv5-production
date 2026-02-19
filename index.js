@@ -169,6 +169,9 @@ import assistenteEscalacaoRoutes from "./routes/assistente-escalacao-routes.js";
 // 📰 Notícias personalizadas do time do coração
 import noticiasTimeRoutes from "./routes/noticias-time-routes.js";
 
+// 🏆 Copa do Mundo 2026 - Notícias e dados
+import copa2026NoticiasRoutes from "./routes/copa-2026-noticias-routes.js";
+
 // 📊 Tabelas Esportivas (Brasileirão, jogos do time, etc)
 import tabelasEsportesRoutes from "./routes/tabelas-esportes-routes.js";
 
@@ -588,6 +591,10 @@ console.log("[SERVER] 🤖 Rotas do Assistente de Escalação registradas em /ap
 // 📰 Notícias do Time do Coração
 app.use("/api/noticias", noticiasTimeRoutes);
 console.log("[SERVER] 📰 Rotas de notícias personalizadas registradas em /api/noticias");
+
+// 🏆 Copa do Mundo 2026
+app.use("/api/copa-2026", copa2026NoticiasRoutes);
+console.log("[SERVER] 🏆 Rotas da Copa do Mundo 2026 registradas em /api/copa-2026");
 
 // 📊 Tabelas Esportivas
 app.use("/api/tabelas", tabelasEsportesRoutes);

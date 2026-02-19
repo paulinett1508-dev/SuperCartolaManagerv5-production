@@ -1,0 +1,614 @@
+/**
+ * Copa do Mundo 2026 - Landing Page Styles
+ * =========================================
+ * Usa tokens de _app-tokens.css (--app-copa-*)
+ * Mobile-first, dark theme
+ */
+
+/* ═══════════════════════════════════════════════════
+   PAGE CONTAINER
+   ═══════════════════════════════════════════════════ */
+.copa-mundo-page {
+    min-height: 100vh;
+    background: var(--app-bg, #0a0a0a);
+    padding-bottom: 5rem;
+}
+
+/* ═══════════════════════════════════════════════════
+   HERO / COUNTDOWN
+   ═══════════════════════════════════════════════════ */
+.copa-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 2.5rem 1rem 2rem;
+    text-align: center;
+}
+
+.copa-hero-bg {
+    position: absolute;
+    inset: 0;
+    background: var(--app-copa-gradient, linear-gradient(135deg, #8B1538 0%, #1E3A5F 50%, #D4AF37 100%));
+    opacity: 0.85;
+    z-index: 0;
+}
+
+.copa-hero-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.06) 1px, transparent 0);
+    background-size: 32px 32px;
+}
+
+.copa-hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.copa-hero-flags {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.copa-host-flag {
+    font-size: 2rem;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
+}
+
+.copa-hero-title {
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 2rem;
+    color: #fff;
+    letter-spacing: 0.08em;
+    margin: 0;
+    line-height: 1.1;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+}
+
+.copa-hero-subtitle {
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 3rem;
+    color: var(--app-copa-secondary, #D4AF37);
+    margin: 0;
+    line-height: 1;
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+}
+
+.copa-hero-local {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.7);
+    margin: 0.5rem 0 1.25rem;
+    letter-spacing: 0.05em;
+}
+
+/* Countdown */
+.copa-countdown {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.copa-countdown-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(0,0,0,0.35);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    min-width: 3.5rem;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.copa-countdown-value {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+}
+
+.copa-countdown-label {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.6rem;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.copa-countdown-sep {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 1.25rem;
+    color: var(--app-copa-secondary, #D4AF37);
+    opacity: 0.7;
+}
+
+.copa-hero-abertura {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.6);
+    margin: 0;
+}
+
+.copa-hero-abertura-icon {
+    font-size: 0.9rem;
+}
+
+/* ═══════════════════════════════════════════════════
+   SECTIONS GENÉRICO
+   ═══════════════════════════════════════════════════ */
+.copa-section {
+    padding: 1.25rem 1rem;
+}
+
+.copa-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.copa-section-icon {
+    font-size: 1.25rem;
+}
+
+.copa-section-title {
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 1.1rem;
+    color: #fff;
+    margin: 0;
+    flex: 1;
+}
+
+.copa-section-badge {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.65rem;
+    color: var(--app-copa-secondary, #D4AF37);
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 999px;
+    padding: 0.2rem 0.6rem;
+    white-space: nowrap;
+}
+
+.copa-loading-placeholder {
+    text-align: center;
+    color: var(--app-text-muted, rgba(255,255,255,0.4));
+    font-size: 0.85rem;
+    padding: 2rem 0;
+}
+
+/* ═══════════════════════════════════════════════════
+   JOGOS DO BRASIL
+   ═══════════════════════════════════════════════════ */
+.copa-brasil-jogos {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.copa-jogo-brasil {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--app-surface, #1a1a1a);
+    border-radius: 0.75rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid rgba(212, 175, 55, 0.15);
+}
+
+.copa-jogo-rodada {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.6rem;
+    color: var(--app-copa-secondary, #D4AF37);
+    background: rgba(212, 175, 55, 0.12);
+    border-radius: 0.25rem;
+    padding: 0.15rem 0.4rem;
+    white-space: nowrap;
+}
+
+.copa-jogo-times {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.copa-jogo-time {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    color: #fff;
+    min-width: 0;
+}
+
+.copa-jogo-time-nome {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.copa-jogo-time-brasil .copa-jogo-time-nome {
+    color: var(--app-copa-secondary, #D4AF37);
+    font-weight: 700;
+}
+
+.copa-jogo-vs {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.7rem;
+    color: var(--app-text-muted, rgba(255,255,255,0.4));
+    flex-shrink: 0;
+}
+
+.copa-jogo-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.15rem;
+    flex-shrink: 0;
+}
+
+.copa-jogo-data {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.7);
+}
+
+.copa-jogo-local {
+    font-size: 0.6rem;
+    color: var(--app-text-muted, rgba(255,255,255,0.4));
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 10rem;
+}
+
+/* ═══════════════════════════════════════════════════
+   NOTÍCIAS
+   ═══════════════════════════════════════════════════ */
+.copa-noticias-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.25rem;
+}
+
+.copa-tab {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--app-text-muted, rgba(255,255,255,0.5));
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 999px;
+    padding: 0.4rem 1rem;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.copa-tab:active {
+    transform: scale(0.96);
+}
+
+.copa-tab-active {
+    color: #fff;
+    background: rgba(139, 21, 56, 0.5);
+    border-color: var(--app-copa-primary, #8B1538);
+}
+
+.copa-noticias-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.copa-noticia-card {
+    display: block;
+    background: var(--app-surface, #1a1a1a);
+    border-radius: 0.75rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--app-border, #333);
+    text-decoration: none;
+    transition: border-color 0.2s ease;
+}
+
+.copa-noticia-card:active {
+    border-color: var(--app-copa-primary, #8B1538);
+}
+
+.copa-noticia-titulo {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.3;
+    margin-bottom: 0.35rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.copa-noticia-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    color: var(--app-text-muted, rgba(255,255,255,0.4));
+}
+
+.copa-noticia-fonte {
+    color: var(--app-copa-secondary, #D4AF37);
+    font-weight: 500;
+}
+
+.copa-noticia-tempo {
+    opacity: 0.7;
+}
+
+/* ═══════════════════════════════════════════════════
+   GRUPOS (Accordion)
+   ═══════════════════════════════════════════════════ */
+.copa-grupos-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.copa-grupo-details {
+    background: var(--app-surface, #1a1a1a);
+    border-radius: 0.75rem;
+    border: 1px solid var(--app-border, #333);
+    overflow: hidden;
+}
+
+.copa-grupo-details[open] {
+    border-color: rgba(139, 21, 56, 0.4);
+}
+
+.copa-grupo-details[data-grupo="C"] {
+    border-color: rgba(212, 175, 55, 0.35);
+}
+
+.copa-grupo-summary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+}
+
+.copa-grupo-summary::-webkit-details-marker {
+    display: none;
+}
+
+.copa-grupo-letra {
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 0.9rem;
+    color: var(--app-copa-secondary, #D4AF37);
+    background: rgba(212, 175, 55, 0.12);
+    border-radius: 0.35rem;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.copa-grupo-selecoes-preview {
+    flex: 1;
+    display: flex;
+    gap: 0.35rem;
+    align-items: center;
+    overflow: hidden;
+}
+
+.copa-grupo-selecao-flag {
+    font-size: 1.1rem;
+}
+
+.copa-grupo-selecao-name {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.6);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.copa-grupo-arrow {
+    font-size: 0.75rem;
+    color: var(--app-text-muted, rgba(255,255,255,0.4));
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.copa-grupo-details[open] .copa-grupo-arrow {
+    transform: rotate(90deg);
+}
+
+/* Conteúdo do grupo expandido */
+.copa-grupo-content {
+    padding: 0 1rem 1rem;
+}
+
+.copa-grupo-jogo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    font-size: 0.8rem;
+}
+
+.copa-grupo-jogo:last-child {
+    border-bottom: none;
+}
+
+.copa-grupo-jogo-rodada {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.55rem;
+    color: var(--app-text-muted, rgba(255,255,255,0.4));
+    width: 1.5rem;
+    flex-shrink: 0;
+}
+
+.copa-grupo-jogo-times {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-width: 0;
+}
+
+.copa-grupo-jogo-team {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.85);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.copa-grupo-jogo-team-brasil {
+    color: var(--app-copa-secondary, #D4AF37);
+    font-weight: 600;
+}
+
+.copa-grupo-jogo-vs {
+    font-size: 0.65rem;
+    color: var(--app-text-muted, rgba(255,255,255,0.3));
+    flex-shrink: 0;
+}
+
+.copa-grupo-jogo-info {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.5);
+    text-align: right;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════════════
+   FASE ELIMINATÓRIA (Timeline)
+   ═══════════════════════════════════════════════════ */
+.copa-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding-left: 1.5rem;
+    border-left: 2px solid rgba(212, 175, 55, 0.2);
+}
+
+.copa-timeline-item {
+    position: relative;
+    padding: 0.75rem 0 0.75rem 1.25rem;
+}
+
+.copa-timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -1.85rem;
+    top: 1rem;
+    width: 0.65rem;
+    height: 0.65rem;
+    background: var(--app-copa-secondary, #D4AF37);
+    border-radius: 50%;
+    border: 2px solid var(--app-bg, #0a0a0a);
+}
+
+.copa-timeline-item-final::before {
+    width: 0.85rem;
+    height: 0.85rem;
+    left: -1.95rem;
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
+}
+
+.copa-timeline-fase {
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 0.9rem;
+    color: #fff;
+    margin-bottom: 0.2rem;
+}
+
+.copa-timeline-info {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.7rem;
+    color: var(--app-text-muted, rgba(255,255,255,0.4));
+}
+
+.copa-timeline-jogos {
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.3);
+}
+
+/* ═══════════════════════════════════════════════════
+   SEDES E ESTÁDIOS
+   ═══════════════════════════════════════════════════ */
+.copa-sedes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.copa-sede-card {
+    background: var(--app-surface, #1a1a1a);
+    border-radius: 0.65rem;
+    padding: 0.65rem;
+    border: 1px solid var(--app-border, #333);
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.copa-sede-pais {
+    font-size: 1rem;
+}
+
+.copa-sede-cidade {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.75rem;
+    color: #fff;
+    font-weight: 500;
+}
+
+.copa-sede-estadio {
+    font-size: 0.65rem;
+    color: var(--app-text-muted, rgba(255,255,255,0.4));
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.copa-sede-capacidade {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.6rem;
+    color: rgba(255,255,255,0.35);
+}
+
+/* ═══════════════════════════════════════════════════
+   UTILITIES
+   ═══════════════════════════════════════════════════ */
+.copa-divider {
+    border: none;
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+    margin: 0.5rem 0;
+}
