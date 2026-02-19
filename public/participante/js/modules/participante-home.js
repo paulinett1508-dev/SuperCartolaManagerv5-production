@@ -1500,6 +1500,28 @@ function toggleCopaHome() {
 window.toggleCopaHome = toggleCopaHome;
 
 // =====================================================================
+// TOGGLE LIBERTADORES (Colapsável)
+// =====================================================================
+function toggleLibertaHome() {
+    const section = document.getElementById('liberta-home-section');
+    const content = document.getElementById('liberta-home-content');
+
+    if (!section || !content) return;
+
+    const isExpanded = section.classList.contains('expanded');
+
+    if (isExpanded) {
+        section.classList.remove('expanded');
+        content.classList.add('collapsed');
+    } else {
+        section.classList.add('expanded');
+        content.classList.remove('collapsed');
+    }
+}
+
+window.toggleLibertaHome = toggleLibertaHome;
+
+// =====================================================================
 // TOGGLE JOGOS/AGENDA DO DIA (Colapsável)
 // =====================================================================
 function toggleJogosHome() {
@@ -1897,6 +1919,13 @@ async function carregarJogosECopa(participante) {
                 copaEl.innerHTML = mod.renderizarSecaoCopa(result.copa);
                 if (window.Log) Log.info("PARTICIPANTE-HOME", `Copa do Mundo renderizada (fase: ${result.copa.fase})`);
             }
+        }
+
+        // Libertadores 2026 - Faixa de notícias (entre Copa e Jogos)
+        const libertaEl = document.getElementById('home-liberta-placeholder');
+        if (libertaEl) {
+            libertaEl.innerHTML = mod.renderizarSecaoLibertadores();
+            if (window.Log) Log.info("PARTICIPANTE-HOME", "Libertadores 2026 faixa renderizada");
         }
 
         // Jogos brasileiros do dia (com "Meu Time" se tiver clube)

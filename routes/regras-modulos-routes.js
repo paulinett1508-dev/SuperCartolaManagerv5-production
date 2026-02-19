@@ -233,23 +233,6 @@ const MODULOS_DEFAULT = [
 <p><em>Módulo especial — ativado apenas em anos de Copa do Mundo.</em></p>`
     },
     {
-        modulo: 'bolao_libertadores',
-        titulo: 'Bolão da Libertadores',
-        icone: 'emoji_events',
-        cor: '#f59e0b',
-        ordem: 13,
-        conteudo_html: `<h3>🏆 Como funciona o Bolão da Libertadores?</h3>
-<p>Acompanhe a Libertadores com palpites e disputas entre os participantes da liga!</p>
-<h4>Mecânica:</h4>
-<ul>
-<li>Dê seus <strong>palpites nos jogos</strong> das fases eliminatórias</li>
-<li>Placar exato vale mais pontos que acertar só o resultado</li>
-<li>Fases mais avançadas (quartas, semi, final) valem <strong>pontuação dobrada</strong></li>
-</ul>
-<p>O ranking é pela soma de pontos de todos os palpites. O campeão do Bolão leva o prêmio!</p>
-<p><em>A emoção da Libertadores dentro da sua liga!</em></p>`
-    },
-    {
         modulo: 'copa_mundo_sc',
         titulo: 'Copa do Mundo do Super Cartola',
         icone: 'stadium',

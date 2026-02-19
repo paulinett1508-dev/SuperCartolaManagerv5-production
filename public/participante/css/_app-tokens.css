@@ -92,6 +92,15 @@
     --app-copa-gradient: linear-gradient(135deg, #8B1538 0%, #1E3A5F 50%, #D4AF37 100%);
     --app-copa-gradient-subtle: linear-gradient(135deg, rgba(139, 21, 56, 0.2) 0%, rgba(30, 58, 95, 0.15) 100%);
 
+    /* Libertadores 2026 */
+    --app-liberta-primary: #1B5E20;               /* Verde CONMEBOL escuro */
+    --app-liberta-secondary: #D4AF37;             /* Dourado troféu */
+    --app-liberta-accent: #2E7D32;                /* Verde vibrante */
+    --app-liberta-muted: rgba(27, 94, 32, 0.15);
+    --app-liberta-border: rgba(27, 94, 32, 0.35);
+    --app-liberta-gradient: linear-gradient(135deg, #1B5E20 0%, #0D3B12 50%, #D4AF37 100%);
+    --app-liberta-gradient-subtle: linear-gradient(135deg, rgba(27, 94, 32, 0.2) 0%, rgba(13, 59, 18, 0.15) 100%);
+
     /* Agenda do Dia (Jogos) */
     --app-agenda-primary: #1a6b35;              /* Verde gramado */
     --app-agenda-secondary: #0d3d1e;            /* Verde escuro */

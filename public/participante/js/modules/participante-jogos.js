@@ -700,6 +700,86 @@ export function renderizarJogosDoDia(jogos, isMock = false) {
 }
 
 // =====================================================================
+// LIBERTADORES 2026 - Faixa de Notícias
+// =====================================================================
+
+/**
+ * Notícias prévias estáticas da Libertadores 2026
+ * Será substituído por dados dinâmicos quando o sorteio acontecer
+ */
+const LIBERTA_NOTICIAS = [
+    {
+        icone: 'calendar_today',
+        titulo: 'Libertadores 2026 começa em abril com fase preliminar',
+        meta: 'CONMEBOL',
+        badge: 'AGENDA'
+    },
+    {
+        icone: 'groups',
+        titulo: 'Fase de grupos terá 32 times - veja os classificados até agora',
+        meta: 'CONMEBOL',
+        badge: 'CLASSIFICADOS'
+    },
+    {
+        icone: 'stadium',
+        titulo: 'Final única será em novembro - sede ainda será definida',
+        meta: 'CONMEBOL',
+        badge: 'FINAL'
+    },
+    {
+        icone: 'emoji_events',
+        titulo: 'Campeão garante vaga no Mundial de Clubes 2027',
+        meta: 'CONMEBOL',
+        badge: 'MUNDIAL'
+    }
+];
+
+/**
+ * Renderiza faixa de notícias da Libertadores (estilo Copa do Mundo)
+ * @returns {string} HTML da seção ou '' se desativada
+ */
+export function renderizarSecaoLibertadores() {
+    const noticias = LIBERTA_NOTICIAS;
+
+    return `
+    <section id="liberta-home-section" class="liberta-home-section mx-4 mb-6">
+        <!-- Header Colapsável Libertadores -->
+        <button class="liberta-home-header" onclick="window.toggleLibertaHome && window.toggleLibertaHome()">
+            <div class="liberta-home-header-left">
+                <span class="material-icons" style="font-size:22px;color:var(--app-liberta-secondary);">emoji_events</span>
+                <div>
+                    <h2 class="font-brand text-white text-sm tracking-wide">Libertadores 2026</h2>
+                    <span class="text-[10px] text-white/70">CONMEBOL Libertadores da Am\u00e9rica</span>
+                </div>
+            </div>
+            <span class="material-icons liberta-home-chevron">expand_more</span>
+        </button>
+
+        <!-- Conteúdo Colapsável -->
+        <div class="liberta-home-content collapsed" id="liberta-home-content">
+            ${noticias.map(n => `
+                <div class="liberta-news-card">
+                    <div class="liberta-news-icon">
+                        <span class="material-icons">${n.icone}</span>
+                    </div>
+                    <div class="liberta-news-text">
+                        <p class="liberta-news-title">${n.titulo}</p>
+                        <div class="liberta-news-meta">
+                            <span class="liberta-news-badge">${n.badge}</span>
+                            ${n.meta}
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+            <div style="text-align:center;padding:8px 0 4px;">
+                <span class="text-[10px] text-white/30" style="font-style:italic;">Sorteio dos grupos em breve</span>
+            </div>
+        </div>
+    </section>
+    `;
+}
+
+// =====================================================================
 // AUTO-REFRESH PARA JOGOS AO VIVO - v4.0
 // =====================================================================
 
