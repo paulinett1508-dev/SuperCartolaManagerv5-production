@@ -1,10 +1,10 @@
 /**
- * RESTA UM CONTROLLER v1.0
+ * RESTA UM CONTROLLER v1.1
  *
  * Endpoints para o módulo Resta Um (eliminação progressiva).
  * - GET status da disputa (participante)
+ * - GET parciais ao vivo (live experience)
  * - POST iniciar edição (admin)
- * - POST processar eliminação (admin/orchestrator)
  */
 import RestaUmCache from '../models/RestaUmCache.js';
 import Liga from '../models/Liga.js';
@@ -214,8 +214,61 @@ export async function listarEdicoes(req, res) {
     }
 }
 
+/**
+ * GET /:ligaId/parciais
+ * Retorna ranking parcial ao vivo (durante rodada em andamento).
+ * Usa mesma lógica do status, mas sinaliza que é parcial.
+ */
+export async function obterParciais(req, res) {
+    try {
+        const { ligaId } = req.params;
+        const temporada = parseInt(req.query.temporada) || CURRENT_SEASON;
+
+        const edicao = await RestaUmCache.findOne({
+            liga_id: ligaId,
+            temporada,
+            status: 'em_andamento',
+        }).sort({ edicao: -1 }).lean();
+
+        if (!edicao) {
+            return res.status(404).json({ error: 'Nenhuma edição em andamento' });
+        }
+
+        const participantes = (edicao.participantes || []).map(p => ({
+            ...p,
+            pontosRodada: p.pontosRodada || null,
+        }));
+
+        const vivos = participantes
+            .filter(p => p.status === 'vivo')
+            .sort((a, b) => (b.pontosAcumulados || 0) - (a.pontosAcumulados || 0));
+
+        const eliminados = participantes
+            .filter(p => p.status === 'eliminado')
+            .sort((a, b) => (b.rodadaEliminacao || 0) - (a.rodadaEliminacao || 0));
+
+        return res.json({
+            parcial: true,
+            edicao: {
+                id: edicao.edicao,
+                nome: edicao.nome,
+                status: edicao.status,
+                eliminadosPorRodada: edicao.eliminadosPorRodada,
+            },
+            participantes: [...vivos, ...eliminados],
+            rodadaAtual: edicao.rodadaAtual,
+            ultimaAtualizacao: edicao.ultima_atualizacao,
+        });
+
+    } catch (error) {
+        logger.error('[RESTA-UM] Erro ao obter parciais:', error);
+        return res.status(500).json({ error: 'Erro interno ao buscar parciais' });
+    }
+}
+
 export default {
     obterStatus,
     iniciarEdicao,
     listarEdicoes,
+    obterParciais,
 };

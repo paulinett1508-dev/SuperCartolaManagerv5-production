@@ -1,0 +1,489 @@
+/**
+ * RESTA UM - CSS Module v1.0.0
+ * ============================
+ * Estilos do módulo Resta Um (eliminação progressiva) no app participante.
+ *
+ * Tokens: Usa variáveis de _app-tokens.css (--app-restaum-*)
+ * Escopo: Prefixo .resta-um-* para isolamento
+ * Animações: Reutiliza app-spin, app-fade-in-up de _app-tokens.css
+ *
+ * @module resta-um
+ * @version 1.0.0
+ * @loadedBy participante/index.html
+ */
+
+/* ========================================
+   CONTAINER BASE
+   ======================================== */
+
+.resta-um-participante {
+    padding: var(--app-space-3) 0;
+    font-family: var(--app-font-base);
+}
+
+/* ========================================
+   SPINNER (reutiliza app-spin keyframe)
+   ======================================== */
+
+.spinner-resta-um {
+    border: 4px solid var(--app-surface-elevated);
+    border-top: 4px solid var(--app-restaum-primary);
+    border-radius: var(--app-radius-full);
+    width: var(--app-spinner-lg);
+    height: var(--app-spinner-lg);
+    animation: app-spin 0.8s linear infinite;
+    margin: 0 auto;
+}
+
+.resta-um-loading-text {
+    margin-top: var(--app-space-6);
+    color: var(--app-text-muted);
+    font-size: var(--app-font-md);
+}
+
+/* ========================================
+   ESTADOS: NÃO INICIADO / EMPTY / ERROR
+   ======================================== */
+
+.resta-um-state-container {
+    text-align: center;
+    padding: 40px var(--app-space-6);
+}
+
+.resta-um-state-card {
+    background: var(--app-restaum-gradient);
+    border-radius: var(--app-radius-xl);
+    padding: 32px var(--app-space-6);
+    border: 1px solid var(--app-restaum-border);
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.resta-um-state-icon {
+    font-size: 56px;
+    color: var(--app-restaum-primary);
+    margin-bottom: var(--app-space-5);
+    display: block;
+}
+
+.resta-um-state-title {
+    color: var(--app-text-primary);
+    font-family: var(--app-font-brand);
+    font-size: var(--app-font-xl);
+    margin-bottom: var(--app-space-2);
+}
+
+.resta-um-state-msg {
+    color: var(--app-text-muted);
+    font-size: var(--app-font-md);
+    line-height: var(--app-leading-relaxed);
+    margin-bottom: var(--app-space-5);
+}
+
+.resta-um-state-hint {
+    background: var(--app-glass-bg);
+    border-radius: var(--app-radius-md);
+    padding: var(--app-space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-2);
+    justify-content: center;
+}
+
+.resta-um-state-hint-icon {
+    color: var(--app-warning);
+    font-size: var(--app-font-xl);
+}
+
+.resta-um-state-hint-text {
+    color: var(--app-text-dim);
+    font-size: var(--app-font-sm);
+}
+
+/* Empty state (módulo não configurado) */
+.resta-um-empty-icon {
+    font-size: 64px;
+    color: var(--app-text-disabled);
+    margin-bottom: var(--app-space-5);
+    display: block;
+}
+
+.resta-um-empty-title {
+    color: var(--app-text-muted);
+    font-size: var(--app-font-xl);
+    margin-bottom: var(--app-space-2);
+}
+
+.resta-um-empty-msg {
+    color: var(--app-text-dim);
+    font-size: var(--app-font-md);
+}
+
+/* Error state */
+.resta-um-error-icon {
+    font-size: 64px;
+    color: var(--app-warning);
+    margin-bottom: var(--app-space-5);
+    display: block;
+}
+
+.resta-um-error-title {
+    color: var(--app-text-muted);
+    font-size: var(--app-font-xl);
+    margin-bottom: var(--app-space-2);
+}
+
+.resta-um-error-msg {
+    color: var(--app-text-dim);
+    font-size: var(--app-font-base);
+    margin-bottom: var(--app-space-6);
+}
+
+.resta-um-retry-btn {
+    padding: var(--app-space-3) var(--app-space-6);
+    background: var(--app-gradient-primary);
+    color: var(--app-text-primary);
+    border: none;
+    border-radius: var(--app-radius-md);
+    font-weight: var(--app-font-semibold);
+    cursor: pointer;
+    font-size: var(--app-font-md);
+}
+
+.resta-um-retry-btn:active {
+    transform: scale(0.96);
+}
+
+/* ========================================
+   HEADER DA EDIÇÃO
+   ======================================== */
+
+.resta-um-header {
+    background: var(--app-restaum-gradient);
+    border: 1px solid var(--app-restaum-border);
+    border-radius: var(--app-radius-lg);
+    padding: var(--app-space-5);
+    margin: 0 var(--app-space-4) var(--app-space-4);
+    text-align: center;
+}
+
+.resta-um-header-title {
+    font-family: var(--app-font-brand);
+    font-size: var(--app-font-xl);
+    color: var(--app-text-primary);
+    margin-bottom: var(--app-space-1);
+}
+
+.resta-um-header-subtitle {
+    font-size: var(--app-font-sm);
+    color: var(--app-text-muted);
+}
+
+/* ========================================
+   STATS GRID (Vivos / Eliminados / Total)
+   ======================================== */
+
+.resta-um-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--app-space-2);
+    margin: var(--app-space-4) var(--app-space-4) var(--app-space-5);
+}
+
+.resta-um-stat {
+    background: var(--app-surface);
+    border: 1px solid var(--app-border);
+    border-radius: var(--app-radius-md);
+    padding: var(--app-space-4) var(--app-space-2);
+    text-align: center;
+}
+
+.resta-um-stat-value {
+    font-family: var(--app-font-mono);
+    font-size: var(--app-font-2xl);
+    font-weight: var(--app-font-bold);
+    color: var(--app-text-primary);
+}
+
+.resta-um-stat-label {
+    font-size: var(--app-font-xs);
+    color: var(--app-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+}
+
+/* ========================================
+   MEU STATUS (card pessoal)
+   ======================================== */
+
+.resta-um-meu-status {
+    background: var(--app-surface);
+    border: 1px solid var(--app-border);
+    border-radius: var(--app-radius-lg);
+    padding: var(--app-space-4);
+    margin: 0 var(--app-space-4) var(--app-space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-4);
+}
+
+.resta-um-meu-status.vivo {
+    border-color: rgba(34, 197, 94, 0.3);
+    background: var(--app-restaum-gradient-subtle);
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), transparent);
+}
+
+.resta-um-meu-status.eliminado {
+    border-color: rgba(239, 68, 68, 0.3);
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.08), transparent);
+}
+
+.resta-um-meu-status.campeao {
+    border-color: rgba(255, 215, 0, 0.4);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), transparent);
+}
+
+.resta-um-meu-status-icon {
+    font-size: 28px;
+}
+
+.resta-um-meu-status-label {
+    font-size: var(--app-font-sm);
+    color: var(--app-text-muted);
+    margin-bottom: 2px;
+}
+
+.resta-um-meu-status-text {
+    font-size: var(--app-font-md);
+    font-weight: var(--app-font-semibold);
+    color: var(--app-text-primary);
+}
+
+/* ========================================
+   STATUS BADGE
+   ======================================== */
+
+.resta-um-status-badge {
+    font-size: var(--app-font-xs);
+    font-weight: var(--app-font-semibold);
+    padding: 2px var(--app-space-2);
+    border-radius: var(--app-radius-md);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.resta-um-status-badge.vivo {
+    background: var(--app-success-muted);
+    color: var(--app-restaum-vivo);
+}
+
+.resta-um-status-badge.eliminado {
+    background: var(--app-danger-muted);
+    color: var(--app-restaum-eliminado);
+}
+
+.resta-um-status-badge.campeao {
+    background: var(--app-gold-muted);
+    color: var(--app-restaum-campeao);
+}
+
+.resta-um-status-badge.perigo {
+    background: var(--app-warning-muted);
+    color: var(--app-restaum-perigo);
+}
+
+/* ========================================
+   LISTA DE SOBREVIVENTES / ELIMINADOS
+   ======================================== */
+
+.resta-um-lista {
+    margin: 0 var(--app-space-4);
+}
+
+.resta-um-lista-title {
+    font-family: var(--app-font-brand);
+    font-size: var(--app-font-md);
+    color: var(--app-text-primary);
+    margin-bottom: var(--app-space-2);
+    padding: 0 var(--app-space-1);
+}
+
+.resta-um-row {
+    background: var(--app-surface);
+    border: 1px solid var(--app-border);
+    border-radius: var(--app-radius-md);
+    padding: var(--app-space-3) var(--app-space-4);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-3);
+    transition: all var(--app-transition-normal);
+}
+
+.resta-um-row.eliminado {
+    opacity: 0.5;
+    filter: grayscale(0.4);
+}
+
+.resta-um-row.lanterna {
+    background: linear-gradient(90deg, rgba(239, 68, 68, 0.3) 0%, rgba(239, 68, 68, 0.1) 100%);
+    border: 2px solid var(--app-restaum-eliminado);
+    border-radius: var(--app-radius-lg);
+}
+
+.resta-um-row.meu-time {
+    border-color: var(--app-primary);
+    background: linear-gradient(90deg, var(--app-primary-muted), transparent);
+}
+
+.resta-um-pos {
+    font-family: var(--app-font-mono);
+    font-size: var(--app-font-md);
+    font-weight: var(--app-font-bold);
+    color: var(--app-text-muted);
+    min-width: 24px;
+    text-align: center;
+}
+
+.resta-um-escudo {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--app-radius-full);
+    object-fit: contain;
+}
+
+.resta-um-nome {
+    flex: 1;
+    font-size: var(--app-font-base);
+    color: var(--app-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.resta-um-pontos {
+    font-family: var(--app-font-mono);
+    font-size: var(--app-font-base);
+    font-weight: var(--app-font-semibold);
+    color: var(--app-text-primary);
+}
+
+/* Seção de eliminados */
+.resta-um-eliminados-section {
+    margin: var(--app-space-5) var(--app-space-4) 0;
+    padding-top: var(--app-space-4);
+    border-top: 1px solid var(--app-border);
+}
+
+.resta-um-eliminado-rodada {
+    font-size: var(--app-font-xs);
+    color: var(--app-text-dim);
+}
+
+/* ========================================
+   LANTERNA - MODO ALERTA (user na última posição)
+   ======================================== */
+
+.resta-um-participante.user-is-lanterna .resta-um-header {
+    border-color: var(--app-restaum-eliminado);
+    animation: resta-um-pulse-danger 2s ease-in-out infinite;
+}
+
+@keyframes resta-um-pulse-danger {
+    0%, 100% { border-color: var(--app-restaum-border); }
+    50% { border-color: var(--app-restaum-eliminado); box-shadow: 0 0 12px rgba(239, 68, 68, 0.3); }
+}
+
+/* Faixa de alerta lanterna */
+.resta-um-alerta-lanterna {
+    background: linear-gradient(90deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.08) 100%);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--app-radius-md);
+    padding: var(--app-space-3) var(--app-space-4);
+    margin: 0 var(--app-space-4) var(--app-space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-2);
+    animation: app-fade-in-up var(--app-duration-normal) ease-out;
+}
+
+.resta-um-alerta-lanterna-icon {
+    color: var(--app-restaum-eliminado);
+    font-size: var(--app-font-xl);
+    animation: app-pulse 1.5s ease-in-out infinite;
+}
+
+.resta-um-alerta-lanterna-text {
+    color: var(--app-danger-text);
+    font-size: var(--app-font-sm);
+    font-weight: var(--app-font-medium);
+}
+
+/* Escapou da lanterna */
+.resta-um-escaped-lanterna {
+    background: linear-gradient(90deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.05) 100%);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: var(--app-radius-md);
+    padding: var(--app-space-3) var(--app-space-4);
+    margin: 0 var(--app-space-4) var(--app-space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-2);
+    animation: app-fade-in-up var(--app-duration-normal) ease-out;
+}
+
+.resta-um-escaped-lanterna-icon {
+    color: var(--app-success-light);
+    font-size: var(--app-font-xl);
+}
+
+.resta-um-escaped-lanterna-text {
+    color: var(--app-success-text);
+    font-size: var(--app-font-sm);
+    font-weight: var(--app-font-medium);
+}
+
+/* ========================================
+   LIVE INDICATOR (rodada em andamento)
+   ======================================== */
+
+.resta-um-live-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--app-font-xs);
+    color: var(--app-restaum-eliminado);
+    font-weight: var(--app-font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.resta-um-live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--app-radius-full);
+    background: var(--app-restaum-eliminado);
+    animation: app-pulse 1.5s ease-in-out infinite;
+}
+
+/* ========================================
+   FONT BRAND FORÇADORES (Russo One)
+   ======================================== */
+
+.resta-um-header-title,
+.resta-um-lista-title,
+.resta-um-state-title {
+    font-family: 'Russo One', sans-serif !important;
+    font-weight: 400 !important;
+}
+
+/* ========================================
+   MOBILE RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .resta-um-participante {
+        padding: var(--app-space-2) 0;
+    }
+}
