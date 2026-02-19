@@ -347,10 +347,6 @@ class QuickAccessBar {
                         <span class="material-icons">sports</span>
                         <span class="menu-card-label">Bolão Copa</span>
                     </div>
-                    <div class="menu-card disabled" data-action="em-breve">
-                        <span class="material-icons">stadium</span>
-                        <span class="menu-card-label">Bolão Libertadores</span>
-                    </div>
                 </div>
             </div>
         `;
