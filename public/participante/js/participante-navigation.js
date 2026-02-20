@@ -494,7 +494,7 @@ class ParticipanteNavigation {
      */
     _isModuloOpcionalInativo(moduloId) {
         // Módulos de sistema/base: sempre permitidos
-        const modulosPermitidos = ['home', 'boas-vindas', 'extrato', 'ranking', 'rodadas', 'historico', 'configuracoes', 'copa-times-sc', 'regras'];
+        const modulosPermitidos = ['home', 'boas-vindas', 'extrato', 'ranking', 'rodadas', 'historico', 'configuracoes', 'copa-times-sc', 'copa-2026-mundo', 'regras'];
         if (modulosPermitidos.includes(moduloId)) return false;
 
         // Sem dados de módulos carregados: permitir (graceful degradation)
