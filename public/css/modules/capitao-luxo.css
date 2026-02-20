@@ -440,10 +440,7 @@
   margin: 0 auto 12px;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+/* spin: removido — definido em _admin-tokens.css */
 
 .capitao-luxo-loading p {
   color: #9ca3af;
@@ -531,10 +528,7 @@
   font-size: 18px;
 }
 
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.05); opacity: 0.8; }
-}
+/* pulse: removido — definido em _admin-tokens.css */
 
 /* =============================================
    RESPONSIVO

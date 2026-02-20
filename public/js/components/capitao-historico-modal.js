@@ -52,12 +52,12 @@ const CapitaoHistoricoModal = {
             let statusHtml = '';
             if (isParcial) {
                 if (jogou === false) {
-                    statusHtml = '<span class="badge-status status-pendente">⏳ Pendente</span>';
+                    statusHtml = '<span class="badge-status status-pendente"><span class="material-icons" style="color: var(--app-warning); font-size: 14px; vertical-align: middle;">schedule</span> Pendente</span>';
                 } else {
-                    statusHtml = '<span class="badge-status status-parcial">🔴 Em andamento</span>';
+                    statusHtml = '<span class="badge-status status-parcial"><span class="material-icons" style="color: var(--app-danger); font-size: 14px; vertical-align: middle;">circle</span> Em andamento</span>';
                 }
             } else {
-                statusHtml = '<span class="badge-status status-finalizada">✅ Finalizada</span>';
+                statusHtml = '<span class="badge-status status-finalizada"><span class="material-icons" style="color: var(--app-success); font-size: 14px; vertical-align: middle;">check_circle</span> Finalizada</span>';
             }
 
             const rowClass = index % 2 === 0 ? 'row-even' : 'row-odd';

@@ -762,10 +762,7 @@
 
 /* === ANIMAÇÕES === */
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
+/* pulse: removido — definido em _admin-tokens.css */
 
 /* === RESPONSIVIDADE === */
 @media (max-width: 768px) {

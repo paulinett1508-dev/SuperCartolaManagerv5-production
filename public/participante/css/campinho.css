@@ -1408,9 +1408,7 @@
     animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
+/* spin: removido — definido em _app-tokens.css */
 
 .campinho-loading p {
     font-size: 14px;

@@ -2652,10 +2652,7 @@ body.sidebar-collapsed .main-content {
     animation: pulse-live 1.5s infinite;
 }
 
-@keyframes pulse-live {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
-}
+/* pulse-live: removido — definido em _admin-tokens.css */
 
 /* === SIDEBAR ITEMS DESABILITADOS === */
 .sidebar-accordion-item.disabled {
@@ -2730,10 +2727,7 @@ body.sidebar-collapsed .main-content {
     animation: fadeIn 0.2s ease;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
+/* fadeIn: removido — definido em _admin-tokens.css */
 
 /* Conteúdo do Modal */
 .modal-historico-content {
@@ -2749,16 +2743,7 @@ body.sidebar-collapsed .main-content {
     overflow: hidden;
 }
 
-@keyframes slideUp {
-    from {
-        transform: translateY(20px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
+/* slideUp: removido — definido em _admin-tokens.css */
 
 /* Header do Modal */
 .modal-historico-header {
@@ -2914,10 +2899,7 @@ body.sidebar-collapsed .main-content {
     animation: none;
 }
 
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
+/* pulse: removido — definido em _admin-tokens.css */
 
 /* Item do histórico */
 .historico-item {

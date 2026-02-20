@@ -133,7 +133,7 @@ class TooltipRegrasFinanceiras {
         if (valores.mitos && valores.micos) {
             html += '<div class="valores-coluna">';
             html += '<div class="valores-grupo positivo">';
-            html += '<h4>🏆 Mitos</h4>';
+            html += '<h4><span class="material-icons" style="color: var(--module-luva-primary); font-size: 18px; vertical-align: middle;">emoji_events</span> Mitos</h4>';
             html += '<ul>';
             for (const [pos, config] of Object.entries(valores.mitos)) {
                 const valor = config.valor || config;
@@ -143,7 +143,7 @@ class TooltipRegrasFinanceiras {
             html += '</div>';
 
             html += '<div class="valores-grupo negativo">';
-            html += '<h4>💀 Micos</h4>';
+            html += '<h4><span class="material-icons" style="color: var(--app-danger); font-size: 18px; vertical-align: middle;">skull</span> Micos</h4>';
             html += '<ul>';
             for (const [pos, config] of Object.entries(valores.micos)) {
                 const valor = config.valor || config;

@@ -621,10 +621,7 @@
   animation: pulse-live 1.5s infinite;
 }
 
-@keyframes pulse-live {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.8); }
-}
+/* pulse-live: removido — definido em _admin-tokens.css */
 
 .parciais-header {
   text-align: center;

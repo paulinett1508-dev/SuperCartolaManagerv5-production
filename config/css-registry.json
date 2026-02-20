@@ -207,6 +207,11 @@
         "path": "public/css/modules/github-analytics-unified.css",
         "loadedBy": ["github-analytics-unified.html"],
         "description": "Analytics de repositorio e gestao de branches"
+      },
+      {
+        "path": "public/css/modules/admin-tiro-certo.css",
+        "loadedBy": ["admin-tiro-certo.html"],
+        "description": "Gerenciamento admin do modo Tiro Certo (Survival)"
       }
     ]
   },

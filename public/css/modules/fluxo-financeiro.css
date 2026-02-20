@@ -3002,11 +3002,7 @@ table.fluxo-participantes-tabela {
    AJUSTES FINANCEIROS DINAMICOS (v8.0 - 2026+)
    ============================================================================= */
 
-/* Animacao de spin para loading */
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
+/* spin: removido — definido em _admin-tokens.css */
 
 /* Secao de ajustes */
 .ajustes-section {
@@ -3090,16 +3086,7 @@ table.fluxo-participantes-tabela {
     animation: slideUp 0.3s ease;
 }
 
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+/* slideUp: removido — definido em _admin-tokens.css */
 
 /* Inputs do modal de ajuste */
 .modal-ajuste-body input:focus {
