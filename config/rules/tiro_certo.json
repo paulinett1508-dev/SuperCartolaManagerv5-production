@@ -3,7 +3,7 @@
   "nome": "Tiro Certo",
   "descricao": "Modo Survival baseado em palpites de resultados reais. Escolha um time que vai VENCER na rodada - se acertar, avança. Errou ou empatou? Eliminado. Último sobrevivente vence.",
   "tipo": "competicao_survival",
-  "status": "planejado",
+  "status": "ativo",
   "versao": "2.0.0",
 
   "configuracao": {

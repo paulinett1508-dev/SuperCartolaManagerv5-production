@@ -60,7 +60,10 @@ export async function inicializarTiroCertoParticipante({ participante, ligaId, t
     _participante = participante;
     _timeSelecionado = null;
 
-    if (window.Log) Log.info('TIRO-CERTO', `Inicializando: liga=${ligaId} time=${timeId}`);
+    // Detectar premium via participante-navigation
+    const isPremium = window.participanteNav?._isPremium === true;
+
+    if (window.Log) Log.info('TIRO-CERTO', `Inicializando: liga=${ligaId} time=${timeId} premium=${isPremium}`);
 
     // Aguardar DOM estar renderizado (double RAF — padrao SPA)
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
@@ -77,12 +80,21 @@ export async function inicializarTiroCertoParticipante({ participante, ligaId, t
         const status = await fetchStatus(ligaId);
         if (status && status.edicao && status.edicao.status !== 'pendente') {
             await ativarModoAtivo(status);
+        } else if (isPremium) {
+            // Premium sem edicao ativa: exibir modo ativo com banner de teste
+            await ativarModoTestePremium();
         } else {
             ativarModoTeaser();
         }
     } catch (err) {
-        if (window.Log) Log.warn('TIRO-CERTO', 'Sem edicao ativa, exibindo teaser:', err.message);
-        ativarModoTeaser();
+        if (isPremium) {
+            // Premium: mesmo sem API, mostrar modo teste
+            if (window.Log) Log.info('TIRO-CERTO', 'Premium sem edicao, ativando modo teste');
+            await ativarModoTestePremium();
+        } else {
+            if (window.Log) Log.warn('TIRO-CERTO', 'Sem edicao ativa, exibindo teaser:', err.message);
+            ativarModoTeaser();
+        }
     }
 }
 
@@ -126,6 +138,67 @@ function ativarModoTeaser() {
     const modoTeaser = document.getElementById('tc-modo-teaser');
     if (modoAtivo) modoAtivo.style.display = 'none';
     if (modoTeaser) modoTeaser.style.display = '';
+}
+
+// =====================================================================
+// MODO TESTE PREMIUM (sem edicao ativa, usuario premium)
+// =====================================================================
+
+async function ativarModoTestePremium() {
+    const modoAtivo = document.getElementById('tc-modo-ativo');
+    const modoTeaser = document.getElementById('tc-modo-teaser');
+    if (modoAtivo) modoAtivo.style.display = '';
+    if (modoTeaser) modoTeaser.style.display = 'none';
+
+    // Header
+    const edicaoNome = document.getElementById('tc-edicao-nome');
+    if (edicaoNome) edicaoNome.textContent = 'Modo Teste Premium';
+
+    // Badge premium
+    const badge = document.getElementById('tc-status-badge');
+    if (badge) {
+        badge.className = 'tc-status-badge vivo';
+        badge.innerHTML = '<span class="material-icons" style="font-size:14px;margin-right:2px;">star</span> PREMIUM';
+    }
+
+    // Meu status: mensagem informativa
+    const statusContent = document.getElementById('tc-meu-status-content');
+    if (statusContent) {
+        statusContent.innerHTML = `
+            <div style="text-align:center;padding:var(--app-space-4);">
+                <span class="material-icons" style="color:var(--app-warning);font-size:2.5rem;">star</span>
+                <p style="font-family:var(--app-font-brand);font-size:1.1rem;color:white;margin-top:0.5rem;">
+                    Acesso Antecipado Premium
+                </p>
+                <p style="font-size:var(--app-font-sm);color:var(--app-text-secondary);margin-top:0.5rem;">
+                    Voce tem acesso exclusivo ao Tiro Certo antes da abertura oficial no 2o turno.
+                </p>
+                <p style="font-size:var(--app-font-xs);color:var(--app-text-muted);margin-top:0.75rem;">
+                    Nenhuma edicao foi iniciada ainda pelo admin da liga.
+                    Quando a disputa comecar, voce podera fazer suas escolhas aqui.
+                </p>
+            </div>
+        `;
+    }
+
+    // Esconder secao de escolha
+    const escolhaSection = document.getElementById('tc-escolha-section');
+    if (escolhaSection) escolhaSection.style.display = 'none';
+
+    // Historico vazio
+    const historicoContent = document.getElementById('tc-historico-content');
+    if (historicoContent) {
+        historicoContent.innerHTML = '<p style="color:var(--app-text-muted);text-align:center;">Nenhuma escolha registrada</p>';
+    }
+
+    // Participantes vazio
+    const participantesContent = document.getElementById('tc-participantes-content');
+    if (participantesContent) {
+        participantesContent.innerHTML = '<p style="color:var(--app-text-muted);text-align:center;">Participantes aparecerao quando a edicao iniciar</p>';
+    }
+
+    const vivosCount = document.getElementById('tc-vivos-count');
+    if (vivosCount) vivosCount.textContent = '';
 }
 
 // =====================================================================
