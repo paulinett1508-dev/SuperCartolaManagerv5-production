@@ -526,6 +526,24 @@ async function buscarJogosAoVivo() {
 }
 
 /**
+ * Busca fixtures de uma rodada especifica do Brasileirao Serie A.
+ * Custo: 1 request
+ * Usado pelo TiroCertoManager para obter resultados reais por rodada.
+ *
+ * @param {number} rodada - Numero da rodada (1-38)
+ * @param {number} liga - ID da liga (default: 71 = Brasileirao A)
+ * @returns {Object} { success, data, quotaInfo }
+ */
+async function buscarFixturesPorRodada(rodada, liga = 71) {
+  return await request('/fixtures', {
+    league: liga,
+    season: new Date().getFullYear(),
+    round: `Regular Season - ${rodada}`,
+    timezone: 'America/Sao_Paulo'
+  }, { priority: 'normal' });
+}
+
+/**
  * Busca eventos de um jogo específico (gols, cartões, substituições).
  * Custo: 1 request
  * Usar APENAS quando usuário clicar em um jogo (on-demand).
@@ -653,6 +671,7 @@ export default {
   init,
   request,
   buscarFixturesDoDia,
+  buscarFixturesPorRodada,
   buscarJogosAoVivo,
   buscarEventosJogo,
   buscarEstatisticasJogo,
@@ -666,6 +685,7 @@ export {
   init,
   request,
   buscarFixturesDoDia,
+  buscarFixturesPorRodada,
   buscarJogosAoVivo,
   buscarEventosJogo,
   buscarEstatisticasJogo,

@@ -27,6 +27,7 @@ import OrchestratorState from '../../models/OrchestratorState.js';
 import Liga from '../../models/Liga.js';
 import { CURRENT_SEASON } from '../../config/seasons.js';
 import { criarManagers, criarManagersMap } from './managers/index.js';
+import { buscarFixturesPorRodada } from '../api-football-service.js';
 
 // ============================================================================
 // CONSTANTES
@@ -49,6 +50,37 @@ const MARKET_LABEL = {
     5: 'FUTURO',
     6: 'TEMPORADA_ENCERRADA',
 };
+
+// Mapeamento nomes API-Football → IDs Cartola FC
+// Usado pelo _buscarResultadosBrasileirao para converter IDs
+const _NOMES_PARA_ID_CARTOLA = {
+    'flamengo': 262, 'botafogo': 263, 'corinthians': 264, 'bahia': 265,
+    'fluminense': 266, 'vasco': 267, 'vasco da gama': 267,
+    'palmeiras': 275, 'sao paulo': 276, 'são paulo': 276, 'santos': 277,
+    'bragantino': 280, 'red bull bragantino': 280,
+    'atletico mineiro': 282, 'atlético mineiro': 282, 'atletico-mg': 282, 'atlético-mg': 282,
+    'cruzeiro': 283, 'gremio': 284, 'grêmio': 284,
+    'internacional': 285, 'juventude': 286, 'vitoria': 287, 'vitória': 287,
+    'goias': 290, 'goiás': 290, 'sport': 292, 'sport recife': 292,
+    'athletico paranaense': 293, 'athletico-pr': 293, 'atletico paranaense': 293,
+    'ceara': 354, 'ceará': 354, 'fortaleza': 356,
+    'cuiaba': 1371, 'cuiabá': 1371, 'mirassol': 2305,
+};
+
+function _resolverIdCartola(nomeApiFootball) {
+    if (!nomeApiFootball) return null;
+    const normalizado = nomeApiFootball.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .trim();
+    // Busca exata primeiro
+    if (_NOMES_PARA_ID_CARTOLA[normalizado]) return _NOMES_PARA_ID_CARTOLA[normalizado];
+    // Busca parcial
+    for (const [nome, id] of Object.entries(_NOMES_PARA_ID_CARTOLA)) {
+        if (normalizado.includes(nome) || nome.includes(normalizado)) return id;
+    }
+    console.warn(`[ORCHESTRATOR] Clube nao mapeado: "${nomeApiFootball}"`);
+    return null;
+}
 
 const FASE_RODADA = {
     AGUARDANDO: 'aguardando',
@@ -389,8 +421,11 @@ class RoundMarketOrchestrator extends EventEmitter {
         const contexto = this._criarContexto(this._rodadaAtual);
         const ligas = await this._getligasAtivas();
 
+        // Buscar resultados do Brasileirao uma vez (compartilhado entre ligas)
+        const resultadosBrasileirao = await this._buscarResultadosBrasileirao(this._rodadaAtual);
+
         for (const liga of ligas) {
-            const ctx = { ...contexto, liga, ligaId: liga._id.toString() };
+            const ctx = { ...contexto, liga, ligaId: liga._id.toString(), resultadosBrasileirao };
 
             for (const manager of this._managers) {
                 if (manager.isEnabled(liga) && manager.temColeta) {
@@ -409,8 +444,11 @@ class RoundMarketOrchestrator extends EventEmitter {
 
         const contexto = this._criarContexto(rodada);
 
+        // Buscar resultados finais do Brasileirao uma vez (compartilhado entre ligas)
+        const resultadosBrasileirao = await this._buscarResultadosBrasileirao(rodada);
+
         for (const liga of ligas) {
-            const ctx = { ...contexto, liga, ligaId: liga._id.toString() };
+            const ctx = { ...contexto, liga, ligaId: liga._id.toString(), resultadosBrasileirao };
 
             // Executar por prioridade (managers já estão ordenados)
             for (const manager of this._managers) {
@@ -537,6 +575,51 @@ class RoundMarketOrchestrator extends EventEmitter {
             faseRodada: this._faseRodada,
             timestamp: new Date(),
         };
+    }
+
+    /**
+     * Busca resultados do Brasileirao Serie A para uma rodada via API-Football.
+     * Retorna array no formato esperado pelos managers (mandanteId, visitanteId, etc).
+     * IDs sao mapeados de nomes API-Football para IDs Cartola.
+     * Retorna [] se API falhar (managers fazem skip graciosamente).
+     */
+    async _buscarResultadosBrasileirao(rodada) {
+        try {
+            const resultado = await buscarFixturesPorRodada(rodada);
+            if (!resultado || !resultado.success || !Array.isArray(resultado.data)) {
+                console.log(`[ORCHESTRATOR] Sem resultados da API-Football para R${rodada}`);
+                return [];
+            }
+
+            // Filtrar apenas Brasileirao Serie A (league 71)
+            const fixtures = resultado.data.filter(f =>
+                f.league?.id === 71 || /serie\s*a/i.test(f.league?.name || '')
+            );
+
+            if (fixtures.length === 0) return [];
+
+            // Mapear para formato dos managers com IDs Cartola
+            const jogos = fixtures.map(f => {
+                const homeName = f.teams?.home?.name || '';
+                const awayName = f.teams?.away?.name || '';
+                return {
+                    mandanteId: _resolverIdCartola(homeName),
+                    visitanteId: _resolverIdCartola(awayName),
+                    mandanteNome: homeName,
+                    visitanteNome: awayName,
+                    placarMandante: f.goals?.home ?? null,
+                    placarVisitante: f.goals?.away ?? null,
+                    statusJogo: f.fixture?.status?.short || 'NS',
+                    fixtureId: f.fixture?.id,
+                };
+            }).filter(j => j.mandanteId && j.visitanteId);
+
+            console.log(`[ORCHESTRATOR] R${rodada}: ${jogos.length} jogos do Brasileirao mapeados`);
+            return jogos;
+        } catch (err) {
+            console.error(`[ORCHESTRATOR] Erro ao buscar resultados Brasileirao R${rodada}:`, err.message);
+            return [];
+        }
     }
 
     async _getligasAtivas() {
