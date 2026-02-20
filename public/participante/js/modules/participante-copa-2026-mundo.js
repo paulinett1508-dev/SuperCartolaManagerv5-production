@@ -315,7 +315,7 @@ function renderizarSedes() {
 
     const estadiosOrdenados = Object.entries(dadosCopa.estadios)
         .sort((a, b) => {
-            const ordemPais = { '\u{1F1FA}\u{1F1F8}': 0, '\u{1F1F2}\u{1F1FD}': 1, '\u{1F1E8}\u{1F1E6}': 2 };
+            const ordemPais = { 'EUA': 0, 'MEX': 1, 'CAN': 2 };
             const pA = ordemPais[a[1].pais] ?? 9;
             const pB = ordemPais[b[1].pais] ?? 9;
             if (pA !== pB) return pA - pB;

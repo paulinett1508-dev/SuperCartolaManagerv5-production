@@ -128,22 +128,22 @@ const GRUPOS = {
 // SEDES E ESTÁDIOS
 // ════════════════════════════════════════════════════════════════
 const ESTADIOS = {
-  'MetLife Stadium': { cidade: 'Nova York/Nova Jersey', pais: '🇺🇸', capacidade: 82500 },
-  'SoFi Stadium': { cidade: 'Los Angeles', pais: '🇺🇸', capacidade: 70000 },
-  'AT&T Stadium': { cidade: 'Dallas', pais: '🇺🇸', capacidade: 94000 },
-  'Hard Rock Stadium': { cidade: 'Miami', pais: '🇺🇸', capacidade: 65000 },
-  'Mercedes-Benz Stadium': { cidade: 'Atlanta', pais: '🇺🇸', capacidade: 75000 },
-  'NRG Stadium': { cidade: 'Houston', pais: '🇺🇸', capacidade: 72000 },
-  'Lumen Field': { cidade: 'Seattle', pais: '🇺🇸', capacidade: 69000 },
-  'Lincoln Financial Field': { cidade: 'Filadélfia', pais: '🇺🇸', capacidade: 69000 },
-  'Arrowhead Stadium': { cidade: 'Kansas City', pais: '🇺🇸', capacidade: 73000 },
-  'Gillette Stadium': { cidade: 'Boston', pais: '🇺🇸', capacidade: 65000 },
-  "Levi's Stadium": { cidade: 'São Francisco', pais: '🇺🇸', capacidade: 71000 },
-  'Estadio Azteca': { cidade: 'Cidade do México', pais: '🇲🇽', capacidade: 83000 },
-  'Estadio BBVA': { cidade: 'Monterrey', pais: '🇲🇽', capacidade: 53500 },
-  'Estadio Akron': { cidade: 'Guadalajara', pais: '🇲🇽', capacidade: 48000 },
-  'BC Place': { cidade: 'Vancouver', pais: '🇨🇦', capacidade: 54000 },
-  'BMO Field': { cidade: 'Toronto', pais: '🇨🇦', capacidade: 45000 },
+  'MetLife Stadium': { cidade: 'Nova York/Nova Jersey', pais: 'EUA', capacidade: 82500 },
+  'SoFi Stadium': { cidade: 'Los Angeles', pais: 'EUA', capacidade: 70000 },
+  'AT&T Stadium': { cidade: 'Dallas', pais: 'EUA', capacidade: 94000 },
+  'Hard Rock Stadium': { cidade: 'Miami', pais: 'EUA', capacidade: 65000 },
+  'Mercedes-Benz Stadium': { cidade: 'Atlanta', pais: 'EUA', capacidade: 75000 },
+  'NRG Stadium': { cidade: 'Houston', pais: 'EUA', capacidade: 72000 },
+  'Lumen Field': { cidade: 'Seattle', pais: 'EUA', capacidade: 69000 },
+  'Lincoln Financial Field': { cidade: 'Filadélfia', pais: 'EUA', capacidade: 69000 },
+  'Arrowhead Stadium': { cidade: 'Kansas City', pais: 'EUA', capacidade: 73000 },
+  'Gillette Stadium': { cidade: 'Boston', pais: 'EUA', capacidade: 65000 },
+  "Levi's Stadium": { cidade: 'São Francisco', pais: 'EUA', capacidade: 71000 },
+  'Estadio Azteca': { cidade: 'Cidade do México', pais: 'MEX', capacidade: 83000 },
+  'Estadio BBVA': { cidade: 'Monterrey', pais: 'MEX', capacidade: 53500 },
+  'Estadio Akron': { cidade: 'Guadalajara', pais: 'MEX', capacidade: 48000 },
+  'BC Place': { cidade: 'Vancouver', pais: 'CAN', capacidade: 54000 },
+  'BMO Field': { cidade: 'Toronto', pais: 'CAN', capacidade: 45000 },
 };
 
 // ════════════════════════════════════════════════════════════════
