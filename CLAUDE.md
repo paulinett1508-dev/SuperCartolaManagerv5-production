@@ -175,6 +175,57 @@ if (document.readyState === 'loading') {
 }
 ```
 
+## 🎨 REGRA Nº 1 — Skill `frontend-design` (AUTORIDADE ESTÉTICA MÁXIMA)
+
+> **Prioridade absoluta em qualquer decisão de design visual. Sobrepõe preferências genéricas. Respeita o design system do projeto.**
+
+A skill `frontend-design` (instalada em `~/.claude/skills/frontend-design/`) define a **filosofia estética** de todas as telas do projeto. Sempre que o assunto envolver criação ou redesign de interface, ela é ativada **antes** de qualquer outra skill de frontend.
+
+### Gatilhos de Ativação (frontend-design)
+
+| Categoria | Keywords |
+|-----------|----------|
+| **Telas / Entregáveis** | redesign, nova tela, nova página, nova home, landing, dashboard, painel, componente visual, card, banner, hero, layout |
+| **Ações de design** | criar interface, redesenhar, melhorar visual, modernizar, deixar mais bonito, estilizar, visual do app |
+| **Referências estéticas** | dark mode, tema, paleta, tipografia, animação, motion, responsivo, mobile-first, UX premium |
+| **Specs do projeto** | SPEC-HOME-REDESIGN, redesign participante, redesign admin, nova home 2026 |
+
+### O que a skill determina (adaptado ao projeto)
+
+**Antes de qualquer código, definir:**
+- Propósito da tela no contexto do Super Cartola Manager
+- Tom estético dentro da identidade do projeto (dark mode, foco em dados esportivos)
+- O que tornará a tela **inesquecível** para o usuário do fantasy
+
+**Pilares estéticos obrigatórios:**
+
+| Pilar | Diretriz do Projeto |
+|-------|-------------------|
+| **Tipografia** | Russo One (títulos/stats) + JetBrains Mono (números) + Inter (corpo). Nunca Arial, Roboto ou fontes genéricas. |
+| **Cor & Tema** | Dark mode estrito. Usar variáveis CSS de `_admin-tokens.css`. Cores dos módulos (Verde Artilheiro, Roxo Capitão, Dourado Luva). |
+| **Motion** | Animações de entrada escalonadas. Hover states que surpreendem. CSS-only por padrão. |
+| **Composição** | Densidade visual otimizada (inspiração: dashboards fantasy premium). Hierarquia clara de dados. |
+| **Fundos/Detalhes** | Gradients sutis, noise textures, sombras dramáticas, glassmorphism onde couber. Nunca fundo sólido genérico. |
+
+**Proibições absolutas:**
+- Fontes genéricas (Inter como display, Arial, system fonts)
+- Gradientes roxos em fundo branco (clichê AI)
+- Layouts previsíveis sem caráter
+- Emojis no código (usar Material Icons com `var(--css-var)`)
+- Cores hardcoded — sempre variáveis CSS
+
+### Integração com outros protocolos
+
+```
+frontend-design (AESTHETICS)     ← autoridade estética, define direção visual
+    ↓
+anti-frankenstein (GOVERNANCE)   ← verifica o que já existe antes de criar CSS
+    ↓
+frontend-crafter (IMPLEMENTATION) ← executa o código seguindo design system
+```
+
+---
+
 ## 🤖 Skills com Ativação por Keywords
 
 Skills são ativadas automaticamente por **palavras-chave contextuais** em vez de nome direto.
@@ -183,14 +234,15 @@ Documentação das skills: [`docs/skills/`](docs/skills/) (agnóstico, Markdown 
 
 ### Protocolo de Ativação
 1. Detectar keywords na mensagem do usuário
-2. Consultar [`SKILL-KEYWORD-MAP.md`](docs/skills/SKILL-KEYWORD-MAP.md) para identificar a skill
-3. Carregar skill de `docs/skills/[categoria]/[skill].md`
-4. Executar protocolo da skill
+2. Se keyword de design/visual → ativar **frontend-design** primeiro
+3. Consultar [`SKILL-KEYWORD-MAP.md`](docs/skills/SKILL-KEYWORD-MAP.md) para skills complementares
+4. Executar protocolo na ordem: frontend-design → anti-frankenstein → skill específica
 
 ### Tabela Rápida - Keyword → Skill
 
 | Quando o usuário diz... | Skill Ativada | Categoria |
 |--------------------------|---------------|-----------|
+| "redesign", "nova tela", "nova home", "visual do app", "deixar bonito", "UX premium" | **frontend-design** | Design (PRIORIDADE 1) |
 | "quero criar feature", "como fazer", "por onde começar" | **workflow** | Core |
 | "pesquise", "analise o código", "gere PRD" | **pesquisa** | Core |
 | "especifique", "mapeie dependências", "fase 2" | **spec** | Core |
@@ -222,7 +274,7 @@ Documentação das skills: [`docs/skills/`](docs/skills/) (agnóstico, Markdown 
 ```
 workflow → FASE 1: pesquisa → PRD.md
          → FASE 2: spec → SPEC.md
-         → FASE 3: [anti-frankenstein se frontend] → code → Implementado
+         → FASE 3: [frontend-design se visual] → [anti-frankenstein] → code → Implementado
 ```
 
 ### Anti-Frankenstein Protocol (Governança Frontend)
