@@ -77,7 +77,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #6b7280;
+    background: var(--text-dim);
     flex-shrink: 0;
 }
 
@@ -88,7 +88,7 @@
 }
 
 .mercado-dot.fechado {
-    background: #ef4444;
+    background: var(--color-danger);
     box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
 }
 
@@ -107,7 +107,7 @@
     gap: 4px;
     font-size: 0.8rem;
     font-weight: 500;
-    color: #9ca3af;
+    color: var(--text-muted);
 }
 
 /* Linha 2: Barra de progresso */
@@ -127,7 +127,7 @@
 
 .progress-label {
     font-size: 0.75rem;
-    color: #9ca3af;
+    color: var(--text-muted);
 }
 
 .progress-label strong {
@@ -138,7 +138,7 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.75rem;
     font-weight: 600;
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 .progress-bar-track {
@@ -150,7 +150,7 @@
 
 .progress-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, #FF5500, #ff8c42);
+    background: linear-gradient(90deg, var(--color-primary), #ff8c42);
     border-radius: 4px;
     transition: width 0.8s ease;
 }
@@ -280,7 +280,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #FF5500;
+    background: var(--color-primary);
     border: none;
     color: #ffffff;
     padding: 10px 16px;
@@ -324,10 +324,10 @@
 }
 
 .stat-card-new {
-    background: #1E1E1E;
+    background: var(--surface-card);
     padding: 20px;
     border-radius: 12px;
-    border: 1px solid #333333;
+    border: 1px solid var(--surface-card-hover);
     position: relative;
     overflow: hidden;
     transition: all 0.2s ease;
@@ -370,7 +370,7 @@
 .stat-card-content .stat-label-new {
     font-size: 0.75rem;
     font-weight: 600;
-    color: #9ca3af;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin: 0 0 4px 0;
@@ -409,12 +409,12 @@
 
 .stat-icon-new.blue {
     background: rgba(59, 130, 246, 0.15);
-    color: #3b82f6;
+    color: var(--color-info);
 }
 
 .stat-icon-new.yellow {
     background: rgba(234, 179, 8, 0.15);
-    color: #eab308;
+    color: var(--color-warning);
 }
 
 .stat-icon-new.purple {
@@ -426,7 +426,7 @@
     display: flex;
     align-items: center;
     font-size: 0.75rem;
-    color: #9ca3af;
+    color: var(--text-muted);
     position: relative;
     z-index: 1;
 }
@@ -441,7 +441,7 @@
 }
 
 .stat-badge {
-    background: #3b82f6;
+    background: var(--color-info);
     color: #ffffff;
     font-size: 0.625rem;
     font-weight: 700;
@@ -461,7 +461,7 @@
     left: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: #9ca3af;
+    color: var(--text-muted);
     pointer-events: none;
 }
 
@@ -472,8 +472,8 @@
 .search-input-new {
     width: 100%;
     padding: 14px 16px 14px 44px;
-    background: #1E1E1E;
-    border: 1px solid #333333;
+    background: var(--surface-card);
+    border: 1px solid var(--surface-card-hover);
     border-radius: 12px;
     color: #ffffff;
     font-size: 0.875rem;
@@ -482,12 +482,12 @@
 }
 
 .search-input-new:focus {
-    border-color: #FF5500;
+    border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(255, 85, 0, 0.1);
 }
 
 .search-input-new::placeholder {
-    color: #6b7280;
+    color: var(--text-dim);
 }
 
 /* === SEÇÃO DE LIGA PRINCIPAL === */
@@ -516,12 +516,12 @@
 .liga-section-title .accent-bar {
     width: 6px;
     height: 24px;
-    background: #FF5500;
+    background: var(--color-primary);
     border-radius: 3px;
 }
 
 .liga-section-title .accent-bar.gray {
-    background: #6b7280;
+    background: var(--text-dim);
 }
 
 .liga-status-badge {
@@ -540,15 +540,15 @@
 
 .liga-status-badge.finished {
     background: rgba(107, 114, 128, 0.1);
-    color: #9ca3af;
+    color: var(--text-muted);
     border-color: rgba(107, 114, 128, 0.3);
 }
 
 /* === CARD DE LIGA PRINCIPAL === */
 .liga-card-featured {
-    background: #1E1E1E;
+    background: var(--surface-card);
     border-radius: 12px;
-    border: 1px solid #333333;
+    border: 1px solid var(--surface-card-hover);
     overflow: hidden;
     transition: all 0.2s ease;
 }
@@ -583,12 +583,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid #333333;
+    border: 1px solid var(--surface-card-hover);
 }
 
 .liga-icon-large .material-icons {
     font-size: 40px;
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 .liga-card-info {
@@ -606,7 +606,7 @@
 
 .liga-card-info p {
     font-size: 0.875rem;
-    color: #9ca3af;
+    color: var(--text-muted);
     margin: 0 0 12px 0;
 }
 
@@ -629,7 +629,7 @@
 
 .liga-tag .material-icons {
     font-size: 14px;
-    color: #9ca3af;
+    color: var(--text-muted);
 }
 
 .liga-card-action {
@@ -648,7 +648,7 @@
     display: block;
     width: 100%;
     text-align: center;
-    background: #FF5500;
+    background: var(--color-primary);
     color: #ffffff;
     padding: 12px 24px;
     border-radius: 8px;
@@ -675,7 +675,7 @@
 .liga-card-featured-footer {
     background: #18181b;
     padding: 16px 24px;
-    border-top: 1px solid #333333;
+    border-top: 1px solid var(--surface-card-hover);
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -697,7 +697,7 @@
 }
 
 .liga-leader-info .label {
-    color: #9ca3af;
+    color: var(--text-muted);
 }
 
 .liga-leader-info .leader {
@@ -707,7 +707,7 @@
 }
 
 .liga-leader-info .leader .material-icons {
-    color: #eab308;
+    color: var(--color-warning);
     font-size: 18px;
 }
 
@@ -728,7 +728,7 @@
 
 .liga-update-info {
     font-size: 0.75rem;
-    color: #6b7280;
+    color: var(--text-dim);
 }
 
 /* === GRID DE CARDS SECUNDÁRIOS === */
@@ -752,9 +752,9 @@
 
 /* === CARD DE LIGA SECUNDÁRIO === */
 .liga-card-new {
-    background: #1E1E1E;
+    background: var(--surface-card);
     border-radius: 12px;
-    border: 1px solid #333333;
+    border: 1px solid var(--surface-card-hover);
     padding: 20px;
     transition: all 0.2s ease;
     cursor: pointer;
@@ -779,10 +779,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #9ca3af;
+    color: var(--text-muted);
     font-weight: 700;
     font-size: 0.875rem;
-    border: 1px solid #333333;
+    border: 1px solid var(--surface-card-hover);
 }
 
 .liga-card-type-badge {
@@ -796,7 +796,7 @@
 
 .liga-card-type-badge.amistosa {
     background: #252525;
-    color: #9ca3af;
+    color: var(--text-muted);
 }
 
 .liga-card-type-badge.ativa {
@@ -815,12 +815,12 @@
 }
 
 .liga-card-new:hover h4 {
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 .liga-card-new p {
     font-size: 0.75rem;
-    color: #9ca3af;
+    color: var(--text-muted);
     margin: 0 0 16px 0;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -844,7 +844,7 @@
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    border: 2px solid #1E1E1E;
+    border: 2px solid var(--surface-card);
     margin-left: -8px;
 }
 
@@ -856,22 +856,22 @@
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    background: #333333;
-    border: 2px solid #1E1E1E;
+    background: var(--surface-card-hover);
+    border: 2px solid var(--surface-card);
     margin-left: -8px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 0.5rem;
     font-weight: 700;
-    color: #9ca3af;
+    color: var(--text-muted);
 }
 
 .liga-card-date {
     display: flex;
     align-items: center;
     font-size: 0.75rem;
-    color: #9ca3af;
+    color: var(--text-muted);
 }
 
 .liga-card-date .material-icons {
@@ -882,7 +882,7 @@
 .liga-card-link {
     font-size: 0.75rem;
     font-weight: 600;
-    color: #FF5500;
+    color: var(--color-primary);
     text-decoration: none;
     transition: color 0.2s ease;
 }
@@ -894,7 +894,7 @@
 /* === CARD DE CRIAR NOVA LIGA === */
 .liga-card-create {
     background: rgba(24, 24, 27, 0.5);
-    border: 2px dashed #333333;
+    border: 2px dashed var(--surface-card-hover);
     border-radius: 12px;
     padding: 20px;
     display: flex;
@@ -908,8 +908,8 @@
 }
 
 .liga-card-create:hover {
-    border-color: #FF5500;
-    background: #1E1E1E;
+    border-color: var(--color-primary);
+    background: var(--surface-card);
 }
 
 .liga-card-create-icon {
@@ -930,12 +930,12 @@
 
 .liga-card-create-icon .material-icons {
     font-size: 20px;
-    color: #9ca3af;
+    color: var(--text-muted);
     transition: color 0.2s ease;
 }
 
 .liga-card-create:hover .liga-card-create-icon .material-icons {
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 .liga-card-create h4 {
@@ -947,7 +947,7 @@
 
 .liga-card-create p {
     font-size: 0.75rem;
-    color: #6b7280;
+    color: var(--text-dim);
     margin: 0;
 }
 
@@ -958,9 +958,9 @@
     align-items: center;
     justify-content: center;
     padding: 60px 40px;
-    background: #1E1E1E;
+    background: var(--surface-card);
     border-radius: 12px;
-    border: 1px solid #333333;
+    border: 1px solid var(--surface-card-hover);
     max-width: 400px;
     margin: 40px auto;
 }
@@ -969,7 +969,7 @@
     width: 48px;
     height: 48px;
     border: 3px solid rgba(255, 85, 0, 0.2);
-    border-top: 3px solid #FF5500;
+    border-top: 3px solid var(--color-primary);
     border-radius: 50%;
     animation: admin-spin 1s linear infinite;
     margin-bottom: 16px;
@@ -983,14 +983,14 @@
 }
 
 .loading-subtitle-new {
-    color: #9ca3af;
+    color: var(--text-muted);
     font-size: 0.875rem;
     text-align: center;
 }
 
 .error-container-new {
-    background: #1E1E1E;
-    border: 1px solid #ef4444;
+    background: var(--surface-card);
+    border: 1px solid var(--color-danger);
     border-radius: 12px;
     padding: 32px;
     text-align: center;
@@ -1011,18 +1011,18 @@
 
 .error-icon-new .material-icons {
     font-size: 24px;
-    color: #ef4444;
+    color: var(--color-danger);
 }
 
 .error-title-new {
     font-size: 1rem;
     font-weight: 700;
-    color: #ef4444;
+    color: var(--color-danger);
     margin-bottom: 8px;
 }
 
 .error-message-new {
-    color: #9ca3af;
+    color: var(--text-muted);
     margin-bottom: 16px;
     font-size: 0.875rem;
 }
@@ -1031,7 +1031,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #ef4444;
+    background: var(--color-danger);
     color: #ffffff;
     padding: 10px 20px;
     border: none;
@@ -1043,7 +1043,7 @@
 }
 
 .retry-btn-new:hover {
-    background: #dc2626;
+    background: var(--color-danger-dark);
 }
 
 .retry-btn-new .material-icons {
@@ -1053,9 +1053,9 @@
 .empty-state-new {
     text-align: center;
     padding: 60px 40px;
-    background: #1E1E1E;
+    background: var(--surface-card);
     border-radius: 12px;
-    border: 2px dashed #333333;
+    border: 2px dashed var(--surface-card-hover);
     max-width: 400px;
     margin: 40px auto;
 }
@@ -1073,7 +1073,7 @@
 
 .empty-icon-new .material-icons {
     font-size: 32px;
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 .empty-title-new {
@@ -1084,7 +1084,7 @@
 }
 
 .empty-subtitle-new {
-    color: #9ca3af;
+    color: var(--text-muted);
     margin-bottom: 24px;
     font-size: 0.875rem;
     line-height: 1.5;
@@ -1094,7 +1094,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #FF5500;
+    background: var(--color-primary);
     color: #ffffff;
     padding: 12px 24px;
     border: none;
@@ -1130,11 +1130,11 @@
     transform: translateY(-50%);
     width: 24px;
     height: 48px;
-    background: #1a1a1a;
+    background: var(--surface-card);
     border: 1px solid #333;
     border-left: none;
     border-radius: 0 8px 8px 0;
-    color: #9ca3af;
+    color: var(--text-muted);
     cursor: pointer;
     z-index: 1001;
     display: flex;
@@ -1241,7 +1241,7 @@ body.sidebar-collapsed .app-main {
     left: calc(100% + 12px);
     top: 50%;
     transform: translateY(-50%);
-    background: #1a1a1a;
+    background: var(--surface-card);
     color: #e5e7eb;
     padding: 6px 12px;
     border-radius: 6px;
@@ -1306,7 +1306,7 @@ body.sidebar-collapsed .app-main {
 
 .sidebar-logo-text p {
     font-size: 0.625rem;
-    color: #6b7280;
+    color: var(--text-dim);
     margin: 4px 0 0 0;
     font-weight: 500;
     letter-spacing: 0.2em;
@@ -1346,7 +1346,7 @@ body.sidebar-collapsed .app-main {
     font-family: var(--font-family-brand);
     font-size: 0.7rem;
     font-weight: 400;
-    color: #6b7280;
+    color: var(--text-dim);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 0 12px;
@@ -1373,7 +1373,7 @@ body.sidebar-collapsed .app-main {
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    color: #9ca3af;
+    color: var(--text-muted);
     text-decoration: none;
     border-radius: 12px;
     transition: all 0.15s ease;
@@ -1414,7 +1414,7 @@ body.sidebar-collapsed .app-main {
 .sidebar-menu-item .item-badge {
     margin-left: auto;
     background: #1f1f1f;
-    color: #6b7280;
+    color: var(--text-dim);
     font-size: 0.65rem;
     font-weight: 600;
     padding: 2px 6px;
@@ -1448,12 +1448,12 @@ body.sidebar-collapsed .app-main {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #6b7280;
+    background: var(--text-dim);
     transition: background 0.15s ease;
 }
 
 .sidebar-liga-item:hover .liga-dot {
-    background: #FF5500;
+    background: var(--color-primary);
 }
 
 /* Logo das Ligas no Sidebar */
@@ -1481,13 +1481,13 @@ body.sidebar-collapsed .app-main {
 
 .sidebar-liga-item .liga-count {
     font-size: 0.7rem;
-    color: #6b7280;
+    color: var(--text-dim);
 }
 
 .sidebar-liga-item .liga-badge-count {
     margin-left: auto;
     background: rgba(255, 255, 255, 0.1);
-    color: #9ca3af;
+    color: var(--text-muted);
     font-size: 0.625rem;
     font-weight: 700;
     padding: 2px 8px;
@@ -1515,7 +1515,7 @@ body.sidebar-collapsed .app-main {
     cursor: pointer;
     border-radius: 6px;
     transition: all 0.15s ease;
-    color: #9ca3af;
+    color: var(--text-muted);
 }
 
 .sidebar-temporada-header:hover {
@@ -1549,7 +1549,7 @@ body.sidebar-collapsed .app-main {
 
 .sidebar-temporada-header .temporada-badge.archived {
     background: rgba(107, 114, 128, 0.3);
-    color: #9ca3af;
+    color: var(--text-muted);
 }
 
 .sidebar-temporada-header .temporada-arrow {
@@ -1587,13 +1587,13 @@ body.sidebar-collapsed .app-main {
 }
 
 .sidebar-liga-item.aposentada .liga-dot.archived {
-    background: #6b7280;
-    border: 1px dashed #9ca3af;
+    background: var(--text-dim);
+    border: 1px dashed var(--text-muted);
 }
 
 .sidebar-liga-item .liga-status-tag {
     font-size: 0.6rem;
-    color: #6b7280;
+    color: var(--text-dim);
     font-weight: 500;
     display: block;
     margin-top: 2px;
@@ -1647,11 +1647,11 @@ body.sidebar-collapsed .app-main {
 }
 
 .sidebar-user-inner:hover .sidebar-user-avatar {
-    border-color: #FF5500;
+    border-color: var(--color-primary);
 }
 
 .sidebar-user-inner:hover .sidebar-user-name {
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 /* Seta indicadora de menu */
@@ -1659,13 +1659,13 @@ body.sidebar-collapsed .app-main {
     content: 'expand_more';
     font-family: 'Material Icons';
     font-size: 18px;
-    color: #6b7280;
+    color: var(--text-dim);
     transition: transform 0.2s ease;
 }
 
 .sidebar-user-new.menu-open .sidebar-user-inner::after {
     transform: rotate(180deg);
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 .sidebar-user-avatar {
@@ -1684,7 +1684,7 @@ body.sidebar-collapsed .app-main {
 
 .sidebar-user-avatar .material-icons {
     font-size: 20px;
-    color: #9ca3af;
+    color: var(--text-muted);
 }
 
 /* Online status dot */
@@ -1716,7 +1716,7 @@ body.sidebar-collapsed .app-main {
 
 .sidebar-user-role {
     font-size: 0.7rem;
-    color: #6b7280;
+    color: var(--text-dim);
 }
 
 /* ============================================================
@@ -1727,8 +1727,8 @@ body.sidebar-collapsed .app-main {
     bottom: 100%;
     left: 12px;
     right: 12px;
-    background: #1a1a1a;
-    border: 1px solid #333333;
+    background: var(--surface-card);
+    border: 1px solid var(--surface-card-hover);
     border-radius: 10px;
     margin-bottom: 8px;
     opacity: 0;
@@ -1764,33 +1764,33 @@ body.sidebar-collapsed .app-main {
 
 .sidebar-user-menu-item:hover {
     background: rgba(255, 85, 0, 0.1);
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 .sidebar-user-menu-item .material-icons {
     font-size: 20px;
-    color: #6b7280;
+    color: var(--text-dim);
     transition: color 0.15s ease;
 }
 
 .sidebar-user-menu-item:hover .material-icons {
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 /* Separador */
 .sidebar-user-menu-divider {
     height: 1px;
-    background: #333333;
+    background: var(--surface-card-hover);
     margin: 4px 0;
 }
 
 /* Item de logout (vermelho) */
 .sidebar-user-menu-item.logout {
-    color: #ef4444;
+    color: var(--color-danger);
 }
 
 .sidebar-user-menu-item.logout .material-icons {
-    color: #ef4444;
+    color: var(--color-danger);
 }
 
 .sidebar-user-menu-item.logout:hover {
@@ -1828,7 +1828,7 @@ body.sidebar-collapsed .app-main {
 }
 
 .modal-perfil-content {
-    background: #1a1a1a;
+    background: var(--surface-card);
     border: 1px solid #333;
     border-radius: 16px;
     width: 90%;
@@ -1865,11 +1865,11 @@ body.sidebar-collapsed .app-main {
 
 .modal-perfil-close .material-icons {
     font-size: 18px;
-    color: #9ca3af;
+    color: var(--text-muted);
 }
 
 .modal-perfil-close:hover .material-icons {
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 .modal-perfil-header {
@@ -1881,7 +1881,7 @@ body.sidebar-collapsed .app-main {
 .modal-perfil-avatar {
     width: 72px;
     height: 72px;
-    background: linear-gradient(135deg, #FF5500, #ff7733);
+    background: linear-gradient(135deg, var(--color-primary), #ff7733);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -1919,7 +1919,7 @@ body.sidebar-collapsed .app-main {
 
 .modal-perfil-badge.super-admin {
     background: rgba(255, 85, 0, 0.15);
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 .modal-perfil-badge .material-icons {
@@ -1944,7 +1944,7 @@ body.sidebar-collapsed .app-main {
 
 .modal-perfil-item > .material-icons {
     font-size: 20px;
-    color: #6b7280;
+    color: var(--text-dim);
     margin-top: 2px;
 }
 
@@ -1956,7 +1956,7 @@ body.sidebar-collapsed .app-main {
     display: block;
     font-size: 0.7rem;
     font-weight: 600;
-    color: #6b7280;
+    color: var(--text-dim);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-bottom: 2px;
@@ -1978,7 +1978,7 @@ body.sidebar-collapsed .app-main {
     padding: 10px 24px;
     border: 1px solid #333;
     background: transparent;
-    color: #9ca3af;
+    color: var(--text-muted);
     border-radius: 8px;
     font-size: 0.875rem;
     font-weight: 600;
@@ -1987,15 +1987,15 @@ body.sidebar-collapsed .app-main {
 }
 
 .btn-modal-secondary:hover {
-    border-color: #FF5500;
-    color: #FF5500;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
 }
 
 /* Loading state for ligas */
 .sidebar-ligas-loading {
     padding: 16px 12px;
     text-align: center;
-    color: #6b7280;
+    color: var(--text-dim);
     font-size: 0.75rem;
 }
 
@@ -2004,13 +2004,13 @@ body.sidebar-collapsed .app-main {
     animation: admin-spin 1s linear infinite;
     display: block;
     margin: 0 auto 8px;
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 .sidebar-ligas-empty {
     padding: 16px 12px;
     text-align: center;
-    color: #6b7280;
+    color: var(--text-dim);
     font-size: 0.75rem;
     background: rgba(255, 85, 0, 0.05);
     border-radius: 8px;
@@ -2079,7 +2079,7 @@ body.sidebar-collapsed .main-content {
    =================================================== */
 
 .stat-card-new.usuarios-online {
-    background: linear-gradient(135deg, #1a2e1a 0%, #1E1E1E 100%);
+    background: linear-gradient(135deg, #1a2e1a 0%, var(--surface-card) 100%);
     border-color: rgba(16, 185, 129, 0.3);
     min-height: 200px;
     display: flex;
@@ -2131,7 +2131,7 @@ body.sidebar-collapsed .main-content {
     align-items: center;
     justify-content: center;
     height: 100%;
-    color: #6b7280;
+    color: var(--text-dim);
     gap: 8px;
     padding: 20px 0;
 }
@@ -2170,7 +2170,7 @@ body.sidebar-collapsed .main-content {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: #2a2a2a;
+    background: var(--surface-card-elevated);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2186,7 +2186,7 @@ body.sidebar-collapsed .main-content {
 
 .usuario-avatar .material-icons {
     font-size: 18px;
-    color: #6b7280;
+    color: var(--text-dim);
 }
 
 /* Info do usuário */
@@ -2209,7 +2209,7 @@ body.sidebar-collapsed .main-content {
 
 .usuario-liga {
     font-size: 0.65rem;
-    color: #9ca3af;
+    color: var(--text-muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2235,7 +2235,7 @@ body.sidebar-collapsed .main-content {
 
 .usuario-tempo {
     font-size: 0.6rem;
-    color: #6b7280;
+    color: var(--text-dim);
 }
 
 /* Responsividade do card de usuários online */
@@ -2295,7 +2295,7 @@ body.sidebar-collapsed .main-content {
     gap: 8px;
     font-size: 0.6875rem;
     font-weight: 700;
-    color: #6b7280;
+    color: var(--text-dim);
     text-transform: uppercase;
     letter-spacing: 0.1em;
 }
@@ -2307,29 +2307,29 @@ body.sidebar-collapsed .main-content {
 
 .sidebar-accordion-title .material-icons {
     font-size: 16px;
-    color: #6b7280;
+    color: var(--text-dim);
     transition: color 0.15s ease;
 }
 
 .sidebar-accordion-header:hover .sidebar-accordion-title .material-icons,
 .sidebar-accordion-header.active .sidebar-accordion-title .material-icons {
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 /* Seta do accordion */
 .sidebar-accordion-arrow {
     font-size: 18px !important;
-    color: #6b7280;
+    color: var(--text-dim);
     transition: transform 0.25s ease, color 0.15s ease;
 }
 
 .sidebar-accordion-header:hover .sidebar-accordion-arrow {
-    color: #9ca3af;
+    color: var(--text-muted);
 }
 
 .sidebar-accordion.open .sidebar-accordion-arrow {
     transform: rotate(180deg);
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 /* Conteúdo do accordion */
@@ -2361,7 +2361,7 @@ body.sidebar-collapsed .main-content {
     align-items: center;
     gap: 12px;
     padding: 10px 12px 10px 40px;
-    color: #9ca3af;
+    color: var(--text-muted);
     text-decoration: none;
     border-radius: 8px;
     transition: all 0.15s ease;
@@ -2384,7 +2384,7 @@ body.sidebar-collapsed .main-content {
 
 .sidebar-accordion-item .material-icons {
     font-size: 18px;
-    color: #6b7280;
+    color: var(--text-dim);
     transition: color 0.15s ease;
 }
 
@@ -2400,7 +2400,7 @@ body.sidebar-collapsed .main-content {
 .sidebar-accordion-badge {
     margin-left: auto;
     background: #1f1f1f;
-    color: #6b7280;
+    color: var(--text-dim);
     font-size: 0.6rem;
     font-weight: 600;
     padding: 2px 6px;
@@ -2409,7 +2409,7 @@ body.sidebar-collapsed .main-content {
 
 .sidebar-accordion-item.active .sidebar-accordion-badge {
     background: rgba(255, 85, 0, 0.2);
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 /* Divisor entre seções */
@@ -2471,7 +2471,7 @@ body.sidebar-collapsed .main-content {
 }
 
 .sidebar-sub-accordion-header:hover {
-    background: #1a1a1a;
+    background: var(--surface-card);
 }
 
 .sidebar-sub-accordion-title {
@@ -2480,7 +2480,7 @@ body.sidebar-collapsed .main-content {
     gap: 8px;
     font-size: 0.8rem;
     font-weight: 500;
-    color: #9ca3af;
+    color: var(--text-muted);
 }
 
 .sidebar-sub-accordion-header:hover .sidebar-sub-accordion-title {
@@ -2489,28 +2489,28 @@ body.sidebar-collapsed .main-content {
 
 .sidebar-sub-accordion-title .material-icons {
     font-size: 16px;
-    color: #6b7280;
+    color: var(--text-dim);
     transition: color 0.15s ease;
 }
 
 .sidebar-sub-accordion-header:hover .sidebar-sub-accordion-title .material-icons {
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 /* Seta do sub-accordion */
 .sidebar-sub-accordion-arrow {
     font-size: 16px !important;
-    color: #6b7280;
+    color: var(--text-dim);
     transition: transform 0.25s ease, color 0.15s ease;
 }
 
 .sidebar-sub-accordion-header:hover .sidebar-sub-accordion-arrow {
-    color: #9ca3af;
+    color: var(--text-muted);
 }
 
 .sidebar-sub-accordion.open .sidebar-sub-accordion-arrow {
     transform: rotate(180deg);
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 /* Conteúdo do sub-accordion */
@@ -2544,7 +2544,7 @@ body.sidebar-collapsed .main-content {
     align-items: center;
     gap: 10px;
     padding: 10px 12px 10px 40px;
-    color: #9ca3af;
+    color: var(--text-muted);
     border-radius: 8px;
     transition: all 0.15s ease;
     font-size: 0.8rem;
@@ -2573,13 +2573,13 @@ body.sidebar-collapsed .main-content {
 .sidebar-temporadas-arrow {
     margin-left: auto !important;
     font-size: 18px !important;
-    color: #6b7280;
+    color: var(--text-dim);
     transition: transform 0.25s ease, color 0.15s ease;
 }
 
 .sidebar-temporadas-wrapper.open .sidebar-temporadas-arrow {
     transform: rotate(180deg);
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 .sidebar-temporadas-list {
@@ -2599,7 +2599,7 @@ body.sidebar-collapsed .main-content {
     align-items: center;
     gap: 8px;
     padding: 8px 12px 8px 40px;
-    color: #FF5500;
+    color: var(--color-primary);
     text-decoration: none;
     border-radius: 6px;
     transition: all 0.15s ease;
@@ -2630,7 +2630,7 @@ body.sidebar-collapsed .main-content {
 }
 
 .sidebar-badge.new {
-    background: linear-gradient(135deg, #ff5500, #ff7733);
+    background: linear-gradient(135deg, var(--color-primary), #ff7733);
     color: white;
     animation: pulse-new 2s infinite;
 }
@@ -2642,12 +2642,12 @@ body.sidebar-collapsed .main-content {
 
 .sidebar-badge.soon {
     background: rgba(255, 255, 255, 0.1);
-    color: #9ca3af;
+    color: var(--text-muted);
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sidebar-badge.live {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
+    background: linear-gradient(135deg, var(--color-danger), var(--color-danger-dark));
     color: white;
     animation: pulse-live 1.5s infinite;
 }
@@ -2666,7 +2666,7 @@ body.sidebar-collapsed .main-content {
 }
 
 .sidebar-accordion-item.disabled .material-icons {
-    color: #6b7280;
+    color: var(--text-dim);
 }
 
 /* Badge dentro do titulo do accordion */
@@ -2689,7 +2689,7 @@ body.sidebar-collapsed .main-content {
 }
 
 .sidebar-admin-section .sidebar-accordion-title .material-icons {
-    color: #FF5500 !important;
+    color: var(--color-primary) !important;
 }
 
 /* ========================================
@@ -2808,7 +2808,7 @@ body.sidebar-collapsed .main-content {
 
 .modal-historico-filtros select {
     flex: 1;
-    background: #2a2a2a;
+    background: var(--surface-card-elevated);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     padding: 8px 12px;
@@ -2826,7 +2826,7 @@ body.sidebar-collapsed .main-content {
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #9ca3af;
+    color: var(--text-muted);
     font-size: 0.75rem;
     white-space: nowrap;
 }
@@ -2862,7 +2862,7 @@ body.sidebar-collapsed .main-content {
 .stat-box .stat-label {
     display: block;
     font-size: 0.75rem;
-    color: #9ca3af;
+    color: var(--text-muted);
     margin-top: 2px;
 }
 
@@ -2884,7 +2884,7 @@ body.sidebar-collapsed .main-content {
     justify-content: center;
     gap: 8px;
     padding: 40px 20px;
-    color: #6b7280;
+    color: var(--text-dim);
 }
 
 .modal-historico-loading .material-icons,
@@ -2895,7 +2895,7 @@ body.sidebar-collapsed .main-content {
 }
 
 .modal-historico-error .material-icons {
-    color: #ef4444;
+    color: var(--color-danger);
     animation: none;
 }
 
@@ -2925,7 +2925,7 @@ body.sidebar-collapsed .main-content {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: #2a2a2a;
+    background: var(--surface-card-elevated);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2941,7 +2941,7 @@ body.sidebar-collapsed .main-content {
 
 .historico-avatar .material-icons {
     font-size: 20px;
-    color: #6b7280;
+    color: var(--text-dim);
 }
 
 .historico-info {
@@ -2963,7 +2963,7 @@ body.sidebar-collapsed .main-content {
 
 .historico-liga {
     font-size: 0.75rem;
-    color: #9ca3af;
+    color: var(--text-muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2985,7 +2985,7 @@ body.sidebar-collapsed .main-content {
 
 .historico-ultimo {
     font-size: 0.7rem;
-    color: #6b7280;
+    color: var(--text-dim);
 }
 
 /* Footer */

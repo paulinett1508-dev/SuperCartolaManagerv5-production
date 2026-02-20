@@ -63,7 +63,7 @@
 
 .module-title .material-icons {
   font-size: 22px;
-  color: #FF5500;
+  color: var(--color-primary);
 }
 
 /* Stats Badges Inline */
@@ -159,17 +159,17 @@
 .toolbar-btn:hover {
   background: rgba(255, 85, 0, 0.1);
   border-color: rgba(255, 85, 0, 0.3);
-  color: #FF5500;
+  color: var(--color-primary);
 }
 
 .toolbar-btn.btn-primary {
-  background: linear-gradient(135deg, #FF5500 0%, #cc4400 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, #cc4400 100%);
   border-color: transparent;
   color: #fff;
 }
 
 .toolbar-btn.btn-primary:hover {
-  background: linear-gradient(135deg, #ff6611 0%, #FF5500 100%);
+  background: linear-gradient(135deg, #ff6611 0%, var(--color-primary) 100%);
 }
 
 /* Botão Adicionar Participante */
@@ -208,13 +208,13 @@
 
 /* ✅ v2.15: Botão PDF (secondary) */
 .btn-toolbar.btn-secondary {
-  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  background: linear-gradient(135deg, var(--text-dim) 0%, #4b5563 100%);
   color: #fff;
   box-shadow: 0 2px 8px rgba(107, 114, 128, 0.3);
 }
 
 .btn-toolbar.btn-secondary:hover {
-  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+  background: linear-gradient(135deg, var(--text-muted) 0%, var(--text-dim) 100%);
   box-shadow: 0 4px 12px rgba(107, 114, 128, 0.4);
   transform: translateY(-1px);
 }
@@ -493,7 +493,7 @@
 }
 
 .participante-avatar-mini .status-dot.status-inativo {
-  background: #ef4444;
+  background: var(--color-danger);
 }
 
 /* === INFO COMPACTO (SEM FLEX-GROW) === */
@@ -566,7 +566,7 @@
 .btn-compact:hover {
   background: rgba(255, 85, 0, 0.1);
   border-color: rgba(255, 85, 0, 0.3);
-  color: #FF5500;
+  color: var(--color-primary);
 }
 
 .btn-compact-status:hover {
@@ -578,13 +578,13 @@
 .btn-compact-senha:hover {
   background: rgba(59, 130, 246, 0.1);
   border-color: rgba(59, 130, 246, 0.3);
-  color: #3b82f6;
+  color: var(--color-info);
 }
 
 .btn-compact-dados:hover {
   background: rgba(255, 85, 0, 0.15);
   border-color: rgba(255, 85, 0, 0.4);
-  color: #FF5500;
+  color: var(--color-primary);
 }
 
 /* === BOTÃO JÁ VALIDADO (check verde) === */
@@ -674,11 +674,11 @@
 }
 
 .brasao-fantasy {
-  border-color: #3b82f6;
+  border-color: var(--color-info);
 }
 
 .brasao-clube {
-  border-color: #ef4444;
+  border-color: var(--color-danger);
 }
 
 .brasao-disabled {
@@ -703,11 +703,11 @@
 }
 
 .fantasy-label {
-  color: #3b82f6;
+  color: var(--color-info);
 }
 
 .clube-label {
-  color: #ef4444;
+  color: var(--color-danger);
 }
 
 .brasao-separator {
@@ -1254,13 +1254,13 @@
 .btn-batch-success { background: var(--color-success-light); }
 .btn-batch-success:hover { background: var(--color-success-dark, #16a34a); }
 
-.btn-batch-danger { background: #ef4444; }
-.btn-batch-danger:hover { background: #dc2626; }
+.btn-batch-danger { background: var(--color-danger); }
+.btn-batch-danger:hover { background: var(--color-danger-dark); }
 
 .btn-batch-warning { background: #f59e0b; color: #000; }
 .btn-batch-warning:hover { background: #d97706; }
 
-.btn-batch-info { background: #3b82f6; }
+.btn-batch-info { background: var(--color-info); }
 .btn-batch-info:hover { background: #2563eb; }
 
 .btn-batch-secondary { background: #4b5563; }
@@ -1361,7 +1361,7 @@
 }
 
 .modal-custom .btn-primary {
-    background: linear-gradient(135deg, var(--laranja, #FF5500) 0%, #cc4400 100%);
+    background: linear-gradient(135deg, var(--laranja, var(--color-primary)) 0%, #cc4400 100%);
     color: #fff;
     border: none;
     padding: 10px 20px;
@@ -1393,7 +1393,7 @@
 }
 
 .modal-custom .btn-danger {
-    background: #ef4444;
+    background: var(--color-danger);
     color: #fff;
     border: none;
     padding: 10px 20px;
@@ -1406,7 +1406,7 @@
 }
 
 .modal-custom .btn-danger:hover {
-    background: #dc2626;
+    background: var(--color-danger-dark);
 }
 
 /* Scrollbar elegante para lista batch */
@@ -1420,7 +1420,7 @@
 }
 
 .batch-lista-container::-webkit-scrollbar-thumb {
-    background: #FF5500;
+    background: var(--color-primary);
     border-radius: 3px;
 }
 
@@ -1435,7 +1435,7 @@
 /* Botão Dados Globo no card */
 .btn-dados-globo {
     background: rgba(255, 85, 0, 0.2) !important;
-    color: #FF5500 !important;
+    color: var(--color-primary) !important;
     border: 1px solid rgba(255, 85, 0, 0.3) !important;
 }
 
@@ -1539,7 +1539,7 @@
 
 .modal-dados-header .btn-atualizar {
     background: rgba(255, 85, 0, 0.2);
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 .modal-dados-header .btn-atualizar:hover {
@@ -1603,7 +1603,7 @@
 
 .modal-tabs .tab-btn.active {
     background: rgba(255, 85, 0, 0.2);
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 /* Body do Modal */
@@ -1639,19 +1639,19 @@
 
 .pre-temporada-banner > .material-symbols-outlined {
     font-size: 28px;
-    color: #3b82f6;
+    color: var(--color-info);
     flex-shrink: 0;
 }
 
 .pre-temporada-banner strong {
-    color: #3b82f6;
+    color: var(--color-info);
     font-size: 1rem;
     display: block;
     margin-bottom: 4px;
 }
 
 .pre-temporada-banner p {
-    color: #9ca3af;
+    color: var(--text-muted);
     font-size: 0.85rem;
     margin: 0;
 }
@@ -1669,11 +1669,11 @@
 
 .pre-temporada-info .material-symbols-outlined {
     font-size: 20px;
-    color: #6b7280;
+    color: var(--text-dim);
 }
 
 .pre-temporada-info p {
-    color: #9ca3af;
+    color: var(--text-muted);
     font-size: 0.85rem;
     margin: 0;
 }
@@ -1709,19 +1709,19 @@
 }
 
 .resumo-item-destaque .resumo-icon {
-    background: linear-gradient(135deg, #FF5500 0%, #cc4400 100%);
+    background: linear-gradient(135deg, var(--color-primary) 0%, #cc4400 100%);
     color: white;
 }
 
 .resumo-item-destaque .resumo-value {
-    color: #FF5500;
+    color: var(--color-primary);
     font-size: 1.3rem;
     font-weight: 700;
 }
 
 .resumo-icon {
     font-size: 24px;
-    color: #FF5500;
+    color: var(--color-primary);
     width: 48px;
     height: 48px;
     background: rgba(255, 85, 0, 0.1);
@@ -1808,7 +1808,7 @@
 
 .atleta-pontos {
     font-size: 0.7rem;
-    color: #FF5500;
+    color: var(--color-primary);
     font-weight: 600;
     margin-top: 4px;
 }
@@ -1832,7 +1832,7 @@
 .btn-copiar-json {
     padding: 8px 16px;
     background: rgba(255, 85, 0, 0.2);
-    color: #FF5500;
+    color: var(--color-primary);
     border: 1px solid rgba(255, 85, 0, 0.3);
     border-radius: 6px;
     cursor: pointer;
@@ -1879,7 +1879,7 @@
 }
 
 .historico-item .material-symbols-outlined {
-    color: #FF5500;
+    color: var(--color-primary);
     font-size: 20px;
 }
 
@@ -1922,7 +1922,7 @@
 
 .btn-sincronizar-globo {
     padding: 14px 28px;
-    background: linear-gradient(135deg, #FF5500 0%, #cc4400 100%);
+    background: linear-gradient(135deg, var(--color-primary) 0%, #cc4400 100%);
     color: white;
     border: none;
     border-radius: 10px;
@@ -2162,7 +2162,7 @@
 
 .jv-stat .material-symbols-outlined {
     font-size: 16px;
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 .jv-actions {
@@ -2196,7 +2196,7 @@
 .jv-btn-primary {
     background: rgba(255, 85, 0, 0.2);
     border-color: rgba(255, 85, 0, 0.4);
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 .jv-btn-primary:hover {
@@ -2261,7 +2261,7 @@
 }
 
 .jv-key-destaque {
-    color: #FF5500 !important;
+    color: var(--color-primary) !important;
     font-weight: 700;
 }
 
@@ -2307,7 +2307,7 @@
 
 .jv-expanded > .jv-row-header .jv-expand-icon {
     transform: rotate(90deg);
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 .jv-row-content {
@@ -2371,7 +2371,7 @@
 
 .jv-bool-false {
     background: rgba(239, 68, 68, 0.15);
-    color: #ef4444;
+    color: var(--color-danger);
 }
 
 .jv-number {
@@ -2401,7 +2401,7 @@
 }
 
 .jv-negative {
-    color: #ef4444;
+    color: var(--color-danger);
     font-weight: 600;
 }
 
@@ -2466,10 +2466,10 @@
 /* Posições com cores */
 .jv-atleta-card.goleiro { border-left: 3px solid #f97316; }
 .jv-atleta-card.lateral { border-left: 3px solid var(--color-success-light); }
-.jv-atleta-card.zagueiro { border-left: 3px solid #3b82f6; }
+.jv-atleta-card.zagueiro { border-left: 3px solid var(--color-info); }
 .jv-atleta-card.meia { border-left: 3px solid #a855f7; }
-.jv-atleta-card.atacante { border-left: 3px solid #ef4444; }
-.jv-atleta-card.tecnico { border-left: 3px solid #6b7280; }
+.jv-atleta-card.atacante { border-left: 3px solid var(--color-danger); }
+.jv-atleta-card.tecnico { border-left: 3px solid var(--text-dim); }
 
 .jv-atleta-foto {
     position: relative;
@@ -2541,7 +2541,7 @@
 }
 
 .jv-atleta-pontos.negativo {
-    color: #ef4444;
+    color: var(--color-danger);
 }
 
 .jv-atleta-preco {
@@ -2555,7 +2555,7 @@
     padding: 12px;
     background: rgba(255, 85, 0, 0.1);
     border-radius: 8px;
-    color: #FF5500;
+    color: var(--color-primary);
     font-size: 0.85rem;
     font-weight: 500;
 }
@@ -2639,7 +2639,7 @@
     background: rgba(255, 85, 0, 0.15);
     border: 1px solid rgba(255, 85, 0, 0.3);
     border-radius: 8px;
-    color: #FF5500;
+    color: var(--color-primary);
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -2663,7 +2663,7 @@
 }
 
 .rodadas-header h4 .material-symbols-outlined {
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 .rodadas-count {
@@ -2700,13 +2700,13 @@
 .rodada-btn:hover {
     background: rgba(255, 85, 0, 0.2);
     border-color: rgba(255, 85, 0, 0.4);
-    color: #FF5500;
+    color: var(--color-primary);
     transform: scale(1.05);
 }
 
 .rodada-btn.active {
-    background: linear-gradient(135deg, #FF5500 0%, #cc4400 100%);
-    border-color: #FF5500;
+    background: linear-gradient(135deg, var(--color-primary) 0%, #cc4400 100%);
+    border-color: var(--color-primary);
     color: white;
     box-shadow: 0 2px 10px rgba(255, 85, 0, 0.4);
 }
@@ -2788,7 +2788,7 @@
     display: block;
     font-size: 2rem;
     font-weight: 700;
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 .rodada-meta {
@@ -2809,7 +2809,7 @@
 
 .rodada-meta .material-symbols-outlined {
     font-size: 16px;
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 .rodada-json-section h4 {
@@ -2822,7 +2822,7 @@
 }
 
 .rodada-json-section h4 .material-symbols-outlined {
-    color: #FF5500;
+    color: var(--color-primary);
     font-size: 18px;
 }
 
@@ -2855,8 +2855,8 @@
 
 .nav-rodada-btn:hover:not(.disabled) {
     background: rgba(255, 85, 0, 0.25);
-    border-color: #FF5500;
-    color: #FF5500;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
 }
 
 .nav-rodada-btn:first-child:hover:not(.disabled) {
@@ -2886,7 +2886,7 @@
     gap: 8px;
     font-weight: 600;
     font-size: 1rem;
-    color: #FF5500;
+    color: var(--color-primary);
     padding: 8px 16px;
     background: rgba(255, 85, 0, 0.15);
     border-radius: 8px;
@@ -2949,7 +2949,7 @@
     border-radius: 8px;
     border: 1px solid rgba(255, 85, 0, 0.3);
     background: rgba(255, 85, 0, 0.15);
-    color: #FF5500;
+    color: var(--color-primary);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -2989,7 +2989,7 @@
 
 .sync-status-bar .material-symbols-outlined {
     font-size: 18px;
-    color: #6b7280;
+    color: var(--text-dim);
 }
 
 .sync-status-bar.sync-success {
@@ -3017,7 +3017,7 @@
 
 .api-section-header .material-symbols-outlined {
     font-size: 20px;
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 .api-section-header h4 {
@@ -3137,7 +3137,7 @@
 }
 
 .api-card-destaque .api-card-value {
-    color: #FF5500;
+    color: var(--color-primary);
     font-size: 1.2rem;
 }
 
@@ -3160,7 +3160,7 @@
 }
 
 .valor-negativo {
-    color: #ef4444 !important;
+    color: var(--color-danger) !important;
 }
 
 /* Botões de Ação */

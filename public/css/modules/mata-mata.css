@@ -25,7 +25,7 @@
   padding: 8px 12px;
   border-radius: 6px;
   border: 1px solid rgba(255, 69, 0, 0.3);
-  background: var(--bg-secondary, #1a1a1a);
+  background: var(--bg-secondary, var(--surface-card));
   color: var(--text-primary, #ffffff);
   font-size: 13px;
   transition: all 0.3s ease;
@@ -84,7 +84,7 @@
   cursor: not-allowed;
   pointer-events: none;
   border-color: rgba(107, 114, 128, 0.3);
-  color: #6b7280;
+  color: var(--text-dim);
   background: rgba(42, 42, 42, 0.3);
 }
 
@@ -110,7 +110,7 @@
 
 .mata-mata-fase-bloqueada h4 {
   font-family: 'Russo One', sans-serif;
-  color: #9ca3af;
+  color: var(--text-muted);
   font-size: 18px;
   margin: 12px 0 8px;
 }
@@ -220,11 +220,11 @@
 }
 
 .valor-positivo {
-  color: var(--success, #22c55e);
+  color: var(--success, var(--color-success-light));
 }
 
 .valor-negativo {
-  color: var(--danger, #ef4444);
+  color: var(--danger, var(--color-danger));
 }
 
 .valor-neutro {
@@ -257,7 +257,7 @@
 }
 
 .pontos-cell.resultado-derrota .pontos-valor {
-  color: #ef4444;
+  color: var(--color-danger);
   font-weight: 600;
   opacity: 0.8;
 }
@@ -280,7 +280,7 @@
 }
 
 .error-state {
-  color: var(--danger, #ef4444);
+  color: var(--danger, var(--color-danger));
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.2);
   padding: 20px;
@@ -325,7 +325,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+  background: linear-gradient(135deg, var(--surface-card) 0%, #0a0a0a 100%);
 }
 
 .campeao-banner-bg::before {
@@ -603,7 +603,7 @@
   gap: 6px;
   background: rgba(239, 68, 68, 0.15);
   border: 1px solid rgba(239, 68, 68, 0.4);
-  color: #ef4444;
+  color: var(--color-danger);
   font-size: 11px;
   font-weight: 700;
   padding: 4px 10px;
@@ -616,7 +616,7 @@
   content: '';
   width: 8px;
   height: 8px;
-  background: #ef4444;
+  background: var(--color-danger);
   border-radius: 50%;
   animation: pulse-live 1.5s infinite;
 }
