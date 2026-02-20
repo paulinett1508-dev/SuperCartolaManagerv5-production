@@ -1016,6 +1016,7 @@ class ParticipanteNavigation {
             regras: "/participante/js/modules/participante-regras.js",
             "rodada-xray": "/participante/js/modules/participante-rodada-xray.js",
             "resta-um": "/participante/js/modules/participante-resta-um.js",
+            "tiro-certo": "/participante/js/modules/participante-tiro-certo.js",
         };
 
         const jsPath = modulosPaths[modulo];

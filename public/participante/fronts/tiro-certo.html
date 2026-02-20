@@ -1,151 +1,223 @@
-<!-- TIRO CERTO - Teaser MVP -->
+<!-- TIRO CERTO - Módulo Survival -->
 <!-- Fragmento HTML (sem doctype/html/body) para inserção via navegação SPA -->
 <div id="tiro-certo-container" class="min-h-screen">
 
-    <!-- Hero Section -->
-    <div class="relative overflow-hidden">
+    <!-- Botão Fechar (X) -->
+    <button onclick="window.participanteNav?.navegarPara('home')"
+            class="absolute top-4 right-4 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-gray-800/80 hover:bg-gray-700 transition-colors"
+            aria-label="Fechar">
+        <span class="material-icons text-gray-300 hover:text-white" style="font-size: 22px;">close</span>
+    </button>
 
-        <!-- Background Pattern -->
-        <div class="absolute inset-0 tc-pattern-dots"></div>
+    <!-- ═══════════════════════════════════════════════════
+         MODO ATIVO: Exibido quando há edição em andamento
+         ═══════════════════════════════════════════════════ -->
+    <div id="tc-modo-ativo" style="display:none;">
 
-        <!-- Botão Fechar (X) -->
-        <button onclick="window.participanteNav?.navegarPara('home')"
-                class="absolute top-4 right-4 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-gray-800/80 hover:bg-gray-700 transition-colors"
-                aria-label="Fechar">
-            <span class="material-icons text-gray-300 hover:text-white" style="font-size: 22px;">close</span>
-        </button>
-
-        <!-- Content -->
-        <div class="relative z-10 max-w-4xl mx-auto px-4 py-16 text-center">
-
-            <!-- Crosshair SVG animado -->
-            <div class="mb-8">
-                <svg class="w-32 h-32 mx-auto tc-crosshair-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="50" cy="50" r="46" stroke="currentColor" stroke-width="2" fill="none" opacity="0.3" style="color: var(--tc-primary);"/>
-                    <circle cx="50" cy="50" r="38" stroke="currentColor" stroke-width="2" fill="none" opacity="0.5" style="color: var(--tc-primary);"/>
-                    <circle cx="50" cy="50" r="28" stroke="currentColor" stroke-width="2.5" fill="none" opacity="0.75" style="color: var(--tc-primary);"/>
-                    <circle cx="50" cy="50" r="14" stroke="currentColor" stroke-width="3" fill="none" style="color: var(--tc-primary);"/>
-                    <circle cx="50" cy="50" r="5" fill="currentColor" style="color: var(--tc-primary);"/>
-                    <line x1="50" y1="0" x2="50" y2="22" stroke="currentColor" stroke-width="3" stroke-linecap="round" style="color: var(--tc-primary);"/>
-                    <line x1="50" y1="78" x2="50" y2="100" stroke="currentColor" stroke-width="3" stroke-linecap="round" style="color: var(--tc-primary);"/>
-                    <line x1="0" y1="50" x2="22" y2="50" stroke="currentColor" stroke-width="3" stroke-linecap="round" style="color: var(--tc-primary);"/>
-                    <line x1="78" y1="50" x2="100" y2="50" stroke="currentColor" stroke-width="3" stroke-linecap="round" style="color: var(--tc-primary);"/>
-                </svg>
-            </div>
-
-            <!-- Badge EM BREVE -->
-            <div class="tc-badge-em-breve inline-flex mb-6">
-                <span class="tc-badge-dot-outer">
-                    <span class="tc-badge-dot-ping"></span>
-                    <span class="tc-badge-dot-solid"></span>
-                </span>
-                <span class="tc-badge-label">EM BREVE</span>
-            </div>
-
-            <!-- Título Principal -->
-            <h1 class="tc-title-main text-white mb-4">
-                <span class="tc-gradient-text">TIRO</span>
-                <br>
-                <span>CERTO</span>
-            </h1>
-
-            <!-- Subtítulo -->
-            <p class="text-xl md:text-2xl text-gray-300 mb-12 font-light">
-                Até sobrar apenas um jogador!
-            </p>
-
-            <!-- Card Principal -->
-            <div class="tc-card max-w-2xl mx-auto">
-
-                <!-- Segundo Turno -->
-                <div class="flex items-center justify-center gap-3 mb-6">
-                    <span class="material-icons tc-stat-icon" style="font-size: 2rem; margin-bottom: 0;">calendar_month</span>
-                    <h2 class="tc-section-title">SEGUNDO TURNO</h2>
-                </div>
-
-                <!-- Duração -->
-                <div class="tc-section-highlight">
-                    <p class="tc-section-label">Duração</p>
-                    <p class="text-sm font-semibold text-white">Até sobrar apenas um jogador!</p>
-                </div>
-
-                <!-- Objetivo -->
-                <div class="tc-section">
-                    <p class="tc-section-label--muted">Objetivo</p>
-                    <p class="text-sm" style="color: var(--app-text-secondary);">Escolher um time por rodada e sobreviver o máximo possível.</p>
-                </div>
-
-                <!-- Como funciona -->
-                <div class="tc-section">
-                    <p class="tc-section-label--muted">Como funciona</p>
-                    <div class="tc-rule-list">
-                        <div class="tc-rule-item">
-                            <span class="material-icons tc-icon-choice">gps_fixed</span>
-                            <p class="text-sm" style="color: var(--app-text-secondary);">Em cada rodada, escolha apenas <strong class="text-white">1 time</strong> para vencer.</p>
-                        </div>
-                        <div class="tc-rule-item">
-                            <span class="material-icons tc-icon-avanca">check_circle</span>
-                            <p class="text-sm" style="color: var(--app-text-secondary);">Se ele <strong style="color: var(--tc-vivo);">vencer</strong>, você avança para a próxima rodada.</p>
-                        </div>
-                        <div class="tc-rule-item">
-                            <span class="material-icons tc-icon-eliminado">cancel</span>
-                            <p class="text-sm" style="color: var(--app-text-secondary);">Se <strong style="color: var(--tc-eliminado);">empatar ou perder</strong>, você está eliminado.</p>
-                        </div>
-                        <div class="tc-rule-item">
-                            <span class="material-icons tc-icon-bloqueia">block</span>
-                            <p class="text-sm" style="color: var(--app-text-secondary);">Você <strong style="color: var(--tc-bloqueio);">não pode repetir times</strong> — cada time só pode ser usado uma vez por edição.</p>
-                        </div>
-                        <div class="tc-rule-item">
-                            <span class="material-icons tc-icon-dica">lightbulb</span>
-                            <p class="text-sm" style="color: var(--app-text-muted);">Deixe os favoritos para as fases finais e avance com times menores no início.</p>
-                        </div>
+        <!-- Header compacto -->
+        <div class="tc-header-ativo">
+            <div class="tc-header-content">
+                <div class="tc-header-left">
+                    <span class="material-icons" style="color:var(--tc-primary);font-size:1.75rem;">gps_fixed</span>
+                    <div>
+                        <h1 class="tc-header-title">TIRO CERTO</h1>
+                        <p id="tc-edicao-nome" class="tc-header-subtitle"></p>
                     </div>
                 </div>
-
-                <!-- Grid de detalhes -->
-                <div class="tc-grid-stats">
-                    <div class="tc-stat-card">
-                        <span class="material-icons tc-stat-icon">sports_soccer</span>
-                        <div class="tc-stat-label">Modo</div>
-                        <div class="tc-stat-value">Survival</div>
-                    </div>
-                    <div class="tc-stat-card">
-                        <span class="material-icons tc-stat-icon">block</span>
-                        <div class="tc-stat-label">Times</div>
-                        <div class="tc-stat-value">Sem Repetição</div>
-                    </div>
-                    <div class="tc-stat-card">
-                        <span class="material-icons tc-stat-icon">emoji_events</span>
-                        <div class="tc-stat-label">Prêmio</div>
-                        <div class="tc-stat-value">Único Sobrevivente</div>
-                    </div>
-                </div>
-
-                <!-- Separador -->
-                <div class="border-t mb-6" style="border-color: var(--tc-border);"></div>
-
-                <!-- Call to Action -->
-                <div class="text-center">
-                    <p class="text-sm mb-3" style="color: var(--app-text-muted);">
-                        Fique atento às próximas comunicações!
-                    </p>
-                    <div class="flex items-center justify-center gap-2">
-                        <span class="material-icons tc-cta-icon">notifications</span>
-                        <span class="text-sm" style="color: var(--app-text-secondary);">
-                            Você será notificado quando a disputa começar
-                        </span>
-                    </div>
-                </div>
-
+                <div id="tc-status-badge" class="tc-status-badge"></div>
             </div>
         </div>
+
+        <!-- Meu Status -->
+        <section class="tc-section-ativo" id="tc-meu-status">
+            <div class="tc-section-header-ativo">
+                <span class="material-icons" style="color:var(--tc-primary);">person</span>
+                <h2>Meu Status</h2>
+            </div>
+            <div id="tc-meu-status-content" class="tc-loading-placeholder">
+                Carregando...
+            </div>
+        </section>
+
+        <!-- Escolha da Rodada -->
+        <section class="tc-section-ativo" id="tc-escolha-section" style="display:none;">
+            <div class="tc-section-header-ativo">
+                <span class="material-icons" style="color:var(--tc-primary);">gps_fixed</span>
+                <h2>Escolha da Rodada</h2>
+                <span id="tc-rodada-label" class="tc-rodada-badge"></span>
+            </div>
+            <div id="tc-escolha-content">
+                <!-- Preenchido via JS: lista de times ou escolha já feita -->
+            </div>
+        </section>
+
+        <!-- Minhas Escolhas (histórico) -->
+        <section class="tc-section-ativo" id="tc-historico-section">
+            <div class="tc-section-header-ativo">
+                <span class="material-icons" style="color:var(--tc-estrategia);">history</span>
+                <h2>Minhas Escolhas</h2>
+            </div>
+            <div id="tc-historico-content" class="tc-loading-placeholder">
+                Carregando...
+            </div>
+        </section>
+
+        <!-- Participantes -->
+        <section class="tc-section-ativo" id="tc-participantes-section">
+            <div class="tc-section-header-ativo">
+                <span class="material-icons" style="color:var(--tc-vivo);">groups</span>
+                <h2>Participantes</h2>
+                <span id="tc-vivos-count" class="tc-vivos-badge"></span>
+            </div>
+            <div id="tc-participantes-content" class="tc-loading-placeholder">
+                Carregando...
+            </div>
+        </section>
+
     </div>
 
-    <!-- Footer -->
-    <div class="max-w-4xl mx-auto px-4 py-8 text-center">
-        <p class="text-xs" style="color: var(--app-text-dim);">
-            O Tiro Certo é uma disputa exclusiva do segundo turno da sua liga
-        </p>
+    <!-- ═══════════════════════════════════════════════════
+         MODO TEASER: Exibido quando módulo inativo/sem edição
+         ═══════════════════════════════════════════════════ -->
+    <div id="tc-modo-teaser">
+
+        <!-- Background Pattern -->
+        <div class="relative overflow-hidden">
+            <div class="absolute inset-0 tc-pattern-dots"></div>
+
+            <!-- Content -->
+            <div class="relative z-10 max-w-4xl mx-auto px-4 py-16 text-center">
+
+                <!-- Crosshair SVG animado -->
+                <div class="mb-8">
+                    <svg class="w-32 h-32 mx-auto tc-crosshair-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="46" stroke="currentColor" stroke-width="2" fill="none" opacity="0.3" style="color: var(--tc-primary);"/>
+                        <circle cx="50" cy="50" r="38" stroke="currentColor" stroke-width="2" fill="none" opacity="0.5" style="color: var(--tc-primary);"/>
+                        <circle cx="50" cy="50" r="28" stroke="currentColor" stroke-width="2.5" fill="none" opacity="0.75" style="color: var(--tc-primary);"/>
+                        <circle cx="50" cy="50" r="14" stroke="currentColor" stroke-width="3" fill="none" style="color: var(--tc-primary);"/>
+                        <circle cx="50" cy="50" r="5" fill="currentColor" style="color: var(--tc-primary);"/>
+                        <line x1="50" y1="0" x2="50" y2="22" stroke="currentColor" stroke-width="3" stroke-linecap="round" style="color: var(--tc-primary);"/>
+                        <line x1="50" y1="78" x2="50" y2="100" stroke="currentColor" stroke-width="3" stroke-linecap="round" style="color: var(--tc-primary);"/>
+                        <line x1="0" y1="50" x2="22" y2="50" stroke="currentColor" stroke-width="3" stroke-linecap="round" style="color: var(--tc-primary);"/>
+                        <line x1="78" y1="50" x2="100" y2="50" stroke="currentColor" stroke-width="3" stroke-linecap="round" style="color: var(--tc-primary);"/>
+                    </svg>
+                </div>
+
+                <!-- Badge EM BREVE -->
+                <div class="tc-badge-em-breve inline-flex mb-6">
+                    <span class="tc-badge-dot-outer">
+                        <span class="tc-badge-dot-ping"></span>
+                        <span class="tc-badge-dot-solid"></span>
+                    </span>
+                    <span class="tc-badge-label">EM BREVE</span>
+                </div>
+
+                <!-- Título Principal -->
+                <h1 class="tc-title-main text-white mb-4">
+                    <span class="tc-gradient-text">TIRO</span>
+                    <br>
+                    <span>CERTO</span>
+                </h1>
+
+                <!-- Subtítulo -->
+                <p class="text-xl md:text-2xl text-gray-300 mb-12 font-light">
+                    Até sobrar apenas um jogador!
+                </p>
+
+                <!-- Card Principal -->
+                <div class="tc-card max-w-2xl mx-auto">
+
+                    <!-- Segundo Turno -->
+                    <div class="flex items-center justify-center gap-3 mb-6">
+                        <span class="material-icons tc-stat-icon" style="font-size: 2rem; margin-bottom: 0;">calendar_month</span>
+                        <h2 class="tc-section-title">SEGUNDO TURNO</h2>
+                    </div>
+
+                    <!-- Duração -->
+                    <div class="tc-section-highlight">
+                        <p class="tc-section-label">Duração</p>
+                        <p class="text-sm font-semibold text-white">Até sobrar apenas um jogador!</p>
+                    </div>
+
+                    <!-- Objetivo -->
+                    <div class="tc-section">
+                        <p class="tc-section-label--muted">Objetivo</p>
+                        <p class="text-sm" style="color: var(--app-text-secondary);">Escolher um time por rodada e sobreviver o máximo possível.</p>
+                    </div>
+
+                    <!-- Como funciona -->
+                    <div class="tc-section">
+                        <p class="tc-section-label--muted">Como funciona</p>
+                        <div class="tc-rule-list">
+                            <div class="tc-rule-item">
+                                <span class="material-icons tc-icon-choice">gps_fixed</span>
+                                <p class="text-sm" style="color: var(--app-text-secondary);">Em cada rodada, escolha apenas <strong class="text-white">1 time</strong> para vencer.</p>
+                            </div>
+                            <div class="tc-rule-item">
+                                <span class="material-icons tc-icon-avanca">check_circle</span>
+                                <p class="text-sm" style="color: var(--app-text-secondary);">Se ele <strong style="color: var(--tc-vivo);">vencer</strong>, você avança para a próxima rodada.</p>
+                            </div>
+                            <div class="tc-rule-item">
+                                <span class="material-icons tc-icon-eliminado">cancel</span>
+                                <p class="text-sm" style="color: var(--app-text-secondary);">Se <strong style="color: var(--tc-eliminado);">empatar ou perder</strong>, você está eliminado.</p>
+                            </div>
+                            <div class="tc-rule-item">
+                                <span class="material-icons tc-icon-bloqueia">block</span>
+                                <p class="text-sm" style="color: var(--app-text-secondary);">Você <strong style="color: var(--tc-bloqueio);">não pode repetir times</strong> — cada time só pode ser usado uma vez por edição.</p>
+                            </div>
+                            <div class="tc-rule-item">
+                                <span class="material-icons tc-icon-dica">lightbulb</span>
+                                <p class="text-sm" style="color: var(--app-text-muted);">Deixe os favoritos para as fases finais e avance com times menores no início.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grid de detalhes -->
+                    <div class="tc-grid-stats">
+                        <div class="tc-stat-card">
+                            <span class="material-icons tc-stat-icon">sports_soccer</span>
+                            <div class="tc-stat-label">Modo</div>
+                            <div class="tc-stat-value">Survival</div>
+                        </div>
+                        <div class="tc-stat-card">
+                            <span class="material-icons tc-stat-icon">block</span>
+                            <div class="tc-stat-label">Times</div>
+                            <div class="tc-stat-value">Sem Repetição</div>
+                        </div>
+                        <div class="tc-stat-card">
+                            <span class="material-icons tc-stat-icon">emoji_events</span>
+                            <div class="tc-stat-label">Prêmio</div>
+                            <div class="tc-stat-value">Único Sobrevivente</div>
+                        </div>
+                    </div>
+
+                    <!-- Separador -->
+                    <div class="border-t mb-6" style="border-color: var(--tc-border);"></div>
+
+                    <!-- Call to Action -->
+                    <div class="text-center">
+                        <p class="text-sm mb-3" style="color: var(--app-text-muted);">
+                            Fique atento às próximas comunicações!
+                        </p>
+                        <div class="flex items-center justify-center gap-2">
+                            <span class="material-icons tc-cta-icon">notifications</span>
+                            <span class="text-sm" style="color: var(--app-text-secondary);">
+                                Você será notificado quando a disputa começar
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="max-w-4xl mx-auto px-4 py-8 text-center">
+            <p class="text-xs" style="color: var(--app-text-dim);">
+                O Tiro Certo é uma disputa exclusiva do segundo turno da sua liga
+            </p>
+        </div>
+
     </div>
 
 </div>
