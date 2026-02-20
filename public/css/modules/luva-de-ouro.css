@@ -57,26 +57,26 @@
 .luva-title h3 {
   margin: 0;
   font: 600 14px 'Russo One', sans-serif;
-  color: #1a1a1a;
+  color: var(--surface-card);
 }
 
 .luva-badge {
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--surface-overlay);
   padding: 2px 8px;
   border-radius: 4px;
   font: 600 9px "Inter", sans-serif;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .luva-info-rodada {
   display: flex;
   align-items: center;
   gap: 5px;
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--surface-overlay);
   padding: 4px 10px;
   border-radius: 12px;
   font: 500 10px "Inter", sans-serif;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--surface-white-80);
 }
 
 .luva-info-rodada .material-icons {
@@ -91,7 +91,7 @@
   justify-content: center;
   gap: 16px;
   padding: 8px 12px;
-  background: rgba(0, 0, 0, 0.15);
+  background: var(--surface-overlay-subtle);
   border-bottom: 1px solid var(--module-luva-border);
   flex-wrap: wrap;
 }
@@ -101,7 +101,7 @@
   align-items: center;
   gap: 5px;
   font: 500 10px "Inter", sans-serif;
-  color: #888;
+  color: var(--text-muted);
 }
 
 .luva-legenda .legenda-cor {
@@ -111,8 +111,8 @@
 }
 
 .luva-legenda .legenda-cor.positivo { background: var(--module-luva-primary); }
-.luva-legenda .legenda-cor.negativo { background: #dc3545; }
-.luva-legenda .legenda-cor.parcial { background: #f39c12; }
+.luva-legenda .legenda-cor.negativo { background: var(--color-danger); }
+.luva-legenda .legenda-cor.parcial { background: var(--color-warning); }
 
 /* =============================================
    NAVEGACAO DE RODADAS
@@ -123,7 +123,7 @@
   align-items: center;
   gap: 10px;
   padding: 8px 12px;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--surface-overlay-subtle);
   border-bottom: 1px solid var(--module-luva-border);
 }
 
@@ -149,7 +149,7 @@
 .luva-nav-btn:hover {
   background: rgba(255, 215, 0, 0.4);
   border-color: var(--module-luva-primary);
-  color: #1a1a1a;
+  color: var(--surface-card);
 }
 
 .luva-nav-btn:disabled {
@@ -159,7 +159,7 @@
 
 .luva-nav-info {
   font: 600 11px "Inter", sans-serif;
-  color: #ccc;
+  color: var(--text-secondary);
   min-width: 100px;
   text-align: center;
 }
@@ -179,7 +179,7 @@
 .luva-content-header h4 {
   margin: 0;
   font: 600 13px "Inter", sans-serif;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .luva-subtitulo {
@@ -196,7 +196,7 @@
 .luva-table-container {
   border-radius: 6px;
   border: 1px solid var(--module-luva-border);
-  background: rgba(0, 0, 0, 0.1);
+  background: var(--surface-overlay-subtle);
   overflow-x: auto;
 }
 
@@ -234,21 +234,21 @@
 
 /* Header de rodada parcial (em andamento) */
 .luva-ranking-table thead th.col-rodada.parcial {
-  background: rgba(230, 126, 34, 0.3);
-  color: #f39c12;
+  background: var(--color-warning-muted);
+  color: var(--color-warning);
 }
 
 /* Header de rodada atual */
 .luva-ranking-table thead th.col-rodada.atual {
-  background: rgba(52, 152, 219, 0.3);
-  color: #5dade2;
+  background: var(--color-info-muted);
+  color: var(--color-info);
 }
 
 .luva-ranking-table tbody td {
   padding: 6px 4px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   vertical-align: middle;
-  color: #ccc;
+  color: var(--text-secondary);
   text-align: center;
 }
 
@@ -283,7 +283,7 @@
 .col-rodada-pts .pts-goleiro {
   display: block;
   font: 400 8px "Inter", sans-serif;
-  color: #777;
+  color: var(--text-dim);
   line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
@@ -291,25 +291,25 @@
 }
 
 .col-rodada-pts.positivo .pts-valor { color: var(--module-luva-primary); }
-.col-rodada-pts.negativo .pts-valor { color: #e74c3c; }
-.col-rodada-pts.zero .pts-valor { color: #888; }
-.col-rodada-pts.vazio .pts-valor { color: #444; }
-.col-rodada-pts.vazio .pts-goleiro { color: #333; }
-.col-rodada-pts.sem-goleiro .pts-valor { color: #e67e22; }
-.col-rodada-pts.sem-goleiro .pts-goleiro { color: #e67e22; font-weight: 500; }
+.col-rodada-pts.negativo .pts-valor { color: var(--color-danger); }
+.col-rodada-pts.zero .pts-valor { color: var(--text-muted); }
+.col-rodada-pts.vazio .pts-valor { color: var(--surface-card-hover); }
+.col-rodada-pts.vazio .pts-goleiro { color: var(--surface-card-hover); }
+.col-rodada-pts.sem-goleiro .pts-valor { color: var(--color-warning); }
+.col-rodada-pts.sem-goleiro .pts-goleiro { color: var(--color-warning); font-weight: 500; }
 
 /* Rodada parcial (em andamento) */
 .col-rodada-pts.parcial {
-  background: rgba(230, 126, 34, 0.15);
+  background: var(--color-warning-muted);
   border-left: 2px solid rgba(230, 126, 34, 0.5);
 }
-.col-rodada-pts.parcial .pts-valor { color: #f39c12 !important; }
-.col-rodada-pts.parcial .pts-goleiro { color: #e67e22; }
+.col-rodada-pts.parcial .pts-valor { color: var(--color-warning) !important; }
+.col-rodada-pts.parcial .pts-goleiro { color: var(--color-warning); }
 
 .loading-cell {
   text-align: center;
   padding: 40px !important;
-  color: #888;
+  color: var(--text-muted);
 }
 
 /* Badge de posicao */
@@ -323,7 +323,7 @@
   background: rgba(255, 255, 255, 0.08);
   border-radius: 4px;
   font: 700 11px "Inter", sans-serif;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .pos-badge .material-icons {
@@ -332,31 +332,31 @@
 
 /* Posicoes especiais */
 .luva-ranking-row.pos-1 { background: var(--module-luva-muted); }
-.luva-ranking-row.pos-1 .pos-badge { background: var(--gradient-luva); color: #1a1a1a; }
+.luva-ranking-row.pos-1 .pos-badge { background: var(--gradient-luva); color: var(--surface-card); }
 
-.luva-ranking-row.pos-2 .pos-badge { background: linear-gradient(135deg, #c0c0c0, #a8a8a8); color: #1a1a1a; }
+.luva-ranking-row.pos-2 .pos-badge { background: linear-gradient(135deg, var(--color-silver), #a8a8a8); color: var(--surface-card); }
 
-.luva-ranking-row.pos-3 .pos-badge { background: linear-gradient(135deg, #cd7f32, #b87333); color: #fff; }
+.luva-ranking-row.pos-3 .pos-badge { background: linear-gradient(135deg, var(--color-bronze), #b87333); color: var(--text-primary); }
 
 /* Escudo */
 .escudo-img {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--surface-white-10);
   object-fit: cover;
 }
 
 /* Escudo fallback com Material Icons */
 .col-escudo .material-icons {
   font-size: 20px;
-  color: #666;
+  color: var(--text-disabled);
 }
 
 /* Participante */
 .participante-nome {
   font: 500 11px "Inter", sans-serif;
-  color: #fff;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -373,7 +373,7 @@
   display: inline-block;
   padding: 3px 8px;
   background: var(--gradient-luva);
-  color: #1a1a1a;
+  color: var(--surface-card);
   border-radius: 4px;
   font: 700 11px "Inter", sans-serif;
 }
@@ -401,8 +401,8 @@
 }
 
 .luva-stat-card.blue {
-  background: linear-gradient(135deg, rgba(52, 152, 219, 0.15), rgba(41, 128, 185, 0.08));
-  border: 1px solid rgba(52, 152, 219, 0.25);
+  background: linear-gradient(135deg, var(--color-info-muted), rgba(41, 128, 185, 0.08));
+  border: 1px solid var(--color-info-border);
 }
 
 .luva-stat-card.green {
@@ -411,9 +411,9 @@
 }
 
 .stat-icon { font-size: 16px; margin-bottom: 2px; }
-.stat-value { font: 700 16px "Inter", sans-serif; color: #fff; }
-.stat-label { font: 600 8px "Inter", sans-serif; color: #999; text-transform: uppercase; letter-spacing: 0.4px; }
-.stat-detail { font: 400 9px "Inter", sans-serif; color: #666; margin-top: 1px; }
+.stat-value { font: 700 16px "Inter", sans-serif; color: var(--text-primary); }
+.stat-label { font: 600 8px "Inter", sans-serif; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
+.stat-detail { font: 400 9px "Inter", sans-serif; color: var(--text-disabled); margin-top: 1px; }
 
 /* =============================================
    MINI DASHBOARD
@@ -427,19 +427,19 @@
 
 .luva-mini-dashboard .mini-dash-card {
   flex: 1;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  background: var(--gradient-dark);
   border-radius: 12px;
   padding: 15px 20px;
   display: flex;
   align-items: center;
   gap: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--surface-white-10);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .luva-mini-dashboard .mini-dash-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .luva-mini-dashboard .mini-dash-icon {
@@ -460,7 +460,7 @@
 .luva-mini-dashboard .mini-dash-valor {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
   line-height: 1.2;
 }
 

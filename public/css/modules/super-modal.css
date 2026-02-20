@@ -71,7 +71,7 @@
 
 .super-toast__close:hover {
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--surface-white-10);
 }
 
 /* Progress bar */
@@ -138,7 +138,7 @@
 .super-modal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--surface-overlay-medium);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     z-index: var(--z-modal-backdrop);

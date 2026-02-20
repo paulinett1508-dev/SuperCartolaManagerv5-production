@@ -120,6 +120,22 @@
     --app-restaum-perigo: var(--app-warning);          /* Amarelo zona de perigo */
     --app-restaum-campeao: var(--app-gold);            /* Dourado campeão */
 
+    /* Resta Um — Estado Vivo (verde #22c55e / success-light) */
+    --app-restaum-vivo-border: rgba(34, 197, 94, 0.3);
+    --app-restaum-vivo-gradient: linear-gradient(135deg, rgba(34, 197, 94, 0.08), transparent);
+    --app-restaum-vivo-gradient-strong: linear-gradient(90deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.05) 100%);
+
+    /* Resta Um — Estado Eliminado (vermelho #ef4444 / danger) */
+    --app-restaum-eliminado-border: rgba(239, 68, 68, 0.3);
+    --app-restaum-eliminado-gradient: linear-gradient(135deg, rgba(239, 68, 68, 0.08), transparent);
+    --app-restaum-eliminado-gradient-strong: linear-gradient(90deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.08) 100%);
+    --app-restaum-eliminado-glow: 0 0 12px rgba(239, 68, 68, 0.3);
+    --app-restaum-lanterna-gradient: linear-gradient(90deg, rgba(239, 68, 68, 0.3) 0%, rgba(239, 68, 68, 0.1) 100%);
+
+    /* Resta Um — Estado Campeão (dourado #ffd700 / gold) */
+    --app-restaum-campeao-border: rgba(255, 215, 0, 0.4);
+    --app-restaum-campeao-gradient: linear-gradient(135deg, rgba(255, 215, 0, 0.1), transparent);
+
     /* Notícias do Time (gradient dinâmico via inline style) */
     --app-noticias-border: rgba(255, 255, 255, 0.15);
     --app-noticias-fallback-gradient: linear-gradient(135deg, #374151 0%, #1f2937 50%, #4b5563 100%);

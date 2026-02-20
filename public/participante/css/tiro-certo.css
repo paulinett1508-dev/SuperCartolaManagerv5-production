@@ -30,6 +30,24 @@
     --tc-eliminado:       var(--app-danger);              /* Vermelho: eliminado */
     --tc-estrategia:      var(--app-warning);             /* Amarelo: dica */
     --tc-bloqueio:        var(--app-primary);             /* Laranja: não repetir */
+
+    /* Status — backgrounds e bordas derivados */
+    --tc-vivo-bg:         rgba(34, 197, 94, 0.2);        /* Badge vivo background */
+    --tc-vivo-bg-subtle:  rgba(34, 197, 94, 0.15);       /* Lista vivos background */
+    --tc-vivo-border:     rgba(34, 197, 94, 0.4);        /* Badge vivo borda */
+    --tc-vivo-border-subtle: rgba(34, 197, 94, 0.3);     /* Card/lista vivo borda */
+
+    --tc-eliminado-bg:    rgba(239, 68, 68, 0.2);        /* Badge eliminado background */
+    --tc-eliminado-border: rgba(239, 68, 68, 0.4);       /* Badge eliminado borda */
+    --tc-eliminado-border-subtle: rgba(239, 68, 68, 0.2); /* Card eliminado borda */
+
+    --tc-campeao-bg:      rgba(255, 215, 0, 0.2);        /* Badge campeão background */
+    --tc-campeao-bg-subtle: rgba(255, 215, 0, 0.08);     /* Card campeão background */
+    --tc-campeao-border:  rgba(255, 215, 0, 0.4);        /* Badge campeão borda */
+    --tc-campeao-border-strong: rgba(255, 215, 0, 0.5);  /* Card campeão borda */
+
+    /* Header gradient */
+    --tc-header-gradient: linear-gradient(135deg, rgba(255, 85, 0, 0.15) 0%, rgba(15, 23, 42, 0.95) 60%);
 }
 
 /* =====================================================================
@@ -336,7 +354,7 @@
     font-family: var(--app-font-brand), sans-serif;
     font-size: 1.25rem;
     font-weight: 700;
-    color: white;
+    color: var(--app-text-primary);
     line-height: 1.2;
 }
 
@@ -393,7 +411,7 @@
     font-family: var(--app-font-brand), sans-serif;
     font-size: 1rem;
     font-weight: 700;
-    color: white;
+    color: var(--app-text-primary);
 }
 
 .tc-rodada-badge {
@@ -469,7 +487,7 @@
 .tc-participante-nome {
     font-weight: 600;
     font-size: var(--app-font-sm);
-    color: white;
+    color: var(--app-text-primary);
     flex: 1;
 }
 
@@ -539,7 +557,7 @@
 .tc-time-nome {
     font-size: var(--app-font-sm);
     font-weight: 600;
-    color: white;
+    color: var(--app-text-primary);
 }
 
 .tc-btn-confirmar {
@@ -549,7 +567,7 @@
     border: none;
     border-radius: var(--app-radius-lg);
     background: var(--tc-primary);
-    color: white;
+    color: var(--app-text-primary);
     font-family: var(--app-font-brand), sans-serif;
     font-size: 1rem;
     font-weight: 700;
@@ -608,7 +626,7 @@
     flex: 1;
     font-size: var(--app-font-sm);
     font-weight: 600;
-    color: white;
+    color: var(--app-text-primary);
 }
 
 .tc-escolha-resultado {
@@ -635,7 +653,7 @@
     font-family: var(--app-font-brand), sans-serif;
     font-size: 1.25rem;
     font-weight: 700;
-    color: white;
+    color: var(--app-text-primary);
     margin-top: 0.5rem;
 }
 

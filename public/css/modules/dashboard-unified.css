@@ -34,9 +34,9 @@
    ============================================================ */
 
 .health-section {
-    background: #1a1a1a;
+    background: var(--surface-card);
     border-radius: 12px;
-    border: 1px solid #2d2d2d;
+    border: 1px solid var(--border-color);
     margin: 24px 0;
     overflow: hidden;
 }
@@ -52,7 +52,7 @@
 }
 
 .health-section-header:hover {
-    background: #1f1f1f;
+    background: var(--surface-card-elevated);
 }
 
 .health-section-title {
@@ -62,7 +62,7 @@
     font-family: var(--font-family-brand, 'Russo One', sans-serif);
     font-size: 0.95rem;
     font-weight: 400;
-    color: #ffffff;
+    color: var(--text-primary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -87,9 +87,9 @@
     font-weight: 600;
     padding: 4px 12px;
     border-radius: 6px;
-    background: rgba(34, 197, 94, 0.1);
+    background: var(--color-success-muted);
     color: var(--color-success-light);
-    border: 1px solid rgba(34, 197, 94, 0.2);
+    border: 1px solid var(--module-artilheiro-border);
 }
 
 .health-score-badge.warning {

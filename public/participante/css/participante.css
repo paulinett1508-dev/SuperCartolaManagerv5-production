@@ -22,7 +22,7 @@
 }
 
 .bg-primary\/80 {
-    background-color: rgba(255, 85, 0, 0.8);
+    background-color: color-mix(in srgb, var(--app-primary) 80%, transparent);
 }
 
 .border-primary {
@@ -139,7 +139,7 @@ body {
     background: var(--app-header-bg);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255, 85, 0, 0.15);
+    border-bottom: 1px solid var(--app-primary-border);
     box-shadow: var(--app-shadow-sm);
 }
 
@@ -178,7 +178,7 @@ body {
     width: 24px;
     height: 24px;
     border-radius: var(--app-radius-full);
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid var(--app-text-disabled);
     object-fit: cover;
     position: relative;
     top: 16px;
@@ -217,7 +217,7 @@ body {
     height: var(--app-touch-target);
     border-radius: var(--app-radius-full);
     border: none;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--participante-border);
     color: var(--app-text-primary);
     display: flex;
     align-items: center;
@@ -229,7 +229,7 @@ body {
 
 .btn-icon-modern:active {
     transform: scale(0.9);
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--app-primary-border);
 }
 
 .material-icon {
@@ -245,7 +245,7 @@ body {
     height: 8px;
     background: var(--app-info);
     border-radius: var(--app-radius-full);
-    border: 2px solid rgba(10, 10, 10, 0.9);
+    border: 2px solid var(--app-surface-overlay);
     animation: app-pulse 2s infinite;
 }
 
@@ -440,7 +440,7 @@ body {
     border-radius: var(--app-radius-lg);
     padding: var(--app-space-4) var(--app-space-3);
     border: var(--app-border-subtle);
-    box-shadow: var(--app-shadow-md), 0 2px 8px rgba(255, 85, 0, 0.1);
+    box-shadow: var(--app-shadow-md), 0 2px 8px var(--app-primary-muted);
     transition: all var(--app-transition-bounce);
     position: relative;
     overflow: hidden;
@@ -470,7 +470,7 @@ body {
     font-size: 24px;
     margin-bottom: var(--app-space-2);
     opacity: 0.9;
-    filter: drop-shadow(0 2px 8px rgba(255, 85, 0, 0.3));
+    filter: drop-shadow(0 2px 8px var(--app-primary-border));
 }
 
 .stat-label-modern {
@@ -487,7 +487,7 @@ body {
     font-weight: var(--app-font-extrabold);
     color: var(--app-text-primary);
     font-family: var(--app-font-mono);
-    text-shadow: 0 2px 12px rgba(255, 255, 255, 0.1);
+    text-shadow: 0 2px 12px var(--participante-border);
     letter-spacing: -0.5px;
     white-space: nowrap;
     overflow: hidden;
@@ -508,12 +508,12 @@ body {
 /* Card de saldo positivo com gradiente verde */
 .stat-balance.saldo-positivo {
     background: linear-gradient(135deg, var(--app-success-muted) 0%, rgba(22, 163, 74, 0.08) 100%);
-    border: 1px solid rgba(34, 197, 94, 0.2);
-    box-shadow: var(--app-shadow-lg), 0 2px 8px rgba(34, 197, 94, 0.15);
+    border: 1px solid var(--app-success-muted);
+    box-shadow: var(--app-shadow-lg), 0 2px 8px var(--app-success-muted);
 }
 
 .stat-balance.saldo-positivo::before {
-    background: linear-gradient(90deg, var(--app-success-light) 0%, #16A34A 100%);
+    background: linear-gradient(90deg, var(--app-success-light) 0%, var(--app-success) 100%);
 }
 
 .stat-balance.saldo-positivo .stat-icon-modern {
@@ -522,7 +522,7 @@ body {
 
 .stat-balance.saldo-positivo .stat-value-modern {
     color: var(--app-success-text);
-    text-shadow: 0 2px 12px rgba(34, 197, 94, 0.2);
+    text-shadow: 0 2px 12px var(--app-success-muted);
 }
 
 /* Card de saldo negativo com gradiente avermelhado */

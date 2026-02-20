@@ -6,11 +6,11 @@
 
 /* === CONTAINER DO RANKING === */
 #ranking-geral {
-    background: linear-gradient(135deg, #2a2a2a 0%, #1e1e1e 100%);
+    background: var(--gradient-card);
     border-radius: 16px;
     padding: 30px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 69, 0, 0.2);
+    box-shadow: var(--shadow-lg);
+    border: var(--border-default);
     position: relative;
     overflow: hidden;
 }
@@ -22,8 +22,8 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(135deg, #ff4500 0%, #e8472b 100%);
-    box-shadow: 0 0 15px rgba(255, 69, 0, 0.6);
+    background: var(--gradient-primary);
+    box-shadow: var(--shadow-primary-glow);
 }
 
 /* === HEADER DO RANKING === */
@@ -31,7 +31,7 @@
     text-align: center;
     margin-bottom: 30px;
     padding-bottom: 20px;
-    border-bottom: 2px solid rgba(255, 69, 0, 0.3);
+    border-bottom: 2px solid var(--color-primary-border);
 }
 
 .ranking-title {
@@ -45,19 +45,19 @@
 .ranking-icon {
     width: 48px;
     height: 48px;
-    background: linear-gradient(135deg, #ff4500 0%, #e8472b 100%);
+    background: var(--gradient-primary);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 24px;
-    color: white;
-    box-shadow: 0 4px 20px rgba(255, 69, 0, 0.4);
-    border: 3px solid rgba(255, 69, 0, 0.3);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-primary);
+    border: 3px solid var(--color-primary-border);
 }
 
 .ranking-title h2 {
-    color: #ffffff !important;
+    color: var(--text-primary) !important;
     font-family: var(--font-family-brand);
     font-size: 28px;
     font-weight: 400;
@@ -67,7 +67,7 @@
 }
 
 .ranking-subtitle {
-    color: #a0a0a0 !important;
+    color: var(--text-muted) !important;
     font-size: 14px;
     font-weight: 500;
     margin: 0;
@@ -81,13 +81,13 @@
     align-items: center;
     margin-bottom: 20px;
     padding: 15px 20px;
-    background: rgba(255, 69, 0, 0.05);
+    background: var(--color-primary-hover-bg);
     border-radius: 12px;
-    border: 1px solid rgba(255, 69, 0, 0.2);
+    border: var(--border-default);
 }
 
 .ranking-info {
-    color: #e0e0e0;
+    color: var(--text-secondary);
     font-size: 13px;
     font-weight: 600;
 }
@@ -102,8 +102,8 @@
     background: rgba(26, 26, 26, 0.9);
     border-radius: 12px;
     overflow: hidden;
-    border: 1px solid rgba(255, 69, 0, 0.3);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    border: var(--border-strong);
+    box-shadow: var(--shadow-lg);
 }
 
 .ranking-table {
@@ -113,38 +113,38 @@
 }
 
 .ranking-table th {
-    background: linear-gradient(135deg, #ff4500 0%, #e8472b 100%);
-    color: #ffffff;
+    background: var(--gradient-primary);
+    color: var(--text-primary);
     padding: 15px 12px;
     font-weight: 700;
     text-transform: uppercase;
     font-size: 12px;
     letter-spacing: 1px;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    border-bottom: 2px solid rgba(255, 69, 0, 0.5);
+    text-shadow: 0 1px 3px var(--surface-overlay-light);
+    border-bottom: 2px solid rgba(255, 85, 0, 0.5);
 }
 
 .ranking-table td {
     padding: 14px 12px;
-    border-bottom: 1px solid rgba(255, 69, 0, 0.1);
-    color: #e0e0e0;
+    border-bottom: var(--border-subtle);
+    color: var(--text-secondary);
     font-size: 13px;
     transition: background-color 0.2s ease;
 }
 
 /* HOVER OTIMIZADO - Apenas mudança de cor */
 .ranking-table tbody tr:hover {
-    background: rgba(255, 69, 0, 0.08) !important;
+    background: var(--table-row-hover) !important;
 }
 
 .ranking-table tbody tr:nth-child(even) {
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--table-row-stripe);
 }
 
 /* === POSIÇÕES ESPECIAIS === */
 /* Apenas 1º lugar destacado (ouro) */
 .ranking-table tbody tr:nth-child(1) {
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 193, 7, 0.1) 100%) !important;
+    background: linear-gradient(135deg, var(--color-gold-muted) 0%, rgba(255, 193, 7, 0.1) 100%) !important;
     border-left: 4px solid var(--color-gold);
     font-weight: 600;
 }

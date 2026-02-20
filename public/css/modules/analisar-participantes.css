@@ -3,7 +3,7 @@
    ============================================================ */
 
 .analisar-page {
-    background: #121212;
+    background: var(--surface-bg);
     min-height: 100vh;
 }
 

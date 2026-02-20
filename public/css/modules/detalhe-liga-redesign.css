@@ -5,7 +5,7 @@
 
 /* === RESET E BASE === */
 .detalhe-liga-redesign {
-    background: #121212 !important;
+    background: var(--surface-bg) !important;
     min-height: 100vh;
 }
 
@@ -16,8 +16,8 @@
 
 /* === HEADER DA LIGA (COMPACTO) === */
 .detalhe-liga-redesign .liga-header-new {
-    background: linear-gradient(135deg, #1E1E1E 0%, #242424 100%);
-    border: 1px solid #333333;
+    background: linear-gradient(135deg, var(--surface-card) 0%, #242424 100%);
+    border: 1px solid var(--surface-card-hover);
     border-radius: 10px;
     padding: 14px 20px;
     margin-bottom: 16px;
@@ -36,7 +36,7 @@
     width: 40px;
     height: 40px;
     border-radius: 8px;
-    background: rgba(255, 85, 0, 0.1);
+    background: var(--color-primary-muted);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -51,19 +51,19 @@
 
 .detalhe-liga-redesign .liga-logo-icon {
     font-size: 20px;
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 .detalhe-liga-redesign .liga-header-info h1 {
     font-size: 1.125rem;
     font-weight: 600;
-    color: #ffffff;
+    color: var(--text-primary);
     margin: 0 0 2px 0;
 }
 
 .detalhe-liga-redesign .liga-header-info p {
     font-size: 0.75rem;
-    color: #9ca3af;
+    color: var(--text-muted);
     margin: 0;
 }
 
@@ -88,13 +88,13 @@
 
 .detalhe-liga-redesign .btn-header-secondary {
     background: #262626;
-    color: #9ca3af;
-    border: 1px solid #333333;
+    color: var(--text-muted);
+    border: 1px solid var(--surface-card-hover);
 }
 
 .detalhe-liga-redesign .btn-header-secondary:hover {
-    background: #333333;
-    color: #ffffff;
+    background: var(--surface-card-hover);
+    color: var(--text-primary);
 }
 
 .detalhe-liga-redesign .btn-header-secondary .material-icons {
@@ -107,7 +107,7 @@
     align-items: center;
     gap: 4px;
     background: linear-gradient(135deg, #f59e0b, #d97706);
-    color: #fff;
+    color: var(--text-primary);
     padding: 4px 10px;
     border-radius: 6px;
     font-size: 0.7rem;
@@ -139,10 +139,10 @@ body.temporada-historica [data-action="limpar-cache"] {
     align-items: center;
     gap: 5px;
     padding: 6px 12px;
-    background: #1E1E1E;
-    border: 1px solid #333333;
+    background: var(--surface-card);
+    border: 1px solid var(--surface-card-hover);
     border-radius: 6px;
-    color: #9ca3af;
+    color: var(--text-muted);
     font-size: 0.75rem;
     font-weight: 500;
     cursor: pointer;
@@ -152,7 +152,7 @@ body.temporada-historica [data-action="limpar-cache"] {
 
 .detalhe-liga-redesign .btn-back-new:hover {
     background: #262626;
-    color: #ffffff;
+    color: var(--text-primary);
     border-color: #444444;
 }
 
@@ -171,8 +171,8 @@ body.temporada-historica [data-action="limpar-cache"] {
 /* === CARD DE MÓDULO (COMPACTO) === */
 .detalhe-liga-redesign .module-card {
     position: relative;
-    background: linear-gradient(135deg, #1E1E1E 0%, #242424 100%);
-    border: 1px solid #333333;
+    background: linear-gradient(135deg, var(--surface-card) 0%, #242424 100%);
+    border: 1px solid var(--surface-card-hover);
     border-radius: 10px;
     padding: 14px 16px;
     cursor: pointer;
@@ -187,7 +187,7 @@ body.temporada-historica [data-action="limpar-cache"] {
     left: 0;
     width: 3px;
     height: 100%;
-    background: #FF5500;
+    background: var(--color-primary);
     opacity: 0;
     transition: opacity 0.2s ease;
     border-radius: 10px 0 0 10px;
@@ -196,7 +196,7 @@ body.temporada-historica [data-action="limpar-cache"] {
 .detalhe-liga-redesign .module-card:hover {
     border-color: rgba(255, 85, 0, 0.5);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 4px 12px var(--surface-overlay-subtle);
 }
 
 .detalhe-liga-redesign .module-card:hover::before {
@@ -226,12 +226,12 @@ body.temporada-historica [data-action="limpar-cache"] {
 
 /* Cores dos ícones por módulo */
 .detalhe-liga-redesign .module-card[data-module="participantes"] .module-icon {
-    background: rgba(59, 130, 246, 0.15);
-    color: #3b82f6;
+    background: var(--color-info-muted);
+    color: var(--color-info);
 }
 
 .detalhe-liga-redesign .module-card[data-module="ranking-geral"] .module-icon {
-    background: rgba(34, 197, 94, 0.15);
+    background: var(--color-success-muted);
     color: var(--color-success-light);
 }
 
@@ -241,8 +241,8 @@ body.temporada-historica [data-action="limpar-cache"] {
 }
 
 .detalhe-liga-redesign .module-card[data-module="top10"] .module-icon {
-    background: rgba(234, 179, 8, 0.15);
-    color: #eab308;
+    background: var(--color-warning-muted);
+    color: var(--color-warning);
 }
 
 .detalhe-liga-redesign .module-card[data-module="rodadas"] .module-icon {
@@ -256,8 +256,8 @@ body.temporada-historica [data-action="limpar-cache"] {
 }
 
 .detalhe-liga-redesign .module-card[data-module="mata-mata"] .module-icon {
-    background: rgba(239, 68, 68, 0.15);
-    color: #ef4444;
+    background: var(--color-danger-muted);
+    color: var(--color-danger);
 }
 
 .detalhe-liga-redesign .module-card[data-module="pontos-corridos"] .module-icon {
@@ -271,23 +271,23 @@ body.temporada-historica [data-action="limpar-cache"] {
 }
 
 .detalhe-liga-redesign .module-card[data-module="artilheiro-campeao"] .module-icon {
-    background: rgba(16, 185, 129, 0.15);
-    color: #10b981;
+    background: var(--color-success-muted);
+    color: var(--color-success);
 }
 
 .detalhe-liga-redesign .module-card[data-module="fluxo-financeiro"] .module-icon {
-    background: rgba(34, 197, 94, 0.15);
+    background: var(--color-success-muted);
     color: var(--color-success-light);
 }
 
 .detalhe-liga-redesign .module-card[data-module="capitao-luxo"] .module-icon {
-    background: rgba(139, 92, 246, 0.15);
+    background: var(--module-capitao-muted);
     color: var(--module-capitao-primary);
 }
 
 /* Card temático Capitão de Luxo */
 .detalhe-liga-redesign .module-card-capitao {
-    border-color: rgba(139, 92, 246, 0.25);
+    border-color: var(--module-capitao-border);
 }
 
 .detalhe-liga-redesign .module-card-capitao::before {
@@ -296,7 +296,7 @@ body.temporada-historica [data-action="limpar-cache"] {
 
 .detalhe-liga-redesign .module-card-capitao:hover {
     border-color: rgba(139, 92, 246, 0.5);
-    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.15);
+    box-shadow: 0 4px 16px var(--module-capitao-muted);
 }
 
 .detalhe-liga-redesign .module-card-capitao:hover .module-arrow {
@@ -305,13 +305,13 @@ body.temporada-historica [data-action="limpar-cache"] {
 
 /* Seta do card */
 .detalhe-liga-redesign .module-card .module-arrow {
-    color: #4b5563;
+    color: var(--text-dim);
     font-size: 18px;
     transition: all 0.2s ease;
 }
 
 .detalhe-liga-redesign .module-card:hover .module-arrow {
-    color: #FF5500;
+    color: var(--color-primary);
     transform: translateX(2px);
 }
 
@@ -320,13 +320,13 @@ body.temporada-historica [data-action="limpar-cache"] {
     font-family: var(--font-family-brand);
     font-size: 0.8125rem;
     font-weight: 400;
-    color: #ffffff;
+    color: var(--text-primary);
     margin: 0 0 2px 0;
 }
 
 .detalhe-liga-redesign .module-card .module-description {
     font-size: 0.6875rem;
-    color: #6b7280;
+    color: var(--text-dim);
     margin: 0;
     line-height: 1.3;
     display: -webkit-box;
@@ -337,7 +337,7 @@ body.temporada-historica [data-action="limpar-cache"] {
 
 .detalhe-liga-redesign .module-card .module-count {
     font-size: 0.625rem;
-    color: #9ca3af;
+    color: var(--text-muted);
     margin-top: 4px;
 }
 
@@ -350,32 +350,32 @@ body.temporada-historica [data-action="limpar-cache"] {
 }
 
 .detalhe-liga-redesign .quick-stat-card {
-    background: #1E1E1E;
-    border: 1px solid #333333;
+    background: var(--surface-card);
+    border: 1px solid var(--surface-card-hover);
     border-radius: 8px;
     padding: 10px 12px;
     text-align: center;
 }
 
 .detalhe-liga-redesign .quick-stat-card.highlight {
-    background: rgba(255, 85, 0, 0.08);
-    border-color: rgba(255, 85, 0, 0.3);
+    background: var(--table-row-hover);
+    border-color: var(--color-primary-border);
 }
 
 .detalhe-liga-redesign .quick-stat-value {
     font-size: 1.125rem;
     font-weight: 700;
-    color: #ffffff;
+    color: var(--text-primary);
     margin-bottom: 2px;
 }
 
 .detalhe-liga-redesign .quick-stat-card.highlight .quick-stat-value {
-    color: #FF5500;
+    color: var(--color-primary);
 }
 
 .detalhe-liga-redesign .quick-stat-label {
     font-size: 0.5625rem;
-    color: #6b7280;
+    color: var(--text-dim);
     text-transform: uppercase;
     letter-spacing: 0.3px;
     font-weight: 600;
@@ -390,8 +390,8 @@ body.temporada-historica [data-action="limpar-cache"] {
 }
 
 .detalhe-liga-redesign .highlight-card {
-    background: #1E1E1E;
-    border: 1px solid #333333;
+    background: var(--surface-card);
+    border: 1px solid var(--surface-card-hover);
     border-radius: 8px;
     overflow: hidden;
 }
@@ -401,8 +401,8 @@ body.temporada-historica [data-action="limpar-cache"] {
     align-items: center;
     justify-content: space-between;
     padding: 10px 12px;
-    background: rgba(255, 255, 255, 0.02);
-    border-bottom: 1px solid #2a2a2a;
+    background: var(--table-row-stripe);
+    border-bottom: 1px solid var(--surface-card-elevated);
 }
 
 .detalhe-liga-redesign .highlight-card-title {

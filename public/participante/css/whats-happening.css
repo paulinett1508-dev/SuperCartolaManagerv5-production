@@ -121,7 +121,7 @@
 /* Ícone do FAB */
 .wh-fab-icon {
     font-size: 32px;
-    color: white;
+    color: var(--app-text-primary);
     transition: transform 0.3s ease;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
     animation: wh-icon-dance 0.5s ease-in-out infinite alternate;
@@ -226,7 +226,7 @@
     height: 20px;
     padding: 0 6px;
     background: var(--app-danger);
-    color: white;
+    color: var(--app-text-primary);
     font-size: 11px;
     font-weight: 700;
     font-family: var(--app-font-mono);
@@ -308,7 +308,7 @@
 }
 
 .wh-fab--waiting .wh-fab-icon {
-    color: rgba(255, 255, 255, 0.6) !important;
+    color: var(--app-text-muted) !important;
     animation: none !important;
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2)) grayscale(80%) !important;
 }
@@ -338,7 +338,7 @@
 }
 
 .wh-fab--live .wh-fab-icon {
-    color: white !important;
+    color: var(--app-text-primary) !important;
     animation: wh-icon-dance-intense 0.3s ease-in-out infinite alternate !important;
     filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8)) !important;
 }
@@ -371,7 +371,7 @@
 }
 
 .wh-fab--interval .wh-fab-icon {
-    color: rgba(255, 255, 255, 0.85) !important;
+    color: var(--app-text-secondary) !important;
     animation: wh-icon-dance 1.5s ease-in-out infinite alternate !important;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3)) !important;
 }
@@ -399,7 +399,7 @@
 }
 
 .wh-fab--cooling .wh-fab-icon {
-    color: rgba(255, 255, 255, 0.7) !important;
+    color: var(--app-text-muted) !important;
     animation: wh-cooling-flicker 2s ease-in-out infinite !important;
     filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3)) !important;
 }
@@ -432,7 +432,7 @@
 }
 
 .wh-fab--finished .wh-fab-icon {
-    color: rgba(156, 163, 175, 0.6) !important;
+    color: var(--app-text-muted) !important;
     animation: none !important;
     filter: grayscale(100%) !important;
 }
@@ -552,7 +552,7 @@
     -webkit-overflow-scrolling: touch;
     /* Scrollbar customizada */
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+    scrollbar-color: var(--app-noticias-border) transparent;
     /* Mask: gradient fade no topo e fundo */
     mask-image: linear-gradient(
         to bottom,
@@ -580,7 +580,7 @@
 }
 
 .wh-content::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--app-noticias-border);
     border-radius: 2px;
 }
 
@@ -1536,7 +1536,7 @@
    14. INSIGHTS POR NÍVEL DE INTENSIDADE
    ======================================== */
 .wh-insight--inferno {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(255, 69, 0, 0.1)) !important;
+    background: linear-gradient(135deg, var(--app-danger-muted), var(--app-primary-muted)) !important;
     color: var(--app-danger) !important;
     border-left: 3px solid var(--app-danger);
     animation: wh-insight-pulse 1s ease-in-out infinite;
@@ -1555,14 +1555,14 @@
 }
 
 .wh-insight--tied {
-    background: rgba(168, 85, 247, 0.1) !important;
-    color: #a855f7 !important;
-    border-left: 3px solid #a855f7;
+    background: var(--app-purple-muted) !important;
+    color: var(--app-purple) !important;
+    border-left: 3px solid var(--app-purple);
     animation: wh-insight-pulse 1.2s ease-in-out infinite;
 }
 
 .wh-insight--blowout {
-    background: rgba(34, 197, 94, 0.1) !important;
+    background: var(--app-success-muted) !important;
     color: var(--app-success) !important;
     border-left: 3px solid var(--app-success);
 }
@@ -1864,7 +1864,7 @@
 }
 
 .wh-podium-table tr {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--app-glass-elevated);
 }
 
 .wh-podium-table tr:last-child {
