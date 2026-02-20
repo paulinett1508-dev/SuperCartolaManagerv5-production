@@ -113,7 +113,7 @@
 
 .extrato-hero-v2__label .material-icons {
     font-size: 18px;
-    color: var(--color-primary, var(--color-primary));
+    color: var(--color-primary);
 }
 
 .extrato-hero-v2__actions {
@@ -284,7 +284,7 @@
 
 .extrato-timeline-v2__title .material-icons {
     font-size: 18px;
-    color: var(--color-primary, var(--color-primary));
+    color: var(--color-primary);
 }
 
 /* Filtros da Timeline */
@@ -313,7 +313,7 @@
 .extrato-timeline-v2__filter-btn--active {
     background: var(--color-primary-muted, rgba(255, 85, 0, 0.15));
     border-color: var(--color-primary-border, rgba(255, 85, 0, 0.3));
-    color: var(--color-primary, var(--color-primary));
+    color: var(--color-primary);
 }
 
 /* Container de itens */
@@ -378,7 +378,7 @@
 
 .extrato-timeline-v2__group-icon--rodada {
     background: rgba(255, 85, 0, 0.12);
-    color: var(--color-primary, var(--color-primary));
+    color: var(--color-primary);
 }
 
 .extrato-timeline-v2__group-icon--inscricao {
@@ -749,7 +749,7 @@
 
 .extrato-chart-v2__title .material-icons {
     font-size: 18px;
-    color: var(--color-primary, var(--color-primary));
+    color: var(--color-primary);
 }
 
 .extrato-chart-v2__filters {
@@ -776,7 +776,7 @@
 .extrato-chart-v2__filter-btn--active {
     background: var(--color-primary-muted, rgba(255, 85, 0, 0.15));
     border-color: var(--color-primary-border, rgba(255, 85, 0, 0.3));
-    color: var(--color-primary, var(--color-primary));
+    color: var(--color-primary);
 }
 
 .extrato-chart-v2__container {
@@ -822,7 +822,7 @@
 
 .extrato-performance-v2__title .material-icons {
     font-size: 18px;
-    color: var(--color-primary, var(--color-primary));
+    color: var(--color-primary);
 }
 
 .extrato-performance-v2__grid {

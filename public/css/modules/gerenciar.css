@@ -233,7 +233,7 @@
 #modalConfigModulo .table td,
 #modalWizardModulo .table td,
 #modalConfigModulos .table td {
-    border-color: rgba(255, 85, 0, 0.1);
+    border-color: var(--color-primary-muted);
     padding: 6px 0;
 }
 
@@ -1105,7 +1105,7 @@ input:checked + .toggle-slider:before {
 }
 
 .btn-outline:hover:not(:disabled) {
-    background: rgba(255, 85, 0, 0.1);
+    background: var(--color-primary-muted);
     border-color: var(--accent-orange-light, #ff7a33);
     color: var(--accent-orange-light, #ff7a33);
 }
@@ -1154,7 +1154,7 @@ input:checked + .toggle-slider:before {
     background: var(--surface-card);
     border-radius: var(--radius-card);
     border: 1px solid var(--border-default);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 85, 0, 0.1);
+    box-shadow: 0 20px 60px var(--surface-overlay), 0 0 0 1px var(--color-primary-muted);
     max-width: 700px;
     width: 100%;
     max-height: 90vh;

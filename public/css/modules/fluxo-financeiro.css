@@ -6,24 +6,24 @@
 :root {
   /* Variáveis de cor originais redefinidas para o tema laranja/preto */
   --bg-primary: #0a0a0a;
-  --bg-secondary: #121212;
-  --bg-tertiary: #1a1a1a;
-  --bg-card: #1e1e1e;
+  --bg-secondary: var(--surface-bg);
+  --bg-tertiary: var(--surface-card);
+  --bg-card: var(--surface-card);
   --bg-card-hover: #262626;
   --text-primary: #ffffff;
   --text-secondary: #e0e0e0;
   --text-muted: #a0a0a0;
   --text-dark: #666666;
   --laranja: #ff4500; /* Tema laranja principal */
-  --laranja-dark: #e8472b; /* Versão mais escura do laranja */
+  --laranja-dark: var(--color-primary-dark); /* Versão mais escura do laranja */
   --border-primary: rgba(255, 69, 0, 0.3); /* Borda com tom laranja */
   /* Gradientes atualizados para o tema laranja */
-  --gradient-primary: linear-gradient(135deg, #ff4500 0%, #e8472b 100%);
+  --gradient-primary: linear-gradient(135deg, #ff4500 0%, var(--color-primary-dark) 100%);
   --gradient-secondary: linear-gradient(135deg, #ff6347 0%, #ff7f50 100%); /* Gradiente secundário laranja */
   --success: var(--color-success-light);
-  --danger: #ef4444;
+  --danger: var(--color-danger);
   --warning: #f59e0b;
-  --info: #3b82f6;
+  --info: var(--color-info);
 }
 
 /* === CLASSES UTILITÁRIAS DE VALORES === */
@@ -73,14 +73,14 @@
 }
 
 .tab-btn-inline:hover {
-  background: rgba(255, 85, 0, 0.1);
-  color: var(--laranja, #FF5500);
+  background: var(--color-primary-muted);
+  color: var(--laranja, var(--color-primary));
 }
 
 .tab-btn-inline.active {
-  background: linear-gradient(135deg, #FF5500 0%, #cc4400 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, #cc4400 100%);
   color: #fff;
-  box-shadow: 0 2px 6px rgba(255, 85, 0, 0.3);
+  box-shadow: 0 2px 6px var(--color-primary-border);
 }
 
 /* Responsivo - tabs inline */
@@ -787,8 +787,8 @@ body {
     position: sticky;
     top: 0;
     z-index: 10;
-    background: var(--bg-tertiary, #1a1a1a);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Sombra para destacar */
+    background: var(--bg-tertiary, var(--surface-card));
+    box-shadow: 0 2px 4px var(--surface-overlay-light); /* Sombra para destacar */
 }
 
 .detalhamento-tabela th {
@@ -824,7 +824,7 @@ body {
 }
 
 .detalhamento-tabela tbody tr.row-mico {
-    background: rgba(239, 68, 68, 0.15) !important;
+    background: var(--color-danger-muted) !important;
     border-left: 3px solid var(--danger);
 }
 
@@ -1470,7 +1470,7 @@ body {
 .btn-secondary-gradient { background: #3498db; }
 .btn-success-gradient { background: #2ecc71; }
 .btn-danger-gradient { background: #e74c3c; }
-.btn-pdf-gradient { background: #dc2626; }
+.btn-pdf-gradient { background: var(--color-danger-dark); }
 .btn-acerto-gradient { background: #f59e0b; }
 
 /* Campos Editáveis */
@@ -1561,8 +1561,8 @@ body {
 }
 
 .input-campo-editavel.campo-negativo {
-    border-color: #ef4444;
-    color: #ef4444;
+    border-color: var(--color-danger);
+    color: var(--color-danger);
 }
 
 /* ==========================================================================
@@ -1640,7 +1640,7 @@ body {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--surface-white-10);
     border: none;
     color: var(--text-primary, #fff);
     cursor: pointer;
@@ -1675,7 +1675,7 @@ body {
 }
 
 .modal-extrato-body::-webkit-scrollbar-track {
-    background: var(--bg-secondary, #121212);
+    background: var(--bg-secondary, var(--surface-bg));
 }
 
 .modal-extrato-body::-webkit-scrollbar-thumb {
@@ -1684,7 +1684,7 @@ body {
 }
 
 .modal-extrato-body::-webkit-scrollbar-thumb:hover {
-    background: var(--laranja-dark, #e8472b);
+    background: var(--laranja-dark, var(--color-primary-dark));
 }
 
 /* Footer do Modal (botões de ação) */
@@ -1693,7 +1693,7 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 12px 20px;
-    background: var(--bg-card, #1e1e1e);
+    background: var(--bg-card, var(--surface-card));
     border-top: 1px solid var(--border-primary, rgba(255, 69, 0, 0.3));
     flex-shrink: 0;
     gap: 12px;
@@ -1746,8 +1746,8 @@ body {
 
 /* Botão "Limpar Cache" estilizado */
 .btn-recalc-cache {
-    background: rgba(239, 68, 68, 0.15);
-    color: #ef4444;
+    background: var(--color-danger-muted);
+    color: var(--color-danger);
     border: 1px solid rgba(239, 68, 68, 0.3);
     padding: 8px 12px;
     border-radius: 6px;
@@ -1762,7 +1762,7 @@ body {
 
 .btn-recalc-cache:hover {
     background: rgba(239, 68, 68, 0.25);
-    border-color: #ef4444;
+    border-color: var(--color-danger);
 }
 
 /* ==========================================================================
@@ -1813,7 +1813,7 @@ body {
 }
 
 .modal-content .form-control.bg-gray-700::placeholder {
-    color: #9ca3af !important;
+    color: var(--text-muted) !important;
 }
 
 .modal-content .form-control.bg-gray-700:focus,
@@ -1839,7 +1839,7 @@ body {
 }
 
 .modal-content .card.bg-gray-900 .card-title {
-    color: var(--color-primary, #ff5500);
+    color: var(--color-primary, var(--color-primary));
     font-family: var(--font-family-brand);
     font-size: 0.95rem;
     font-weight: 400;
@@ -1897,7 +1897,7 @@ body {
 }
 
 .modal-content .alert-info {
-    background-color: rgba(59, 130, 246, 0.15);
+    background-color: var(--color-info-muted);
     color: #93c5fd;
 }
 
@@ -1907,7 +1907,7 @@ body {
 }
 
 .modal-content .alert-danger {
-    background-color: rgba(239, 68, 68, 0.15);
+    background-color: var(--color-danger-muted);
     color: #fca5a5;
 }
 
@@ -1950,7 +1950,7 @@ body {
    ============================================================================= */
 .badge-novato {
     display: inline-block;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, var(--color-success) 0%, #059669 100%);
     color: #fff;
     font-size: 9px;
     font-weight: 700;
@@ -1976,7 +1976,7 @@ body {
    ============================================================================= */
 .badge-quitado {
     display: inline-block;
-    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    background: linear-gradient(135deg, var(--text-dim) 0%, #4b5563 100%);
     color: #fff;
     font-size: 9px;
     font-weight: 700;
@@ -1991,11 +1991,11 @@ body {
 }
 
 .col-saldo.quitado {
-    color: #6b7280 !important;
+    color: var(--text-dim) !important;
 }
 
 .col-saldo.quitado strong {
-    color: #6b7280 !important;
+    color: var(--text-dim) !important;
 }
 
 /* =============================================================================
@@ -2008,7 +2008,7 @@ body {
 }
 
 .col-time-coracao th {
-    color: #ef4444;
+    color: var(--color-danger);
 }
 
 .escudo-coracao {
@@ -2022,9 +2022,9 @@ body {
    BOTÃO MARCAR PAGO (ação pós-cadastro)
    ============================================================================= */
 .btn-marcar-pago {
-    background: rgba(16, 185, 129, 0.15);
+    background: var(--color-success-muted);
     border: 1px solid rgba(16, 185, 129, 0.3);
-    color: #10b981;
+    color: var(--color-success);
     padding: 4px 8px;
     border-radius: 4px;
     font-size: 11px;
@@ -2034,7 +2034,7 @@ body {
 
 .btn-marcar-pago:hover {
     background: rgba(16, 185, 129, 0.25);
-    border-color: #10b981;
+    border-color: var(--color-success);
 }
 
 .btn-marcar-pago .material-icons {
@@ -2045,7 +2045,7 @@ body {
 /* Badge "Pago" confirmado */
 .badge-pago-ok {
     display: inline-block;
-    background: #10b981;
+    background: var(--color-success);
     color: #fff;
     font-size: 10px;
     font-weight: 600;
@@ -2088,7 +2088,7 @@ body {
 #modalNovoParticipante .nav-tabs .nav-link {
     border: 1px solid #374151;
     border-bottom: none;
-    color: #9ca3af;
+    color: var(--text-muted);
     background: #1f2937;
     transition: all 0.2s;
 }
@@ -2135,7 +2135,7 @@ body {
     background-color: #1f2937 !important;
     border: 1px solid #374151 !important;
     border-radius: 0.5rem !important;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+    box-shadow: 0 10px 25px var(--surface-overlay) !important;
 }
 
 #modalNovoParticipante .modal-body {
@@ -2235,7 +2235,7 @@ table.fluxo-participantes-tabela {
     position: sticky !important;
     top: 0 !important;
     z-index: 20 !important;
-    background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%) !important;
+    background: linear-gradient(135deg, var(--surface-card-elevated) 0%, #1f1f1f 100%) !important;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important; /* Sombra para destacar */
 }
 
@@ -2247,7 +2247,7 @@ table.fluxo-participantes-tabela {
     right: 0;
     bottom: 0;
     height: 2px;
-    background: #FF5500;
+    background: var(--color-primary);
 }
 
 /* =============================================================================
@@ -2307,7 +2307,7 @@ table.fluxo-participantes-tabela {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, var(--color-success) 0%, #059669 100%);
     color: #fff;
     font-size: 10px;
     font-weight: 700;
@@ -2324,7 +2324,7 @@ table.fluxo-participantes-tabela {
 
 /* Banner de Temporada Quitada */
 .extrato-quitado-banner {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%);
+    background: linear-gradient(135deg, var(--color-success-muted) 0%, rgba(5, 150, 105, 0.1) 100%);
     border: 1px solid rgba(16, 185, 129, 0.3);
     border-radius: 8px;
     padding: 16px;
@@ -2340,12 +2340,12 @@ table.fluxo-participantes-tabela {
 
 .extrato-quitado-banner-header .material-icons {
     font-size: 24px;
-    color: #10b981;
+    color: var(--color-success);
 }
 
 .extrato-quitado-banner-header h4 {
     margin: 0;
-    color: #10b981;
+    color: var(--color-success);
     font-size: 14px;
     font-weight: 700;
 }
@@ -2376,20 +2376,20 @@ table.fluxo-participantes-tabela {
 }
 
 .extrato-quitado-item span.valor-positivo {
-    color: #10b981;
+    color: var(--color-success);
 }
 
 .extrato-quitado-item span.valor-negativo {
-    color: #ef4444;
+    color: var(--color-danger);
 }
 
 .extrato-quitado-item span.valor-zerado {
-    color: #6b7280;
+    color: var(--text-dim);
 }
 
 /* Legado para próxima temporada */
 .extrato-legado-banner {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%);
+    background: linear-gradient(135deg, var(--color-info-muted) 0%, rgba(37, 99, 235, 0.1) 100%);
     border: 1px solid rgba(59, 130, 246, 0.3);
     border-radius: 8px;
     padding: 16px;
@@ -2405,12 +2405,12 @@ table.fluxo-participantes-tabela {
 
 .extrato-legado-banner-header .material-icons {
     font-size: 24px;
-    color: #3b82f6;
+    color: var(--color-info);
 }
 
 .extrato-legado-banner-header h4 {
     margin: 0;
-    color: #3b82f6;
+    color: var(--color-info);
     font-size: 14px;
     font-weight: 700;
 }
@@ -2424,7 +2424,7 @@ table.fluxo-participantes-tabela {
 }
 
 .extrato-resumo-card {
-    background: var(--bg-card, #1e1e1e);
+    background: var(--bg-card, var(--surface-card));
     border: 1px solid var(--border-primary, rgba(255, 69, 0, 0.2));
     border-radius: 8px;
     padding: 12px;
@@ -2451,11 +2451,11 @@ table.fluxo-participantes-tabela {
 }
 
 .extrato-resumo-card .card-value.positivo {
-    color: #10b981;
+    color: var(--color-success);
 }
 
 .extrato-resumo-card .card-value.negativo {
-    color: #ef4444;
+    color: var(--color-danger);
 }
 
 .extrato-resumo-card .card-value.neutro {
@@ -2511,7 +2511,7 @@ table.fluxo-participantes-tabela {
 
 /* ===== TRANSAÇÕES ESPECIAIS (Inscrição, Legado) ===== */
 .extrato-transacoes-especiais {
-    background: var(--bg-card, #1e1e1e);
+    background: var(--bg-card, var(--surface-card));
     border-radius: 12px;
     padding: 16px;
     border: 1px solid var(--border-primary, rgba(255, 69, 0, 0.2));
@@ -2534,7 +2534,7 @@ table.fluxo-participantes-tabela {
     justify-content: space-between;
     align-items: center;
     padding: 12px 16px;
-    background: var(--bg-tertiary, #1a1a1a);
+    background: var(--bg-tertiary, var(--surface-card));
     border-radius: 8px;
     border-left: 3px solid var(--laranja, #ff4500);
 }
@@ -2571,7 +2571,7 @@ table.fluxo-participantes-tabela {
 
 /* ===== AJUSTES DINÂMICOS (2026+) ===== */
 .extrato-ajustes-section {
-    background: var(--bg-card, #1e1e1e);
+    background: var(--bg-card, var(--surface-card));
     border-radius: 12px;
     padding: 16px;
     border: 1px solid var(--border-primary, rgba(255, 69, 0, 0.2));
@@ -2583,7 +2583,7 @@ table.fluxo-participantes-tabela {
     align-items: center;
     margin-bottom: 16px;
     padding-bottom: 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--surface-white-10);
 }
 
 .extrato-ajustes-titulo {
@@ -2608,7 +2608,7 @@ table.fluxo-participantes-tabela {
     font-weight: 600;
     padding: 4px 10px;
     border-radius: 20px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--surface-white-10);
 }
 
 .btn-adicionar-ajuste {
@@ -2627,7 +2627,7 @@ table.fluxo-participantes-tabela {
 }
 
 .btn-adicionar-ajuste:hover {
-    background: var(--laranja-dark, #e8472b);
+    background: var(--laranja-dark, var(--color-primary-dark));
     transform: translateY(-1px);
 }
 
@@ -2661,7 +2661,7 @@ table.fluxo-participantes-tabela {
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    background: var(--bg-tertiary, #1a1a1a);
+    background: var(--bg-tertiary, var(--surface-card));
     border-radius: 8px;
     border-left: 3px solid var(--laranja, #ff4500);
 }
@@ -2700,7 +2700,7 @@ table.fluxo-participantes-tabela {
     border: 1px solid rgba(239, 68, 68, 0.3);
     border-radius: 6px;
     cursor: pointer;
-    color: var(--danger, #ef4444);
+    color: var(--danger, var(--color-danger));
     opacity: 0.6;
     transition: all 0.2s;
 }
@@ -2737,12 +2737,12 @@ table.fluxo-participantes-tabela {
 }
 
 .modal-ajuste-container {
-    background: var(--bg-card, #1e1e1e);
+    background: var(--bg-card, var(--surface-card));
     border-radius: 16px;
     width: 90%;
     max-width: 400px;
     border: 1px solid var(--border-primary, rgba(255, 69, 0, 0.2));
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 50px var(--surface-overlay);
     transform: translateY(20px);
     transition: transform 0.3s;
 }
@@ -2756,7 +2756,7 @@ table.fluxo-participantes-tabela {
     justify-content: space-between;
     align-items: center;
     padding: 16px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--surface-white-10);
 }
 
 .modal-ajuste-header h3 {
@@ -2780,7 +2780,7 @@ table.fluxo-participantes-tabela {
 }
 
 .modal-ajuste-close:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--surface-white-10);
     color: var(--text-primary, #fff);
 }
 
@@ -2802,8 +2802,8 @@ table.fluxo-participantes-tabela {
 .input-ajuste {
     width: 100%;
     padding: 12px 16px;
-    background: var(--bg-tertiary, #1a1a1a);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--bg-tertiary, var(--surface-card));
+    border: 1px solid var(--surface-white-10);
     border-radius: 8px;
     color: var(--text-primary, #fff);
     font-size: 14px;
@@ -2846,7 +2846,7 @@ table.fluxo-participantes-tabela {
 }
 
 .tipo-label.debito {
-    color: var(--danger, #ef4444) !important;
+    color: var(--danger, var(--color-danger)) !important;
 }
 
 .modal-ajuste-footer {
@@ -2854,13 +2854,13 @@ table.fluxo-participantes-tabela {
     justify-content: flex-end;
     gap: 12px;
     padding: 16px 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid var(--surface-white-10);
 }
 
 .modal-ajuste-footer .btn-cancelar {
     padding: 10px 20px;
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--surface-white-20);
     border-radius: 8px;
     color: var(--text-secondary, #e0e0e0);
     cursor: pointer;
@@ -2885,7 +2885,7 @@ table.fluxo-participantes-tabela {
 }
 
 .modal-ajuste-footer .btn-salvar:hover {
-    background: var(--laranja-dark, #e8472b);
+    background: var(--laranja-dark, var(--color-primary-dark));
 }
 
 /* Responsividade Ajustes */
@@ -2933,24 +2933,24 @@ table.fluxo-participantes-tabela {
 }
 
 .fluxo-tabela-container::-webkit-scrollbar-track {
-    background: #1a1a1a;
+    background: var(--surface-card);
     border-radius: 5px;
 }
 
 .fluxo-tabela-container::-webkit-scrollbar-thumb {
-    background: linear-gradient(90deg, #FF5500, #ff6b1a);
+    background: linear-gradient(90deg, var(--color-primary), #ff6b1a);
     border-radius: 5px;
-    border: 2px solid #1a1a1a;
+    border: 2px solid var(--surface-card);
 }
 
 .fluxo-tabela-container::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(90deg, #ff6b1a, #FF5500);
+    background: linear-gradient(90deg, #ff6b1a, var(--color-primary));
 }
 
 /* Firefox scrollbar */
 .fluxo-tabela-container {
     scrollbar-width: thin;
-    scrollbar-color: #FF5500 #1a1a1a;
+    scrollbar-color: var(--color-primary) var(--surface-card);
 }
 
 /* Tabela wrapper tambem com scroll */
@@ -2964,12 +2964,12 @@ table.fluxo-participantes-tabela {
 }
 
 .tabela-wrapper::-webkit-scrollbar-track {
-    background: #1a1a1a;
+    background: var(--surface-card);
     border-radius: 5px;
 }
 
 .tabela-wrapper::-webkit-scrollbar-thumb {
-    background: linear-gradient(90deg, #FF5500, #ff6b1a);
+    background: linear-gradient(90deg, var(--color-primary), #ff6b1a);
     border-radius: 5px;
 }
 
@@ -3016,7 +3016,7 @@ table.fluxo-participantes-tabela {
     max-height: 300px;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: #FF5500 #1a1a1a;
+    scrollbar-color: var(--color-primary) var(--surface-card);
 }
 
 .ajustes-lista::-webkit-scrollbar {
@@ -3024,12 +3024,12 @@ table.fluxo-participantes-tabela {
 }
 
 .ajustes-lista::-webkit-scrollbar-track {
-    background: #1a1a1a;
+    background: var(--surface-card);
     border-radius: 3px;
 }
 
 .ajustes-lista::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #FF5500, #ff6b1a);
+    background: linear-gradient(180deg, var(--color-primary), #ff6b1a);
     border-radius: 3px;
 }
 
@@ -3177,8 +3177,8 @@ table.fluxo-participantes-tabela {
     position: sticky !important;
     top: 0 !important;
     z-index: 100 !important;
-    background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5) !important;
+    background: linear-gradient(135deg, var(--surface-card-elevated) 0%, #1f1f1f 100%) !important;
+    box-shadow: 0 2px 8px var(--surface-overlay) !important;
     /* Garantir que background seja sólido e cubra conteúdo abaixo */
     background-clip: padding-box !important;
 }
@@ -3256,8 +3256,8 @@ table.fluxo-participantes-tabela,
     z-index: 200 !important;
     background: #1f1f1f !important; /* Background SÓLIDO, não gradiente */
     box-shadow:
-        0 2px 4px rgba(0, 0, 0, 0.5),
-        inset 0 -2px 0 #FF5500 !important; /* Linha laranja inferior */
+        0 2px 4px var(--surface-overlay),
+        inset 0 -2px 0 var(--color-primary) !important; /* Linha laranja inferior */
 }
 
 /* =============================================================================
@@ -3332,14 +3332,14 @@ table.fluxo-participantes-tabela,
 /* Tabela clone dentro do wrapper */
 .sticky-header-clone table {
     pointer-events: auto !important;
-    background: #1a1a1a !important;
+    background: var(--surface-card) !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
 }
 
 /* Celulas do header clone */
 .sticky-header-clone th {
-    background: #1a1a1a !important;
-    border-bottom: 2px solid #FF5500 !important;
+    background: var(--surface-card) !important;
+    border-bottom: 2px solid var(--color-primary) !important;
     color: #fff !important;
 }
 
@@ -3359,7 +3359,7 @@ table.fluxo-participantes-tabela,
 
 /* Header - Lista de Ligas */
 .fluxo-header {
-    background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
+    background: linear-gradient(135deg, var(--surface-card) 0%, #252525 100%);
     border-radius: var(--radius-md);
     padding: 18px 20px;
     margin-bottom: 24px;
@@ -3407,7 +3407,7 @@ table.fluxo-participantes-tabela,
 }
 
 .liga-card {
-    background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
+    background: linear-gradient(135deg, var(--surface-card) 0%, #252525 100%);
     border-radius: 12px;
     padding: 20px;
     border: 1px solid var(--border-color);
@@ -3519,7 +3519,7 @@ table.fluxo-participantes-tabela,
 
 /* Header - Liga Específica */
 .liga-header {
-    background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
+    background: linear-gradient(135deg, var(--surface-card) 0%, #252525 100%);
     border-radius: var(--radius-md);
     padding: 16px 20px;
     margin-bottom: 20px;
