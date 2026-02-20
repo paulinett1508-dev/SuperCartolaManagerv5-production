@@ -760,8 +760,10 @@ function renderizarMinhaEscalacao(rodadaData, isParcial) {
     const nomeTime = meuPart.nome || meuPart.nome_time || 'Meu Time';
     const nomeCartola = meuPart.nome_cartola || '';
 
-    // Pontos formatados
-    const pontosFormatados = pontos.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    // Pontos formatados (truncar, nunca arredondar)
+    const pontosFormatados = typeof window.truncarPontos === 'function'
+        ? window.truncarPontos(pontos)
+        : (Math.trunc(pontos * 100) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     // Posições do Cartola
     const POSICOES = {
@@ -1438,10 +1440,10 @@ function renderizarDetalhamentoRodada(rodadaData, isParcial = false, inativos = 
         const isMito = posicao === 1;
         const isMico = posicao === totalParticipantes && totalParticipantes > 1;
 
-        const pontosFormatados = Number(participante.pontos || 0).toLocaleString("pt-BR", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-        });
+        const pontosRaw = Number(participante.pontos || 0);
+        const pontosFormatados = typeof window.truncarPontos === 'function'
+            ? window.truncarPontos(pontosRaw)
+            : (Math.trunc(pontosRaw * 100) / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
         const nomeTime = participante.nome || participante.nome_time || "N/D";
         const naoJogouBadge = participante.rodadaNaoJogada ? '<span class="badge-nao-jogou">N/E</span>' : "";

@@ -251,6 +251,16 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 | **NÃO confundir** | Auditoria de código específico → `code-inspector`; Auditoria de módulo → `auditor-module` |
 | **Localização** | `docs/skills/04-project-specific/context7-monthly-audit.md` |
 
+#### live-experience
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `live experience`, `experiência ao vivo`, `auditoria live`, `rodada ao vivo`, `parciais ao vivo`, `orchestrator`, `managers live`, `ciclo de vida rodada` |
+| **Frases PT-BR** | "auditar experiência ao vivo", "como tá o live", "parciais tão funcionando?", "auditar rodada ao vivo", "orchestrator tá ok?", "managers estão rodando?", "experiência durante jogos", "pre-flight da rodada", "validar fluxo live", "consolidação tá correta?", "polling tá adequado?", "cache durante live" |
+| **Dimensões** | orchestrator, managers, parciais, cache live, frontend live, consolidação |
+| **Contexto** | Auditoria do fluxo completo durante rodadas ao vivo: orchestrator, managers, parciais, cache, frontend e consolidação |
+| **NÃO confundir** | Auditoria de módulo individual → `auditor-module`; Auditoria de cache geral → `cache-auditor`; Auditoria UX geral → `ux-auditor-app` |
+| **Localização** | `docs/skills/04-project-specific/live-experience.md` |
+
 ---
 
 ### 05 - Meta (Skills sobre Skills)
@@ -317,6 +327,10 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | "sempre pensando no modo anti-frank" | `anti-frankenstein` | Modo persistente de governança |
 | "HTMLs ativado no modo anti-frank" | `anti-frankenstein` | Checkpoint em criação de HTML |
 | "verificar mudanças api cartola" | `context7-monthly-audit` | Check mensal automático |
+| "auditar experiência ao vivo" | `live-experience` | Auditoria fluxo live completo |
+| "parciais tão funcionando?" | `live-experience` | Validação de parciais live |
+| "orchestrator tá ok?" | `live-experience` | Saúde do orchestrator |
+| "pre-flight da rodada" | `live-experience` | Check antes da rodada |
 | "criar uma skill nova" | `skill-creator` | Meta |
 | "instalar skill X" | `skill-installer` | Meta |
 
@@ -334,6 +348,8 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | Auditoria de módulo | `auditor-module` → `code-inspector` → `cache-auditor` |
 | Auditoria UX pré-release | `ux-auditor-app` → `cache-auditor` → `code-inspector` |
 | Auditoria UX + correção | `ux-auditor-app` → `frontend-crafter` |
+| Auditoria live pré-rodada | `live-experience` → `cache-auditor` → `ux-auditor-app` |
+| Auditoria live completa | `live-experience --report` → `auditor-module parciais` → `cache-auditor CACHE-APP --participante` |
 | HTML externo → Código | `stitch-adapter` → `frontend-crafter` (ajustes se necessário) |
 | Documentação | `system-scribe` |
 | Deploy completo | `git-commit-push` → `replit-pull` |
