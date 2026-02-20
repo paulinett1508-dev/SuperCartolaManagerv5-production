@@ -166,7 +166,7 @@ export function renderizarJogosAoVivo(jogos, fonte = 'soccerdata', aoVivo = fals
         <!-- Header Colapsável Agenda do Dia (Padrão Copa) -->
         <button class="jogos-home-header" onclick="window.toggleJogosHome && window.toggleJogosHome()">
             <div class="jogos-home-header-left">
-                <span class="text-xl">⚽</span>
+                <span class="material-icons" style="font-size:1.25rem;color:var(--app-success);">sports_soccer</span>
                 <div>
                     <h2 class="font-brand text-white text-sm tracking-wide" style="margin:0;line-height:1.2;">Agenda do Dia</h2>
                     <span class="text-[10px] text-white/70">${totalJogos} jogos · Brasileirão e mais</span>
@@ -516,7 +516,7 @@ export function renderizarSecaoCopa(copa) {
         <!-- Header Colapsável Copa do Mundo -->
         <button class="copa-home-header" onclick="window.toggleCopaHome && window.toggleCopaHome()">
             <div class="copa-home-header-left">
-                <span class="text-xl">🏆</span>
+                <span class="material-icons" style="font-size:1.25rem;color:var(--app-copa-secondary, #D4AF37);">emoji_events</span>
                 <div>
                     <h2 class="font-brand text-white text-sm tracking-wide">Copa do Mundo 2026</h2>
                     <span class="text-[10px] text-white/70">${faseTitulo} · EUA/México/Canadá</span>
@@ -537,7 +537,7 @@ export function renderizarSecaoCopa(copa) {
             ${jogosExibir.length > 0 ? renderizarJogosCopaLista(jogosExibir, copa.jogosDoDia?.length > 0 ? 'Jogos do Dia' : 'Próximos Jogos') : ''}
             ${jogosExibir.length === 0 && jogosBrasil.length === 0 ? `
                 <div class="text-center py-6 text-white/30">
-                    <span class="text-2xl block mb-1">⚽</span>
+                    <span class="material-icons block mb-1" style="font-size:1.5rem;color:var(--app-text-muted);">sports_soccer</span>
                     <p class="text-xs">Sem jogos da Copa hoje</p>
                 </div>
             ` : ''}
@@ -563,7 +563,7 @@ function renderizarJogosBrasilCopa(jogos) {
     return `
     <div class="px-3 pt-3 pb-1">
         <div class="flex items-center gap-1.5 mb-2">
-            <span class="text-base">🇧🇷</span>
+            <span class="material-icons" style="font-size:1rem;color:var(--app-success);">flag</span>
             <h4 class="text-[11px] font-brand text-white/90 tracking-wide">Brasil no Grupo C</h4>
         </div>
         <div class="space-y-1.5">
