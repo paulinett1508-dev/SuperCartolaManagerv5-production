@@ -7,6 +7,7 @@ import Liga from "../models/Liga.js";
 import { CURRENT_SEASON } from "../config/seasons.js";
 import fetch from "node-fetch";
 import { getNomeClube } from "../utils/clubesData.js";
+import { truncarPontosNum } from "../utils/type-helpers.js";
 import {
   buscarStatusParticipantes,
   obterUltimaRodadaValida,
@@ -582,7 +583,7 @@ async function gerarRankingGoleiros(ligaId, rodadaInicio, rodadaFim) {
         ...p,
         mediaPontos:
           p.totalJogos > 0
-            ? (p.pontosTotais / p.totalJogos).toFixed(2)
+            ? truncarPontosNum(p.pontosTotais / p.totalJogos).toFixed(2)
             : "0.00",
       }))
       .sort((a, b) => b.pontosTotais - a.pontosTotais)
@@ -756,7 +757,7 @@ export async function obterRankingGoleiros(
       // ✅ NOVO: Mapear todas as rodadas para exibição em colunas
       const rodadas = dadosParticipante.map((item) => ({
         rodada: item.rodada,
-        pontos: parseFloat((item.pontos || 0).toFixed(2)),
+        pontos: truncarPontosNum(item.pontos || 0),
         goleiroNome: item.goleiroNome || "Sem goleiro",
         goleiroClube: item.goleiroClube || "",
         parcial: !item.rodadaConcluida, // ✅ Flag para UI destacar
@@ -766,7 +767,7 @@ export async function obterRankingGoleiros(
         participanteId: timeId,
         participanteNome: nome,
         clubeId: clubeId,
-        pontosTotais: parseFloat(pontosTotais.toFixed(2)),
+        pontosTotais: truncarPontosNum(pontosTotais),
         rodadasJogadas,
         totalJogos: rodadasJogadas,
         rodadas, // ✅ NOVO: Array completo de rodadas
@@ -775,7 +776,7 @@ export async function obterRankingGoleiros(
               rodada: ultimaRodada.rodada,
               goleiroNome: ultimaRodada.goleiroNome,
               goleiroClube: ultimaRodada.goleiroClube,
-              pontos: parseFloat((ultimaRodada.pontos || 0).toFixed(2)),
+              pontos: truncarPontosNum(ultimaRodada.pontos || 0),
             }
           : null,
         // ✅ NOVO: Campos de status
@@ -784,7 +785,7 @@ export async function obterRankingGoleiros(
       });
 
       console.log(
-        `✅ Processado ${nome}: ${pontosTotais.toFixed(2)} pontos em ${rodadasJogadas} rodadas ${!isAtivo ? "(INATIVO)" : ""}`,
+        `✅ Processado ${nome}: ${truncarPontosNum(pontosTotais)} pontos em ${rodadasJogadas} rodadas ${!isAtivo ? "(INATIVO)" : ""}`,
       );
     }
 

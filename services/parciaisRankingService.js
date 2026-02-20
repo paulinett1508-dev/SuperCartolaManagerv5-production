@@ -7,6 +7,7 @@ import Liga from "../models/Liga.js";
 import Time from "../models/Time.js";
 import mongoose from "mongoose";
 import { CURRENT_SEASON } from "../config/seasons.js";
+import { truncarPontosNum } from "../utils/type-helpers.js";
 
 const LOG_PREFIX = "[PARCIAIS-RANKING-SERVICE]";
 const CARTOLA_API_BASE = "https://api.cartola.globo.com";
@@ -286,9 +287,9 @@ export async function buscarRankingParcial(ligaId) {
                     nome_cartola: escalacao?.time?.nome_cartola || participante.nome_cartola || "N/D",
                     escudo: escalacao?.time?.url_escudo_png || participante.foto_time || "",
                     clube_id: escalacao?.time?.time_id || participante.clube_id,
-                    pontos: parseFloat(pontosTotais.toFixed(2)), // ✅ Pontos totais (acumulado + parcial)
-                    pontos_rodada_atual: parseFloat(pontos.toFixed(2)), // Pontos apenas da rodada atual
-                    pontos_acumulados: parseFloat(pontosAnteriores.toFixed(2)), // Pontos das rodadas anteriores
+                    pontos: truncarPontosNum(pontosTotais), // ✅ Pontos totais (acumulado + parcial)
+                    pontos_rodada_atual: truncarPontosNum(pontos), // Pontos apenas da rodada atual
+                    pontos_acumulados: truncarPontosNum(pontosAnteriores), // Pontos das rodadas anteriores
                     escalou: calculado,
                     ativo: participante.ativo !== false,
                 };

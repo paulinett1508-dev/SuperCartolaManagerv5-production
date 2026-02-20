@@ -422,7 +422,7 @@ function renderizarEdicaoCard(edicao, meuTimeIdNum) {
 
     const edicaoIcon = edicoesIcons[edicao.id] || '<span class="material-symbols-outlined" style="font-size: 20px; color: #ff5c00;">event</span>';
     const pontosFormatados = campeao
-        ? campeao.pontos_total.toLocaleString("pt-BR", {
+        ? (Math.trunc(campeao.pontos_total * 100) / 100).toLocaleString("pt-BR", {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
           })
@@ -489,7 +489,7 @@ function renderizarEdicaoCard(edicao, meuTimeIdNum) {
                                 '<span class="material-symbols-outlined" style="font-size: 20px; color: var(--app-bronze);">workspace_premium</span>'
                             ];
                             const medalha = medalhaIcons[idx] || medalhaIcons[2];
-                            const pts = time.pontos_total.toLocaleString(
+                            const pts = (Math.trunc(time.pontos_total * 10) / 10).toLocaleString(
                                 "pt-BR",
                                 {
                                     minimumFractionDigits: 1,
@@ -586,7 +586,7 @@ function renderizarRankingCards(ranking, meuTimeIdNum) {
         html += restanteAtivos
             .map((time) => {
                 const isMeuTime = Number(time.timeId) === meuTimeIdNum;
-                const pts = time.pontos_total.toLocaleString("pt-BR", {
+                const pts = (Math.trunc(time.pontos_total * 10) / 10).toLocaleString("pt-BR", {
                     minimumFractionDigits: 1,
                     maximumFractionDigits: 1,
                 });
@@ -604,7 +604,7 @@ function renderizarRankingCards(ranking, meuTimeIdNum) {
 
     // Card especial se usuário está fora do top 10
     if (minhaPosicao && minhaPosicao > 10 && meusDados) {
-        const pts = meusDados.pontos_total.toLocaleString("pt-BR", {
+        const pts = (Math.trunc(meusDados.pontos_total * 10) / 10).toLocaleString("pt-BR", {
             minimumFractionDigits: 1,
             maximumFractionDigits: 1,
         });
@@ -631,7 +631,7 @@ function renderizarRankingCards(ranking, meuTimeIdNum) {
         html += inativos
             .slice(0, 5)
             .map((time) => {
-                const pts = time.pontos_total.toLocaleString("pt-BR", {
+                const pts = (Math.trunc(time.pontos_total * 10) / 10).toLocaleString("pt-BR", {
                     minimumFractionDigits: 1,
                     maximumFractionDigits: 1,
                 });

@@ -20,10 +20,11 @@ const CACHE_CONFIG = {
   },
   ttl: {
     // TTL em milissegundos
-    rankings: 10 * 60 * 1000, // 10 min
+    // ✅ Rankings reduzido para refresh mais rápido durante parciais ao vivo
+    rankings: 3 * 60 * 1000, // 3 min (era 10min - reduzido para live)
     participantes: 5 * 60 * 1000, // 5 min (reduzido para atualizar novos participantes)
     extrato: 5 * 60 * 1000, // 5 min
-    rodadas: 15 * 60 * 1000, // 15 min
+    rodadas: 5 * 60 * 1000, // 5 min (era 15min - reduzido para live)
     status: 2 * 60 * 1000, // 2 min
     ligas: 20 * 60 * 1000, // 20 min
   },

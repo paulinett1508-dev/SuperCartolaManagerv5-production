@@ -253,6 +253,48 @@ function notificarStatus(tipo) {
 }
 
 // =====================================================================
+// PAGE VISIBILITY API - Pausa/retoma polling ao sair/voltar à aba
+// =====================================================================
+function setupVisibilityListener() {
+    document.addEventListener("visibilitychange", () => {
+        if (!estadoPolling.ativo) return;
+
+        if (document.hidden) {
+            // Aba oculta: parar polling para economia de bateria
+            if (estadoPolling.pollingAtivo) {
+                if (window.Log) Log.info("[POLLING] 👁️ Aba oculta - pausando polling");
+                desativarPolling();
+            }
+        } else {
+            // Aba visível novamente: reativar se calendário permite
+            if (window.Log) Log.info("[POLLING] 👁️ Aba visível - verificando se deve reativar polling");
+
+            if (estadoPolling.calendarioDisponivel) {
+                // Re-verificar calendário antes de reativar
+                CalendarModule.inicializarCalendario(
+                    estadoPolling.temporada,
+                    estadoPolling.rodada
+                ).then(calendarInfo => {
+                    if (calendarInfo.disponivel && calendarInfo.deve_ativar_polling) {
+                        ativarPolling();
+                    }
+                }).catch(err => {
+                    if (window.Log) Log.error("[POLLING] Erro ao reativar após visibility:", err);
+                });
+            } else {
+                // Fallback: reativar direto (bola_rolando será verificado internamente)
+                ativarPolling();
+            }
+        }
+    });
+
+    if (window.Log) Log.info("[POLLING] 👁️ Visibility listener configurado");
+}
+
+// Configurar listener imediatamente
+setupVisibilityListener();
+
+// =====================================================================
 // PARAR POLLING INTELIGENTE (cleanup)
 // =====================================================================
 export function parar() {

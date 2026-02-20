@@ -3,6 +3,14 @@
 // Analisa contexto da rodada e gera texto em português natural
 // =====================================================================
 
+import { truncarPontosNum } from '../utils/type-helpers.js';
+
+/** Trunca para 1 casa decimal (sem arredondar) */
+function truncar1(valor) {
+    const num = parseFloat(valor) || 0;
+    return Math.trunc(num * 10) / 10;
+}
+
 /**
  * Gera narrativa inteligente baseada no contexto da rodada
  * @param {Object} contexto - Dados completos do contexto
@@ -122,27 +130,27 @@ function analisarPontosCorridos(pc) {
     let detalhado = "";
 
     if (resultado === "vitoria") {
-        resumido = `Vitória nos Pontos Corridos (${pc.seu_confronto.voce.toFixed(1)} × ${adversario.pontos.toFixed(1)})`;
+        resumido = `Vitória nos Pontos Corridos (${truncar1(pc.seu_confronto.voce)} × ${truncar1(adversario.pontos)})`;
 
         if (zona === "G4") {
             resumido += " te mantém no G4";
-            detalhado = `Vitória apertada sobre ${adversario.nome} por ${diferenca.toFixed(1)} pontos te manteve no G4 dos Pontos Corridos (${minha_posicao}º lugar). `;
+            detalhado = `Vitória apertada sobre ${adversario.nome} por ${truncar1(diferenca)} pontos te manteve no G4 dos Pontos Corridos (${minha_posicao}º lugar). `;
         } else {
             resumido += ` e te coloca em ${minha_posicao}º`;
             detalhado = `Vitória sobre ${adversario.nome} te levou ao ${minha_posicao}º lugar na classificação. `;
         }
     } else if (resultado === "derrota") {
-        resumido = `Derrota nos PC (${pc.seu_confronto.voce.toFixed(1)} × ${adversario.pontos.toFixed(1)})`;
+        resumido = `Derrota nos PC (${truncar1(pc.seu_confronto.voce)} × ${truncar1(adversario.pontos)})`;
 
         if (zona === "Z4") {
             resumido += " te deixa na Z4";
             detalhado = `Derrota para ${adversario.nome} te colocou na zona de rebaixamento (${minha_posicao}º lugar). `;
         } else {
             resumido += `, caiu para ${minha_posicao}º`;
-            detalhado = `Derrota por ${diferenca.toFixed(1)} pontos para ${adversario.nome} te fez cair para ${minha_posicao}º. `;
+            detalhado = `Derrota por ${truncar1(diferenca)} pontos para ${adversario.nome} te fez cair para ${minha_posicao}º. `;
         }
     } else {
-        resumido = `Empate nos PC (${pc.seu_confronto.voce.toFixed(1)} × ${adversario.pontos.toFixed(1)})`;
+        resumido = `Empate nos PC (${truncar1(pc.seu_confronto.voce)} × ${truncar1(adversario.pontos)})`;
         detalhado = `Empate equilibrado com ${adversario.nome}. Você está em ${minha_posicao}º na classificação. `;
     }
 
@@ -163,10 +171,10 @@ function analisarMataMata(mm) {
 
     if (resultado === "classificado") {
         resumido = `Avançou nas ${fase_atual} do Mata-Mata`;
-        detalhado = `Classificação nas ${fase_atual} após vencer ${adversario?.nome || "adversário"} por ${diferenca?.toFixed(1) || "N/D"} pontos. `;
+        detalhado = `Classificação nas ${fase_atual} após vencer ${adversario?.nome || "adversário"} por ${diferenca != null ? truncar1(diferenca) : "N/D"} pontos. `;
     } else if (resultado === "eliminado") {
         resumido = `❌ Eliminado nas ${fase_atual}`;
-        detalhado = `Eliminação dolorosa nas ${fase_atual} do Mata-Mata. Diferença de apenas ${diferenca?.toFixed(1) || "N/D"} pontos para ${adversario?.nome || "adversário"}. `;
+        detalhado = `Eliminação dolorosa nas ${fase_atual} do Mata-Mata. Diferença de apenas ${diferenca != null ? truncar1(diferenca) : "N/D"} pontos para ${adversario?.nome || "adversário"}. `;
     }
 
     return { resumido, detalhado };
@@ -220,13 +228,13 @@ function analisarCapitao(cap) {
     let detalhado = "";
 
     if (sua_posicao === 1) {
-        resumido = `👑 Líder do Capitão de Luxo (${lider.pontos.toFixed(1)} pts)`;
-        detalhado = `Você lidera o Capitão de Luxo com ${lider.pontos.toFixed(1)} pontos acumulados. `;
+        resumido = `👑 Líder do Capitão de Luxo (${truncar1(lider.pontos)} pts)`;
+        detalhado = `Você lidera o Capitão de Luxo com ${truncar1(lider.pontos)} pontos acumulados. `;
     } else {
         const minhaPosicaoObj = classificacao_acumulada.find(c => c.posicao === sua_posicao);
         const diferenca = Math.abs(minhaPosicaoObj?.diferenca || 0);
-        resumido = `${sua_posicao}º no Capitão (-${diferenca.toFixed(1)} pts)`;
-        detalhado = `Capitão de Luxo: ${sua_posicao}º lugar, ${diferenca.toFixed(1)} pontos atrás do líder. `;
+        resumido = `${sua_posicao}º no Capitão (-${truncar1(diferenca)} pts)`;
+        detalhado = `Capitão de Luxo: ${sua_posicao}º lugar, ${truncar1(diferenca)} pontos atrás do líder. `;
     }
 
     return { resumido, detalhado };
@@ -237,7 +245,7 @@ function analisarCapitao(cap) {
  */
 function construirNarrativaResumida(abertura, eventos, performance) {
     if (eventos.length === 0) {
-        return `${abertura} Você fez ${performance.pontos.toFixed(2)} pontos (${performance.posicao}º de ${performance.total_participantes}).`;
+        return `${abertura} Você fez ${truncarPontosNum(performance.pontos)} pontos (${performance.posicao}º de ${performance.total_participantes}).`;
     }
 
     // Limitar a 3 eventos mais importantes
@@ -255,12 +263,12 @@ function construirNarrativaCompleta(abertura, eventosDetalhados, contexto) {
     let narrativa = `${abertura} `;
 
     // Adicionar contexto de performance
-    narrativa += `Você fez ${performance.pontos.toFixed(2)} pontos e ficou em ${performance.posicao}º lugar de ${performance.total_participantes} participantes. `;
+    narrativa += `Você fez ${truncarPontosNum(performance.pontos)} pontos e ficou em ${performance.posicao}º lugar de ${performance.total_participantes} participantes. `;
 
     if (performance.vs_media > 0) {
-        narrativa += `Ficou ${performance.vs_media.toFixed(1)} pontos acima da média da liga. `;
+        narrativa += `Ficou ${truncar1(performance.vs_media)} pontos acima da média da liga. `;
     } else if (performance.vs_media < 0) {
-        narrativa += `Ficou ${Math.abs(performance.vs_media).toFixed(1)} pontos abaixo da média. `;
+        narrativa += `Ficou ${truncar1(Math.abs(performance.vs_media))} pontos abaixo da média. `;
     }
 
     // Adicionar eventos detalhados

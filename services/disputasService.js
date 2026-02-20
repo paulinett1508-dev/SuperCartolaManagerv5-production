@@ -11,6 +11,7 @@ import Goleiros from "../models/Goleiros.js";
 import CapitaoCaches from "../models/CapitaoCaches.js";
 import MelhorMesCache from "../models/MelhorMesCache.js";
 import Rodada from "../models/Rodada.js";
+import { truncarPontosNum } from "../utils/type-helpers.js";
 
 const LOG_PREFIX = "[DISPUTAS-SERVICE]";
 
@@ -206,15 +207,15 @@ export async function calcularPontosCorridos(ligaId, rodada, timeId, temporada) 
 
         return {
             seu_confronto: {
-                voce: parseFloat(eu.pontos.toFixed(2)),
+                voce: truncarPontosNum(eu.pontos),
                 adversario: {
                     nome: adversario.nome_cartola || adversario.nome,
-                    pontos: parseFloat(adversario.pontos.toFixed(2)),
+                    pontos: truncarPontosNum(adversario.pontos),
                     timeId: adversario.id,
                     escudo: adversario.escudo,
                 },
                 resultado, // "vitoria", "empate", "derrota"
-                diferenca: parseFloat(Math.abs(eu.pontos - adversario.pontos).toFixed(2)),
+                diferenca: truncarPontosNum(Math.abs(eu.pontos - adversario.pontos)),
                 pontos_ganhos,
             },
             classificacao_atual: (cache.classificacao || []).slice(0, 10).map(c => ({
@@ -354,7 +355,7 @@ export async function calcularMataMata(ligaId, rodada, timeId, temporada) {
                         escudo: adversario?.url_escudo_png || null,
                     },
                     resultado,
-                    diferenca: parseFloat(Math.abs(meusPontos - advPontos).toFixed(2)),
+                    diferenca: truncarPontosNum(Math.abs(meusPontos - advPontos)),
                 },
                 proxima_fase: proximaFase,
                 chave_completa: chaveCompleta,
@@ -610,7 +611,7 @@ export async function calcularCapitaoLuxo(ligaId, rodada, timeId, temporada) {
                 timeId: r.timeId,
                 nome: r.nome_cartola,
                 pontos: r.pontuacao_total,
-                diferenca: i === 0 ? 0 : parseFloat((r.pontuacao_total - lider.pontuacao_total).toFixed(2)),
+                diferenca: i === 0 ? 0 : truncarPontosNum(r.pontuacao_total - lider.pontuacao_total),
             })),
             sua_posicao: minhaPosicao,
             seus_pontos: meusDados?.pontuacao_total || 0,
@@ -666,7 +667,7 @@ export async function calcularMelhorMes(ligaId, rodada, timeId, temporada) {
             classificacao: ranking.slice(0, 5).map((r, i) => ({
                 posicao: i + 1,
                 ...r,
-                diferenca: i === 0 ? 0 : parseFloat((r.pontos - lider.pontos).toFixed(2)),
+                diferenca: i === 0 ? 0 : truncarPontosNum(r.pontos - lider.pontos),
             })),
             sua_posicao: minhaPosicao,
             seus_pontos: meusDados?.pontos || 0,

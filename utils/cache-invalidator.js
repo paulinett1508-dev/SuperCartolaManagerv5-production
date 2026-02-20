@@ -27,6 +27,12 @@ const CACHE_DEPENDENCIES = {
 
     // Quando ExtratoFinanceiroCache é invalidado, invalidar:
     'ExtratoFinanceiroCache': ['RankingGeralCache'],
+
+    // ✅ Live: Quando parciais são atualizados, invalidar ranking/top10
+    'Parciais': ['RankingGeralCache', 'Top10Cache'],
+
+    // ✅ Live: Consolidação de rodada invalida módulos competitivos
+    'Consolidacao': ['ExtratoFinanceiroCache', 'RankingGeralCache', 'Top10Cache', 'PontosCorridosCache', 'MataMataCache'],
 };
 
 // Log prefix para debug
