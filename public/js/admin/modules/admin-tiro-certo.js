@@ -180,16 +180,20 @@ class AdminTiroCerto {
 
     renderEdicaoCard(edicao) {
         const statusLabel = { pendente: 'Pendente', em_andamento: 'Em Andamento', finalizada: 'Finalizada' };
+        const podeAtivar = edicao.status === 'pendente';
         return `
-            <div class="tc-edicao-card" style="cursor:pointer;" onclick="window.adminTiroCerto.selecionarEdicao(${edicao.id})">
-                <div class="tc-edicao-info">
+            <div class="tc-edicao-card">
+                <div class="tc-edicao-info" style="cursor:pointer;" onclick="window.adminTiroCerto.selecionarEdicao(${edicao.id})">
                     <span class="material-icons" style="color:var(--app-primary);font-size:1.25rem;">gps_fixed</span>
                     <div>
                         <div class="tc-edicao-nome">${edicao.nome || edicao.id + 'a Edicao'}</div>
                         <div class="tc-edicao-rodadas">R${edicao.rodadaInicial} - R${edicao.rodadaFinal} | ${edicao.totalParticipantes || 0} participantes | ${edicao.vivosCount || 0} vivos</div>
                     </div>
                 </div>
-                <span class="tc-edicao-status ${edicao.status}">${statusLabel[edicao.status] || edicao.status}</span>
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                    ${podeAtivar ? `<button class="tc-btn tc-btn-primary" style="padding:0.25rem 0.75rem;font-size:var(--app-font-xs);" onclick="window.adminTiroCerto.ativarEdicao(${edicao.id})"><span class="material-icons" style="font-size:14px;">play_arrow</span> Ativar</button>` : ''}
+                    <span class="tc-edicao-status ${edicao.status}">${statusLabel[edicao.status] || edicao.status}</span>
+                </div>
             </div>
         `;
     }
@@ -236,6 +240,42 @@ class AdminTiroCerto {
         } catch (err) {
             console.error('[ADMIN-TC] Erro ao carregar participantes:', err);
             lista.innerHTML = '<p style="color:var(--app-danger);text-align:center;">Erro ao carregar participantes</p>';
+        }
+    }
+
+    // ==========================================================================
+    // ATIVAR EDICAO (pendente → em_andamento)
+    // ==========================================================================
+
+    async ativarEdicao(edicaoId) {
+        if (!confirm(`Ativar a edicao ${edicaoId}? Participantes poderao fazer escolhas.`)) return;
+
+        try {
+            const res = await fetch(`/api/tiro-certo/${this.ligaId}/ativar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ edicao: edicaoId }),
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                if (window.SuperModal) {
+                    SuperModal.toast.success(`Edicao ${edicaoId} ativada!`);
+                }
+                await this.carregarDashboard();
+            } else {
+                if (window.SuperModal) {
+                    SuperModal.toast.error(data.error || 'Erro ao ativar edicao');
+                } else {
+                    alert(data.error || 'Erro ao ativar edicao');
+                }
+            }
+        } catch (err) {
+            console.error('[ADMIN-TC] Erro ao ativar edicao:', err);
+            if (window.SuperModal) {
+                SuperModal.toast.error('Erro de conexao ao ativar edicao');
+            }
         }
     }
 

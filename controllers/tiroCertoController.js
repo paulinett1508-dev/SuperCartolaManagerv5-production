@@ -1,12 +1,13 @@
 /**
- * TIRO CERTO CONTROLLER v1.0
+ * TIRO CERTO CONTROLLER v1.1
  *
  * Endpoints para o modulo Tiro Certo (survival - acertar vencedor).
  * - GET status da disputa (participante)
- * - GET minhas escolhas (participante)
- * - POST registrar escolha (participante)
+ * - GET minhas escolhas (participante — usa timeId da sessao)
+ * - POST registrar escolha (participante — valida dono)
  * - GET participantes vivos (participante)
  * - POST iniciar edicao (admin)
+ * - POST ativar edicao (admin)
  */
 import TiroCertoCache from '../models/TiroCertoCache.js';
 import Liga from '../models/Liga.js';
@@ -74,7 +75,9 @@ export async function obterMinhasEscolhas(req, res) {
         const { ligaId } = req.params;
         const temporada = parseInt(req.query.temporada) || CURRENT_SEASON;
         const edicaoNum = parseInt(req.query.edicao) || null;
-        const timeId = parseInt(req.query.timeId);
+
+        // Usar timeId da sessao (seguro) — query param como fallback
+        const timeId = parseInt(req.session?.participante?.time_id) || parseInt(req.query.timeId);
 
         if (!timeId) {
             return res.status(400).json({ error: 'timeId obrigatorio' });
@@ -129,7 +132,20 @@ export async function obterMinhasEscolhas(req, res) {
 export async function registrarEscolha(req, res) {
     try {
         const { ligaId } = req.params;
-        const { timeId, rodada, timeEscolhidoId, timeEscolhidoNome } = req.body;
+        const { rodada, timeEscolhidoId, timeEscolhidoNome } = req.body;
+
+        // Usar timeId da sessao (seguro) — body como fallback
+        const timeIdSessao = parseInt(req.session?.participante?.time_id);
+        const timeIdBody = parseInt(req.body.timeId);
+        const timeId = timeIdSessao || timeIdBody;
+
+        // Validar que participante so pode escolher por si mesmo
+        if (timeIdSessao && timeIdBody && timeIdSessao !== timeIdBody) {
+            logger.warn(`[TIRO-CERTO] Tentativa de escolha para outro time: sessao=${timeIdSessao} body=${timeIdBody}`);
+            return res.status(403).json({
+                error: 'Voce so pode registrar escolhas para o seu proprio time',
+            });
+        }
 
         if (!timeId || !rodada || !timeEscolhidoId) {
             return res.status(400).json({
@@ -378,6 +394,7 @@ export async function iniciarEdicao(req, res) {
             nome: `${edicao}a Edicao`,
             rodadaInicial: parseInt(rodadaInicial),
             rodadaFinal: parseInt(rodadaFinal),
+            rodadaAtual: parseInt(rodadaInicial),
             status: 'pendente',
             participantes,
             vivosCount: participantes.length,
@@ -402,5 +419,70 @@ export async function iniciarEdicao(req, res) {
     } catch (err) {
         logger.error('[TIRO-CERTO] Erro iniciarEdicao:', err.message);
         return res.status(500).json({ error: 'Erro ao iniciar edicao' });
+    }
+}
+
+/**
+ * POST /:ligaId/ativar (ADMIN)
+ * Ativa uma edicao: pendente → em_andamento
+ * Body: { edicao }
+ */
+export async function ativarEdicao(req, res) {
+    try {
+        const { ligaId } = req.params;
+        const edicaoNum = parseInt(req.body.edicao);
+        const temporada = parseInt(req.body.temporada) || CURRENT_SEASON;
+
+        if (!edicaoNum) {
+            return res.status(400).json({ error: 'Campo obrigatorio: edicao' });
+        }
+
+        // Verificar se existe outra edicao em andamento
+        const emAndamento = await TiroCertoCache.findOne({
+            liga_id: ligaId,
+            temporada,
+            status: 'em_andamento',
+        }).lean();
+
+        if (emAndamento) {
+            return res.status(409).json({
+                error: `Ja existe uma edicao em andamento (${emAndamento.nome}). Finalize-a antes de ativar outra.`,
+            });
+        }
+
+        const edicao = await TiroCertoCache.findOne({
+            liga_id: ligaId,
+            temporada,
+            edicao: edicaoNum,
+        });
+
+        if (!edicao) {
+            return res.status(404).json({ error: `Edicao ${edicaoNum} nao encontrada` });
+        }
+
+        if (edicao.status !== 'pendente') {
+            return res.status(400).json({
+                error: `Edicao ${edicaoNum} esta com status '${edicao.status}', so pode ativar edicoes pendentes`,
+            });
+        }
+
+        edicao.status = 'em_andamento';
+        edicao.ultima_atualizacao = new Date();
+        await edicao.save();
+
+        logger.info(`[TIRO-CERTO] Edicao ${edicaoNum} ativada para liga ${ligaId}`);
+
+        return res.json({
+            success: true,
+            mensagem: `Edicao ${edicaoNum} ativada com sucesso`,
+            edicao: {
+                id: edicao.edicao,
+                nome: edicao.nome,
+                status: edicao.status,
+            },
+        });
+    } catch (err) {
+        logger.error('[TIRO-CERTO] Erro ativarEdicao:', err.message);
+        return res.status(500).json({ error: 'Erro ao ativar edicao' });
     }
 }

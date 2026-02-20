@@ -28,14 +28,34 @@ export default class TiroCertoManager extends BaseManager {
         const { ligaId, rodada, temporada } = ctx;
         console.log(`[TIRO-CERTO] onMarketClose R${rodada} liga=${ligaId}`);
 
-        const edicao = await TiroCertoCache.findOne({
+        // Auto-ativacao: se edicao pendente e rodada chegou, ativar
+        let edicao = await TiroCertoCache.findOne({
             liga_id: ligaId,
             temporada,
             status: 'em_andamento',
         });
 
         if (!edicao) {
-            return { skip: true, motivo: 'Nenhuma edicao em andamento' };
+            const pendente = await TiroCertoCache.findOne({
+                liga_id: ligaId,
+                temporada,
+                status: 'pendente',
+                rodadaInicial: { $lte: rodada },
+                rodadaFinal: { $gte: rodada },
+            });
+
+            if (pendente) {
+                pendente.status = 'em_andamento';
+                pendente.rodadaAtual = rodada;
+                pendente.ultima_atualizacao = new Date();
+                await pendente.save();
+                console.log(`[TIRO-CERTO] Auto-ativacao: edicao ${pendente.edicao} ativada na R${rodada}`);
+                edicao = pendente;
+            }
+        }
+
+        if (!edicao) {
+            return { skip: true, motivo: 'Nenhuma edicao em andamento ou pendente para esta rodada' };
         }
 
         // Rodada fora do intervalo desta edicao
