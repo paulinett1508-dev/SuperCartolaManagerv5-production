@@ -374,7 +374,23 @@ if (IS_DEVELOPMENT) {
 // JS, CSS, imagens e fontes não precisam de session/MongoDB
 // HTML e diretórios seguem para o chain completo (session → protegerRotas)
 // ====================================================================
-const servePublicAssets = express.static("public");
+// ✅ FIX MOBILE: Cache-Control para assets estáticos
+// Sem isso, browsers mobile refaziam requests para TODOS os assets em cada reload.
+// max-age=1h com must-revalidate: browser usa cache mas valida com servidor (304 Not Modified)
+// O cache-busting via ?v=versao no HTML garante que versões novas são baixadas.
+const servePublicAssets = express.static("public", {
+  maxAge: '1h',
+  setHeaders: (res, filePath) => {
+    // Fontes e imagens: cache mais longo (7 dias) - raramente mudam
+    if (/\.(woff|woff2|ttf|eot|png|jpg|jpeg|gif|svg|ico|webp)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+    }
+    // JS e CSS: cache curto (1h) - mudam em deploys, cache-busted via ?v=
+    else if (/\.(js|mjs|css)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');
+    }
+  }
+});
 app.use((req, res, next) => {
   if (/\.(js|mjs|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|map|webp|webmanifest)$/i.test(req.path)) {
     return servePublicAssets(req, res, next);

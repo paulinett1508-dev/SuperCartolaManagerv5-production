@@ -391,22 +391,28 @@ const AppVersion = {
         localStorage.removeItem(this.LOCAL_BOOT_KEY);
 
         // Forçar atualização do Service Worker
-        if (navigator.serviceWorker.controller) {
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
             navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
         }
 
-        // Limpar cache do SW (aguardar conclusão antes de recarregar)
+        // ✅ FIX MOBILE: Limpar apenas caches OBSOLETOS (preservar SW cache ativo)
+        // Antes deletava TODOS os caches, causando tela branca no mobile pós-Republish
+        // porque o SW perdia seus assets e tudo precisava ser re-baixado do zero.
         if ('caches' in window) {
             try {
+                const CURRENT_SW_CACHE = 'super-cartola-v22-logo-ano12';
                 const names = await caches.keys();
-                await Promise.all(names.map(name => caches.delete(name)));
+                const obsoletos = names.filter(name => name !== CURRENT_SW_CACHE);
+                if (obsoletos.length > 0) {
+                    await Promise.all(obsoletos.map(name => caches.delete(name)));
+                }
             } catch (e) {
                 // Ignorar erros de cache — prosseguir com reload de qualquer forma
             }
         }
 
-        // Recarregar página (sem race condition com deleção de caches)
-        window.location.reload(true);
+        // Recarregar página
+        window.location.reload();
     }
 };
 
