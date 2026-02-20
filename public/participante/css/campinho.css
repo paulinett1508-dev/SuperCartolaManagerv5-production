@@ -58,7 +58,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
+    background: var(--app-glass-hover);
 }
 
 .campinho-status-indicator.consolidada .campinho-status-dot {
@@ -136,7 +136,7 @@
    CARD "MEU DESEMPENHO" - Padrão App
    ===================================================== */
 .campinho-desempenho-card {
-    background: rgba(26, 26, 26, 0.6);
+    background: var(--app-surface-overlay);
     border: var(--app-border-default);
     border-left: 4px solid var(--app-primary, var(--app-primary));
     border-radius: 10px;
@@ -176,7 +176,7 @@
     align-items: center;
     gap: 4px;
     padding: 16px 32px;
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--app-surface-overlay);
     border-radius: 12px;
 }
 
@@ -205,7 +205,7 @@
 .campinho-desemp-stat {
     text-align: center;
     padding: 10px 8px;
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--app-surface-overlay);
     border-radius: 8px;
 }
 
@@ -251,7 +251,7 @@
     align-items: center;
     margin-top: 12px;
     padding: 10px 12px;
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--app-surface-overlay);
     border-radius: 8px;
     gap: 8px;
 }
@@ -305,9 +305,9 @@
     gap: 10px;
     margin-top: 14px;
     padding: 12px 14px;
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--app-surface-overlay);
     border-radius: 8px;
-    border-left: 3px solid rgba(255, 255, 255, 0.2);
+    border-left: 3px solid var(--app-border);
 }
 
 .campinho-desemp-extrato-icon {
@@ -457,7 +457,7 @@
 
 /* === TABELA DE ESCALAÇÃO (formato Rodadas) === */
 .campinho-escalacao-tabela {
-    background: rgba(15, 23, 42, 0.6);
+    background: var(--app-surface-overlay);
     border-radius: 16px;
     border: var(--app-border-subtle);
     padding: 16px;
@@ -523,13 +523,13 @@
 
 .campinho-escalacao-divisoria {
     height: 1px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--app-glass-hover);
     margin: 12px 0;
 }
 
 /* Campo visual como complemento */
 .campinho-field-panel {
-    background: rgba(15, 23, 42, 0.85);
+    background: var(--app-surface-overlay);
     border-radius: 20px;
     border: var(--app-border-subtle);
     padding: 20px;
@@ -679,7 +679,7 @@
     gap: 12px;
     padding: 10px 12px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--app-glass-bg);
     border: var(--app-border-subtle);
 }
 
@@ -694,7 +694,7 @@
 }
 
 .campinho-tabela-jogador.reserva-bg {
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--app-glass-bg);
 }
 
 /* Escudo do clube */
@@ -702,7 +702,7 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--app-glass-hover);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -816,14 +816,14 @@
 
 .campinho-lineup-panel::-webkit-scrollbar-thumb,
 .campinho-lineup-body::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--app-glass-hover);
     border-radius: 999px;
 }
 
 /* === HEADER DO CAMPINHO === */
 .campinho-header {
     padding: 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-bottom: var(--app-border-default);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -885,7 +885,7 @@
         linear-gradient(180deg, #0d2818 0%, #0a1f14 50%, #071510 100%);
 
     /* Borda do campo */
-    border: 2px solid rgba(255,255,255,0.15);
+    border: 2px solid var(--app-border);
     box-shadow:
         inset 0 0 60px rgba(0,0,0,0.5),
         0 8px 32px rgba(0,0,0,0.4);
@@ -935,7 +935,7 @@
     transform: translateX(-50%);
     width: 55%;
     height: 60px;
-    border: 1px solid rgba(255,255,255,0.15);
+    border: var(--app-border-default);
     border-top: none;
     border-radius: 0 0 4px 4px;
     pointer-events: none;
@@ -949,7 +949,7 @@
     transform: translateX(-50%);
     width: 25%;
     height: 25px;
-    border: 1px solid rgba(255,255,255,0.12);
+    border: var(--app-border-default);
     border-top: none;
     border-radius: 0 0 2px 2px;
     pointer-events: none;
@@ -1034,8 +1034,8 @@
     font-family: var(--app-font-mono);
     font-size: 9px;
     font-weight: 700;
-    background: rgba(0,0,0,0.9);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: var(--app-surface-overlay);
+    border: var(--app-border-default);
     white-space: nowrap;
 }
 
@@ -1238,9 +1238,9 @@
 .campinho-confronto-card {
     margin: 16px;
     padding: 16px;
-    background: rgba(255,255,255,0.03);
+    background: var(--app-glass-bg);
     border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.08);
+    border: var(--app-border-subtle);
 }
 
 .campinho-confronto-header {
@@ -1299,7 +1299,7 @@
     gap: 12px;
     padding: 8px 14px;
     margin: 0;
-    background: rgba(255,255,255,0.03);
+    background: var(--app-glass-bg);
     border-radius: 12px;
     flex-wrap: wrap;
 }
