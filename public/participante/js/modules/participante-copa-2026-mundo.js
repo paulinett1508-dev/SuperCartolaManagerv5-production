@@ -105,8 +105,8 @@ function renderizarCountdown() {
         if (countdownEl) {
             countdownEl.innerHTML = `
                 <div style="display:flex;align-items:center;gap:0.5rem;background:rgba(34,197,94,0.2);border:1px solid rgba(34,197,94,0.4);border-radius:999px;padding:0.35rem 1rem;">
-                    <span style="width:0.5rem;height:0.5rem;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;"></span>
-                    <span style="font-family:var(--app-font-brand);font-size:0.85rem;color:#22c55e;">COPA EM ANDAMENTO</span>
+                    <span style="width:0.5rem;height:0.5rem;background:var(--app-success);border-radius:50%;animation:pulse 2s infinite;"></span>
+                    <span style="font-family:var(--app-font-brand);font-size:0.85rem;color:var(--app-success);">COPA EM ANDAMENTO</span>
                 </div>
             `;
         }
