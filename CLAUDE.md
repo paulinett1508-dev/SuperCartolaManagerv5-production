@@ -265,6 +265,7 @@ Documentação das skills: [`docs/skills/`](docs/skills/) (agnóstico, Markdown 
 | "auditar cache", "cache lento", "Service Worker" | **cache-auditor** | Project |
 | "auditar módulo", "checklist módulo" | **auditor-module** | Project |
 | "auditar UX app", "revisar design participante", "visual do app" | **ux-auditor-app** | Project |
+| "auditar live", "experiência ao vivo", "parciais ao vivo", "orchestrator ok", "pre-flight rodada" | **live-experience** | Project |
 | "análise de branches", "comparar branches" | **analise-branches** | Project |
 | "auditoria mensal", "verificar mudanças", "check context7" | **context7-monthly-audit** | Project |
 | "criar skill", "skill nova" | **skill-creator** | Meta |
@@ -338,6 +339,7 @@ As keywords ativam a mesma skill automaticamente (ver tabela acima).
 | `/auditor-module [modulo]` | "audite o módulo X", "checklist módulo" |
 | `/cache-auditor [modo]` | "auditar cache", "cache desatualizado" |
 | `/ux-auditor-app` | "auditar UX do app", "revisar design participante", "visual do app tá ok?" |
+| `/live-experience` | "auditar experiência ao vivo", "parciais tão ok?", "orchestrator tá rodando?", "pre-flight rodada" |
 | `/anti-frankenstein` | "anti-frank", "ative modo anti-frank", "antes de criar CSS", "já existe?", "blindar frontend", "HTMLs no modo anti-frank" |
 | `/newsession` | "nova sessão", "salvar contexto" |
 | `/liste-pr-github [período]` | "listar PRs", "PRs de hoje", "merges da semana" |
