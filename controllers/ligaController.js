@@ -847,6 +847,7 @@ const buscarModulosAtivos = async (req, res) => {
       premiacoes: true,
       regras: true,
       cartolaPro: false,
+      tiroCerto: false,
     };
 
     if (liga.modulos_ativos && Object.keys(liga.modulos_ativos).length > 0) {
@@ -897,6 +898,7 @@ const mapearModuloId = (moduloFrontend) => {
     premiacoes: "premiacoes",
     regras: "regras",
     cartolaPro: "cartola_pro",
+    tiroCerto: "tiro_certo",
   };
   return mapeamento[moduloFrontend] || moduloFrontend;
 };

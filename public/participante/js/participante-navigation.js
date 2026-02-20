@@ -59,6 +59,7 @@ class ParticipanteNavigation {
             "copa-2026-mundo": "/participante/fronts/copa-2026-mundo.html",
             regras: "/participante/fronts/regras.html",
             "rodada-xray": "/participante/fronts/rodada-xray.html",
+            "tiro-certo": "/participante/fronts/tiro-certo.html",
         };
 
         // ✅ v3.0: Controles simplificados (apenas debounce por tempo)
