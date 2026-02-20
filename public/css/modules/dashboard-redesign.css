@@ -7,12 +7,12 @@
 
 /* === RESET DO LAYOUT PARA NOVO DESIGN === */
 .dashboard-redesign {
-    background: #121212 !important;
+    background: var(--surface-bg) !important;
     min-height: 100vh;
 }
 
 .dashboard-redesign .page-content {
-    background: #121212 !important;
+    background: var(--surface-bg) !important;
     padding: 24px 20px !important; /* Reduzido de 32px para 20px - menos gap */
     min-height: calc(100vh - 60px);
 }
@@ -1422,7 +1422,7 @@ body.sidebar-collapsed .app-main {
 }
 
 .sidebar-menu-item.active .item-badge {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--surface-white-20);
     color: #ffffff;
 }
 
@@ -1486,7 +1486,7 @@ body.sidebar-collapsed .app-main {
 
 .sidebar-liga-item .liga-badge-count {
     margin-left: auto;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--surface-white-10);
     color: var(--text-muted);
     font-size: 0.625rem;
     font-weight: 700;
@@ -1566,7 +1566,7 @@ body.sidebar-collapsed .app-main {
     overflow: hidden;
     transition: max-height 0.2s ease;
     margin-left: 16px;
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: 1px solid var(--surface-white-10);
 }
 
 .sidebar-temporada-group.open .sidebar-temporada-content {
@@ -1672,7 +1672,7 @@ body.sidebar-collapsed .app-main {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--surface-white-10);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1735,7 +1735,7 @@ body.sidebar-collapsed .app-main {
     visibility: hidden;
     transform: translateY(10px);
     transition: all 0.2s ease;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 -4px 20px var(--surface-overlay);
     z-index: 1001;
     overflow: hidden;
 }
@@ -1836,7 +1836,7 @@ body.sidebar-collapsed .app-main {
     position: relative;
     transform: scale(0.9) translateY(20px);
     transition: transform 0.2s ease;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 60px var(--surface-overlay);
 }
 
 .modal-perfil-overlay.active .modal-perfil-content {
@@ -1850,7 +1850,7 @@ body.sidebar-collapsed .app-main {
     width: 32px;
     height: 32px;
     border: none;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--surface-white-10);
     border-radius: 50%;
     cursor: pointer;
     display: flex;
@@ -2641,9 +2641,9 @@ body.sidebar-collapsed .main-content {
 }
 
 .sidebar-badge.soon {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--surface-white-10);
     color: var(--text-muted);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--surface-white-10);
 }
 
 .sidebar-badge.live {
@@ -2704,7 +2704,7 @@ body.sidebar-collapsed .main-content {
 
 .stat-card-new.clicavel:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 24px var(--surface-overlay-light);
 }
 
 .stat-card-new.clicavel:active {
@@ -2732,7 +2732,7 @@ body.sidebar-collapsed .main-content {
 /* Conteúdo do Modal */
 .modal-historico-content {
     background: linear-gradient(180deg, #1f1f1f 0%, #171717 100%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--surface-white-10);
     border-radius: 16px;
     width: 100%;
     max-width: 500px;
@@ -2774,7 +2774,7 @@ body.sidebar-collapsed .main-content {
 }
 
 .modal-historico-close {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--surface-white-20);
     border: none;
     border-radius: 50%;
     width: 36px;
@@ -2809,7 +2809,7 @@ body.sidebar-collapsed .main-content {
 .modal-historico-filtros select {
     flex: 1;
     background: var(--surface-card-elevated);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--surface-white-10);
     border-radius: 8px;
     padding: 8px 12px;
     color: white;

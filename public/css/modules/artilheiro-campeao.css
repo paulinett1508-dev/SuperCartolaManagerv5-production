@@ -289,8 +289,8 @@
   line-height: 1;
 }
 
-.gols-saldo.positivo { color: #28a745; }
-.gols-saldo.negativo { color: #dc3545; }
+.gols-saldo.positivo { color: var(--module-artilheiro-primary); }
+.gols-saldo.negativo { color: var(--color-danger); }
 .gols-saldo.zero { color: #888; }
 
 /* Material Icons dentro de gols-saldo */
@@ -343,8 +343,8 @@
   line-height: 1;
 }
 
-.col-rodada-gols.positivo .gols-valor { color: #28a745; }
-.col-rodada-gols.negativo .gols-valor { color: #dc3545; }
+.col-rodada-gols.positivo .gols-valor { color: var(--module-artilheiro-primary); }
+.col-rodada-gols.negativo .gols-valor { color: var(--color-danger); }
 .col-rodada-gols.zero .gols-valor { color: #888; }
 .col-rodada-gols.vazio .gols-valor,
 .col-rodada-gols.vazio .gols-saldo { color: #444; }
@@ -759,8 +759,8 @@
   font: 700 24px "Inter", sans-serif;
 }
 
-.resumo-valor.positivo { color: #28a745; }
-.resumo-valor.negativo { color: #dc3545; }
+.resumo-valor.positivo { color: var(--module-artilheiro-primary); }
+.resumo-valor.negativo { color: var(--color-danger); }
 .resumo-valor.zero { color: #888; }
 
 .modal-secao {
@@ -800,11 +800,11 @@
 }
 
 .gol-item.positivo {
-  border-left-color: #28a745;
+  border-left-color: var(--module-artilheiro-primary);
 }
 
 .gol-item.negativo {
-  border-left-color: #dc3545;
+  border-left-color: var(--color-danger);
 }
 
 .jogador-nome {

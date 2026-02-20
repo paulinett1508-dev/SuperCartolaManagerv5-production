@@ -334,7 +334,7 @@
     padding: 8px 10px;
     border-radius: var(--radius-md, 8px);
     border: 1px solid rgba(255, 85, 0, 0.22);
-    background: #121212;
+    background: var(--surface-bg);
 }
 
 #modalConfigModulo .valores-grid-section.zone-ganho,
@@ -378,7 +378,7 @@
 
 #modalConfigModulo .valores-grid-section.zone-ganho .valores-grid-title,
 #modalWizardModulo .valores-grid-section.zone-ganho .valores-grid-title {
-    color: #10b981;
+    color: var(--color-success);
 }
 
 #modalConfigModulo .valores-grid-section.zone-neutra .valores-grid-title,
@@ -388,7 +388,7 @@
 
 #modalConfigModulo .valores-grid-section.zone-perda .valores-grid-title,
 #modalWizardModulo .valores-grid-section.zone-perda .valores-grid-title {
-    color: #ef4444;
+    color: var(--color-danger);
 }
 
 #modalConfigModulo .btn-success,
@@ -710,7 +710,7 @@
 
 .btn-edit {
     background: rgba(59, 130, 246, 0.1);
-    color: #3b82f6;
+    color: var(--color-info);
     border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
@@ -730,7 +730,7 @@
 
 .btn-delete {
     background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
+    color: var(--color-danger);
     border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
@@ -826,14 +826,14 @@
     display: flex;
     background: rgba(16, 185, 129, 0.1);
     border: 1px solid rgba(16, 185, 129, 0.3);
-    color: #10b981;
+    color: var(--color-success);
 }
 
 .status-message.error {
     display: flex;
     background: rgba(239, 68, 68, 0.1);
     border: 1px solid rgba(239, 68, 68, 0.3);
-    color: #ef4444;
+    color: var(--color-danger);
 }
 
 /* === SECTION TITLE === */
@@ -934,7 +934,7 @@
 }
 
 .modulo-card.ativo .modulo-icon .material-icons {
-    color: #10b981;
+    color: var(--color-success);
 }
 
 .modulo-card.base .modulo-icon {
@@ -1016,7 +1016,7 @@ input:checked + .toggle-slider {
 
 input:checked + .toggle-slider:before {
     transform: translateX(20px);
-    background-color: #10b981;
+    background-color: var(--color-success);
 }
 
 .modulo-card.base .toggle-switch {

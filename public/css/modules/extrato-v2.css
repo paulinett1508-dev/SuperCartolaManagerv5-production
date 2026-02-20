@@ -31,8 +31,8 @@
 
     /* Cores de ícones */
     --extrato-icon-positive: var(--color-success-light);
-    --extrato-icon-negative: #ef4444;
-    --extrato-icon-acerto: #3b82f6;
+    --extrato-icon-negative: var(--color-danger);
+    --extrato-icon-acerto: var(--color-info);
     --extrato-icon-inscricao: #f59e0b;
 
     /* Espaçamentos */
@@ -46,7 +46,7 @@
    ======================================== */
 
 .extrato-hero-v2 {
-    background: var(--surface-card, #1a1a1a);
+    background: var(--surface-card);
     border: 1px solid var(--extrato-border-neutral);
     border-radius: var(--extrato-card-radius);
     padding: var(--extrato-card-padding);
@@ -113,7 +113,7 @@
 
 .extrato-hero-v2__label .material-icons {
     font-size: 18px;
-    color: var(--color-primary, #FF5500);
+    color: var(--color-primary, var(--color-primary));
 }
 
 .extrato-hero-v2__actions {
@@ -129,14 +129,14 @@
     justify-content: center;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--surface-white-10);
     color: var(--text-muted, #a0a0a0);
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .extrato-hero-v2__action-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--surface-white-10);
     color: var(--text-primary, #ffffff);
 }
 
@@ -185,7 +185,7 @@
 }
 
 .extrato-hero-v2__status--deve {
-    background: rgba(239, 68, 68, 0.15);
+    background: var(--color-danger-muted);
     color: #f87171;
 }
 
@@ -231,7 +231,7 @@
 
 .extrato-stat-pill-v2:hover {
     background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--surface-white-10);
 }
 
 .extrato-stat-pill-v2__value {
@@ -257,7 +257,7 @@
    ======================================== */
 
 .extrato-timeline-v2 {
-    background: var(--surface-card, #1a1a1a);
+    background: var(--surface-card);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: var(--extrato-card-radius);
     overflow: hidden;
@@ -284,7 +284,7 @@
 
 .extrato-timeline-v2__title .material-icons {
     font-size: 18px;
-    color: var(--color-primary, #FF5500);
+    color: var(--color-primary, var(--color-primary));
 }
 
 /* Filtros da Timeline */
@@ -296,7 +296,7 @@
 .extrato-timeline-v2__filter-btn {
     padding: 6px 12px;
     border-radius: 9999px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--surface-white-10);
     background: transparent;
     color: var(--text-muted, #a0a0a0);
     font-size: 11px;
@@ -313,7 +313,7 @@
 .extrato-timeline-v2__filter-btn--active {
     background: var(--color-primary-muted, rgba(255, 85, 0, 0.15));
     border-color: var(--color-primary-border, rgba(255, 85, 0, 0.3));
-    color: var(--color-primary, #FF5500);
+    color: var(--color-primary, var(--color-primary));
 }
 
 /* Container de itens */
@@ -321,7 +321,7 @@
     max-height: 400px;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+    scrollbar-color: var(--surface-white-10) transparent;
 }
 
 .extrato-timeline-v2__content::-webkit-scrollbar {
@@ -333,7 +333,7 @@
 }
 
 .extrato-timeline-v2__content::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--surface-white-10);
     border-radius: 3px;
 }
 
@@ -378,7 +378,7 @@
 
 .extrato-timeline-v2__group-icon--rodada {
     background: rgba(255, 85, 0, 0.12);
-    color: var(--color-primary, #FF5500);
+    color: var(--color-primary, var(--color-primary));
 }
 
 .extrato-timeline-v2__group-icon--inscricao {
@@ -430,7 +430,7 @@
 }
 
 .extrato-timeline-v2__group-badge--mico {
-    background: rgba(239, 68, 68, 0.15);
+    background: var(--color-danger-muted);
     color: #f87171;
 }
 
@@ -440,7 +440,7 @@
 }
 
 .extrato-timeline-v2__group-badge--zona-z {
-    background: rgba(239, 68, 68, 0.15);
+    background: var(--color-danger-muted);
     color: #f87171;
 }
 
@@ -593,8 +593,8 @@
    ======================================== */
 
 .extrato-acertos-v2 {
-    background: var(--surface-card, #1a1a1a);
-    border: 1px solid rgba(59, 130, 246, 0.15);
+    background: var(--surface-card);
+    border: 1px solid var(--color-info-muted);
     border-radius: var(--extrato-card-radius);
     overflow: hidden;
 }
@@ -627,7 +627,7 @@
 .extrato-acertos-v2__count {
     padding: 4px 10px;
     border-radius: 9999px;
-    background: rgba(59, 130, 246, 0.15);
+    background: var(--color-info-muted);
     font-family: var(--font-family-mono, 'JetBrains Mono', monospace);
     font-size: 12px;
     font-weight: 700;
@@ -723,7 +723,7 @@
    ======================================== */
 
 .extrato-chart-v2 {
-    background: var(--surface-card, #1a1a1a);
+    background: var(--surface-card);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: var(--extrato-card-radius);
     padding: var(--extrato-card-padding);
@@ -749,7 +749,7 @@
 
 .extrato-chart-v2__title .material-icons {
     font-size: 18px;
-    color: var(--color-primary, #FF5500);
+    color: var(--color-primary, var(--color-primary));
 }
 
 .extrato-chart-v2__filters {
@@ -760,7 +760,7 @@
 .extrato-chart-v2__filter-btn {
     padding: 5px 10px;
     border-radius: 9999px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--surface-white-10);
     background: transparent;
     color: var(--text-muted, #a0a0a0);
     font-size: 10px;
@@ -776,7 +776,7 @@
 .extrato-chart-v2__filter-btn--active {
     background: var(--color-primary-muted, rgba(255, 85, 0, 0.15));
     border-color: var(--color-primary-border, rgba(255, 85, 0, 0.3));
-    color: var(--color-primary, #FF5500);
+    color: var(--color-primary, var(--color-primary));
 }
 
 .extrato-chart-v2__container {
@@ -802,7 +802,7 @@
    ======================================== */
 
 .extrato-performance-v2 {
-    background: var(--surface-card, #1a1a1a);
+    background: var(--surface-card);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: var(--extrato-card-radius);
     padding: var(--extrato-card-padding);
@@ -822,7 +822,7 @@
 
 .extrato-performance-v2__title .material-icons {
     font-size: 18px;
-    color: var(--color-primary, #FF5500);
+    color: var(--color-primary, var(--color-primary));
 }
 
 .extrato-performance-v2__grid {
@@ -1020,7 +1020,7 @@
 /* --- 1. Hero Card: Borda laranja + sombras coloridas por status --- */
 .extrato-hero-v2 {
     border-color: rgba(255, 85, 0, 0.15);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 20px var(--surface-overlay-light);
 }
 
 .extrato-hero-v2--positive {
@@ -1070,7 +1070,7 @@
 
 /* --- 5. Performance: Text-shadow para profundidade --- */
 .extrato-performance-v2__stat-value {
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 2px 8px var(--surface-overlay-light);
 }
 
 /* --- 6. Transições suaves em todos os cards --- */

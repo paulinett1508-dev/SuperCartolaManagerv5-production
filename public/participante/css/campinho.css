@@ -5,7 +5,7 @@
 
 /* === CONTAINER PRINCIPAL === */
 .campinho-wrapper {
-    background: linear-gradient(180deg, var(--app-bg) 0%, #111 100%);
+    background: linear-gradient(180deg, var(--app-bg) 0%, var(--app-bg-dark) 100%);
     min-height: 100vh;
     padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
 }
@@ -39,7 +39,7 @@
 .campinho-rodada-badge {
     font-family: var(--app-font-brand, 'Russo One', sans-serif);
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--app-text-light);
     letter-spacing: 1px;
 }
 
@@ -51,7 +51,7 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--app-text-muted);
 }
 
 .campinho-status-dot {
@@ -67,7 +67,7 @@
 }
 
 .campinho-status-indicator.parcial .campinho-status-dot {
-    background: #fbbf24;
+    background: var(--app-amber);
     box-shadow: 0 0 6px rgba(251, 191, 36, 0.5);
     animation: pulse-dot 1.5s ease-in-out infinite;
 }
@@ -83,7 +83,7 @@
     padding: 3px 10px;
     border-radius: 999px;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--app-text-muted);
 }
 
 /* Patrimônio em destaque */
@@ -107,7 +107,7 @@
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-disabled);
 }
 
 /* Variação */
@@ -158,7 +158,7 @@
 .campinho-desemp-header span:not(.material-icons) {
     font-size: 12px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--app-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -192,7 +192,7 @@
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--app-text-dim);
 }
 
 /* Stats secundários */
@@ -228,7 +228,7 @@
 
 .campinho-desemp-stat-label {
     font-size: 9px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-disabled);
     text-transform: uppercase;
     margin-top: 4px;
     display: block;
@@ -294,7 +294,7 @@
 
 .campinho-desemp-esc-label {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--app-text-dim);
     text-transform: lowercase;
 }
 
@@ -312,12 +312,12 @@
 
 .campinho-desemp-extrato-icon {
     font-size: 20px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--app-text-dim);
 }
 
 .campinho-desemp-extrato-icon.loading {
     animation: spin-icon 1s linear infinite;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-disabled);
 }
 
 @keyframes spin-icon {
@@ -333,13 +333,13 @@
 }
 
 .campinho-desemp-extrato-icon.neutro {
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-disabled);
 }
 
 .campinho-desemp-extrato-texto {
     font-size: 13px;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--app-text-muted);
     flex: 1;
 }
 
@@ -352,7 +352,7 @@
 }
 
 .campinho-desemp-extrato-texto.neutro {
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--app-text-dim);
 }
 
 /* Responsivo - 4 colunas para 2x2 em telas pequenas */
@@ -398,7 +398,7 @@
     letter-spacing: 1.5px;
     font-size: 11px;
     margin: 0 0 6px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--app-text-dim);
 }
 
 .campinho-header-actions {
@@ -427,7 +427,7 @@
 
 .campinho-market-rodada {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--app-text-muted);
     margin-top: 4px;
     letter-spacing: 0.8px;
 }
@@ -443,7 +443,7 @@
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--app-text-muted);
 }
 
 .campinho-header-patrimonio strong,
@@ -492,7 +492,7 @@
 .campinho-escalacao-count {
     font-family: var(--app-font-base, 'Inter', sans-serif);
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-disabled);
     font-weight: 400;
 }
 
@@ -505,7 +505,7 @@
 .campinho-escalacao-total-label {
     font-family: var(--app-font-base, 'Inter', sans-serif);
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--app-text-dim);
 }
 
 .campinho-escalacao-total-valor {
@@ -554,7 +554,7 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--app-text-muted);
 }
 
 .campinho-points strong {
@@ -567,7 +567,7 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--app-text-muted);
     text-align: center;
 }
 
@@ -605,7 +605,7 @@
     text-transform: uppercase;
     font-size: 12px;
     letter-spacing: 1px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--app-text-dim);
     margin: 0;
 }
 
@@ -621,7 +621,7 @@
 .campinho-lineup-balance-label {
     font-family: var(--app-font-base, 'Inter', sans-serif);
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--app-text-dim);
     display: block;
 }
 
@@ -653,7 +653,7 @@
     font-size: 12px;
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--app-text-muted);
 }
 
 .campinho-lineup-section-icon {
@@ -663,7 +663,7 @@
 
 .campinho-lineup-section-count {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-disabled);
 }
 
 .campinho-lineup-section-body {
@@ -728,17 +728,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid #0f1012;
+    border: 2px solid var(--app-bg);
 }
 
 .campinho-tabela-badge span {
     font-size: 9px;
     font-weight: 700;
-    color: #000;
+    color: var(--app-text-inverse);
 }
 
 .campinho-tabela-badge.badge-c {
-    background: linear-gradient(135deg, var(--app-gold, #fbbf24), var(--app-amber, var(--app-amber)));
+    background: linear-gradient(135deg, var(--app-gold), var(--app-amber));
 }
 
 .campinho-tabela-badge.badge-l {
@@ -767,7 +767,7 @@
 .campinho-tabela-pos {
     font-family: var(--app-font-base, 'Inter', sans-serif);
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-disabled);
 }
 
 /* Pontos */
@@ -784,7 +784,7 @@
 }
 
 .campinho-tabela-pontos-valor.positivo {
-    color: #4ade80;
+    color: var(--app-pos-mei-light);
 }
 
 .campinho-tabela-pontos-valor.negativo {
@@ -792,7 +792,7 @@
 }
 
 .campinho-tabela-pontos-valor.neutro {
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-disabled);
 }
 
 .campinho-tabela-multiplicador {
@@ -1402,7 +1402,7 @@
 .campinho-loading .spinner {
     width: 48px;
     height: 48px;
-    border: 4px solid rgba(255, 69, 0, 0.2);
+    border: 4px solid var(--app-primary-border);
     border-top-color: var(--app-primary);
     border-radius: 50%;
     animation: spin 1s linear infinite;
