@@ -28,38 +28,53 @@
         <link rel="manifest" href="manifest.json" />
         <link rel="apple-touch-icon" href="/img/newlogo-supercartola.png" />
 
+        <!-- Preload CSS critico (browser descobre antes de parsear o HTML completo) -->
+        <link rel="preload" href="css/tailwind.css" as="style" />
+        <link rel="preload" href="css/_app-tokens.css" as="style" />
+
         <!-- TAILWIND CSS (build estático via npm run build:css) -->
         <link rel="stylesheet" href="css/tailwind.css" />
 
-        <!-- MATERIAL ICONS -->
+        <!-- FONTS: preconnect (mantido para performance) -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+        <!-- MATERIAL ICONS (non-blocking: media=print trick evita render-blocking no mobile) -->
         <link
             rel="stylesheet"
             href="https://fonts.googleapis.com/icon?family=Material+Icons"
+            media="print" onload="this.media='all'"
         />
         <link
             rel="stylesheet"
             href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+            media="print" onload="this.media='all'"
         />
 
-        <!-- FONTS -->
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <!-- Roboto removida: nao faz parte do design system (Inter, Russo One, JetBrains Mono) -->
+        <!-- FONTS (non-blocking: carregam em background, display=swap ja garante texto visivel) -->
         <link
             href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
             rel="stylesheet"
+            media="print" onload="this.media='all'"
         />
-        <!-- TEASER 2026: Fontes Russo One e Inter -->
         <link
             href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Russo+One&display=swap"
             rel="stylesheet"
+            media="print" onload="this.media='all'"
         />
+        <!-- Fallback noscript para browsers sem JS -->
+        <noscript>
+            <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" />
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Russo+One&display=swap" />
+        </noscript>
 
-        <!-- TEASER 2026: Phosphor Icons -->
-        <script src="https://unpkg.com/@phosphor-icons/web"></script>
+        <!-- TEASER 2026: Phosphor Icons (defer: evita parser-blocking no mobile) -->
+        <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
 
-        <!-- TEASER 2026: Confetti -->
-        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+        <!-- TEASER 2026: Confetti (defer: evita parser-blocking no mobile) -->
+        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
 
         <!-- Design Tokens (SEMPRE PRIMEIRO) -->
         <link rel="stylesheet" href="css/_app-tokens.css" />
@@ -597,22 +612,28 @@
     </head>
     <body class="bg-background-dark font-display text-white">
 
-        <!-- ✅ FORCE CACHE CLEAR v7 - Executa após página carregar -->
+        <!-- ✅ CACHE CLEANUP v8 - Limpa apenas caches OBSOLETOS (preserva SW ativo) -->
+        <!-- FIX MOBILE: v7 deletava TODOS os caches incluindo o SW ativo,
+             causando tela branca no mobile pós-Republish -->
         <script>
             (function() {
-                var FORCE_CLEAR_KEY = 'sw_force_clear_v7';
+                var FORCE_CLEAR_KEY = 'sw_force_clear_v8';
+                var CURRENT_SW_CACHE = 'super-cartola-v22-logo-ano12';
 
-                // Se ainda não limpou nesta versão, agenda limpeza após carregamento
                 if (!localStorage.getItem(FORCE_CLEAR_KEY)) {
-                    // Marcar imediatamente para evitar múltiplas execuções
                     localStorage.setItem(FORCE_CLEAR_KEY, 'pending');
 
-                    // Executar limpeza apenas APÓS página carregar completamente
                     window.addEventListener('load', function() {
                         setTimeout(function() {
                             if ('caches' in window) {
                                 caches.keys().then(function(names) {
-                                    return Promise.all(names.map(function(name) {
+                                    var obsoletos = names.filter(function(name) {
+                                        return name !== CURRENT_SW_CACHE;
+                                    });
+                                    if (obsoletos.length > 0) {
+                                        console.log('[CACHE-CLEANUP] Removendo ' + obsoletos.length + ' caches obsoletos');
+                                    }
+                                    return Promise.all(obsoletos.map(function(name) {
                                         return caches.delete(name);
                                     }));
                                 }).then(function() {
@@ -623,7 +644,7 @@
                             } else {
                                 localStorage.setItem(FORCE_CLEAR_KEY, Date.now().toString());
                             }
-                        }, 2000); // Aguarda 2s após load para não interferir
+                        }, 2000);
                     });
                 }
             })();
@@ -740,22 +761,23 @@
             })();
         </script>
 
-        <!-- ✅ FAILSAFE JS DE EMERGÊNCIA v3 - Força splash esconder após 6s -->
+        <!-- ✅ FAILSAFE JS DE EMERGÊNCIA v4 - Força splash esconder após 12s -->
+        <!-- ✅ FIX MOBILE: 12s (era 6s) - pós-Republish com caches limpos, mobile lento precisa mais tempo -->
         <script>
             (function() {
-                // Failsafe: Se após 6 segundos a splash ainda estiver visível, força esconder
+                // Failsafe: Se após 12 segundos a splash ainda estiver visível, força esconder
                 setTimeout(function() {
                     var splash = document.getElementById('splashScreen');
                     var overlay = document.getElementById('reload-glass-overlay');
                     var container = document.querySelector('.participante-container');
                     var bottomNav = document.querySelector('.bottom-nav-modern');
 
-                    console.log('[FAILSAFE] Verificando estado após 6s...');
+                    console.log('[FAILSAFE] Verificando estado após 12s...');
 
                     // Esconder splash se ainda visível
                     if (splash && (splash.classList.contains('animate') ||
                         getComputedStyle(splash).display !== 'none')) {
-                        console.warn('[FAILSAFE] Forçando splash a esconder após 6s');
+                        console.warn('[FAILSAFE] Forçando splash a esconder após 12s');
                         splash.style.display = 'none';
                         splash.style.opacity = '0';
                         splash.style.visibility = 'hidden';
@@ -783,7 +805,7 @@
                     } else if (emManutencao) {
                         console.log('[FAILSAFE] Manutenção ativa - não forçar app visível');
                     }
-                }, 6000);
+                }, 12000);
             })();
         </script>
         <!-- ✅ FALLBACK: Estilos inline garantem que app fique oculto até estar pronto -->

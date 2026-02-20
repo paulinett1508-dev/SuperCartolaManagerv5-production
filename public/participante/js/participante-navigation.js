@@ -105,12 +105,12 @@ class ParticipanteNavigation {
                     resolve();
                 };
                 window.addEventListener('participante-auth-ready', onAuthReady, { once: true });
-                // Timeout de segurança (5s)
+                // ✅ FIX MOBILE: 15s (era 5s) - compatível com mobile lento pós-Republish
                 setTimeout(() => {
                     window.removeEventListener('participante-auth-ready', onAuthReady);
-                    if (window.Log) Log.warn('PARTICIPANTE-NAV', '⚠️ Timeout aguardando auth - continuando');
+                    if (window.Log) Log.warn('PARTICIPANTE-NAV', '⚠️ Timeout aguardando auth (15s) - continuando');
                     resolve();
-                }, 5000);
+                }, 15000);
             });
         }
 
@@ -234,6 +234,9 @@ class ParticipanteNavigation {
                 }
             }, 200);
 
+            // ✅ FIX MOBILE: 15s (era 5s) - no mobile pós-Republish com caches limpos,
+            // auth pode demorar >5s em 3G/4G. O timeout de 5s causava redirect
+            // indevido para login mesmo com sessão válida.
             const timeout = setTimeout(() => {
                 clearInterval(pollInterval);
                 // ✅ ÚLTIMA CHANCE: Verificar se dados chegaram durante o timeout
@@ -251,10 +254,10 @@ class ParticipanteNavigation {
                     resolve();
                     return;
                 }
-                if (window.Log) Log.error('PARTICIPANTE-NAV', '❌ Timeout aguardando auth');
+                if (window.Log) Log.error('PARTICIPANTE-NAV', '❌ Timeout aguardando auth (15s)');
                 window.location.href = "/participante-login.html";
                 reject(new Error('Timeout'));
-            }, 5000);
+            }, 15000);
 
             window.addEventListener('participante-auth-ready', (event) => {
                 clearInterval(pollInterval);
