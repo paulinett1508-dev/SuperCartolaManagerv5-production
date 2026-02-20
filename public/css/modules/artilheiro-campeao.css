@@ -58,7 +58,7 @@
 .artilheiro-title h3 {
   margin: 0;
   font: 600 14px 'Russo One', sans-serif;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .artilheiro-badge {
@@ -66,7 +66,7 @@
   padding: 2px 8px;
   border-radius: 4px;
   font: 600 9px "Inter", sans-serif;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .artilheiro-info-rodada {
@@ -137,10 +137,10 @@
   border-radius: 2px;
 }
 
-.legenda-cor.gp { background: #28a745; }
-.legenda-cor.gc { background: #dc3545; }
-.legenda-cor.sg-pos { background: linear-gradient(135deg, #1e7e34, #28a745); }
-.legenda-cor.sg-neg { background: linear-gradient(135deg, #a71d2a, #dc3545); }
+.legenda-cor.gp { background: var(--module-artilheiro-primary); }
+.legenda-cor.gc { background: var(--color-danger); }
+.legenda-cor.sg-pos { background: linear-gradient(135deg, var(--module-artilheiro-dark), var(--module-artilheiro-primary)); }
+.legenda-cor.sg-neg { background: linear-gradient(135deg, var(--color-danger-dark), var(--color-danger)); }
 
 /* =============================================
    NAVEGAÇÃO DE RODADAS
@@ -177,7 +177,7 @@
 .artilheiro-nav-btn:hover {
   background: rgba(34, 197, 94, 0.4);
   border-color: var(--module-artilheiro-primary);
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .artilheiro-nav-btn:disabled {
@@ -289,8 +289,8 @@
   line-height: 1;
 }
 
-.gols-saldo.positivo { color: #28a745; }
-.gols-saldo.negativo { color: #dc3545; }
+.gols-saldo.positivo { color: var(--module-artilheiro-primary); }
+.gols-saldo.negativo { color: var(--color-danger); }
 .gols-saldo.zero { color: #888; }
 
 /* Material Icons dentro de gols-saldo */
@@ -315,12 +315,12 @@
 }
 
 .gols-gp {
-  color: #28a745;
+  color: var(--module-artilheiro-primary);
   background: rgba(40, 167, 69, 0.2);
 }
 
 .gols-gc {
-  color: #dc3545;
+  color: var(--color-danger);
   background: rgba(220, 53, 69, 0.2);
 }
 
@@ -343,8 +343,8 @@
   line-height: 1;
 }
 
-.col-rodada-gols.positivo .gols-valor { color: #28a745; }
-.col-rodada-gols.negativo .gols-valor { color: #dc3545; }
+.col-rodada-gols.positivo .gols-valor { color: var(--module-artilheiro-primary); }
+.col-rodada-gols.negativo .gols-valor { color: var(--color-danger); }
 .col-rodada-gols.zero .gols-valor { color: #888; }
 .col-rodada-gols.vazio .gols-valor,
 .col-rodada-gols.vazio .gols-saldo { color: #444; }
@@ -363,7 +363,7 @@
   right: 2px;
   width: 5px;
   height: 5px;
-  background: #dc3545;
+  background: var(--color-danger);
   border-radius: 50%;
   box-shadow: 0 0 3px rgba(220, 53, 69, 0.5);
 }
@@ -407,10 +407,7 @@
   font-size: 5px;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
+/* pulse: removido — definido em _admin-tokens.css */
 
 /* Badge de posição */
 .pos-badge {
@@ -423,7 +420,7 @@
   background: rgba(255, 255, 255, 0.08);
   border-radius: 4px;
   font: 700 11px "Inter", sans-serif;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .pos-badge .material-icons {
@@ -432,11 +429,11 @@
 
 /* Posições especiais */
 .artilheiro-ranking-row.pos-1 { background: rgba(255, 215, 0, 0.1); }
-.artilheiro-ranking-row.pos-1 .pos-badge { background: linear-gradient(135deg, var(--color-gold), #f0c000); color: #1a1a1a; }
+.artilheiro-ranking-row.pos-1 .pos-badge { background: linear-gradient(135deg, var(--color-gold), #f0c000); color: var(--surface-card); }
 
-.artilheiro-ranking-row.pos-2 .pos-badge { background: linear-gradient(135deg, #c0c0c0, #a8a8a8); color: #1a1a1a; }
+.artilheiro-ranking-row.pos-2 .pos-badge { background: linear-gradient(135deg, #c0c0c0, #a8a8a8); color: var(--surface-card); }
 
-.artilheiro-ranking-row.pos-3 .pos-badge { background: linear-gradient(135deg, #cd7f32, #b87333); color: #fff; }
+.artilheiro-ranking-row.pos-3 .pos-badge { background: linear-gradient(135deg, #cd7f32, #b87333); color: var(--text-primary); }
 
 /* Escudo */
 .escudo-img {
@@ -461,7 +458,7 @@
 
 .participante-nome {
   font: 500 10px "Inter", sans-serif;
-  color: #fff;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -487,12 +484,12 @@
 /* Totais */
 .total-gp {
   font: 700 11px "Inter", sans-serif;
-  color: #28a745;
+  color: var(--module-artilheiro-primary);
 }
 
 .total-gc {
   font: 700 11px "Inter", sans-serif;
-  color: #dc3545;
+  color: var(--color-danger);
 }
 
 .total-sg {
@@ -504,12 +501,12 @@
 
 .total-sg.positivo {
   background: rgba(40, 167, 69, 0.2);
-  color: #28a745;
+  color: var(--module-artilheiro-primary);
 }
 
 .total-sg.negativo {
   background: rgba(220, 53, 69, 0.2);
-  color: #dc3545;
+  color: var(--color-danger);
 }
 
 .total-sg.zero {
@@ -556,7 +553,7 @@
 
 .artilheiro-erro .erro-msg {
   font: 600 13px "Inter", sans-serif;
-  color: #dc3545;
+  color: var(--color-danger);
 }
 
 .artilheiro-erro .erro-detalhe {
@@ -626,7 +623,7 @@
 }
 
 .col-rodada-gols.clicavel:hover {
-  background: rgba(34, 197, 94, 0.3) !important;
+  background: var(--module-artilheiro-border) !important;
   transform: scale(1.1);
   z-index: 5;
   position: relative;
@@ -656,13 +653,10 @@
   animation: fadeIn 0.2s ease;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+/* fadeIn: removido — definido em _admin-tokens.css */
 
 .artilheiro-modal-content {
-  background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
+  background: var(--gradient-dark);
   border-radius: 16px;
   padding: 24px;
   min-width: 320px;
@@ -673,16 +667,7 @@
   animation: slideUp 0.25s ease;
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* slideUp: removido — definido em _admin-tokens.css */
 
 .modal-fechar {
   position: absolute;
@@ -707,7 +692,7 @@
 }
 
 .modal-fechar:hover {
-  background: rgba(34, 197, 94, 0.3);
+  background: var(--module-artilheiro-border);
   color: var(--module-artilheiro-primary);
 }
 
@@ -720,14 +705,14 @@
 
 .modal-header h3 {
   font: 700 22px 'Russo One', sans-serif;
-  color: #fff;
+  color: var(--text-primary);
   margin: 0 0 8px 0;
 }
 
 .modal-badge-parcial {
   display: inline-block;
   background: linear-gradient(135deg, #e67e22, #f39c12);
-  color: #fff;
+  color: var(--text-primary);
   font: 600 9px "Inter", sans-serif;
   padding: 3px 8px;
   border-radius: 10px;
@@ -774,8 +759,8 @@
   font: 700 24px "Inter", sans-serif;
 }
 
-.resumo-valor.positivo { color: #28a745; }
-.resumo-valor.negativo { color: #dc3545; }
+.resumo-valor.positivo { color: var(--module-artilheiro-primary); }
+.resumo-valor.negativo { color: var(--color-danger); }
 .resumo-valor.zero { color: #888; }
 
 .modal-secao {
@@ -815,16 +800,16 @@
 }
 
 .gol-item.positivo {
-  border-left-color: #28a745;
+  border-left-color: var(--module-artilheiro-primary);
 }
 
 .gol-item.negativo {
-  border-left-color: #dc3545;
+  border-left-color: var(--color-danger);
 }
 
 .jogador-nome {
   font: 500 13px "Inter", sans-serif;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .jogador-gols {
@@ -835,12 +820,12 @@
 
 .gol-item.positivo .jogador-gols {
   background: rgba(40, 167, 69, 0.2);
-  color: #28a745;
+  color: var(--module-artilheiro-primary);
 }
 
 .gol-item.negativo .jogador-gols {
   background: rgba(220, 53, 69, 0.2);
-  color: #dc3545;
+  color: var(--color-danger);
 }
 
 .modal-vazio {
@@ -927,7 +912,7 @@
 .desistencia-badge {
   display: inline-block;
   background: rgba(220, 53, 69, 0.2);
-  color: #dc3545;
+  color: var(--color-danger);
   font: 600 7px "Inter", sans-serif;
   padding: 2px 5px;
   border-radius: 8px;
@@ -981,7 +966,7 @@
 
 .artilheiro-mini-dashboard .mini-dash-card {
     flex: 1;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: var(--gradient-dark);
     border-radius: 12px;
     padding: 15px 20px;
     display: flex;
@@ -1014,7 +999,7 @@
 .artilheiro-mini-dashboard .mini-dash-valor {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--text-primary);
     line-height: 1.2;
 }
 
@@ -1115,12 +1100,12 @@
 .artilheiro-aguardando-title {
     font-family: 'Russo One', sans-serif;
     font-size: 1.5rem;
-    color: #fff;
+    color: var(--text-primary);
     margin-bottom: 0.75rem;
 }
 
 .artilheiro-aguardando-desc {
-    color: #9ca3af;
+    color: var(--text-muted);
     font-size: 1rem;
     margin-bottom: 1.5rem;
     line-height: 1.5;

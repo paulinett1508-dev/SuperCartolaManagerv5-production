@@ -215,9 +215,7 @@
     margin-bottom: 16px;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
+/* spin: removido — definido em _app-tokens.css */
 
 .rxray-loading p {
     font-size: 14px;

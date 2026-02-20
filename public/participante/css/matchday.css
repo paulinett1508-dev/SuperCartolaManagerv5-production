@@ -42,15 +42,15 @@
 
 .matchday-header-subtitle {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--app-text-muted);
   margin-top: 2px;
 }
 
 /* Ticker de Scouts */
 .scout-ticker {
   background: rgba(0, 0, 0, 0.5);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--participante-border);
+  border-bottom: 1px solid var(--participante-border);
   padding: 8px 0;
   overflow: hidden;
   position: relative;

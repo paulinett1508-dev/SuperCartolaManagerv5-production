@@ -22,12 +22,12 @@
 
 .extrato-hero--positive {
     background: var(--app-gradient-positive);
-    border-color: rgba(16, 185, 129, 0.12);
+    border-color: var(--app-success-muted);
 }
 
 .extrato-hero--negative {
     background: var(--app-gradient-negative);
-    border-color: rgba(239, 68, 68, 0.12);
+    border-color: var(--app-danger-muted);
 }
 
 .extrato-hero--zero {
@@ -111,12 +111,12 @@
 }
 
 .extrato-hero__status--devedor {
-    background: rgba(239, 68, 68, 0.15);
+    background: var(--app-danger-muted);
     color: var(--app-danger-light);
 }
 
 .extrato-hero__status--credor {
-    background: rgba(16, 185, 129, 0.15);
+    background: var(--app-success-muted);
     color: var(--app-success-text);
 }
 
@@ -146,12 +146,12 @@
 }
 
 .extrato-hero__inscricao-badge--paga {
-    background: rgba(16, 185, 129, 0.15);
+    background: var(--app-success-muted);
     color: var(--app-success-light);
 }
 
 .extrato-hero__inscricao-badge--devida {
-    background: rgba(239, 68, 68, 0.15);
+    background: var(--app-danger-muted);
     color: var(--app-danger-light);
 }
 
@@ -371,22 +371,22 @@
 }
 
 .extrato-timeline__item-icon--credit {
-    background: rgba(16, 185, 129, 0.12);
+    background: var(--app-success-muted);
     color: var(--app-success-light);
 }
 
 .extrato-timeline__item-icon--debit {
-    background: rgba(239, 68, 68, 0.12);
+    background: var(--app-danger-muted);
     color: var(--app-danger-light);
 }
 
 .extrato-timeline__item-icon--acerto {
-    background: rgba(59, 130, 246, 0.12);
+    background: var(--app-info-muted);
     color: var(--app-info-light);
 }
 
 .extrato-timeline__item-icon--inscricao {
-    background: rgba(234, 179, 8, 0.12);
+    background: var(--app-warning-muted);
     color: var(--app-warning);
 }
 
@@ -907,14 +907,14 @@
 
 /* Hero Card - Borda laranja sutil no estado neutro/base */
 .extrato-hero {
-    border-color: rgba(255, 85, 0, 0.15);
+    border-color: var(--app-primary-border);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 /* Hero Card - Borda mais marcada por status */
 .extrato-hero--positive {
     border-color: rgba(34, 197, 94, 0.25);
-    box-shadow: 0 4px 20px rgba(34, 197, 94, 0.1);
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.1);
 }
 
 .extrato-hero--negative {
@@ -924,14 +924,14 @@
 
 /* Stat Pills - Contraste maior e borda mais visível */
 .extrato-stat-pill {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--app-glass-bg);
+    border: 1px solid var(--app-glass-hover);
     transition: all 0.2s ease;
 }
 
 .extrato-stat-pill:active {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 85, 0, 0.2);
+    background: var(--app-glass-hover);
+    border-color: var(--app-primary-border);
 }
 
 .extrato-stat-pill__value {
@@ -950,17 +950,17 @@
 
 /* Timeline - Header com borda laranja sutil */
 .extrato-timeline__group-header {
-    border-color: rgba(255, 85, 0, 0.1);
+    border-color: var(--app-primary-muted);
 }
 
 /* Chart - Borda laranja sutil */
 .extrato-chart {
-    border-color: rgba(255, 85, 0, 0.12);
+    border-color: var(--app-primary-muted);
 }
 
 /* Performance Card - Borda laranja sutil */
 .extrato-performance {
-    border-color: rgba(255, 85, 0, 0.12);
+    border-color: var(--app-primary-muted);
 }
 
 /* Performance Stats - Valores mais destacados */
@@ -969,14 +969,15 @@
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
+
 /* Botão Meus Acertos - Destaque Inter-style */
 .extrato-acertos-btn {
-    background: rgba(255, 85, 0, 0.08);
-    border: 1px solid rgba(255, 85, 0, 0.2);
+    background: var(--app-glass-hover);
+    border: 1px solid var(--app-primary-border);
 }
 
 .extrato-acertos-btn:active {
-    background: rgba(255, 85, 0, 0.15);
+    background: var(--app-primary-muted);
     border-color: rgba(255, 85, 0, 0.3);
 }
 
@@ -991,12 +992,12 @@
 /* Subtle hover effect em desktop */
 @media (hover: hover) {
     .extrato-stat-pill:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 85, 0, 0.2);
+        background: var(--app-glass-hover);
+        border-color: var(--app-primary-border);
         transform: translateY(-1px);
     }
 
     .extrato-timeline__item:hover {
-        background: rgba(255, 85, 0, 0.05);
+        background: var(--app-primary-muted);
     }
 }

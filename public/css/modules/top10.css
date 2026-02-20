@@ -9,7 +9,7 @@
   border-radius: var(--border-radius-md);
   padding: var(--spacing-lg);
   margin: var(--spacing-md) 0;
-  border: 1px solid rgba(255, 69, 0, 0.1);
+  border: 1px solid var(--color-primary-muted);
   position: relative;
   overflow: hidden;
 }
@@ -29,7 +29,7 @@
   text-align: center;
   margin-bottom: var(--spacing-lg);
   padding-bottom: var(--spacing-md);
-  border-bottom: 2px solid rgba(255, 69, 0, 0.2);
+  border-bottom: 2px solid var(--color-primary-border);
 }
 
 .top10-titulo {
@@ -59,7 +59,7 @@
   background: var(--bg-secondary);
   border-radius: var(--border-radius-md);
   padding: var(--spacing-md);
-  border: 1px solid rgba(255, 69, 0, 0.1);
+  border: 1px solid var(--color-primary-muted);
   position: relative;
 }
 
@@ -78,7 +78,7 @@
   gap: var(--spacing-sm);
   margin-bottom: var(--spacing-md);
   padding-bottom: var(--spacing-sm);
-  border-bottom: 1px solid rgba(255, 69, 0, 0.1);
+  border-bottom: 1px solid var(--color-primary-muted);
 }
 
 .section-icon {
@@ -121,7 +121,7 @@
   background: var(--bg-card);
   border-radius: var(--border-radius-md);
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-lg);
   margin: 0;
   font-size: 11px;
 }
@@ -141,19 +141,19 @@
 .tabela-top10 thead th {
   padding: 8px 4px;
   font: 600 10px "Inter", -apple-system, sans-serif;
-  color: white;
+  color: var(--text-primary);
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
 
 .tabela-top10 tbody tr {
-  border-bottom: 1px solid rgba(255, 69, 0, 0.1);
-  transition: all 0.2s ease;
+  border-bottom: 1px solid var(--color-primary-muted);
+  transition: all var(--transition-fast);
 }
 
 .tabela-top10 tbody tr:hover {
-  background: rgba(255, 69, 0, 0.05);
+  background: var(--color-primary-hover-bg);
 }
 
 .tabela-top10 tbody td {
@@ -165,13 +165,13 @@
 
 /* === POSIÇÕES DE DESTAQUE === */
 .mitos-section .tabela-top10 tbody tr:first-child {
-  background: rgba(34, 197, 94, 0.1);
+  background: var(--color-success-muted);
   border-left: 4px solid var(--success);
   font-weight: 700;
 }
 
 .micos-section .tabela-top10 tbody tr:first-child {
-  background: rgba(239, 68, 68, 0.1);
+  background: var(--color-danger-muted);
   border-left: 4px solid var(--danger);
   font-weight: 700;
 }
@@ -193,7 +193,7 @@
   border-radius: 50%;
   object-fit: contain;
   background: var(--bg-primary);
-  border: 1px solid rgba(255, 69, 0, 0.2);
+  border: 1px solid var(--color-primary-muted);
 }
 
 /* Exportação removida - usar módulo Relatórios */

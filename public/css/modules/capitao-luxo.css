@@ -85,7 +85,7 @@
   background: rgba(139, 92, 246, 0.05);
   border-bottom: 1px solid rgba(139, 92, 246, 0.15);
   font-size: 11px;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .capitao-luxo-legenda .legenda-item {
@@ -104,7 +104,7 @@
 .capitao-luxo-legenda .legenda-cor.pts { background: var(--module-capitao-primary); }
 .capitao-luxo-legenda .legenda-cor.media { background: var(--module-capitao-light); }
 .capitao-luxo-legenda .legenda-cor.melhor { background: var(--color-success-light); }
-.capitao-luxo-legenda .legenda-cor.pior { background: #ef4444; }
+.capitao-luxo-legenda .legenda-cor.pior { background: var(--color-danger); }
 
 /* =============================================
    TABELA
@@ -191,7 +191,7 @@
 
 .capitao-luxo-ranking-table .nome-time {
   font-size: 10px;
-  color: #6b7280;
+  color: var(--text-dim);
   display: block;
 }
 
@@ -260,10 +260,10 @@
 .chip-dot.dot-positive { background: var(--color-success-light); }
 
 /* Vermelho - pontuou negativo */
-.chip-dot.dot-negative { background: #ef4444; }
+.chip-dot.dot-negative { background: var(--color-danger); }
 
 /* Branco - 0 pts / nem banco */
-.chip-dot.dot-neutral { background: #9ca3af; }
+.chip-dot.dot-neutral { background: var(--text-muted); }
 
 /* Toggle expandir/colapsar histórico */
 .capitao-hist-collapsible {
@@ -312,12 +312,12 @@
 
 .capitao-luxo-ranking-table .val-pior {
   font-family: 'JetBrains Mono', monospace;
-  color: #ef4444;
+  color: var(--color-danger);
 }
 
 .capitao-luxo-ranking-table .val-distintos {
   font-family: 'JetBrains Mono', monospace;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 /* Destaque 1º lugar */
@@ -344,7 +344,7 @@
    BANNER RODADA FINAL
    ============================================= */
 .capitao-luxo-banner-final {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  background: var(--gradient-dark);
   border: 2px solid var(--module-capitao-primary);
   border-radius: 12px;
   padding: 12px 20px;
@@ -440,20 +440,17 @@
   margin: 0 auto 12px;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+/* spin: removido — definido em _admin-tokens.css */
 
 .capitao-luxo-loading p {
-  color: #9ca3af;
+  color: var(--text-muted);
   font-size: 13px;
 }
 
 .capitao-luxo-empty {
   text-align: center;
   padding: 60px 20px;
-  color: #6b7280;
+  color: var(--text-dim);
 }
 
 .capitao-luxo-empty .material-icons {
@@ -465,7 +462,7 @@
 .capitao-luxo-error {
   text-align: center;
   padding: 40px 20px;
-  color: #ef4444;
+  color: var(--color-danger);
 }
 
 /* =============================================
@@ -509,7 +506,7 @@
 }
 
 .capitao-luxo-aguardando-desc {
-  color: #9ca3af;
+  color: var(--text-muted);
   font-size: 1rem;
   margin-bottom: 1.5rem;
   line-height: 1.5;
@@ -531,10 +528,7 @@
   font-size: 18px;
 }
 
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.05); opacity: 0.8; }
-}
+/* pulse: removido — definido em _admin-tokens.css */
 
 /* =============================================
    RESPONSIVO
@@ -579,8 +573,8 @@
   align-items: center;
   gap: 4px;
   background: rgba(139, 92, 246, 0.15);
-  border: 1px solid rgba(139, 92, 246, 0.3);
-  color: #a78bfa;
+  border: 1px solid var(--module-capitao-border);
+  color: var(--module-capitao-light);
   padding: 6px 12px;
   border-radius: 6px;
   font-size: 11px;
@@ -614,7 +608,7 @@
 
 .capitao-progresso-bar {
   height: 100%;
-  background: linear-gradient(90deg, #8b5cf6 0%, #a78bfa 100%);
+  background: linear-gradient(90deg, var(--module-capitao-primary) 0%, var(--module-capitao-light) 100%);
   border-radius: 10px;
   transition: width 0.3s ease;
   box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);

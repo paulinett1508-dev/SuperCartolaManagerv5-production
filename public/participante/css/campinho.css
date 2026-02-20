@@ -5,7 +5,7 @@
 
 /* === CONTAINER PRINCIPAL === */
 .campinho-wrapper {
-    background: linear-gradient(180deg, var(--app-bg) 0%, #111 100%);
+    background: linear-gradient(180deg, var(--app-bg) 0%, var(--app-bg-dark) 100%);
     min-height: 100vh;
     padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
 }
@@ -24,7 +24,7 @@
     align-items: center;
     gap: 12px;
     padding: 20px 16px 24px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: var(--app-border-subtle);
     text-align: center;
 }
 
@@ -39,7 +39,7 @@
 .campinho-rodada-badge {
     font-family: var(--app-font-brand, 'Russo One', sans-serif);
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--app-text-light);
     letter-spacing: 1px;
 }
 
@@ -51,24 +51,24 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--app-text-muted);
 }
 
 .campinho-status-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
+    background: var(--app-glass-hover);
 }
 
 .campinho-status-indicator.consolidada .campinho-status-dot {
     background: var(--app-success-light);
-    box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
+    box-shadow: 0 0 6px var(--app-success-muted);
 }
 
 .campinho-status-indicator.parcial .campinho-status-dot {
-    background: #fbbf24;
-    box-shadow: 0 0 6px rgba(251, 191, 36, 0.5);
+    background: var(--app-amber);
+    box-shadow: 0 0 6px var(--app-warning-muted);
     animation: pulse-dot 1.5s ease-in-out infinite;
 }
 
@@ -82,8 +82,8 @@
     font-size: 12px;
     padding: 3px 10px;
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: rgba(255, 255, 255, 0.7);
+    border: 1px solid var(--app-border);
+    color: var(--app-text-muted);
 }
 
 /* Patrimônio em destaque */
@@ -107,7 +107,7 @@
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-disabled);
 }
 
 /* Variação */
@@ -136,8 +136,8 @@
    CARD "MEU DESEMPENHO" - Padrão App
    ===================================================== */
 .campinho-desempenho-card {
-    background: rgba(26, 26, 26, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--app-surface-overlay);
+    border: var(--app-border-default);
     border-left: 4px solid var(--app-primary, var(--app-primary));
     border-radius: 10px;
     padding: 14px 16px;
@@ -158,7 +158,7 @@
 .campinho-desemp-header span:not(.material-icons) {
     font-size: 12px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--app-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -176,7 +176,7 @@
     align-items: center;
     gap: 4px;
     padding: 16px 32px;
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--app-surface-overlay);
     border-radius: 12px;
 }
 
@@ -192,7 +192,7 @@
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--app-text-dim);
 }
 
 /* Stats secundários */
@@ -205,7 +205,7 @@
 .campinho-desemp-stat {
     text-align: center;
     padding: 10px 8px;
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--app-surface-overlay);
     border-radius: 8px;
 }
 
@@ -228,7 +228,7 @@
 
 .campinho-desemp-stat-label {
     font-size: 9px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-disabled);
     text-transform: uppercase;
     margin-top: 4px;
     display: block;
@@ -251,7 +251,7 @@
     align-items: center;
     margin-top: 12px;
     padding: 10px 12px;
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--app-surface-overlay);
     border-radius: 8px;
     gap: 8px;
 }
@@ -294,7 +294,7 @@
 
 .campinho-desemp-esc-label {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--app-text-dim);
     text-transform: lowercase;
 }
 
@@ -305,19 +305,19 @@
     gap: 10px;
     margin-top: 14px;
     padding: 12px 14px;
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--app-surface-overlay);
     border-radius: 8px;
-    border-left: 3px solid rgba(255, 255, 255, 0.2);
+    border-left: 3px solid var(--app-border);
 }
 
 .campinho-desemp-extrato-icon {
     font-size: 20px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--app-text-dim);
 }
 
 .campinho-desemp-extrato-icon.loading {
     animation: spin-icon 1s linear infinite;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-disabled);
 }
 
 @keyframes spin-icon {
@@ -333,13 +333,13 @@
 }
 
 .campinho-desemp-extrato-icon.neutro {
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-disabled);
 }
 
 .campinho-desemp-extrato-texto {
     font-size: 13px;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--app-text-muted);
     flex: 1;
 }
 
@@ -352,7 +352,7 @@
 }
 
 .campinho-desemp-extrato-texto.neutro {
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--app-text-dim);
 }
 
 /* Responsivo - 4 colunas para 2x2 em telas pequenas */
@@ -377,7 +377,7 @@
     align-items: flex-start;
     gap: 24px;
     padding-bottom: 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: var(--app-border-subtle);
 }
 
 .campinho-title-block h1 {
@@ -398,7 +398,7 @@
     letter-spacing: 1.5px;
     font-size: 11px;
     margin: 0 0 6px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--app-text-dim);
 }
 
 .campinho-header-actions {
@@ -427,7 +427,7 @@
 
 .campinho-market-rodada {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--app-text-muted);
     margin-top: 4px;
     letter-spacing: 0.8px;
 }
@@ -443,7 +443,7 @@
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--app-text-muted);
 }
 
 .campinho-header-patrimonio strong,
@@ -457,9 +457,9 @@
 
 /* === TABELA DE ESCALAÇÃO (formato Rodadas) === */
 .campinho-escalacao-tabela {
-    background: rgba(15, 23, 42, 0.6);
+    background: var(--app-surface-overlay);
     border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: var(--app-border-subtle);
     padding: 16px;
     margin-bottom: 16px;
 }
@@ -470,7 +470,7 @@
     justify-content: space-between;
     margin-bottom: 12px;
     padding-bottom: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: var(--app-border-subtle);
 }
 
 .campinho-escalacao-header-left {
@@ -492,7 +492,7 @@
 .campinho-escalacao-count {
     font-family: var(--app-font-base, 'Inter', sans-serif);
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-disabled);
     font-weight: 400;
 }
 
@@ -505,7 +505,7 @@
 .campinho-escalacao-total-label {
     font-family: var(--app-font-base, 'Inter', sans-serif);
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--app-text-dim);
 }
 
 .campinho-escalacao-total-valor {
@@ -523,15 +523,15 @@
 
 .campinho-escalacao-divisoria {
     height: 1px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--app-glass-hover);
     margin: 12px 0;
 }
 
 /* Campo visual como complemento */
 .campinho-field-panel {
-    background: rgba(15, 23, 42, 0.85);
+    background: var(--app-surface-overlay);
     border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: var(--app-border-subtle);
     padding: 20px;
     display: flex;
     flex-direction: column;
@@ -554,7 +554,7 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--app-text-muted);
 }
 
 .campinho-points strong {
@@ -567,7 +567,7 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--app-text-muted);
     text-align: center;
 }
 
@@ -578,15 +578,15 @@
 }
 
 .campinho-lineup-panel {
-    background: rgba(4, 7, 17, 0.9);
+    background: var(--app-surface-overlay);
     border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: var(--app-border-subtle);
     padding: 18px;
     min-width: min(280px, 100%);
     display: flex;
     flex-direction: column;
     gap: 16px;
-    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
+    box-shadow: var(--app-shadow-lg);
 }
 
 .campinho-lineup-card {
@@ -605,7 +605,7 @@
     text-transform: uppercase;
     font-size: 12px;
     letter-spacing: 1px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--app-text-dim);
     margin: 0;
 }
 
@@ -621,7 +621,7 @@
 .campinho-lineup-balance-label {
     font-family: var(--app-font-base, 'Inter', sans-serif);
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--app-text-dim);
     display: block;
 }
 
@@ -653,7 +653,7 @@
     font-size: 12px;
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--app-text-muted);
 }
 
 .campinho-lineup-section-icon {
@@ -663,7 +663,7 @@
 
 .campinho-lineup-section-count {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-disabled);
 }
 
 .campinho-lineup-section-body {
@@ -679,22 +679,22 @@
     gap: 12px;
     padding: 10px 12px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--app-glass-bg);
+    border: var(--app-border-subtle);
 }
 
 .campinho-tabela-jogador.capitao {
-    border: 1px solid rgba(251, 191, 36, 0.5);
-    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.15);
+    border: 1px solid var(--app-gold);
+    box-shadow: 0 2px 8px var(--app-gold-muted);
 }
 
 .campinho-tabela-jogador.luxo {
-    border: 1px solid rgba(168, 85, 247, 0.4);
-    box-shadow: 0 2px 8px rgba(168, 85, 247, 0.1);
+    border: 1px solid var(--app-pos-tec);
+    box-shadow: 0 2px 8px var(--app-purple-muted);
 }
 
 .campinho-tabela-jogador.reserva-bg {
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--app-glass-bg);
 }
 
 /* Escudo do clube */
@@ -702,7 +702,7 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--app-glass-hover);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -728,17 +728,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid #0f1012;
+    border: 2px solid var(--app-bg);
 }
 
 .campinho-tabela-badge span {
     font-size: 9px;
     font-weight: 700;
-    color: #000;
+    color: var(--app-text-inverse);
 }
 
 .campinho-tabela-badge.badge-c {
-    background: linear-gradient(135deg, var(--app-gold, #fbbf24), var(--app-amber, var(--app-amber)));
+    background: linear-gradient(135deg, var(--app-gold), var(--app-amber));
 }
 
 .campinho-tabela-badge.badge-l {
@@ -767,7 +767,7 @@
 .campinho-tabela-pos {
     font-family: var(--app-font-base, 'Inter', sans-serif);
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-disabled);
 }
 
 /* Pontos */
@@ -784,7 +784,7 @@
 }
 
 .campinho-tabela-pontos-valor.positivo {
-    color: #4ade80;
+    color: var(--app-pos-mei-light);
 }
 
 .campinho-tabela-pontos-valor.negativo {
@@ -792,7 +792,7 @@
 }
 
 .campinho-tabela-pontos-valor.neutro {
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-disabled);
 }
 
 .campinho-tabela-multiplicador {
@@ -802,11 +802,11 @@
 }
 
 .campinho-tabela-multiplicador.cap {
-    color: rgba(251, 191, 36, 0.7);
+    color: var(--app-gold);
 }
 
 .campinho-tabela-multiplicador.lux {
-    color: rgba(168, 85, 247, 0.7);
+    color: var(--app-pos-tec);
 }
 
 .campinho-lineup-panel::-webkit-scrollbar,
@@ -816,14 +816,14 @@
 
 .campinho-lineup-panel::-webkit-scrollbar-thumb,
 .campinho-lineup-body::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--app-glass-hover);
     border-radius: 999px;
 }
 
 /* === HEADER DO CAMPINHO === */
 .campinho-header {
     padding: 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-bottom: var(--app-border-default);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -838,7 +838,7 @@
 
 .campinho-header-info .rodada {
     font-size: 12px;
-    color: rgba(255,255,255,0.5);
+    color: var(--app-text-dim);
     margin-top: 2px;
 }
 
@@ -855,7 +855,7 @@
 
 .campinho-header-pontos .label {
     font-size: 10px;
-    color: rgba(255,255,255,0.5);
+    color: var(--app-text-dim);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -878,17 +878,17 @@
             0deg,
             transparent,
             transparent 25px,
-            rgba(34, 197, 94, 0.03) 25px,
-            rgba(34, 197, 94, 0.03) 50px
+            var(--app-success-muted) 25px,
+            var(--app-success-muted) 50px
         ),
         /* Gradiente base verde escuro */
-        linear-gradient(180deg, #0d2818 0%, #0a1f14 50%, #071510 100%);
+        linear-gradient(180deg, var(--app-bg-success) 0%, var(--app-bg-success) 50%, var(--app-bg-dark) 100%);
 
     /* Borda do campo */
-    border: 2px solid rgba(255,255,255,0.15);
+    border: 2px solid var(--app-border);
     box-shadow:
-        inset 0 0 60px rgba(0,0,0,0.5),
-        0 8px 32px rgba(0,0,0,0.4);
+        inset 0 0 60px var(--app-bg-dark),
+        var(--app-shadow-lg);
 
     overflow: hidden;
 }
@@ -906,22 +906,22 @@
         linear-gradient(
             to bottom,
             transparent calc(50% - 1px),
-            rgba(255,255,255,0.2) calc(50% - 1px),
-            rgba(255,255,255,0.2) calc(50% + 1px),
+            var(--app-glass-hover) calc(50% - 1px),
+            var(--app-glass-hover) calc(50% + 1px),
             transparent calc(50% + 1px)
         ),
         /* Círculo central (aproximado com radial) */
         radial-gradient(
             circle at 50% 50%,
             transparent 35px,
-            rgba(255,255,255,0.15) 35px,
-            rgba(255,255,255,0.15) 37px,
+            var(--app-glass-hover) 35px,
+            var(--app-glass-hover) 37px,
             transparent 37px
         ),
         /* Pequeno círculo central */
         radial-gradient(
             circle at 50% 50%,
-            rgba(255,255,255,0.2) 4px,
+            var(--app-glass-hover) 4px,
             transparent 4px
         );
 }
@@ -935,7 +935,7 @@
     transform: translateX(-50%);
     width: 55%;
     height: 60px;
-    border: 1px solid rgba(255,255,255,0.15);
+    border: var(--app-border-default);
     border-top: none;
     border-radius: 0 0 4px 4px;
     pointer-events: none;
@@ -949,7 +949,7 @@
     transform: translateX(-50%);
     width: 25%;
     height: 25px;
-    border: 1px solid rgba(255,255,255,0.12);
+    border: var(--app-border-default);
     border-top: none;
     border-radius: 0 0 2px 2px;
     pointer-events: none;
@@ -991,7 +991,7 @@
     margin-bottom: 4px;
 
     /* Sombra suave */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    box-shadow: var(--app-shadow-md);
 }
 
 /* Cores por posição */
@@ -1021,7 +1021,7 @@
     width: 26px;
     height: 26px;
     object-fit: contain;
-    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+    filter: drop-shadow(var(--app-shadow-sm));
 }
 
 /* Badge de pontos */
@@ -1034,32 +1034,32 @@
     font-family: var(--app-font-mono);
     font-size: 9px;
     font-weight: 700;
-    background: rgba(0,0,0,0.9);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: var(--app-surface-overlay);
+    border: var(--app-border-default);
     white-space: nowrap;
 }
 
 .campinho-jogador-pontos.positivo { color: var(--app-pos-mei-light); }
 .campinho-jogador-pontos.negativo { color: var(--app-danger-light); }
-.campinho-jogador-pontos.neutro { color: rgba(255,255,255,0.5); }
+.campinho-jogador-pontos.neutro { color: var(--app-text-dim); }
 
 /* Nome do jogador */
 .campinho-jogador-nome {
     font-size: 9px;
     font-weight: 600;
-    color: rgba(255,255,255,0.9);
+    color: var(--app-text-light);
     text-align: center;
     max-width: 56px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    text-shadow: var(--app-shadow-sm);
 }
 
 /* Posição do jogador */
 .campinho-jogador-pos {
     font-size: 8px;
-    color: rgba(255,255,255,0.4);
+    color: var(--app-text-disabled);
     text-transform: uppercase;
     letter-spacing: 0.3px;
 }
@@ -1068,7 +1068,7 @@
 .campinho-jogador.is-capitao .campinho-jogador-avatar {
     box-shadow:
         0 0 0 3px var(--app-gold),
-        0 4px 12px rgba(251, 191, 36, 0.4);
+        0 4px 12px var(--app-gold-muted);
 }
 
 .campinho-jogador-badge-c {
@@ -1095,7 +1095,7 @@
 .campinho-jogador.is-luxo .campinho-jogador-avatar {
     box-shadow:
         0 0 0 3px var(--app-pos-tec),
-        0 4px 12px rgba(168, 85, 247, 0.4);
+        0 4px 12px var(--app-purple-muted);
 }
 
 .campinho-jogador-badge-l {
@@ -1124,8 +1124,8 @@
 }
 
 @keyframes mito-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
-    50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+    0%, 100% { box-shadow: 0 0 0 0 var(--app-success-muted); }
+    50% { box-shadow: 0 0 0 8px transparent; }
 }
 
 .campinho-jogador.is-mico .campinho-jogador-avatar {
@@ -1133,16 +1133,16 @@
 }
 
 @keyframes mico-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-    50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+    0%, 100% { box-shadow: 0 0 0 0 var(--app-danger-muted); }
+    50% { box-shadow: 0 0 0 8px transparent; }
 }
 
 /* === JOGADOR QUE NEGATIVOU (tom avermelhado sutil) === */
 .campinho-jogador.is-negativo .campinho-jogador-avatar {
-    border-color: rgba(239, 68, 68, 0.8) !important;
+    border-color: var(--app-danger) !important;
     box-shadow:
-        0 0 0 2px rgba(239, 68, 68, 0.4),
-        0 4px 12px rgba(239, 68, 68, 0.4) !important;
+        0 0 0 2px var(--app-danger-muted),
+        0 4px 12px var(--app-danger-muted) !important;
 }
 
 /* Overlay avermelhado sobre o avatar */
@@ -1151,7 +1151,7 @@
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.45) 0%, rgba(185, 28, 28, 0.55) 100%);
+    background: linear-gradient(135deg, var(--app-danger-muted) 0%, var(--app-danger-muted) 100%);
     pointer-events: none;
     z-index: var(--app-z-content);
 }
@@ -1164,14 +1164,14 @@
 
 /* Badge de pontos com fundo avermelhado quando negativo */
 .campinho-jogador.is-negativo .campinho-jogador-pontos {
-    background: rgba(185, 28, 28, 0.95) !important;
-    border-color: rgba(239, 68, 68, 0.6) !important;
+    background: var(--app-danger-dark) !important;
+    border-color: var(--app-danger) !important;
 }
 
 /* === TABELA: Jogador que negativou (tom avermelhado sutil no card) === */
 .campinho-tabela-jogador.negativo-bg {
-    background: rgba(239, 68, 68, 0.08);
-    border-color: rgba(239, 68, 68, 0.3);
+    background: var(--app-danger-muted);
+    border-color: var(--app-danger-muted);
 }
 
 /* === ANIMAÇÕES DE ENTRADA === */
@@ -1204,11 +1204,11 @@
             0deg,
             transparent,
             transparent 25px,
-            rgba(239, 68, 68, 0.03) 25px,
-            rgba(239, 68, 68, 0.03) 50px
+            var(--app-danger-muted) 25px,
+            var(--app-danger-muted) 50px
         ),
-        linear-gradient(180deg, #1a0a0a 0%, #140808 50%, #0f0505 100%);
-    border-color: rgba(239, 68, 68, 0.2);
+        linear-gradient(180deg, var(--app-bg-danger) 0%, var(--app-bg-danger) 50%, var(--app-bg-dark) 100%);
+    border-color: var(--app-danger-muted);
 }
 
 .campinho-field.adversario::before {
@@ -1216,20 +1216,20 @@
         linear-gradient(
             to bottom,
             transparent calc(50% - 1px),
-            rgba(255,255,255,0.1) calc(50% - 1px),
-            rgba(255,255,255,0.1) calc(50% + 1px),
+            var(--app-glass-hover) calc(50% - 1px),
+            var(--app-glass-hover) calc(50% + 1px),
             transparent calc(50% + 1px)
         ),
         radial-gradient(
             circle at 50% 50%,
             transparent 35px,
-            rgba(255,255,255,0.08) 35px,
-            rgba(255,255,255,0.08) 37px,
+            var(--app-glass-border) 35px,
+            var(--app-glass-border) 37px,
             transparent 37px
         ),
         radial-gradient(
             circle at 50% 50%,
-            rgba(255,255,255,0.1) 4px,
+            var(--app-glass-hover) 4px,
             transparent 4px
         );
 }
@@ -1238,9 +1238,9 @@
 .campinho-confronto-card {
     margin: 16px;
     padding: 16px;
-    background: rgba(255,255,255,0.03);
+    background: var(--app-glass-bg);
     border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.08);
+    border: var(--app-border-subtle);
 }
 
 .campinho-confronto-header {
@@ -1274,7 +1274,7 @@
 
 .campinho-confronto-time .nome {
     font-size: 11px;
-    color: rgba(255,255,255,0.5);
+    color: var(--app-text-dim);
     margin-bottom: 4px;
 }
 
@@ -1287,7 +1287,7 @@
 
 .campinho-confronto-vs {
     font-size: 14px;
-    color: rgba(255,255,255,0.3);
+    color: var(--app-text-disabled);
     font-weight: 600;
     padding: 0 12px;
 }
@@ -1299,7 +1299,7 @@
     gap: 12px;
     padding: 8px 14px;
     margin: 0;
-    background: rgba(255,255,255,0.03);
+    background: var(--app-glass-bg);
     border-radius: 12px;
     flex-wrap: wrap;
 }
@@ -1324,7 +1324,7 @@
 
 .campinho-legenda-item span {
     font-size: 10px;
-    color: rgba(255,255,255,0.5);
+    color: var(--app-text-dim);
 }
 
 /* === RESPONSIVO === */
@@ -1402,19 +1402,17 @@
 .campinho-loading .spinner {
     width: 48px;
     height: 48px;
-    border: 4px solid rgba(255, 69, 0, 0.2);
+    border: 4px solid var(--app-primary-border);
     border-top-color: var(--app-primary);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
+/* spin: removido — definido em _app-tokens.css */
 
 .campinho-loading p {
     font-size: 14px;
-    color: rgba(255,255,255,0.5);
+    color: var(--app-text-dim);
 }
 
 /* === MERCADO ABERTO (ícone verde) === */
@@ -1444,7 +1442,7 @@
 
 .campinho-empty .material-icons {
     font-size: 64px;
-    color: rgba(255,255,255,0.2);
+    color: var(--app-text-disabled);
     margin-bottom: 16px;
 }
 
@@ -1456,5 +1454,5 @@
 
 .campinho-empty p {
     font-size: 14px;
-    color: rgba(255,255,255,0.5);
+    color: var(--app-text-dim);
 }

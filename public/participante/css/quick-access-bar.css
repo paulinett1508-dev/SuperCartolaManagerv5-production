@@ -18,7 +18,7 @@
     background: rgba(20, 20, 20, 0.98);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid var(--participante-border);
     padding: 8px 0 max(8px, env(safe-area-inset-bottom));
     z-index: var(--app-z-bottom-nav);
     box-shadow: 0 -2px 24px rgba(0, 0, 0, 0.4);
@@ -215,8 +215,8 @@
 }
 
 .menu-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--app-glass-elevated);
+    border: 1px solid var(--app-glass-hover);
     border-radius: 16px;
     padding: 16px 12px;
     display: flex;
@@ -238,8 +238,8 @@
 }
 
 .menu-card:hover {
-    background: rgba(255, 69, 0, 0.1);
-    border-color: rgba(255, 69, 0, 0.3);
+    background: var(--app-primary-muted);
+    border-color: var(--app-primary-border);
 }
 
 .menu-card .material-icons {
@@ -324,7 +324,7 @@
 }
 
 .menu-sheet::-webkit-scrollbar-thumb {
-    background: rgba(255, 69, 0, 0.3);
+    background: var(--app-primary-border);
     border-radius: 2px;
 }
 
@@ -336,7 +336,7 @@
     top: 50%;
     left: 50%;
     background: var(--app-surface);
-    border: 1px solid rgba(255, 69, 0, 0.3);
+    border: 1px solid var(--app-primary-border);
     border-radius: 12px;
     padding: 16px 24px;
     color: var(--app-text-white);
@@ -450,7 +450,7 @@
     right: 4px;
     font-size: 7px;
     font-weight: 600;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--app-glass-hover);
     color: var(--app-text-muted);
     padding: 2px 5px;
     border-radius: 4px;
@@ -459,8 +459,8 @@
 }
 
 .menu-card.aguarde:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: var(--app-glass-elevated);
+    border-color: var(--participante-border);
 }
 
 .menu-card.aguarde:active {
@@ -478,7 +478,7 @@
 }
 
 .menu-card.ao-vivo-card:hover {
-    background: rgba(239, 68, 68, 0.15);
+    background: var(--app-danger-muted);
     border-color: rgba(239, 68, 68, 0.4);
 }
 

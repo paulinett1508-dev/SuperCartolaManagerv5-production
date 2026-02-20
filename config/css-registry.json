@@ -1,7 +1,7 @@
 {
   "_meta": {
     "version": "1.0.0",
-    "lastUpdated": "2026-02-15",
+    "lastUpdated": "2026-02-20",
     "description": "Manifesto centralizado de todos os CSS do projeto. Fonte da verdade para a skill anti-frankenstein. Atualizar ao criar/remover/renomear CSS.",
     "maintainedBy": "anti-frankenstein skill"
   },
@@ -207,6 +207,11 @@
         "path": "public/css/modules/github-analytics-unified.css",
         "loadedBy": ["github-analytics-unified.html"],
         "description": "Analytics de repositorio e gestao de branches"
+      },
+      {
+        "path": "public/css/modules/admin-tiro-certo.css",
+        "loadedBy": ["admin-tiro-certo.html"],
+        "description": "Gerenciamento admin do modo Tiro Certo (Survival)"
       }
     ]
   },
@@ -317,6 +322,11 @@
         "loadedBy": ["participante/index.html"],
         "description": "Modulo Resta Um (eliminacao progressiva) com tema rose",
         "moduleColor": "--app-restaum-*"
+      },
+      {
+        "path": "public/participante/css/copa-mundo-2026.css",
+        "loadedBy": ["participante/index.html"],
+        "description": "Tema Copa do Mundo 2026 com identidade visual do mundial"
       }
     ]
   },

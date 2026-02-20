@@ -446,7 +446,7 @@
    ======================================== */
 
 .module-dashboard {
-    background: var(--surface-secondary, #1a1a1a);
+    background: var(--surface-secondary, var(--surface-card));
     border-radius: var(--radius-lg, 12px);
     padding: var(--space-4, 16px);
     border: 1px solid rgba(255, 85, 0, 0.1);
@@ -460,7 +460,7 @@
     left: 0;
     right: 0;
     height: 2px;
-    background: linear-gradient(90deg, var(--color-primary, #FF5500) 0%, transparent 100%);
+    background: linear-gradient(90deg, var(--color-primary) 0%, transparent 100%);
 }
 
 .module-toolbar {
@@ -500,12 +500,12 @@
 
 .module-title .material-icons {
     font-size: 22px;
-    color: var(--color-primary, #FF5500);
+    color: var(--color-primary);
 }
 
 /* ✅ v7.9: Seletor de Temporada */
 .temporada-selector {
-    background: linear-gradient(135deg, #FF5500 0%, #cc4400 100%);
+    background: linear-gradient(135deg, var(--color-primary) 0%, #cc4400 100%);
     border: none;
     border-radius: 8px;
     padding: 8px 16px;
@@ -576,7 +576,7 @@
 .stat-badge.stat-danger {
     background: rgba(239, 68, 68, 0.1);
     border-color: rgba(239, 68, 68, 0.2);
-    color: #ef4444;
+    color: var(--color-danger);
 }
 
 /* Search Inline */
@@ -585,7 +585,7 @@
     align-items: center;
     gap: 8px;
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--surface-white-10);
     border-radius: 8px;
     padding: 6px 12px;
     transition: all 0.2s ease;
@@ -621,7 +621,7 @@
     gap: 6px;
     padding: 6px 12px;
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--surface-white-10);
     border-radius: 6px;
     color: var(--text-secondary, #888);
     font-size: 0.8rem;
@@ -637,17 +637,17 @@
 .toolbar-btn:hover {
     background: rgba(255, 85, 0, 0.1);
     border-color: rgba(255, 85, 0, 0.3);
-    color: var(--color-primary, #FF5500);
+    color: var(--color-primary);
 }
 
 .toolbar-btn.btn-primary {
-    background: linear-gradient(135deg, #FF5500 0%, #cc4400 100%);
+    background: linear-gradient(135deg, var(--color-primary) 0%, #cc4400 100%);
     border-color: transparent;
     color: #fff;
 }
 
 .toolbar-btn.btn-primary:hover {
-    background: linear-gradient(135deg, #ff6611 0%, #FF5500 100%);
+    background: linear-gradient(135deg, #ff6611 0%, var(--color-primary) 100%);
 }
 
 /* Responsivo Toolbar */
@@ -693,7 +693,7 @@
     gap: 6px;
     padding: 8px 16px;
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--surface-white-10);
     border-radius: 8px;
     color: var(--text-muted, #888);
     font-size: 0.9rem;
@@ -709,11 +709,11 @@
 .tab-btn:hover {
     background: rgba(255, 85, 0, 0.1);
     border-color: rgba(255, 85, 0, 0.3);
-    color: var(--color-primary, #FF5500);
+    color: var(--color-primary);
 }
 
 .tab-btn.active {
-    background: linear-gradient(135deg, #FF5500 0%, #cc4400 100%);
+    background: linear-gradient(135deg, var(--color-primary) 0%, #cc4400 100%);
     border-color: transparent;
     color: #fff;
     box-shadow: 0 2px 8px rgba(255, 85, 0, 0.3);
@@ -743,7 +743,7 @@
 
 .participante-status-badge.badge-info {
     background: rgba(59, 130, 246, 0.15);
-    color: #3b82f6;
+    color: var(--color-info);
     border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
@@ -755,7 +755,7 @@
 
 .participante-status-badge.badge-danger {
     background: rgba(239, 68, 68, 0.15);
-    color: #ef4444;
+    color: var(--color-danger);
     border: 1px solid rgba(239, 68, 68, 0.3);
 }
 

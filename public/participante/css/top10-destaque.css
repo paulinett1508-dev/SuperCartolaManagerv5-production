@@ -14,16 +14,16 @@
 /* Borda dourada para MITOS */
 .top10-destaque-wrapper.mitos {
     border: 2px solid rgba(255, 215, 0, 0.4);
-    box-shadow: 
-        0 4px 20px rgba(255, 215, 0, 0.15),
+    box-shadow:
+        0 4px 20px var(--app-gold-muted),
         inset 0 1px 0 rgba(255, 215, 0, 0.1);
 }
 
 /* Borda vermelha para MICOS */
 .top10-destaque-wrapper.micos {
     border: 2px solid rgba(239, 68, 68, 0.4);
-    box-shadow: 
-        0 4px 20px rgba(239, 68, 68, 0.15),
+    box-shadow:
+        0 4px 20px var(--app-danger-muted),
         inset 0 1px 0 rgba(239, 68, 68, 0.1);
 }
 
@@ -71,7 +71,7 @@
 }
 
 .top10-table.destaque tbody tr:hover {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--app-glass-bg);
 }
 
 /* Linha TOP 10 com brilho sutil */
@@ -114,7 +114,7 @@
     background: rgba(255, 255, 255, 0.02);
     border-radius: 8px;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--app-glass-elevated);
 }
 
 .top10-restante-header {
@@ -124,7 +124,7 @@
     padding: 12px 14px;
     font-size: 12px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--app-text-dim);
     cursor: pointer;
     transition: all 0.2s ease;
     user-select: none;
@@ -132,7 +132,7 @@
 }
 
 .top10-restante-header:hover {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--app-glass-bg);
     color: rgba(255, 255, 255, 0.7);
 }
 
@@ -177,7 +177,7 @@
 .top10-empty {
     text-align: center;
     padding: 24px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-disabled);
     font-size: 13px;
 }
 
@@ -208,7 +208,7 @@
     display: block;
     font-size: 9px;
     font-weight: 400;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--app-text-dim);
     line-height: 1.2;
     white-space: nowrap;
     overflow: hidden;
@@ -262,10 +262,10 @@
     margin-top: 12px;
     font-size: 11px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-disabled);
     background: rgba(255, 255, 255, 0.02);
     border-radius: 8px 8px 0 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--app-glass-elevated);
 }
 
 .inativos-separator .material-symbols-outlined {
