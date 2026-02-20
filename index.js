@@ -392,7 +392,7 @@ const servePublicAssets = express.static("public", {
   }
 });
 app.use((req, res, next) => {
-  if (/\.(js|mjs|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|map|webp|webmanifest)$/i.test(req.path)) {
+  if (/\.(js|mjs|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|map|webp|webmanifest|json)$/i.test(req.path)) {
     return servePublicAssets(req, res, next);
   }
   next();
