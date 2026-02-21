@@ -214,9 +214,9 @@
     background: radial-gradient(ellipse at 50% 0%, rgba(255, 69, 0, 0.08) 0%, var(--xray-surface-elevated) 70%);
     border: 1px solid var(--xray-border);
     border-radius: 16px;
-    padding: 24px 20px;
+    padding: 16px;
     text-align: center;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     position: relative;
     overflow: hidden;
     animation: xray-pulseGlow 4s ease-in-out infinite;
@@ -271,7 +271,7 @@
     width: 40px;
     height: 1px;
     background: linear-gradient(90deg, transparent, var(--xray-primary), transparent);
-    margin: 16px auto;
+    margin: 10px auto;
     position: relative;
     z-index: 1;
 }
@@ -279,7 +279,7 @@
 .xray-score-meta {
     display: flex;
     justify-content: center;
-    gap: 32px;
+    gap: 24px;
     position: relative;
     z-index: 1;
 }
@@ -1075,12 +1075,11 @@
 
         <!-- Comparacao com Liga -->
         <div class="xray-comparison xray-glass xray-anim-section" id="xrayComparison">
-            <h3 class="xray-section-title xray-toggle" data-target="xrayCompBars">
+            <h3 class="xray-section-title">
                 <span class="material-icons">compare_arrows</span>
                 Comparacao com a Liga
-                <span class="material-icons xray-chevron">expand_more</span>
             </h3>
-            <div id="xrayCompBars" style="display:none;"></div>
+            <div id="xrayCompBars"></div>
         </div>
 
         <!-- Capitao -->
@@ -1108,12 +1107,11 @@
 
         <!-- Performance Geral (Modulos individuais) -->
         <div class="xray-perf-section xray-glass xray-anim-section" id="xrayPerfSection" style="display:none;">
-            <h3 class="xray-section-title xray-toggle" data-target="xrayPerfGrid">
+            <h3 class="xray-section-title">
                 <span class="material-icons">emoji_events</span>
                 Performance Geral
-                <span class="material-icons xray-chevron">expand_more</span>
             </h3>
-            <div class="xray-perf-grid" id="xrayPerfGrid" style="display:none;"></div>
+            <div class="xray-perf-grid" id="xrayPerfGrid"></div>
         </div>
 
         <!-- O que vem por ai (Competicoes/Ligas) -->
