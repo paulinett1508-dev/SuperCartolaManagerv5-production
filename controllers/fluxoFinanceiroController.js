@@ -178,12 +178,18 @@ async function getStatusMercadoInterno() {
             },
         );
         if (!response.ok) throw new Error("Falha na API Cartola");
-        return await response.json();
+        const data = await response.json();
+        data._fallback = false;
+        return data;
     } catch (error) {
         logger.warn(
-            "[FLUXO-CONTROLLER] Falha ao obter status mercado, usando fallback.",
+            "[FLUXO-CONTROLLER] Falha ao obter status mercado, usando fallback seguro (rodada_atual: 0).",
         );
-        return { rodada_atual: 38, status_mercado: 2 };
+        // ✅ v8.13.0 FIX: Fallback seguro — rodada_atual: 0 impede cálculo de módulos
+        // Bug anterior: rodada_atual: 38 fazia calcular MATA_MATA/TOP10 para todas as
+        // edições usando rankings potencialmente de outra temporada, gerando cobranças
+        // indevidas no extratofinanceirocaches.
+        return { rodada_atual: 0, status_mercado: 2, _fallback: true };
     }
 }
 
@@ -555,6 +561,8 @@ export const getExtratoFinanceiro = async (req, res) => {
         const statusMercado = await getStatusMercadoInterno();
         const rodadaAtualCartola = statusMercado.rodada_atual;
         const mercadoAberto = statusMercado.status_mercado === 1;
+        // ✅ v8.13.0: Flag que indica se dados do mercado vieram do fallback (API indisponível)
+        const usouFallback = statusMercado._fallback === true;
 
         const limiteConsolidacaoBase = mercadoAberto
             ? rodadaAtualCartola - 1
@@ -713,8 +721,8 @@ export const getExtratoFinanceiro = async (req, res) => {
         let novoSaldo = 0;
         let cacheModificado = false;
 
-        // Só calcular rodadas se NÃO for temporada futura
-        if (!isTemporadaFutura && cache.ultima_rodada_consolidada < rodadaLimite) {
+        // Só calcular rodadas se NÃO for temporada futura e NÃO for fallback
+        if (!isTemporadaFutura && !usouFallback && cache.ultima_rodada_consolidada < rodadaLimite) {
             logger.log(
                 `[FLUXO-CONTROLLER] Calculando R${cache.ultima_rodada_consolidada + 1} → R${rodadaLimite}`,
             );
@@ -744,7 +752,7 @@ export const getExtratoFinanceiro = async (req, res) => {
         // ✅ v8.4.0: Só calcular se NÃO for temporada futura
         // ✅ v8.5.0: top10 é OPCIONAL, só habilita se === true
         const top10Habilitado = isModuloHabilitado(liga, 'top10') || liga.modulos_ativos?.top10 === true;
-        if (top10Habilitado && !isTemporadaFutura) {
+        if (top10Habilitado && !isTemporadaFutura && !usouFallback) {
             // Verificar se já tem transações de TOP10 no cache
             const temTop10NoCache = cache.historico_transacoes.some(
                 (t) => t.tipo === "MITO" || t.tipo === "MICO"
@@ -776,8 +784,11 @@ export const getExtratoFinanceiro = async (req, res) => {
         // Bug anterior: transações de participantes não classificados ficavam eternamente
         // congeladas no cache porque o guard impedia recálculo. Agora sempre recalcula
         // com dados frescos do bracket real (cross-validação v1.3 no backend).
+        // ✅ v8.13.0 FIX: NÃO calcular quando API Cartola está indisponível (fallback)
+        // Bug anterior: fallback rodada_atual:38 fazia calcular MM com rankings de outra
+        // temporada, gerando cobranças indevidas no cache.
         const mataHabilitado = isModuloHabilitado(liga, 'mata_mata') || liga.modulos_ativos?.mataMata;
-        if (mataHabilitado && !isTemporadaFutura) {
+        if (mataHabilitado && !isTemporadaFutura && !usouFallback) {
             // Sempre remover transações de MATA_MATA antigas para recalcular com dados frescos
             const mmAntigas = cache.historico_transacoes.filter(t => t.tipo === "MATA_MATA");
             if (mmAntigas.length > 0) {
