@@ -101,7 +101,7 @@
 
 /* === HEADER === */
 .xray-header {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .xray-header-row {
@@ -198,8 +198,8 @@
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    padding: 8px 0;
-    margin-bottom: 8px;
+    padding: 6px 0;
+    margin-bottom: 4px;
     transition: opacity 0.2s;
 }
 
@@ -974,6 +974,34 @@
     font-size: 14px;
 }
 
+/* === COLLAPSIBLE SECTIONS === */
+.xray-section-title.xray-toggle {
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.xray-section-title.xray-toggle:active {
+    opacity: 0.7;
+}
+
+.xray-section-title.xray-toggle::after {
+    display: none;
+}
+
+.xray-chevron {
+    font-size: 20px;
+    color: var(--xray-text-muted);
+    margin-left: auto;
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+}
+
+.xray-section-title.xray-toggle.expanded .xray-chevron {
+    transform: rotate(180deg);
+}
+
 /* === REDUCE MOTION === */
 @media (prefers-reduced-motion: reduce) {
     .xray-anim-section {
@@ -1047,11 +1075,12 @@
 
         <!-- Comparacao com Liga -->
         <div class="xray-comparison xray-glass xray-anim-section" id="xrayComparison">
-            <h3 class="xray-section-title">
+            <h3 class="xray-section-title xray-toggle" data-target="xrayCompBars">
                 <span class="material-icons">compare_arrows</span>
                 Comparacao com a Liga
+                <span class="material-icons xray-chevron">expand_more</span>
             </h3>
-            <div id="xrayCompBars"></div>
+            <div id="xrayCompBars" style="display:none;"></div>
         </div>
 
         <!-- Capitao -->
@@ -1059,38 +1088,42 @@
 
         <!-- Analise por Posicao -->
         <div class="xray-posicao-section xray-glass xray-anim-section">
-            <h3 class="xray-section-title">
+            <h3 class="xray-section-title xray-toggle" data-target="xrayPosicaoGrid">
                 <span class="material-icons">pie_chart</span>
                 Pontos por Posicao
+                <span class="material-icons xray-chevron">expand_more</span>
             </h3>
-            <div class="xray-posicao-grid" id="xrayPosicaoGrid"></div>
+            <div class="xray-posicao-grid" id="xrayPosicaoGrid" style="display:none;"></div>
         </div>
 
         <!-- Distribuicao na Liga -->
         <div class="xray-distrib-section xray-glass xray-anim-section">
-            <h3 class="xray-section-title">
+            <h3 class="xray-section-title xray-toggle" data-target="xrayDistribBars">
                 <span class="material-icons">bar_chart</span>
                 Distribuicao na Liga
+                <span class="material-icons xray-chevron">expand_more</span>
             </h3>
-            <div class="xray-distrib-bars" id="xrayDistribBars"></div>
+            <div class="xray-distrib-bars" id="xrayDistribBars" style="display:none;"></div>
         </div>
 
         <!-- Performance Geral (Modulos individuais) -->
         <div class="xray-perf-section xray-glass xray-anim-section" id="xrayPerfSection" style="display:none;">
-            <h3 class="xray-section-title">
+            <h3 class="xray-section-title xray-toggle" data-target="xrayPerfGrid">
                 <span class="material-icons">emoji_events</span>
                 Performance Geral
+                <span class="material-icons xray-chevron">expand_more</span>
             </h3>
-            <div class="xray-perf-grid" id="xrayPerfGrid"></div>
+            <div class="xray-perf-grid" id="xrayPerfGrid" style="display:none;"></div>
         </div>
 
         <!-- O que vem por ai (Competicoes/Ligas) -->
         <div class="xray-upcoming-section xray-glass xray-anim-section" id="xrayUpcomingSection">
-            <h3 class="xray-section-title">
+            <h3 class="xray-section-title xray-toggle" data-target="xrayUpcomingLista">
                 <span class="material-icons">rocket_launch</span>
                 O que vem por ai...
+                <span class="material-icons xray-chevron">expand_more</span>
             </h3>
-            <div id="xrayUpcomingLista" class="xray-upcoming-lista"></div>
+            <div id="xrayUpcomingLista" class="xray-upcoming-lista" style="display:none;"></div>
         </div>
 
     </div>
