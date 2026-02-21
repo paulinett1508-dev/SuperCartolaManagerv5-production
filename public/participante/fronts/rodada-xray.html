@@ -1,9 +1,10 @@
-<!-- RAIO-X DA RODADA - Template v1.0 -->
-<!-- Análise detalhada de performance por rodada -->
+<!-- RAIO-X DA RODADA - Template v2.0 -->
+<!-- Redesign: Premium Dark Sports Analytics -->
 <style>
 /* ============================================
-   RAIO-X DA RODADA v1.0
+   RAIO-X DA RODADA v2.0
    Design System: Black & Orange (#FF4500)
+   Premium Dark Mode + Glassmorphism + Motion
    ============================================ */
 
 :root {
@@ -12,9 +13,11 @@
     --xray-font-mono: 'JetBrains Mono', monospace;
     --xray-primary: var(--app-primary, #FF4500);
     --xray-primary-dark: var(--app-primary-dark, #CC3700);
+    --xray-primary-glow: rgba(255, 69, 0, 0.25);
     --xray-surface: var(--app-surface, #1a1a1a);
     --xray-surface-elevated: var(--app-surface-elevated, #262626);
     --xray-surface-hover: var(--app-surface-hover, #333);
+    --xray-surface-glass: rgba(38, 38, 38, 0.65);
     --xray-success: var(--app-success, #22c55e);
     --xray-danger: var(--app-danger, #ef4444);
     --xray-warning: var(--app-warning, #eab308);
@@ -22,16 +25,78 @@
     --xray-text-muted: var(--app-text-muted, #9ca3af);
     --xray-text-dim: var(--app-text-dim, #6b7280);
     --xray-text-white: var(--app-text-white, #fff);
-    --xray-border: var(--app-border, #333);
+    --xray-border: rgba(255, 255, 255, 0.08);
+    --xray-border-hover: rgba(255, 255, 255, 0.14);
     --xray-gold: var(--app-gold, #ffd700);
 }
 
+/* === CONTAINER === */
 .xray-container {
     padding: 16px;
     padding-bottom: 180px;
     font-family: var(--xray-font-body);
     max-width: 600px;
     margin: 0 auto;
+    position: relative;
+}
+
+/* === STAGGERED ENTRY ANIMATIONS === */
+@keyframes xray-fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes xray-spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes xray-shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+}
+
+@keyframes xray-pulseGlow {
+    0%, 100% { box-shadow: 0 0 20px rgba(255, 69, 0, 0.15); }
+    50% { box-shadow: 0 0 35px rgba(255, 69, 0, 0.3); }
+}
+
+@keyframes xray-barGrow {
+    from { width: 0; }
+}
+
+.xray-anim-section {
+    opacity: 0;
+    animation: xray-fadeSlideUp 0.5s ease-out forwards;
+}
+
+.xray-anim-section:nth-child(1) { animation-delay: 0s; }
+.xray-anim-section:nth-child(2) { animation-delay: 0.08s; }
+.xray-anim-section:nth-child(3) { animation-delay: 0.16s; }
+.xray-anim-section:nth-child(4) { animation-delay: 0.24s; }
+.xray-anim-section:nth-child(5) { animation-delay: 0.32s; }
+.xray-anim-section:nth-child(6) { animation-delay: 0.40s; }
+.xray-anim-section:nth-child(7) { animation-delay: 0.48s; }
+.xray-anim-section:nth-child(8) { animation-delay: 0.56s; }
+.xray-anim-section:nth-child(9) { animation-delay: 0.64s; }
+
+/* === GLASS CARD BASE === */
+.xray-glass {
+    background: var(--xray-surface-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--xray-border);
+    border-radius: 14px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.xray-glass:hover {
+    border-color: var(--xray-border-hover);
 }
 
 /* === HEADER === */
@@ -56,6 +121,7 @@
 .xray-header-title .material-icons {
     font-size: 28px;
     color: var(--xray-primary);
+    filter: drop-shadow(0 0 6px var(--xray-primary-glow));
 }
 
 .xray-header-title h2 {
@@ -64,19 +130,21 @@
     font-weight: 400;
     color: var(--xray-text-white);
     margin: 0;
+    letter-spacing: 0.5px;
 }
 
 .xray-header-sub {
     font-size: 13px;
     color: var(--xray-text-muted);
-    margin-top: 4px;
+    margin-top: 6px;
     text-align: center;
+    letter-spacing: 0.3px;
 }
 
 /* === REFRESH BUTTON === */
 .xray-refresh-btn {
     background: none;
-    border: none;
+    border: 1px solid transparent;
     color: var(--xray-text-muted);
     cursor: pointer;
     padding: 6px;
@@ -84,7 +152,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: color 0.2s, background 0.2s;
+    transition: all 0.25s ease;
     flex-shrink: 0;
     width: 36px;
     height: 36px;
@@ -92,11 +160,17 @@
 
 .xray-refresh-btn:hover {
     color: var(--xray-primary);
-    background: rgba(255, 69, 0, 0.1);
+    background: rgba(255, 69, 0, 0.08);
+    border-color: rgba(255, 69, 0, 0.2);
 }
 
 .xray-refresh-btn .material-icons {
     font-size: 20px;
+    transition: transform 0.3s ease;
+}
+
+.xray-refresh-btn:hover .material-icons {
+    transform: rotate(90deg);
 }
 
 .xray-refresh-btn.spinning .material-icons {
@@ -108,7 +182,6 @@
     cursor: not-allowed;
 }
 
-/* Spacer to balance the refresh button on the right */
 .xray-header-spacer {
     width: 36px;
     flex-shrink: 0;
@@ -126,20 +199,27 @@
     font-weight: 600;
     cursor: pointer;
     padding: 8px 0;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
+    transition: opacity 0.2s;
 }
+
+.xray-back-btn:hover {
+    opacity: 0.8;
+}
+
 .xray-back-btn .material-icons { font-size: 18px; }
 
-/* === SCORE CARD === */
+/* === SCORE CARD (Hero) === */
 .xray-score-card {
-    background: var(--xray-surface-elevated);
+    background: radial-gradient(ellipse at 50% 0%, rgba(255, 69, 0, 0.08) 0%, var(--xray-surface-elevated) 70%);
     border: 1px solid var(--xray-border);
     border-radius: 16px;
-    padding: 20px;
+    padding: 24px 20px;
     text-align: center;
     margin-bottom: 16px;
     position: relative;
     overflow: hidden;
+    animation: xray-pulseGlow 4s ease-in-out infinite;
 }
 
 .xray-score-card::before {
@@ -149,30 +229,59 @@
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, var(--xray-primary), var(--xray-primary-dark));
+    background: linear-gradient(90deg, transparent, var(--xray-primary), var(--xray-primary-dark), var(--xray-primary), transparent);
+    background-size: 200% 100%;
+    animation: xray-shimmer 3s linear infinite;
+}
+
+.xray-score-card::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: linear-gradient(180deg, rgba(255, 69, 0, 0.06) 0%, transparent 100%);
+    pointer-events: none;
 }
 
 .xray-score-pontos {
     font-family: var(--xray-font-mono);
-    font-size: 40px;
+    font-size: 44px;
     font-weight: 700;
     color: var(--xray-text-white);
     line-height: 1;
+    text-shadow: 0 0 30px rgba(255, 255, 255, 0.08);
+    position: relative;
+    z-index: 1;
 }
 
 .xray-score-label {
+    font-family: var(--xray-font-brand);
     font-size: 11px;
     color: var(--xray-text-muted);
     text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-top: 4px;
+    letter-spacing: 1.5px;
+    margin-top: 6px;
+    position: relative;
+    z-index: 1;
+}
+
+.xray-score-divider {
+    width: 40px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--xray-primary), transparent);
+    margin: 16px auto;
+    position: relative;
+    z-index: 1;
 }
 
 .xray-score-meta {
     display: flex;
     justify-content: center;
-    gap: 24px;
-    margin-top: 16px;
+    gap: 32px;
+    position: relative;
+    z-index: 1;
 }
 
 .xray-score-meta-item {
@@ -187,39 +296,47 @@
 }
 
 .xray-score-meta-label {
-    font-size: 10px;
-    color: var(--xray-text-muted);
+    font-size: 9px;
+    color: var(--xray-text-dim);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
+    margin-top: 2px;
 }
 
 .xray-financeiro-positivo { color: var(--xray-success); }
 .xray-financeiro-negativo { color: var(--xray-danger); }
 .xray-financeiro-neutro { color: var(--xray-text-muted); }
 
-/* === COMPARISON BARS === */
-.xray-comparison {
-    background: var(--xray-surface-elevated);
-    border: 1px solid var(--xray-border);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 16px;
-}
-
+/* === SECTION TITLE === */
 .xray-section-title {
     font-family: var(--xray-font-brand);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 400;
     color: var(--xray-text-white);
-    margin: 0 0 12px 0;
+    margin: 0 0 14px 0;
     display: flex;
     align-items: center;
     gap: 8px;
+    letter-spacing: 0.3px;
 }
 
 .xray-section-title .material-icons {
     font-size: 18px;
     color: var(--xray-primary);
+}
+
+.xray-section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--xray-border), transparent);
+    margin-left: 8px;
+}
+
+/* === COMPARISON BARS === */
+.xray-comparison {
+    padding: 16px;
+    margin-bottom: 16px;
 }
 
 .xray-comp-row {
@@ -229,62 +346,92 @@
     margin-bottom: 10px;
 }
 
+.xray-comp-row:last-child {
+    margin-bottom: 0;
+}
+
 .xray-comp-label {
     font-size: 11px;
     color: var(--xray-text-muted);
-    min-width: 60px;
+    min-width: 55px;
     text-align: right;
+    font-weight: 500;
 }
 
 .xray-comp-bar-track {
     flex: 1;
-    height: 20px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 4px;
+    height: 22px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 6px;
     overflow: hidden;
     position: relative;
 }
 
 .xray-comp-bar-fill {
     height: 100%;
-    border-radius: 4px;
-    transition: width 0.6s ease;
+    border-radius: 6px;
+    transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
     min-width: 2px;
+    position: relative;
 }
 
-.xray-comp-bar-fill.meu { background: var(--xray-primary); }
-.xray-comp-bar-fill.media { background: var(--xray-info); opacity: 0.7; }
-.xray-comp-bar-fill.melhor { background: var(--xray-gold); opacity: 0.7; }
+.xray-comp-bar-fill.meu {
+    background: linear-gradient(90deg, var(--xray-primary-dark), var(--xray-primary));
+    box-shadow: 0 0 12px var(--xray-primary-glow);
+}
+
+.xray-comp-bar-fill.media {
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.5), rgba(59, 130, 246, 0.7));
+}
+
+.xray-comp-bar-fill.melhor {
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.4), rgba(255, 215, 0, 0.65));
+}
 
 .xray-comp-value {
     font-family: var(--xray-font-mono);
     font-size: 12px;
     font-weight: 600;
     color: var(--xray-text-white);
-    min-width: 50px;
+    min-width: 48px;
     text-align: right;
 }
 
 .xray-comp-diff {
     font-family: var(--xray-font-mono);
-    font-size: 11px;
+    font-size: 10px;
     padding: 2px 6px;
     border-radius: 4px;
-    font-weight: 600;
+    font-weight: 700;
+    min-width: 40px;
+    text-align: center;
 }
-.xray-comp-diff.positivo { background: rgba(34,197,94,0.15); color: var(--xray-success); }
-.xray-comp-diff.negativo { background: rgba(239,68,68,0.15); color: var(--xray-danger); }
 
-/* === CAPITÃO CARD === */
+.xray-comp-diff.positivo {
+    background: rgba(34, 197, 94, 0.12);
+    color: var(--xray-success);
+}
+
+.xray-comp-diff.negativo {
+    background: rgba(239, 68, 68, 0.12);
+    color: var(--xray-danger);
+}
+
+/* === CAPITAO CARD === */
 .xray-capitao-card {
-    background: var(--xray-surface-elevated);
+    background: linear-gradient(135deg, var(--xray-surface-elevated) 0%, rgba(255, 215, 0, 0.04) 100%);
     border: 1px solid var(--xray-border);
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 16px;
     margin-bottom: 16px;
     display: flex;
     align-items: center;
     gap: 14px;
+    transition: border-color 0.3s;
+}
+
+.xray-capitao-card:hover {
+    border-color: rgba(255, 215, 0, 0.2);
 }
 
 .xray-capitao-badge {
@@ -296,6 +443,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
 }
 
 .xray-capitao-badge .material-icons {
@@ -314,6 +462,7 @@
 .xray-capitao-pos {
     font-size: 11px;
     color: var(--xray-text-muted);
+    margin-top: 1px;
 }
 
 .xray-capitao-stats {
@@ -322,22 +471,28 @@
 
 .xray-capitao-pontos {
     font-family: var(--xray-font-mono);
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
     color: var(--xray-gold);
+    text-shadow: 0 0 16px rgba(255, 215, 0, 0.15);
 }
 
 .xray-capitao-bonus {
     font-size: 10px;
     color: var(--xray-success);
+    margin-top: 2px;
 }
 
-/* === POSIÇÃO ANALYSIS === */
+/* === POSICAO ANALYSIS === */
+.xray-posicao-section {
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
 .xray-posicao-grid {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    margin-bottom: 16px;
 }
 
 .xray-posicao-row {
@@ -359,28 +514,30 @@
 
 .xray-posicao-bar-track {
     flex: 1;
-    height: 24px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 6px;
+    height: 26px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 8px;
     overflow: hidden;
 }
 
 .xray-posicao-bar-fill {
     height: 100%;
-    border-radius: 6px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
-    padding-left: 8px;
-    transition: width 0.6s ease;
+    padding-left: 10px;
+    transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
     min-width: 2px;
+    position: relative;
 }
 
 .xray-posicao-bar-label {
     font-family: var(--xray-font-mono);
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
-    color: #fff;
+    color: rgba(255, 255, 255, 0.9);
     white-space: nowrap;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .xray-posicao-value {
@@ -394,9 +551,6 @@
 
 /* === ATLETAS TABLE === */
 .xray-atletas-section {
-    background: var(--xray-surface-elevated);
-    border: 1px solid var(--xray-border);
-    border-radius: 12px;
     padding: 16px;
     margin-bottom: 16px;
 }
@@ -406,7 +560,7 @@
     align-items: center;
     gap: 10px;
     padding: 10px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .xray-atleta-row:last-child { border-bottom: none; }
@@ -472,7 +626,7 @@
 
 .xray-reserva-tag {
     font-size: 9px;
-    background: rgba(107,114,128,0.3);
+    background: rgba(107, 114, 128, 0.3);
     color: var(--xray-text-dim);
     padding: 1px 5px;
     border-radius: 3px;
@@ -480,11 +634,8 @@
     flex-shrink: 0;
 }
 
-/* === DISTRIBUIÇÃO (HISTOGRAMA) === */
+/* === DISTRIBUICAO (HISTOGRAMA) === */
 .xray-distrib-section {
-    background: var(--xray-surface-elevated);
-    border: 1px solid var(--xray-border);
-    border-radius: 12px;
     padding: 16px;
     margin-bottom: 16px;
 }
@@ -492,7 +643,7 @@
 .xray-distrib-bars {
     display: flex;
     align-items: flex-end;
-    gap: 6px;
+    gap: 5px;
     height: 100px;
     margin-top: 12px;
 }
@@ -510,12 +661,18 @@
 .xray-distrib-bar {
     width: 100%;
     border-radius: 4px 4px 0 0;
-    transition: height 0.6s ease;
+    transition: height 0.8s cubic-bezier(0.22, 1, 0.36, 1);
     min-height: 4px;
 }
 
-.xray-distrib-bar.normal { background: rgba(255,255,255,0.15); }
-.xray-distrib-bar.destaque { background: var(--xray-primary); }
+.xray-distrib-bar.normal {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.xray-distrib-bar.destaque {
+    background: linear-gradient(180deg, var(--xray-primary), var(--xray-primary-dark));
+    box-shadow: 0 0 10px var(--xray-primary-glow);
+}
 
 .xray-distrib-count {
     font-family: var(--xray-font-mono);
@@ -524,17 +681,15 @@
 }
 
 .xray-distrib-label {
-    font-size: 9px;
+    font-size: 8px;
     color: var(--xray-text-dim);
     text-align: center;
     word-break: break-all;
+    letter-spacing: -0.3px;
 }
 
 /* === PERFORMANCE GERAL === */
 .xray-perf-section {
-    background: var(--xray-surface-elevated);
-    border: 1px solid var(--xray-border);
-    border-radius: 12px;
     padding: 16px;
     margin-bottom: 16px;
 }
@@ -546,15 +701,22 @@
 }
 
 .xray-perf-card {
-    background: var(--xray-surface);
+    background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--xray-border);
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 12px;
     display: flex;
     align-items: center;
     gap: 10px;
     position: relative;
     overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.xray-perf-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--xray-border-hover);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
 .xray-perf-card::before {
@@ -564,6 +726,7 @@
     top: 0;
     bottom: 0;
     width: 3px;
+    border-radius: 3px 0 0 3px;
 }
 
 .xray-perf-card.mod-capitao::before { background: var(--module-capitao-primary, #8b5cf6); }
@@ -571,11 +734,25 @@
 .xray-perf-card.mod-luva::before { background: var(--module-luva-primary, #ffd700); }
 .xray-perf-card.mod-top10::before { background: var(--xray-primary); }
 
+/* Subtle module-specific background glow */
+.xray-perf-card.mod-capitao { background: linear-gradient(135deg, rgba(139, 92, 246, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%); }
+.xray-perf-card.mod-artilheiro { background: linear-gradient(135deg, rgba(34, 197, 94, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%); }
+.xray-perf-card.mod-luva { background: linear-gradient(135deg, rgba(255, 215, 0, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%); }
+.xray-perf-card.mod-top10 { background: linear-gradient(135deg, rgba(255, 69, 0, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%); }
+
 .xray-perf-icon {
-    font-size: 22px;
     flex-shrink: 0;
-    width: 32px;
-    text-align: center;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.xray-perf-icon .material-icons {
+    font-size: 20px;
 }
 
 .xray-perf-info {
@@ -585,7 +762,7 @@
 
 .xray-perf-title {
     font-family: var(--xray-font-brand);
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 400;
     color: var(--xray-text-muted);
     text-transform: uppercase;
@@ -598,7 +775,7 @@
 
 .xray-perf-value {
     font-family: var(--xray-font-mono);
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
     color: var(--xray-text-white);
     line-height: 1.2;
@@ -618,26 +795,8 @@
 .xray-perf-card.mod-luva .xray-perf-value { color: var(--module-luva-primary, #ffd700); }
 .xray-perf-card.mod-top10 .xray-perf-value { color: var(--xray-primary); }
 
-/* === "EM BREVE" CARDS === */
-.xray-upcoming-card.em-breve {
-    opacity: 0.45;
-    pointer-events: none;
-    position: relative;
-}
-
-.xray-upcoming-card.em-breve .xray-upcoming-badge.breve {
-    background: rgba(255,255,255,0.08);
-    color: var(--xray-text-dim);
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-/* === O QUE VEM POR AÍ === */
+/* === UPCOMING SECTION === */
 .xray-upcoming-section {
-    background: var(--xray-surface-elevated);
-    border: 1px solid var(--xray-border);
-    border-radius: 12px;
     padding: 16px;
     margin-bottom: 16px;
 }
@@ -645,24 +804,39 @@
 .xray-upcoming-lista {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
 }
 
 .xray-upcoming-card {
-    background: var(--xray-surface);
+    background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--xray-border);
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 14px;
     display: flex;
     align-items: center;
     gap: 12px;
+    transition: all 0.3s ease;
+}
+
+.xray-upcoming-card:not(.em-breve):hover {
+    border-color: var(--xray-border-hover);
+    transform: translateX(3px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .xray-upcoming-icon {
-    font-size: 24px;
     flex-shrink: 0;
     width: 40px;
-    text-align: center;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.xray-upcoming-icon .material-icons {
+    font-size: 22px;
 }
 
 .xray-upcoming-info {
@@ -672,10 +846,11 @@
 
 .xray-upcoming-title {
     font-family: var(--xray-font-brand);
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 400;
     color: var(--xray-primary);
     margin-bottom: 4px;
+    letter-spacing: 0.3px;
 }
 
 .xray-upcoming-desc {
@@ -688,30 +863,73 @@
     font-size: 11px;
     color: var(--xray-text-muted);
     margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
 }
 
 .xray-upcoming-badge {
     font-family: var(--xray-font-mono);
     font-size: 11px;
     font-weight: 700;
-    padding: 4px 8px;
-    border-radius: 6px;
+    padding: 4px 10px;
+    border-radius: 8px;
     flex-shrink: 0;
 }
 
 .xray-upcoming-badge.classificado {
-    background: rgba(34,197,94,0.15);
+    background: rgba(34, 197, 94, 0.12);
     color: var(--xray-success);
+    border: 1px solid rgba(34, 197, 94, 0.2);
 }
 
 .xray-upcoming-badge.eliminado {
-    background: rgba(239,68,68,0.15);
+    background: rgba(239, 68, 68, 0.12);
     color: var(--xray-danger);
+    border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
 .xray-upcoming-badge.posicao {
-    background: rgba(255,69,0,0.15);
+    background: rgba(255, 69, 0, 0.12);
     color: var(--xray-primary);
+    border: 1px solid rgba(255, 69, 0, 0.2);
+}
+
+/* === INLINE MATERIAL ICONS (replacing emojis) === */
+.xray-inline-icon {
+    font-size: 14px;
+    vertical-align: middle;
+    margin-right: 2px;
+}
+
+.xray-inline-icon.success { color: var(--xray-success); }
+.xray-inline-icon.danger { color: var(--xray-danger); }
+.xray-inline-icon.neutral { color: var(--xray-text-muted); }
+
+/* === "EM BREVE" CARDS === */
+.xray-upcoming-card.em-breve {
+    opacity: 0.35;
+    pointer-events: none;
+    position: relative;
+    border-style: dashed;
+}
+
+.xray-upcoming-card.em-breve .xray-upcoming-icon {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.xray-upcoming-card.em-breve .xray-upcoming-icon .material-icons {
+    color: var(--xray-text-dim);
+}
+
+.xray-upcoming-card.em-breve .xray-upcoming-badge.breve {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--xray-text-dim);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: var(--xray-font-brand);
+    font-weight: 400;
 }
 
 /* === LOADING & EMPTY STATE === */
@@ -727,19 +945,17 @@
 .xray-loading-spinner {
     width: 40px;
     height: 40px;
-    border: 3px solid rgba(255,255,255,0.1);
+    border: 3px solid rgba(255, 255, 255, 0.06);
     border-top-color: var(--xray-primary);
     border-radius: 50%;
     animation: xray-spin 0.8s linear infinite;
 }
 
-@keyframes xray-spin {
-    to { transform: rotate(360deg); }
-}
-
 .xray-loading-text {
     font-size: 13px;
     color: var(--xray-text-muted);
+    font-family: var(--xray-font-brand);
+    letter-spacing: 0.5px;
 }
 
 .xray-empty {
@@ -756,6 +972,24 @@
 .xray-empty p {
     color: var(--xray-text-muted);
     font-size: 14px;
+}
+
+/* === REDUCE MOTION === */
+@media (prefers-reduced-motion: reduce) {
+    .xray-anim-section {
+        animation: none;
+        opacity: 1;
+    }
+    .xray-score-card {
+        animation: none;
+    }
+    .xray-score-card::before {
+        animation: none;
+    }
+    .xray-perf-card:hover,
+    .xray-upcoming-card:hover {
+        transform: none;
+    }
 }
 </style>
 
@@ -776,7 +1010,7 @@
         </button>
 
         <!-- Header -->
-        <div class="xray-header">
+        <div class="xray-header xray-anim-section">
             <div class="xray-header-row">
                 <div class="xray-header-spacer"></div>
                 <div class="xray-header-title">
@@ -790,14 +1024,15 @@
             <div class="xray-header-sub" id="xraySubtitulo">Rodada --</div>
         </div>
 
-        <!-- Score Card -->
-        <div class="xray-score-card" id="xrayScoreCard">
+        <!-- Score Card (Hero) -->
+        <div class="xray-score-card xray-anim-section" id="xrayScoreCard">
             <div class="xray-score-pontos" id="xrayPontos">0.00</div>
             <div class="xray-score-label">Pontos na Rodada</div>
+            <div class="xray-score-divider"></div>
             <div class="xray-score-meta">
                 <div class="xray-score-meta-item">
                     <div class="xray-score-meta-value" id="xrayPosicao">--</div>
-                    <div class="xray-score-meta-label">Posição</div>
+                    <div class="xray-score-meta-label">Posicao</div>
                 </div>
                 <div class="xray-score-meta-item">
                     <div class="xray-score-meta-value" id="xrayFinanceiro">R$ 0</div>
@@ -810,38 +1045,38 @@
             </div>
         </div>
 
-        <!-- Comparação com Liga -->
-        <div class="xray-comparison" id="xrayComparison">
+        <!-- Comparacao com Liga -->
+        <div class="xray-comparison xray-glass xray-anim-section" id="xrayComparison">
             <h3 class="xray-section-title">
                 <span class="material-icons">compare_arrows</span>
-                Comparação com a Liga
+                Comparacao com a Liga
             </h3>
             <div id="xrayCompBars"></div>
         </div>
 
-        <!-- Capitão -->
-        <div id="xrayCapitaoSection"></div>
+        <!-- Capitao -->
+        <div class="xray-anim-section" id="xrayCapitaoSection"></div>
 
-        <!-- Análise por Posição -->
-        <div class="xray-comparison">
+        <!-- Analise por Posicao -->
+        <div class="xray-posicao-section xray-glass xray-anim-section">
             <h3 class="xray-section-title">
                 <span class="material-icons">pie_chart</span>
-                Pontos por Posição
+                Pontos por Posicao
             </h3>
             <div class="xray-posicao-grid" id="xrayPosicaoGrid"></div>
         </div>
 
-        <!-- Distribuição na Liga -->
-        <div class="xray-distrib-section">
+        <!-- Distribuicao na Liga -->
+        <div class="xray-distrib-section xray-glass xray-anim-section">
             <h3 class="xray-section-title">
                 <span class="material-icons">bar_chart</span>
-                Distribuição na Liga
+                Distribuicao na Liga
             </h3>
             <div class="xray-distrib-bars" id="xrayDistribBars"></div>
         </div>
 
-        <!-- Performance Geral (Módulos individuais) -->
-        <div class="xray-perf-section" id="xrayPerfSection" style="display:none;">
+        <!-- Performance Geral (Modulos individuais) -->
+        <div class="xray-perf-section xray-glass xray-anim-section" id="xrayPerfSection" style="display:none;">
             <h3 class="xray-section-title">
                 <span class="material-icons">emoji_events</span>
                 Performance Geral
@@ -849,11 +1084,11 @@
             <div class="xray-perf-grid" id="xrayPerfGrid"></div>
         </div>
 
-        <!-- O que vem por aí (Competições/Ligas) -->
-        <div class="xray-upcoming-section" id="xrayUpcomingSection">
+        <!-- O que vem por ai (Competicoes/Ligas) -->
+        <div class="xray-upcoming-section xray-glass xray-anim-section" id="xrayUpcomingSection">
             <h3 class="xray-section-title">
                 <span class="material-icons">rocket_launch</span>
-                O que vem por aí...
+                O que vem por ai...
             </h3>
             <div id="xrayUpcomingLista" class="xray-upcoming-lista"></div>
         </div>
