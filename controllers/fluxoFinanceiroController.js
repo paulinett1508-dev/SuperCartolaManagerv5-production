@@ -178,12 +178,18 @@ async function getStatusMercadoInterno() {
             },
         );
         if (!response.ok) throw new Error("Falha na API Cartola");
-        return await response.json();
+        const data = await response.json();
+        data._fallback = false;
+        return data;
     } catch (error) {
         logger.warn(
-            "[FLUXO-CONTROLLER] Falha ao obter status mercado, usando fallback.",
+            "[FLUXO-CONTROLLER] Falha ao obter status mercado, usando fallback seguro (rodada_atual: 0).",
         );
-        return { rodada_atual: 38, status_mercado: 2 };
+        // ✅ v8.13.0 FIX: Fallback seguro — rodada_atual: 0 impede cálculo de módulos
+        // Bug anterior: rodada_atual: 38 fazia calcular MATA_MATA/TOP10 para todas as
+        // edições usando rankings potencialmente de outra temporada, gerando cobranças
+        // indevidas no extratofinanceirocaches.
+        return { rodada_atual: 0, status_mercado: 2, _fallback: true };
     }
 }
 
@@ -555,6 +561,8 @@ export const getExtratoFinanceiro = async (req, res) => {
         const statusMercado = await getStatusMercadoInterno();
         const rodadaAtualCartola = statusMercado.rodada_atual;
         const mercadoAberto = statusMercado.status_mercado === 1;
+        // ✅ v8.13.0: Flag que indica se dados do mercado vieram do fallback (API indisponível)
+        const usouFallback = statusMercado._fallback === true;
 
         const limiteConsolidacaoBase = mercadoAberto
             ? rodadaAtualCartola - 1
@@ -713,8 +721,8 @@ export const getExtratoFinanceiro = async (req, res) => {
         let novoSaldo = 0;
         let cacheModificado = false;
 
-        // Só calcular rodadas se NÃO for temporada futura
-        if (!isTemporadaFutura && cache.ultima_rodada_consolidada < rodadaLimite) {
+        // Só calcular rodadas se NÃO for temporada futura e NÃO for fallback
+        if (!isTemporadaFutura && !usouFallback && cache.ultima_rodada_consolidada < rodadaLimite) {
             logger.log(
                 `[FLUXO-CONTROLLER] Calculando R${cache.ultima_rodada_consolidada + 1} → R${rodadaLimite}`,
             );
@@ -744,7 +752,7 @@ export const getExtratoFinanceiro = async (req, res) => {
         // ✅ v8.4.0: Só calcular se NÃO for temporada futura
         // ✅ v8.5.0: top10 é OPCIONAL, só habilita se === true
         const top10Habilitado = isModuloHabilitado(liga, 'top10') || liga.modulos_ativos?.top10 === true;
-        if (top10Habilitado && !isTemporadaFutura) {
+        if (top10Habilitado && !isTemporadaFutura && !usouFallback) {
             // Verificar se já tem transações de TOP10 no cache
             const temTop10NoCache = cache.historico_transacoes.some(
                 (t) => t.tipo === "MITO" || t.tipo === "MICO"
@@ -772,59 +780,66 @@ export const getExtratoFinanceiro = async (req, res) => {
         // ✅ v8.0: Calcular MATA-MATA histórico (separado do loop de rodadas)
         // Usa isModuloHabilitado ao invés de hardcoded ID
         // ✅ v8.4.0: Só calcular se NÃO for temporada futura
+        // ✅ v8.12.0 FIX: SEMPRE recalcular MATA_MATA (remover guard temMataMataNcache)
+        // Bug anterior: transações de participantes não classificados ficavam eternamente
+        // congeladas no cache porque o guard impedia recálculo. Agora sempre recalcula
+        // com dados frescos do bracket real (cross-validação v1.3 no backend).
+        // ✅ v8.13.0 FIX: NÃO calcular quando API Cartola está indisponível (fallback)
+        // Bug anterior: fallback rodada_atual:38 fazia calcular MM com rankings de outra
+        // temporada, gerando cobranças indevidas no cache.
         const mataHabilitado = isModuloHabilitado(liga, 'mata_mata') || liga.modulos_ativos?.mataMata;
-        if (mataHabilitado && !isTemporadaFutura) {
-            const temMataMataNcache = cache.historico_transacoes.some(
-                (t) => t.tipo === "MATA_MATA"
-            );
+        if (mataHabilitado && !isTemporadaFutura && !usouFallback) {
+            // Sempre remover transações de MATA_MATA antigas para recalcular com dados frescos
+            const mmAntigas = cache.historico_transacoes.filter(t => t.tipo === "MATA_MATA");
+            if (mmAntigas.length > 0) {
+                // Descontar saldo das transações antigas antes de recalcular
+                const saldoMMantigo = mmAntigas.reduce((acc, t) => acc + (t.valor || 0), 0);
+                cache.saldo_consolidado -= saldoMMantigo;
+                cache.historico_transacoes = cache.historico_transacoes.filter(
+                    (t) => t.tipo !== "MATA_MATA"
+                );
+                cacheModificado = true;
+                logger.log(`[FLUXO-CONTROLLER] MATA-MATA: ${mmAntigas.length} transações antigas removidas (saldo ajustado: -${saldoMMantigo})`);
+            }
 
-            if (!temMataMataNcache || forcarRecalculo) {
-                // Remover transações de MATA_MATA antigas (se houver, para recálculo)
-                if (forcarRecalculo) {
-                    cache.historico_transacoes = cache.historico_transacoes.filter(
-                        (t) => t.tipo !== "MATA_MATA"
-                    );
-                }
+            logger.log(`[FLUXO-CONTROLLER] Calculando MATA-MATA histórico para time ${timeId}`);
 
-                logger.log(`[FLUXO-CONTROLLER] Calculando MATA-MATA histórico para time ${timeId}`);
+            // Calcular TODOS os resultados de Mata-Mata
+            const resultadosMM = await getResultadosMataMataCompleto(ligaId, rodadaAtualCartola + 1);
 
-                // Calcular TODOS os resultados de Mata-Mata
-                const resultadosMM = await getResultadosMataMataCompleto(ligaId, rodadaAtualCartola + 1);
+            // Filtrar apenas resultados deste time E dentro do limite de rodadas
+            // ✅ v8.8.0 FIX: rodadaPontos é a rodada do Brasileirão onde a fase é calculada
+            // Não incluir resultados de rodadas além do limiteConsolidacao (ainda não disputadas)
+            const transacoesMM = resultadosMM
+                .filter((r) => String(r.timeId) === String(timeId))
+                .filter((r) => r.rodadaPontos <= rodadaLimite)
+                .map((r) => {
+                    const faseLabel = {
+                        primeira: "1ª Fase",
+                        oitavas: "Oitavas",
+                        quartas: "Quartas",
+                        semis: "Semis",
+                        final: "Final",
+                    }[r.fase] || r.fase;
 
-                // Filtrar apenas resultados deste time E dentro do limite de rodadas
-                // ✅ v8.8.0 FIX: rodadaPontos é a rodada do Brasileirão onde a fase é calculada
-                // Não incluir resultados de rodadas além do limiteConsolidacao (ainda não disputadas)
-                const transacoesMM = resultadosMM
-                    .filter((r) => String(r.timeId) === String(timeId))
-                    .filter((r) => r.rodadaPontos <= rodadaLimite)
-                    .map((r) => {
-                        const faseLabel = {
-                            primeira: "1ª Fase",
-                            oitavas: "Oitavas",
-                            quartas: "Quartas",
-                            semis: "Semis",
-                            final: "Final",
-                        }[r.fase] || r.fase;
+                    return {
+                        rodada: r.rodadaPontos,
+                        tipo: "MATA_MATA",
+                        descricao: `${r.valor > 0 ? "Vitória" : "Derrota"} M-M ${faseLabel}`,
+                        valor: r.valor,
+                        fase: r.fase,
+                        edicao: r.edicao,
+                        data: new Date(),
+                    };
+                });
 
-                        return {
-                            rodada: r.rodadaPontos,
-                            tipo: "MATA_MATA",
-                            descricao: `${r.valor > 0 ? "Vitória" : "Derrota"} M-M ${faseLabel}`,
-                            valor: r.valor,
-                            fase: r.fase,
-                            edicao: r.edicao,
-                            data: new Date(),
-                        };
-                    });
-
-                if (transacoesMM.length > 0) {
-                    novasTransacoes.push(...transacoesMM);
-                    transacoesMM.forEach((t) => (novoSaldo += t.valor));
-                    cacheModificado = true;
-                    logger.log(
-                        `[FLUXO-CONTROLLER] MATA-MATA histórico: ${transacoesMM.length} transações`
-                    );
-                }
+            if (transacoesMM.length > 0) {
+                novasTransacoes.push(...transacoesMM);
+                transacoesMM.forEach((t) => (novoSaldo += t.valor));
+                cacheModificado = true;
+                logger.log(
+                    `[FLUXO-CONTROLLER] MATA-MATA histórico: ${transacoesMM.length} transações`
+                );
             }
         }
 
@@ -1238,48 +1253,52 @@ export const getFluxoFinanceiroLiga = async (ligaId, rodadaNumero) => {
 
                 // ✅ v8.0: Calcular MATA-MATA histórico na consolidação
                 // Usa isModuloHabilitado ao invés de hardcoded ID
+                // ✅ v8.12.0 FIX: SEMPRE recalcular MATA_MATA (mesma lógica do getExtratoFinanceiro)
                 const mataHabilitado = isModuloHabilitado(liga, 'mata_mata') || liga.modulos_ativos?.mataMata;
                 if (mataHabilitado) {
-                    // Verificar se já tem transações de MATA_MATA no cache
-                    const temMataMataNcache = cache.historico_transacoes.some(
-                        (t) => t.tipo === "MATA_MATA"
-                    );
+                    // Sempre remover transações de MATA_MATA antigas para recalcular
+                    const mmAntigas = cache.historico_transacoes.filter(t => t.tipo === "MATA_MATA");
+                    if (mmAntigas.length > 0) {
+                        const saldoMMantigo = mmAntigas.reduce((acc, t) => acc + (t.valor || 0), 0);
+                        cache.saldo_consolidado -= saldoMMantigo;
+                        cache.historico_transacoes = cache.historico_transacoes.filter(
+                            (t) => t.tipo !== "MATA_MATA"
+                        );
+                    }
 
-                    if (!temMataMataNcache) {
-                        logger.log(`[FLUXO-CONSOLIDAÇÃO] Recalculando MATA-MATA histórico para time ${timeId}`);
+                    logger.log(`[FLUXO-CONSOLIDAÇÃO] Recalculando MATA-MATA histórico para time ${timeId}`);
 
-                        // Calcular TODOS os resultados de Mata-Mata
-                        const { getResultadosMataMataCompleto } = await import("./mata-mata-backend.js");
-                        const resultadosMM = await getResultadosMataMataCompleto(ligaId, rodadaNumero + 1);
+                    // Calcular TODOS os resultados de Mata-Mata
+                    const { getResultadosMataMataCompleto } = await import("./mata-mata-backend.js");
+                    const resultadosMM = await getResultadosMataMataCompleto(ligaId, rodadaNumero + 1);
 
-                        // Filtrar apenas resultados deste time
-                        const transacoesMM = resultadosMM
-                            .filter((r) => String(r.timeId) === String(timeId))
-                            .map((r) => {
-                                const faseLabel = {
-                                    primeira: "1ª Fase",
-                                    oitavas: "Oitavas",
-                                    quartas: "Quartas",
-                                    semis: "Semis",
-                                    final: "Final",
-                                }[r.fase] || r.fase;
+                    // Filtrar apenas resultados deste time
+                    const transacoesMM = resultadosMM
+                        .filter((r) => String(r.timeId) === String(timeId))
+                        .map((r) => {
+                            const faseLabel = {
+                                primeira: "1ª Fase",
+                                oitavas: "Oitavas",
+                                quartas: "Quartas",
+                                semis: "Semis",
+                                final: "Final",
+                            }[r.fase] || r.fase;
 
-                                return {
-                                    rodada: r.rodadaPontos,
-                                    tipo: "MATA_MATA",
-                                    descricao: `${r.valor > 0 ? "Vitória" : "Derrota"} M-M ${faseLabel}`,
-                                    valor: r.valor,
-                                    fase: r.fase,
-                                    edicao: r.edicao,
-                                    data: new Date(),
-                                };
-                            });
+                            return {
+                                rodada: r.rodadaPontos,
+                                tipo: "MATA_MATA",
+                                descricao: `${r.valor > 0 ? "Vitória" : "Derrota"} M-M ${faseLabel}`,
+                                valor: r.valor,
+                                fase: r.fase,
+                                edicao: r.edicao,
+                                data: new Date(),
+                            };
+                        });
 
-                        if (transacoesMM.length > 0) {
-                            cache.historico_transacoes.push(...transacoesMM);
-                            transacoesMM.forEach((t) => (cache.saldo_consolidado += t.valor));
-                            logger.log(`[FLUXO-CONSOLIDAÇÃO] ✅ MATA-MATA: ${transacoesMM.length} transações adicionadas para time ${timeId}`);
-                        }
+                    if (transacoesMM.length > 0) {
+                        cache.historico_transacoes.push(...transacoesMM);
+                        transacoesMM.forEach((t) => (cache.saldo_consolidado += t.valor));
+                        logger.log(`[FLUXO-CONSOLIDAÇÃO] ✅ MATA-MATA: ${transacoesMM.length} transações adicionadas para time ${timeId}`);
                     }
                 }
 

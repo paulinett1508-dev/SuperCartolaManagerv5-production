@@ -15,10 +15,12 @@ const MataMataCacheSchema = new mongoose.Schema(
         },
 
         // ✅ Tamanho real calculado do torneio (8, 16, 32, 64)
+        // ✅ FIX: Removido default: 32 — se não foi salvo explicitamente, deve ser null
+        // para que o backend use o fallback correto (calcularTamanhoIdealMataMata)
+        // em vez de assumir 32 silenciosamente.
         tamanhoTorneio: {
             type: Number,
             required: false,
-            default: 32,
             min: 4,
             max: 64,
         },

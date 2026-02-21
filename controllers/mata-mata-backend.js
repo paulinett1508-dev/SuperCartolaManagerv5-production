@@ -141,6 +141,31 @@ function getFasesParaTamanho(tamanho) {
     return [];
 }
 
+/**
+ * ✅ v1.3: Extrai todos os timeIds presentes no bracket (dados_torneio)
+ * Percorre todas as fases e coleta timeIds dos confrontos salvos.
+ * Retorna Set<string> com os timeIds que realmente participam do torneio.
+ */
+function extrairTimeIdsDoBracket(dadosTorneio) {
+    const timeIds = new Set();
+    if (!dadosTorneio || typeof dadosTorneio !== 'object') return timeIds;
+
+    const fasesDoTorneio = ['primeira', 'oitavas', 'quartas', 'semis', 'final'];
+    for (const fase of fasesDoTorneio) {
+        const confrontosFase = dadosTorneio[fase];
+        if (!Array.isArray(confrontosFase)) continue;
+
+        for (const confronto of confrontosFase) {
+            // Suportar ambos formatos: { timeA: { timeId } } e { timeA: { id } }
+            const idA = confronto?.timeA?.timeId || confronto?.timeA?.id;
+            const idB = confronto?.timeB?.timeId || confronto?.timeB?.id;
+            if (idA) timeIds.add(String(idA));
+            if (idB) timeIds.add(String(idB));
+        }
+    }
+    return timeIds;
+}
+
 // ============================================================================
 // MONTAGEM DE CONFRONTOS (espelho do frontend)
 // ============================================================================
@@ -295,20 +320,29 @@ async function calcularResultadosEdicao(ligaId, edicao, rodadaAtual, config) {
         const totalParticipantesHistorico = rankingBase.length;
         let tamanhoTorneio;
 
-        // ✅ v1.2 FIX CRÍTICO: Ler tamanhoTorneio do MataMataCache (bracket salvo pelo admin)
+        // ✅ v1.3 FIX CRÍTICO: Ler tamanhoTorneio E dados_torneio do MataMataCache
         // O bracket salvo é a FONTE DE VERDADE para quem participa do torneio.
-        // Sem este fix, o cálculo financeiro recalculava o tamanho independentemente
-        // e podia incluir participantes que o admin NÃO classificou (ex: 32 vs 16).
+        // v1.3: Também lê dados_torneio para cross-validar quais timeIds realmente
+        // estão no bracket — resolve bug onde participantes não classificados eram cobrados.
+        let participantesNoBracket = null; // Set de timeIds que realmente estão nos confrontos
         try {
             const cacheEdicao = await MataMataCache.findOne({
                 liga_id: String(ligaId),
                 edicao: edicao.id,
                 temporada: CURRENT_SEASON,
-            }).select('tamanhoTorneio').lean();
+            }).select('tamanhoTorneio dados_torneio').lean();
 
             if (cacheEdicao && cacheEdicao.tamanhoTorneio && [8, 16, 32, 64].includes(cacheEdicao.tamanhoTorneio)) {
                 tamanhoTorneio = cacheEdicao.tamanhoTorneio;
                 logger.log(`[MATA-BACKEND] ✅ tamanhoTorneio do cache: ${tamanhoTorneio} (bracket salvo pelo admin)`);
+            }
+
+            // ✅ v1.3: Extrair timeIds do bracket real (dados_torneio) como whitelist
+            if (cacheEdicao?.dados_torneio) {
+                participantesNoBracket = extrairTimeIdsDoBracket(cacheEdicao.dados_torneio);
+                if (participantesNoBracket.size > 0) {
+                    logger.log(`[MATA-BACKEND] ✅ Bracket real: ${participantesNoBracket.size} participantes extraídos dos confrontos`);
+                }
             }
         } catch (err) {
             logger.warn(`[MATA-BACKEND] ⚠️ Erro ao ler MataMataCache para edição ${edicao.id}:`, err.message);
@@ -432,6 +466,24 @@ async function calcularResultadosEdicao(ligaId, edicao, rodadaAtual, config) {
             logger.log(
                 `[MATA-BACKEND] ${edicao.nome} - ${fase}: ${confrontos.length} confrontos, ${proximosVencedores.length} vencedores`,
             );
+        }
+
+        // ✅ v1.3 FIX: Cross-validar resultados contra o bracket real
+        // Se temos dados do bracket (dados_torneio), filtrar para garantir que
+        // APENAS participantes que realmente estão nos confrontos sejam cobrados.
+        // Resolve bug onde participantes fora do bracket recebiam cobrança indevida.
+        if (participantesNoBracket && participantesNoBracket.size > 0) {
+            const antes = resultadosFinanceiros.length;
+            const resultadosFiltrados = resultadosFinanceiros.filter(
+                r => participantesNoBracket.has(String(r.timeId))
+            );
+            const removidos = antes - resultadosFiltrados.length;
+            if (removidos > 0) {
+                logger.warn(
+                    `[MATA-BACKEND] ⚠️ ${edicao.nome}: ${removidos} transações removidas (participantes fora do bracket real)`
+                );
+            }
+            return resultadosFiltrados;
         }
 
         return resultadosFinanceiros;
