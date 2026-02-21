@@ -1,6 +1,7 @@
 /**
  * Copa do Mundo 2026 - Landing Page Styles
  * =========================================
+ * Redesign inspirado em estetica minimal/premium (Stitch 2026)
  * Usa tokens de _app-tokens.css (--app-copa-*)
  * Mobile-first, dark theme
  */
@@ -15,7 +16,7 @@
 }
 
 /* ═══════════════════════════════════════════════════
-   BOTÃO VOLTAR
+   BOTAO VOLTAR
    ═══════════════════════════════════════════════════ */
 .copa-btn-voltar {
     position: sticky;
@@ -32,7 +33,7 @@
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #fff;
+    color: var(--app-text-primary, #fff);
     cursor: pointer;
     margin: 12px 0 -48px 12px;
     transition: background 0.2s, transform 0.15s;
@@ -46,149 +47,143 @@
 }
 
 /* ═══════════════════════════════════════════════════
-   HERO / COUNTDOWN
+   HERO / COUNTDOWN — Stitch-inspired minimal
    ═══════════════════════════════════════════════════ */
 .copa-hero {
     position: relative;
     overflow: hidden;
-    padding: 2.5rem 1rem 2rem;
-    text-align: center;
+    margin: 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--app-border, #333);
+    background: var(--app-surface, #1a1a1a);
 }
 
-.copa-hero-bg {
-    position: absolute;
-    inset: 0;
-    background: var(--app-copa-gradient, linear-gradient(135deg, #8B1538 0%, #1E3A5F 50%, #D4AF37 100%));
-    opacity: 0.85;
-    z-index: 0;
-}
-
-.copa-hero-bg::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 2px 2px, var(--app-glass-border) 1px, transparent 0);
-    background-size: 32px 32px;
+/* Flag accent bar — top gradient (USA red + white + Mexico green) */
+.copa-flag-accent {
+    height: 4px;
+    background: linear-gradient(
+        90deg,
+        var(--app-danger, #ef4444) 0%,
+        var(--app-danger, #ef4444) 33%,
+        rgba(255, 255, 255, 0.9) 33%,
+        rgba(255, 255, 255, 0.9) 66%,
+        var(--app-success, #10b981) 66%,
+        var(--app-success, #10b981) 100%
+    );
 }
 
 .copa-hero-content {
     position: relative;
     z-index: 1;
-    max-width: 600px;
-    margin: 0 auto;
+    padding: 1.5rem 1rem 1.75rem;
+    text-align: center;
 }
 
+/* Host flags row */
 .copa-hero-flags {
     display: flex;
     justify-content: center;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    opacity: 0.8;
 }
 
 .copa-host-flag {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-family: var(--app-font-brand, 'Russo One', sans-serif);
-    font-size: 0.9rem;
-    color: var(--app-text-primary);
-    letter-spacing: 0.05em;
-    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
-}
-
-.copa-host-flag-emoji {
     font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
-    font-size: 1.75rem;
+    font-size: 1rem;
     line-height: 1;
-    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.3));
 }
 
+/* Title block */
 .copa-hero-title {
     font-family: var(--app-font-brand, 'Russo One', sans-serif);
     font-size: 2rem;
-    color: var(--app-text-primary);
-    letter-spacing: 0.08em;
+    color: var(--app-text-primary, #fff);
+    letter-spacing: -0.02em;
     margin: 0;
-    line-height: 1.1;
-    text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    line-height: 1;
+    text-transform: uppercase;
 }
 
 .copa-hero-subtitle {
     font-family: var(--app-font-brand, 'Russo One', sans-serif);
-    font-size: 3rem;
+    font-size: 2.5rem;
     color: var(--app-copa-secondary, #D4AF37);
     margin: 0;
     line-height: 1;
-    text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+    font-style: italic;
 }
 
 .copa-hero-local {
     font-family: var(--app-font-base, 'Inter', sans-serif);
-    font-size: 0.85rem;
-    color: var(--app-text-secondary);
-    margin: 0.5rem 0 1.25rem;
-    letter-spacing: 0.05em;
+    font-size: 0.65rem;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.5));
+    margin: 0.5rem 0 1.5rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
 }
 
-/* Countdown */
+/* Countdown — grid boxes */
 .copa-countdown {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 0.5rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
+    padding: 0 0.5rem;
 }
 
 .copa-countdown-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: rgba(0,0,0,0.35);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    min-width: 3.5rem;
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(212, 175, 55, 0.2);
+    padding: 0.75rem 0.5rem;
 }
 
 .copa-countdown-value {
-    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--app-text-primary);
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 1.75rem;
+    font-weight: 400;
+    color: var(--app-text-primary, #fff);
     line-height: 1.2;
 }
 
 .copa-countdown-label {
-    font-family: var(--app-font-base, 'Inter', sans-serif);
-    font-size: 0.6rem;
-    color: var(--app-text-muted);
+    font-size: 0.55rem;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.5));
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.2em;
+    margin-top: 0.15rem;
 }
 
+/* No separator needed in grid layout */
 .copa-countdown-sep {
-    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
-    font-size: 1.25rem;
-    color: var(--app-copa-secondary, #D4AF37);
-    opacity: 0.7;
+    display: none;
 }
 
+/* Abertura info */
 .copa-hero-abertura {
-    font-size: 0.8rem;
-    color: var(--app-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    font-size: 0.7rem;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.5));
     margin: 0;
 }
 
-.copa-hero-abertura-icon {
-    font-size: 0.9rem;
+.copa-hero-abertura .material-icons {
+    font-size: 0.85rem;
 }
 
 /* ═══════════════════════════════════════════════════
-   SECTIONS GENÉRICO
+   SECTIONS GENERICO
    ═══════════════════════════════════════════════════ */
 .copa-section {
-    padding: 1.25rem 1rem;
+    padding: 1.5rem 1rem 0;
 }
 
 .copa-section-header {
@@ -196,52 +191,127 @@
     align-items: center;
     gap: 0.5rem;
     margin-bottom: 1rem;
-    flex-wrap: wrap;
 }
 
-.copa-section-icon {
+.copa-section-icon .material-icons {
+    color: var(--app-copa-secondary, #D4AF37);
     font-size: 1.25rem;
 }
 
 .copa-section-title {
     font-family: var(--app-font-brand, 'Russo One', sans-serif);
-    font-size: 1.1rem;
-    color: var(--app-text-primary);
+    font-size: 1rem;
+    color: var(--app-text-primary, #fff);
     margin: 0;
     flex: 1;
+    text-transform: uppercase;
+    font-style: italic;
 }
 
 .copa-section-badge {
     font-family: var(--app-font-base, 'Inter', sans-serif);
-    font-size: 0.65rem;
+    font-size: 0.6rem;
+    font-weight: 600;
     color: var(--app-copa-secondary, #D4AF37);
-    background: rgba(212, 175, 55, 0.12);
-    border: 1px solid rgba(212, 175, 55, 0.25);
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.2);
     border-radius: 999px;
-    padding: 0.2rem 0.6rem;
+    padding: 0.15rem 0.5rem;
     white-space: nowrap;
 }
 
 .copa-loading-placeholder {
     text-align: center;
-    color: var(--app-text-muted, rgba(255,255,255,0.4));
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.4));
     font-size: 0.85rem;
     padding: 2rem 0;
 }
 
 /* ═══════════════════════════════════════════════════
-   JOGOS DO BRASIL
+   JOGOS DO BRASIL — Card-style individual matches
    ═══════════════════════════════════════════════════ */
 .copa-brasil-jogos {
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: 0.5rem;
+}
+
+/* Individual match card (Stitch-style) */
+.copa-match-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--app-surface, #1a1a1a);
+    border-radius: 0.75rem;
+    border: 1px solid var(--app-border, #333);
+    padding: 0.75rem;
+    transition: border-color 0.2s ease;
+}
+
+.copa-match-card:first-child {
+    border-color: rgba(212, 175, 55, 0.25);
+}
+
+.copa-match-card:not(:first-child) {
+    opacity: 0.8;
+}
+
+.copa-match-team {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.copa-match-team--away {
+    justify-content: flex-end;
+}
+
+.copa-match-team-sigla {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--app-text-primary, #fff);
+    white-space: nowrap;
+}
+
+.copa-match-team-flag {
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
+    font-size: 0.85rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.copa-match-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 1rem;
+    flex-shrink: 0;
+}
+
+.copa-match-horario {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: var(--app-copa-secondary, #D4AF37);
+    line-height: 1.2;
+}
+
+.copa-match-card:not(:first-child) .copa-match-horario {
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.5));
+}
+
+.copa-match-data {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.55rem;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.4));
+    line-height: 1;
 }
 
 /* ═══════════════════════════════════════════════════
-   FIXTURE ROWS — Compacto (LP version, estilo scoreboard)
-   Espelho das .copa-fx-* da home, adaptado para dados
-   estáticos (jogos futuros: horário + data no centro)
+   FIXTURE ROWS — Compacto (para dentro dos grupos)
    ═══════════════════════════════════════════════════ */
 .copa-lp-fx-table { display: flex; flex-direction: column; }
 
@@ -278,7 +348,7 @@
     text-overflow: ellipsis;
     max-width: 82px;
 }
-.copa-lp-fx-name.destaque { color: #fff; font-weight: 700; }
+.copa-lp-fx-name.destaque { color: var(--app-text-primary, #fff); font-weight: 700; }
 
 .copa-lp-fx-flag {
     font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
@@ -293,20 +363,20 @@
     gap: 1px; flex-shrink: 0;
 }
 .copa-lp-fx-time {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
     font-size: 10px; font-weight: 600;
     color: var(--app-copa-secondary, #D4AF37);
     line-height: 1;
 }
 .copa-lp-fx-date {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
     font-size: 10px;
     color: rgba(255, 255, 255, 0.32);
     line-height: 1;
 }
 
 .copa-lp-fx-round {
-    font-family: 'Russo One', sans-serif;
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
     font-size: 9px;
     color: rgba(255, 255, 255, 0.22);
     text-align: center;
@@ -315,108 +385,32 @@
     text-transform: uppercase;
 }
 
-.copa-jogo-brasil {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: var(--app-surface, #1a1a1a);
-    border-radius: 0.75rem;
-    padding: 0.85rem 1rem;
-    border: 1px solid rgba(212, 175, 55, 0.15);
-}
-
-.copa-jogo-rodada {
-    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
-    font-size: 0.6rem;
-    color: var(--app-copa-secondary, #D4AF37);
-    background: rgba(212, 175, 55, 0.12);
-    border-radius: 0.25rem;
-    padding: 0.15rem 0.4rem;
-    white-space: nowrap;
-}
-
-.copa-jogo-times {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    min-width: 0;
-}
-
-.copa-jogo-time {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    font-size: 0.85rem;
-    color: var(--app-text-primary);
-    min-width: 0;
-}
-
-.copa-jogo-time-nome {
-    font-family: var(--app-font-base, 'Inter', sans-serif);
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.copa-jogo-time-brasil .copa-jogo-time-nome {
-    color: var(--app-copa-secondary, #D4AF37);
-    font-weight: 700;
-}
-
-.copa-jogo-vs {
-    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
-    font-size: 0.7rem;
-    color: var(--app-text-muted, rgba(255,255,255,0.4));
-    flex-shrink: 0;
-}
-
-.copa-jogo-info {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.15rem;
-    flex-shrink: 0;
-}
-
-.copa-jogo-data {
-    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
-    font-size: 0.7rem;
-    color: var(--app-text-secondary);
-}
-
-.copa-jogo-local {
-    font-size: 0.6rem;
-    color: var(--app-text-muted, rgba(255,255,255,0.4));
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 10rem;
-}
-
 /* ═══════════════════════════════════════════════════
-   NOTÍCIAS
+   NOTICIAS — Filter chips + cards
    ═══════════════════════════════════════════════════ */
 .copa-noticias-tabs {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    gap: 0.35rem;
+    margin-bottom: 0.75rem;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     padding-bottom: 0.25rem;
+    scrollbar-width: none;
+}
+
+.copa-noticias-tabs::-webkit-scrollbar {
+    display: none;
 }
 
 .copa-tab {
     font-family: var(--app-font-base, 'Inter', sans-serif);
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     font-weight: 500;
-    color: var(--app-text-muted, rgba(255,255,255,0.5));
-    background: rgba(255,255,255,0.05);
-    border: 1px solid var(--participante-border);
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.5));
+    background: var(--app-surface, #1a1a1a);
+    border: 1px solid var(--app-border, #333);
     border-radius: 999px;
-    padding: 0.4rem 1rem;
+    padding: 0.4rem 0.85rem;
     white-space: nowrap;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -427,9 +421,10 @@
 }
 
 .copa-tab-active {
-    color: var(--app-text-primary);
-    background: rgba(139, 21, 56, 0.5);
-    border-color: var(--app-copa-primary, #8B1538);
+    color: var(--app-bg, #0a0a0a);
+    background: var(--app-copa-secondary, #D4AF37);
+    border-color: var(--app-copa-secondary, #D4AF37);
+    font-weight: 700;
 }
 
 .copa-noticias-lista {
@@ -442,23 +437,23 @@
     display: block;
     background: var(--app-surface, #1a1a1a);
     border-radius: 0.75rem;
-    padding: 0.85rem 1rem;
+    padding: 1rem;
     border: 1px solid var(--app-border, #333);
     text-decoration: none;
     transition: border-color 0.2s ease;
 }
 
 .copa-noticia-card:active {
-    border-color: var(--app-copa-primary, #8B1538);
+    border-color: var(--app-copa-secondary, #D4AF37);
 }
 
 .copa-noticia-titulo {
     font-family: var(--app-font-base, 'Inter', sans-serif);
     font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--app-text-primary);
-    line-height: 1.3;
-    margin-bottom: 0.35rem;
+    font-weight: 700;
+    color: var(--app-text-primary, #fff);
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -469,21 +464,21 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.7rem;
-    color: var(--app-text-muted, rgba(255,255,255,0.4));
+    font-size: 0.6rem;
 }
 
 .copa-noticia-fonte {
     color: var(--app-copa-secondary, #D4AF37);
-    font-weight: 500;
+    font-weight: 700;
+    text-transform: uppercase;
 }
 
 .copa-noticia-tempo {
-    opacity: 0.7;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.4));
 }
 
 /* ═══════════════════════════════════════════════════
-   GRUPOS (Accordion)
+   GRUPOS — Cards com overlapping flags (Stitch-style)
    ═══════════════════════════════════════════════════ */
 .copa-grupos-container {
     display: flex;
@@ -499,18 +494,19 @@
 }
 
 .copa-grupo-details[open] {
-    border-color: rgba(139, 21, 56, 0.4);
+    border-color: var(--app-copa-border, rgba(139, 21, 56, 0.3));
 }
 
+/* Brazil's group — highlighted border */
 .copa-grupo-details[data-grupo="C"] {
-    border-color: rgba(212, 175, 55, 0.35);
+    border-color: var(--app-copa-secondary, #D4AF37);
 }
 
 .copa-grupo-summary {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1rem;
+    gap: 0.75rem;
+    padding: 0.75rem;
     cursor: pointer;
     list-style: none;
     user-select: none;
@@ -520,169 +516,191 @@
     display: none;
 }
 
+/* Letter badge */
 .copa-grupo-letra {
     font-family: var(--app-font-brand, 'Russo One', sans-serif);
-    font-size: 0.9rem;
-    color: var(--app-copa-secondary, #D4AF37);
-    background: rgba(212, 175, 55, 0.12);
-    border-radius: 0.35rem;
-    width: 2rem;
-    height: 2rem;
+    font-size: 0.8rem;
+    width: 1.5rem;
+    height: 1.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    border-radius: 0.25rem;
 }
 
-.copa-grupo-selecoes-preview {
-    flex: 1;
+/* Default letter badge style */
+.copa-grupo-letra--default {
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.5));
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Brazil group (C) letter badge — gold highlight */
+.copa-grupo-letra--brasil {
+    color: var(--app-bg, #0a0a0a);
+    background: var(--app-copa-secondary, #D4AF37);
+}
+
+/* Overlapping flags container */
+.copa-grupo-flags-stack {
     display: flex;
-    gap: 0.35rem;
-    align-items: center;
-    overflow: hidden;
+    flex-shrink: 0;
 }
 
-.copa-grupo-selecao-flag {
+.copa-grupo-flag-item {
     font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
-    font-size: 1.1rem;
+    font-size: 1rem;
+    line-height: 1;
+    margin-left: -0.15rem;
 }
 
-.copa-grupo-selecao-name {
-    font-size: 0.75rem;
-    color: var(--app-text-muted);
+.copa-grupo-flag-item:first-child {
+    margin-left: 0;
+}
+
+/* Team names text */
+.copa-grupo-nomes {
+    flex: 1;
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.6));
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.copa-grupo-arrow {
-    font-size: 0.75rem;
-    color: var(--app-text-muted, rgba(255,255,255,0.4));
-    transition: transform 0.2s ease;
-    flex-shrink: 0;
-}
-
-.copa-grupo-details[open] .copa-grupo-arrow {
-    transform: rotate(90deg);
-}
-
-/* Conteúdo do grupo expandido */
-.copa-grupo-content {
-    padding: 0 1rem 1rem;
-}
-
-.copa-grupo-jogo {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--app-glass-border);
-    font-size: 0.8rem;
-}
-
-.copa-grupo-jogo:last-child {
-    border-bottom: none;
-}
-
-.copa-grupo-jogo-rodada {
-    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
-    font-size: 0.55rem;
-    color: var(--app-text-muted, rgba(255,255,255,0.4));
-    width: 1.5rem;
-    flex-shrink: 0;
-}
-
-.copa-grupo-jogo-times {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
     min-width: 0;
 }
 
-.copa-grupo-jogo-team {
-    font-size: 0.8rem;
-    color: rgba(255,255,255,0.85);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+/* Expand/collapse arrow */
+.copa-grupo-arrow .material-icons {
+    font-size: 1.1rem;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.4));
+    transition: transform 0.2s ease;
 }
 
-.copa-grupo-jogo-team-brasil {
+.copa-grupo-details[open] .copa-grupo-arrow .material-icons {
+    transform: rotate(180deg);
+}
+
+/* Group content (expanded games) */
+.copa-grupo-content {
+    padding: 0 0.75rem 0.75rem;
+}
+
+.copa-grupo-content .copa-grupo-game {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.6rem;
+    margin-bottom: 0.35rem;
+    font-size: 0.6rem;
+}
+
+.copa-grupo-content .copa-grupo-game:last-child {
+    margin-bottom: 0;
+}
+
+.copa-grupo-game-team {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7);
+    min-width: 4rem;
+}
+
+.copa-grupo-game-team--away {
+    text-align: right;
+}
+
+.copa-grupo-game-team--brasil {
     color: var(--app-copa-secondary, #D4AF37);
     font-weight: 600;
 }
 
-.copa-grupo-jogo-vs {
-    font-size: 0.65rem;
-    color: var(--app-text-muted, rgba(255,255,255,0.3));
-    flex-shrink: 0;
-}
-
-.copa-grupo-jogo-info {
+.copa-grupo-game-info {
     font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
-    font-size: 0.65rem;
-    color: rgba(255,255,255,0.5);
-    text-align: right;
+    font-weight: 600;
+    color: var(--app-copa-secondary, #D4AF37);
+    text-align: center;
     flex-shrink: 0;
-    white-space: nowrap;
 }
 
 /* ═══════════════════════════════════════════════════
-   FASE ELIMINATÓRIA (Timeline)
+   FASE ELIMINATORIA — Timeline minimal (Stitch-style)
    ═══════════════════════════════════════════════════ */
 .copa-timeline {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
+    position: relative;
     padding-left: 1.5rem;
-    border-left: 2px solid rgba(212, 175, 55, 0.2);
+}
+
+/* Vertical line */
+.copa-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.25rem;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    width: 2px;
+    background: var(--app-border, #333);
 }
 
 .copa-timeline-item {
     position: relative;
-    padding: 0.75rem 0 0.75rem 1.25rem;
+    padding: 0 0 1.5rem 1.25rem;
 }
 
+.copa-timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+/* Timeline dot */
 .copa-timeline-item::before {
     content: '';
     position: absolute;
-    left: -1.85rem;
-    top: 1rem;
-    width: 0.65rem;
-    height: 0.65rem;
-    background: var(--app-copa-secondary, #D4AF37);
+    left: -1.2rem;
+    top: 0.25rem;
+    width: 0.6rem;
+    height: 0.6rem;
+    background: var(--app-text-muted, rgba(255, 255, 255, 0.4));
     border-radius: 50%;
     border: 2px solid var(--app-bg, #0a0a0a);
 }
 
+/* Final item — gold dot with glow */
 .copa-timeline-item-final::before {
-    width: 0.85rem;
-    height: 0.85rem;
-    left: -1.95rem;
-    box-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
+    background: var(--app-copa-secondary, #D4AF37);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+    width: 0.7rem;
+    height: 0.7rem;
+    left: -1.25rem;
 }
 
 .copa-timeline-fase {
     font-family: var(--app-font-brand, 'Russo One', sans-serif);
-    font-size: 0.9rem;
-    color: var(--app-text-primary);
-    margin-bottom: 0.2rem;
+    font-size: 0.85rem;
+    color: var(--app-text-primary, #fff);
+    margin-bottom: 0.15rem;
+}
+
+.copa-timeline-item-final .copa-timeline-fase {
+    color: var(--app-copa-secondary, #D4AF37);
+    font-style: italic;
 }
 
 .copa-timeline-info {
     font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
-    font-size: 0.7rem;
-    color: var(--app-text-muted, rgba(255,255,255,0.4));
+    font-size: 0.6rem;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.5));
+    text-transform: uppercase;
 }
 
 .copa-timeline-jogos {
-    font-size: 0.65rem;
-    color: rgba(255,255,255,0.3);
+    display: none; /* Simplificado no novo design */
 }
 
 /* ═══════════════════════════════════════════════════
-   SEDES E ESTÁDIOS — FLIP CARDS 3D
+   SEDES E ESTADIOS — FLIP CARDS 3D
    ═══════════════════════════════════════════════════ */
 .copa-sedes-grid {
     display: grid;
@@ -705,7 +723,7 @@
     transform: rotateY(180deg);
 }
 
-/* Faces compartilham posição absoluta */
+/* Faces compartilham posicao absoluta */
 .copa-sede-card-front,
 .copa-sede-card-back {
     position: absolute;
@@ -716,7 +734,7 @@
     overflow: hidden;
 }
 
-/* ── FRENTE ── */
+/* -- FRENTE -- */
 .copa-sede-card-front {
     background: var(--app-surface, #1a1a1a);
     border: 1px solid var(--app-border, #333);
@@ -731,7 +749,7 @@
     border-color: rgba(212, 175, 55, 0.5);
 }
 
-/* Header: flag + país + ícone câmera */
+/* Header: flag + pais + icone camera */
 .copa-sede-header {
     display: flex;
     align-items: center;
@@ -773,13 +791,13 @@
 .copa-sede-cidade {
     font-family: var(--app-font-base, 'Inter', sans-serif);
     font-size: 0.72rem;
-    color: var(--app-text-primary);
+    color: var(--app-text-primary, #fff);
     font-weight: 500;
 }
 
 .copa-sede-estadio {
     font-size: 0.62rem;
-    color: var(--app-text-muted, rgba(255,255,255,0.4));
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.4));
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -788,14 +806,14 @@
 .copa-sede-capacidade {
     font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
     font-size: 0.58rem;
-    color: rgba(255,255,255,0.3);
+    color: rgba(255, 255, 255, 0.3);
     margin-top: auto;
 }
 
-/* ── VERSO (foto) ── */
+/* -- VERSO (foto) -- */
 .copa-sede-card-back {
     transform: rotateY(180deg);
-    background: #0a0a0a;
+    background: var(--app-bg, #0a0a0a);
 }
 
 .copa-sede-back-foto {
@@ -811,7 +829,7 @@
     filter: brightness(0.88);
 }
 
-/* Overlay gradiente no rodapé */
+/* Overlay gradiente no rodape */
 .copa-sede-back-overlay {
     position: absolute;
     bottom: 0;
@@ -830,7 +848,7 @@
 .copa-sede-back-nome {
     font-family: var(--app-font-brand, 'Russo One', sans-serif);
     font-size: 0.65rem;
-    color: #fff;
+    color: var(--app-text-primary, #fff);
     line-height: 1.2;
     white-space: nowrap;
     overflow: hidden;
@@ -843,7 +861,7 @@
     color: var(--app-copa-secondary, #D4AF37);
 }
 
-/* Botão "virar de volta" no canto superior direito do verso */
+/* Botao "virar de volta" no canto superior direito do verso */
 .copa-sede-back-flip-hint {
     position: absolute;
     top: 0.35rem;
@@ -874,9 +892,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg,
-        rgba(139, 21, 56, 0.25) 0%,
-        rgba(30, 58, 95, 0.25) 100%);
+    background: var(--app-copa-gradient-subtle, linear-gradient(135deg, rgba(139, 21, 56, 0.2) 0%, rgba(30, 58, 95, 0.15) 100%));
     border: 1px solid var(--app-border, #333);
 }
 
@@ -891,12 +907,12 @@
 .copa-divider {
     border: none;
     height: 1px;
-    background: var(--app-glass-border);
+    background: var(--app-border, #333);
     margin: 0.5rem 0;
 }
 
 /* ═══════════════════════════════════════════════════
-   MODAL - FOTO ESTÁDIO
+   MODAL - FOTO ESTADIO
    ═══════════════════════════════════════════════════ */
 .copa-modal {
     position: fixed;
@@ -958,7 +974,7 @@
     background: rgba(0, 0, 0, 0.6);
     border: none;
     border-radius: 50%;
-    color: #fff;
+    color: var(--app-text-primary, #fff);
     cursor: pointer;
     transition: background 0.2s;
 }
@@ -976,7 +992,7 @@
     width: 100%;
     max-height: 60vh;
     overflow: hidden;
-    background: linear-gradient(135deg, rgba(139, 21, 56, 0.3) 0%, rgba(30, 58, 95, 0.3) 100%);
+    background: var(--app-copa-gradient-subtle, linear-gradient(135deg, rgba(139, 21, 56, 0.2) 0%, rgba(30, 58, 95, 0.15) 100%));
 }
 
 .copa-modal-foto {
@@ -993,7 +1009,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, rgba(139, 21, 56, 0.4) 0%, rgba(30, 58, 95, 0.4) 100%);
+    background: var(--app-copa-gradient-subtle, linear-gradient(135deg, rgba(139, 21, 56, 0.2) 0%, rgba(30, 58, 95, 0.15) 100%));
 }
 
 .copa-modal-fallback .material-icons {
@@ -1013,7 +1029,7 @@
 .copa-modal-nome {
     font-family: var(--app-font-brand, 'Russo One', sans-serif);
     font-size: 1.1rem;
-    color: var(--app-text-primary);
+    color: var(--app-text-primary, #fff);
     margin: 0 0 0.25rem;
 }
 

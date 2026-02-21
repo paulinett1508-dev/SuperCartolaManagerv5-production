@@ -123,19 +123,45 @@ function renderizarCountdown() {
 }
 
 // ═══════════════════════════════════════════════════
-// JOGOS DO BRASIL
+// JOGOS DO BRASIL — Card-style (Stitch design)
 // ═══════════════════════════════════════════════════
+
+// Siglas de selecoes (3 letras)
+const SIGLAS = {
+    'Brasil': 'BRA', 'Marrocos': 'MAR', 'Haiti': 'HAI', 'Escocia': 'ESC',
+    'Mexico': 'MEX', 'Coreia do Sul': 'COR', 'Africa do Sul': 'AFS',
+    'Canada': 'CAN', 'Suica': 'SUI', 'Catar': 'CAT',
+    'Estados Unidos': 'EUA', 'Paraguai': 'PAR', 'Australia': 'AUS',
+    'Alemanha': 'ALE', 'Costa do Marfim': 'CDM', 'Equador': 'EQU', 'Curacao': 'CUR',
+    'Holanda': 'HOL', 'Japao': 'JAP', 'Tunisia': 'TUN',
+    'Belgica': 'BEL', 'Egito': 'EGI', 'Ira': 'IRA', 'Nova Zelandia': 'NZL',
+    'Espanha': 'ESP', 'Uruguai': 'URU', 'Arabia Saudita': 'ARS', 'Cabo Verde': 'CPV',
+    'Franca': 'FRA', 'Senegal': 'SEN', 'Noruega': 'NOR',
+    'Argentina': 'ARG', 'Argelia': 'ARG', 'Austria': 'AUT', 'Jordania': 'JOR',
+    'Portugal': 'POR', 'Colombia': 'COL', 'Uzbequistao': 'UZB',
+    'Inglaterra': 'ING', 'Croacia': 'CRO', 'Gana': 'GAN', 'Panama': 'PAN',
+};
+
+function getSigla(nome) {
+    if (!nome) return '???';
+    // Tenta match direto, depois sem acentos
+    if (SIGLAS[nome]) return SIGLAS[nome];
+    const semAcento = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    if (SIGLAS[semAcento]) return SIGLAS[semAcento];
+    // Fallback: primeiras 3 letras
+    return nome.substring(0, 3).toUpperCase();
+}
 
 /**
  * Renderiza uma linha compacta de fixture (scoreboard style)
- * Usado em Jogos do Brasil e Tabela de Grupos da LP.
+ * Usado dentro dos grupos expandidos.
  */
 function renderizarLpFxRow(jogo) {
     const mandanteIsBrasil = jogo.mandante === 'Brasil';
     const visitanteIsBrasil = jogo.visitante === 'Brasil';
     const isBrasil = mandanteIsBrasil || visitanteIsBrasil;
 
-    const dataFmt = formatarData(jogo.data); // ex: "14/jun"
+    const dataFmt = formatarData(jogo.data);
 
     return `
     <div class="copa-lp-fx-row${isBrasil ? ' brasil-jogo' : ''}">
@@ -155,6 +181,30 @@ function renderizarLpFxRow(jogo) {
     </div>`;
 }
 
+/**
+ * Renderiza card individual de match (Stitch-style)
+ * Usado na secao Jogos do Brasil.
+ */
+function renderizarMatchCard(jogo) {
+    const dataFmt = formatarDataCurta(jogo.data);
+
+    return `
+    <div class="copa-match-card">
+        <div class="copa-match-team">
+            <span class="copa-match-team-sigla">${getSigla(jogo.mandante)}</span>
+            <span class="copa-match-team-flag">${getBandeira(jogo.mandante)}</span>
+        </div>
+        <div class="copa-match-center">
+            <span class="copa-match-horario">${jogo.horarioBR || 'TBD'}</span>
+            <span class="copa-match-data">${dataFmt}</span>
+        </div>
+        <div class="copa-match-team copa-match-team--away">
+            <span class="copa-match-team-flag">${getBandeira(jogo.visitante)}</span>
+            <span class="copa-match-team-sigla">${getSigla(jogo.visitante)}</span>
+        </div>
+    </div>`;
+}
+
 function renderizarJogosBrasil() {
     const container = document.getElementById('copa-brasil-jogos');
     if (!container || !dadosCopa?.jogosFaseGrupos) return;
@@ -164,11 +214,11 @@ function renderizarJogosBrasil() {
     );
 
     if (!jogosBrasil.length) {
-        container.innerHTML = '<p class="copa-loading-placeholder">Jogos do Brasil ainda não definidos</p>';
+        container.innerHTML = '<p class="copa-loading-placeholder">Jogos do Brasil ainda nao definidos</p>';
         return;
     }
 
-    container.innerHTML = `<div class="copa-lp-fx-table">${jogosBrasil.map(renderizarLpFxRow).join('')}</div>`;
+    container.innerHTML = jogosBrasil.map(renderizarMatchCard).join('');
 }
 
 // ═══════════════════════════════════════════════════
@@ -243,23 +293,40 @@ function renderizarGrupos() {
         const isBrasil = letra === 'C';
         const jogosDoGrupo = jogos.filter(j => j.grupo === letra);
 
-        // Preview: bandeiras das seleções
-        const flagsPreview = selecoes.map(s => getBandeira(s)).join(' ');
+        // Overlapping flags stack
+        const flagsStack = selecoes.map(s =>
+            `<span class="copa-grupo-flag-item">${getBandeira(s)}</span>`
+        ).join('');
+
+        // Nomes truncados (ex: "Brasil, Marrocos, Haiti, Esc...")
+        const nomesTexto = selecoes.map(s => {
+            const nome = s.length > 8 ? s.substring(0, 6) + '...' : s;
+            return nome;
+        }).join(', ');
+
+        // Jogos formatados para dentro do grupo expandido (Stitch-style)
+        const jogosHtml = jogosDoGrupo.map(jogo => {
+            const mandanteIsBrasil = jogo.mandante === 'Brasil';
+            const visitanteIsBrasil = jogo.visitante === 'Brasil';
+            const dataFmt = formatarDataCurta(jogo.data);
+            return `
+            <div class="copa-grupo-game">
+                <span class="copa-grupo-game-team${mandanteIsBrasil ? ' copa-grupo-game-team--brasil' : ''}">${jogo.mandante}</span>
+                <span class="copa-grupo-game-info">${dataFmt} &bull; ${jogo.horarioBR || 'TBD'}</span>
+                <span class="copa-grupo-game-team copa-grupo-game-team--away${visitanteIsBrasil ? ' copa-grupo-game-team--brasil' : ''}">${jogo.visitante}</span>
+            </div>`;
+        }).join('');
 
         return `
         <details class="copa-grupo-details" data-grupo="${letra}" ${isBrasil ? 'open' : ''}>
             <summary class="copa-grupo-summary">
-                <span class="copa-grupo-letra">${letra}</span>
-                <div class="copa-grupo-selecoes-preview">
-                    <span class="copa-grupo-selecao-flag">${flagsPreview}</span>
-                    <span class="copa-grupo-selecao-name">${selecoes.join(' · ')}</span>
-                </div>
-                <span class="copa-grupo-arrow">&#9654;</span>
+                <span class="copa-grupo-letra ${isBrasil ? 'copa-grupo-letra--brasil' : 'copa-grupo-letra--default'}">${letra}</span>
+                <div class="copa-grupo-flags-stack">${flagsStack}</div>
+                <span class="copa-grupo-nomes">${nomesTexto}</span>
+                <span class="copa-grupo-arrow"><span class="material-icons">${isBrasil ? 'expand_less' : 'chevron_right'}</span></span>
             </summary>
             <div class="copa-grupo-content">
-                <div class="copa-lp-fx-table" style="padding: 0 4px;">
-                    ${jogosDoGrupo.map(renderizarLpFxRow).join('')}
-                </div>
+                ${jogosHtml}
             </div>
         </details>
         `;
@@ -279,17 +346,14 @@ function renderizarFaseEliminatoria() {
     container.innerHTML = fases.map(([nome, info]) => {
         const isFinal = nome === 'Final';
         const datas = info.data
-            ? formatarData(info.data)
-            : `${formatarData(info.inicio)} a ${formatarData(info.fim)}`;
+            ? formatarDataCurta(info.data)
+            : `${formatarDataCurta(info.inicio)} A ${formatarDataCurta(info.fim)}`;
+        const jogosInfo = `${info.jogos} ${info.jogos === 1 ? 'JOGO' : 'JOGOS'}`;
 
         return `
         <div class="copa-timeline-item ${isFinal ? 'copa-timeline-item-final' : ''}">
             <div class="copa-timeline-fase">${nome}</div>
-            <div class="copa-timeline-info">
-                ${datas}
-                ${info.estadio ? ` · ${info.estadio}` : ''}
-            </div>
-            <div class="copa-timeline-jogos">${info.jogos} ${info.jogos === 1 ? 'jogo' : 'jogos'}</div>
+            <div class="copa-timeline-info">${datas} &bull; ${jogosInfo}</div>
         </div>
         `;
     }).join('');
@@ -465,6 +529,16 @@ function formatarData(dataStr) {
     const [ano, mes, dia] = dataStr.split('-');
     const meses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
     return `${parseInt(dia)}/${meses[parseInt(mes) - 1]}`;
+}
+
+/**
+ * Formato curto para match cards: "13 JUN"
+ */
+function formatarDataCurta(dataStr) {
+    if (!dataStr) return '';
+    const [ano, mes, dia] = dataStr.split('-');
+    const meses = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+    return `${parseInt(dia)} ${meses[parseInt(mes) - 1]}`;
 }
 
 function escapeHtml(str) {
