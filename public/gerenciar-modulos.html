@@ -23,10 +23,14 @@
 
             <main class="app-main modulos-page">
                 <div class="modulos-content">
-                    <!-- Header -->
+                    <!-- Header Premium -->
                     <header class="modulos-header">
                         <div class="modulos-header-info">
-                            <h1>Gerenciar Módulos</h1>
+                            <h1>
+                                <span class="material-icons modulos-header-icon">widgets</span>
+                                Gerenciar Modulos
+                                <span class="modulos-version-badge">v2.0</span>
+                            </h1>
                             <p>Liga: <span class="liga-name" id="ligaNome">Carregando...</span></p>
                         </div>
                         <a href="gerenciar.html" class="btn-voltar">
@@ -34,6 +38,46 @@
                             Voltar
                         </a>
                     </header>
+
+                    <!-- Stats Bar -->
+                    <div class="modulos-stats-bar" id="modulosStatsBar">
+                        <div class="modulos-stat-chip">
+                            <div class="modulos-stat-icon" style="background: var(--color-primary-muted);">
+                                <span class="material-icons" style="color: var(--color-primary);">extension</span>
+                            </div>
+                            <div class="modulos-stat-content">
+                                <span class="modulos-stat-value" id="statTotal">--</span>
+                                <span class="modulos-stat-label">Total</span>
+                            </div>
+                        </div>
+                        <div class="modulos-stat-chip">
+                            <div class="modulos-stat-icon" style="background: var(--color-success-muted);">
+                                <span class="material-icons" style="color: var(--color-success);">toggle_on</span>
+                            </div>
+                            <div class="modulos-stat-content">
+                                <span class="modulos-stat-value" id="statAtivos">--</span>
+                                <span class="modulos-stat-label">Ativos</span>
+                            </div>
+                        </div>
+                        <div class="modulos-stat-chip">
+                            <div class="modulos-stat-icon" style="background: var(--color-primary-muted);">
+                                <span class="material-icons" style="color: var(--color-primary);">lock</span>
+                            </div>
+                            <div class="modulos-stat-content">
+                                <span class="modulos-stat-value" id="statBase">--</span>
+                                <span class="modulos-stat-label">Base</span>
+                            </div>
+                        </div>
+                        <div class="modulos-stat-chip">
+                            <div class="modulos-stat-icon" style="background: var(--color-info-muted);">
+                                <span class="material-icons" style="color: var(--color-info);">schedule</span>
+                            </div>
+                            <div class="modulos-stat-content">
+                                <span class="modulos-stat-value" id="statPlanejados">--</span>
+                                <span class="modulos-stat-label">Em Breve</span>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Status Message -->
                     <div id="statusMessage" class="status-message"></div>
@@ -364,8 +408,8 @@
                                 <span class="modulo-title">
                                     ${config.titulo}
                                     ${config.base ? '<span class="badge-base">Base</span>' : ''}
-                                    ${config.status === 'planned' ? '<span class="badge-planned" style="background: #3b82f6; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; margin-left: 6px;">Em Breve</span>' : ''}
-                                    ${config.hasWizard === false && !config.base ? '<span class="badge-no-config" style="background: #6b7280; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; margin-left: 6px;">Sem Config</span>' : ''}
+                                    ${config.status === 'planned' ? '<span class="badge-planned">Em Breve</span>' : ''}
+                                    ${config.hasWizard === false && !config.base ? '<span class="badge-no-config">Sem Config</span>' : ''}
                                 </span>
                             </div>
                             <label class="toggle-switch" onclick="event.stopPropagation();">
@@ -378,9 +422,9 @@
                         </div>
                         <div class="modulo-desc">
                             ${config.descricao}
-                            ${config.base ? ' <span class="badge-always-active" style="color:#22c55e; font-weight: 600;">✓ Sempre Ativo</span>' : ''}
-                            ${config.status === 'planned' ? '<br><small style="color: #60a5fa; font-size: 0.75rem; margin-top: 4px; display: inline-block;">🚀 Módulo em desenvolvimento</small>' : ''}
-                            ${config.hasWizard === false && !config.base ? '<br><small style="color: #9ca3af; font-size: 0.75rem; margin-top: 4px; display: inline-block;">⚙️ Usa configurações padrão</small>' : ''}
+                            ${config.base ? ' <span class="badge-always-active"><span class="material-icons" style="font-size: 12px; vertical-align: middle;">check_circle</span> Sempre Ativo</span>' : ''}
+                            ${config.status === 'planned' ? '<br><small class="modulo-planned-note"><span class="material-icons" style="font-size: 14px; vertical-align: middle;">rocket_launch</span> Modulo em desenvolvimento</small>' : ''}
+                            ${config.hasWizard === false && !config.base ? '<br><small class="modulo-noconfig-note"><span class="material-icons" style="font-size: 14px; vertical-align: middle;">settings</span> Usa configuracoes padrao</small>' : ''}
                         </div>
                     `;
 
@@ -411,6 +455,22 @@
                         opcionaisGrid.appendChild(card);
                     }
                 });
+
+                // Atualizar stats bar
+                const configs = Object.entries(MODULOS_CONFIG);
+                const totalCount = configs.length;
+                const baseCount = configs.filter(([,c]) => c.base).length;
+                const plannedCount = configs.filter(([,c]) => c.status === 'planned').length;
+                const activeCount = configs.filter(([key, c]) => c.base || modulosState[key] !== false).length;
+
+                const elTotal = document.getElementById('statTotal');
+                const elAtivos = document.getElementById('statAtivos');
+                const elBase = document.getElementById('statBase');
+                const elPlanejados = document.getElementById('statPlanejados');
+                if (elTotal) elTotal.textContent = totalCount;
+                if (elAtivos) elAtivos.textContent = activeCount;
+                if (elBase) elBase.textContent = baseCount;
+                if (elPlanejados) elPlanejados.textContent = plannedCount;
             }
 
             async function salvarModulos() {
