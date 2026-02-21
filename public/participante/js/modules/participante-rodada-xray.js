@@ -617,14 +617,17 @@ function escapeHtml(str) {
 }
 
 /**
- * Inicializa seções colapsáveis — todas começam fechadas,
- * usuário clica no título para expandir/recolher.
+ * Inicializa seções colapsáveis — todas começam ABERTAS,
+ * usuário clica no título para recolher/expandir.
  */
 function inicializarCollapsible() {
     const toggles = document.querySelectorAll('.xray-toggle');
     toggles.forEach(toggle => {
-        if (toggle._xrayToggleInit) return; // evitar duplicatas
+        if (toggle._xrayToggleInit) return;
         toggle._xrayToggleInit = true;
+
+        // Default: expandido
+        toggle.classList.add('expanded');
 
         toggle.addEventListener('click', () => {
             const targetId = toggle.dataset.target;
