@@ -54,6 +54,9 @@ export async function inicializarRodadaXrayParticipante(payload) {
             });
         }
 
+        // Setup collapsible sections
+        inicializarCollapsible();
+
         // Carregar dados
         await carregarRaioX();
 
@@ -611,6 +614,33 @@ function escapeHtml(str) {
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
+}
+
+/**
+ * Inicializa seções colapsáveis — todas começam fechadas,
+ * usuário clica no título para expandir/recolher.
+ */
+function inicializarCollapsible() {
+    const toggles = document.querySelectorAll('.xray-toggle');
+    toggles.forEach(toggle => {
+        if (toggle._xrayToggleInit) return; // evitar duplicatas
+        toggle._xrayToggleInit = true;
+
+        toggle.addEventListener('click', () => {
+            const targetId = toggle.dataset.target;
+            const target = targetId ? document.getElementById(targetId) : null;
+            if (!target) return;
+
+            const isExpanded = toggle.classList.contains('expanded');
+            if (isExpanded) {
+                target.style.display = 'none';
+                toggle.classList.remove('expanded');
+            } else {
+                target.style.display = '';
+                toggle.classList.add('expanded');
+            }
+        });
+    });
 }
 
 export default { inicializarRodadaXrayParticipante };
