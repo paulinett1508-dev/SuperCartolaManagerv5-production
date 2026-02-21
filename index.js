@@ -354,6 +354,18 @@ app.get(["/participante/", "/participante/index.html"], async (req, res, next) =
 
     res.send(html);
   } catch (error) {
+    // EIO transiente pós-deploy: retry uma vez após 500ms
+    if (error.code === 'EIO') {
+      try {
+        await new Promise(r => setTimeout(r, 500));
+        const htmlPath = path.join(__dirname, "public", "participante", "index.html");
+        const html = await readFile(htmlPath, "utf8");
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        return res.send(html);
+      } catch (_) {
+        return res.status(503).send(getRestartingHtml());
+      }
+    }
     // Fallback: servir arquivo original
     next();
   }
@@ -649,13 +661,50 @@ app.use("/api/*", (req, res) => {
 
 // Depois: servir o frontend para qualquer outra rota
 // ✅ FIX: Não servir HTML para requests de assets estáticos (evita MIME type errors)
+// ✅ FIX EIO: Retry + página amigável para erros de I/O pós-republish
 app.get("*", (req, res) => {
   const ext = path.extname(req.path).toLowerCase();
   if (ext && ext !== '.html') {
     return res.status(404).end();
   }
-  res.sendFile(path.resolve("public/index.html"));
+  const htmlPath = path.resolve("public/index.html");
+  res.sendFile(htmlPath, (err) => {
+    if (!err) return;
+    // Retry uma vez após 500ms (EIO é transiente pós-deploy)
+    setTimeout(() => {
+      res.sendFile(htmlPath, (retryErr) => {
+        if (!retryErr) return;
+        originalConsole.error(`[CATCH-ALL] sendFile falhou após retry:`, retryErr.code || retryErr.message);
+        res.status(503).send(getRestartingHtml());
+      });
+    }, 500);
+  });
 });
+
+// ====================================================================
+// 🛡️ PÁGINA AMIGÁVEL PARA ERROS DE I/O PÓS-DEPLOY
+// ====================================================================
+function getRestartingHtml() {
+  return `<!DOCTYPE html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="refresh" content="4">
+<title>Atualizando...</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#111827;color:#f3f4f6;font-family:'Inter',-apple-system,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh}
+.c{text-align:center;padding:2rem}
+h1{font-family:'Russo One',sans-serif;font-size:1.5rem;margin-bottom:.75rem;color:#60a5fa}
+p{font-size:.95rem;color:#9ca3af;margin-bottom:1.5rem}
+.spinner{width:36px;height:36px;border:3px solid #374151;border-top-color:#60a5fa;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style></head>
+<body><div class="c">
+<div class="spinner"></div>
+<h1 style="margin-top:1.25rem">Servidor reiniciando</h1>
+<p>Uma atualização foi aplicada. A pagina sera recarregada automaticamente.</p>
+</div></body></html>`;
+}
 
 // ====================================================================
 // 🛡️ MIDDLEWARE DE ERRO GLOBAL (HARDENING DE PRODUÇÃO)
@@ -666,7 +715,14 @@ app.use((err, req, res, next) => {
     // Log interno para monitoramento (mantém console.error original)
     originalConsole.error(`[ERROR] ${req.method} ${req.path}:`, err.message);
 
-    // Resposta genérica ao cliente
+    // ✅ FIX EIO: Para requisições não-API com erro de I/O, retornar HTML amigável com auto-refresh
+    const isApiRequest = req.path.startsWith('/api/');
+    const isTransientIO = err.code === 'EIO' || err.code === 'ENOENT' || err.code === 'EMFILE';
+    if (!isApiRequest && isTransientIO) {
+      return res.status(503).send(getRestartingHtml());
+    }
+
+    // Resposta genérica ao cliente (rotas API)
     return res.status(err.status || 500).json({
       msg: "Erro interno",
       code: err.code || "INTERNAL_ERROR"
