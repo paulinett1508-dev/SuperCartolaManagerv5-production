@@ -280,7 +280,12 @@
 }
 .copa-lp-fx-name.destaque { color: #fff; font-weight: 700; }
 
-.copa-lp-fx-flag { font-size: 13px; flex-shrink: 0; line-height: 1; }
+.copa-lp-fx-flag {
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
+    font-size: 14px;
+    flex-shrink: 0;
+    line-height: 1;
+}
 
 .copa-lp-fx-score {
     display: flex; flex-direction: column;
@@ -538,6 +543,7 @@
 }
 
 .copa-grupo-selecao-flag {
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
     font-size: 1.1rem;
 }
 
