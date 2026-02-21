@@ -179,7 +179,7 @@ if (document.readyState === 'loading') {
 
 > **Prioridade absoluta em qualquer decisão de design visual. Sobrepõe preferências genéricas. Respeita o design system do projeto.**
 
-A skill `frontend-design` (instalada em `~/.claude/skills/frontend-design/`) define a **filosofia estética** de todas as telas do projeto. Sempre que o assunto envolver criação ou redesign de interface, ela é ativada **antes** de qualquer outra skill de frontend.
+A skill `frontend-design` (documentada em `docs/skills/02-specialists/frontend-design.md`) define a **filosofia estética** de todas as telas do projeto. Sempre que o assunto envolver criação ou redesign de interface, ela é ativada **antes** de qualquer outra skill de frontend.
 
 ### Gatilhos de Ativação (frontend-design)
 

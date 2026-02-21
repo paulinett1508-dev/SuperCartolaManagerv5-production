@@ -2,6 +2,33 @@
 
 Este diretório contém todas as **skills** (agentes especializados) do Super Cartola Manager, organizadas por categoria funcional.
 
+---
+
+## 🚨 REGRA ABSOLUTA: AGNOSTICISMO DE AMBIENTE
+
+**PRIORIDADE MÁXIMA** — Skills DEVEM ser portáteis entre ambientes.
+
+### Proibido
+
+- ❌ Criar skills em `~/.claude/skills/`
+- ❌ Criar skills em `~/.agents/skills/`
+- ❌ Criar skills fora do repositório do projeto
+- ❌ Referenciar paths externos no CLAUDE.md
+
+### Obrigatório
+
+- ✅ Todas skills em `/docs/skills/[categoria]/`
+- ✅ Versionadas no git
+- ✅ Funcionam no VS Code, Antigravity, Terminal, Web
+
+### Por quê?
+
+O codebase deve funcionar em **QUALQUER ambiente** Claude Code sem dependências de arquivos locais do usuário. Se você abrir o projeto em outra máquina ou IDE, TODAS as skills devem estar disponíveis.
+
+**Ao criar nova skill:** Use `skill-creator` que já inclui esta regra como prioridade máxima.
+
+---
+
 ## 📁 Estrutura de Diretórios
 
 ```
@@ -41,6 +68,8 @@ Agentes com expertise profunda em áreas específicas:
 
 | Skill | Expertise | Quando Usar |
 |-------|-----------|-------------|
+| **frontend-design** | Autoridade Estética Máxima | "redesign", "nova tela", "visual do app", "deixar bonito" |
+| **anti-frankenstein** | Governança CSS/Frontend | "já existe esse CSS?", "antes de criar CSS", "blindar frontend" |
 | **code-inspector** | Auditoria Sênior de Código | "auditar código", "security review", "OWASP check" |
 | **db-guardian** | MongoDB, Segurança de Dados, Migrations | Scripts DB, limpeza, manutenção, snapshots |
 | **frontend-crafter** | Frontend Mobile-First, UX, Cache Offline | Criar/ajustar telas, componentes, CSS/JS |
@@ -75,6 +104,10 @@ Skills desenvolvidas especificamente para o Super Cartola Manager:
 | **cartola-api** | Base de conhecimento da API Cartola FC | Consultar endpoints, schemas, scouts, autenticação |
 | **auditor-module** | Auditoria de módulos do sistema | Validar implementação de novos módulos |
 | **cache-auditor** | Auditoria de cache (3 ambientes) | Detectar cache stale/morto, validar coerência, otimizar velocidade |
+| **cache-sentinel** | Monitoramento proativo de cache participante | "cache stale", "cache antigo prevalecendo", "vasculhar caches" |
+| **ux-auditor-app** | Auditoria UX do app participante | "auditar UX do app", "revisar design participante" |
+| **live-experience** | Auditoria de experiência ao vivo | "auditar live", "parciais ao vivo", "pre-flight rodada" |
+| **context7-monthly-audit** | Auditoria mensal preventiva | "auditoria mensal", "verificar mudanças API" |
 | **analise-branches** | Análise de branches Git | Comparar branches, identificar divergências |
 
 ---

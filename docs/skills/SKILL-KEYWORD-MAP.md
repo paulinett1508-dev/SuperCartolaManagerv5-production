@@ -60,6 +60,15 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 
 ### 02 - Specialists (Especialistas Técnicos)
 
+#### frontend-design
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `frontend-design`, `design visual`, `autoridade estética`, `criar interface`, `redesign`, `nova tela`, `nova home`, `landing`, `dashboard` |
+| **Frases PT-BR** | "redesenhar tela", "melhorar visual", "deixar bonito", "modernizar interface", "visual do app", "estilizar", "UX premium", "dark mode", "paleta de cores", "tipografia", "animação", "motion" |
+| **Contexto** | Criação ou redesign de interfaces. Ativada ANTES de qualquer outra skill de frontend quando o assunto envolve design visual |
+| **Prioridade** | MÁXIMA — sobrepõe `frontend-crafter` em decisões estéticas |
+| **Localização** | `docs/skills/02-specialists/frontend-design.md` |
+
 #### code-inspector
 | Tipo | Keywords |
 |------|----------|
@@ -221,7 +230,7 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 | **Modos** | `--full`, `--mongo`, `--sw`, `--frontend`, `--live` |
 | **Contexto** | Monitoramento proativo de caches stale no app participante, pre-flight de rodada, pos-deploy, investigação de dados antigos |
 | **NÃO confundir** | Auditoria broad dos 3 ambientes → `cache-auditor`; Cache de backend puro → `db-guardian` |
-| **Localização** | `~/.agents/skills/cache-sentinel/SKILL.md` |
+| **Localização** | `docs/skills/04-project-specific/cache-sentinel.md` |
 
 #### auditor-module
 | Tipo | Keywords |
@@ -299,6 +308,9 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 
 | Usuário disse... | Skill | Motivo |
 |-------------------|-------|--------|
+| "redesenhar a tela" | `frontend-design` | Autoridade estética máxima |
+| "deixar bonito" | `frontend-design` | Design visual |
+| "nova home" | `frontend-design` | Criação de interface |
 | "quero criar uma feature nova" | `workflow` | Início de ciclo completo |
 | "pesquise como funciona o extrato" | `pesquisa` | Levantamento exploratório |
 | "especifique as mudanças" | `spec` | Planejamento técnico |

@@ -9,6 +9,58 @@ metadata:
 
 This skill provides guidance for creating effective skills.
 
+---
+
+## REGRA ABSOLUTA: AGNOSTICISMO DE AMBIENTE (PRIORIDADE MAXIMA)
+
+**Esta regra sobrepoe TODAS as outras diretrizes de criacao de skills.**
+
+### Por que isso importa?
+
+O codebase deve funcionar em **QUALQUER ambiente** Claude Code (VS Code, Antigravity, Terminal, Web) sem dependencias de arquivos locais do usuario. Skills fora do repositorio NAO sao versionadas no git e NAO existem em outros ambientes.
+
+### Proibido (NUNCA fazer)
+
+| Local | Por que e proibido |
+|-------|-------------------|
+| `~/.claude/skills/` | Nao versionado, nao existe em outras maquinas |
+| `~/.agents/skills/` | Nao versionado, nao existe em outras maquinas |
+| `~/.claude/plugins/` | Dependencia local, nao portavel |
+| Qualquer path `~/` | Arquivos do usuario, nao do projeto |
+
+### Obrigatorio (SEMPRE fazer)
+
+| Regra | Como implementar |
+|-------|------------------|
+| Skills dentro do projeto | Criar em `/docs/skills/[categoria]/` |
+| Versionadas no git | Commitar junto com o codigo |
+| Referencias internas | CLAUDE.md aponta para `docs/skills/...` (nunca `~/...`) |
+| Agnóstico de IDE | Funciona em VS Code, Antigravity, Terminal, Web |
+
+### Checklist de Criacao de Skill
+
+Antes de finalizar qualquer skill, verificar:
+
+- [ ] Arquivo `.md` esta em `docs/skills/[categoria]/`?
+- [ ] Nenhuma referencia a paths externos (`~/.claude/`, `~/.agents/`)?
+- [ ] SKILL-KEYWORD-MAP.md atualizado com localizacao correta?
+- [ ] README.md das skills atualizado?
+- [ ] Skill funciona se o projeto for clonado em outra maquina?
+
+### Exemplo Correto vs Incorreto
+
+```markdown
+# INCORRETO - NAO FAZER
+A skill `frontend-design` (instalada em `~/.claude/skills/frontend-design/`)
+
+# CORRETO - FAZER ASSIM
+A skill `frontend-design` (documentada em `docs/skills/02-specialists/frontend-design.md`)
+```
+
+**Se voce encontrar uma skill fora do projeto, MOVA-A para dentro de `docs/skills/` antes de qualquer outra acao.**
+
+---
+
 ## About Skills
 
 Skills are modular, self-contained packages that extend Codex's capabilities by providing

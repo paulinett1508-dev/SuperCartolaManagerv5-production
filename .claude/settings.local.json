@@ -135,7 +135,10 @@
       "Bash(git -C /home/runner/workspace log --all --oneline --grep=\"tiro\\\\|Tiro\")",
       "Bash(git -C /home/runner/workspace log --all --oneline --grep=\"certo\\\\|Certo\")",
       "Bash(git -C /home/runner/workspace log --oneline -20 -- \"config/rules/tiro_certo.json\" \"config/definitions/tiro_certo_def.json\")",
-      "Bash(then echo \"Servidor reiniciado com sucesso!\" curl -s \"http://localhost:5000/api/cartola/mercado/status\")"
+      "Bash(then echo \"Servidor reiniciado com sucesso!\" curl -s \"http://localhost:5000/api/cartola/mercado/status\")",
+      "Bash(ln:*)",
+      "Bash(xxd:*)",
+      "Bash(cd:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
