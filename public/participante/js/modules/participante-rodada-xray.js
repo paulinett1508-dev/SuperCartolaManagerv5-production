@@ -313,7 +313,7 @@ async function renderizarPerformanceGeral(disputas) {
         const cap = disputas.capitao_luxo;
         cards.push(`
             <div class="xray-perf-card mod-capitao">
-                <div class="xray-perf-icon">👑</div>
+                <div class="xray-perf-icon"><span class="material-icons" style="color: var(--module-capitao-primary, #8b5cf6)">diamond</span></div>
                 <div class="xray-perf-info">
                     <div class="xray-perf-title">Capitão de Luxo</div>
                     <div class="xray-perf-value">${cap.sua_posicao}º</div>
@@ -328,7 +328,7 @@ async function renderizarPerformanceGeral(disputas) {
         const art = disputas.artilheiro;
         cards.push(`
             <div class="xray-perf-card mod-artilheiro">
-                <div class="xray-perf-icon">🎯</div>
+                <div class="xray-perf-icon"><span class="material-icons" style="color: var(--module-artilheiro-primary, #22c55e)">sports_soccer</span></div>
                 <div class="xray-perf-info">
                     <div class="xray-perf-title">Artilheiro Campeão</div>
                     <div class="xray-perf-value">${art.sua_posicao}º</div>
@@ -343,7 +343,7 @@ async function renderizarPerformanceGeral(disputas) {
         const luva = disputas.luva_ouro;
         cards.push(`
             <div class="xray-perf-card mod-luva">
-                <div class="xray-perf-icon">🧤</div>
+                <div class="xray-perf-icon"><span class="material-icons" style="color: var(--module-luva-primary, #ffd700)">sports_mma</span></div>
                 <div class="xray-perf-info">
                     <div class="xray-perf-title">Luva de Ouro</div>
                     <div class="xray-perf-value">${luva.sua_posicao}º</div>
@@ -391,7 +391,7 @@ async function buscarTop10Card() {
         if (meuMito) {
             return `
                 <div class="xray-perf-card mod-top10">
-                    <div class="xray-perf-icon">🏅</div>
+                    <div class="xray-perf-icon"><span class="material-icons" style="color: var(--xray-primary)">military_tech</span></div>
                     <div class="xray-perf-info">
                         <div class="xray-perf-title">TOP 10 - Mito</div>
                         <div class="xray-perf-value">${meuMito.posicao}º</div>
@@ -406,7 +406,7 @@ async function buscarTop10Card() {
         if (meuMico) {
             return `
                 <div class="xray-perf-card mod-top10">
-                    <div class="xray-perf-icon">😬</div>
+                    <div class="xray-perf-icon"><span class="material-icons" style="color: var(--xray-danger)">trending_down</span></div>
                     <div class="xray-perf-info">
                         <div class="xray-perf-title">TOP 10 - Mico</div>
                         <div class="xray-perf-value">${meuMico.posicao}º</div>
@@ -438,12 +438,15 @@ function renderizarUpcoming(disputas) {
 
         if (pc.proximo_confronto) {
             // Próximo jogo disponível - destaque principal
-            const resultIcon = pc.seu_confronto.resultado === 'vitoria' ? '✅' :
-                              pc.seu_confronto.resultado === 'derrota' ? '❌' : '⚖️';
+            const resultIcon = pc.seu_confronto.resultado === 'vitoria'
+                ? '<span class="material-icons xray-inline-icon success">check_circle</span>'
+                : pc.seu_confronto.resultado === 'derrota'
+                ? '<span class="material-icons xray-inline-icon danger">cancel</span>'
+                : '<span class="material-icons xray-inline-icon neutral">balance</span>';
 
             cards.push(`
                 <div class="xray-upcoming-card">
-                    <div class="xray-upcoming-icon">⚽</div>
+                    <div class="xray-upcoming-icon"><span class="material-icons" style="color: var(--xray-success)">sports_soccer</span></div>
                     <div class="xray-upcoming-info">
                         <div class="xray-upcoming-title">PONTOS CORRIDOS • Rodada ${pc.proximo_confronto.rodada}</div>
                         <div class="xray-upcoming-desc">
@@ -463,7 +466,7 @@ function renderizarUpcoming(disputas) {
             // Sem próximo jogo definido - mostra status atual
             cards.push(`
                 <div class="xray-upcoming-card">
-                    <div class="xray-upcoming-icon">⚽</div>
+                    <div class="xray-upcoming-icon"><span class="material-icons" style="color: var(--xray-success)">sports_soccer</span></div>
                     <div class="xray-upcoming-info">
                         <div class="xray-upcoming-title">PONTOS CORRIDOS</div>
                         <div class="xray-upcoming-desc">
@@ -484,16 +487,20 @@ function renderizarUpcoming(disputas) {
         const mm = disputas.mata_mata;
         const isClassificado = mm.seu_confronto.resultado === 'classificado';
         const statusText = isClassificado ? 'Classificado!' : mm.seu_confronto.resultado === 'eliminado' ? 'Eliminado' : 'Aguardando';
-        const statusIcon = isClassificado ? '🏆' : mm.seu_confronto.resultado === 'eliminado' ? '💔' : '⏳';
+        const statusIcon = isClassificado
+            ? '<span class="material-icons xray-inline-icon success">emoji_events</span>'
+            : mm.seu_confronto.resultado === 'eliminado'
+            ? '<span class="material-icons xray-inline-icon danger">heart_broken</span>'
+            : '<span class="material-icons xray-inline-icon neutral">hourglass_empty</span>';
 
         let descExtra = '';
         if (isClassificado && mm.proxima_fase) {
-            descExtra = `<div class="xray-upcoming-meta" style="margin-top:4px;">🔜 Próxima fase: ${escapeHtml(mm.proxima_fase)}</div>`;
+            descExtra = `<div class="xray-upcoming-meta" style="margin-top:4px;"><span class="material-icons" style="font-size:14px;vertical-align:middle;color:var(--xray-info)">arrow_forward</span> Próxima fase: ${escapeHtml(mm.proxima_fase)}</div>`;
         }
 
         cards.push(`
             <div class="xray-upcoming-card">
-                <div class="xray-upcoming-icon">🏆</div>
+                <div class="xray-upcoming-icon"><span class="material-icons" style="color: var(--xray-warning)">emoji_events</span></div>
                 <div class="xray-upcoming-info">
                     <div class="xray-upcoming-title">MATA-MATA (${escapeHtml(mm.fase_atual)}) • Edição ${mm.edicao}</div>
                     <div class="xray-upcoming-desc">
@@ -515,7 +522,7 @@ function renderizarUpcoming(disputas) {
         const nomesMes = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
         cards.push(`
             <div class="xray-upcoming-card">
-                <div class="xray-upcoming-icon">📅</div>
+                <div class="xray-upcoming-icon"><span class="material-icons" style="color: var(--xray-info)">calendar_month</span></div>
                 <div class="xray-upcoming-info">
                     <div class="xray-upcoming-title">MELHOR DO MÊS (${nomesMes[mes.mes]}/${mes.ano})</div>
                     <div class="xray-upcoming-desc">
@@ -530,16 +537,16 @@ function renderizarUpcoming(disputas) {
 
     // === PLACEHOLDERS "EM BREVE" ===
     const emBreve = [
-        { icon: '🌎', nome: 'Bolão Copa do Mundo', desc: 'Palpites nos jogos da Copa' },
-        { icon: '🏆', nome: 'Bolão Libertadores', desc: 'Palpites na Libertadores' },
-        { icon: '⚔️', nome: 'Copa de Times SC', desc: 'Torneio eliminatório entre times' },
-        { icon: '🎲', nome: 'RestaUM', desc: 'Sobrevivência rodada a rodada' },
+        { icon: 'public', nome: 'Bolão Copa do Mundo', desc: 'Palpites nos jogos da Copa' },
+        { icon: 'casino', nome: 'Tiro Certo', desc: 'Acerte o placar exato' },
+        { icon: 'swords', nome: 'Copa de Times SC', desc: 'Torneio eliminatório entre times' },
+        { icon: 'casino', nome: 'RestaUM', desc: 'Sobrevivência rodada a rodada' },
     ];
 
     emBreve.forEach(item => {
         cards.push(`
             <div class="xray-upcoming-card em-breve">
-                <div class="xray-upcoming-icon">${item.icon}</div>
+                <div class="xray-upcoming-icon"><span class="material-icons">${item.icon}</span></div>
                 <div class="xray-upcoming-info">
                     <div class="xray-upcoming-title">${item.nome}</div>
                     <div class="xray-upcoming-desc">${item.desc}</div>
