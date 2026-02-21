@@ -232,7 +232,7 @@ export const salvarCachePontosCorridos = async (req, res) => {
         if (confrontos) updateData.confrontos = confrontos;
 
         // ✅ AUDIT-FIX: Incluir temporada no filtro para segregação correta
-        const temporada = req.body.temporada || new Date().getFullYear();
+        const temporada = req.body.temporada || CURRENT_SEASON;
         const result = await PontosCorridosCache.findOneAndUpdate(
             { liga_id: ligaId, rodada_consolidada: rodada, temporada: temporada },
             updateData,
@@ -416,7 +416,7 @@ export const obterConfrontosPontosCorridos = async (
         if (dadosPorRodada.length === 0) {
             // Para temporadas passadas, sempre tentar reconstruir (rodadaAtualLiga pode ser negativo)
             // Para temporada atual, só reconstruir se já começou (rodadaAtualLiga > 0)
-            const mercadoTemporada = mercadoStatus.temporada || new Date().getFullYear();
+            const mercadoTemporada = mercadoStatus.temporada || CURRENT_SEASON;
             const isTemporadaPassada = temporada < mercadoTemporada;
 
             if (isTemporadaPassada || rodadaAtualLiga > 0) {

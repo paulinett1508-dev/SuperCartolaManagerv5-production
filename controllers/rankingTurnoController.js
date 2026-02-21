@@ -4,6 +4,7 @@ import {
     reconsolidarTodosOsTurnos,
     invalidarCacheTurno,
 } from "../services/rankingTurnoService.js";
+import { CURRENT_SEASON } from "../config/seasons.js";
 
 const LOG_PREFIX = "[RANKING-TURNO-CTRL]";
 
@@ -15,8 +16,8 @@ export async function getRankingTurno(req, res) {
     try {
         const { ligaId } = req.params;
         const { turno = "geral", temporada } = req.query;
-        // Multi-Temporada: usar temporada do query ou ano atual
-        const temporadaNum = temporada ? parseInt(temporada, 10) : new Date().getFullYear();
+        // Multi-Temporada: usar temporada do query ou temporada ativa
+        const temporadaNum = temporada ? parseInt(temporada, 10) : CURRENT_SEASON;
 
         console.log(
             `${LOG_PREFIX} GET ranking turno ${turno} - Liga: ${ligaId} - Temporada: ${temporadaNum}`,

@@ -1,9 +1,11 @@
-// capitaoController.js v1.1.0 - Controller do módulo Capitão de Luxo
+// capitaoController.js v1.2.0 - Controller do módulo Capitão de Luxo
+// v1.2.0: FIX - Substituído new Date().getFullYear() por CURRENT_SEASON (config/seasons.js)
 // v1.1.0: Fix ranking-live para retornar pontos do CAPITÃO (não pontos totais do time)
 import capitaoService from '../services/capitaoService.js';
 import { buscarCapitaoRodada } from '../services/capitaoService.js';
 import CapitaoCaches from '../models/CapitaoCaches.js';
 import cartolaApiService from '../services/cartolaApiService.js';
+import { CURRENT_SEASON } from '../config/seasons.js';
 
 /**
  * GET /api/capitao/:ligaId/ranking
@@ -12,7 +14,7 @@ import cartolaApiService from '../services/cartolaApiService.js';
 export async function getRankingCapitao(req, res) {
   try {
     const { ligaId } = req.params;
-    const temporada = parseInt(req.query.temporada) || new Date().getFullYear();
+    const temporada = parseInt(req.query.temporada) || CURRENT_SEASON;
 
     if (!ligaId) {
       return res.status(400).json({ success: false, error: 'ligaId obrigatório' });
@@ -40,7 +42,7 @@ export async function getRankingCapitao(req, res) {
 export async function getRankingCapitaoLive(req, res) {
   try {
     const { ligaId } = req.params;
-    const temporada = parseInt(req.query.temporada) || new Date().getFullYear();
+    const temporada = parseInt(req.query.temporada) || CURRENT_SEASON;
 
     if (!ligaId) {
       return res.status(400).json({ success: false, error: 'ligaId obrigatório' });
@@ -129,7 +131,7 @@ export async function getRankingCapitaoLive(req, res) {
 export async function consolidarCapitaoTemporada(req, res) {
   try {
     const { ligaId } = req.params;
-    const temporada = parseInt(req.body.temporada) || new Date().getFullYear();
+    const temporada = parseInt(req.body.temporada) || CURRENT_SEASON;
     const rodadaFinal = parseInt(req.body.rodadaFinal) || 38;
 
     if (!ligaId) {

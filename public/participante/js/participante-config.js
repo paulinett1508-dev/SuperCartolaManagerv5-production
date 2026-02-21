@@ -8,7 +8,7 @@
 // Temporada atual (sincronizado com config/seasons.js do backend)
 // ⚠️ FALLBACK ESTÁTICO - Para dados dinâmicos use SeasonStatusManager
 const CURRENT_SEASON = 2026;
-const PREVIOUS_SEASON = 2025;
+const PREVIOUS_SEASON = CURRENT_SEASON - 1; // ✅ v2.1 FIX: Calculado dinamicamente (não hardcoded)
 
 // Status da temporada: 'ativa' | 'preparando' | 'encerrada'
 // 'preparando' = Brasileirao nao iniciou, modulos bloqueados
@@ -61,12 +61,12 @@ window.ParticipanteConfig = {
     isAtiva: () => SEASON_STATUS === 'ativa',
 
     // ✅ v1.2 FIX: Retorna temporada correta para dados FINANCEIROS
-    // Durante pré-temporada, retorna 2025 (temporada anterior)
+    // Durante pré-temporada, retorna temporada anterior (CURRENT_SEASON - 1)
     getFinancialSeason: () => {
         if (SEASON_STATUS === 'preparando') {
-            return PREVIOUS_SEASON; // 2025 durante pré-temporada
+            return PREVIOUS_SEASON; // Temporada anterior durante pré-temporada
         }
-        return CURRENT_SEASON; // 2026 quando temporada ativa
+        return CURRENT_SEASON;
     },
 
     // Contagem regressiva ate abertura do mercado

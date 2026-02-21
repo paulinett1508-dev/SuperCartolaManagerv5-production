@@ -1553,8 +1553,9 @@ async function carregarRodadaEspecifica(timeId, rodada) {
     `;
 
     try {
-        // Temporada 2025 (histórico) - TODO: tornar dinâmico via seletor de temporada
-        const response = await fetch(`/api/data-lake/raw/${timeId}?rodada=${rodada}&historico=false&temporada=2025`);
+        // ✅ FIX: Usar temporada do contexto (não hardcodada)
+        const temporadaRodada = temporadaSelecionada || new Date().getFullYear();
+        const response = await fetch(`/api/data-lake/raw/${timeId}?rodada=${rodada}&historico=false&temporada=${temporadaRodada}`);
         const data = await response.json();
 
         if (!data.success) {

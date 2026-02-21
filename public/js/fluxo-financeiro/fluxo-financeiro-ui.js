@@ -470,19 +470,20 @@ export class FluxoFinanceiroUI {
                 <div class="extrato-sem-dados-temporada">
                     <span class="material-icons">hourglass_empty</span>
                     <p>Nenhum dado de rodadas para ${temporada}</p>
-                    <p class="hint">${temporada === 2026 ? 'A temporada 2026 ainda não começou. Use o botão "Acerto" no rodapé para registrar valores.' : 'Verifique se o cache foi gerado.'}</p>
+                    <p class="hint">${temporada === (window.temporadaAtual || 2026) ? `A temporada ${temporada} ainda não começou. Use o botão "Acerto" no rodapé para registrar valores.` : 'Verifique se o cache foi gerado.'}</p>
                 </div>
             `;
         }
 
-        // Se tem inscrição 2026 (para temporada 2025), mostrar info
-        if (temporada === 2025 && data.inscricao_proxima) {
+        // Se tem inscrição da próxima temporada (ao visualizar extrato de temporada anterior), mostrar info
+        const temporadaAtualCtx = window.temporadaAtual || 2026; // ✅ FIX: dinâmico
+        if (temporada < temporadaAtualCtx && data.inscricao_proxima) {
             const insc = data.inscricao_proxima;
             html += `
                 <div class="extrato-legado-banner" style="margin-top: 20px;">
                     <div class="extrato-legado-banner-header">
                         <span class="material-icons">update</span>
-                        <h4>Renovação 2026</h4>
+                        <h4>Renovação ${temporada + 1}</h4>
                     </div>
                     <div class="extrato-quitado-banner-content">
                         <div class="extrato-quitado-item">
@@ -2631,8 +2632,8 @@ export class FluxoFinanceiroUI {
      * ✅ v8.0: Renderiza campos fixos (sistema legado para temporada <= 2025)
      */
     async renderizarCamposFixos(timeId) {
-        // ✅ v6.10 FIX: Passar temporada correta para buscar campos da temporada selecionada
-        const temporadaSelecionada = window.temporadaAtual || 2025;
+        // ✅ v8.10 FIX: Usar temporada do modal (legado 2025) ou contexto atual — nunca hardcodar 2025
+        const temporadaSelecionada = this.temporadaModalExtrato || window.temporadaAtual || 2026;
         const campos =
             await FluxoFinanceiroCampos.carregarTodosCamposEditaveis(timeId, temporadaSelecionada);
         const lista = [
