@@ -205,6 +205,65 @@ export async function calcularPontosCorridos(ligaId, rodada, timeId, temporada) 
             }
         }
 
+        // Fallback: derivar do bracket round-robin quando não há cache da próxima rodada
+        if (!proximoConfronto && caches.length > 0) {
+            try {
+                const listaIds = _extrairOrdemCanonica(caches);
+                if (listaIds && listaIds.length >= 2) {
+                    const bracket = _gerarBracketRoundRobin(listaIds);
+                    const rodadaIndex = rodadaPC; // bracket 0-based → rodadaPC+1 = index rodadaPC
+                    if (rodadaIndex < bracket.length) {
+                        const jogos = bracket[rodadaIndex];
+                        const meuJogo = jogos.find(j =>
+                            String(j.timeAId) === String(timeId) || String(j.timeBId) === String(timeId)
+                        );
+
+                        if (meuJogo) {
+                            const advId = String(meuJogo.timeAId) === String(timeId)
+                                ? Number(meuJogo.timeBId)
+                                : Number(meuJogo.timeAId);
+
+                            // Resolver nome: primeiro via classificação do cache atual
+                            let nomeAdv = null;
+                            let escudoAdv = null;
+                            const advClassif = cache.classificacao?.find(c => c.timeId === advId);
+                            if (advClassif) {
+                                nomeAdv = advClassif.nome_cartola || advClassif.nome;
+                                escudoAdv = advClassif.escudo || null;
+                            }
+
+                            // Fallback: buscar na collection Rodada
+                            if (!nomeAdv || nomeAdv === "N/D") {
+                                const advRodada = await Rodada.findOne({
+                                    ligaId: ligaId,
+                                    temporada: temporada,
+                                    timeId: advId,
+                                }).select("nome_cartola escudo").lean();
+                                if (advRodada) {
+                                    nomeAdv = advRodada.nome_cartola;
+                                    escudoAdv = escudoAdv || advRodada.escudo || null;
+                                }
+                            }
+
+                            if (nomeAdv && nomeAdv !== "N/D") {
+                                proximoConfronto = {
+                                    rodada: rodadaPC + 1,
+                                    adversario: {
+                                        nome: nomeAdv,
+                                        timeId: advId,
+                                        escudo: escudoAdv,
+                                    },
+                                };
+                                console.log(`${LOG_PREFIX} [PC] Próximo confronto derivado via bracket: vs ${nomeAdv} (R${rodadaPC + 1})`);
+                            }
+                        }
+                    }
+                }
+            } catch (bracketError) {
+                console.log(`${LOG_PREFIX} [PC] Fallback bracket falhou:`, bracketError.message);
+            }
+        }
+
         return {
             seu_confronto: {
                 voce: truncarPontosNum(eu.pontos),
@@ -677,6 +736,61 @@ export async function calcularMelhorMes(ligaId, rodada, timeId, temporada) {
         console.error(`${LOG_PREFIX} [MES] Erro:`, error);
         return null;
     }
+}
+
+/**
+ * Extrai ordem canônica dos IDs a partir do cache PC mais recente.
+ * Replica lógica de extrairOrdemDoCache do controller.
+ */
+function _extrairOrdemCanonica(caches) {
+    const cacheBase = [...caches]
+        .sort((a, b) => (b.rodada_consolidada || 0) - (a.rodada_consolidada || 0))
+        .find(c => c.confrontos?.length > 0);
+
+    if (!cacheBase) return null;
+
+    const rodadaNum = cacheBase.rodada_consolidada;
+    const confrontos = cacheBase.confrontos;
+    const n = confrontos.length * 2;
+
+    // Reconstruir a lista na posição da rodada R
+    const listaRodada = new Array(n);
+    for (let i = 0; i < confrontos.length; i++) {
+        listaRodada[i] = String(confrontos[i].time1?.id || confrontos[i].time1);
+        listaRodada[n - 1 - i] = String(confrontos[i].time2?.id || confrontos[i].time2);
+    }
+
+    // Desfazer (R-1) rotações para obter a lista original
+    const lista = [...listaRodada];
+    for (let r = 0; r < rodadaNum - 1; r++) {
+        const x = lista.splice(1, 1)[0];
+        lista.push(x);
+    }
+
+    return lista;
+}
+
+/**
+ * Gera bracket round-robin completo a partir de lista de IDs.
+ * Replica lógica de gerarBracketFromIds do controller.
+ */
+function _gerarBracketRoundRobin(listaIds) {
+    const rodadas = [];
+    const lista = [...listaIds];
+    if (lista.length % 2 !== 0) lista.push(null);
+
+    const total = lista.length - 1;
+    for (let rodada = 0; rodada < total; rodada++) {
+        const jogos = [];
+        for (let i = 0; i < lista.length / 2; i++) {
+            const tidA = lista[i];
+            const tidB = lista[lista.length - 1 - i];
+            if (tidA && tidB) jogos.push({ timeAId: tidA, timeBId: tidB });
+        }
+        rodadas.push(jogos);
+        lista.splice(1, 0, lista.pop());
+    }
+    return rodadas;
 }
 
 export default {
