@@ -110,17 +110,17 @@ const NOMES_PT = {
 // GRUPOS (Sorteio 5/dez/2025)
 // ════════════════════════════════════════════════════════════════
 const GRUPOS = {
-  A: ['México', 'Coreia do Sul', 'África do Sul', 'TBD (Playoff UEFA D)'],
-  B: ['Canadá', 'Suíça', 'Catar', 'TBD (Playoff UEFA A)'],
+  A: ['México', 'Coreia do Sul', 'África do Sul', 'TBD UEFA-D'],
+  B: ['Canadá', 'Suíça', 'Catar', 'TBD UEFA-A'],
   C: ['Brasil', 'Marrocos', 'Haiti', 'Escócia'],
-  D: ['Estados Unidos', 'Paraguai', 'Austrália', 'TBD (Playoff UEFA C)'],
+  D: ['Estados Unidos', 'Paraguai', 'Austrália', 'TBD UEFA-C'],
   E: ['Alemanha', 'Costa do Marfim', 'Equador', 'Curaçao'],
-  F: ['Holanda', 'Japão', 'Tunísia', 'TBD (Playoff UEFA B)'],
+  F: ['Holanda', 'Japão', 'Tunísia', 'TBD UEFA-B'],
   G: ['Bélgica', 'Egito', 'Irã', 'Nova Zelândia'],
   H: ['Espanha', 'Uruguai', 'Arábia Saudita', 'Cabo Verde'],
-  I: ['França', 'Senegal', 'Noruega', 'TBD (Interc. Playoff 2)'],
+  I: ['França', 'Senegal', 'Noruega', 'TBD IC-2'],
   J: ['Argentina', 'Argélia', 'Áustria', 'Jordânia'],
-  K: ['Portugal', 'Colômbia', 'Uzbequistão', 'TBD (Interc. Playoff 1)'],
+  K: ['Portugal', 'Colômbia', 'Uzbequistão', 'TBD IC-1'],
   L: ['Inglaterra', 'Croácia', 'Gana', 'Panamá'],
 };
 
@@ -128,22 +128,70 @@ const GRUPOS = {
 // SEDES E ESTÁDIOS
 // ════════════════════════════════════════════════════════════════
 const ESTADIOS = {
-  'MetLife Stadium': { cidade: 'Nova York/Nova Jersey', pais: 'EUA', capacidade: 82500 },
-  'SoFi Stadium': { cidade: 'Los Angeles', pais: 'EUA', capacidade: 70000 },
-  'AT&T Stadium': { cidade: 'Dallas', pais: 'EUA', capacidade: 94000 },
-  'Hard Rock Stadium': { cidade: 'Miami', pais: 'EUA', capacidade: 65000 },
-  'Mercedes-Benz Stadium': { cidade: 'Atlanta', pais: 'EUA', capacidade: 75000 },
-  'NRG Stadium': { cidade: 'Houston', pais: 'EUA', capacidade: 72000 },
-  'Lumen Field': { cidade: 'Seattle', pais: 'EUA', capacidade: 69000 },
-  'Lincoln Financial Field': { cidade: 'Filadélfia', pais: 'EUA', capacidade: 69000 },
-  'Arrowhead Stadium': { cidade: 'Kansas City', pais: 'EUA', capacidade: 73000 },
-  'Gillette Stadium': { cidade: 'Boston', pais: 'EUA', capacidade: 65000 },
-  "Levi's Stadium": { cidade: 'São Francisco', pais: 'EUA', capacidade: 71000 },
-  'Estadio Azteca': { cidade: 'Cidade do México', pais: 'MEX', capacidade: 83000 },
-  'Estadio BBVA': { cidade: 'Monterrey', pais: 'MEX', capacidade: 53500 },
-  'Estadio Akron': { cidade: 'Guadalajara', pais: 'MEX', capacidade: 48000 },
-  'BC Place': { cidade: 'Vancouver', pais: 'CAN', capacidade: 54000 },
-  'BMO Field': { cidade: 'Toronto', pais: 'CAN', capacidade: 45000 },
+  'MetLife Stadium': {
+    cidade: 'Nova York/Nova Jersey', pais: 'EUA', capacidade: 82500,
+    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Metlife_stadium_%28Aerial_view%29.jpg/640px-Metlife_stadium_%28Aerial_view%29.jpg'
+  },
+  'SoFi Stadium': {
+    cidade: 'Los Angeles', pais: 'EUA', capacidade: 70000,
+    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/SoFi_Stadium_exterior_2.jpg/640px-SoFi_Stadium_exterior_2.jpg'
+  },
+  'AT&T Stadium': {
+    cidade: 'Dallas', pais: 'EUA', capacidade: 94000,
+    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Cowboys_Stadium_full_view.jpg/640px-Cowboys_Stadium_full_view.jpg'
+  },
+  'Hard Rock Stadium': {
+    cidade: 'Miami', pais: 'EUA', capacidade: 65000,
+    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Hard_Rock_Stadium_aerial_2023.jpg/640px-Hard_Rock_Stadium_aerial_2023.jpg'
+  },
+  'Mercedes-Benz Stadium': {
+    cidade: 'Atlanta', pais: 'EUA', capacidade: 75000,
+    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Mercedes-Benz_Stadium%2C_October_2017.jpg/640px-Mercedes-Benz_Stadium%2C_October_2017.jpg'
+  },
+  'NRG Stadium': {
+    cidade: 'Houston', pais: 'EUA', capacidade: 72000,
+    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/NRG_Stadium_-_Houston%2C_Texas.jpg/640px-NRG_Stadium_-_Houston%2C_Texas.jpg'
+  },
+  'Lumen Field': {
+    cidade: 'Seattle', pais: 'EUA', capacidade: 69000,
+    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/CenturyLink_Field_-_MLS_Cup_2016.jpg/640px-CenturyLink_Field_-_MLS_Cup_2016.jpg'
+  },
+  'Lincoln Financial Field': {
+    cidade: 'Filadélfia', pais: 'EUA', capacidade: 69000,
+    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Lincoln_Financial_Field_%28Aerial_view%29.jpg/640px-Lincoln_Financial_Field_%28Aerial_view%29.jpg'
+  },
+  'Arrowhead Stadium': {
+    cidade: 'Kansas City', pais: 'EUA', capacidade: 73000,
+    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Arrowhead_Stadium_%2814586858494%29.jpg/640px-Arrowhead_Stadium_%2814586858494%29.jpg'
+  },
+  'Gillette Stadium': {
+    cidade: 'Boston', pais: 'EUA', capacidade: 65000,
+    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Gillette_Stadium_%28Top_View%29.jpg/640px-Gillette_Stadium_%28Top_View%29.jpg'
+  },
+  "Levi's Stadium": {
+    cidade: 'São Francisco', pais: 'EUA', capacidade: 71000,
+    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Levi%27s_Stadium_aerial.jpg/640px-Levi%27s_Stadium_aerial.jpg'
+  },
+  'Estadio Azteca': {
+    cidade: 'Cidade do México', pais: 'MEX', capacidade: 83000,
+    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Azteca_Entrance.jpg/640px-Azteca_Entrance.jpg'
+  },
+  'Estadio BBVA': {
+    cidade: 'Monterrey', pais: 'MEX', capacidade: 53500,
+    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/EstadioRayados.JPG/640px-EstadioRayados.JPG'
+  },
+  'Estadio Akron': {
+    cidade: 'Guadalajara', pais: 'MEX', capacidade: 48000,
+    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Estadio_Chivas.jpg/640px-Estadio_Chivas.jpg'
+  },
+  'BC Place': {
+    cidade: 'Vancouver', pais: 'CAN', capacidade: 54000,
+    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Interior_BC_Place_2015.jpg/640px-Interior_BC_Place_2015.jpg'
+  },
+  'BMO Field': {
+    cidade: 'Toronto', pais: 'CAN', capacidade: 45000,
+    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/BMO_Field_2016_East_Stand.jpg/640px-BMO_Field_2016_East_Stand.jpg'
+  },
 };
 
 // ════════════════════════════════════════════════════════════════
@@ -152,19 +200,19 @@ const ESTADIOS = {
 const JOGOS_FASE_GRUPOS = [
   // ── GRUPO A ──
   { id: 'wc-a1', grupo: 'A', rodada: 1, data: '2026-06-11', horario: '13:00', mandante: 'México', visitante: 'África do Sul', estadio: 'Estadio Azteca', horarioBR: '14:00' },
-  { id: 'wc-a2', grupo: 'A', rodada: 1, data: '2026-06-11', horario: '16:00', mandante: 'Coreia do Sul', visitante: 'TBD (Playoff UEFA D)', estadio: 'Estadio Akron', horarioBR: '17:00' },
+  { id: 'wc-a2', grupo: 'A', rodada: 1, data: '2026-06-11', horario: '16:00', mandante: 'Coreia do Sul', visitante: 'TBD UEFA-D', estadio: 'Estadio Akron', horarioBR: '17:00' },
   { id: 'wc-a3', grupo: 'A', rodada: 2, data: '2026-06-18', horario: '13:00', mandante: 'México', visitante: 'Coreia do Sul', estadio: 'Estadio Akron', horarioBR: '14:00' },
-  { id: 'wc-a4', grupo: 'A', rodada: 2, data: '2026-06-18', horario: '16:00', mandante: 'TBD (Playoff UEFA D)', visitante: 'África do Sul', estadio: 'Mercedes-Benz Stadium', horarioBR: '17:00' },
-  { id: 'wc-a5', grupo: 'A', rodada: 3, data: '2026-06-24', horario: '16:00', mandante: 'TBD (Playoff UEFA D)', visitante: 'México', estadio: 'Estadio Azteca', horarioBR: '17:00' },
+  { id: 'wc-a4', grupo: 'A', rodada: 2, data: '2026-06-18', horario: '16:00', mandante: 'TBD UEFA-D', visitante: 'África do Sul', estadio: 'Mercedes-Benz Stadium', horarioBR: '17:00' },
+  { id: 'wc-a5', grupo: 'A', rodada: 3, data: '2026-06-24', horario: '16:00', mandante: 'TBD UEFA-D', visitante: 'México', estadio: 'Estadio Azteca', horarioBR: '17:00' },
   { id: 'wc-a6', grupo: 'A', rodada: 3, data: '2026-06-24', horario: '16:00', mandante: 'África do Sul', visitante: 'Coreia do Sul', estadio: 'Estadio BBVA', horarioBR: '17:00' },
 
   // ── GRUPO B ──
-  { id: 'wc-b1', grupo: 'B', rodada: 1, data: '2026-06-12', horario: '17:00', mandante: 'Canadá', visitante: 'TBD (Playoff UEFA A)', estadio: 'BMO Field', horarioBR: '18:00' },
+  { id: 'wc-b1', grupo: 'B', rodada: 1, data: '2026-06-12', horario: '17:00', mandante: 'Canadá', visitante: 'TBD UEFA-A', estadio: 'BMO Field', horarioBR: '18:00' },
   { id: 'wc-b2', grupo: 'B', rodada: 1, data: '2026-06-13', horario: '13:00', mandante: 'Catar', visitante: 'Suíça', estadio: "Levi's Stadium", horarioBR: '17:00' },
-  { id: 'wc-b3', grupo: 'B', rodada: 2, data: '2026-06-18', horario: '19:00', mandante: 'Suíça', visitante: 'TBD (Playoff UEFA A)', estadio: 'SoFi Stadium', horarioBR: '23:00' },
+  { id: 'wc-b3', grupo: 'B', rodada: 2, data: '2026-06-18', horario: '19:00', mandante: 'Suíça', visitante: 'TBD UEFA-A', estadio: 'SoFi Stadium', horarioBR: '23:00' },
   { id: 'wc-b4', grupo: 'B', rodada: 2, data: '2026-06-18', horario: '19:00', mandante: 'Canadá', visitante: 'Catar', estadio: 'BC Place', horarioBR: '23:00' },
   { id: 'wc-b5', grupo: 'B', rodada: 3, data: '2026-06-24', horario: '19:00', mandante: 'Suíça', visitante: 'Canadá', estadio: 'BC Place', horarioBR: '23:00' },
-  { id: 'wc-b6', grupo: 'B', rodada: 3, data: '2026-06-24', horario: '19:00', mandante: 'Catar', visitante: 'TBD (Playoff UEFA A)', estadio: 'BMO Field', horarioBR: '23:00' },
+  { id: 'wc-b6', grupo: 'B', rodada: 3, data: '2026-06-24', horario: '19:00', mandante: 'Catar', visitante: 'TBD UEFA-A', estadio: 'BMO Field', horarioBR: '23:00' },
 
   // ── GRUPO C (BRASIL) ──
   { id: 'wc-c1', grupo: 'C', rodada: 1, data: '2026-06-13', horario: '18:00', mandante: 'Brasil', visitante: 'Marrocos', estadio: 'MetLife Stadium', horarioBR: '19:00' },
@@ -176,10 +224,10 @@ const JOGOS_FASE_GRUPOS = [
 
   // ── GRUPO D ──
   { id: 'wc-d1', grupo: 'D', rodada: 1, data: '2026-06-12', horario: '21:00', mandante: 'Estados Unidos', visitante: 'Paraguai', estadio: 'SoFi Stadium', horarioBR: '01:00' },
-  { id: 'wc-d2', grupo: 'D', rodada: 1, data: '2026-06-13', horario: '19:00', mandante: 'Austrália', visitante: 'TBD (Playoff UEFA C)', estadio: 'BC Place', horarioBR: '23:00' },
+  { id: 'wc-d2', grupo: 'D', rodada: 1, data: '2026-06-13', horario: '19:00', mandante: 'Austrália', visitante: 'TBD UEFA-C', estadio: 'BC Place', horarioBR: '23:00' },
   { id: 'wc-d3', grupo: 'D', rodada: 2, data: '2026-06-19', horario: '19:00', mandante: 'Estados Unidos', visitante: 'Austrália', estadio: 'Lumen Field', horarioBR: '23:00' },
-  { id: 'wc-d4', grupo: 'D', rodada: 2, data: '2026-06-19', horario: '13:00', mandante: 'TBD (Playoff UEFA C)', visitante: 'Paraguai', estadio: "Levi's Stadium", horarioBR: '17:00' },
-  { id: 'wc-d5', grupo: 'D', rodada: 3, data: '2026-06-25', horario: '21:00', mandante: 'TBD (Playoff UEFA C)', visitante: 'Estados Unidos', estadio: 'SoFi Stadium', horarioBR: '01:00' },
+  { id: 'wc-d4', grupo: 'D', rodada: 2, data: '2026-06-19', horario: '13:00', mandante: 'TBD UEFA-C', visitante: 'Paraguai', estadio: "Levi's Stadium", horarioBR: '17:00' },
+  { id: 'wc-d5', grupo: 'D', rodada: 3, data: '2026-06-25', horario: '21:00', mandante: 'TBD UEFA-C', visitante: 'Estados Unidos', estadio: 'SoFi Stadium', horarioBR: '01:00' },
   { id: 'wc-d6', grupo: 'D', rodada: 3, data: '2026-06-25', horario: '13:00', mandante: 'Paraguai', visitante: 'Austrália', estadio: "Levi's Stadium", horarioBR: '17:00' },
 
   // ── GRUPO E ──
@@ -192,11 +240,11 @@ const JOGOS_FASE_GRUPOS = [
 
   // ── GRUPO F ──
   { id: 'wc-f1', grupo: 'F', rodada: 1, data: '2026-06-14', horario: '19:00', mandante: 'Holanda', visitante: 'Japão', estadio: 'AT&T Stadium', horarioBR: '21:00' },
-  { id: 'wc-f2', grupo: 'F', rodada: 1, data: '2026-06-14', horario: '21:00', mandante: 'TBD (Playoff UEFA B)', visitante: 'Tunísia', estadio: 'NRG Stadium', horarioBR: '23:00' },
-  { id: 'wc-f3', grupo: 'F', rodada: 2, data: '2026-06-20', horario: '19:00', mandante: 'Holanda', visitante: 'TBD (Playoff UEFA B)', estadio: 'NRG Stadium', horarioBR: '21:00' },
+  { id: 'wc-f2', grupo: 'F', rodada: 1, data: '2026-06-14', horario: '21:00', mandante: 'TBD UEFA-B', visitante: 'Tunísia', estadio: 'NRG Stadium', horarioBR: '23:00' },
+  { id: 'wc-f3', grupo: 'F', rodada: 2, data: '2026-06-20', horario: '19:00', mandante: 'Holanda', visitante: 'TBD UEFA-B', estadio: 'NRG Stadium', horarioBR: '21:00' },
   { id: 'wc-f4', grupo: 'F', rodada: 2, data: '2026-06-20', horario: '15:00', mandante: 'Tunísia', visitante: 'Japão', estadio: 'AT&T Stadium', horarioBR: '17:00' },
   { id: 'wc-f5', grupo: 'F', rodada: 3, data: '2026-06-25', horario: '19:00', mandante: 'Tunísia', visitante: 'Holanda', estadio: 'Arrowhead Stadium', horarioBR: '21:00' },
-  { id: 'wc-f6', grupo: 'F', rodada: 3, data: '2026-06-25', horario: '19:00', mandante: 'Japão', visitante: 'TBD (Playoff UEFA B)', estadio: 'AT&T Stadium', horarioBR: '21:00' },
+  { id: 'wc-f6', grupo: 'F', rodada: 3, data: '2026-06-25', horario: '19:00', mandante: 'Japão', visitante: 'TBD UEFA-B', estadio: 'AT&T Stadium', horarioBR: '21:00' },
 
   // ── GRUPO G ──
   { id: 'wc-g1', grupo: 'G', rodada: 1, data: '2026-06-15', horario: '13:00', mandante: 'Bélgica', visitante: 'Egito', estadio: 'Lumen Field', horarioBR: '17:00' },
@@ -216,11 +264,11 @@ const JOGOS_FASE_GRUPOS = [
 
   // ── GRUPO I ──
   { id: 'wc-i1', grupo: 'I', rodada: 1, data: '2026-06-16', horario: '18:00', mandante: 'França', visitante: 'Senegal', estadio: 'MetLife Stadium', horarioBR: '19:00' },
-  { id: 'wc-i2', grupo: 'I', rodada: 1, data: '2026-06-16', horario: '15:00', mandante: 'TBD (Interc. Playoff 2)', visitante: 'Noruega', estadio: 'Gillette Stadium', horarioBR: '16:00' },
-  { id: 'wc-i3', grupo: 'I', rodada: 2, data: '2026-06-22', horario: '15:00', mandante: 'França', visitante: 'TBD (Interc. Playoff 2)', estadio: 'Lincoln Financial Field', horarioBR: '16:00' },
+  { id: 'wc-i2', grupo: 'I', rodada: 1, data: '2026-06-16', horario: '15:00', mandante: 'TBD IC-2', visitante: 'Noruega', estadio: 'Gillette Stadium', horarioBR: '16:00' },
+  { id: 'wc-i3', grupo: 'I', rodada: 2, data: '2026-06-22', horario: '15:00', mandante: 'França', visitante: 'TBD IC-2', estadio: 'Lincoln Financial Field', horarioBR: '16:00' },
   { id: 'wc-i4', grupo: 'I', rodada: 2, data: '2026-06-22', horario: '18:00', mandante: 'Noruega', visitante: 'Senegal', estadio: 'MetLife Stadium', horarioBR: '19:00' },
   { id: 'wc-i5', grupo: 'I', rodada: 3, data: '2026-06-26', horario: '18:00', mandante: 'Noruega', visitante: 'França', estadio: 'Gillette Stadium', horarioBR: '19:00' },
-  { id: 'wc-i6', grupo: 'I', rodada: 3, data: '2026-06-26', horario: '18:00', mandante: 'Senegal', visitante: 'TBD (Interc. Playoff 2)', estadio: 'BMO Field', horarioBR: '19:00' },
+  { id: 'wc-i6', grupo: 'I', rodada: 3, data: '2026-06-26', horario: '18:00', mandante: 'Senegal', visitante: 'TBD IC-2', estadio: 'BMO Field', horarioBR: '19:00' },
 
   // ── GRUPO J ──
   { id: 'wc-j1', grupo: 'J', rodada: 1, data: '2026-06-16', horario: '13:00', mandante: 'Argentina', visitante: 'Argélia', estadio: 'Arrowhead Stadium', horarioBR: '15:00' },
@@ -231,12 +279,12 @@ const JOGOS_FASE_GRUPOS = [
   { id: 'wc-j6', grupo: 'J', rodada: 3, data: '2026-06-27', horario: '13:00', mandante: 'Argélia', visitante: 'Áustria', estadio: 'Arrowhead Stadium', horarioBR: '15:00' },
 
   // ── GRUPO K ──
-  { id: 'wc-k1', grupo: 'K', rodada: 1, data: '2026-06-17', horario: '13:00', mandante: 'Portugal', visitante: 'TBD (Interc. Playoff 1)', estadio: 'NRG Stadium', horarioBR: '15:00' },
+  { id: 'wc-k1', grupo: 'K', rodada: 1, data: '2026-06-17', horario: '13:00', mandante: 'Portugal', visitante: 'TBD IC-1', estadio: 'NRG Stadium', horarioBR: '15:00' },
   { id: 'wc-k2', grupo: 'K', rodada: 1, data: '2026-06-17', horario: '13:00', mandante: 'Uzbequistão', visitante: 'Colômbia', estadio: 'Estadio Azteca', horarioBR: '15:00' },
   { id: 'wc-k3', grupo: 'K', rodada: 2, data: '2026-06-23', horario: '13:00', mandante: 'Portugal', visitante: 'Uzbequistão', estadio: 'NRG Stadium', horarioBR: '15:00' },
-  { id: 'wc-k4', grupo: 'K', rodada: 2, data: '2026-06-23', horario: '16:00', mandante: 'Colômbia', visitante: 'TBD (Interc. Playoff 1)', estadio: 'Estadio Akron', horarioBR: '18:00' },
+  { id: 'wc-k4', grupo: 'K', rodada: 2, data: '2026-06-23', horario: '16:00', mandante: 'Colômbia', visitante: 'TBD IC-1', estadio: 'Estadio Akron', horarioBR: '18:00' },
   { id: 'wc-k5', grupo: 'K', rodada: 3, data: '2026-06-27', horario: '18:00', mandante: 'Colômbia', visitante: 'Portugal', estadio: 'Hard Rock Stadium', horarioBR: '19:00' },
-  { id: 'wc-k6', grupo: 'K', rodada: 3, data: '2026-06-27', horario: '18:00', mandante: 'TBD (Interc. Playoff 1)', visitante: 'Uzbequistão', estadio: 'Mercedes-Benz Stadium', horarioBR: '19:00' },
+  { id: 'wc-k6', grupo: 'K', rodada: 3, data: '2026-06-27', horario: '18:00', mandante: 'TBD IC-1', visitante: 'Uzbequistão', estadio: 'Mercedes-Benz Stadium', horarioBR: '19:00' },
 
   // ── GRUPO L ──
   { id: 'wc-l1', grupo: 'L', rodada: 1, data: '2026-06-17', horario: '19:00', mandante: 'Inglaterra', visitante: 'Croácia', estadio: 'AT&T Stadium', horarioBR: '21:00' },

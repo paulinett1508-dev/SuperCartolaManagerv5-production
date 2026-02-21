@@ -312,14 +312,148 @@ function renderizarSedes() {
             return b[1].capacidade - a[1].capacidade;
         });
 
-    container.innerHTML = estadiosOrdenados.map(([nome, info]) => `
-        <div class="copa-sede-card">
-            <span class="copa-sede-pais">${info.pais}</span>
-            <span class="copa-sede-cidade">${info.cidade}</span>
-            <span class="copa-sede-estadio">${nome}</span>
-            <span class="copa-sede-capacidade">${info.capacidade.toLocaleString('pt-BR')} lugares</span>
-        </div>
-    `).join('');
+    container.innerHTML = estadiosOrdenados.map(([nome, info]) => {
+        const bandeiraPais = getBandeira(info.pais);
+        const temFoto = !!info.foto;
+        const nomeEscaped = escapeHtml(nome);
+        const cidadeEscaped = escapeHtml(info.cidade);
+
+        const verso = temFoto
+            ? `<div class="copa-sede-card-back">
+                <img class="copa-sede-back-foto"
+                     src="${escapeHtml(info.foto)}"
+                     loading="lazy"
+                     alt="${nomeEscaped}">
+                <div class="copa-sede-back-overlay">
+                    <span class="copa-sede-back-nome">${nomeEscaped}</span>
+                    <span class="copa-sede-back-cidade">${cidadeEscaped}</span>
+                </div>
+                <div class="copa-sede-back-flip-hint" aria-hidden="true">
+                    <span class="material-icons">flip</span>
+                </div>
+               </div>`
+            : `<div class="copa-sede-card-back copa-sede-card-back--empty">
+                <span class="material-icons">stadium</span>
+               </div>`;
+
+        return `
+        <div class="copa-sede-card"
+             data-estadio="${nomeEscaped}"
+             data-cidade="${cidadeEscaped}"
+             data-capacidade="${info.capacidade}"
+             role="button"
+             tabindex="0"
+             aria-label="${nomeEscaped}, ${cidadeEscaped}. Toque para ver foto.">
+            <div class="copa-sede-card-front">
+                <div class="copa-sede-header">
+                    <span class="copa-sede-pais-flag">${bandeiraPais}</span>
+                    <span class="copa-sede-pais-label">${info.pais}</span>
+                    ${temFoto ? `<span class="copa-sede-foto-hint"><span class="material-icons">photo_camera</span></span>` : ''}
+                </div>
+                <span class="copa-sede-cidade">${cidadeEscaped}</span>
+                <span class="copa-sede-estadio">${nomeEscaped}</span>
+                <span class="copa-sede-capacidade">${info.capacidade.toLocaleString('pt-BR')} lugares</span>
+            </div>
+            ${verso}
+        </div>`;
+    }).join('');
+
+    // Adicionar event listeners aos cards
+    setupSedesClique();
+}
+
+// ═══════════════════════════════════════════════════
+// MODAL ESTÁDIO
+// ═══════════════════════════════════════════════════
+
+function setupSedesClique() {
+    const container = document.getElementById('copa-sedes-grid');
+    if (!container) return;
+
+    const toggleFlip = (card) => {
+        if (!card) return;
+        const virandoPara = card.classList.toggle('flipped');
+        card.setAttribute('aria-label',
+            virandoPara
+                ? `${card.dataset.estadio} — toque para voltar`
+                : `${card.dataset.estadio}, ${card.dataset.cidade}. Toque para ver foto.`
+        );
+    };
+
+    container.addEventListener('click', (e) => {
+        toggleFlip(e.target.closest('.copa-sede-card'));
+    });
+
+    // Acessibilidade: Enter/Space vira o card
+    container.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            const card = e.target.closest('.copa-sede-card');
+            if (card) {
+                e.preventDefault();
+                toggleFlip(card);
+            }
+        }
+    });
+}
+
+function abrirModalEstadio(nome, fotoUrl, cidade, capacidade) {
+    const modal = document.getElementById('copa-estadio-modal');
+    const imgEl = document.getElementById('copa-modal-foto');
+    const nomeEl = document.getElementById('copa-modal-nome');
+    const detalhesEl = document.getElementById('copa-modal-detalhes');
+    const fallbackEl = modal?.querySelector('.copa-modal-fallback');
+
+    if (!modal || !imgEl) return;
+
+    // Reset estado
+    imgEl.classList.remove('loaded');
+    imgEl.src = '';
+    if (fallbackEl) fallbackEl.style.display = 'flex';
+
+    // Preencher dados
+    nomeEl.textContent = nome;
+    detalhesEl.textContent = `${cidade} • ${capacidade.toLocaleString('pt-BR')} lugares`;
+
+    // Carregar imagem com fallback
+    if (fotoUrl) {
+        imgEl.onload = () => {
+            imgEl.classList.add('loaded');
+            if (fallbackEl) fallbackEl.style.display = 'none';
+        };
+        imgEl.onerror = () => {
+            imgEl.classList.remove('loaded');
+            if (fallbackEl) fallbackEl.style.display = 'flex';
+        };
+        imgEl.src = fotoUrl;
+        imgEl.alt = nome;
+    }
+
+    // Abrir modal
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+
+    // Setup fechar modal
+    setupFecharModal(modal);
+}
+
+function setupFecharModal(modal) {
+    const closeBtn = modal.querySelector('.copa-modal-close');
+    const backdrop = modal.querySelector('.copa-modal-backdrop');
+
+    const handleEsc = (e) => {
+        if (e.key === 'Escape') fechar();
+    };
+
+    const fechar = () => {
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        // Remove ESC listener independente de como o modal foi fechado
+        document.removeEventListener('keydown', handleEsc);
+    };
+
+    closeBtn?.addEventListener('click', fechar, { once: true });
+    backdrop?.addEventListener('click', fechar, { once: true });
+    document.addEventListener('keydown', handleEsc);
 }
 
 // ═══════════════════════════════════════════════════

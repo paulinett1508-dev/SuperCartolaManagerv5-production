@@ -17,9 +17,9 @@
         <div class="copa-hero-bg"></div>
         <div class="copa-hero-content">
             <div class="copa-hero-flags">
-                <span class="copa-host-flag"><img src="https://flagcdn.com/w80/us.png" alt="EUA" class="copa-flag-img"> USA</span>
-                <span class="copa-host-flag"><img src="https://flagcdn.com/w80/mx.png" alt="México" class="copa-flag-img"> MEX</span>
-                <span class="copa-host-flag"><img src="https://flagcdn.com/w80/ca.png" alt="Canadá" class="copa-flag-img"> CAN</span>
+                <span class="copa-host-flag"><span class="copa-host-flag-emoji">🇺🇸</span> USA</span>
+                <span class="copa-host-flag"><span class="copa-host-flag-emoji">🇲🇽</span> MEX</span>
+                <span class="copa-host-flag"><span class="copa-host-flag-emoji">🇨🇦</span> CAN</span>
             </div>
             <h1 class="copa-hero-title">COPA DO MUNDO</h1>
             <p class="copa-hero-subtitle">2026</p>
@@ -127,6 +127,28 @@
             <!-- Preenchido via JS -->
         </div>
     </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         MODAL - FOTO DO ESTÁDIO
+         ═══════════════════════════════════════════════════ -->
+    <div id="copa-estadio-modal" class="copa-modal" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="copa-modal-backdrop"></div>
+        <div class="copa-modal-content">
+            <button class="copa-modal-close" aria-label="Fechar">
+                <span class="material-icons">close</span>
+            </button>
+            <div class="copa-modal-img-container">
+                <img id="copa-modal-foto" src="" alt="" class="copa-modal-foto">
+                <div class="copa-modal-fallback">
+                    <span class="material-icons">stadium</span>
+                </div>
+            </div>
+            <div class="copa-modal-info">
+                <h3 id="copa-modal-nome" class="copa-modal-nome"></h3>
+                <p id="copa-modal-detalhes" class="copa-modal-detalhes"></p>
+            </div>
+        </div>
+    </div>
 
     <!-- Bottom padding para bottom nav -->
     <div class="pb-24"></div>
