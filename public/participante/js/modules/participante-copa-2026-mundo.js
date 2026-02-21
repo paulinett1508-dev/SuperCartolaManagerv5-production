@@ -29,21 +29,23 @@ export async function inicializarCopa2026Mundo(params) {
             return;
         }
 
-        // 2. Renderizar seções estáticas (instantâneo com dados em memória)
+        // 2. Renderizar secoes estaticas (instantaneo com dados em memoria)
         renderizarCountdown();
         renderizarJogosBrasil();
         renderizarGrupos();
+        renderizarClassificacao();
         renderizarFaseEliminatoria();
         renderizarSedes();
 
         // 3. Iniciar countdown timer
         countdownInterval = setInterval(renderizarCountdown, 60000);
 
-        // 4. Carregar notícias (assíncrono, não bloqueia render)
+        // 4. Carregar noticias (assincrono, nao bloqueia render)
         carregarNoticias('geral');
 
-        // 5. Setup tabs de notícias
+        // 5. Setup tabs de noticias e toggles
         setupNoticiaTabs();
+        setupGruposToggle();
 
         if (window.Log) Log.info('COPA-MUNDO', 'Hub renderizado com sucesso');
     } catch (erro) {
@@ -334,7 +336,216 @@ function renderizarGrupos() {
 }
 
 // ═══════════════════════════════════════════════════
-// FASE ELIMINATÓRIA (Timeline)
+// CLASSIFICACAO — Standings por grupo (Stitch-inspired)
+// ═══════════════════════════════════════════════════
+
+/**
+ * Calcula classificacao de um grupo a partir dos jogos finalizados.
+ * Pre-torneio: retorna todos com 0 pts em ordem alfabetica.
+ * @returns {Array<{time, bandeira, j, v, e, d, gp, gc, sg, pts, forma}>}
+ */
+function calcularClassificacaoGrupo(grupoLetra, selecoes, jogos) {
+    // Inicializar tabela
+    const tabela = {};
+    selecoes.forEach(time => {
+        tabela[time] = {
+            time,
+            bandeira: getBandeira(time),
+            j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pts: 0,
+            forma: [] // ultimos resultados: 'W', 'D', 'L'
+        };
+    });
+
+    // Processar jogos finalizados (se houver resultados)
+    const jogosDoGrupo = jogos.filter(j => j.grupo === grupoLetra && j.golsMandante != null);
+    jogosDoGrupo.forEach(jogo => {
+        const m = tabela[jogo.mandante];
+        const v = tabela[jogo.visitante];
+        if (!m || !v) return;
+
+        const gm = jogo.golsMandante;
+        const gv = jogo.golsVisitante;
+
+        m.j++; v.j++;
+        m.gp += gm; m.gc += gv;
+        v.gp += gv; v.gc += gm;
+
+        if (gm > gv) {
+            m.v++; m.pts += 3; m.forma.push('W');
+            v.d++; v.forma.push('L');
+        } else if (gm < gv) {
+            v.v++; v.pts += 3; v.forma.push('W');
+            m.d++; m.forma.push('L');
+        } else {
+            m.e++; m.pts += 1; m.forma.push('D');
+            v.e++; v.pts += 1; v.forma.push('D');
+        }
+    });
+
+    // Calcular saldo de gols
+    Object.values(tabela).forEach(t => { t.sg = t.gp - t.gc; });
+
+    // Ordenar: pts DESC, sg DESC, gp DESC, nome ASC
+    return Object.values(tabela).sort((a, b) => {
+        if (b.pts !== a.pts) return b.pts - a.pts;
+        if (b.sg !== a.sg) return b.sg - a.sg;
+        if (b.gp !== a.gp) return b.gp - a.gp;
+        return a.time.localeCompare(b.time);
+    });
+}
+
+/**
+ * Determina o status da fase de grupos para exibicao
+ */
+function getStatusGrupos() {
+    if (!dadosCopa?.periodo) return { fase: 'pre', label: 'Aguardando', rodada: 0 };
+
+    const agora = new Date();
+    const inicio = new Date(dadosCopa.periodo.inicio);
+    const fimGrupos = new Date(dadosCopa.periodo.fimFaseGrupos || dadosCopa.periodo.inicio);
+
+    if (agora < inicio) return { fase: 'pre', label: 'Aguardando', rodada: 0 };
+    if (agora <= fimGrupos) return { fase: 'live', label: 'Ao Vivo', rodada: 0 };
+    return { fase: 'done', label: 'Encerrada', rodada: 3 };
+}
+
+function renderizarClassificacao() {
+    const container = document.getElementById('copa-standings-container');
+    if (!container || !dadosCopa?.grupos) return;
+
+    const gruposOrdenados = Object.entries(dadosCopa.grupos).sort((a, b) => a[0].localeCompare(b[0]));
+    const jogos = dadosCopa.jogosFaseGrupos || [];
+    const status = getStatusGrupos();
+
+    // Mostrar apenas Brasil (C) e mais 2 grupos vizinhos no pre-torneio
+    // Na Copa ativa, mostrar todos
+    const gruposParaMostrar = status.fase === 'pre'
+        ? gruposOrdenados.filter(([l]) => ['A', 'B', 'C', 'D'].includes(l))
+        : gruposOrdenados;
+
+    container.innerHTML = gruposParaMostrar.map(([letra, selecoes]) => {
+        const classificacao = calcularClassificacaoGrupo(letra, selecoes, jogos);
+        const isBrasil = letra === 'C';
+        const temJogos = classificacao.some(t => t.j > 0);
+
+        // Status label e dot
+        const statusClass = status.fase === 'live' ? 'copa-standings-status--live'
+            : status.fase === 'done' ? 'copa-standings-status--done'
+            : 'copa-standings-status--pre';
+        const dotClass = status.fase === 'live' ? 'copa-standings-live-dot--active' : '';
+
+        // Rows dos times
+        const rowsHtml = classificacao.map((time, idx) => {
+            const isQualified = idx < 2; // Top 2 classificam direto
+            const isEliminated = idx >= 3 && temJogos; // 4o nao avanca (se ja jogou)
+            const rowClass = isQualified && temJogos ? 'copa-standings-row--qualified'
+                : isEliminated ? 'copa-standings-row--eliminated' : '';
+
+            // Saldo de gols colorido
+            const sgClass = time.sg > 0 ? 'copa-standings-stat-value--positive'
+                : time.sg < 0 ? 'copa-standings-stat-value--negative'
+                : 'copa-standings-stat-value--neutral';
+            const sgText = time.sg > 0 ? `+${time.sg}` : `${time.sg}`;
+
+            // Form dots (ultimos 3 jogos)
+            const formaDots = time.forma.slice(-3).map(f => {
+                const dotClass = f === 'W' ? 'copa-standings-form-dot--win'
+                    : f === 'D' ? 'copa-standings-form-dot--draw'
+                    : 'copa-standings-form-dot--loss';
+                return `<span class="copa-standings-form-dot ${dotClass}"></span>`;
+            }).join('');
+
+            return `
+            <div class="copa-standings-row ${rowClass}">
+                <div class="copa-standings-team">
+                    <span class="copa-standings-rank">${idx + 1}</span>
+                    <span class="copa-standings-flag">${time.bandeira}</span>
+                    <div class="copa-standings-name-wrap">
+                        <span class="copa-standings-name">${time.time}</span>
+                        ${formaDots ? `<div class="copa-standings-form">${formaDots}</div>` : ''}
+                    </div>
+                </div>
+                <div class="copa-standings-stats">
+                    <div class="copa-standings-stat">
+                        <span class="copa-standings-stat-value ${sgClass}">${sgText}</span>
+                    </div>
+                    <span class="copa-standings-pts">${time.pts}</span>
+                </div>
+            </div>`;
+        }).join('');
+
+        // Mensagem pre-torneio
+        const preMsg = !temJogos
+            ? '<div class="copa-standings-pre-msg">Classificacao sera atualizada apos inicio dos jogos</div>'
+            : '';
+
+        return `
+        <div class="copa-standings-card" data-grupo="${letra}">
+            <div class="copa-standings-header">
+                <div class="copa-standings-header-left">
+                    <span class="copa-standings-grupo-nome">Grupo ${letra}</span>
+                    <span class="copa-standings-status ${statusClass}">${status.label}</span>
+                </div>
+                <div class="copa-standings-header-right">
+                    <span class="copa-standings-live-dot ${dotClass}"></span>
+                    <span class="copa-standings-matchday">Rodada ${temJogos ? Math.max(...classificacao.map(t => t.j)) : 0}/3</span>
+                </div>
+            </div>
+            <div class="copa-standings-columns">
+                <span class="copa-standings-col-label">SG</span>
+                <span class="copa-standings-col-label">PTS</span>
+            </div>
+            ${rowsHtml}
+            ${preMsg}
+        </div>`;
+    }).join('');
+
+    // Se pre-torneio e mostrando subconjunto, adicionar nota
+    if (status.fase === 'pre' && gruposParaMostrar.length < gruposOrdenados.length) {
+        container.innerHTML += `
+        <div class="copa-standings-pre-msg" style="padding:0.5rem 0;">
+            ${gruposOrdenados.length - gruposParaMostrar.length} grupos restantes disponiveis apos inicio da Copa
+        </div>`;
+    }
+}
+
+// ═══════════════════════════════════════════════════
+// TOGGLE — Jogos / Classificacao
+// ═══════════════════════════════════════════════════
+
+function setupGruposToggle() {
+    const toggleContainer = document.getElementById('copa-grupos-toggle');
+    if (!toggleContainer) return;
+
+    const jogosView = document.getElementById('copa-grupos-container');
+    const standingsView = document.getElementById('copa-standings-container');
+
+    toggleContainer.addEventListener('click', (e) => {
+        const btn = e.target.closest('.copa-view-toggle-btn');
+        if (!btn) return;
+
+        const view = btn.dataset.view;
+        if (!view) return;
+
+        // Atualizar botoes
+        toggleContainer.querySelectorAll('.copa-view-toggle-btn').forEach(b =>
+            b.classList.remove('copa-view-toggle-btn--active')
+        );
+        btn.classList.add('copa-view-toggle-btn--active');
+
+        // Alternar views
+        if (view === 'jogos') {
+            if (jogosView) jogosView.style.display = '';
+            if (standingsView) standingsView.style.display = 'none';
+        } else {
+            if (jogosView) jogosView.style.display = 'none';
+            if (standingsView) standingsView.style.display = '';
+        }
+    });
+}
+
+// ═══════════════════════════════════════════════════
+// FASE ELIMINATORIA (Timeline)
 // ═══════════════════════════════════════════════════
 
 function renderizarFaseEliminatoria() {

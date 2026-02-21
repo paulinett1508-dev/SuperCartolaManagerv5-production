@@ -90,17 +90,29 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════
-         TABELA DE GRUPOS (Accordion)
+         TABELA DE GRUPOS — Toggle Jogos / Classificacao
          ═══════════════════════════════════════════════════ -->
     <section class="copa-section" id="copa-grupos-section">
         <div class="copa-section-header">
-            <span class="copa-section-icon"><span class="material-icons">emoji_events</span></span>
+            <span class="copa-section-icon"><span class="material-icons">groups</span></span>
             <h2 class="copa-section-title">Fase de Grupos</h2>
-            <span class="copa-section-badge">12 grupos &bull; 48 seleções</span>
+            <span class="copa-section-badge">12 grupos &bull; 48 selecoes</span>
         </div>
+
+        <!-- Toggle: Jogos vs Classificacao -->
+        <div class="copa-view-toggle" id="copa-grupos-toggle">
+            <button class="copa-view-toggle-btn copa-view-toggle-btn--active" data-view="jogos">Jogos</button>
+            <button class="copa-view-toggle-btn" data-view="classificacao">Classificacao</button>
+        </div>
+
+        <!-- View: Jogos (accordion existente) -->
         <div id="copa-grupos-container" class="copa-grupos-container">
-            <!-- Preenchido via JS: details/summary para cada grupo -->
             <div class="copa-loading-placeholder">Carregando grupos...</div>
+        </div>
+
+        <!-- View: Classificacao (standings cards) -->
+        <div id="copa-standings-container" class="copa-standings-container" style="display:none;">
+            <div class="copa-loading-placeholder">Carregando classificacao...</div>
         </div>
     </section>
 
