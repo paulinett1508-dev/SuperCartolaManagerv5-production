@@ -512,40 +512,44 @@ export function renderizarSecaoCopa(copa) {
         : 'Copa do Mundo';
 
     return `
-    <section id="copa-home-section" class="copa-home-section mx-4 mb-6">
-        <!-- Header Colapsável Copa do Mundo -->
+    <section id="copa-home-section" class="copa-home-section" style="margin:0 1rem 1.5rem;">
+        <!-- Header -->
         <button class="copa-home-header" onclick="window.toggleCopaHome && window.toggleCopaHome()">
             <div class="copa-home-header-left">
-                <span class="material-icons" style="font-size:1.25rem;color:var(--app-copa-secondary, #D4AF37);">emoji_events</span>
-                <div>
-                    <h2 class="font-brand text-white text-sm tracking-wide">Copa do Mundo 2026</h2>
-                    <span class="text-[10px] text-white/70">${faseTitulo} · EUA/México/Canadá</span>
+                <div class="copa-home-icon">
+                    <span class="material-icons" style="font-size:1.1rem;color:var(--app-copa-secondary,#D4AF37);">emoji_events</span>
                 </div>
-                ${copa.temAoVivo ? `
-                    <span class="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 ml-2">
-                        <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
-                        AO VIVO
-                    </span>
-                ` : ''}
+                <div class="copa-home-titles">
+                    <span class="copa-home-title">Copa do Mundo 2026</span>
+                    <span class="copa-home-subtitle">EUA · México · Canadá</span>
+                </div>
             </div>
-            <span class="material-icons copa-home-chevron">expand_more</span>
+            <div class="copa-home-meta">
+                ${copa.temAoVivo
+                    ? `<span class="copa-home-live-badge"><span class="copa-home-live-dot"></span>AO VIVO</span>`
+                    : `<span class="copa-home-phase-badge">${faseTitulo}</span>`
+                }
+                <span class="material-icons copa-home-chevron">expand_more</span>
+            </div>
         </button>
 
-        <!-- Conteúdo Colapsável -->
+        <!-- Content -->
         <div class="copa-home-content collapsed" id="copa-home-content">
             ${jogosBrasil.length > 0 ? renderizarJogosBrasilCopa(jogosBrasil) : ''}
             ${jogosExibir.length > 0 ? renderizarJogosCopaLista(jogosExibir, copa.jogosDoDia?.length > 0 ? 'Jogos do Dia' : 'Próximos Jogos') : ''}
             ${jogosExibir.length === 0 && jogosBrasil.length === 0 ? `
-                <div class="text-center py-6 text-white/30">
-                    <span class="material-icons block mb-1" style="font-size:1.5rem;color:var(--app-text-muted);">sports_soccer</span>
-                    <p class="text-xs">Sem jogos da Copa hoje</p>
+                <div class="copa-home-empty">
+                    <span class="material-icons">sports_soccer</span>
+                    <p>Sem jogos da Copa hoje</p>
                 </div>
             ` : ''}
-
-            <!-- Link para Hub completo -->
-            <div class="text-center py-2 border-t border-gray-700/40 mt-2 mx-3">
-                <button onclick="window.participanteNav && window.participanteNav.navegarPara('copa-2026-mundo')" class="text-[11px] font-medium tracking-wide" style="color: var(--app-copa-secondary, #D4AF37); background: none; border: none; cursor: pointer;">
-                    Ver tabela completa, notícias e mais &#8250;
+            <div class="copa-home-cta">
+                <button
+                    onclick="window.participanteNav && window.participanteNav.navegarPara('copa-2026-mundo')"
+                    class="copa-home-cta-btn">
+                    <span class="material-icons">public</span>
+                    HUB COPA 2026
+                    <span class="material-icons">arrow_forward</span>
                 </button>
             </div>
         </div>
@@ -561,12 +565,12 @@ function renderizarJogosBrasilCopa(jogos) {
     if (!jogos || !jogos.length) return '';
 
     return `
-    <div class="px-3 pt-3 pb-1">
-        <div class="flex items-center gap-1.5 mb-2">
-            <span class="material-icons" style="font-size:1rem;color:var(--app-success);">flag</span>
-            <h4 class="text-[11px] font-brand text-white/90 tracking-wide">Brasil no Grupo C</h4>
+    <div class="copa-fx-section">
+        <div class="copa-fx-section-header">
+            <span class="material-icons" style="font-size:0.8rem;color:var(--app-success);">flag</span>
+            Brasil · Grupo C
         </div>
-        <div class="space-y-1.5">
+        <div class="copa-fx-table">
             ${jogos.map(j => renderizarCardJogoCopa(j)).join('')}
         </div>
     </div>
@@ -590,15 +594,15 @@ function renderizarJogosCopaLista(jogos, titulo) {
     }, {});
 
     return `
-    <div class="px-3 pt-3">
-        <div class="flex items-center gap-1.5 mb-2">
-            <span class="material-icons text-sm" style="color: var(--app-copa-secondary);">calendar_today</span>
-            <h4 class="text-[11px] font-brand text-white/90 tracking-wide">${titulo}</h4>
+    <div class="copa-fx-section">
+        <div class="copa-fx-section-header">
+            <span class="material-icons" style="font-size:0.8rem;color:var(--app-copa-secondary);">calendar_today</span>
+            ${titulo}
         </div>
         ${Object.entries(jogosPorData).map(([data, lista]) => `
-            <div class="mb-2">
-                ${data !== 'Hoje' ? `<div class="text-[9px] text-white/40 mb-1 px-1">${formatarDataCopa(data)}</div>` : ''}
-                <div class="space-y-1.5">
+            <div>
+                ${data !== 'Hoje' ? `<div class="copa-fx-data-label">${formatarDataCopa(data)}</div>` : ''}
+                <div class="copa-fx-table">
                     ${lista.map(j => renderizarCardJogoCopa(j)).join('')}
                 </div>
             </div>
@@ -616,67 +620,55 @@ function renderizarCardJogoCopa(jogo) {
     const encerrado = isJogoEncerrado(jogo);
     const agendado = isJogoAgendado(jogo);
 
-    const containerClass = aoVivo
-        ? 'ring-1 ring-green-500/30 bg-gradient-to-r from-green-500/5 to-transparent'
-        : encerrado
-            ? 'bg-gray-700/30 opacity-80'
-            : 'bg-gray-700/50';
-
     const bandeiraMandante = jogo.bandeirasMandante || '🏳️';
     const bandeiraVisitante = jogo.bandeirasVisitante || '🏳️';
 
+    const nomeMandante  = jogo.mandante  || '?';
+    const nomeVisitante = jogo.visitante || '?';
+
+    const isBrasilMandante  = /brasil|brazil/i.test(nomeMandante);
+    const isBrasilVisitante = /brasil|brazil/i.test(nomeVisitante);
+    const isBrasil = isBrasilMandante || isBrasilVisitante;
+
+    // Centro: horário (agendado), placar ao vivo, placar final
+    let centro;
+    if (agendado) {
+        centro = `<span class="copa-fx-score-time">${jogo.horario}</span>`;
+    } else if (aoVivo) {
+        centro = `<span class="copa-fx-score-num">${jogo.golsMandante ?? 0}<span style="color:rgba(255,255,255,0.25);margin:0 2px">-</span>${jogo.golsVisitante ?? 0}</span>`;
+    } else {
+        centro = `<span class="copa-fx-score-num" style="color:rgba(255,255,255,0.5)">${jogo.golsMandante ?? 0}<span style="color:rgba(255,255,255,0.18);margin:0 2px">-</span>${jogo.golsVisitante ?? 0}</span>`;
+    }
+
+    // Status (coluna direita)
+    let status;
+    if (aoVivo) {
+        status = `<div class="copa-fx-live-dot"></div>`;
+    } else if (encerrado) {
+        status = `<span class="copa-fx-fim-label">FIM</span>`;
+    } else {
+        status = '';
+    }
+
+    const rowClass = [
+        'copa-fx-row',
+        aoVivo   ? 'ao-vivo'    : '',
+        encerrado? 'encerrado'  : '',
+        isBrasil ? 'brasil-jogo': '',
+    ].filter(Boolean).join(' ');
+
     return `
-    <div class="flex flex-col py-1.5 px-2.5 rounded-lg ${containerClass}">
-        <!-- Header: Grupo + Status -->
-        <div class="flex items-center justify-between mb-1">
-            <span class="text-[9px] text-white/40 truncate">${jogo.liga || 'Copa do Mundo'}</span>
-            ${aoVivo ? `
-                <span class="flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full bg-green-500/20 text-green-400">
-                    <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
-                    ${jogo.tempo ? `${jogo.tempo}'` : 'AO VIVO'}
-                </span>
-            ` : encerrado ? `
-                <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-gray-500/20 text-gray-400">Encerrado</span>
-            ` : `
-                <span class="text-[9px] px-1.5 py-0.5 rounded-full" style="background: var(--app-copa-muted); color: var(--app-copa-secondary);">${jogo.horario}</span>
-            `}
+    <div class="${rowClass}">
+        <div class="copa-fx-home">
+            <span class="copa-fx-name${isBrasilMandante ? ' destaque' : ''}">${nomeMandante}</span>
+            <span class="copa-fx-flag">${bandeiraMandante}</span>
         </div>
-
-        <!-- Linha principal: Seleções e Placar -->
-        <div class="flex items-center">
-            <!-- Seleção Mandante -->
-            <div class="flex items-center gap-2 flex-1 min-w-0">
-                <span class="text-lg shrink-0">${bandeiraMandante}</span>
-                ${jogo.logoMandante ? `<img src="${jogo.logoMandante}" class="w-5 h-5 object-contain shrink-0" onerror="this.style.display='none'">` : ''}
-                <span class="text-white font-medium text-[11px] truncate">${jogo.mandante}</span>
-            </div>
-
-            <!-- Placar Central -->
-            <div class="flex flex-col items-center justify-center min-w-[60px] shrink-0 px-1.5">
-                ${agendado ? `
-                    <span class="font-brand text-base" style="color: var(--app-copa-secondary);">vs</span>
-                    <span class="text-white/50 text-[9px]">${jogo.horario}</span>
-                ` : `
-                    <span class="${aoVivo ? 'text-white' : 'text-white/70'} ${aoVivo ? 'text-lg' : 'text-base'} font-brand leading-tight tabular-nums">
-                        ${jogo.golsMandante ?? 0} - ${jogo.golsVisitante ?? 0}
-                    </span>
-                `}
-            </div>
-
-            <!-- Seleção Visitante -->
-            <div class="flex items-center gap-2 flex-1 min-w-0 justify-end">
-                <span class="text-white font-medium text-[11px] truncate text-right">${jogo.visitante}</span>
-                ${jogo.logoVisitante ? `<img src="${jogo.logoVisitante}" class="w-5 h-5 object-contain shrink-0" onerror="this.style.display='none'">` : ''}
-                <span class="text-lg shrink-0">${bandeiraVisitante}</span>
-            </div>
+        <div class="copa-fx-score">${centro}</div>
+        <div class="copa-fx-away">
+            <span class="copa-fx-flag">${bandeiraVisitante}</span>
+            <span class="copa-fx-name${isBrasilVisitante ? ' destaque' : ''}">${nomeVisitante}</span>
         </div>
-
-        <!-- Footer: Estádio -->
-        ${jogo.estadio ? `
-            <div class="mt-1 text-center">
-                <span class="text-[8px] text-white/25">${jogo.estadio}${jogo.cidade ? `, ${jogo.cidade}` : ''}</span>
-            </div>
-        ` : ''}
+        <div class="copa-fx-status">${status}</div>
     </div>
     `;
 }

@@ -2,6 +2,14 @@
 <!-- Fragmento HTML para inserção via navegação SPA -->
 <div id="copa-2026-mundo-container" class="copa-mundo-page">
 
+    <!-- Botão Voltar -->
+    <button
+        onclick="window.participanteNav ? window.participanteNav.navegarPara('home') : history.back()"
+        class="copa-btn-voltar"
+        aria-label="Voltar">
+        <span class="material-icons">arrow_back</span>
+    </button>
+
     <!-- ═══════════════════════════════════════════════════
          HERO / COUNTDOWN
          ═══════════════════════════════════════════════════ -->
@@ -9,9 +17,9 @@
         <div class="copa-hero-bg"></div>
         <div class="copa-hero-content">
             <div class="copa-hero-flags">
-                <span class="copa-host-flag"><span class="material-icons" style="color:var(--app-copa-accent);font-size:2rem;">flag</span> USA</span>
-                <span class="copa-host-flag"><span class="material-icons" style="color:var(--app-copa-accent);font-size:2rem;">flag</span> MEX</span>
-                <span class="copa-host-flag"><span class="material-icons" style="color:var(--app-copa-accent);font-size:2rem;">flag</span> CAN</span>
+                <span class="copa-host-flag"><img src="https://flagcdn.com/w80/us.png" alt="EUA" class="copa-flag-img"> USA</span>
+                <span class="copa-host-flag"><img src="https://flagcdn.com/w80/mx.png" alt="México" class="copa-flag-img"> MEX</span>
+                <span class="copa-host-flag"><img src="https://flagcdn.com/w80/ca.png" alt="Canadá" class="copa-flag-img"> CAN</span>
             </div>
             <h1 class="copa-hero-title">COPA DO MUNDO</h1>
             <p class="copa-hero-subtitle">2026</p>

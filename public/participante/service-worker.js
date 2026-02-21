@@ -16,7 +16,7 @@
 // BUILD: 2026-02-11T01:10:00Z
 // =====================================================================
 
-const CACHE_NAME = "super-cartola-v22-logo-ano12";
+const CACHE_NAME = "super-cartola-v24-copa2026-lp";
 
 // Arquivos essenciais para cache inicial
 const STATIC_ASSETS = [

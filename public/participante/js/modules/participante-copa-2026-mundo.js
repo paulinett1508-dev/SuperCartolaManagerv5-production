@@ -126,6 +126,35 @@ function renderizarCountdown() {
 // JOGOS DO BRASIL
 // ═══════════════════════════════════════════════════
 
+/**
+ * Renderiza uma linha compacta de fixture (scoreboard style)
+ * Usado em Jogos do Brasil e Tabela de Grupos da LP.
+ */
+function renderizarLpFxRow(jogo) {
+    const mandanteIsBrasil = jogo.mandante === 'Brasil';
+    const visitanteIsBrasil = jogo.visitante === 'Brasil';
+    const isBrasil = mandanteIsBrasil || visitanteIsBrasil;
+
+    const dataFmt = formatarData(jogo.data); // ex: "14/jun"
+
+    return `
+    <div class="copa-lp-fx-row${isBrasil ? ' brasil-jogo' : ''}">
+        <div class="copa-lp-fx-home">
+            <span class="copa-lp-fx-name${mandanteIsBrasil ? ' destaque' : ''}">${jogo.mandante}</span>
+            <span class="copa-lp-fx-flag">${getBandeira(jogo.mandante)}</span>
+        </div>
+        <div class="copa-lp-fx-score">
+            <span class="copa-lp-fx-time">${jogo.horarioBR || 'TBD'}</span>
+            <span class="copa-lp-fx-date">${dataFmt}</span>
+        </div>
+        <div class="copa-lp-fx-away">
+            <span class="copa-lp-fx-flag">${getBandeira(jogo.visitante)}</span>
+            <span class="copa-lp-fx-name${visitanteIsBrasil ? ' destaque' : ''}">${jogo.visitante}</span>
+        </div>
+        <div class="copa-lp-fx-round">R${jogo.rodada}</div>
+    </div>`;
+}
+
 function renderizarJogosBrasil() {
     const container = document.getElementById('copa-brasil-jogos');
     if (!container || !dadosCopa?.jogosFaseGrupos) return;
@@ -139,32 +168,7 @@ function renderizarJogosBrasil() {
         return;
     }
 
-    container.innerHTML = jogosBrasil.map(jogo => {
-        const mandanteIsBrasil = jogo.mandante === 'Brasil';
-        const visitanteIsBrasil = jogo.visitante === 'Brasil';
-        const dataFormatada = formatarData(jogo.data);
-
-        return `
-        <div class="copa-jogo-brasil">
-            <span class="copa-jogo-rodada">R${jogo.rodada}</span>
-            <div class="copa-jogo-times">
-                <div class="copa-jogo-time ${mandanteIsBrasil ? 'copa-jogo-time-brasil' : ''}">
-                    <span>${getBandeira(jogo.mandante)}</span>
-                    <span class="copa-jogo-time-nome">${jogo.mandante}</span>
-                </div>
-                <span class="copa-jogo-vs">vs</span>
-                <div class="copa-jogo-time ${visitanteIsBrasil ? 'copa-jogo-time-brasil' : ''}">
-                    <span class="copa-jogo-time-nome">${jogo.visitante}</span>
-                    <span>${getBandeira(jogo.visitante)}</span>
-                </div>
-            </div>
-            <div class="copa-jogo-info">
-                <span class="copa-jogo-data">${dataFormatada} ${jogo.horarioBR}</span>
-                <span class="copa-jogo-local">${jogo.estadio}</span>
-            </div>
-        </div>
-        `;
-    }).join('');
+    container.innerHTML = `<div class="copa-lp-fx-table">${jogosBrasil.map(renderizarLpFxRow).join('')}</div>`;
 }
 
 // ═══════════════════════════════════════════════════
@@ -253,23 +257,9 @@ function renderizarGrupos() {
                 <span class="copa-grupo-arrow">&#9654;</span>
             </summary>
             <div class="copa-grupo-content">
-                ${jogosDoGrupo.map(jogo => {
-                    const mandanteIsBrasil = jogo.mandante === 'Brasil';
-                    const visitanteIsBrasil = jogo.visitante === 'Brasil';
-                    return `
-                    <div class="copa-grupo-jogo">
-                        <span class="copa-grupo-jogo-rodada">R${jogo.rodada}</span>
-                        <div class="copa-grupo-jogo-times">
-                            <span>${getBandeira(jogo.mandante)}</span>
-                            <span class="copa-grupo-jogo-team ${mandanteIsBrasil ? 'copa-grupo-jogo-team-brasil' : ''}">${jogo.mandante}</span>
-                            <span class="copa-grupo-jogo-vs">vs</span>
-                            <span class="copa-grupo-jogo-team ${visitanteIsBrasil ? 'copa-grupo-jogo-team-brasil' : ''}">${jogo.visitante}</span>
-                            <span>${getBandeira(jogo.visitante)}</span>
-                        </div>
-                        <span class="copa-grupo-jogo-info">${formatarData(jogo.data)} ${jogo.horarioBR}</span>
-                    </div>
-                    `;
-                }).join('')}
+                <div class="copa-lp-fx-table" style="padding: 0 4px;">
+                    ${jogosDoGrupo.map(renderizarLpFxRow).join('')}
+                </div>
             </div>
         </details>
         `;

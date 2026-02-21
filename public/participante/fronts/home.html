@@ -1194,71 +1194,295 @@
     font-family: Inter, sans-serif;
 }
 
-/* === COPA DO MUNDO - COLAPSÁVEL === */
-.copa-home-section {
-    padding: 0;
-}
+/* ══════════════════════════════════════════════════
+   COPA 2026 — BROADCAST PANEL
+   ══════════════════════════════════════════════════ */
+.copa-home-section { padding: 0; position: relative; }
 
+/* ── Header ── */
 .copa-home-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 12px 16px;
-    background: var(--app-copa-gradient);
-    border: 1px solid var(--app-copa-border);
+    min-height: 58px;
+    padding: 0 14px;
+    background: linear-gradient(135deg, #6b1029 0%, #1a2f4a 55%, #162840 100%);
+    border: 1px solid rgba(212, 175, 55, 0.28);
     border-radius: 12px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    transition: opacity 0.2s;
 }
-
-.copa-home-header:active {
-    transform: scale(0.99);
-    opacity: 0.9;
+/* Gold accent bar */
+.copa-home-header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #D4AF37 0%, rgba(212,175,55,0.25) 65%, transparent 100%);
 }
+/* Subtle diagonal texture */
+.copa-home-header::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        -50deg,
+        transparent, transparent 18px,
+        rgba(255,255,255,0.012) 18px, rgba(255,255,255,0.012) 19px
+    );
+    pointer-events: none;
+}
+.copa-home-header:active { opacity: 0.85; }
 
 .copa-home-header-left {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    position: relative;
+    z-index: 1;
+}
+
+.copa-home-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.28);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.copa-home-titles { display: flex; flex-direction: column; gap: 1px; }
+
+.copa-home-title {
+    font-family: 'Russo One', sans-serif;
+    font-size: 13px;
+    color: #fff;
+    letter-spacing: 0.2px;
+    line-height: 1.2;
+}
+
+.copa-home-subtitle {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1.2;
+}
+
+.copa-home-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    z-index: 1;
+}
+
+.copa-home-phase-badge {
+    font-family: 'Russo One', sans-serif;
+    font-size: 8px;
+    color: var(--app-copa-secondary, #D4AF37);
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.22);
+    padding: 2px 7px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.copa-home-live-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Russo One', sans-serif;
+    font-size: 8px;
+    color: #4ade80;
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    padding: 2px 6px;
+    border-radius: 20px;
+    letter-spacing: 0.4px;
+}
+.copa-home-live-dot {
+    width: 5px;
+    height: 5px;
+    background: #4ade80;
+    border-radius: 50%;
+    animation: copaHeaderPulse 1.5s ease-in-out infinite;
+}
+@keyframes copaHeaderPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
 }
 
 .copa-home-chevron {
-    font-size: 22px;
-    color: rgba(255,255,255,0.7);
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.5);
     transition: transform 0.3s ease;
+    position: relative;
+    z-index: 1;
 }
 
-/* Estado expandido */
+/* Expanded */
 .copa-home-section.expanded .copa-home-header {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
-    border-bottom: none;
+    border-bottom-color: transparent;
 }
+.copa-home-section.expanded .copa-home-chevron { transform: rotate(180deg); }
 
-.copa-home-section.expanded .copa-home-chevron {
-    transform: rotate(180deg);
-}
-
-/* Conteúdo colapsável */
+/* ── Content panel ── */
 .copa-home-content {
-    max-height: 500px;
-    overflow: hidden;
-    transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
-    background: linear-gradient(180deg, rgba(30, 58, 95, 0.15) 0%, var(--app-surface) 100%);
-    border: 1px solid var(--app-copa-border);
+    max-height: 420px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+    background: #0d1a2e;
+    border: 1px solid rgba(212, 175, 55, 0.2);
     border-top: none;
     border-radius: 0 0 12px 12px;
-    padding: 4px 0 8px;
     opacity: 1;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212, 175, 55, 0.18) transparent;
 }
-
 .copa-home-content.collapsed {
     max-height: 0;
-    padding: 0;
     opacity: 0;
     border: none;
+    overflow: hidden;
 }
+
+/* ── Fixture Table — Scoreboard rows ── */
+.copa-fx-section { padding: 4px 0 2px; }
+.copa-fx-section + .copa-fx-section {
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* Label de seção: hairline + texto inline — zero altura extra */
+.copa-fx-section-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 12px 3px;
+    font-family: 'Russo One', sans-serif;
+    font-size: 7px;
+    color: rgba(255, 255, 255, 0.28);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+.copa-fx-section-header .material-icons { font-size: 9px !important; }
+
+.copa-fx-data-label {
+    font-size: 7px;
+    color: rgba(255, 255, 255, 0.2);
+    padding: 2px 12px 1px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.copa-fx-table { display: flex; flex-direction: column; }
+
+.copa-fx-row {
+    display: grid;
+    grid-template-columns: 1fr 46px 1fr 12px;
+    align-items: center;
+    gap: 3px;
+    padding: 5px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+.copa-fx-row:last-child { border-bottom: none; }
+.copa-fx-row.ao-vivo   { background: rgba(34, 197, 94, 0.06); }
+.copa-fx-row.encerrado { opacity: 0.55; }
+.copa-fx-row.brasil-jogo {
+    border-left: 2px solid rgba(212, 175, 55, 0.5);
+    padding-left: 10px;
+    background: rgba(212, 175, 55, 0.03);
+}
+
+.copa-fx-home {
+    display: flex; align-items: center; gap: 3px;
+    justify-content: flex-end; min-width: 0;
+}
+.copa-fx-away {
+    display: flex; align-items: center; gap: 3px;
+    justify-content: flex-start; min-width: 0;
+}
+
+.copa-fx-name {
+    font-size: 10px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 74px;
+}
+.copa-fx-name.destaque { color: #fff; font-weight: 700; }
+
+.copa-fx-flag { font-size: 12px; flex-shrink: 0; line-height: 1; }
+
+.copa-fx-score { display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+.copa-fx-score-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 700; color: #fff;
+    letter-spacing: -0.5px; line-height: 1;
+}
+.copa-fx-score-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; font-weight: 600;
+    color: var(--app-copa-secondary, #D4AF37);
+}
+
+.copa-fx-status {
+    display: flex; align-items: center; justify-content: center;
+    width: 10px; flex-shrink: 0;
+}
+.copa-fx-live-dot {
+    width: 5px; height: 5px;
+    background: #22c55e; border-radius: 50%;
+    animation: copaLivePulse 1.5s ease-in-out infinite;
+}
+@keyframes copaLivePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.38; transform: scale(0.7); }
+}
+.copa-fx-fim-label {
+    font-size: 7px; color: rgba(255,255,255,0.2);
+    font-weight: 600; letter-spacing: 0.3px;
+}
+
+/* Empty state */
+.copa-home-empty {
+    padding: 20px 12px; text-align: center; color: rgba(255,255,255,0.22);
+}
+.copa-home-empty .material-icons { font-size: 1.6rem; display: block; margin-bottom: 6px; }
+.copa-home-empty p { font-size: 11px; }
+
+/* CTA */
+.copa-home-cta {
+    padding: 8px 12px 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+.copa-home-cta-btn {
+    width: 100%;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    padding: 10px;
+    border-radius: 8px;
+    font-family: 'Russo One', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.6px;
+    color: #fff;
+    background: linear-gradient(135deg, rgba(107,16,41,0.85) 0%, rgba(26,47,74,0.9) 100%);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+}
+.copa-home-cta-btn:active { opacity: 0.82; transform: scale(0.99); }
+.copa-home-cta-btn .material-icons { font-size: 14px; color: var(--app-copa-secondary, #D4AF37); }
 
 /* === LIBERTADORES 2026 - FAIXA NOTÍCIAS === */
 .liberta-home-section {
