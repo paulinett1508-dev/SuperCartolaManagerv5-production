@@ -30,7 +30,8 @@ const AppVersion = {
 
         try {
             // Limpar apenas caches com nomes antigos (não o atual do SW)
-            const CURRENT_SW_CACHE = 'super-cartola-v22-logo-ano12';
+            // ⚠️ MANTER SINCRONIZADO com CACHE_NAME em service-worker.js
+            const CURRENT_SW_CACHE = 'super-cartola-v25-copa2026-modal';
             const cacheNames = await caches.keys();
             const obsoletos = cacheNames.filter(name => name !== CURRENT_SW_CACHE);
 
@@ -400,7 +401,8 @@ const AppVersion = {
         // porque o SW perdia seus assets e tudo precisava ser re-baixado do zero.
         if ('caches' in window) {
             try {
-                const CURRENT_SW_CACHE = 'super-cartola-v22-logo-ano12';
+                // ⚠️ MANTER SINCRONIZADO com CACHE_NAME em service-worker.js
+                const CURRENT_SW_CACHE = 'super-cartola-v25-copa2026-modal';
                 const names = await caches.keys();
                 const obsoletos = names.filter(name => name !== CURRENT_SW_CACHE);
                 if (obsoletos.length > 0) {

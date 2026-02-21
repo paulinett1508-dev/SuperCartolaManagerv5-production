@@ -36,6 +36,7 @@ import {
   triggerMitoMico
 } from '../services/notificationTriggers.js';
 import logger from '../utils/logger.js';
+import { invalidarCachesLiga } from '../utils/cache-invalidator.js';
 
 // ============================================================================
 // ✅ v3.0: FUNÇÕES SaaS DINÂMICAS (Multi-Tenant)
@@ -533,6 +534,14 @@ export const consolidarRodada = async (req, res) => {
         );
 
         await session.commitTransaction();
+
+        // 12c. INVALIDAR CACHES DEPENDENTES (pós-commit)
+        try {
+            await invalidarCachesLiga(ligaId, CURRENT_SEASON, `Consolidação R${rodadaNum} completada`);
+            logger.log(`[CONSOLIDAÇÃO] 🗑️ Caches dependentes invalidados para liga ${ligaId}`);
+        } catch (cacheError) {
+            logger.error(`[CONSOLIDAÇÃO] ⚠️ Erro ao invalidar caches (não-fatal):`, cacheError.message);
+        }
 
         // 13. BACKUP PARA DATA LAKE (após commit, não bloqueia consolidação)
         // Salva dados permanentes para Hall da Fama e restaurações futuras

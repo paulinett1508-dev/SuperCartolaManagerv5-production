@@ -210,8 +210,18 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 | **Frases PT-BR** | "auditar cache", "cache desatualizado", "limpar cache", "velocidade do app", "performance de cache", "CACHE-APP", "CACHE-WEB", "cache offline" |
 | **Modos** | `CACHE-APP --participante`, `CACHE-WEB --admin`, `CACHE-APP --admin` |
 | **Contexto** | Problemas de cache, performance, dados desatualizados nos apps |
-| **NÃO confundir** | Cache de backend/MongoDB → `db-guardian`; Otimizar JS/CSS → `frontend-crafter` |
+| **NÃO confundir** | Cache de backend/MongoDB → `db-guardian`; Otimizar JS/CSS → `frontend-crafter`; Monitoramento profundo participante → `cache-sentinel` |
 | **Localização** | `docs/skills/04-project-specific/cache-auditor.md` |
+
+#### cache-sentinel
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `cache stale`, `cache antigo`, `sentinel`, `cache participante`, `monitorar cache`, `cache prevalecendo`, `dado antigo no app`, `vasculhar caches` |
+| **Frases PT-BR** | "cache antigo prevalecendo", "dado desatualizado no app", "participante vendo dado antigo", "cache não tá limpando", "monitorar cache do app", "verificar se cache tá atualizado", "SW desatualizado", "IndexedDB stale", "cache sentinel", "vasculhar caches do participante" |
+| **Modos** | `--full`, `--mongo`, `--sw`, `--frontend`, `--live` |
+| **Contexto** | Monitoramento proativo de caches stale no app participante, pre-flight de rodada, pos-deploy, investigação de dados antigos |
+| **NÃO confundir** | Auditoria broad dos 3 ambientes → `cache-auditor`; Cache de backend puro → `db-guardian` |
+| **Localização** | `~/.agents/skills/cache-sentinel/SKILL.md` |
 
 #### auditor-module
 | Tipo | Keywords |
@@ -312,6 +322,9 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | "avalie qualidade deste html" | `stitch-adapter` | Avaliação score 0-100 |
 | "endpoint do cartola" | `cartola-api` | API externa |
 | "cache tá lento" | `cache-auditor` | Performance de cache |
+| "cache antigo prevalecendo" | `cache-sentinel` | Monitoramento proativo |
+| "dado desatualizado no app" | `cache-sentinel` | Cache stale participante |
+| "vasculhar caches" | `cache-sentinel` | Investigação profunda |
 | "audite o módulo top 10" | `auditor-module` | Auditoria de módulo |
 | "auditar UX do app" | `ux-auditor-app` | Auditoria UX holística do app |
 | "revisar design do participante" | `ux-auditor-app` | Consistência visual do app |
@@ -350,6 +363,9 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | Auditoria UX + correção | `ux-auditor-app` → `frontend-crafter` |
 | Auditoria live pré-rodada | `live-experience` → `cache-auditor` → `ux-auditor-app` |
 | Auditoria live completa | `live-experience --report` → `auditor-module parciais` → `cache-auditor CACHE-APP --participante` |
+| Cache stale participante | `cache-sentinel --full` (profundidade no participante) |
+| Pre-flight rodada (cache) | `cache-sentinel --live` → `live-experience` |
+| Pre-release cache completo | `cache-sentinel --full` → `cache-auditor CACHE-WEB --admin` |
 | HTML externo → Código | `stitch-adapter` → `frontend-crafter` (ajustes se necessário) |
 | Documentação | `system-scribe` |
 | Deploy completo | `git-commit-push` → `replit-pull` |

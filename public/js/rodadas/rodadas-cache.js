@@ -3,9 +3,9 @@
 
 // CONFIGURAÇÃO DE CACHE
 const CACHE_CONFIG = {
-  maxAge: 5 * 60 * 1000, // 5 minutos
+  maxAge: 3 * 60 * 1000, // 3 minutos (alinhado com IDB TTL do cache-manager.js)
   maxEntries: 100,
-  cleanupInterval: 5 * 60 * 1000, // 5 minutos (mesmo do maxAge)
+  cleanupInterval: 3 * 60 * 1000, // 3 minutos (mesmo do maxAge)
 };
 
 // STORE DE CACHE

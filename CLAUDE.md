@@ -263,6 +263,7 @@ Documentação das skills: [`docs/skills/`](docs/skills/) (agnóstico, Markdown 
 | "adaptar html", "converter html externo", "html do stitch" | **stitch-adapter** | Utility |
 | "API Cartola", "endpoint", "scout", "mercado" | **cartola-api** | Project |
 | "auditar cache", "cache lento", "Service Worker" | **cache-auditor** | Project |
+| "cache stale", "cache antigo", "sentinel", "monitorar cache", "dado antigo no app", "vasculhar caches" | **cache-sentinel** | Project |
 | "auditar módulo", "checklist módulo" | **auditor-module** | Project |
 | "auditar UX app", "revisar design participante", "visual do app" | **ux-auditor-app** | Project |
 | "auditar live", "experiência ao vivo", "parciais ao vivo", "orchestrator ok", "pre-flight rodada" | **live-experience** | Project |
@@ -338,6 +339,7 @@ As keywords ativam a mesma skill automaticamente (ver tabela acima).
 | `/code` | "implemente", "aplique spec" |
 | `/auditor-module [modulo]` | "audite o módulo X", "checklist módulo" |
 | `/cache-auditor [modo]` | "auditar cache", "cache desatualizado" |
+| `/cache-sentinel [modo]` | "cache stale", "cache antigo prevalecendo", "monitorar cache participante", "vasculhar caches" |
 | `/ux-auditor-app` | "auditar UX do app", "revisar design participante", "visual do app tá ok?" |
 | `/live-experience` | "auditar experiência ao vivo", "parciais tão ok?", "orchestrator tá rodando?", "pre-flight rodada" |
 | `/anti-frankenstein` | "anti-frank", "ative modo anti-frank", "antes de criar CSS", "já existe?", "blindar frontend", "HTMLs no modo anti-frank" |

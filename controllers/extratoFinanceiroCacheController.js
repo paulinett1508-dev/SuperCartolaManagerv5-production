@@ -121,20 +121,34 @@ async function buscarAcertosFinanceiros(ligaId, timeId, temporada = CURRENT_SEAS
     }
 }
 
-// ✅ v4.0: Verificar se temporada está finalizada
+// ✅ v4.1: Verificar se temporada está finalizada (dinâmico por temporada)
 async function verificarTemporadaFinalizada(ligaId) {
     try {
         const liga = await Liga.findById(toLigaId(ligaId)).lean();
         if (!liga) return { finalizada: false };
 
-        const temporada2025 = liga.configuracoes?.temporada_2025;
-        if (temporada2025?.status === 'finalizada') {
+        // Verificar temporada atual dinamicamente (não mais hardcoded)
+        const temporadaKey = `temporada_${CURRENT_SEASON}`;
+        const temporadaData = liga.configuracoes?.[temporadaKey];
+        if (temporadaData?.status === 'finalizada') {
             return {
                 finalizada: true,
-                rodadaFinal: temporada2025.rodada_final || 38,
-                dataEncerramento: temporada2025.data_encerramento
+                rodadaFinal: temporadaData.rodada_final || 38,
+                dataEncerramento: temporadaData.data_encerramento
             };
         }
+
+        // Fallback: verificar temporada anterior (para transição de ano)
+        const temporadaAnteriorKey = `temporada_${CURRENT_SEASON - 1}`;
+        const temporadaAnterior = liga.configuracoes?.[temporadaAnteriorKey];
+        if (temporadaAnterior?.status === 'finalizada') {
+            return {
+                finalizada: true,
+                rodadaFinal: temporadaAnterior.rodada_final || 38,
+                dataEncerramento: temporadaAnterior.data_encerramento
+            };
+        }
+
         return { finalizada: false };
     } catch (error) {
         logger.error('[CACHE-CONTROLLER] Erro ao verificar temporada:', error);

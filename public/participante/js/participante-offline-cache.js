@@ -422,16 +422,18 @@ const OfflineCache = {
     /**
      * Salvar extrato financeiro
      */
-    async saveExtrato(ligaId, timeId, data) {
-        const key = `${ligaId}_${timeId}`;
+    async saveExtrato(ligaId, timeId, data, temporada = null) {
+        const temp = temporada || window.ParticipanteConfig?.CURRENT_SEASON || new Date().getFullYear();
+        const key = `${ligaId}_${timeId}_${temp}`;
         return this.set('extrato', key, data);
     },
 
     /**
      * Buscar extrato com fallback
      */
-    async getExtratoWithFallback(ligaId, timeId, fetchFn, onUpdate) {
-        const key = `${ligaId}_${timeId}`;
+    async getExtratoWithFallback(ligaId, timeId, fetchFn, onUpdate, temporada = null) {
+        const temp = temporada || window.ParticipanteConfig?.CURRENT_SEASON || new Date().getFullYear();
+        const key = `${ligaId}_${timeId}_${temp}`;
         return this.getWithFallback('extrato', key, fetchFn, onUpdate);
     },
 

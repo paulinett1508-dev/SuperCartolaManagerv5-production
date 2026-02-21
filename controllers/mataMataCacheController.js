@@ -95,6 +95,7 @@ export const deletarCacheMataMata = async (req, res) => {
         await MataMataCache.deleteOne({
             liga_id: ligaId,
             edicao: Number(edicao),
+            temporada: CURRENT_SEASON,
         });
 
         logger.log(
