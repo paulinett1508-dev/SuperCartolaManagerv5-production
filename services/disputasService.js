@@ -6,7 +6,7 @@
 import mongoose from "mongoose";
 import PontosCorridosCache from "../models/PontosCorridosCache.js";
 import MataMataCache from "../models/MataMataCache.js";
-import ArtilheiroCampeao from "../models/ArtilheiroCampeao.js";
+// ArtilheiroCampeao removido - agora usa GolsConsolidados diretamente
 import Goleiros from "../models/Goleiros.js";
 import CapitaoCaches from "../models/CapitaoCaches.js";
 import MelhorMesCache from "../models/MelhorMesCache.js";
@@ -440,29 +440,95 @@ export async function calcularMataMata(ligaId, rodada, timeId, temporada) {
  */
 export async function calcularArtilheiro(ligaId, rodada, timeId, temporada) {
     try {
-        const dados = await ArtilheiroCampeao.findOne({
+        // ✅ v1.1: Usa GolsConsolidados diretamente (agregação) em vez de ArtilheiroCampeao
+        // Isso garante que dados coletados via script apareçam no Raio-X
+        let GolsConsolidados;
+        try {
+            GolsConsolidados = mongoose.model("GolsConsolidados");
+        } catch (e) {
+            // Model não registrado ainda, tentar registrar
+            const GolsConsolidadosSchema = new mongoose.Schema({
+                ligaId: String,
+                timeId: Number,
+                rodada: Number,
+                temporada: Number,
+                golsPro: { type: Number, default: 0 },
+                golsContra: { type: Number, default: 0 },
+                saldo: { type: Number, default: 0 },
+                jogadores: [{ atletaId: Number, nome: String, gols: Number, golsContra: Number }],
+            });
+            GolsConsolidados = mongoose.model("GolsConsolidados", GolsConsolidadosSchema);
+        }
+
+        // Buscar todos os gols consolidados até a rodada atual
+        const golsConsolidados = await GolsConsolidados.find({
             ligaId: String(ligaId),
             temporada: temporada,
+            rodada: { $lte: rodada },
         }).lean();
 
-        if (!dados || !dados.dados) {
-            console.log(`${LOG_PREFIX} [ART] Dados não encontrados`);
+        if (!golsConsolidados || golsConsolidados.length === 0) {
+            console.log(`${LOG_PREFIX} [ART] Nenhum dado em GolsConsolidados para liga=${ligaId} temp=${temporada}`);
             return null;
         }
 
-        // Ordenar por gols pro (ranking atual)
-        const ranking = dados.dados
-            .map(d => ({
-                timeId: d.timeId,
-                nome: d.nomeCartoleiro,
-                gols: d.golsPro,
-                saldo: d.saldoGols,
-                detalhePorRodada: d.detalhePorRodada,
-            }))
+        // Agregar por timeId
+        const agregado = {};
+        const detalhePorTime = {}; // Para calcular mudanças de posição
+
+        golsConsolidados.forEach(g => {
+            const tid = g.timeId;
+            if (!agregado[tid]) {
+                agregado[tid] = {
+                    timeId: tid,
+                    nome: '', // Será preenchido depois
+                    gols: 0,
+                    golsContra: 0,
+                    saldo: 0,
+                };
+                detalhePorTime[tid] = {};
+            }
+            agregado[tid].gols += g.golsPro || 0;
+            agregado[tid].golsContra += g.golsContra || 0;
+            agregado[tid].saldo += (g.golsPro || 0) - (g.golsContra || 0);
+
+            // Guardar detalhe por rodada para calcular mudanças
+            detalhePorTime[tid][g.rodada] = { golsPro: g.golsPro || 0 };
+        });
+
+        // Buscar nomes dos participantes via Rodada (mais confiável)
+        const rodadaDoc = await Rodada.findOne({
+            ligaId: mongoose.Types.ObjectId.isValid(ligaId) ? new mongoose.Types.ObjectId(ligaId) : ligaId,
+            rodada: rodada,
+            temporada: temporada,
+        }).lean();
+
+        if (rodadaDoc) {
+            // Buscar todos os participantes da rodada para pegar os nomes
+            const participantes = await Rodada.find({
+                ligaId: mongoose.Types.ObjectId.isValid(ligaId) ? new mongoose.Types.ObjectId(ligaId) : ligaId,
+                rodada: rodada,
+                temporada: temporada,
+            }, { timeId: 1, nome_cartola: 1 }).lean();
+
+            participantes.forEach(p => {
+                if (agregado[p.timeId]) {
+                    agregado[p.timeId].nome = p.nome_cartola || `Time ${p.timeId}`;
+                }
+            });
+        }
+
+        // Converter para array e ordenar por gols (critério padrão)
+        const ranking = Object.values(agregado)
             .sort((a, b) => {
                 if (b.gols !== a.gols) return b.gols - a.gols;
                 return b.saldo - a.saldo;
             });
+
+        if (ranking.length === 0) {
+            console.log(`${LOG_PREFIX} [ART] Ranking vazio após agregação`);
+            return null;
+        }
 
         const minhaPosicao = ranking.findIndex(r => r.timeId === timeId) + 1;
         const meusDados = ranking.find(r => r.timeId === timeId);
@@ -481,12 +547,11 @@ export async function calcularArtilheiro(ligaId, rodada, timeId, temporada) {
                 rival = segundo.nome;
             }
 
-            // Recalcular ranking da rodada anterior usando detalhePorRodada
+            // Recalcular ranking da rodada anterior
             if (rodada > 1) {
                 const rankingAnterior = ranking
                     .map(r => {
-                        // Subtrair gols desta rodada para obter acumulado até rodada N-1
-                        const golsEstaRodada = extrairGolsDaRodada(r.detalhePorRodada, rodada);
+                        const golsEstaRodada = detalhePorTime[r.timeId]?.[rodada]?.golsPro || 0;
                         return {
                             timeId: r.timeId,
                             gols: r.gols - golsEstaRodada,
@@ -494,10 +559,6 @@ export async function calcularArtilheiro(ligaId, rodada, timeId, temporada) {
                     })
                     .sort((a, b) => b.gols - a.gols);
 
-                const liderAnterior = rankingAnterior[0];
-                const liderAtual = ranking[0];
-
-                // Verificar mudanças para o time consultado
                 const minhaPosAnterior = rankingAnterior.findIndex(r => r.timeId === timeId) + 1;
 
                 if (minhaPosicao === 1 && minhaPosAnterior > 1) {
@@ -508,37 +569,23 @@ export async function calcularArtilheiro(ligaId, rodada, timeId, temporada) {
             }
         }
 
-        // Buscar gols da rodada via GolsConsolidados
+        // Buscar artilheiro da rodada específica
         let atletaRodada = null;
-        try {
-            const GolsConsolidados = mongoose.model("GolsConsolidados");
-            const golsRodada = await GolsConsolidados.findOne({
-                ligaId: String(ligaId),
-                timeId: timeId,
-                rodada: rodada,
-                temporada: temporada,
-            }).lean();
+        const golsRodada = golsConsolidados.find(g => g.timeId === timeId && g.rodada === rodada);
+        if (golsRodada && golsRodada.jogadores && golsRodada.jogadores.length > 0) {
+            const artilheiroRodada = [...golsRodada.jogadores]
+                .filter(j => j.gols > 0)
+                .sort((a, b) => b.gols - a.gols)[0];
 
-            if (golsRodada && golsRodada.jogadores && golsRodada.jogadores.length > 0) {
-                // Pegar o jogador com mais gols na rodada
-                const artilheiroRodada = [...golsRodada.jogadores]
-                    .filter(j => j.gols > 0)
-                    .sort((a, b) => b.gols - a.gols)[0];
-
-                if (artilheiroRodada) {
-                    atletaRodada = {
-                        nome: artilheiroRodada.nome,
-                        gols: artilheiroRodada.gols,
-                        pontos: 0,
-                    };
-                }
+            if (artilheiroRodada) {
+                atletaRodada = {
+                    nome: artilheiroRodada.nome,
+                    gols: artilheiroRodada.gols,
+                    pontos: 0,
+                };
             }
-        } catch (e) {
-            // GolsConsolidados pode não estar registrado ainda, fallback silencioso
-            console.log(`${LOG_PREFIX} [ART] GolsConsolidados não disponível, pulando gols da rodada`);
         }
 
-        // Remover detalhePorRodada do retorno (dados internos)
         return {
             classificacao: ranking.slice(0, 5).map((r, i) => ({
                 posicao: i + 1,

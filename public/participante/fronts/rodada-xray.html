@@ -211,15 +211,16 @@
 
 /* === SCORE CARD (Hero) === */
 .xray-score-card {
-    background: radial-gradient(ellipse at 50% 0%, rgba(255, 69, 0, 0.08) 0%, var(--xray-surface-elevated) 70%);
-    border: 1px solid var(--xray-border);
+    background: radial-gradient(ellipse at 50% 0%, rgba(255, 69, 0, 0.15) 0%, var(--xray-surface-elevated) 70%);
+    border: 1px solid rgba(255, 69, 0, 0.25);
     border-radius: 16px;
-    padding: 24px 20px;
+    padding: 20px 16px;
     text-align: center;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     position: relative;
     overflow: hidden;
-    animation: xray-pulseGlow 4s ease-in-out infinite;
+    /* Combina fadeIn + pulseGlow para não conflitar com xray-anim-section */
+    animation: xray-fadeSlideUp 0.5s ease-out forwards, xray-pulseGlow 4s ease-in-out 0.5s infinite;
 }
 
 .xray-score-card::before {

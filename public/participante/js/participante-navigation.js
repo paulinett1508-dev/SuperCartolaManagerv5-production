@@ -497,8 +497,8 @@ class ParticipanteNavigation {
      * estar explicitamente ativos em modulosAtivos.
      */
     _isModuloOpcionalInativo(moduloId) {
-        // Módulos de sistema/base: sempre permitidos
-        const modulosPermitidos = ['home', 'boas-vindas', 'extrato', 'ranking', 'rodadas', 'historico', 'configuracoes', 'copa-times-sc', 'copa-2026-mundo', 'regras'];
+        // Módulos de sistema/base: sempre permitidos (inclui sub-módulos como rodada-xray)
+        const modulosPermitidos = ['home', 'boas-vindas', 'extrato', 'ranking', 'rodadas', 'rodada-xray', 'historico', 'configuracoes', 'copa-times-sc', 'copa-2026-mundo', 'regras'];
         if (modulosPermitidos.includes(moduloId)) return false;
 
         // Sem dados de módulos carregados: permitir (graceful degradation)
