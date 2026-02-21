@@ -146,7 +146,10 @@ async function salvarFaseNoMongoDB(
     }
 
     // ✅ 3.5. Adicionar metadata do tamanho calculado
-    if (tamanhoTorneio && tamanhoTorneio !== TAMANHO_TORNEIO_DEFAULT) {
+    // ✅ FIX: SEMPRE enviar tamanhoTorneio, inclusive quando é o default (32).
+    // Bug anterior: quando tamanhoTorneio === 32, metadata não era enviada,
+    // e o backend não recebia o tamanho explícito, podendo usar fallback incorreto.
+    if (tamanhoTorneio) {
       dadosAtuais.metadata = {
         tamanhoTorneio: tamanhoTorneio,
         calculadoEm: new Date().toISOString()
