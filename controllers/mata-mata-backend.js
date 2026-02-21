@@ -1,8 +1,11 @@
 /**
- * MATA-MATA-BACKEND.JS v1.1
+ * MATA-MATA-BACKEND.JS v1.2
  * Lógica de Mata-Mata para Node.js - Espelho do frontend
  * Calcula todas as fases: primeira, oitavas, quartas, semis, final
  *
+ * v1.2: FIX CRÍTICO - Usar tamanhoTorneio do MataMataCache (bracket salvo pelo admin)
+ *   - Resolve bug onde participantes não classificados recebiam cobrança indevida
+ *   - O cálculo financeiro agora respeita o bracket salvo em vez de recalcular independente
  * v1.1: Fix conversão ligaId + logging detalhado
  */
 
@@ -10,6 +13,7 @@ import mongoose from "mongoose";
 import Rodada from "../models/Rodada.js";
 import Time from "../models/Time.js"; // Importar modelo Time
 import ModuleConfig from "../models/ModuleConfig.js"; // Importar ModuleConfig
+import MataMataCache from "../models/MataMataCache.js"; // ✅ v1.2: Ler tamanhoTorneio do cache
 import { calcularTamanhoIdealMataMata } from "../utils/tournamentUtils.js"; // Importar nova função
 import mataMataRules from "../config/rules/mata_mata.json" with { type: "json" }; // Importar regras padrão
 import { CURRENT_SEASON } from "../config/seasons.js";
@@ -289,13 +293,37 @@ async function calcularResultadosEdicao(ligaId, edicao, rodadaAtual, config) {
 
         // 2. Calcular tamanho ideal baseado em participantes HISTÓRICOS (quem jogou na rodada de definição)
         const totalParticipantesHistorico = rankingBase.length;
-        let tamanhoTorneio = calcularTamanhoIdealMataMata(totalParticipantesHistorico);
+        let tamanhoTorneio;
 
-        // ✅ FIX #1: Respeitar total_times configurado no wizard como teto
-        // Se o admin configurou 16 times no wizard, não usar 32 mesmo que haja 35 participantes
-        const totalTimesConfig = Number(config.wizard_respostas?.total_times);
-        if (totalTimesConfig && [8, 16, 32].includes(totalTimesConfig)) {
-            tamanhoTorneio = Math.min(tamanhoTorneio, totalTimesConfig);
+        // ✅ v1.2 FIX CRÍTICO: Ler tamanhoTorneio do MataMataCache (bracket salvo pelo admin)
+        // O bracket salvo é a FONTE DE VERDADE para quem participa do torneio.
+        // Sem este fix, o cálculo financeiro recalculava o tamanho independentemente
+        // e podia incluir participantes que o admin NÃO classificou (ex: 32 vs 16).
+        try {
+            const cacheEdicao = await MataMataCache.findOne({
+                liga_id: String(ligaId),
+                edicao: edicao.id,
+                temporada: CURRENT_SEASON,
+            }).select('tamanhoTorneio').lean();
+
+            if (cacheEdicao && cacheEdicao.tamanhoTorneio && [8, 16, 32, 64].includes(cacheEdicao.tamanhoTorneio)) {
+                tamanhoTorneio = cacheEdicao.tamanhoTorneio;
+                logger.log(`[MATA-BACKEND] ✅ tamanhoTorneio do cache: ${tamanhoTorneio} (bracket salvo pelo admin)`);
+            }
+        } catch (err) {
+            logger.warn(`[MATA-BACKEND] ⚠️ Erro ao ler MataMataCache para edição ${edicao.id}:`, err.message);
+        }
+
+        // Fallback: calcular dinamicamente se não há cache
+        if (!tamanhoTorneio) {
+            tamanhoTorneio = calcularTamanhoIdealMataMata(totalParticipantesHistorico);
+
+            // Respeitar total_times configurado no wizard como teto
+            const totalTimesConfig = Number(config.wizard_respostas?.total_times);
+            if (totalTimesConfig && [8, 16, 32].includes(totalTimesConfig)) {
+                tamanhoTorneio = Math.min(tamanhoTorneio, totalTimesConfig);
+            }
+            logger.log(`[MATA-BACKEND] ⚠️ Sem cache, tamanhoTorneio calculado: ${tamanhoTorneio} (fallback dinâmico)`);
         }
 
         if (tamanhoTorneio === 0) {
@@ -562,4 +590,4 @@ export async function criarMapaMataMata(ligaId, rodadaAtual) {
     return mapa;
 }
 
-logger.log("[MATA-BACKEND] ✅ Módulo v1.1 carregado");
+logger.log("[MATA-BACKEND] ✅ Módulo v1.2 carregado (fix tamanhoTorneio do cache)");

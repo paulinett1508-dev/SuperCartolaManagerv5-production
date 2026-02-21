@@ -283,6 +283,7 @@ export async function getResultadosMataMataFluxo(ligaIdParam = null) {
             edicao: edicao.id,
             fase: resultado.fase,
             valor: resultado.valor,
+            rodadaPontos: resultado.rodadaPontos, // ✅ FIX: Preservar rodadaPontos para mapeamento correto
           });
         });
 
@@ -336,7 +337,26 @@ export async function calcularResultadosEdicaoFluxo(
 ) {
   try {
     const resultadosFinanceiros = [];
-    const fases = getFasesParaTamanho(tamanhoTorneio);
+
+    // ✅ FIX CRÍTICO: Ler tamanhoTorneio do MataMataCache (bracket salvo pelo admin)
+    // Sem este fix, usava o tamanhoTorneio global (default 32 ou wizard),
+    // que podia ser diferente do bracket real salvo pelo admin.
+    let tamanhoTorneioEdicao = tamanhoTorneio; // fallback: módulo-level
+    try {
+      const resCacheEdicao = await fetch(`/api/mata-mata/cache/${ligaId}/${edicao.id}`);
+      if (resCacheEdicao.ok) {
+        const cacheData = await resCacheEdicao.json();
+        const tamCache = cacheData?.tamanhoTorneio;
+        if (tamCache && [8, 16, 32, 64].includes(tamCache)) {
+          tamanhoTorneioEdicao = tamCache;
+          console.log(`[MATA-FINANCEIRO] ✅ tamanhoTorneio da edição ${edicao.id} via cache: ${tamanhoTorneioEdicao}`);
+        }
+      }
+    } catch (err) {
+      console.warn(`[MATA-FINANCEIRO] ⚠️ Cache da edição ${edicao.id} indisponível, usando fallback: ${tamanhoTorneioEdicao}`);
+    }
+
+    const fases = getFasesParaTamanho(tamanhoTorneioEdicao);
     const primeiraFaseFluxo = fases[0];
 
     const rodadasFases = {};
@@ -374,14 +394,16 @@ export async function calcularResultadosEdicaoFluxo(
       }
     }
 
-    if (!Array.isArray(rankingBase) || rankingBase.length < tamanhoTorneio) {
+    if (!Array.isArray(rankingBase) || rankingBase.length < tamanhoTorneioEdicao) {
       console.error(
-        `[MATA-FINANCEIRO] Ranking base inválido para ${edicao.nome}: ${rankingBase?.length || 0}/${tamanhoTorneio}`,
+        `[MATA-FINANCEIRO] Ranking base inválido para ${edicao.nome}: ${rankingBase?.length || 0}/${tamanhoTorneioEdicao}`,
       );
       return [];
     }
 
-    let vencedoresAnteriores = rankingBase;
+    // ✅ FIX: Limitar rankingBase ao tamanhoTorneio (igual ao backend faz com slice)
+    const rankingClassificados = rankingBase.slice(0, tamanhoTorneioEdicao);
+    let vencedoresAnteriores = rankingClassificados;
     for (const fase of fases) {
       const rodadaPontosNum = rodadasFases[fase];
       if (rodadaPontosNum >= rodadaAtual) break;
@@ -393,7 +415,7 @@ export async function calcularResultadosEdicaoFluxo(
 
       const confrontosFase =
         fase === primeiraFaseFluxo
-          ? montarConfrontosPrimeiraFase(rankingBase, pontosDaRodadaAtual, tamanhoTorneio)
+          ? montarConfrontosPrimeiraFase(rankingClassificados, pontosDaRodadaAtual, tamanhoTorneioEdicao)
           : montarConfrontosFase(
               vencedoresAnteriores,
               pontosDaRodadaAtual,
