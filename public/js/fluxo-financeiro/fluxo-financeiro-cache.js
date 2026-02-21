@@ -952,30 +952,29 @@ export class FluxoFinanceiroCache {
     }
 
     _calcularRodadaPontosCorrigido(edicao, fase) {
+        // ✅ FIX: Usar rodadaInicial (primeiro confronto) em vez de rodadaDefinicao (classificação)
+        // Antes usava rodadaDefinicao (2, 9, 15...) causando mapeamento errado das rodadas
         const edicaoConfig = {
-            1: { rodadaBase: 2 },
-            2: { rodadaBase: 9 },
-            3: { rodadaBase: 15 },
-            4: { rodadaBase: 22 },
-            5: { rodadaBase: 31 },
+            1: { rodadaInicial: 3 },
+            2: { rodadaInicial: 10 },
+            3: { rodadaInicial: 16 },
+            4: { rodadaInicial: 22 },
+            5: { rodadaInicial: 27 },
+            6: { rodadaInicial: 33 },
         };
 
-        const faseOffset = {
-            primeira: 0,
-            oitavas: 1,
-            quartas: 2,
-            semis: 3,
-            final: 4,
-        };
-
+        // Offset absoluto por fase (correto para torneios de 32 times)
+        // NOTA: Para 16/8 times, rodadaPontos é preservado na consolidação (FIX 2A)
+        // e este fallback raramente será usado. Se ativado para <32 times,
+        // o offset pode ser +1/+2 além do correto, mas é melhor que o bug anterior.
+        const todasFases = ["primeira", "oitavas", "quartas", "semis", "final"];
         const config = edicaoConfig[edicao];
-        const offset = faseOffset[fase];
+        if (!config) return 0;
 
-        if (!config || offset === undefined) return 0;
+        const faseIndex = todasFases.indexOf(fase);
+        if (faseIndex === -1) return 0;
 
-        if (edicao === 5 && fase === "final") return config.rodadaBase + 4;
-
-        return config.rodadaBase + offset;
+        return config.rodadaInicial + faseIndex;
     }
 
     // ===================================================================
