@@ -1,379 +1,52 @@
-# Tarefas Pendentes - Super Cartola Manager
-
-> Atualizado: 2026-02-18 (sessao tarde)
-> Sessao 18/02 manha: AUDIT-009..014 concluidos (todos modulos auditados).
-> Sessao 18/02 tarde: Auditoria sincronismo 2025/2026 (commit 8323eab) + Consolidacao banco unico MongoDB (commit 84ce387).
-
----
-
-## ~~AUDITORIAS PENDENTES~~ ✅ TODAS CONCLUIDAS (18/02/2026)
-
-### ~~AUDIT-011: TOP 10~~ ✅ (4 fixes)
-### ~~AUDIT-012: MELHOR MES~~ ✅ (4 fixes)
-### ~~AUDIT-013: CAMPINHO~~ ✅ (0 fixes — modulo visualizacao)
-### ~~AUDIT-014: DICAS PREMIUM~~ ✅ (0 fixes — modulo API stateless)
-
----
-
-## ~~AUDITORIA SINCRONISMO + BANCO UNICO~~ ✅ CONCLUIDA (18/02/2026)
-
-**Resultado:** Sistema estava sincronizado em producao — banco real `cartola-manager` tem R1-R3 2026, 35 participantes, 43 caches 2026, 46 inscricoes 2026. Scripts e MCP apontavam para banco orfao `cartola-manager-dev` (dados ate dez/2025).
-
-**Fixes de codigo (commit `8323eab`):**
-- `utils/saldo-calculator.js` + `routes/tesouraria-routes.js`: 21x `>= 2026` → `>= CURRENT_SEASON`
-- `utils/seasonGuard.js`: remove LEAGUES hardcoded com IDs 2025
-
-**Consolidacao banco unico (commit `84ce387`):**
-- `mongo-server.js` (MCP) + 9 scripts: removida logica MONGO_URI_DEV
-- Todos usam exclusivamente `MONGO_URI` (cartola-manager)
-- `MONGO_URI_DEV` deletada dos Replit Secrets pelo admin
-- Liga producao: `nome` atualizado para "Super Cartola 2026"
-- `CLAUDE.md`: documenta banco unico e stack dev/prod
-
-**Estado MCP Mongo:** Agora conecta ao banco real `cartola-manager` ✅
-
-| MCP | Status |
-|-----|--------|
-| Mongo | ✅ Ativo — banco cartola-manager (real) |
-| Perplexity | ✅ Ativo |
-| Context7 | ✅ Ativo |
-| IDE | ✅ Ativo |
-| ~~Google Stitch~~ | ❌ Removido |
-| ~~Figma~~ | ❌ Removido |
-
----
-
-## RESUMO DAS AUDITORIAS CONCLUIDAS (AUDIT-006 a AUDIT-010)
-
-| # | Modulo | Score Antes→Depois | Fixes | Commits | Bug Seguranca |
-|---|--------|-------------------|-------|---------|---------------|
-| AUDIT-006 | Artilheiro | 70→90 | 12 | 3 | Auth 4 rotas |
-| AUDIT-007 | Capitao | 80→92 | 4 | 2 | - |
-| AUDIT-008 | Luva de Ouro | 73→91 | 5 | 1 | Auth diagnostico |
-| AUDIT-009 | Mata-Mata | 91→95 | 3 | 1 | - |
-| AUDIT-010 | Pontos Corridos | 82→93 | 4 | 1 | Auth 2 rotas POST |
-| AUDIT-011 | Top 10 | 82→92 | 4 | 1 | - |
-| AUDIT-012 | Melhor Mes | 78→90 | 4 | 1 | - |
-| AUDIT-013 | Campinho | 88 (sem fixes) | 0 | 0 | - |
-| AUDIT-014 | Dicas Premium | 87 (sem fixes) | 0 | 0 | - |
-
-**Padrao recorrente corrigido em todos:**
-1. Manager hooks sem `stub: true` → Documentado v1.1.0
-2. `RODADA_FINAL = 38` hardcoded → Import de `season-config.js`
-3. Config JSON com `ligas_habilitadas` / `temporada` stale → Limpo + nota ModuleConfig
-4. `[DEBUG-*]` console.logs → Removidos
-5. Rotas POST/DELETE sem `verificarAdmin` → Middleware adicionado
-
----
-
-## RESUMO SESSAO 2026-02-13
-
-### Tarefas Executadas
-| # | Tarefa | Resultado |
-|---|--------|-----------|
-| 1 | [MCP-001] Testar Stitch OAuth2 | OAuth2 AINDA expirado. Requer reautenticacao manual |
-| 2 | Restart servidor v8.12.0 | Ja rodando (boot 2026-02-13T10:43:28, PID 166512) |
-| 3 | [AUDIT-002] Validar extratos | ✅ CONCLUIDA — financeiro correto |
-| 4 | [AUDIT-001] Auditoria Extrato v2.0 | ✅ CONCLUIDA — implementacao completa |
-| 5 | [AUDIT-003] Ranking Geral + Parciais (Os Fuleros) | ✅ CONCLUIDA — ZERO discrepancias |
-
-### Achados AUDIT-002 (Extratos Financeiros)
-
-**Owner/Premium Isento:**
-- [x] Paulinett (13935277, premium:true) na Super Cartola: SEM debito -R$180 ✅
-- [x] Felipe Barbosa (8098497, sem premium): TEM debito -R$180 ✅
-- [x] Felipe Jokstay (575856, sem premium): TEM debito -R$180 ✅
-
-**Reconciliacao Financeira (API vs calculo manual):**
-- [x] Paulinett: -14 + (-13) + (-5) = -32 == API saldo_total -32 ✅
-- [x] Felipe Barbosa: -180 + 10 + 10 = -160 == API saldo_total -160 ✅
-- [x] Cassio (com legado): 163.38 + 0 + 17 = 180.38 == API saldo_total 180.38 ✅
-
-**Multi-Liga:**
-- [x] Super Cartola: saldo -32 (independente) ✅
-- [x] Os Fuleros: saldo -14 (independente) ✅
-
-**Issues Menores Encontrados (nao-bloqueantes):**
-- ~~`saldo_consolidado` no MongoDB stale~~ → Corrigido via reconciliacao --force 2026-02-13 (15/15 caches)
-- Alguns participantes (1323370, 8188312) sem entrada de inscricao e sem premium. Investigar se pagouInscricao=true.
-- MITO/MICO com valor=0 em Os Fuleros (config top10 sem valores_mito/valores_mico definidos).
-
-### Achados AUDIT-001 (Extrato v2.0 Redesign)
-
-**Todos 9 componentes da spec implementados:**
-- [x] Hero Card (saldo + toggle + status + pills) — `renderHeroCardV2()` L53-112
-- [x] Grid 2 colunas (sidebar + main) — `renderExtratoV2()` L522-531
-- [x] Grafico SVG #FF5500 + filtros — `renderChartV2()` + `renderExtratoChartV2()`
-- [x] Card Acertos (lista + empty state) — `renderAcertosCardV2()` L162-214
-- [x] Performance Card (Mito/Mico/ZonaG/ZonaZ) — `renderPerformanceV2()` L432-493
-- [x] Timeline expandivel + filtros + totais — `renderTimelineV2()` L219-427
-- [x] Lancamentos iniciais (inscricao/legado) — dentro de `renderTimelineV2()`
-- [x] Filtros Timeline (Todos/Creditos/Debitos) — `setupExtratoTimelineFiltersV2()`
-- [x] Filtros Chart (Tudo/10R/5R) — `setupExtratoChartFiltersV2()`
-
-**Wiring/Integracao:** CSS carregado ✅, JS importado ✅, fallback v1 ✅, setup interatividade ✅
-
-**App Participante:** Usa v11.0 propria (NAO v2). Correto — spec previa apenas tweaks CSS.
-
-**Dark Mode:** Usa `var(--surface-card, #1a1a1a)`, herda do admin theme. Sem conflito.
-
-**Gaps Menores (cosmeticos):**
-- Mini sparkline no Performance Card (spec aspiracional, nao implementada)
-- Botao PDF export (pode estar no wrapper do modal, nao no render v2)
-- Responsividade mobile nao verificada visualmente
-
-### Achados AUDIT-003 (Ranking Geral + Parciais)
-
-**Cruzamento 4 fontes de dados (Os Fuleros):**
-- [x] `rodadas` (raw data): 16 entries (8 participantes x 2 rodadas) ✅
-- [x] `rankinggeralcaches`: 3 entries (R0, R1, R2) — dados corretos ✅
-- [x] `rodadasnapshots`: R0 (inscricao) + R1 + R2 consolidadas ✅
-- [x] `rankingturnos`: turno1 (R1) + geral (R1-R2) — dados corretos ✅
-- [x] **ZERO discrepancias** entre as 4 fontes ✅
-
-**Ranking Os Fuleros (apos 2 rodadas):**
-
-| Pos | Time | Pontos | ValFin R1 | ValFin R2 |
-|-----|------|--------|-----------|-----------|
-| 1 | TCMV Futebol club | 148.46 | +4 | +6 |
-| 2 | Obraga04 | 144.66 | 0 | +8 |
-| 3 | TriiMundial sp | 139.34 | +8 | -4 |
-| 4 | CR ErySoldado | 136.88 | +6 | +4 |
-| 5 | j.Prado fc | 120.65 | 0 | 0 |
-| 6 | KroonosFLA | 112.16 | -4 | 0 |
-| 7 | Urubu Play F.C. (Paulinett) | 96.73 | -6 | -8 |
-| 8 | Papito's Football Club | 93.91 | -8 | -6 |
-
-**Contagem participantes:**
-- Liga: 8, Rodadas: 8, Cache: 8, Turno: 8 — todos consistentes
-- Snapshot R0 tem 7 (KroonosFLA adicionado depois da inscricao inicial) — esperado
-
-**Paulinett (Owner) em Os Fuleros:**
-- premium=true, owner_email configurado ✅
-- Inscricao ISENTA (premium exemption funciona) ✅
-- Saldo: -14 (R1: -6 onus + R2: -8 onus) ✅
-
-**Super Cartola (comparacao):**
-- 35 participantes, 3 rodadas em 2026 — dados corretos
-- `rankingturnos` geral stale (R2 vs R3 disponivel) — self-healing na proxima chamada API
-- `rankinggeralcaches` vazio para 2026 — gerado on-demand
-
-**Sistema de Parciais:**
-- Admin `parciais.js` v5.1, App `participante-rodada-parcial.js` v3.0, Backend `parciaisRankingService.js` v1.2
-- Fluxo: API Cartola (live) -> calcular pontuacao -> acumular com rodadas anteriores -> ranking
-- Integrado no ranking-turno (turno=geral retorna acumulado + parciais quando disponivel)
-- Auto-refresh 30s com backoff exponencial ate 120s
-- Sem discrepancias de calculo detectadas
-
-**Issues menores (nao-bloqueantes):**
-- Config `top10` vazia em Os Fuleros (MITO/MICO sem valor financeiro) — ja documentado em AUDIT-002
-- MCP Mongo nao converte String para ObjectId (queries retornam vazio para campos ObjectId)
-
----
-
-## ~~[MCP-001]~~ DESCARTADO (2026-02-17)
-
-### Google Stitch MCP - OAuth2 Token
-
-**Status:** DESCARTADO
-**Motivo:** Decisao de abandonar Plano A (MCP automatico) e Plano C (Figma). Stitch Adapter passa a operar apenas em modo manual (HTML colado). MCP Stitch e Figma removidos de `settings.local.json`.
-
-#### Status dos MCPs (atualizado 2026-02-18)
-| MCP | Status |
-|-----|--------|
-| Mongo | ✅ Ativo — agora conecta ao banco real cartola-manager |
-| Perplexity | ✅ Ativo |
-| Context7 | ✅ Ativo |
-| IDE | ✅ Ativo |
-| ~~Google Stitch~~ | ❌ Removido (modo manual apenas) |
-| ~~Figma~~ | ❌ Removido (descartado) |
-
----
-
-## ~~AUDIT-002~~ ✅ CONCLUIDA (2026-02-13)
-
-### Validar 100% Extratos dos Participantes
-
-**Status:** ✅ CONCLUIDA
-**Resultado:** Sistema financeiro correto. Owner/premium isento funciona. Reconciliacao OK em 3 participantes. Multi-liga independente. Issues menores documentados acima.
-
----
-
-## ~~AUDIT-001~~ ✅ CONCLUIDA (2026-02-13)
-
-### Auditoria End-to-End do Redesign Extrato v2.0
-
-**Status:** ✅ CONCLUIDA
-**Resultado:** Implementacao substancialmente completa. Todos componentes da spec implementados. Wiring correto. App participante usa v11.0 propria (correto). Gaps cosmeticos apenas (sparkline, PDF).
-
----
-
-## ~~AUDIT-003~~ ✅ CONCLUIDA (2026-02-13)
-
-### Auditoria Ranking Geral + Parciais (foco Os Fuleros)
-
-**Status:** ✅ CONCLUIDA
-**Resultado:** ZERO discrepancias na contagem. 4 fontes de dados cruzadas (rodadas, rankinggeralcaches, rodadasnapshots, rankingturnos) concordam 100%. 8 participantes consistentes. Premium/owner isento funciona. Parciais integrados corretamente no ranking-turno. Super Cartola com cache stale (self-healing).
-
----
-
-## RESUMO SESSAO 2026-02-11
-
-### Commits desta sessao (4 commits, todos no main)
-| Commit | Descricao |
-|--------|-----------|
-| `e9ca0a3` | fix(extrato): abonar inscricao do owner/premium na liga com owner_email |
-| `8c6245f` | feat(extrato): cores de identidade por modulo e labels descritivos nos sub-itens |
-| `c4b3a92` | fix(extrato): mostrar posicao como titulo em todas as rodadas (single e multi) |
-| `24eb896` | fix(extrato): rodadas sempre expansiveis e contagem de modulos extras |
-
-### Implementacoes desta sessao
-- **Owner/premium isento de inscricao:** `fluxoFinanceiroController.js` v8.12.0
-- **Cores por modulo no extrato:** cor de identidade do Quick Bar por sub-item
-- **Labels descritivos:** "Bonus de posicao" / "Onus de posicao" / "MITO da Rodada" / "MICO da Rodada"
-- **Posicao sempre como titulo:** todas as rodadas mostram "Xo lugar"
-- **Expand/collapse universal:** todas as rodadas com subitems sao expansiveis
-- **Contagem de modulos extras:** conta apenas PC, MM, Top10
-
----
-
-## RESUMO SESSAO 2026-02-10
-
-### Commits (6 commits, todos no main)
-| Commit | Descricao |
-|--------|-----------|
-| `cbcbfc3` | feat(admin): card Premium no dashboard de Analisar Participantes |
-| `5ee7c41` | feat(extrato): redesign Inter-inspired para Admin e App (v2.0) |
-| `8e6b92c` | fix(admin): fallback seguro para SuperModal no toggle premium |
-| `5d71369` | fix(admin): SPA re-init robusto para Analisar Participantes |
-| `aba8909` | feat(admin): toggle Premium na coluna Acoes de Analisar Participantes |
-| `bafc937` | fix(admin): remove modais duplicados e corrige re-init SPA |
-
----
-
-## ~~BUG-001~~ ✅ RESOLVIDO (2026-02-13)
-
-### [BUG-001] Cache stale apos Pontos Corridos
-
-**Status:** ✅ RESOLVIDO
-**Resolucao:** Investigacao profunda revelou que ambos code paths JA estavam corretos:
-- Path A (getExtratoFinanceiro L835-841): recalcula ganhos/perdas ✅
-- Path B (getFluxoFinanceiroLiga L1285-1291): recalcula ganhos/perdas ✅
-- Auto-healing v8.9.0 (L646-678): deleta e recria cache corretamente ✅
-
-**Root cause real:** Caches criados ANTES das fixes v8.9/v8.11/v8.12 tinham saldo_consolidado divergente do sum(historico_transacoes.valor). Dois padroes encontrados:
-- Delta ±R$5: transacao PC no array mas nao contabilizada no saldo (10 participantes)
-- Delta ~R$175-185: inscricao/legado no array mas nao contabilizada no saldo (5 participantes)
-
-**Acoes executadas:**
-- [x] Fix no script reconciliacao: `t.saldo` → `t.valor` (campo correto)
-- [x] Enhanced script: --force agora corrige ganhos_consolidados e perdas_consolidadas tambem
-- [x] Executado `--force --temporada=2026`: 15/15 saldos corrigidos
-- [x] Verificado `--dry-run --temporada=2026`: 43/43 corretos, ZERO divergencias
-
-**Detalhes reconciliacao (2026-02-13):**
-- Total analisados: 43 caches (35 Super Cartola + 8 Os Fuleros)
-- Corretos antes: 28 | Divergentes: 15 (todos Super Cartola)
-- Os Fuleros: 8/8 corretos (sem divergencias)
-- Apos --force: 43/43 corretos
-
----
-
-## 🔥 PROXIMA SESSAO - Tarefas Restantes
-
-### [IMPL-028] Sistema de Avisos e Notificacoes ✅ IMPLEMENTADO (2026-02-04)
-
-**Status:** Implementado e commitado (branch `feat/sistema-avisos-notificacoes`, commit `fb5e4ff`)
-
-**Testes Pendentes:**
-- [ ] Testar CRUD admin completo
-- [ ] Validar publicacao admin -> participante
-- [ ] Verificar marcacao como lido
-- [ ] Testar segmentacao (global/liga/participante)
-- [ ] Validar scroll horizontal mobile
-
----
-
-## ~~FEATURES - Alta Prioridade~~ ✅ AUDITADAS E FECHADAS (18/02/2026)
-
-### ~~[FEAT-026] Polling Inteligente para Modulo Rodadas~~ ✅ JA IMPLEMENTADO
-
-**Auditoria 18/02/2026:** `participante-rodadas-polling.js` (310 linhas) implementa polling inteligente completo — pausa quando nao ha jogos, reativa antes do proximo, feedback visual de estado. Admin usa refresh manual (comportamento correto para admin).
-
-### ~~[FEAT-027] Enriquecer Listagem de Participantes no Modulo Rodadas~~ ✅ JA IMPLEMENTADO
-
-**Auditoria 18/02/2026:** `rodadas-ui.js` ja tem os 3 itens: atletas que jogaram (X/12) L353-358, escudo com fallback L340-342, valores financeiros async via ModuleConfig L252-274.
-
----
-
-## ADMIN MOBILE
-
-### ~~[MOBILE-001] Remover emojis e alinhar visual~~ ✅ IMPLEMENTADO (18/02/2026)
-
-**Fixes aplicados em `login.html`:**
-- Adicionado Material Icons CDN (ausente na page de login)
-- `🏆` → `<span class="material-icons">emoji_events</span>`
-- `🔐` → `<span class="material-icons">lock</span>`
-
----
-
-### ~~[MOBILE-004] Implementar Fases 5 e 6 do App Admin~~ ✅ JA IMPLEMENTADO
-
-**Auditoria 18/02/2026:** `consolidacao.js` (417 linhas) e `financeiro.js` (315 linhas) estao completamente implementados — form, progress bar, historico, validacao, handlers, API calls. Todos os endpoints backend em `admin-mobile-routes.js` tambem existem.
-
----
-
-## UX
-
-### ~~[UX-002] Substituir alert() por SuperModal~~ ✅ IMPLEMENTADO (18/02/2026)
-
-**Fixes aplicados (6 ocorrencias em 5 arquivos):**
-- `navigation.js:5` — SuperModal.toast.error + setTimeout redirect 3s
-- `module-config-modal.js:1294` — removido fallback alert (SuperModal ja no else anterior)
-- `module-config-modal.js:1309` — removido fallback alert
-- `luva-de-ouro-utils.js:700` — SuperModal.toast.warning
-- `capitao-luxo.js:466` — SuperModal.toast.error
-- `admin-analises-ia.js:62` — SuperModal.toast.warning
-
----
-
-## DOCUMENTACAO
-
-### ~~[DOC-001] Migrar Skills do Codebase para docs/~~ ✅ JA IMPLEMENTADO
-
-**Auditoria 18/02/2026:** `docs/skills/` tem 30 skills em 5 categorias + SKILL-KEYWORD-MAP.md + README.md. CLAUDE.md referencia corretamente `docs/skills/`. Sem arquivos orfaos em locais antigos.
-
-**Prioridade:** Media (FECHADO)
-
----
-
-## BACKLOG TECNICO
-
-- **Queries sem `.lean()`:** ~130 restantes (4 controllers ja atualizados)
-- **Console.logs:** 567 encontrados (criar logger configuravel)
-- **Refatoracao fluxo-financeiro-ui.js:** 4.426 linhas (meta <3.000L)
-- ~~**saldo_consolidado stale:**~~ Resolvido 2026-02-13 — reconciliacao --force corrigiu 15/15 caches 2026
-- **Config Top10 incompleta em Os Fuleros:** valores_mito/valores_mico nao definidos, MITO/MICO com valor=0
-- ~~**Arquivos nao commitados (analytics):**~~ Resolvido 2026-02-13 — 4/5 ja commitados, `dashboard-analytics.html` nao existe (removido ou nunca criado)
-
----
-
-## REFERENCIA RAPIDA
-
-### IDs das Ligas
-- **Super Cartola:** `684cb1c8af923da7c7df51de`
-- **Cartoleiros do Sobral:** `684d821cf1a7ae16d1f89572` (aposentada)
-- **Os Fuleros:** `6977a62071dee12036bb163e`
-
-### Scripts de Auditoria
-```bash
-bash scripts/audit_full.sh           # Auditoria completa SPARC
-bash scripts/audit_security.sh       # Seguranca OWASP Top 10
-bash scripts/audit_multitenant.sh    # Isolamento multi-tenant
-bash scripts/detect_dead_code.sh     # Codigo morto/TODOs
-bash scripts/check_dependencies.sh   # NPM vulnerabilidades
-```
-
----
-
-> Arquivo gerenciado pelos comandos `/salvar-tarefas` e `/retomar-tarefas`
+# Tarefas Pendentes
+
+## Baixar imagens dos estádios da Copa 2026
+
+**Status:** Pendente
+**Contexto:** O curl do Replit retorna HTTP 429 (rate limit) no Wikipedia. Precisa baixar manualmente no PC e fazer upload para `/public/img/estadios/`.
+
+**Depois do upload:**
+1. Atualizar `config/copa-do-mundo-2026.js` — trocar URLs do Wikipedia por paths locais (`/img/estadios/nome.jpg`)
+2. Bumpar `CACHE_NAME` no Service Worker (`public/participante/service-worker.js`)
+
+### Arquivos e URLs
+
+| Arquivo | URL |
+|---------|-----|
+| `metlife-stadium.jpg` | https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Metlife_stadium_%28Aerial_view%29.jpg/640px-Metlife_stadium_%28Aerial_view%29.jpg |
+| `sofi-stadium.jpg` | https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/SoFi_Stadium_exterior_2.jpg/640px-SoFi_Stadium_exterior_2.jpg |
+| `att-stadium.jpg` | https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Cowboys_Stadium_full_view.jpg/640px-Cowboys_Stadium_full_view.jpg |
+| `hard-rock-stadium.jpg` | https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Hard_Rock_Stadium_aerial_2023.jpg/640px-Hard_Rock_Stadium_aerial_2023.jpg |
+| `mercedes-benz-stadium.jpg` | https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Mercedes-Benz_Stadium%2C_October_2017.jpg/640px-Mercedes-Benz_Stadium%2C_October_2017.jpg |
+| `nrg-stadium.jpg` | https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/NRG_Stadium_-_Houston%2C_Texas.jpg/640px-NRG_Stadium_-_Houston%2C_Texas.jpg |
+| `lumen-field.jpg` | https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/CenturyLink_Field_-_MLS_Cup_2016.jpg/640px-CenturyLink_Field_-_MLS_Cup_2016.jpg |
+| `lincoln-financial-field.jpg` | https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Lincoln_Financial_Field_%28Aerial_view%29.jpg/640px-Lincoln_Financial_Field_%28Aerial_view%29.jpg |
+| `arrowhead-stadium.jpg` | https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Arrowhead_Stadium_%2814586858494%29.jpg/640px-Arrowhead_Stadium_%2814586858494%29.jpg |
+| `gillette-stadium.jpg` | https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Gillette_Stadium_%28Top_View%29.jpg/640px-Gillette_Stadium_%28Top_View%29.jpg |
+| `levis-stadium.jpg` | https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Levi%27s_Stadium_aerial.jpg/640px-Levi%27s_Stadium_aerial.jpg |
+| `estadio-azteca.jpg` | https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Azteca_Entrance.jpg/640px-Azteca_Entrance.jpg |
+| `estadio-bbva.jpg` | https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/EstadioRayados.JPG/640px-EstadioRayados.JPG |
+| `estadio-akron.jpg` | https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Estadio_Chivas.jpg/640px-Estadio_Chivas.jpg |
+| `bc-place.jpg` | https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Interior_BC_Place_2015.jpg/640px-Interior_BC_Place_2015.jpg |
+| `bmo-field.jpg` | https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/BMO_Field_2016_East_Stand.jpg/640px-BMO_Field_2016_East_Stand.jpg |
+
+### Mapeamento Estádio -> Arquivo
+
+| Estádio | Arquivo |
+|---------|---------|
+| MetLife Stadium | `metlife-stadium.jpg` |
+| SoFi Stadium | `sofi-stadium.jpg` |
+| AT&T Stadium | `att-stadium.jpg` |
+| Hard Rock Stadium | `hard-rock-stadium.jpg` |
+| Mercedes-Benz Stadium | `mercedes-benz-stadium.jpg` |
+| NRG Stadium | `nrg-stadium.jpg` |
+| Lumen Field | `lumen-field.jpg` |
+| Lincoln Financial Field | `lincoln-financial-field.jpg` |
+| Arrowhead Stadium | `arrowhead-stadium.jpg` |
+| Gillette Stadium | `gillette-stadium.jpg` |
+| Levi's Stadium | `levis-stadium.jpg` |
+| Estadio Azteca | `estadio-azteca.jpg` |
+| Estadio BBVA | `estadio-bbva.jpg` |
+| Estadio Akron | `estadio-akron.jpg` |
+| BC Place | `bc-place.jpg` |
+| BMO Field | `bmo-field.jpg` |
