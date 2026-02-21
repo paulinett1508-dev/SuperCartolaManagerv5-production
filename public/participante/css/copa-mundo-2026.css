@@ -186,6 +186,16 @@
     padding: 1.5rem 1rem 0;
 }
 
+/* Separador visual sutil entre secoes */
+.copa-section + .copa-section::before {
+    content: '';
+    display: block;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, var(--app-border, #333) 30%, var(--app-border, #333) 70%, transparent 100%);
+    margin: 0 0 1.25rem;
+    opacity: 0.5;
+}
+
 .copa-section-header {
     display: flex;
     align-items: center;
@@ -228,162 +238,154 @@
 }
 
 /* ═══════════════════════════════════════════════════
-   JOGOS DO BRASIL — Card-style individual matches
+   CALENDARIO DE JOGOS — Card consolidado (Stitch-style)
    ═══════════════════════════════════════════════════ */
-.copa-brasil-jogos {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-/* Individual match card (Stitch-style) */
-.copa-match-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+.copa-calendario-card {
     background: var(--app-surface, #1a1a1a);
     border-radius: 0.75rem;
     border: 1px solid var(--app-border, #333);
-    padding: 0.75rem;
-    transition: border-color 0.2s ease;
+    overflow: hidden;
 }
 
-.copa-match-card:first-child {
-    border-color: rgba(212, 175, 55, 0.25);
-}
-
-.copa-match-card:not(:first-child) {
-    opacity: 0.8;
-}
-
-.copa-match-team {
+/* Group sub-header inside calendar */
+.copa-cal-grupo-header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.85rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.copa-cal-grupo-header:first-child {
+    border-top: none;
+}
+
+.copa-cal-grupo-nome {
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 0.65rem;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.5));
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.copa-cal-grupo-nome--brasil {
+    color: var(--app-copa-secondary, #D4AF37);
+}
+
+.copa-cal-grupo-datas {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.5rem;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.35));
+    text-transform: uppercase;
+}
+
+/* Game row inside calendar */
+.copa-cal-game {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr auto 1fr auto;
+    align-items: center;
     gap: 0.35rem;
-    flex: 1;
+    padding: 0.55rem 0.85rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.copa-cal-game:last-child {
+    border-bottom: none;
+}
+
+.copa-cal-game--brasil {
+    border-left: 2px solid var(--app-copa-secondary, #D4AF37);
+    background: rgba(212, 175, 55, 0.03);
+}
+
+/* Time column */
+.copa-cal-time {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--app-danger, #ef4444);
+    line-height: 1;
+}
+
+.copa-cal-date {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.48rem;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.3));
+    line-height: 1;
+}
+
+/* Team home/away */
+.copa-cal-team {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
     min-width: 0;
 }
 
-.copa-match-team--away {
+.copa-cal-team--away {
     justify-content: flex-end;
 }
 
-.copa-match-team-sigla {
+.copa-cal-team-flag {
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
+    font-size: 0.8rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.copa-cal-team-sigla {
     font-family: var(--app-font-base, 'Inter', sans-serif);
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
     color: var(--app-text-primary, #fff);
     white-space: nowrap;
 }
 
-.copa-match-team-flag {
-    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
-    font-size: 0.85rem;
-    line-height: 1;
-    flex-shrink: 0;
-}
-
-.copa-match-center {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0 1rem;
-    flex-shrink: 0;
-}
-
-.copa-match-horario {
-    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
-    font-size: 0.6rem;
-    font-weight: 600;
+.copa-cal-team-sigla--brasil {
     color: var(--app-copa-secondary, #D4AF37);
-    line-height: 1.2;
+    font-weight: 700;
 }
 
-.copa-match-card:not(:first-child) .copa-match-horario {
-    color: var(--app-text-muted, rgba(255, 255, 255, 0.5));
-}
-
-.copa-match-data {
-    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
-    font-size: 0.55rem;
-    color: var(--app-text-muted, rgba(255, 255, 255, 0.4));
-    line-height: 1;
-}
-
-/* ═══════════════════════════════════════════════════
-   FIXTURE ROWS — Compacto (para dentro dos grupos)
-   ═══════════════════════════════════════════════════ */
-.copa-lp-fx-table { display: flex; flex-direction: column; }
-
-.copa-lp-fx-row {
-    display: grid;
-    grid-template-columns: 1fr 52px 1fr 22px;
-    align-items: center;
-    gap: 4px;
-    padding: 7px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-}
-.copa-lp-fx-row:last-child { border-bottom: none; }
-.copa-lp-fx-row.brasil-jogo {
-    border-left: 2px solid rgba(212, 175, 55, 0.5);
-    padding-left: 8px;
-    background: rgba(212, 175, 55, 0.03);
-}
-
-.copa-lp-fx-home {
-    display: flex; align-items: center; gap: 4px;
-    justify-content: flex-end; min-width: 0;
-}
-.copa-lp-fx-away {
-    display: flex; align-items: center; gap: 4px;
-    justify-content: flex-start; min-width: 0;
-}
-
-.copa-lp-fx-name {
-    font-size: 11px;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.72);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 82px;
-}
-.copa-lp-fx-name.destaque { color: var(--app-text-primary, #fff); font-weight: 700; }
-
-.copa-lp-fx-flag {
-    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
-    font-size: 14px;
-    flex-shrink: 0;
-    line-height: 1;
-}
-
-.copa-lp-fx-score {
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 1px; flex-shrink: 0;
-}
-.copa-lp-fx-time {
-    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
-    font-size: 10px; font-weight: 600;
-    color: var(--app-copa-secondary, #D4AF37);
-    line-height: 1;
-}
-.copa-lp-fx-date {
-    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
-    font-size: 10px;
-    color: rgba(255, 255, 255, 0.32);
-    line-height: 1;
-}
-
-.copa-lp-fx-round {
-    font-family: var(--app-font-brand, 'Russo One', sans-serif);
-    font-size: 9px;
-    color: rgba(255, 255, 255, 0.22);
+/* VS separator */
+.copa-cal-vs {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.5rem;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.3));
     text-align: center;
     flex-shrink: 0;
-    letter-spacing: 0.3px;
-    text-transform: uppercase;
+    padding: 0 0.15rem;
 }
+
+/* ODDS badge */
+.copa-cal-odds {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.5rem;
+    font-weight: 700;
+    color: var(--app-copa-secondary, #D4AF37);
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 999px;
+    padding: 0.15rem 0.4rem;
+    white-space: nowrap;
+}
+
+/* Stadium info below game */
+.copa-cal-venue {
+    grid-column: 2 / -1;
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.45rem;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.25));
+    padding-left: 0.1rem;
+}
+
+.copa-cal-venue .material-icons {
+    font-size: 0.5rem;
+    vertical-align: middle;
+    margin-right: 0.15rem;
+}
+
+/* (FIXTURE ROWS removidas — substituidas por copa-cal-game no Calendario) */
 
 /* ═══════════════════════════════════════════════════
    NOTICIAS — Filter chips + cards
@@ -587,15 +589,16 @@
     padding: 0 0.75rem 0.75rem;
 }
 
+/* Game row — grid garante alinhamento perfeito */
 .copa-grupo-content .copa-grupo-game {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: space-between;
+    gap: 0.4rem;
     background: rgba(255, 255, 255, 0.03);
     border-radius: 0.5rem;
     padding: 0.5rem 0.6rem;
     margin-bottom: 0.35rem;
-    font-size: 0.6rem;
 }
 
 .copa-grupo-content .copa-grupo-game:last-child {
@@ -604,9 +607,12 @@
 
 .copa-grupo-game-team {
     font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.65rem;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.7);
-    min-width: 4rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .copa-grupo-game-team--away {
@@ -615,15 +621,17 @@
 
 .copa-grupo-game-team--brasil {
     color: var(--app-copa-secondary, #D4AF37);
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .copa-grupo-game-info {
     font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.55rem;
     font-weight: 600;
     color: var(--app-copa-secondary, #D4AF37);
     text-align: center;
-    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 0 0.25rem;
 }
 
 /* ═══════════════════════════════════════════════════
@@ -1041,27 +1049,23 @@
 }
 
 /* ═══════════════════════════════════════════════════
-   TOGGLE JOGOS / CLASSIFICACAO
+   TOGGLE JOGOS / CLASSIFICACAO — chip-style (como noticias tabs)
    ═══════════════════════════════════════════════════ */
 .copa-view-toggle {
     display: flex;
-    gap: 0.25rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 999px;
-    padding: 0.15rem;
+    gap: 0.35rem;
     margin-bottom: 0.75rem;
 }
 
 .copa-view-toggle-btn {
-    flex: 1;
     font-family: var(--app-font-base, 'Inter', sans-serif);
     font-size: 0.7rem;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--app-text-muted, rgba(255, 255, 255, 0.5));
-    background: transparent;
-    border: none;
+    background: var(--app-surface, #1a1a1a);
+    border: 1px solid var(--app-border, #333);
     border-radius: 999px;
-    padding: 0.4rem 0.75rem;
+    padding: 0.4rem 0.85rem;
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
@@ -1074,6 +1078,7 @@
 .copa-view-toggle-btn--active {
     color: var(--app-bg, #0a0a0a);
     background: var(--app-copa-secondary, #D4AF37);
+    border-color: var(--app-copa-secondary, #D4AF37);
     font-weight: 700;
 }
 

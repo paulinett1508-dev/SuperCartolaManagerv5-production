@@ -31,7 +31,7 @@ export async function inicializarCopa2026Mundo(params) {
 
         // 2. Renderizar secoes estaticas (instantaneo com dados em memoria)
         renderizarCountdown();
-        renderizarJogosBrasil();
+        renderizarCalendarioJogos();
         renderizarGrupos();
         renderizarClassificacao();
         renderizarFaseEliminatoria();
@@ -125,7 +125,7 @@ function renderizarCountdown() {
 }
 
 // ═══════════════════════════════════════════════════
-// JOGOS DO BRASIL — Card-style (Stitch design)
+// CALENDARIO DE JOGOS — Card consolidado (Stitch-style)
 // ═══════════════════════════════════════════════════
 
 // Siglas de selecoes (3 letras)
@@ -155,72 +155,94 @@ function getSigla(nome) {
 }
 
 /**
- * Renderiza uma linha compacta de fixture (scoreboard style)
- * Usado dentro dos grupos expandidos.
+ * Calcula o range de datas de um grupo (ex: "11 JUN - 15 JUN")
  */
-function renderizarLpFxRow(jogo) {
-    const mandanteIsBrasil = jogo.mandante === 'Brasil';
-    const visitanteIsBrasil = jogo.visitante === 'Brasil';
-    const isBrasil = mandanteIsBrasil || visitanteIsBrasil;
-
-    const dataFmt = formatarData(jogo.data);
-
-    return `
-    <div class="copa-lp-fx-row${isBrasil ? ' brasil-jogo' : ''}">
-        <div class="copa-lp-fx-home">
-            <span class="copa-lp-fx-name${mandanteIsBrasil ? ' destaque' : ''}">${jogo.mandante}</span>
-            <span class="copa-lp-fx-flag">${getBandeira(jogo.mandante)}</span>
-        </div>
-        <div class="copa-lp-fx-score">
-            <span class="copa-lp-fx-time">${jogo.horarioBR || 'TBD'}</span>
-            <span class="copa-lp-fx-date">${dataFmt}</span>
-        </div>
-        <div class="copa-lp-fx-away">
-            <span class="copa-lp-fx-flag">${getBandeira(jogo.visitante)}</span>
-            <span class="copa-lp-fx-name${visitanteIsBrasil ? ' destaque' : ''}">${jogo.visitante}</span>
-        </div>
-        <div class="copa-lp-fx-round">R${jogo.rodada}</div>
-    </div>`;
+function getRangeDatasGrupo(jogosDoGrupo) {
+    if (!jogosDoGrupo.length) return '';
+    const datas = jogosDoGrupo.map(j => j.data).sort();
+    const primeira = formatarDataCurta(datas[0]);
+    const ultima = formatarDataCurta(datas[datas.length - 1]);
+    return primeira === ultima ? primeira : `${primeira} - ${ultima}`;
 }
 
 /**
- * Renderiza card individual de match (Stitch-style)
- * Usado na secao Jogos do Brasil.
+ * Renderiza uma game row no formato Stitch:
+ * [HORARIO] flag SIGLA vs flag SIGLA [ODDS]
+ *                        @ Estadio, Cidade
  */
-function renderizarMatchCard(jogo) {
+function renderizarCalGameRow(jogo) {
+    const isBrasil = jogo.mandante === 'Brasil' || jogo.visitante === 'Brasil';
+    const mandanteIsBrasil = jogo.mandante === 'Brasil';
+    const visitanteIsBrasil = jogo.visitante === 'Brasil';
     const dataFmt = formatarDataCurta(jogo.data);
 
+    // Extrair nome do estadio sem detalhes extras
+    const estadioNome = jogo.estadio || '';
+    const cidade = jogo.cidade || '';
+    const venueInfo = estadioNome ? `<span class="material-icons">location_on</span>${estadioNome}${cidade ? ', ' + cidade : ''}` : '';
+
     return `
-    <div class="copa-match-card">
-        <div class="copa-match-team">
-            <span class="copa-match-team-sigla">${getSigla(jogo.mandante)}</span>
-            <span class="copa-match-team-flag">${getBandeira(jogo.mandante)}</span>
+    <div class="copa-cal-game${isBrasil ? ' copa-cal-game--brasil' : ''}">
+        <div>
+            <div class="copa-cal-time">${jogo.horarioBR || 'TBD'}</div>
+            <div class="copa-cal-date">${dataFmt}</div>
         </div>
-        <div class="copa-match-center">
-            <span class="copa-match-horario">${jogo.horarioBR || 'TBD'}</span>
-            <span class="copa-match-data">${dataFmt}</span>
+        <div class="copa-cal-team">
+            <span class="copa-cal-team-flag">${getBandeira(jogo.mandante)}</span>
+            <span class="copa-cal-team-sigla${mandanteIsBrasil ? ' copa-cal-team-sigla--brasil' : ''}">${getSigla(jogo.mandante)}</span>
         </div>
-        <div class="copa-match-team copa-match-team--away">
-            <span class="copa-match-team-flag">${getBandeira(jogo.visitante)}</span>
-            <span class="copa-match-team-sigla">${getSigla(jogo.visitante)}</span>
+        <span class="copa-cal-vs">vs</span>
+        <div class="copa-cal-team copa-cal-team--away">
+            <span class="copa-cal-team-sigla${visitanteIsBrasil ? ' copa-cal-team-sigla--brasil' : ''}">${getSigla(jogo.visitante)}</span>
+            <span class="copa-cal-team-flag">${getBandeira(jogo.visitante)}</span>
         </div>
-    </div>`;
+        <span class="copa-cal-odds">ODDS</span>
+    </div>
+    ${venueInfo ? `<div class="copa-cal-venue">${venueInfo}</div>` : ''}`;
 }
 
-function renderizarJogosBrasil() {
-    const container = document.getElementById('copa-brasil-jogos');
-    if (!container || !dadosCopa?.jogosFaseGrupos) return;
+/**
+ * Renderiza o Calendario de Jogos como card unico consolidado.
+ * Mostra Brasil (Grupo C) primeiro, depois grupos vizinhos A, B, D.
+ * Pre-torneio: primeiros jogos de cada grupo destacado.
+ */
+function renderizarCalendarioJogos() {
+    const container = document.getElementById('copa-calendario-card');
+    if (!container || !dadosCopa?.jogosFaseGrupos || !dadosCopa?.grupos) return;
 
-    const jogosBrasil = dadosCopa.jogosFaseGrupos.filter(
-        j => j.mandante === 'Brasil' || j.visitante === 'Brasil'
-    );
+    const jogos = dadosCopa.jogosFaseGrupos;
+    const grupos = dadosCopa.grupos;
 
-    if (!jogosBrasil.length) {
-        container.innerHTML = '<p class="copa-loading-placeholder">Jogos do Brasil ainda nao definidos</p>';
-        return;
-    }
+    // Ordem: C (Brasil) primeiro, depois A, B, D (preview no pre-torneio)
+    const ordemGrupos = ['C', 'A', 'B', 'D'];
 
-    container.innerHTML = jogosBrasil.map(renderizarMatchCard).join('');
+    let html = '';
+
+    ordemGrupos.forEach(letra => {
+        const selecoes = grupos[letra];
+        if (!selecoes) return;
+
+        const jogosDoGrupo = jogos.filter(j => j.grupo === letra);
+        if (!jogosDoGrupo.length) return;
+
+        const isBrasil = letra === 'C';
+        const rangeDatas = getRangeDatasGrupo(jogosDoGrupo);
+
+        // Group sub-header
+        html += `
+        <div class="copa-cal-grupo-header">
+            <span class="copa-cal-grupo-nome${isBrasil ? ' copa-cal-grupo-nome--brasil' : ''}">Grupo ${letra}</span>
+            <span class="copa-cal-grupo-datas">${rangeDatas}</span>
+        </div>`;
+
+        // Mostrar apenas primeiro jogo de cada grupo (exceto Brasil que mostra todos)
+        const jogosParaMostrar = isBrasil ? jogosDoGrupo : jogosDoGrupo.slice(0, 1);
+        jogosParaMostrar.forEach(jogo => {
+            html += renderizarCalGameRow(jogo);
+        });
+    });
+
+    container.innerHTML = html;
 }
 
 // ═══════════════════════════════════════════════════
