@@ -545,7 +545,7 @@ export const consolidarRodada = async (req, res) => {
 
         // 13. BACKUP PARA DATA LAKE (após commit, não bloqueia consolidação)
         // Salva dados permanentes para Hall da Fama e restaurações futuras
-        const temporadaAtual = SEASON_CONFIG?.temporada || new Date().getFullYear();
+        const temporadaAtual = CURRENT_SEASON; // ✅ FIX: SEASON_CONFIG.temporada não existe — usar CURRENT_SEASON
         const backupResult = await backupRodadaParaDataLake(ligaId, rodadaNum, dadosRodada, temporadaAtual);
 
         logger.log(`[CONSOLIDAÇÃO] ✅ R${rodadaNum} consolidada com sucesso! (${rankingRodada.length} times)`);
@@ -576,7 +576,7 @@ export const consolidarRodada = async (req, res) => {
                     liga?.configuracoes?.capitao_luxo?.habilitado === true;
 
                 if (capitaoAtivo) {
-                    const temporadaConsolidacao = SEASON_CONFIG?.temporada || new Date().getFullYear();
+                    const temporadaConsolidacao = CURRENT_SEASON; // ✅ FIX: SEASON_CONFIG.temporada não existe — usar CURRENT_SEASON
                     logger.log(`[CONSOLIDAÇÃO] 🎖️ Consolidando Capitão de Luxo até R${rodadaNum}...`);
                     await consolidarRankingCapitao(ligaId, temporadaConsolidacao, rodadaNum);
                     logger.log(`[CONSOLIDAÇÃO] 🎖️ Capitão de Luxo consolidado com sucesso!`);

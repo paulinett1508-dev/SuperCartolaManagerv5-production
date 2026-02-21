@@ -9,6 +9,7 @@ import mongoose from "mongoose";
 import InscricaoTemporada from "../models/InscricaoTemporada.js";
 import Liga from "../models/Liga.js";
 import cartolaApi from "../services/cartolaApiService.js";
+import { CURRENT_SEASON } from "../config/seasons.js";
 
 /**
  * Valida participantes de uma temporada consultando a API do Cartola
@@ -155,7 +156,7 @@ export async function sincronizarParticipanteCartola(req, res) {
     const { id: ligaId, timeId } = req.params;
     const { temporada } = req.body;
 
-    const temporadaNum = parseInt(temporada) || new Date().getFullYear();
+    const temporadaNum = parseInt(temporada) || CURRENT_SEASON;
     const timeIdNum = parseInt(timeId);
 
     if (!timeIdNum || timeIdNum < 0) {
