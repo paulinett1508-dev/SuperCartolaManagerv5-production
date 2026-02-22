@@ -63,7 +63,6 @@ export async function inicializarCapitaoParticipante(params) {
         estadoCapitao.rankingAtual = dadosCache;
         renderizarRanking(dadosCache);
         renderizarCardDesempenho(dadosCache);
-        _lpRenderRankingStatus({ ranking: dadosCache }, estadoCapitao.timeId, 'capitao', ['pontuacao_total'], 'pts');
     }
 
     // 5. Buscar dados frescos (sempre, mesmo com cache)
@@ -201,8 +200,6 @@ async function carregarRanking() {
         estadoCapitao.rankingAtual = data.ranking;
         renderizarRanking(data.ranking);
         renderizarCardDesempenho(data.ranking);
-        // ✅ LP: Atualizar seções de status com dados frescos
-        _lpRenderRankingStatus({ ranking: data.ranking }, estadoCapitao.timeId, 'capitao', ['pontuacao_total'], 'pts');
 
         // Salvar no cache (apenas dados consolidados, não live)
         if (!estadoCapitao.modeLive) {
@@ -618,96 +615,3 @@ function _lpRenderFinanceiroHtml(fo) {
     return html ? `<div class="module-lp-premiacoes-grid">${html}</div>` : '';
 }
 
-function _lpGetValor(item, fields) {
-    for (const f of fields) {
-        if (item?.[f] !== undefined && item[f] !== null) return item[f];
-    }
-    return 0;
-}
-
-function _lpRenderRankingStatus(data, timeId, module, valueFields, valueUnit) {
-    const ranking = data?.ranking || data?.data?.ranking || [];
-    if (!ranking.length) return;
-
-    const meuIdx = ranking.findIndex(item =>
-        String(item?.timeId || item?.participanteId || item?.time_id || '') === String(timeId)
-    );
-
-    const statusEl = document.getElementById(`lp-meu-status-${module}`);
-    if (statusEl) {
-        const posicao = meuIdx >= 0 ? meuIdx + 1 : null;
-        const lider = ranking[0];
-        const meu = meuIdx >= 0 ? ranking[meuIdx] : null;
-        const liderValor = _lpGetValor(lider, valueFields);
-        const meuValor = meu ? _lpGetValor(meu, valueFields) : null;
-        const total = ranking.length;
-        const iAmLider = meuIdx === 0;
-        const diff = (meu && !iAmLider) ? (liderValor - meuValor) : null;
-
-        let html = `<p class="module-lp-section-label"><span class="material-icons">person</span>Meu Desempenho</p>
-        <div class="module-lp-status-grid">`;
-
-        if (posicao !== null) {
-            html += `<div class="module-lp-stat-card highlight">
-                <span class="module-lp-stat-value">${posicao}º</span>
-                <span class="module-lp-stat-label">de ${total}</span>
-            </div>`;
-        } else {
-            html += `<div class="module-lp-stat-card">
-                <span class="module-lp-stat-value">—</span>
-                <span class="module-lp-stat-label">posição</span>
-            </div>`;
-        }
-
-        const meuValorFormatado = (meuValor !== null && typeof truncarPontos === 'function')
-            ? truncarPontos(meuValor) : (meuValor !== null ? meuValor : '—');
-        const liderValorFormatado = (typeof truncarPontos === 'function')
-            ? truncarPontos(liderValor) : liderValor;
-
-        html += `<div class="module-lp-stat-card">
-            <span class="module-lp-stat-value">${meuValorFormatado}</span>
-            <span class="module-lp-stat-label">${valueUnit}</span>
-        </div>`;
-
-        if (iAmLider) {
-            html += `<div class="module-lp-stat-card">
-                <span class="module-lp-stat-value" style="font-size:var(--app-font-md);color:var(--lp-primary)">Líder</span>
-                <span class="module-lp-stat-label">${liderValorFormatado} ${valueUnit}</span>
-            </div>`;
-        } else {
-            const diffFormatado = (diff !== null && typeof truncarPontos === 'function')
-                ? truncarPontos(diff) : diff;
-            html += `<div class="module-lp-stat-card">
-                <span class="module-lp-stat-value" style="${diff > 0 ? 'color:var(--app-danger)' : ''}">
-                    ${diff !== null && diff > 0 ? '-' + diffFormatado : liderValorFormatado}
-                </span>
-                <span class="module-lp-stat-label">${diff !== null && diff > 0 ? 'do líder' : 'líder'}</span>
-            </div>`;
-        }
-        html += `</div>`;
-        statusEl.innerHTML = html;
-        statusEl.style.display = '';
-    }
-
-    const destaqueEl = document.getElementById(`lp-destaque-${module}`);
-    if (destaqueEl) {
-        const top3 = ranking.slice(0, 3);
-        let html = `<p class="module-lp-section-label"><span class="material-icons">leaderboard</span>Top 3</p>
-        <div class="module-lp-destaque-list">`;
-        top3.forEach((item, i) => {
-            const pos = i + 1;
-            const nome = item?.nome_cartola || item?.nomeTime || item?.nomeCartoleiro || item?.nome_time || item?.nome || 'N/D';
-            const valor = _lpGetValor(item, valueFields);
-            const valorFmt = typeof truncarPontos === 'function' ? truncarPontos(valor) : valor;
-            const isMe = String(item?.timeId || item?.participanteId || item?.time_id || '') === String(timeId);
-            html += `<div class="module-lp-destaque-item${isMe ? ' is-me' : ''}">
-                <span class="module-lp-destaque-pos pos-${pos}">${pos}º</span>
-                <span class="module-lp-destaque-nome">${nome}</span>
-                <span class="module-lp-destaque-valor">${valorFmt}<span class="module-lp-destaque-unit"> ${valueUnit}</span></span>
-            </div>`;
-        });
-        html += `</div>`;
-        destaqueEl.innerHTML = html;
-        destaqueEl.style.display = '';
-    }
-}

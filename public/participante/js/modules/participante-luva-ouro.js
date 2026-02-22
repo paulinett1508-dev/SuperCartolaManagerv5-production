@@ -59,7 +59,6 @@ export async function inicializarLuvaOuroParticipante({
                     Log.info("[PARTICIPANTE-LUVA-OURO] ⚡ Cache IndexedDB encontrado");
 
                 await renderizarLuvaOuro(container, luvaCache, timeId);
-                _lpRenderRankingStatus(luvaCache, timeId, 'luva', ['defesas', 'totalDefesas', 'defesasDificeis', 'total_defesas'], 'def.');
             }
         } catch (e) {
             if (window.Log) Log.warn("[PARTICIPANTE-LUVA-OURO] ⚠️ Erro ao ler cache:", e);
@@ -129,8 +128,6 @@ export async function inicializarLuvaOuroParticipante({
         } else if (window.Log) {
             Log.info("[PARTICIPANTE-LUVA-OURO] ✅ Dados iguais, mantendo renderização do cache");
         }
-        // ✅ LP: Atualizar seções de status com dados frescos
-        _lpRenderRankingStatus(responseData, timeId, 'luva', ['defesas', 'totalDefesas', 'defesasDificeis', 'total_defesas'], 'def.');
     } catch (error) {
         if (window.Log) Log.error("[PARTICIPANTE-LUVA-OURO] ❌ Erro:", error);
         if (!usouCache) {
@@ -524,10 +521,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
 
     const html = `
     <div style="padding: 16px;">
-        <div style="text-align: center; margin-bottom: 20px;">
-            <h2 style="margin: 0 0 4px 0; font-size: 20px; font-weight: 800; color: var(--app-gold); display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <span class="material-symbols-outlined">sports_handball</span> Luva de Ouro
-            </h2>
+        <div style="text-align: center; margin-bottom: 16px;">
             <p style="margin: 0; color: #888; font-size: 12px;">
                 Rodadas ${rodadaInicio} - ${rodadaFim}
             </p>
@@ -648,7 +642,8 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                 <span class="material-symbols-outlined" style="font-size: 24px; color: var(--app-gold);">emoji_events</span>
                 <div>
                     <div style="font-size: 10px; color: var(--app-gold); font-weight: 700; text-transform: uppercase;">${labelLider}</div>
-                    <div style="font-size: 14px; font-weight: 700; color: var(--app-text-primary);">${getNome(campeao)}</div>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--app-text-primary);">${campeao.nomeCartoleiro || campeao.nome_cartola || campeao.nome || 'N/D'}</div>
+                    <div style="font-size: 11px; color: #888;">${campeao.nomeTime || campeao.nome_time || ''}</div>
                 </div>
             </div>
             <div style="text-align: right;">
@@ -686,7 +681,10 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); ${isMeuTime ? "background: rgba(255, 215, 0, 0.15);" : ""}">
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span style="font-size: ${pos === 1 ? "16px" : "12px"}; width: 26px; ${pos === 1 ? "" : "color: #888;"}">${posicaoDisplay}</span>
-                            <span style="color: ${isMeuTime ? "var(--app-gold)" : "var(--app-text-primary)"}; font-weight: ${isMeuTime ? "700" : "500"}; font-size: 12px;">${getNome(time)}</span>
+                            <div>
+                                <div style="color: ${isMeuTime ? "var(--app-gold)" : "var(--app-text-primary)"}; font-weight: ${isMeuTime ? "700" : "500"}; font-size: 12px;">${time.nomeCartoleiro || time.nome_cartola || time.nome || 'N/D'}</div>
+                                <div style="color: #888; font-size: 11px;">${time.nomeTime || time.nome_time || ''}</div>
+                            </div>
                         </div>
                         <span style="color: var(--app-gold); font-weight: 700; font-size: 13px;">${getPontos(time).toFixed(1)}</span>
                     </div>
@@ -711,7 +709,10 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.03); opacity: 0.5; filter: grayscale(60%);">
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <span style="font-size: 12px; width: 26px; color: #555;">—</span>
-                                <span style="color: #666; font-weight: 400; font-size: 12px;">${getNome(time)}</span>
+                                <div>
+                                    <div style="color: #666; font-weight: 400; font-size: 12px;">${time.nomeCartoleiro || time.nome_cartola || time.nome || 'N/D'}</div>
+                                    <div style="color: #555; font-size: 11px;">${time.nomeTime || time.nome_time || ''}</div>
+                                </div>
                             </div>
                             <span style="color: #555; font-weight: 500; font-size: 13px;">${getPontos(time).toFixed(1)}</span>
                         </div>
@@ -833,91 +834,3 @@ function _lpRenderFinanceiroHtml(fo) {
     return html ? `<div class="module-lp-premiacoes-grid">${html}</div>` : '';
 }
 
-function _lpGetValor(item, fields) {
-    for (const f of fields) {
-        if (item?.[f] !== undefined && item[f] !== null) return item[f];
-    }
-    return 0;
-}
-
-function _lpRenderRankingStatus(data, timeId, module, valueFields, valueUnit) {
-    const ranking = data?.ranking || data?.data?.ranking || [];
-    if (!ranking.length) return;
-
-    const meuIdx = ranking.findIndex(item =>
-        String(item?.timeId || item?.participanteId || item?.time_id || '') === String(timeId)
-    );
-
-    const statusEl = document.getElementById(`lp-meu-status-${module}`);
-    if (statusEl) {
-        const posicao = meuIdx >= 0 ? meuIdx + 1 : null;
-        const lider = ranking[0];
-        const meu = meuIdx >= 0 ? ranking[meuIdx] : null;
-        const liderValor = _lpGetValor(lider, valueFields);
-        const meuValor = meu ? _lpGetValor(meu, valueFields) : null;
-        const total = ranking.length;
-        const iAmLider = meuIdx === 0;
-        const diff = (meu && !iAmLider) ? (liderValor - meuValor) : null;
-
-        let html = `<p class="module-lp-section-label"><span class="material-icons">person</span>Meu Desempenho</p>
-        <div class="module-lp-status-grid">`;
-
-        if (posicao !== null) {
-            html += `<div class="module-lp-stat-card highlight">
-                <span class="module-lp-stat-value">${posicao}º</span>
-                <span class="module-lp-stat-label">de ${total}</span>
-            </div>`;
-        } else {
-            html += `<div class="module-lp-stat-card">
-                <span class="module-lp-stat-value">—</span>
-                <span class="module-lp-stat-label">posição</span>
-            </div>`;
-        }
-
-        html += `<div class="module-lp-stat-card">
-            <span class="module-lp-stat-value">${meuValor !== null ? meuValor : '—'}</span>
-            <span class="module-lp-stat-label">${valueUnit}</span>
-        </div>`;
-
-        if (iAmLider) {
-            html += `<div class="module-lp-stat-card">
-                <span class="module-lp-stat-value" style="font-size:var(--app-font-md);color:var(--lp-primary)">Líder</span>
-                <span class="module-lp-stat-label">${liderValor} ${valueUnit}</span>
-            </div>`;
-        } else if (diff !== null && diff > 0) {
-            html += `<div class="module-lp-stat-card">
-                <span class="module-lp-stat-value" style="color:var(--app-danger)">-${diff}</span>
-                <span class="module-lp-stat-label">do líder</span>
-            </div>`;
-        } else {
-            html += `<div class="module-lp-stat-card">
-                <span class="module-lp-stat-value">${liderValor}</span>
-                <span class="module-lp-stat-label">líder</span>
-            </div>`;
-        }
-        html += `</div>`;
-        statusEl.innerHTML = html;
-        statusEl.style.display = '';
-    }
-
-    const destaqueEl = document.getElementById(`lp-destaque-${module}`);
-    if (destaqueEl) {
-        const top3 = ranking.slice(0, 3);
-        let html = `<p class="module-lp-section-label"><span class="material-icons">leaderboard</span>Top 3</p>
-        <div class="module-lp-destaque-list">`;
-        top3.forEach((item, i) => {
-            const pos = i + 1;
-            const nome = item?.nomeTime || item?.nomeCartoleiro || item?.nome_cartola || item?.nome_time || item?.nome || 'N/D';
-            const valor = _lpGetValor(item, valueFields);
-            const isMe = String(item?.timeId || item?.participanteId || item?.time_id || '') === String(timeId);
-            html += `<div class="module-lp-destaque-item${isMe ? ' is-me' : ''}">
-                <span class="module-lp-destaque-pos pos-${pos}">${pos}º</span>
-                <span class="module-lp-destaque-nome">${nome}</span>
-                <span class="module-lp-destaque-valor">${valor}<span class="module-lp-destaque-unit"> ${valueUnit}</span></span>
-            </div>`;
-        });
-        html += `</div>`;
-        destaqueEl.innerHTML = html;
-        destaqueEl.style.display = '';
-    }
-}
