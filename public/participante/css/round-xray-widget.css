@@ -1,20 +1,31 @@
 /* ====================================================================
-   ROUND X-RAY WIDGET v1.0
-   Widget flutuante pós-rodada com análise de disputas
+   ROUND X-RAY WIDGET v2.0 — Premium Dark Analytics
+   Design System: App Tokens + Glassmorphism + Module Colors
    ==================================================================== */
 
 :root {
-    --rxray-primary: #FF4500;
-    --rxray-primary-dark: #CC3700;
-    --rxray-surface: #1a1a1a;
-    --rxray-surface-elevated: #262626;
-    --rxray-surface-hover: #333;
-    --rxray-text-white: #fff;
-    --rxray-text-muted: #9ca3af;
-    --rxray-success: #22c55e;
-    --rxray-danger: #ef4444;
-    --rxray-warning: #eab308;
-    --rxray-border: #333;
+    /* Mapeamento para tokens do app (com fallbacks) */
+    --rxray-primary: var(--app-primary, #FF5500);
+    --rxray-primary-dark: var(--app-primary-dark, #e8472b);
+    --rxray-primary-glow: rgba(255, 85, 0, 0.25);
+    --rxray-surface: var(--app-surface, #1a1a1a);
+    --rxray-surface-elevated: var(--app-surface-elevated, #1c1c1c);
+    --rxray-surface-hover: var(--app-surface-hover, #333);
+    --rxray-surface-glass: rgba(26, 26, 26, 0.75);
+    --rxray-text-white: var(--app-text-white, #fff);
+    --rxray-text-muted: var(--app-text-muted, rgba(255,255,255,0.6));
+    --rxray-text-dim: var(--app-text-dim, rgba(255,255,255,0.45));
+    --rxray-success: var(--app-success-light, #22c55e);
+    --rxray-danger: var(--app-danger, #ef4444);
+    --rxray-warning: var(--app-warning, #eab308);
+    --rxray-info: var(--app-info, #3b82f6);
+    --rxray-gold: var(--app-gold, #ffd700);
+    --rxray-border: rgba(255, 255, 255, 0.08);
+    --rxray-border-hover: rgba(255, 255, 255, 0.14);
+
+    --rxray-font-brand: var(--app-font-brand, 'Russo One', sans-serif);
+    --rxray-font-body: 'Inter', -apple-system, sans-serif;
+    --rxray-font-mono: 'JetBrains Mono', monospace;
 }
 
 /* ============================================
@@ -25,10 +36,10 @@
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #fff 0%, #e5e5e5 100%);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3),
-                0 0 0 2px rgba(255, 69, 0, 0.2);
-    display: none; /* Inicialmente escondido */
+    background: linear-gradient(135deg, var(--rxray-primary) 0%, var(--rxray-primary-dark) 100%);
+    box-shadow: 0 4px 16px rgba(255, 85, 0, 0.35),
+                0 0 0 2px rgba(255, 85, 0, 0.15);
+    display: none;
     align-items: center;
     justify-content: center;
     cursor: move;
@@ -38,34 +49,39 @@
 }
 
 .rxray-fab:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4),
-                0 0 0 2px rgba(255, 69, 0, 0.3);
+    transform: scale(1.08);
+    box-shadow: 0 6px 20px rgba(255, 85, 0, 0.45),
+                0 0 0 2px rgba(255, 85, 0, 0.25);
 }
 
 .rxray-fab:active {
     transform: scale(0.95);
 }
 
-/* Ícone bola */
 .rxray-fab-icon {
-    font-size: 32px;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* Badge numérico (rodada) */
+.rxray-fab-icon .material-icons {
+    font-size: 28px;
+    color: #fff;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
+}
+
 .rxray-fab-badge {
     position: absolute;
     top: -4px;
     right: -4px;
-    background: var(--rxray-primary);
-    color: white;
+    background: var(--rxray-text-white);
+    color: var(--rxray-primary);
     font-size: 10px;
     font-weight: bold;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--rxray-font-mono);
     padding: 2px 6px;
     border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
     min-width: 18px;
     text-align: center;
 }
@@ -79,7 +95,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    display: none; /* Inicialmente escondido */
+    display: none;
     align-items: center;
     justify-content: center;
     z-index: 10000;
@@ -92,26 +108,29 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .rxray-modal-content {
     position: relative;
     background: var(--rxray-surface);
-    border-radius: 16px;
+    border: 1px solid var(--rxray-border);
+    border-radius: 20px;
     max-width: 500px;
     width: 100%;
     max-height: 80vh;
     overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    animation: modalSlideUp 0.3s ease-out;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6),
+                0 0 0 1px rgba(255, 85, 0, 0.08);
+    animation: rxrayModalSlideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@keyframes modalSlideUp {
+@keyframes rxrayModalSlideUp {
     from {
         opacity: 0;
-        transform: translateY(20px) scale(0.95);
+        transform: translateY(24px) scale(0.96);
     }
     to {
         opacity: 1;
@@ -124,17 +143,18 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px;
+    padding: 18px 20px;
     border-bottom: 1px solid var(--rxray-border);
     position: sticky;
     top: 0;
     background: var(--rxray-surface);
     z-index: 10;
+    border-radius: 20px 20px 0 0;
 }
 
 .rxray-modal-header h3 {
-    font-family: 'Russo One', sans-serif;
-    font-size: 18px;
+    font-family: var(--rxray-font-brand);
+    font-size: 16px;
     font-weight: 400;
     color: var(--rxray-text-white);
     margin: 0;
@@ -143,8 +163,16 @@
     gap: 8px;
 }
 
-.rxray-modal-header h3 span {
+.rxray-modal-header h3 .material-icons {
+    font-size: 22px;
     color: var(--rxray-primary);
+    filter: drop-shadow(0 0 6px var(--rxray-primary-glow));
+}
+
+.rxray-modal-header h3 span:not(.material-icons) {
+    color: var(--rxray-primary);
+    font-family: var(--rxray-font-mono);
+    font-size: 14px;
 }
 
 .rxray-header-actions {
@@ -155,35 +183,48 @@
 
 .rxray-close-btn {
     background: none;
-    border: none;
+    border: 1px solid transparent;
     color: var(--rxray-text-muted);
-    font-size: 24px;
     cursor: pointer;
-    padding: 4px;
-    line-height: 1;
-    transition: color 0.2s;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    width: 32px;
+    height: 32px;
 }
 
 .rxray-close-btn:hover {
     color: var(--rxray-text-white);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--rxray-border-hover);
+}
+
+.rxray-close-btn .material-icons {
+    font-size: 18px;
 }
 
 .rxray-refresh-btn {
     background: none;
-    border: none;
+    border: 1px solid transparent;
     color: var(--rxray-text-muted);
     cursor: pointer;
-    padding: 4px;
+    padding: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    transition: color 0.2s, background 0.2s;
+    transition: all 0.2s ease;
+    width: 32px;
+    height: 32px;
 }
 
 .rxray-refresh-btn:hover {
     color: var(--rxray-primary);
-    background: rgba(255, 69, 0, 0.1);
+    background: rgba(255, 85, 0, 0.08);
+    border-color: rgba(255, 85, 0, 0.2);
 }
 
 .rxray-refresh-btn:disabled {
@@ -191,8 +232,21 @@
     cursor: not-allowed;
 }
 
+.rxray-refresh-btn .material-icons {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+}
+
+.rxray-refresh-btn:hover .material-icons {
+    transform: rotate(90deg);
+}
+
 .rxray-refresh-btn.spinning .material-icons {
-    animation: spin 0.8s linear infinite;
+    animation: rxraySpin 0.8s linear infinite;
+}
+
+@keyframes rxraySpin {
+    to { transform: rotate(360deg); }
 }
 
 /* Loading */
@@ -208,46 +262,110 @@
 .rxray-loading .spinner {
     width: 40px;
     height: 40px;
-    border: 3px solid var(--rxray-border);
+    border: 3px solid rgba(255, 255, 255, 0.06);
     border-top-color: var(--rxray-primary);
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    animation: rxraySpin 0.8s linear infinite;
     margin-bottom: 16px;
 }
 
-/* spin: removido — definido em _app-tokens.css */
-
 .rxray-loading p {
-    font-size: 14px;
+    font-size: 13px;
+    font-family: var(--rxray-font-brand);
+    letter-spacing: 0.3px;
 }
 
-/* Conteúdo */
+/* Conteudo */
 .rxray-content {
     padding: 20px;
 }
 
-/* Seções */
+/* ============================================
+   SECOES
+   ============================================ */
 .rxray-section {
     margin-bottom: 24px;
 }
 
-.rxray-section h4 {
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--rxray-text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin: 0 0 12px 0;
+.rxray-section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
 }
 
-/* Narrativa */
-.rxray-narrative-box {
-    background: rgba(255, 69, 0, 0.1);
-    border-left: 3px solid var(--rxray-primary);
+.rxray-section-header .rxray-section-icon {
+    width: 28px;
+    height: 28px;
     border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.rxray-section-header .rxray-section-icon .material-icons {
+    font-size: 16px;
+}
+
+.rxray-section-header h4 {
+    font-family: var(--rxray-font-brand);
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--rxray-text-white);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+.rxray-section-header::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--rxray-border), transparent);
+}
+
+/* Section icon themes */
+.rxray-section-icon.icon-narrative {
+    background: rgba(255, 85, 0, 0.12);
+}
+.rxray-section-icon.icon-narrative .material-icons {
+    color: var(--rxray-primary);
+}
+
+.rxray-section-icon.icon-disputas {
+    background: rgba(59, 130, 246, 0.12);
+}
+.rxray-section-icon.icon-disputas .material-icons {
+    color: var(--rxray-info);
+}
+
+.rxray-section-icon.icon-performance {
+    background: rgba(34, 197, 94, 0.12);
+}
+.rxray-section-icon.icon-performance .material-icons {
+    color: var(--rxray-success);
+}
+
+.rxray-section-icon.icon-movimentacoes {
+    background: rgba(139, 92, 246, 0.12);
+}
+.rxray-section-icon.icon-movimentacoes .material-icons {
+    color: #8b5cf6;
+}
+
+/* ============================================
+   NARRATIVA (Chat Bubble Style)
+   ============================================ */
+.rxray-narrative-box {
+    background: var(--rxray-surface-glass);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--rxray-border);
+    border-left: 3px solid var(--rxray-primary);
+    border-radius: 4px 14px 14px 14px;
     padding: 16px;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--rxray-font-body);
     font-size: 14px;
     line-height: 1.6;
     color: var(--rxray-text-white);
@@ -263,53 +381,128 @@
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 }
 
 .rxray-narrative-list li {
     position: relative;
-    padding-left: 16px;
+    padding-left: 20px;
     font-size: 13px;
     line-height: 1.5;
-    color: var(--rxray-text-white);
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .rxray-narrative-list li::before {
-    content: '•';
+    content: '';
     position: absolute;
     left: 0;
-    color: var(--rxray-primary);
-    font-weight: bold;
-    font-size: 16px;
-    line-height: 1.3;
+    top: 8px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--rxray-primary);
+    box-shadow: 0 0 6px var(--rxray-primary-glow);
 }
 
-/* Disputas */
+/* ============================================
+   DISPUTA CARDS (Module-Themed)
+   ============================================ */
 .rxray-disputa-card {
-    background: var(--rxray-surface-elevated);
+    background: var(--rxray-surface-glass);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--rxray-border);
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 16px;
     margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s ease;
 }
 
 .rxray-disputa-card:last-child {
     margin-bottom: 0;
 }
 
+.rxray-disputa-card:hover {
+    border-color: var(--rxray-border-hover);
+}
+
+/* Left accent bar per module */
+.rxray-disputa-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    border-radius: 3px 0 0 3px;
+    background: var(--rxray-primary);
+}
+
+.rxray-disputa-card.mod-pc::before { background: var(--rxray-primary); }
+.rxray-disputa-card.mod-mm::before { background: var(--rxray-danger); }
+.rxray-disputa-card.mod-art::before { background: var(--module-artilheiro-primary, #22c55e); }
+.rxray-disputa-card.mod-cap::before { background: var(--module-capitao-primary, #8b5cf6); }
+.rxray-disputa-card.mod-luva::before { background: var(--module-luva-primary, #ffd700); }
+
+/* Subtle module background glow */
+.rxray-disputa-card.mod-pc { background: linear-gradient(135deg, rgba(255, 85, 0, 0.05) 0%, var(--rxray-surface-glass) 100%); }
+.rxray-disputa-card.mod-mm { background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, var(--rxray-surface-glass) 100%); }
+.rxray-disputa-card.mod-art { background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, var(--rxray-surface-glass) 100%); }
+.rxray-disputa-card.mod-cap { background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, var(--rxray-surface-glass) 100%); }
+.rxray-disputa-card.mod-luva { background: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, var(--rxray-surface-glass) 100%); }
+
 .rxray-disputa-header {
-    font-family: 'Russo One', sans-serif;
-    font-size: 12px;
-    font-weight: 400;
-    color: var(--rxray-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
     margin-bottom: 12px;
+}
+
+.rxray-disputa-header .material-icons {
+    font-size: 18px;
+}
+
+.rxray-disputa-header .rxray-disputa-label {
+    font-family: var(--rxray-font-brand);
+    font-size: 11px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Module-specific header colors */
+.rxray-disputa-card.mod-pc .rxray-disputa-header .material-icons,
+.rxray-disputa-card.mod-pc .rxray-disputa-header .rxray-disputa-label {
+    color: var(--rxray-primary);
+}
+
+.rxray-disputa-card.mod-mm .rxray-disputa-header .material-icons,
+.rxray-disputa-card.mod-mm .rxray-disputa-header .rxray-disputa-label {
+    color: var(--rxray-danger);
+}
+
+.rxray-disputa-card.mod-art .rxray-disputa-header .material-icons,
+.rxray-disputa-card.mod-art .rxray-disputa-header .rxray-disputa-label {
+    color: var(--module-artilheiro-primary, #22c55e);
+}
+
+.rxray-disputa-card.mod-cap .rxray-disputa-header .material-icons,
+.rxray-disputa-card.mod-cap .rxray-disputa-header .rxray-disputa-label {
+    color: var(--module-capitao-primary, #8b5cf6);
+}
+
+.rxray-disputa-card.mod-luva .rxray-disputa-header .material-icons,
+.rxray-disputa-card.mod-luva .rxray-disputa-header .rxray-disputa-label {
+    color: var(--module-luva-primary, #ffd700);
 }
 
 .rxray-disputa-confronto {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--rxray-font-mono);
     font-size: 14px;
     margin-bottom: 8px;
 }
@@ -320,7 +513,8 @@
 }
 
 .rxray-disputa-confronto .vs {
-    color: var(--rxray-text-muted);
+    color: var(--rxray-text-dim);
+    font-size: 12px;
 }
 
 .rxray-disputa-confronto .adv {
@@ -329,92 +523,237 @@
 
 .rxray-disputa-confronto .resultado {
     margin-left: auto;
-    font-size: 18px;
+    display: flex;
+    align-items: center;
 }
 
-.rxray-disputa-confronto .resultado.vitoria {
+.rxray-disputa-confronto .resultado .material-icons {
+    font-size: 22px;
+}
+
+.rxray-disputa-confronto .resultado.vitoria .material-icons {
     color: var(--rxray-success);
 }
 
-.rxray-disputa-confronto .resultado.derrota {
+.rxray-disputa-confronto .resultado.derrota .material-icons {
     color: var(--rxray-danger);
 }
 
-.rxray-disputa-confronto .resultado.empate {
+.rxray-disputa-confronto .resultado.empate .material-icons {
     color: var(--rxray-warning);
 }
 
 .rxray-disputa-status {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--rxray-text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
-/* Performance - Grid de stats */
+.rxray-disputa-status .material-icons {
+    font-size: 14px;
+}
+
+.rxray-disputa-status .status-classificado {
+    color: var(--rxray-success);
+}
+
+.rxray-disputa-status .status-eliminado {
+    color: var(--rxray-danger);
+}
+
+/* ============================================
+   PERFORMANCE — STAT CARDS
+   ============================================ */
 .rxray-stats-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: 10px;
 }
 
-.stat-card {
-    background: var(--rxray-surface-elevated);
+.rxray-stat-card {
+    background: var(--rxray-surface-glass);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--rxray-border);
     border-radius: 12px;
-    padding: 12px;
-    text-align: center;
+    padding: 14px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s ease;
 }
 
-.stat-card .stat-label {
-    font-size: 11px;
+.rxray-stat-card:hover {
+    border-color: var(--rxray-border-hover);
+}
+
+.rxray-stat-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    border-radius: 3px 0 0 3px;
+}
+
+.rxray-stat-card.stat-posicao::before { background: var(--rxray-gold); }
+.rxray-stat-card.stat-pontos::before { background: var(--rxray-primary); }
+.rxray-stat-card.stat-media::before { background: var(--rxray-info); }
+.rxray-stat-card.stat-financeiro::before { background: var(--rxray-success); }
+
+.rxray-stat-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.rxray-stat-icon .material-icons {
+    font-size: 18px;
+}
+
+.rxray-stat-card.stat-posicao .rxray-stat-icon .material-icons { color: var(--rxray-gold); }
+.rxray-stat-card.stat-pontos .rxray-stat-icon .material-icons { color: var(--rxray-primary); }
+.rxray-stat-card.stat-media .rxray-stat-icon .material-icons { color: var(--rxray-info); }
+.rxray-stat-card.stat-financeiro .rxray-stat-icon .material-icons { color: var(--rxray-success); }
+
+.rxray-stat-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.rxray-stat-label {
+    font-size: 10px;
     font-weight: 600;
     color: var(--rxray-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
-.stat-card .stat-value {
-    font-family: 'JetBrains Mono', monospace;
+.rxray-stat-value {
+    font-family: var(--rxray-font-mono);
     font-size: 16px;
+    font-weight: 700;
     color: var(--rxray-text-white);
+    line-height: 1.2;
 }
 
-.stat-card.positive .stat-value {
+.rxray-stat-card.positive .rxray-stat-value {
     color: var(--rxray-success);
 }
 
-.stat-card.negative .stat-value {
+.rxray-stat-card.negative .rxray-stat-value {
     color: var(--rxray-danger);
 }
 
-/* Subtítulo de seção */
+/* ============================================
+   MOVIMENTACOES
+   ============================================ */
 .rxray-section-sub {
-    font-size: 12px;
-    color: var(--rxray-text-muted);
+    font-size: 11px;
+    color: var(--rxray-text-dim);
     margin: -8px 0 12px 0;
     font-style: italic;
 }
 
-/* Movimentações */
-.mov-item {
-    padding: 8px 12px;
-    background: var(--rxray-surface-elevated);
-    border-radius: 8px;
+.rxray-mov-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--rxray-surface-glass);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--rxray-border);
+    border-radius: 10px;
     margin-bottom: 8px;
     font-size: 13px;
     color: var(--rxray-text-white);
+    transition: border-color 0.3s ease;
 }
 
-.mov-item-me {
-    border-left: 3px solid var(--rxray-primary);
-    font-weight: 600;
-}
-
-.mov-item:last-child {
+.rxray-mov-item:last-child {
     margin-bottom: 0;
 }
 
-/* Empty state */
+.rxray-mov-item:hover {
+    border-color: var(--rxray-border-hover);
+}
+
+.rxray-mov-item.mov-item-me {
+    border-color: rgba(255, 85, 0, 0.25);
+    background: linear-gradient(135deg, rgba(255, 85, 0, 0.06) 0%, var(--rxray-surface-glass) 100%);
+}
+
+.rxray-mov-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.rxray-mov-icon.subida {
+    background: rgba(34, 197, 94, 0.12);
+}
+
+.rxray-mov-icon.subida .material-icons {
+    color: var(--rxray-success);
+    font-size: 18px;
+}
+
+.rxray-mov-icon.descida {
+    background: rgba(239, 68, 68, 0.12);
+}
+
+.rxray-mov-icon.descida .material-icons {
+    color: var(--rxray-danger);
+    font-size: 18px;
+}
+
+.rxray-mov-name {
+    flex: 1;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rxray-mov-item.mov-item-me .rxray-mov-name {
+    color: var(--rxray-primary);
+    font-weight: 700;
+}
+
+.rxray-mov-positions {
+    font-family: var(--rxray-font-mono);
+    font-size: 12px;
+    color: var(--rxray-text-muted);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.rxray-mov-positions .material-icons {
+    font-size: 14px;
+    color: var(--rxray-text-dim);
+}
+
+/* ============================================
+   EMPTY / ERROR STATES
+   ============================================ */
 .rxray-empty {
     text-align: center;
     color: var(--rxray-text-muted);
@@ -422,7 +761,6 @@
     padding: 20px;
 }
 
-/* Erro */
 .rxray-error {
     text-align: center;
     padding: 40px 20px;
@@ -434,29 +772,40 @@
     margin-bottom: 12px;
 }
 
-/* Botão primário */
+/* ============================================
+   BOTAO PRIMARIO
+   ============================================ */
 .rxray-btn-primary {
     width: 100%;
     background: linear-gradient(135deg, var(--rxray-primary) 0%, var(--rxray-primary-dark) 100%);
     border: none;
     border-radius: 12px;
     padding: 14px;
-    font-family: 'Inter', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
+    font-family: var(--rxray-font-brand);
+    font-size: 13px;
+    font-weight: 400;
     color: white;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
     margin-top: 24px;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .rxray-btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 69, 0, 0.3);
+    box-shadow: 0 6px 20px rgba(255, 85, 0, 0.35);
 }
 
 .rxray-btn-primary:active {
     transform: translateY(0);
+}
+
+.rxray-btn-primary .material-icons {
+    font-size: 18px;
 }
 
 /* ============================================
@@ -466,7 +815,7 @@
     .rxray-modal-content {
         max-width: 100%;
         margin: 0;
-        border-radius: 16px 16px 0 0;
+        border-radius: 20px 20px 0 0;
         max-height: 90vh;
     }
 
@@ -477,18 +826,30 @@
 
 /* Scrollbar customizada */
 .rxray-modal-content::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
 }
 
 .rxray-modal-content::-webkit-scrollbar-track {
-    background: var(--rxray-surface);
+    background: transparent;
 }
 
 .rxray-modal-content::-webkit-scrollbar-thumb {
-    background: var(--rxray-border);
-    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 3px;
 }
 
 .rxray-modal-content::-webkit-scrollbar-thumb:hover {
-    background: var(--rxray-text-muted);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* ============================================
+   REDUCE MOTION
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+    .rxray-modal-content {
+        animation: none;
+    }
+    .rxray-fab:hover {
+        transform: none;
+    }
 }
