@@ -1,48 +1,28 @@
 /**
- * Dashboard Page - Grid de blocos por categorias
- * Redesign v2 - Material Icons, sem emojis
+ * Dashboard Page - Torre de Controle Admin
+ * Redesign v3 - Monitoramento + Acoes Rapidas
+ *
+ * Filosofia: O admin mobile responde 3 perguntas:
+ * 1. "Ta tudo OK?" (status card)
+ * 2. "Preciso fazer algo?" (alertas)
+ * 3. "Como estao minhas ligas?" (liga cards)
  */
 
 import API from '../api.js';
 import { showLoading, showError, showToast } from '../app.js';
 
-// ========== MATERIAL ICON HELPER ========== //
 const mi = (name, cls = '') => `<span class="material-icons${cls ? ' ' + cls : ''}">${name}</span>`;
-const mio = (name, cls = '') => `<span class="material-icons-outlined${cls ? ' ' + cls : ''}">${name}</span>`;
 
-// ========== BLOCK ICON MAP (Material Icons) ========== //
-const BLOCK_ICONS = {
-  consolidacao: 'sync',
-  ligas: 'emoji_events',
-  rodadas: 'calendar_month',
-  modulos: 'grid_view',
-  acertos: 'payments',
-  fluxo: 'bar_chart',
-  auditoria: 'fact_check',
-  notificador: 'notifications_active',
-  manutencao: 'build',
-  saude: 'monitor_heart',
-  admins: 'admin_panel_settings',
-  participantes: 'groups',
-  historico: 'schedule',
-  github: 'code',
-  football: 'sports_soccer',
-};
-
-// ========== MARKET STATUS LABELS ========== //
 const MARKET_LABELS = {
-  1: 'ABERTO', 2: 'FECHADO', 3: 'DESBLOQUEADO',
-  4: 'ENCERRADO', 5: 'FUTURO', 6: 'TEMPORADA ENCERRADA',
+  1: 'Aberto', 2: 'Fechado', 3: 'Desbloqueado',
+  4: 'Encerrado', 5: 'Futuro', 6: 'Temporada Encerrada',
 };
 
 let orchestratorData = null;
 
-// ========== RENDER ========== //
 export async function render() {
   const container = document.getElementById('page-content');
-
-  updateTopBar({ title: 'Super Cartola', subtitle: 'Painel Admin', showBack: false });
-
+  updateTopBar({ title: 'Super Cartola', subtitle: 'Torre de Controle', showBack: false });
   await loadDashboard(container);
   setupScrollToTop();
 }
@@ -51,7 +31,6 @@ function updateTopBar({ title, subtitle, showBack }) {
   const titleEl = document.getElementById('page-title');
   const subtitleEl = document.getElementById('page-subtitle');
   const backBtn = document.getElementById('btn-back');
-
   if (titleEl) titleEl.textContent = title;
   if (subtitleEl) subtitleEl.textContent = subtitle || '';
   if (backBtn) backBtn.classList.toggle('hidden', !showBack);
@@ -59,13 +38,11 @@ function updateTopBar({ title, subtitle, showBack }) {
 
 async function loadDashboard(container) {
   showLoading(container);
-
   try {
     const [data, orchData] = await Promise.all([
       API.getDashboard(),
       fetchOrchestratorStatus(),
     ]);
-
     orchestratorData = orchData;
     renderDashboard(container, data);
   } catch (error) {
@@ -74,213 +51,171 @@ async function loadDashboard(container) {
   }
 }
 
-// ========== MAIN RENDER ========== //
 function renderDashboard(container, data) {
   const { healthScore, healthStatus, ligas } = data;
 
+  const alerts = buildAlerts(ligas, orchestratorData);
+
   container.innerHTML = `
     <div class="container">
-      <!-- Status Duo: Orchestrator + Health -->
-      <div class="status-duo">
-        ${renderOrchestratorBanner()}
-        ${renderHealthBanner(healthScore, healthStatus)}
-      </div>
 
-      <!-- Ligas Rapidas -->
+      ${renderStatusCard(healthScore, healthStatus)}
+
+      ${alerts.length > 0 ? renderAlerts(alerts) : ''}
+
+      <div class="section-header">Acoes Rapidas</div>
+      ${renderQuickActions()}
+
       ${ligas.length > 0 ? `
-        <div class="blocks-section">
-          <div class="blocks-section-title">Suas Ligas</div>
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            ${ligas.map(liga => renderLigaQuickCard(liga)).join('')}
-          </div>
-        </div>
+        <div class="section-header">Suas Ligas</div>
+        ${ligas.map(liga => renderLigaCard(liga)).join('')}
       ` : ''}
 
-      <!-- Operacoes -->
-      <div class="blocks-section">
-        <div class="blocks-section-title">Operacoes</div>
-        <div class="blocks-grid">
-          ${renderBlock({ icon: BLOCK_ICONS.consolidacao, label: 'Consolidacao', desc: 'Consolidar rodadas', color: 'blue', route: '/consolidacao' })}
-          ${renderBlock({ icon: BLOCK_ICONS.ligas, label: 'Gerenciar Ligas', desc: 'Editar e configurar', color: 'amber', route: '/ligas-gerenciar' })}
-          ${renderBlock({ icon: BLOCK_ICONS.rodadas, label: 'Ferramentas', desc: 'Rodadas e tools', color: 'purple', route: '/ferramentas', external: true })}
-          ${renderBlock({ icon: BLOCK_ICONS.modulos, label: 'Modulos', desc: 'Ativar/desativar', color: 'teal', route: '/modulos', external: true })}
-        </div>
-      </div>
-
-      <!-- Financeiro -->
-      <div class="blocks-section">
-        <div class="blocks-section-title">Financeiro</div>
-        <div class="blocks-grid">
-          ${renderBlock({ icon: BLOCK_ICONS.acertos, label: 'Acertos', desc: 'Pagamentos e recebimentos', color: 'green', route: '/financeiro' })}
-          ${renderBlock({ icon: BLOCK_ICONS.fluxo, label: 'Fluxo Financeiro', desc: 'Extrato geral', color: 'cyan', route: '/fluxo', external: true })}
-          ${renderBlock({ icon: BLOCK_ICONS.auditoria, label: 'Auditoria', desc: 'Auditoria de extratos', color: 'orange', route: '/auditoria' })}
-        </div>
-      </div>
-
-      <!-- Comunicacao -->
-      <div class="blocks-section">
-        <div class="blocks-section-title">Comunicacao</div>
-        <div class="blocks-grid">
-          ${renderBlock({ icon: BLOCK_ICONS.notificador, label: 'Notificador', desc: 'Enviar avisos', color: 'pink', route: '/notificador' })}
-          ${renderBlock({ icon: BLOCK_ICONS.manutencao, label: 'Manutencao', desc: 'Modo on/off', color: 'red', route: '/manutencao' })}
-        </div>
-      </div>
-
-      <!-- Sistema -->
-      <div class="blocks-section">
-        <div class="blocks-section-title">Sistema</div>
-        <div class="blocks-grid">
-          ${renderBlock({ icon: BLOCK_ICONS.saude, label: 'Saude', desc: 'Monitoramento', color: 'green', route: '/health' })}
-          ${renderBlock({ icon: BLOCK_ICONS.admins, label: 'Administradores', desc: 'Gestao de acesso', color: 'blue', route: '/admin-gestao' })}
-          ${renderBlock({ icon: BLOCK_ICONS.participantes, label: 'Participantes', desc: 'Analisar times', color: 'purple', route: '/participantes', external: true })}
-          ${renderBlock({ icon: BLOCK_ICONS.historico, label: 'Historico', desc: 'Acessos recentes', color: 'slate', route: '/historico', external: true })}
-        </div>
-      </div>
-
-      <!-- Analytics -->
-      <div class="blocks-section">
-        <div class="blocks-section-title">Analytics</div>
-        <div class="blocks-grid">
-          ${renderBlock({ icon: BLOCK_ICONS.github, label: 'GitHub', desc: 'Commits e PRs', color: 'slate', route: '/github-analytics', external: true })}
-          ${renderBlock({ icon: BLOCK_ICONS.football, label: 'API Football', desc: 'Dados e stats', color: 'cyan', route: '/api-football', external: true })}
-        </div>
-      </div>
     </div>
   `;
 }
 
-// ========== BLOCK RENDERER ========== //
-function renderBlock({ icon, label, desc, color, route, external, badge }) {
-  const onClick = external
-    ? `window.open('${getExternalUrl(route)}', '_blank')`
-    : `window.router.navigate('${route}')`;
-
-  const badgeHtml = badge
-    ? `<span class="block-card-badge badge-${badge.type}">${badge.text}</span>`
-    : '';
-
-  const externalIndicator = external
-    ? `<span style="position:absolute;top:10px;right:10px;color:var(--text-muted);opacity:0.5;">${mi('open_in_new', 'mi-xs')}</span>`
-    : '';
-
-  return `
-    <div class="block-card block-card--${color}" onclick="${onClick}" role="button" tabindex="0">
-      <div class="block-card-icon">${mi(icon)}</div>
-      <div class="block-card-label">${label}</div>
-      ${desc ? `<div class="block-card-desc">${desc}</div>` : ''}
-      ${badgeHtml}
-      ${externalIndicator}
-    </div>
-  `;
-}
-
-function getExternalUrl(route) {
-  const map = {
-    '/ferramentas': '/ferramentas-rodadas.html',
-    '/modulos': '/gerenciar.html',
-    '/fluxo': '/fluxo-financeiro.html',
-    '/participantes': '/analisar-participantes.html',
-    '/historico': '/historico-acessos.html',
-    '/github-analytics': '/github-analytics-unified.html',
-    '/api-football': '/api-football-analytics.html',
-  };
-  return map[route] || route;
-}
-
-// ========== STATUS BANNERS ========== //
-function renderOrchestratorBanner() {
-  if (!orchestratorData) {
-    return `
-      <div class="status-banner" onclick="window.router.navigate('/orchestrator')">
-        <div class="status-banner-row">
-          <div class="status-banner-indicator" style="background:rgba(148,163,184,0.15);">
-            ${mi('warning', 'mi-md')}
-          </div>
-          <div class="status-banner-info">
-            <div class="status-banner-title">Orchestrator</div>
-            <div class="status-banner-detail">Indisponivel</div>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  const live = orchestratorData.live || {};
+// ========== STATUS CARD ========== //
+function renderStatusCard(healthScore, healthStatus) {
+  const live = orchestratorData?.live || {};
   const statusNum = live.statusMercado;
-  const statusLabel = live.statusMercadoLabel || MARKET_LABELS[statusNum] || '?';
+  const statusLabel = live.statusMercadoLabel || MARKET_LABELS[statusNum] || 'Indisponivel';
   const rodada = live.rodadaAtual || '?';
 
-  let dotClass = 'mi-dot--muted', bgColor = 'rgba(148,163,184,0.15)';
-  if (statusNum === 1) { dotClass = 'mi-dot--success'; bgColor = 'rgba(34,197,94,0.15)'; }
-  else if (statusNum === 2) { dotClass = 'mi-dot--danger'; bgColor = 'rgba(239,68,68,0.15)'; }
-  else if (statusNum === 4) { dotClass = 'mi-dot--warning'; bgColor = 'rgba(245,158,11,0.15)'; }
+  // Market dot color
+  let marketDotColor = 'var(--text-muted)';
+  let marketBadgeBg = 'var(--bg-tertiary)';
+  let marketBadgeColor = 'var(--text-muted)';
+  if (statusNum === 1) { marketDotColor = 'var(--accent-success)'; marketBadgeBg = 'rgba(34,197,94,0.15)'; marketBadgeColor = 'var(--accent-success)'; }
+  else if (statusNum === 2) { marketDotColor = 'var(--accent-danger)'; marketBadgeBg = 'rgba(239,68,68,0.15)'; marketBadgeColor = 'var(--accent-danger)'; }
+  else if (statusNum === 4) { marketDotColor = 'var(--accent-warning)'; marketBadgeBg = 'rgba(245,158,11,0.15)'; marketBadgeColor = 'var(--accent-warning)'; }
+
+  // Health dot color
+  let healthDotColor = 'var(--accent-success)';
+  let healthLabel = 'Saudavel';
+  if (healthStatus === 'warning') { healthDotColor = 'var(--accent-warning)'; healthLabel = 'Atencao'; }
+  else if (healthStatus === 'critical') { healthDotColor = 'var(--accent-danger)'; healthLabel = 'Critico'; }
+
+  // Orchestrator
+  const orchAtivo = orchestratorData != null;
+  const orchDotColor = orchAtivo ? 'var(--accent-success)' : 'var(--text-muted)';
+  const orchLabel = orchAtivo ? 'Ativo' : 'Indisponivel';
 
   return `
-    <div class="status-banner" onclick="window.router.navigate('/orchestrator')">
-      <div class="status-banner-row">
-        <div class="status-banner-indicator" style="background:${bgColor};">
-          <span class="mi-dot ${dotClass}" style="width:14px;height:14px;"></span>
-        </div>
-        <div class="status-banner-info">
-          <div class="status-banner-title">${statusLabel}</div>
-          <div class="status-banner-detail">R${rodada}</div>
-        </div>
+    <div class="status-card" onclick="window.router.navigate('/orchestrator')" role="button" tabindex="0">
+      <!-- Mercado -->
+      <div class="status-card-row">
+        <span class="status-card-dot" style="background:${marketDotColor};"></span>
+        <span class="status-card-label">Mercado</span>
+        <span class="status-card-badge" style="background:${marketBadgeBg};color:${marketBadgeColor};">${statusLabel}</span>
+        <span class="status-card-value">R${rodada}</span>
+      </div>
+      <!-- Health -->
+      <div class="status-card-row" onclick="event.stopPropagation();window.router.navigate('/health')" role="button">
+        <span class="status-card-dot" style="background:${healthDotColor};"></span>
+        <span class="status-card-label">Sistema</span>
+        <span class="status-card-value" style="color:${healthDotColor};">${healthLabel}</span>
+        <span class="status-card-value">${healthScore}/100</span>
+      </div>
+      <!-- Orchestrator -->
+      <div class="status-card-row">
+        <span class="status-card-dot" style="background:${orchDotColor};"></span>
+        <span class="status-card-label">Orchestrator</span>
+        <span class="status-card-value">${orchLabel}</span>
       </div>
     </div>
   `;
 }
 
-function renderHealthBanner(healthScore, healthStatus) {
-  let dotClass = 'mi-dot--success', bgColor = 'rgba(34,197,94,0.15)';
-  if (healthStatus === 'warning') { dotClass = 'mi-dot--warning'; bgColor = 'rgba(245,158,11,0.15)'; }
-  else if (healthStatus === 'critical') { dotClass = 'mi-dot--danger'; bgColor = 'rgba(239,68,68,0.15)'; }
+// ========== ALERTS ========== //
+function buildAlerts(ligas, orchData) {
+  const alerts = [];
 
-  const label = healthStatus === 'healthy' ? 'Saudavel' :
-                healthStatus === 'warning' ? 'Atencao' : 'Critico';
+  // Inadimplentes
+  const totalInadimplentes = ligas.reduce((sum, l) => sum + (l.inadimplentes || 0), 0);
+  if (totalInadimplentes > 0) {
+    alerts.push({
+      icon: 'warning',
+      text: `${totalInadimplentes} inadimplente${totalInadimplentes > 1 ? 's' : ''} no total`,
+      route: null,
+    });
+  }
 
+  // Orchestrator em erro
+  const orchLive = orchData?.live || {};
+  if (orchLive.faseRodada === 'erro') {
+    alerts.push({
+      icon: 'error',
+      text: 'Erro no orchestrator - verificar',
+      route: '/orchestrator',
+      danger: true,
+    });
+  }
+
+  return alerts;
+}
+
+function renderAlerts(alerts) {
+  const hasDanger = alerts.some(a => a.danger);
   return `
-    <div class="status-banner" onclick="window.router.navigate('/health')">
-      <div class="status-banner-row">
-        <div class="status-banner-indicator" style="background:${bgColor};">
-          <span class="mi-dot ${dotClass}" style="width:14px;height:14px;"></span>
+    <div class="alert-banner${hasDanger ? ' alert-banner--danger' : ''}">
+      ${alerts.map(a => `
+        <div class="alert-banner-item"${a.route ? ` onclick="window.router.navigate('${a.route}')"` : ''}>
+          ${mi(a.icon)}
+          <span>${a.text}</span>
         </div>
-        <div class="status-banner-info">
-          <div class="status-banner-title">${label}</div>
-          <div class="status-banner-detail" style="font-family:var(--font-mono);font-weight:600;">${healthScore}/100</div>
-        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// ========== QUICK ACTIONS ========== //
+function renderQuickActions() {
+  return `
+    <div class="action-grid">
+      <div class="action-card action-card--blue" onclick="window.router.navigate('/consolidacao')" role="button" tabindex="0">
+        <div class="action-card-icon">${mi('sync')}</div>
+        <div class="action-card-label">Consolidar</div>
+      </div>
+      <div class="action-card action-card--pink" onclick="window.router.navigate('/notificador')" role="button" tabindex="0">
+        <div class="action-card-icon">${mi('notifications_active')}</div>
+        <div class="action-card-label">Notificar</div>
+      </div>
+      <div class="action-card action-card--red" onclick="window.router.navigate('/manutencao')" role="button" tabindex="0">
+        <div class="action-card-icon">${mi('build')}</div>
+        <div class="action-card-label">Manutencao</div>
+      </div>
+      <div class="action-card action-card--orange" onclick="window.router.navigate('/auditoria')" role="button" tabindex="0">
+        <div class="action-card-icon">${mi('fact_check')}</div>
+        <div class="action-card-label">Auditoria</div>
       </div>
     </div>
   `;
 }
 
-// ========== LIGA QUICK CARD ========== //
-function renderLigaQuickCard(liga) {
+// ========== LIGA CARD ========== //
+function renderLigaCard(liga) {
   const saldoFormatted = (liga.saldoTotal || 0).toFixed(2).replace('.', ',');
   const saldoColor = (liga.saldoTotal || 0) >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)';
-  const inadimplentes = liga.inadimplentes > 0
-    ? `<span class="badge badge-warning" style="font-size:10px;padding:2px 6px;">${liga.inadimplentes} inadimpl.</span>`
-    : '';
+  const inadimplentes = liga.inadimplentes || 0;
 
   return `
-    <div class="liga-quick-card" onclick="window.router.navigate('/ligas', { ligaId: '${liga.id}' })">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-        <div style="flex:1;min-width:0;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
-            ${mi('emoji_events', 'mi-sm')}
-            <span style="font-size:14px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${liga.nome}</span>
-            ${inadimplentes}
-          </div>
-          <div style="display:flex;align-items:center;gap:12px;">
-            <span style="font-size:12px;color:var(--text-muted);">${liga.participantesAtivos}/${liga.participantesTotais} part.</span>
-            <span style="font-size:12px;color:var(--text-muted);">R${liga.rodadaAtual}</span>
-            <span style="font-size:12px;color:var(--text-muted);">T${liga.temporada}</span>
-          </div>
+    <div class="liga-card" onclick="window.router.navigate('/ligas', { ligaId: '${liga.id}' })">
+      <div class="liga-card-header">
+        <div class="liga-card-name">
+          ${mi('emoji_events', 'mi-sm')}
+          <span>${liga.nome}</span>
         </div>
-        <div style="text-align:right;flex-shrink:0;">
-          <div style="font-size:15px;font-weight:700;font-family:var(--font-mono);color:${saldoColor};">
-            R$ ${saldoFormatted}
-          </div>
-        </div>
+        ${inadimplentes > 0 ? `<span class="badge badge-warning" style="font-size:10px;padding:2px 8px;">${inadimplentes} inadimpl.</span>` : ''}
+      </div>
+      <div class="liga-card-stats">
+        <span class="liga-card-stat">${mi('groups')} ${liga.participantesAtivos}/${liga.participantesTotais}</span>
+        <span class="liga-card-stat">${mi('calendar_month')} R${liga.rodadaAtual}</span>
+        <span class="liga-card-stat">${mi('date_range')} T${liga.temporada}</span>
+      </div>
+      <div class="liga-card-footer">
+        <span class="liga-card-saldo" style="color:${saldoColor};">R$ ${saldoFormatted}</span>
+        <span class="material-icons" style="color:var(--text-muted);font-size:18px;">chevron_right</span>
       </div>
     </div>
   `;
@@ -302,7 +237,6 @@ async function fetchOrchestratorStatus() {
 function setupScrollToTop() {
   const btn = document.getElementById('btn-scroll-top');
   if (!btn) return;
-
   let ticking = false;
   window.addEventListener('scroll', () => {
     if (!ticking) {

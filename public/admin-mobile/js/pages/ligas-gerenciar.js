@@ -37,10 +37,7 @@ function renderPage(container, ligas) {
         <div class="empty-state">
           <div class="empty-state-icon"><span class="material-icons mi-xl">emoji_events</span></div>
           <h3 class="empty-state-title">Nenhuma liga encontrada</h3>
-          <p class="empty-state-text">Crie sua primeira liga pelo painel web</p>
-          <button class="btn btn-primary" onclick="window.open('/criar-liga.html','_blank')">
-            Criar Liga (Web)
-          </button>
+          <p class="empty-state-text">Crie sua primeira liga pelo painel desktop</p>
         </div>
       </div>
     `;
@@ -53,12 +50,6 @@ function renderPage(container, ligas) {
         ${ligas.map(liga => renderLigaManageCard(liga)).join('')}
       </div>
 
-      <div style="margin-top:var(--spacing-lg);text-align:center;">
-        <button class="btn btn-ghost btn-sm" onclick="window.open('/criar-liga.html','_blank')" style="gap:6px;">
-          <span class="material-icons mi-inline">add</span>
-          Criar Nova Liga (Web)
-        </button>
-      </div>
     </div>
   `;
 }
@@ -81,22 +72,14 @@ function renderLigaManageCard(liga) {
         <span class="badge badge-info" style="font-size:10px;">${participantesAtivos}/${participantesTotais}</span>
       </div>
 
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn btn-ghost btn-sm" style="flex:1;min-width:0;font-size:12px;padding:8px 10px;"
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost btn-sm" style="flex:1;font-size:12px;padding:8px 10px;"
           onclick="window.router.navigate('/ligas', { ligaId: '${liga.id}' })">
-          Detalhes
+          <span class="material-icons mi-inline" style="font-size:14px;">visibility</span> Detalhes
         </button>
-        <button class="btn btn-ghost btn-sm" style="flex:1;min-width:0;font-size:12px;padding:8px 10px;"
-          onclick="window.open('/editar-liga.html?id=${liga.id}','_blank')">
-          Editar
-        </button>
-        <button class="btn btn-ghost btn-sm" style="flex:1;min-width:0;font-size:12px;padding:8px 10px;"
-          onclick="window.open('/gerenciar.html?liga=${liga.id}','_blank')">
-          Modulos
-        </button>
-        <button class="btn btn-primary btn-sm" style="flex:1;min-width:0;font-size:12px;padding:8px 10px;"
+        <button class="btn btn-primary btn-sm" style="flex:1;font-size:12px;padding:8px 10px;"
           onclick="window.syncLiga('${liga.id}')">
-          Sincronizar
+          <span class="material-icons mi-inline" style="font-size:14px;">sync</span> Sincronizar
         </button>
       </div>
     </div>

@@ -59,12 +59,6 @@ function renderPage(container, ligas) {
       <!-- Resultado -->
       <div id="audit-result"></div>
 
-      <!-- Link web -->
-      <div style="margin-top:var(--spacing-lg);text-align:center;">
-        <button class="btn btn-ghost btn-sm" onclick="window.open('/auditoria-extratos.html','_blank')">
-          Auditoria completa (Web)
-        </button>
-      </div>
     </div>
   `;
 

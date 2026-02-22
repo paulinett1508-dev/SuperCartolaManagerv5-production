@@ -13,8 +13,8 @@ export async function render(params = {}) {
   const titleEl = document.getElementById('page-title');
   const subtitleEl = document.getElementById('page-subtitle');
   const backBtn = document.getElementById('btn-back');
-  if (titleEl) titleEl.textContent = 'Liga';
-  if (subtitleEl) subtitleEl.textContent = 'Detalhes';
+  if (titleEl) titleEl.textContent = 'Detalhes da Liga';
+  if (subtitleEl) subtitleEl.textContent = '';
   if (backBtn) backBtn.classList.remove('hidden');
 
   if (!ligaId) {
@@ -41,17 +41,6 @@ function renderLigaDetalhes(container, liga) {
 
   container.innerHTML = `
     <div class="container">
-      <!-- Header com botão voltar -->
-      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: var(--spacing-md);">
-        <button onclick="window.router.navigate('/')" class="btn btn-ghost btn-sm" style="min-width: 44px; padding: 8px;">
-          <span class="material-icons">arrow_back</span>
-        </button>
-        <div style="flex: 1;">
-          <h2 class="card-title" style="margin: 0; font-size: 20px;">${liga.nome}</h2>
-          <p class="text-muted" style="margin: 0; font-size: 14px;">Temporada ${liga.temporada}</p>
-        </div>
-      </div>
-
       <!-- Info Geral -->
       <div class="card">
         <h3 class="card-title" style="font-size: 16px; margin-bottom: var(--spacing-md);"><span class="material-icons mi-inline">info</span> Informações Gerais</h3>

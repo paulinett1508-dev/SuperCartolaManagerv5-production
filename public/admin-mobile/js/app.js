@@ -1,6 +1,6 @@
 /**
  * App Module - Inicializacao e Routing SPA
- * v2 - Redesign com blocos (sem bottom-nav)
+ * v3 - Torre de Controle (monitoramento + acoes rapidas)
  */
 
 import { requireAuth, getUser } from './auth.js';
@@ -267,4 +267,4 @@ window.addEventListener('offline', () => {
 window.router = router;
 window.currentUser = getUser();
 
-console.log('Admin App v2 initialized - Block Dashboard');
+console.log('Admin App v3 initialized - Torre de Controle');

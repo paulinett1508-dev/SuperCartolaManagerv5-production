@@ -95,12 +95,6 @@ function renderPage(container) {
         `}
       </div>
 
-      <!-- Link para versao avancada -->
-      <div style="margin-top:var(--spacing-lg);text-align:center;">
-        <button class="btn btn-ghost btn-sm" onclick="window.open('/modo-manutencao-avancado.html','_blank')">
-          Configuracoes avancadas (Web)
-        </button>
-      </div>
     </div>
   `;
 }

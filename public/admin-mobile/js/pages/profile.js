@@ -31,21 +31,12 @@ export async function render(params = {}) {
 
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title"><span class="material-icons mi-inline">notifications</span> Notificacoes</h3>
-        </div>
-        <div class="card-body">
-          <p class="text-muted">Configuração de notificações será implementada na FASE 7</p>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
           <h3 class="card-title"><span class="material-icons mi-inline">info</span> Sobre</h3>
         </div>
         <div class="card-body">
           <p><strong>App:</strong> Admin Mobile</p>
-          <p class="mt-sm"><strong>Versão:</strong> 1.0.0</p>
-          <p class="mt-sm"><strong>Fase:</strong> FASE 1 - Setup PWA <span class="material-icons mi-inline" style="color:var(--accent-success);font-size:16px;">check_circle</span></p>
+          <p class="mt-sm"><strong>Versao:</strong> 2.0.0</p>
+          <p class="mt-sm"><strong>Foco:</strong> Monitoramento + Acoes rapidas</p>
         </div>
       </div>
 
