@@ -74,8 +74,6 @@ async function _carregarDados() {
 
         // Renderizar disputa ativa
         _renderizarDisputa(dados, _currentTimeId);
-        // ✅ LP: Atualizar seção de status
-        _lpRenderRestaUmStatus(dados, _currentTimeId);
         // ✅ LP: Se dados reais de premiação existem, sobrescreve o fallback de regras-modulos
         if (dados.premiacao) _lpRenderRestaUmPremiacoes(dados.premiacao);
 
@@ -323,7 +321,10 @@ function _renderizarDisputa(dados, timeId) {
                          src="/escudos/${p.escudoId || 'default'}.png"
                          alt=""
                          onerror="this.src='/escudos/default.png'">
-                    <span class="resta-um-nome">${p.nomeTime || 'Time'}</span>
+                    <div class="resta-um-nome">
+                        <div>${p.nomeCartoleiro || p.nome_cartola || p.nome || 'N/D'}</div>
+                        <div style="font-size: 11px; opacity: 0.7;">${p.nomeTime || ''}</div>
+                    </div>
                     ${rightHtml}
                 </div>
             `;
@@ -447,68 +448,6 @@ function _lpFormatCurrency(val) {
     return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-/**
- * Render Meu Status + Destaque for Resta Um module.
- * Uses different data structure (status: 'vivo'/'eliminado'/'campeao').
- */
-function _lpRenderRestaUmStatus(dados, timeId) {
-    if (!dados?.edicao) return;
-    const participantes = dados.participantes || [];
-    const vivos = participantes.filter(p => p.status === 'vivo' || p.status === 'campeao');
-    const meu = participantes.find(p => String(p.timeId || p.time_id || '') === String(timeId));
-    const edicao = dados.edicao;
-
-    // --- Meu Status ---
-    const statusEl = document.getElementById('lp-meu-status-resta-um');
-    if (statusEl && meu) {
-        const isCampeao = meu.status === 'campeao';
-        const isVivo = meu.status === 'vivo';
-        const isEliminado = meu.status === 'eliminado';
-        const sobreviventes = vivos.length;
-        const total = participantes.length;
-        const rodadaElim = meu.rodadaEliminacao || meu.rodada_eliminacao;
-
-        let badgeHtml;
-        if (isCampeao) {
-            badgeHtml = `<div class="module-lp-status-badge campeao">
-                <span class="material-icons">emoji_events</span>Campeão
-            </div>`;
-        } else if (isVivo) {
-            badgeHtml = `<div class="module-lp-status-badge vivo">
-                <span class="material-icons">check_circle</span>Vivo
-            </div>`;
-        } else {
-            badgeHtml = `<div class="module-lp-status-badge eliminado">
-                <span class="material-icons">cancel</span>Eliminado${rodadaElim ? ' R' + rodadaElim : ''}
-            </div>`;
-        }
-
-        const html = `<p class="module-lp-section-label"><span class="material-icons">person</span>Minha Situação</p>
-        <div class="module-lp-status-grid">
-            <div class="module-lp-stat-card" style="grid-column: span 3; display:flex; justify-content:center; align-items:center; padding: var(--app-space-4);">
-                ${badgeHtml}
-            </div>
-        </div>
-        <div class="module-lp-status-grid" style="margin-top: var(--app-space-3);">
-            <div class="module-lp-stat-card">
-                <span class="module-lp-stat-value">${sobreviventes}</span>
-                <span class="module-lp-stat-label">vivos</span>
-            </div>
-            <div class="module-lp-stat-card">
-                <span class="module-lp-stat-value">${total}</span>
-                <span class="module-lp-stat-label">total</span>
-            </div>
-            <div class="module-lp-stat-card">
-                <span class="module-lp-stat-value">${dados.rodadaAtual || edicao.rodada_atual || '—'}</span>
-                <span class="module-lp-stat-label">rodada</span>
-            </div>
-        </div>`;
-        statusEl.innerHTML = html;
-        statusEl.style.display = '';
-    }
-
-    // Destaque removido (v2.0) — lista completa de sobreviventes já existe na seção de dados
-}
 
 /**
  * Fallback: carrega texto descritivo de regras-modulos (exibido até dados reais do status chegarem).
