@@ -431,10 +431,43 @@ export async function editarEdicao(req, res) {
     }
 }
 
+/**
+ * DELETE /:ligaId/edicoes/:edicao
+ * Deleta uma edição — apenas edições com status 'pendente' podem ser removidas.
+ */
+export async function deletarEdicao(req, res) {
+    try {
+        const { ligaId, edicao } = req.params;
+        const temporada = parseInt(req.query.temporada) || CURRENT_SEASON;
+        const edicaoNum = parseInt(edicao);
+
+        const cache = await RestaUmCache.findOne({ liga_id: ligaId, temporada, edicao: edicaoNum });
+
+        if (!cache) {
+            return res.status(404).json({ error: `Edição ${edicaoNum} não encontrada` });
+        }
+
+        if (cache.status !== 'pendente') {
+            return res.status(400).json({ error: 'Apenas edições pendentes podem ser deletadas. Edições em andamento ou finalizadas não podem ser removidas.' });
+        }
+
+        await RestaUmCache.deleteOne({ liga_id: ligaId, temporada, edicao: edicaoNum });
+
+        logger.log(`[RESTA-UM] Edição ${edicaoNum} da liga ${ligaId} deletada (temporada ${temporada})`);
+
+        return res.json({ success: true, mensagem: `Edição ${edicaoNum} deletada com sucesso` });
+
+    } catch (error) {
+        logger.error('[RESTA-UM] Erro ao deletar edição:', error);
+        return res.status(500).json({ error: 'Erro interno ao deletar edição' });
+    }
+}
+
 export default {
     obterStatus,
     iniciarEdicao,
     editarEdicao,
     listarEdicoes,
     obterParciais,
+    deletarEdicao,
 };

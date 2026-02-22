@@ -9,6 +9,7 @@
  */
 
 import express from 'express';
+import mongoose from 'mongoose';
 import { verificarAdmin } from '../middleware/auth.js';
 import ModuleConfig, { MODULOS_DISPONIVEIS } from '../models/ModuleConfig.js';
 import { getRuleById, allRules } from '../config/rules/index.js';
@@ -354,6 +355,37 @@ router.put('/liga/:ligaId/modulos/:modulo/config', verificarAdmin, async (req, r
             // Propagar ranking_rodada para liga.configuracoes
             if (modulo === 'ranking_rodada' && wizard_respostas.valores_manual) {
                 await propagarRankingRodadaParaLiga(ligaId, wizard_respostas);
+            }
+
+            // ✅ Auto-build financeiro_override.valores_por_posicao a partir do wizard
+            // Lê os campos com afeta = "financeiro_override.valores_por_posicao.N"
+            // e respeita flags vice_habilitado / terceiro_habilitado
+            const regrasJson = getRuleById(modulo);
+            const perguntas = regrasJson?.wizard?.perguntas || [];
+            const valores_por_posicao = {};
+
+            for (const p of perguntas) {
+                if (!p.afeta?.startsWith('financeiro_override.valores_por_posicao.')) continue;
+                const posicao = p.afeta.split('.').pop(); // '1', '2', '3'
+                const val = Number(wizard_respostas[p.id]) || 0;
+
+                // Derivar nome da flag (ex: valor_vice → vice_habilitado)
+                const flagKey = p.id.replace('valor_', '') + '_habilitado';
+                const flagVal = wizard_respostas[flagKey];
+
+                // Incluir posição apenas se: flag não é false E valor > 0
+                if (flagVal === false) continue;
+                if (val > 0) {
+                    valores_por_posicao[posicao] = val;
+                }
+            }
+
+            if (Object.keys(valores_por_posicao).length > 0) {
+                await ModuleConfig.findOneAndUpdate(
+                    { liga_id: new mongoose.Types.ObjectId(ligaId), modulo, temporada: Number(temporada) },
+                    { $set: { 'financeiro_override.valores_por_posicao': valores_por_posicao } }
+                );
+                console.log(`[MODULE-CONFIG] financeiro_override.valores_por_posicao construído para ${modulo}:`, valores_por_posicao);
             }
         }
 

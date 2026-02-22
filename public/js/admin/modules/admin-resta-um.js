@@ -481,6 +481,13 @@ class AdminRestaUm {
 
     renderEdicaoCard(edicao) {
         const statusLabel = { pendente: 'Pendente', em_andamento: 'Em Andamento', finalizada: 'Finalizada' };
+        const btnDeletar = edicao.status === 'pendente'
+            ? `<button class="ru-btn-deletar-edicao" title="Deletar edicao pendente"
+                       onclick="event.stopPropagation(); window.adminRestaUm.deletarEdicao(${edicao.edicao})"
+                       style="background:none;border:1px solid var(--app-danger);color:var(--app-danger);border-radius:var(--app-radius-sm);padding:2px 8px;cursor:pointer;font-size:var(--app-font-xs);display:flex;align-items:center;gap:2px;">
+                   <span class="material-icons" style="font-size:14px;">delete</span> Deletar
+               </button>`
+            : '';
         return `
             <div class="ru-edicao-card">
                 <div class="ru-edicao-info" onclick="window.adminRestaUm.selecionarEdicao(${edicao.edicao})">
@@ -490,9 +497,44 @@ class AdminRestaUm {
                         <div class="ru-edicao-rodadas">R${edicao.rodadaInicial} - R${edicao.rodadaFinal} | ${edicao.totalParticipantes || 0} participantes | ${edicao.vivosRestantes || 0} vivos</div>
                     </div>
                 </div>
-                <span class="ru-edicao-status ${edicao.status}">${statusLabel[edicao.status] || edicao.status}</span>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    ${btnDeletar}
+                    <span class="ru-edicao-status ${edicao.status}">${statusLabel[edicao.status] || edicao.status}</span>
+                </div>
             </div>
         `;
+    }
+
+    async deletarEdicao(edicaoNum) {
+        const confirmMsg = `Confirma a exclusao da Edicao ${edicaoNum}?\n\nEsta acao e irreversivel. Apenas edicoes pendentes podem ser deletadas.`;
+        if (!confirm(confirmMsg)) return;
+
+        try {
+            const res = await fetch(`/api/resta-um/${this.ligaId}/edicoes/${edicaoNum}`, {
+                method: 'DELETE',
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                if (window.SuperModal) {
+                    SuperModal.toast.success(data.mensagem || `Edicao ${edicaoNum} deletada`);
+                } else {
+                    alert(data.mensagem || `Edicao ${edicaoNum} deletada`);
+                }
+                await this.carregarDashboard();
+            } else {
+                if (window.SuperModal) {
+                    SuperModal.toast.error(data.error || 'Erro ao deletar edicao');
+                } else {
+                    alert(data.error || 'Erro ao deletar edicao');
+                }
+            }
+        } catch (err) {
+            console.error('[ADMIN-RU] Erro ao deletar edicao:', err);
+            if (window.SuperModal) {
+                SuperModal.toast.error('Erro de conexao ao deletar edicao');
+            }
+        }
     }
 
     // ==========================================================================

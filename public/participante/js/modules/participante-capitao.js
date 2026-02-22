@@ -589,6 +589,7 @@ function _lpRenderFinanceiroHtml(fo) {
     if (fo.valores_por_posicao && Object.keys(fo.valores_por_posicao).length) {
         Object.entries(fo.valores_por_posicao)
             .sort(([a], [b]) => Number(a) - Number(b))
+            .filter(([, val]) => Number(val) > 0)
             .forEach(([pos, val]) => {
                 html += `<div class="module-lp-premiacoes-item">
                     <span class="module-lp-premiacoes-pos ${posClasses[pos] || ''}">${posLabels[pos] || pos + 'º'}</span>

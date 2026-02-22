@@ -42,4 +42,9 @@ router.put('/:ligaId/editar/:edicao', verificarAdmin, async (req, res) => {
     await RestaUmController.editarEdicao(req, res);
 });
 
+// DELETE /api/resta-um/:ligaId/edicoes/:edicao - Deletar edição pendente
+router.delete('/:ligaId/edicoes/:edicao', verificarAdmin, async (req, res) => {
+    await RestaUmController.deletarEdicao(req, res);
+});
+
 export default router;

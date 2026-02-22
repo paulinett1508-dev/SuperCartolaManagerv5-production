@@ -1200,9 +1200,8 @@ class ModuleConfigModal {
         perguntas.forEach(pergunta => {
             if (!pergunta.dependeDe) return;
             if (this.shouldShowQuestion(pergunta)) return;
-            if (pergunta.dependeDe === 'integrar_extrato') {
-                delete this.userAnswers[pergunta.id];
-            }
+            // Limpar valor de qualquer campo condicional oculto
+            delete this.userAnswers[pergunta.id];
         });
     }
 

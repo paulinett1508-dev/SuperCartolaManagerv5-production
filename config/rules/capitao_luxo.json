@@ -227,27 +227,49 @@
         "afeta": "financeiro_override.valores_por_posicao.1"
       },
       {
+        "id": "vice_habilitado",
+        "tipo": "boolean",
+        "label": "Premiar 2o lugar?",
+        "descricao": "Habilita ou desabilita premiacao para o 2o colocado",
+        "default": true,
+        "required": false,
+        "afeta": "financeiro_override.vice_habilitado"
+      },
+      {
         "id": "valor_vice",
         "tipo": "number",
         "label": "Premio do 2o lugar (R$)",
-        "descricao": "Deixe em branco para nao premiar o 2o lugar",
+        "descricao": "Valor para o vice-Capitao de Luxo",
         "default": 15,
-        "min": 0,
+        "min": 1,
         "max": 300,
         "step": 5,
         "required": false,
+        "dependeDe": "vice_habilitado",
+        "condicao": true,
         "afeta": "financeiro_override.valores_por_posicao.2"
+      },
+      {
+        "id": "terceiro_habilitado",
+        "tipo": "boolean",
+        "label": "Premiar 3o lugar?",
+        "descricao": "Habilita ou desabilita premiacao para o 3o colocado",
+        "default": true,
+        "required": false,
+        "afeta": "financeiro_override.terceiro_habilitado"
       },
       {
         "id": "valor_terceiro",
         "tipo": "number",
         "label": "Premio do 3o lugar (R$)",
-        "descricao": "Deixe em branco para nao premiar o 3o lugar",
+        "descricao": "Valor para o 3o melhor capitao",
         "default": 10,
-        "min": 0,
+        "min": 1,
         "max": 200,
         "step": 5,
         "required": false,
+        "dependeDe": "terceiro_habilitado",
+        "condicao": true,
         "afeta": "financeiro_override.valores_por_posicao.3"
       },
       {
