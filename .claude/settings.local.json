@@ -174,14 +174,17 @@
       "Bash(STITCH_API_KEY=\"AQ.Ab8RN6Jk-OJtZlYW6dKRkzPns5F6ijAO6nzc3DIR9_sdEhJMpg\" npx -y @_davideast/stitch-mcp tool get_screen_code -d '{\"projectId\":\"6180425003809710453\",\"screenId\":\"4c3592b5ac0e49d7866118778868ac3c\"}' 2>&1 | head -80)",
       "mcp__stitch__list_screens",
       "mcp__stitch__get_screen",
-      "WebFetch(domain:lh3.googleusercontent.com)"
+      "WebFetch(domain:lh3.googleusercontent.com)",
+      "WebFetch(domain:unsplash.com)",
+      "Bash(convert:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "mongo",
     "perplexity",
-    "context7"
+    "context7",
+    "stitch"
   ],
   "hooks": {
     "SessionStart": [

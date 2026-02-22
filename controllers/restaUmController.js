@@ -7,6 +7,7 @@
  * - POST iniciar edição (admin)
  */
 import RestaUmCache from '../models/RestaUmCache.js';
+import Rodada from '../models/Rodada.js';
 import Liga from '../models/Liga.js';
 import { CURRENT_SEASON } from '../config/seasons.js';
 import logger from '../utils/logger.js';
@@ -63,16 +64,48 @@ export async function obterStatus(req, res) {
             return res.status(404).json({ error: 'Nenhuma edição encontrada' });
         }
 
-        // Separar vivos e eliminados, ordenar por pontos
-        const participantes = (edicao.participantes || []).map(p => ({
-            ...p,
-            pontosRodada: p.pontosRodada != null ? truncarPontosNum(p.pontosRodada) : null,
-            pontosAcumulados: truncarPontosNum(p.pontosAcumulados || 0),
-        }));
+        // ✅ Live Experience: buscar pontos da rodada atual da collection Rodada
+        let pontosLiveMap = new Map();
+        let isLive = false;
 
+        if (edicao.status === 'em_andamento' && edicao.rodadaAtual) {
+            const rodadasLive = await Rodada.find({
+                ligaId,
+                rodada: edicao.rodadaAtual,
+                temporada,
+            }).lean();
+
+            if (rodadasLive.length > 0) {
+                isLive = true;
+                rodadasLive.forEach(r => {
+                    pontosLiveMap.set(String(r.timeId), r.pontos || 0);
+                });
+            }
+        }
+
+        // Separar vivos e eliminados, mesclar pontos live
+        const participantes = (edicao.participantes || []).map(p => {
+            const pontosLive = pontosLiveMap.get(String(p.timeId));
+            return {
+                ...p,
+                // Se temos pontos live, usar; senão usar o cache
+                pontosRodada: pontosLive != null
+                    ? truncarPontosNum(pontosLive)
+                    : (p.pontosRodada != null ? truncarPontosNum(p.pontosRodada) : null),
+                pontosAcumulados: truncarPontosNum(p.pontosAcumulados || 0),
+            };
+        });
+
+        // Ordenar vivos por pontos da rodada (DESC) para lanterna aparecer por último
         const vivos = participantes
             .filter(p => p.status === 'vivo' || p.status === 'campeao')
-            .sort((a, b) => (b.pontosAcumulados || 0) - (a.pontosAcumulados || 0));
+            .sort((a, b) => {
+                // Durante live, ordenar por pontosRodada; senão por acumulados
+                if (isLive && a.pontosRodada != null && b.pontosRodada != null) {
+                    return (b.pontosRodada || 0) - (a.pontosRodada || 0);
+                }
+                return (b.pontosAcumulados || 0) - (a.pontosAcumulados || 0);
+            });
 
         const eliminados = participantes
             .filter(p => p.status === 'eliminado')
@@ -97,6 +130,7 @@ export async function obterStatus(req, res) {
                 terceiro: edicao.premiacao?.terceiroHabilitado !== false ? (edicao.premiacao?.terceiro || 0) : null,
                 terceiroHabilitado: edicao.premiacao?.terceiroHabilitado !== false,
             },
+            isLive, // ✅ Sinaliza ao frontend se está em modo ao vivo
         });
 
     } catch (error) {
@@ -242,7 +276,7 @@ export async function listarEdicoes(req, res) {
 /**
  * GET /:ligaId/parciais
  * Retorna ranking parcial ao vivo (durante rodada em andamento).
- * Usa mesma lógica do status, mas sinaliza que é parcial.
+ * Busca pontos em tempo real da collection Rodada.
  */
 export async function obterParciais(req, res) {
     try {
@@ -259,15 +293,46 @@ export async function obterParciais(req, res) {
             return res.status(404).json({ error: 'Nenhuma edição em andamento' });
         }
 
-        const participantes = (edicao.participantes || []).map(p => ({
-            ...p,
-            pontosRodada: p.pontosRodada != null ? truncarPontosNum(p.pontosRodada) : null,
-            pontosAcumulados: truncarPontosNum(p.pontosAcumulados || 0),
-        }));
+        // ✅ Live Experience: buscar pontos da rodada atual da collection Rodada
+        let pontosLiveMap = new Map();
+        let isLive = false;
 
+        if (edicao.rodadaAtual) {
+            const rodadasLive = await Rodada.find({
+                ligaId,
+                rodada: edicao.rodadaAtual,
+                temporada,
+            }).lean();
+
+            if (rodadasLive.length > 0) {
+                isLive = true;
+                rodadasLive.forEach(r => {
+                    pontosLiveMap.set(String(r.timeId), r.pontos || 0);
+                });
+            }
+        }
+
+        // Mesclar pontos live com participantes
+        const participantes = (edicao.participantes || []).map(p => {
+            const pontosLive = pontosLiveMap.get(String(p.timeId));
+            return {
+                ...p,
+                pontosRodada: pontosLive != null
+                    ? truncarPontosNum(pontosLive)
+                    : (p.pontosRodada != null ? truncarPontosNum(p.pontosRodada) : null),
+                pontosAcumulados: truncarPontosNum(p.pontosAcumulados || 0),
+            };
+        });
+
+        // Ordenar vivos por pontosRodada (DESC) para lanterna aparecer por último
         const vivos = participantes
             .filter(p => p.status === 'vivo')
-            .sort((a, b) => (b.pontosAcumulados || 0) - (a.pontosAcumulados || 0));
+            .sort((a, b) => {
+                if (isLive && a.pontosRodada != null && b.pontosRodada != null) {
+                    return (b.pontosRodada || 0) - (a.pontosRodada || 0);
+                }
+                return (b.pontosAcumulados || 0) - (a.pontosAcumulados || 0);
+            });
 
         const eliminados = participantes
             .filter(p => p.status === 'eliminado')
@@ -275,6 +340,7 @@ export async function obterParciais(req, res) {
 
         return res.json({
             parcial: true,
+            isLive,
             edicao: {
                 id: edicao.edicao,
                 nome: edicao.nome,
