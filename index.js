@@ -688,7 +688,6 @@ function getRestartingHtml() {
   return `<!DOCTYPE html>
 <html lang="pt-BR"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="refresh" content="4">
 <title>Atualizando...</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -698,12 +697,44 @@ h1{font-family:'Russo One',sans-serif;font-size:1.5rem;margin-bottom:.75rem;colo
 p{font-size:.95rem;color:#9ca3af;margin-bottom:1.5rem}
 .spinner{width:36px;height:36px;border:3px solid #374151;border-top-color:#60a5fa;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
 @keyframes spin{to{transform:rotate(360deg)}}
+#status{font-size:.8rem;color:#6b7280;margin-top:.5rem;transition:color .3s}
+#retry-btn{display:none;margin-top:1rem;padding:.6rem 1.5rem;background:#1d4ed8;color:#fff;border:none;border-radius:8px;font-size:.95rem;cursor:pointer;font-family:'Inter',-apple-system,sans-serif}
+#retry-btn:active{background:#1e40af}
 </style></head>
 <body><div class="c">
 <div class="spinner"></div>
 <h1 style="margin-top:1.25rem">Servidor reiniciando</h1>
 <p>Uma atualização foi aplicada. A pagina sera recarregada automaticamente.</p>
-</div></body></html>`;
+<div id="status"></div>
+<button id="retry-btn" onclick="location.reload()">Toque para recarregar</button>
+</div>
+<script>
+(function(){
+  var tentativas=0, max=60, intervalo=3000;
+  var status=document.getElementById('status');
+  var btn=document.getElementById('retry-btn');
+  function tentar(){
+    tentativas++;
+    if(status)status.textContent='Tentativa '+tentativas+'...';
+    fetch(location.href,{method:'HEAD',cache:'no-store'}).then(function(r){
+      if(r.ok||r.status===304){location.reload();}
+      else if(tentativas<max){setTimeout(tentar,intervalo);}
+      else{mostrarBotao();}
+    }).catch(function(){
+      if(tentativas<max){setTimeout(tentar,intervalo);}
+      else{mostrarBotao();}
+    });
+  }
+  function mostrarBotao(){
+    if(status)status.textContent='Servidor ainda indisponivel.';
+    if(btn)btn.style.display='inline-block';
+  }
+  setTimeout(tentar,intervalo);
+  // Botao manual visivel apos 30s independente das tentativas
+  setTimeout(function(){if(btn)btn.style.display='inline-block';},30000);
+})();
+</script>
+</body></html>`;
 }
 
 // ====================================================================
