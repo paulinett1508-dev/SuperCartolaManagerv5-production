@@ -50,6 +50,13 @@ export async function obterStatus(req, res) {
                     participantes: pendente.participantes || [],
                     rodadaAtual: null,
                     eliminadosDaRodada: [],
+                    premiacao: {
+                        campeao: pendente.premiacao?.campeao || 0,
+                        vice: pendente.premiacao?.viceHabilitado !== false ? (pendente.premiacao?.vice || 0) : null,
+                        viceHabilitado: pendente.premiacao?.viceHabilitado !== false,
+                        terceiro: pendente.premiacao?.terceiroHabilitado !== false ? (pendente.premiacao?.terceiro || 0) : null,
+                        terceiroHabilitado: pendente.premiacao?.terceiroHabilitado !== false,
+                    },
                 });
             }
 
