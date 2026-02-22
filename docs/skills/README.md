@@ -123,6 +123,40 @@ Skills para gerenciar e criar outras skills:
 
 ---
 
+## 🔌 MCPs + Skills (Integrações Padronizadas)
+
+MCPs (Model Context Protocol servers) fornecem **ferramentas externas** que se integram com as skills do projeto. A integração segue pipelines padronizados.
+
+### Stitch MCP → Skills Frontend (Pipeline de Design)
+
+O pipeline mais complexo do projeto — transforma designs visuais em código production-ready:
+
+```
+Stitch MCP (gerar/iterar design)
+    ↓
+frontend-design (validar direção estética)
+    ↓
+stitch-adapter (avaliar score 0-100 + adaptar para design system)
+    ↓
+anti-frankenstein (governança: duplicação, tokens, convenções)
+    ↓
+frontend-crafter (implementar production-ready)
+```
+
+**Guia completo:** [`docs/guides/STITCH-MCP-PIPELINE.md`](../guides/STITCH-MCP-PIPELINE.md)
+**Prompt padrão:** `.claude/STITCH-DESIGN-PROMPT.md`
+
+### Outros MCPs
+
+| MCP | Skills Relacionadas | Integração |
+|-----|---------------------|------------|
+| **Mongo** | `db-guardian`, `cache-sentinel` | Consultas diretas ao banco |
+| **Context7** | `pesquisa`, `context7-monthly-audit`, `fact-checker` | Docs atualizadas de frameworks |
+| **Perplexity** | `pesquisa`, `fact-checker`, `cartola-api` | Pesquisa web, notícias recentes |
+| **Stitch** | `stitch-adapter`, `frontend-design`, `frontend-crafter` | Design-to-code pipeline |
+
+---
+
 ## 🤝 Filosofia Agnóstica
 
 Esta estrutura foi projetada para ser **agnóstica em relação à IA**:

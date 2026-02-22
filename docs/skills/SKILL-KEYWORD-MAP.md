@@ -192,11 +192,13 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 #### stitch-adapter
 | Tipo | Keywords |
 |------|----------|
-| **Primárias** | `adaptar html`, `converter html`, `html externo`, `html do stitch`, `avaliar html`, `qualidade html`, `stitch` |
-| **Frases PT-BR** | "adaptar esse html", "recebi html externo", "converter html para o projeto", "processar html do stitch", "html do ai studio", "avaliar qualidade do html", "adaptar codigo externo" |
-| **Contexto** | Recebe HTML colado (de qualquer fonte: Stitch, AI Studio, ChatGPT, etc.), avalia qualidade, separa HTML/CSS/JS, converte para variáveis CSS, adapta à stack Vanilla JS |
-| **Versão** | 3.0 (Modo Manual + Avaliador de Qualidade) |
-| **NÃO confundir** | Criar componente do zero → `frontend-crafter`; Apenas estilizar → `frontend-crafter` |
+| **Primárias** | `adaptar html`, `converter html`, `html externo`, `html do stitch`, `avaliar html`, `qualidade html`, `stitch`, `stitch mcp`, `gerar tela no stitch`, `design no stitch`, `mockup no stitch`, `variante no stitch`, `usar stitch` |
+| **Frases PT-BR** | "adaptar esse html", "recebi html externo", "converter html para o projeto", "processar html do stitch", "html do ai studio", "avaliar qualidade do html", "adaptar codigo externo", "gerar design no stitch", "criar tela no stitch", "abrir stitch", "listar projetos do stitch", "gerar variante no stitch", "editar tela no stitch" |
+| **Contexto** | Modo MCP (primario): gera/edita/extrai HTML via Stitch MCP Server. Modo Manual (fallback): recebe HTML colado. Ambos: avalia qualidade, separa HTML/CSS/JS, converte para variaveis CSS, adapta a stack Vanilla JS |
+| **Versão** | 4.0 (MCP + Manual + Avaliador de Qualidade) |
+| **MCP Tools** | `generate_screen_from_text`, `edit_screens`, `generate_variants`, `get_screen`, `list_projects`, `list_screens` |
+| **Pipeline** | `docs/guides/STITCH-MCP-PIPELINE.md` |
+| **NÃO confundir** | Criar componente do zero → `frontend-crafter`; Apenas estilizar → `frontend-crafter`; Direção estética → `frontend-design` (roda ANTES) |
 | **Localização** | `docs/skills/03-utilities/stitch-adapter.md` |
 
 ---
@@ -332,6 +334,11 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | "adaptar esse html pro projeto" | `stitch-adapter` | Conversão HTML externo |
 | "recebi html externo" | `stitch-adapter` | Adaptação de código |
 | "avalie qualidade deste html" | `stitch-adapter` | Avaliação score 0-100 |
+| "gerar tela no stitch" | `stitch-adapter` | MCP: generate_screen_from_text |
+| "mockup no stitch" | `stitch-adapter` | MCP: geração de design |
+| "variante no stitch" | `stitch-adapter` | MCP: generate_variants |
+| "listar projetos do stitch" | `stitch-adapter` | MCP: list_projects |
+| "design no stitch" | `stitch-adapter` | MCP: pipeline completo |
 | "endpoint do cartola" | `cartola-api` | API externa |
 | "cache tá lento" | `cache-auditor` | Performance de cache |
 | "cache antigo prevalecendo" | `cache-sentinel` | Monitoramento proativo |
@@ -379,6 +386,9 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | Pre-flight rodada (cache) | `cache-sentinel --live` → `live-experience` |
 | Pre-release cache completo | `cache-sentinel --full` → `cache-auditor CACHE-WEB --admin` |
 | HTML externo → Código | `stitch-adapter` → `frontend-crafter` (ajustes se necessário) |
+| Design com Stitch MCP | Stitch MCP (gerar) → `frontend-design` (validar estetica) → `stitch-adapter` (avaliar + adaptar) → `anti-frankenstein` (governanca) → `frontend-crafter` (implementar) |
+| Variantes com Stitch MCP | Stitch MCP (generate_variants) → `frontend-design` (escolher melhor) → `stitch-adapter` → `anti-frankenstein` → `frontend-crafter` |
+| Redesign com Stitch MCP | Screenshot atual → Stitch MCP (redesign) → `frontend-design` → `stitch-adapter` → `anti-frankenstein` → `frontend-crafter` |
 | Documentação | `system-scribe` |
 | Deploy completo | `git-commit-push` → `replit-pull` |
 | Consulta API Cartola | `cartola-api` → `fact-checker` |

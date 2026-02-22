@@ -260,7 +260,7 @@ Documentação das skills: [`docs/skills/`](docs/skills/) (agnóstico, Markdown 
 | "verifique se", "confirme que", "é verdade?" | **fact-checker** | Utility |
 | "tá complexo", "duplicado", "antes de codar" | **ai-problems-detection** | Utility |
 | "refatorar arquivo grande", "separar módulos" | **Refactor-Monolith** | Utility |
-| "adaptar html", "converter html externo", "html do stitch" | **stitch-adapter** | Utility |
+| "adaptar html", "converter html externo", "html do stitch", "stitch mcp", "gerar tela no stitch", "design no stitch", "mockup no stitch", "variante no stitch" | **stitch-adapter** | Utility |
 | "API Cartola", "endpoint", "scout", "mercado" | **cartola-api** | Project |
 | "auditar cache", "cache lento", "Service Worker" | **cache-auditor** | Project |
 | "cache stale", "cache antigo", "sentinel", "monitorar cache", "dado antigo no app", "vasculhar caches" | **cache-sentinel** | Project |
@@ -326,6 +326,29 @@ Busca docs sempre atualizadas de frameworks/APIs (Mongoose, Express, MDN, OWASP)
 
 **Quando usar:** Consultas rápidas, debug. **Não usar:** Operações destrutivas (usar scripts com `--dry-run`)
 
+### Stitch MCP - Design-to-Code (Google Stitch)
+Gera mockups visuais, variantes e extrai HTML via Google Stitch AI.
+
+| Tool | Função |
+|------|--------|
+| `list_projects` | Listar projetos do usuario |
+| `list_screens` | Listar telas de um projeto |
+| `get_screen` | Obter detalhes + HTML de uma tela |
+| `generate_screen_from_text` | Gerar tela a partir de prompt |
+| `edit_screens` | Editar telas existentes |
+| `generate_variants` | Gerar variações de design |
+
+**Pipeline completo:** [`docs/guides/STITCH-MCP-PIPELINE.md`](docs/guides/STITCH-MCP-PIPELINE.md)
+**Prompt padrão:** `.claude/STITCH-DESIGN-PROMPT.md`
+
+**Integração com skills:**
+```
+Stitch MCP (gerar) → frontend-design (validar) → stitch-adapter (adaptar) → anti-frankenstein (governar) → frontend-crafter (implementar)
+```
+
+**Quando usar:** Ideação rápida de UI, explorar variantes de design, redesign de telas
+**Não usar:** Código final direto (sempre passar pelo stitch-adapter antes)
+
 ## 🎯 Slash Commands & Ativação por Keywords
 
 Skills podem ser invocadas por `/nome` OU por keywords naturais na conversa.
@@ -343,6 +366,7 @@ As keywords ativam a mesma skill automaticamente (ver tabela acima).
 | `/ux-auditor-app` | "auditar UX do app", "revisar design participante", "visual do app tá ok?" |
 | `/live-experience` | "auditar experiência ao vivo", "parciais tão ok?", "orchestrator tá rodando?", "pre-flight rodada" |
 | `/anti-frankenstein` | "anti-frank", "ative modo anti-frank", "antes de criar CSS", "já existe?", "blindar frontend", "HTMLs no modo anti-frank" |
+| `/stitch-adapter` | "stitch mcp", "gerar tela no stitch", "design no stitch", "mockup no stitch", "variante no stitch", "adaptar html do stitch" |
 | `/newsession` | "nova sessão", "salvar contexto" |
 | `/liste-pr-github [período]` | "listar PRs", "PRs de hoje", "merges da semana" |
 

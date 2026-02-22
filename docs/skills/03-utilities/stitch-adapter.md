@@ -1,19 +1,22 @@
 ---
 name: stitch-adapter
-description: "Adaptador de UI externa para o projeto. Recebe HTML colado (do Google Stitch, AI Studio, ou qualquer fonte), avalia qualidade, separa HTML/CSS/JS, converte para variaveis CSS do design system, adapta a stack Vanilla JS do projeto e gera relatorio completo de conformidade."
+description: "Adaptador de UI externa para o projeto. Recebe HTML via Stitch MCP ou colado manualmente (de qualquer fonte), avalia qualidade, separa HTML/CSS/JS, converte para variaveis CSS do design system, adapta a stack Vanilla JS do projeto e gera relatorio completo de conformidade."
 allowed-tools: Read, Grep, Edit, Write, Glob
-version: 3.0
+version: 4.0
 ---
 
-# Stitch Adapter Skill v3.0 (HTML Manual + Avaliador de Qualidade)
+# Stitch Adapter Skill v4.0 (MCP + Manual + Avaliador de Qualidade)
 
 ## Estrategia de Design-to-Code
 
 ```
-HTML colado pelo usuario → Avalia qualidade (score 0-100) → Adapta → Production-Ready
+Stitch MCP ou HTML colado → Avalia qualidade (score 0-100) → Adapta → Production-Ready
 ```
 
+**Pipeline completo:** [`docs/guides/STITCH-MCP-PIPELINE.md`](../../guides/STITCH-MCP-PIPELINE.md)
+
 **Fontes de HTML suportadas:**
+- **Google Stitch MCP** (modo primario — via tools MCP no terminal)
 - Google Stitch (via browser em aistudio.google.com)
 - Google AI Studio
 - ChatGPT / Claude / qualquer LLM que gere HTML
@@ -22,12 +25,60 @@ HTML colado pelo usuario → Avalia qualidade (score 0-100) → Adapta → Produ
 
 ---
 
-## 1. MODO DE OPERACAO
+## 1. MODOS DE OPERACAO
 
-### HTML Colado (Manual)
+### 1A. Stitch MCP (Primario)
+
+Usa o MCP Server do Google Stitch para gerar, iterar e extrair HTML diretamente do terminal.
 
 ```
-1. Usuario gera HTML externamente (Google Stitch, AI Studio, outro LLM, etc.)
+1. list_projects → encontrar ou create_project
+2. generate_screen_from_text(prompt do .claude/STITCH-DESIGN-PROMPT.md)
+3. get_screen → extrair htmlCode
+4. Se htmlCode vazio → fallback para Modo Manual (1B)
+5. Avaliador de qualidade analisa (score 0-100)
+6. Adapta automaticamente para o design system do projeto
+7. Gera arquivos production-ready + relatorio
+```
+
+**Comandos MCP disponiveis:**
+
+| Comando | Funcao |
+|---------|--------|
+| `list_projects` | Lista projetos do usuario |
+| `list_screens(projectId)` | Lista telas de um projeto |
+| `get_screen(name, projectId, screenId)` | Obter detalhes + HTML |
+| `generate_screen_from_text(projectId, prompt)` | Gerar tela nova |
+| `edit_screens(projectId, screenIds, prompt)` | Editar telas existentes |
+| `generate_variants(projectId, screenIds, prompt, options)` | Gerar variacoes |
+
+**Fluxo de geracao via MCP:**
+```
+generate_screen_from_text(projectId, prompt, deviceType: "MOBILE")
+    → Aguardar geracao (pode levar minutos)
+    → list_screens(projectId) para ver tela gerada
+    → get_screen() para extrair HTML
+    → Enviar para avaliador de qualidade
+```
+
+**Fluxo de variantes via MCP:**
+```
+generate_variants(projectId, screenIds, prompt, {
+    variantCount: 3,
+    creativeRange: "EXPLORE",
+    aspects: ["LAYOUT", "COLOR_SCHEME"]
+})
+    → list_screens() para comparar
+    → get_screen() da melhor variante
+    → Enviar para avaliador de qualidade
+```
+
+### 1B. HTML Colado (Fallback Manual)
+
+Usado quando o MCP nao retorna htmlCode ou quando o HTML vem de outra fonte.
+
+```
+1. Usuario gera HTML externamente (Google Stitch browser, AI Studio, outro LLM, etc.)
 2. Cola o HTML na conversa
 3. Avaliador de qualidade analisa (score 0-100)
 4. Adapta automaticamente para o design system do projeto
@@ -951,21 +1002,35 @@ Destino: [Admin/App]
 
 ## 9. REFERENCIAS
 
+- **Pipeline Completo:** `docs/guides/STITCH-MCP-PIPELINE.md`
+- **Stitch MCP Config:** `.mcp.json` (server "stitch")
+- **Design Prompt Padrao:** `.claude/STITCH-DESIGN-PROMPT.md`
 - **Design System Admin:** `/css/_admin-tokens.css`
 - **Design System App:** `/participante/css/_app-tokens.css`
-- **Prompt para gerar HTML:** `/.claude/STITCH-DESIGN-PROMPT.md`
-- **Frontend Crafter:** `docs/skills/02-specialists/frontend-crafter.md`
+- **Frontend Design Skill:** `docs/skills/02-specialists/frontend-design.md`
+- **Anti-Frankenstein Skill:** `docs/skills/02-specialists/anti-frankenstein.md`
+- **Frontend Crafter Skill:** `docs/skills/02-specialists/frontend-crafter.md`
 - **Exemplos Admin:** `public/admin-*.html`
 - **Exemplos App:** `public/participante/fronts/*.html`
 - **Navigation App:** `public/participante/js/participante-navigation.js`
 
 ---
 
-**STATUS:** Stitch Adapter v3.0 - MODO MANUAL + AVALIADOR DE QUALIDADE
+**STATUS:** Stitch Adapter v4.0 - MCP + MANUAL + AVALIADOR DE QUALIDADE
 
-**Versao:** 3.0
+**Versao:** 4.0
 
-**Ultima atualizacao:** 2026-02-17
+**Ultima atualizacao:** 2026-02-22
+
+**Changelog v4.0:**
+- Stitch MCP operacional (package @_davideast/stitch-mcp via proxy)
+- Modo MCP adicionado como modo PRIMARIO (generate, edit, variants, get)
+- Modo Manual rebatizado para Fallback (continua funcional)
+- Adicionada tabela de comandos MCP disponiveis
+- Adicionados fluxos de geracao e variantes via MCP
+- Referencia ao pipeline completo em docs/guides/STITCH-MCP-PIPELINE.md
+- Referencia ao prompt padrao em .claude/STITCH-DESIGN-PROMPT.md
+- Mantidos todos os mapas de conversao e avaliador de qualidade
 
 **Changelog v3.0:**
 - Removido Plano A (MCP automatico) — OAuth2 nunca funcionou em producao
@@ -995,3 +1060,9 @@ Destino: [Admin/App]
 - "qualidade do html"
 - "html do google stitch"
 - "html do ai studio"
+- "stitch mcp"
+- "gerar tela no stitch"
+- "design no stitch"
+- "mockup no stitch"
+- "variante no stitch"
+- "usar stitch"
