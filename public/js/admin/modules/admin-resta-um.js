@@ -19,6 +19,7 @@ class AdminRestaUm {
         this.ligas = [];
         this.edicoes = [];
         this.edicaoSelecionada = null;
+        this.edicaoEditando = null; // Edição carregada no form para edição
     }
 
     // ==========================================================================
@@ -340,13 +341,23 @@ class AdminRestaUm {
                 </div>
             </div>
 
-            <!-- Criar Nova Edicao -->
-            <div class="ru-card">
+            <!-- Form: Criar Nova / Editar Edicao -->
+            <div class="ru-card" id="ruFormCard">
                 <div class="ru-card-header">
-                    <span class="ru-card-title">
+                    <span class="ru-card-title" id="ruFormTitulo">
                         <span class="material-icons">add_circle</span>
                         Criar Nova Edicao
                     </span>
+                    <button id="ruBtnNovaEdicao" style="display:none;background:none;border:1px solid var(--app-border);color:var(--app-text-muted);padding:4px 10px;border-radius:var(--app-radius-md);cursor:pointer;font-size:var(--app-font-xs);"
+                            onclick="window.adminRestaUm.limparFormParaNova()">
+                        <span class="material-icons" style="font-size:14px;vertical-align:middle;">add</span> Nova
+                    </button>
+                </div>
+
+                <!-- Banner de edicao (visivel ao editar) -->
+                <div id="ruEditBanner" style="display:none;background:var(--module-restaum-muted);border:1px solid var(--module-restaum-border);border-radius:var(--app-radius-md);padding:var(--app-space-2) var(--app-space-3);margin-bottom:var(--app-space-3);font-size:var(--app-font-sm);">
+                    <span class="material-icons" style="font-size:16px;vertical-align:middle;color:var(--module-restaum-primary);">edit</span>
+                    <span id="ruEditBannerText"></span>
                 </div>
 
                 <div class="ru-form-row-2col">
@@ -426,10 +437,17 @@ class AdminRestaUm {
                     </div>
                 </div>
 
-                <button class="ru-btn ru-btn-primary" onclick="window.adminRestaUm.criarEdicao()" style="margin-top:var(--app-space-2);">
-                    <span class="material-icons">rocket_launch</span>
-                    Criar Edicao
-                </button>
+                <!-- Botoes contextuais -->
+                <div style="display:flex;gap:var(--app-space-2);margin-top:var(--app-space-2);">
+                    <button class="ru-btn ru-btn-primary" id="ruBtnCriar" onclick="window.adminRestaUm.criarEdicao()">
+                        <span class="material-icons">rocket_launch</span>
+                        Criar Edicao
+                    </button>
+                    <button class="ru-btn ru-btn-primary" id="ruBtnSalvar" onclick="window.adminRestaUm.salvarConfiguracoes()" style="display:none;">
+                        <span class="material-icons">save</span>
+                        Salvar Configuracoes
+                    </button>
+                </div>
             </div>
 
             <!-- Participantes da Edicao Selecionada -->
@@ -483,6 +501,9 @@ class AdminRestaUm {
 
     async selecionarEdicao(edicaoNum) {
         this.edicaoSelecionada = edicaoNum;
+
+        // Carregar dados da edicao no form
+        this.carregarEdicaoNoForm(edicaoNum);
 
         const partCard = document.getElementById('ruParticipantesCard');
         const partLista = document.getElementById('ruParticipantesLista');
@@ -573,6 +594,198 @@ class AdminRestaUm {
                 </div>
             `;
         }).join('');
+    }
+
+    // ==========================================================================
+    // CARREGAR EDICAO NO FORM / SALVAR CONFIGURACOES
+    // ==========================================================================
+
+    /**
+     * Carrega os dados de uma edicao existente no form para edicao.
+     * Chamado ao clicar numa edicao na lista.
+     */
+    carregarEdicaoNoForm(edicaoNum) {
+        const ed = this.edicoes.find(e => e.edicao === edicaoNum);
+        if (!ed) return;
+
+        this.edicaoEditando = ed;
+        const isPendente = ed.status === 'pendente';
+        const isFinalizada = ed.status === 'finalizada';
+
+        // Atualizar titulo e banner
+        const titulo = document.getElementById('ruFormTitulo');
+        if (titulo) titulo.innerHTML = `<span class="material-icons">edit</span> Editar ${ed.nome || ed.edicao + 'a Edicao'}`;
+
+        const banner = document.getElementById('ruEditBanner');
+        const bannerText = document.getElementById('ruEditBannerText');
+        if (banner && bannerText) {
+            const statusLabel = { pendente: 'Pendente', em_andamento: 'Em Andamento', finalizada: 'Finalizada' };
+            bannerText.textContent = `Editando edicao ${ed.edicao} (${statusLabel[ed.status] || ed.status})` +
+                (!isPendente ? ' — Eliminados/rodada e protecao nao editaveis' : '');
+            banner.style.display = '';
+        }
+
+        // Botoes
+        const btnCriar = document.getElementById('ruBtnCriar');
+        const btnSalvar = document.getElementById('ruBtnSalvar');
+        const btnNova = document.getElementById('ruBtnNovaEdicao');
+        if (btnCriar) btnCriar.style.display = 'none';
+        if (btnSalvar) btnSalvar.style.display = isFinalizada ? 'none' : '';
+        if (btnNova) btnNova.style.display = '';
+
+        // Preencher campos
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+        const setChecked = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val; };
+
+        setVal('ruNovaEdicao', ed.edicao);
+        setVal('ruRodadaInicial', ed.rodadaInicial);
+        setVal('ruRodadaFinal', ed.rodadaFinal);
+        setVal('ruEliminadosPorRodada', ed.eliminadosPorRodada || 1);
+        setChecked('ruProtecao', ed.protecaoPrimeiraRodada || false);
+
+        // Premiacao
+        setVal('ruPremiacaoCampeao', ed.premiacao?.campeao || 100);
+        setVal('ruPremiacaoVice', ed.premiacao?.vice || 50);
+        setChecked('ruViceHabilitado', ed.premiacao?.viceHabilitado !== false);
+        setVal('ruPremiacaoTerceiro', ed.premiacao?.terceiro || 25);
+        setChecked('ruTerceiroHabilitado', ed.premiacao?.terceiroHabilitado !== false);
+        this.onToggleVice();
+        this.onToggleTerceiro();
+
+        // Bonus
+        setChecked('ruBonusHabilitado', ed.bonusSobrevivencia?.habilitado !== false);
+        setVal('ruBonusValorBase', ed.bonusSobrevivencia?.valorBase || 2);
+        setVal('ruBonusIncremento', ed.bonusSobrevivencia?.incremento || 0.5);
+
+        // Desabilitar campos que nao podem ser editados
+        const edNumInput = document.getElementById('ruNovaEdicao');
+        const rodIniInput = document.getElementById('ruRodadaInicial');
+        const elimSelect = document.getElementById('ruEliminadosPorRodada');
+        const protCheckbox = document.getElementById('ruProtecao');
+
+        if (edNumInput) { edNumInput.disabled = true; edNumInput.style.opacity = '0.4'; }
+        if (rodIniInput) { rodIniInput.disabled = !isPendente; rodIniInput.style.opacity = isPendente ? '1' : '0.4'; }
+        if (elimSelect) { elimSelect.disabled = !isPendente; elimSelect.style.opacity = isPendente ? '1' : '0.4'; }
+        if (protCheckbox) { protCheckbox.disabled = !isPendente; protCheckbox.style.opacity = isPendente ? '1' : '0.4'; }
+
+        // Scroll para o form
+        document.getElementById('ruFormCard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    /**
+     * Limpa o form e volta para modo "Criar Nova Edicao"
+     */
+    limparFormParaNova() {
+        this.edicaoEditando = null;
+
+        const liga = this.ligas.find(l => l._id === this.ligaId);
+        const totalEdicoes = this.edicoes.length;
+
+        // Titulo e banner
+        const titulo = document.getElementById('ruFormTitulo');
+        if (titulo) titulo.innerHTML = `<span class="material-icons">add_circle</span> Criar Nova Edicao`;
+
+        const banner = document.getElementById('ruEditBanner');
+        if (banner) banner.style.display = 'none';
+
+        // Botoes
+        const btnCriar = document.getElementById('ruBtnCriar');
+        const btnSalvar = document.getElementById('ruBtnSalvar');
+        const btnNova = document.getElementById('ruBtnNovaEdicao');
+        if (btnCriar) btnCriar.style.display = '';
+        if (btnSalvar) btnSalvar.style.display = 'none';
+        if (btnNova) btnNova.style.display = 'none';
+
+        // Resetar valores default
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+        const setChecked = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val; };
+
+        setVal('ruNovaEdicao', totalEdicoes + 1);
+        setVal('ruRodadaInicial', '');
+        setVal('ruRodadaFinal', '');
+        setVal('ruEliminadosPorRodada', '1');
+        setChecked('ruProtecao', false);
+        setVal('ruPremiacaoCampeao', 100);
+        setVal('ruPremiacaoVice', 50);
+        setChecked('ruViceHabilitado', true);
+        setVal('ruPremiacaoTerceiro', 25);
+        setChecked('ruTerceiroHabilitado', true);
+        this.onToggleVice();
+        this.onToggleTerceiro();
+        setChecked('ruBonusHabilitado', true);
+        setVal('ruBonusValorBase', 2);
+        setVal('ruBonusIncremento', 0.5);
+
+        // Reabilitar campos
+        ['ruNovaEdicao', 'ruRodadaInicial', 'ruEliminadosPorRodada', 'ruProtecao'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.disabled = false; el.style.opacity = '1'; }
+        });
+
+        // Recalcular sugestao
+        const ini = document.getElementById('ruRodadaInicial');
+        const fin = document.getElementById('ruRodadaFinal');
+        if (ini) delete ini.dataset.editadoManualmente;
+        if (fin) delete fin.dataset.editadoManualmente;
+        this.atualizarSugestaoRodadas();
+    }
+
+    /**
+     * Salva configuracoes de uma edicao existente via PUT
+     */
+    async salvarConfiguracoes() {
+        if (!this.edicaoEditando) return;
+
+        const edicaoNum = this.edicaoEditando.edicao;
+        const viceHabilitado = document.getElementById('ruViceHabilitado')?.checked !== false;
+        const terceiroHabilitado = document.getElementById('ruTerceiroHabilitado')?.checked !== false;
+
+        const body = {
+            rodadaFinal: parseInt(document.getElementById('ruRodadaFinal')?.value) || undefined,
+            eliminadosPorRodada: parseInt(document.getElementById('ruEliminadosPorRodada')?.value) || undefined,
+            protecaoPrimeiraRodada: document.getElementById('ruProtecao')?.checked || false,
+            premiacao: {
+                campeao: parseFloat(document.getElementById('ruPremiacaoCampeao')?.value) || 100,
+                vice: viceHabilitado ? (parseFloat(document.getElementById('ruPremiacaoVice')?.value) || 50) : 0,
+                viceHabilitado,
+                terceiro: terceiroHabilitado ? (parseFloat(document.getElementById('ruPremiacaoTerceiro')?.value) || 25) : 0,
+                terceiroHabilitado,
+            },
+            bonusSobrevivencia: {
+                habilitado: document.getElementById('ruBonusHabilitado')?.checked !== false,
+                valorBase: parseFloat(document.getElementById('ruBonusValorBase')?.value) || 2,
+                incremento: parseFloat(document.getElementById('ruBonusIncremento')?.value) || 0.5,
+            },
+        };
+
+        try {
+            const res = await fetch(`/api/resta-um/${this.ligaId}/editar/${edicaoNum}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                if (window.SuperModal) {
+                    SuperModal.toast.success(`Edicao ${edicaoNum} atualizada!`);
+                }
+                this.edicaoEditando = null;
+                await this.carregarDashboard();
+            } else {
+                if (window.SuperModal) {
+                    SuperModal.toast.error(data.error || 'Erro ao salvar');
+                } else {
+                    alert(data.error || 'Erro ao salvar');
+                }
+            }
+        } catch (err) {
+            console.error('[ADMIN-RU] Erro ao salvar configuracoes:', err);
+            if (window.SuperModal) {
+                SuperModal.toast.error('Erro de conexao ao salvar');
+            }
+        }
     }
 
     // ==========================================================================

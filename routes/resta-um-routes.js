@@ -37,4 +37,9 @@ router.post('/:ligaId/iniciar', verificarAdmin, async (req, res) => {
     await RestaUmController.iniciarEdicao(req, res);
 });
 
+// PUT /api/resta-um/:ligaId/editar/:edicao - Editar edição existente
+router.put('/:ligaId/editar/:edicao', verificarAdmin, async (req, res) => {
+    await RestaUmController.editarEdicao(req, res);
+});
+
 export default router;

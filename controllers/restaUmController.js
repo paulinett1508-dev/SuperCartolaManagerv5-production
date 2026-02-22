@@ -215,9 +215,13 @@ export async function listarEdicoes(req, res) {
             status: e.status,
             rodadaInicial: e.rodadaInicial,
             rodadaFinal: e.rodadaFinal,
+            eliminadosPorRodada: e.eliminadosPorRodada || 1,
+            protecaoPrimeiraRodada: e.protecaoPrimeiraRodada || false,
             totalParticipantes: (e.participantes || []).length,
             vivosRestantes: (e.participantes || []).filter(p => p.status === 'vivo').length,
             rodadaAtual: e.rodadaAtual,
+            premiacao: e.premiacao || {},
+            bonusSobrevivencia: e.bonusSobrevivencia || {},
         })));
 
     } catch (error) {
@@ -278,9 +282,83 @@ export async function obterParciais(req, res) {
     }
 }
 
+/**
+ * PUT /:ligaId/editar/:edicao
+ * Admin edita configurações de uma edição existente (pendente ou em_andamento).
+ * Edições finalizadas não podem ser editadas.
+ */
+export async function editarEdicao(req, res) {
+    try {
+        const { ligaId, edicao: edicaoParam } = req.params;
+        const edicaoNum = parseInt(edicaoParam);
+
+        if (!edicaoNum) {
+            return res.status(400).json({ error: 'Número da edição inválido' });
+        }
+
+        const edicao = await RestaUmCache.findOne({
+            liga_id: ligaId,
+            temporada: CURRENT_SEASON,
+            edicao: edicaoNum,
+        });
+
+        if (!edicao) {
+            return res.status(404).json({ error: `Edição ${edicaoNum} não encontrada` });
+        }
+
+        if (edicao.status === 'finalizada') {
+            return res.status(400).json({ error: 'Edição finalizada não pode ser editada' });
+        }
+
+        const { premiacao, bonusSobrevivencia, rodadaFinal, eliminadosPorRodada, protecaoPrimeiraRodada } = req.body;
+        const isPendente = edicao.status === 'pendente';
+
+        // Campos editáveis sempre (pendente e em_andamento)
+        if (premiacao) {
+            if (premiacao.campeao !== undefined) edicao.premiacao.campeao = premiacao.campeao;
+            if (premiacao.vice !== undefined) edicao.premiacao.vice = premiacao.vice;
+            if (premiacao.viceHabilitado !== undefined) edicao.premiacao.viceHabilitado = premiacao.viceHabilitado;
+            if (premiacao.terceiro !== undefined) edicao.premiacao.terceiro = premiacao.terceiro;
+            if (premiacao.terceiroHabilitado !== undefined) edicao.premiacao.terceiroHabilitado = premiacao.terceiroHabilitado;
+        }
+
+        if (bonusSobrevivencia) {
+            if (bonusSobrevivencia.habilitado !== undefined) edicao.bonusSobrevivencia.habilitado = bonusSobrevivencia.habilitado;
+            if (bonusSobrevivencia.valorBase !== undefined) edicao.bonusSobrevivencia.valorBase = bonusSobrevivencia.valorBase;
+            if (bonusSobrevivencia.incremento !== undefined) edicao.bonusSobrevivencia.incremento = bonusSobrevivencia.incremento;
+        }
+
+        if (rodadaFinal !== undefined) {
+            edicao.rodadaFinal = rodadaFinal;
+        }
+
+        // Campos editáveis apenas quando pendente
+        if (isPendente) {
+            if (eliminadosPorRodada !== undefined) edicao.eliminadosPorRodada = eliminadosPorRodada;
+            if (protecaoPrimeiraRodada !== undefined) edicao.protecaoPrimeiraRodada = protecaoPrimeiraRodada;
+        }
+
+        edicao.ultima_atualizacao = new Date();
+        await edicao.save();
+
+        logger.log(`[RESTA-UM] Edição ${edicaoNum} da liga ${ligaId} atualizada (status: ${edicao.status})`);
+
+        return res.json({
+            success: true,
+            edicao: edicaoNum,
+            status: edicao.status,
+        });
+
+    } catch (error) {
+        logger.error('[RESTA-UM] Erro ao editar edição:', error);
+        return res.status(500).json({ error: 'Erro interno ao editar edição' });
+    }
+}
+
 export default {
     obterStatus,
     iniciarEdicao,
+    editarEdicao,
     listarEdicoes,
     obterParciais,
 };
