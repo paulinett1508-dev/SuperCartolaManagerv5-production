@@ -443,7 +443,7 @@ class AdminRestaUm {
                         <span class="material-icons">rocket_launch</span>
                         Criar Edicao
                     </button>
-                    <button class="ru-btn ru-btn-primary" id="ruBtnSalvar" onclick="window.adminRestaUm.salvarConfiguracoes()" style="display:none;">
+                    <button class="ru-btn ru-btn-salvar" id="ruBtnSalvar" onclick="window.adminRestaUm.salvarConfiguracoes()" style="display:none;">
                         <span class="material-icons">save</span>
                         Salvar Configuracoes
                     </button>
@@ -481,10 +481,16 @@ class AdminRestaUm {
 
     renderEdicaoCard(edicao) {
         const statusLabel = { pendente: 'Pendente', em_andamento: 'Em Andamento', finalizada: 'Finalizada' };
+        const isEditavel = edicao.status !== 'finalizada';
+        const btnEditar = isEditavel
+            ? `<button class="ru-btn-ghost" title="Editar configuracoes"
+                       onclick="event.stopPropagation(); window.adminRestaUm.selecionarEdicao(${edicao.edicao})">
+                   <span class="material-icons" style="font-size:14px;">edit</span> Editar
+               </button>`
+            : '';
         const btnDeletar = edicao.status === 'pendente'
             ? `<button class="ru-btn-deletar-edicao" title="Deletar edicao pendente"
-                       onclick="event.stopPropagation(); window.adminRestaUm.deletarEdicao(${edicao.edicao})"
-                       style="background:none;border:1px solid var(--app-danger);color:var(--app-danger);border-radius:var(--app-radius-sm);padding:2px 8px;cursor:pointer;font-size:var(--app-font-xs);display:flex;align-items:center;gap:2px;">
+                       onclick="event.stopPropagation(); window.adminRestaUm.deletarEdicao(${edicao.edicao})">
                    <span class="material-icons" style="font-size:14px;">delete</span> Deletar
                </button>`
             : '';
@@ -498,6 +504,7 @@ class AdminRestaUm {
                     </div>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;">
+                    ${btnEditar}
                     ${btnDeletar}
                     <span class="ru-edicao-status ${edicao.status}">${statusLabel[edicao.status] || edicao.status}</span>
                 </div>
@@ -912,6 +919,8 @@ class AdminRestaUm {
                     SuperModal.toast.success(`Edicao ${edicao} criada com ${data.participantes} participantes!`);
                 }
                 await this.carregarDashboard();
+                // Auto-selecionar a edicao recem-criada para edição imediata
+                await this.selecionarEdicao(edicao);
             } else {
                 if (window.SuperModal) {
                     SuperModal.toast.error(data.error || 'Erro ao criar edicao');
