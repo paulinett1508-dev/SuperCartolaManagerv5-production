@@ -740,6 +740,30 @@
     color: var(--app-primary);
 }
 
+.wh-section--resta-um .wh-section-icon {
+    background: var(--app-danger-muted);
+    color: var(--app-danger);
+}
+
+/* Resta Um — Lanterna alert */
+.wh-ru-lanterna {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    margin-top: 6px;
+    border-radius: 8px;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    font-size: 11px;
+    color: var(--app-danger);
+    font-weight: 600;
+}
+
+.wh-ru-lanterna .material-icons {
+    font-size: 16px;
+}
+
 /* Section Body - v3.0: scrollável internamente */
 .wh-section-body {
     padding: 8px;

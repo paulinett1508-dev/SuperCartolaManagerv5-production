@@ -31,7 +31,7 @@
  *
  * Módulos suportados:
  * - Pontos Corridos, Mata-Mata, Artilheiro, Luva de Ouro
- * - Capitão de Luxo, Ranking da Rodada
+ * - Capitão de Luxo, Ranking da Rodada, Resta Um
  */
 
 if (window.Log) Log.info("[WHATS-HAPPENING] 🔥 Widget v3.1 carregando...");
@@ -82,6 +82,7 @@ const WHState = {
         luvaOuro: null,
         capitao: null,
         ranking: null,
+        restaUm: null,
         parciais: null,
         meuConfrontoPc: null,
         meuConfrontoMm: null,
@@ -728,6 +729,11 @@ async function fetchAllData() {
         promises.push(fetchCapitao());
     }
 
+    // Resta Um
+    if (WHState.modulosAtivos.restaUm) {
+        promises.push(fetchRestaUm());
+    }
+
     // Ranking da Rodada (sempre ativo)
     promises.push(fetchRanking());
 
@@ -923,6 +929,32 @@ async function fetchCapitao() {
         }
     } catch (e) {
         if (window.Log) Log.warn("[WHATS-HAPPENING] ⚠️ Erro Capitão:", e.name === 'AbortError' ? 'Timeout' : e);
+    }
+}
+
+async function fetchRestaUm() {
+    try {
+        const res = await fetchWithTimeout(
+            `/api/resta-um/${WHState.ligaId}/parciais`
+        );
+        if (res.ok) {
+            const data = await res.json();
+            const participantes = data?.participantes || [];
+            const vivos = participantes.filter(p => p.status === 'vivo');
+            const eliminados = participantes.filter(p => p.status === 'eliminado');
+            WHState.data.restaUm = {
+                edicao: data.edicao,
+                vivos,
+                eliminados,
+                totalParticipantes: participantes.length,
+                rodadaAtual: data.rodadaAtual,
+                parcial: data.parcial || false,
+            };
+            if (window.Log) Log.info("[WHATS-HAPPENING] Resta Um:", vivos.length, "vivos,", eliminados.length, "eliminados");
+        }
+    } catch (e) {
+        // 404 = nenhuma edição ativa (normal)
+        if (window.Log && e.name !== 'AbortError') Log.debug("[WHATS-HAPPENING] Resta Um: sem edição ativa ou erro:", e.message);
     }
 }
 
@@ -1150,6 +1182,12 @@ function renderContent() {
         if (capSection) sections.push(capSection);
     }
 
+    // Resta Um
+    if (WHState.modulosAtivos.restaUm) {
+        const ruSection = renderRestaUmSection();
+        if (ruSection) sections.push(ruSection);
+    }
+
     // Se não há nada
     if (sections.length <= 1) {
         content.innerHTML = `
@@ -1357,8 +1395,8 @@ function resolverEscudo(item) {
         if (pc?.escudo) return pc.escudo;
     }
 
-    // Fallback local por clubeId
-    const clubeId = item.clubeId || item.clube_id;
+    // Fallback local por clubeId / escudoId
+    const clubeId = item.clubeId || item.clube_id || item.escudoId || item.escudo_id;
     if (clubeId) return `/escudos/${clubeId}.png`;
 
     return '/escudos/default.png';
@@ -1795,6 +1833,109 @@ function renderCapitaoSection() {
         getValue: (r) => `${(r.pontuacao_total || r.total || 0).toFixed(0)} pts`,
         getLabel: (r) => r.nome_cartola || r.nomeCartola || 'Jogador'
     });
+}
+
+function renderRestaUmSection() {
+    const data = WHState.data.restaUm;
+    if (!data || !data.vivos || data.vivos.length === 0) return null;
+
+    const meuId = String(WHState.timeId);
+    const vivos = data.vivos;
+    const totalVivos = vivos.length;
+    const totalEliminados = data.eliminados?.length || 0;
+    const total = data.totalParticipantes || (totalVivos + totalEliminados);
+
+    // Encontrar meu status
+    const meu = vivos.find(p => String(p.timeId) === meuId)
+        || data.eliminados?.find(p => String(p.timeId) === meuId);
+    const meuStatusLabel = !meu ? '' : meu.status === 'vivo' ? 'VIVO' : meu.status === 'campeao' ? 'CAMPEAO' : 'ELIMINADO';
+    const meuStatusClass = meu?.status || '';
+
+    // Lanterna = último vivo na lista (backend ordena por pontos DESC)
+    const lanterna = vivos.length > 1 ? vivos[vivos.length - 1] : null;
+    const lanternaIsMe = lanterna && String(lanterna.timeId) === meuId;
+
+    // Top 3 sobreviventes + lanterna
+    const top3 = vivos.slice(0, 3);
+
+    const rows = top3.map((p, i) => {
+        const isMe = String(p.timeId) === meuId;
+        return `
+            <tr class="${isMe ? 'me' : ''}">
+                <td class="wh-podium-pos">${i + 1}</td>
+                <td class="wh-podium-escudo"><img src="${resolverEscudo(p)}" onerror="this.src='/escudos/default.png'" alt=""></td>
+                <td class="wh-podium-nome">${p.nomeTime || p.nomeCartoleiro || 'Time'}</td>
+                <td class="wh-podium-valor" style="color:var(--app-success)">
+                    <span class="material-icons" style="font-size:12px;vertical-align:middle;">favorite</span> Vivo
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    // Lanterna alert (zona de eliminação)
+    let lanternaHtml = '';
+    if (lanterna) {
+        const isMe = String(lanterna.timeId) === meuId;
+        lanternaHtml = `
+            <div class="wh-ru-lanterna ${isMe ? 'is-me' : ''}">
+                <span class="material-icons" style="font-size:14px;color:var(--app-danger);">warning</span>
+                <img src="${resolverEscudo(lanterna)}" onerror="this.src='/escudos/default.png'" style="width:18px;height:18px;object-fit:contain;">
+                <span style="flex:1;font-size:var(--app-font-xs);color:${isMe ? 'var(--app-danger)' : 'var(--app-text-muted)'};">
+                    ${isMe ? 'VOCE esta na zona!' : (lanterna.nomeTime || 'Time')}
+                </span>
+                <span style="font-size:var(--app-font-xs);color:var(--app-danger);font-weight:600;">Zona de eliminacao</span>
+            </div>
+        `;
+    }
+
+    // Meu badge se não estou no top3
+    let myBadgeHtml = '';
+    if (meu && meu.status === 'vivo') {
+        const meuIndex = vivos.findIndex(p => String(p.timeId) === meuId);
+        if (meuIndex >= 3) {
+            myBadgeHtml = `
+                <div class="wh-my-position-badge">
+                    <span class="wh-mpb-pos">#${meuIndex + 1}</span>
+                    <img class="wh-mpb-escudo" src="${resolverEscudo(meu)}" onerror="this.src='/escudos/default.png'" alt="">
+                    <span class="wh-mpb-nome">${meu.nomeTime || 'Meu Time'}</span>
+                    <span class="wh-mpb-valor" style="color:var(--app-success)">Vivo</span>
+                </div>
+            `;
+        }
+    } else if (meu && meu.status === 'eliminado') {
+        myBadgeHtml = `
+            <div class="wh-my-position-badge" style="border-color:var(--app-danger);">
+                <span class="wh-mpb-pos" style="color:var(--app-danger);">
+                    <span class="material-icons" style="font-size:14px;">close</span>
+                </span>
+                <img class="wh-mpb-escudo" src="${resolverEscudo(meu)}" onerror="this.src='/escudos/default.png'" alt="">
+                <span class="wh-mpb-nome">${meu.nomeTime || 'Meu Time'}</span>
+                <span class="wh-mpb-valor" style="color:var(--app-danger)">Eliminado R${meu.rodadaEliminacao || '?'}</span>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="wh-section wh-section--resta-um">
+            <div class="wh-section-header" data-navigate="resta-um">
+                <div class="wh-section-icon">
+                    <span class="material-icons">person_off</span>
+                </div>
+                <div class="wh-section-title">Resta Um</div>
+                <div style="display:flex;align-items:center;gap:4px;font-size:var(--app-font-xs);color:var(--app-text-muted);">
+                    <span style="color:var(--app-success);font-weight:700;">${totalVivos}</span>/<span>${total}</span> vivos
+                </div>
+                <span class="material-icons wh-navigate-hint">open_in_new</span>
+            </div>
+            <div class="wh-section-body wh-section-body--podium">
+                <table class="wh-podium-table">
+                    ${rows}
+                </table>
+            </div>
+            ${lanternaHtml}
+            ${myBadgeHtml}
+        </div>
+    `;
 }
 
 // ============================================
