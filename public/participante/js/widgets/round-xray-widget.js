@@ -16,7 +16,7 @@
  * - Mercado fecha (nova rodada) → Widget desaparece, foguinho volta
  */
 
-if (window.Log) Log.info("[ROUND-XRAY] ⚽ Widget v1.1 carregando...");
+if (window.Log) Log.info("[ROUND-XRAY] Widget v2.0 carregando...");
 
 // ============================================
 // ESTADO DO WIDGET
@@ -141,7 +141,7 @@ function criarFAB() {
     fab.id = "rxrayFab";
     fab.className = "rxray-fab";
     fab.innerHTML = `
-        <div class="rxray-fab-icon">⚽</div>
+        <div class="rxray-fab-icon"><span class="material-icons">sports_soccer</span></div>
         <div class="rxray-fab-badge" id="rxrayBadge">${RXrayState.rodadaConsolidada || ""}</div>
     `;
     return fab;
@@ -326,52 +326,75 @@ function criarModal() {
         <div class="rxray-modal-content">
             <!-- Header -->
             <div class="rxray-modal-header">
-                <h3>⚽ Raio-X da Rodada <span id="rxrayModalRodada"></span></h3>
+                <h3><span class="material-icons">biotech</span> Raio-X da Rodada <span id="rxrayModalRodada"></span></h3>
                 <div class="rxray-header-actions">
                     <button id="rxrayRefreshBtn" class="rxray-refresh-btn" title="Atualizar dados">
                         <span class="material-icons">refresh</span>
                     </button>
-                    <button id="rxrayCloseBtn" class="rxray-close-btn">✕</button>
+                    <button id="rxrayCloseBtn" class="rxray-close-btn">
+                        <span class="material-icons">close</span>
+                    </button>
                 </div>
             </div>
 
             <!-- Loading -->
             <div id="rxrayLoading" class="rxray-loading">
                 <div class="spinner"></div>
-                <p>Carregando análise...</p>
+                <p>Carregando analise...</p>
             </div>
 
-            <!-- Conteúdo -->
+            <!-- Conteudo -->
             <div id="rxrayContent" class="rxray-content" style="display:none;">
 
                 <!-- NARRATIVA -->
                 <div class="rxray-section">
-                    <h4>💬 Resumo Inteligente</h4>
+                    <div class="rxray-section-header">
+                        <div class="rxray-section-icon icon-narrative">
+                            <span class="material-icons">chat</span>
+                        </div>
+                        <h4>Resumo Inteligente</h4>
+                    </div>
                     <div id="rxrayNarrativa" class="rxray-narrative-box"></div>
                 </div>
 
                 <!-- DISPUTAS -->
                 <div class="rxray-section">
-                    <h4>🎯 Suas Disputas</h4>
+                    <div class="rxray-section-header">
+                        <div class="rxray-section-icon icon-disputas">
+                            <span class="material-icons">casino</span>
+                        </div>
+                        <h4>Suas Disputas</h4>
+                    </div>
                     <div id="rxrayDisputas"></div>
                 </div>
 
                 <!-- PERFORMANCE -->
                 <div class="rxray-section">
-                    <h4>📊 Performance Geral</h4>
+                    <div class="rxray-section-header">
+                        <div class="rxray-section-icon icon-performance">
+                            <span class="material-icons">insights</span>
+                        </div>
+                        <h4>Performance Geral</h4>
+                    </div>
                     <div id="rxrayPerformance" class="rxray-stats-grid"></div>
                 </div>
 
-                <!-- MOVIMENTAÇÕES -->
+                <!-- MOVIMENTACOES -->
                 <div class="rxray-section">
-                    <h4>🎖️ Mudanças no Ranking Geral</h4>
+                    <div class="rxray-section-header">
+                        <div class="rxray-section-icon icon-movimentacoes">
+                            <span class="material-icons">swap_vert</span>
+                        </div>
+                        <h4>Mudancas no Ranking Geral</h4>
+                    </div>
                     <p class="rxray-section-sub" id="rxrayMovSub"></p>
                     <div id="rxrayMovimentacoes"></div>
                 </div>
 
-                <!-- Botão análise completa -->
+                <!-- Botao analise completa -->
                 <button id="rxrayVerCompleto" class="rxray-btn-primary">
-                    Ver Análise Completa →
+                    Ver Analise Completa
+                    <span class="material-icons">arrow_forward</span>
                 </button>
 
             </div>
@@ -523,20 +546,24 @@ function renderizarDisputas(disputas) {
         const pc = disputas.pontos_corridos;
         const resultadoClass = pc.seu_confronto.resultado === "vitoria" ? "vitoria" :
                                pc.seu_confronto.resultado === "derrota" ? "derrota" : "empate";
-        const resultadoIcon = pc.seu_confronto.resultado === "vitoria" ? "✅" :
-                             pc.seu_confronto.resultado === "derrota" ? "❌" : "⚖️";
+        const resultadoIcon = pc.seu_confronto.resultado === "vitoria" ? "check_circle" :
+                             pc.seu_confronto.resultado === "derrota" ? "cancel" : "drag_handle";
 
         disputasHTML.push(`
-            <div class="rxray-disputa-card">
-                <div class="rxray-disputa-header">⚽ PONTOS CORRIDOS</div>
+            <div class="rxray-disputa-card mod-pc">
+                <div class="rxray-disputa-header">
+                    <span class="material-icons">sports_soccer</span>
+                    <span class="rxray-disputa-label">Pontos Corridos</span>
+                </div>
                 <div class="rxray-disputa-confronto">
-                    <span class="voce">Você ${pc.seu_confronto.voce.toFixed(1)}</span>
-                    <span class="vs">×</span>
+                    <span class="voce">Voce ${(Math.trunc((pc.seu_confronto.voce||0) * 10) / 10).toFixed(1)}</span>
+                    <span class="vs">&times;</span>
                     <span class="adv">${(Math.trunc((pc.seu_confronto.adversario.pontos||0) * 10) / 10).toFixed(1)} ${escapeHtml(pc.seu_confronto.adversario.nome)}</span>
-                    <span class="resultado ${resultadoClass}">${resultadoIcon}</span>
+                    <span class="resultado ${resultadoClass}"><span class="material-icons">${resultadoIcon}</span></span>
                 </div>
                 <div class="rxray-disputa-status">
-                    ${pc.minha_posicao}º lugar • ${pc.zona}
+                    <span class="material-icons">leaderboard</span>
+                    ${pc.minha_posicao}o lugar &bull; ${escapeHtml(pc.zona)}
                 </div>
             </div>
         `);
@@ -545,11 +572,16 @@ function renderizarDisputas(disputas) {
     // Mata-Mata
     if (disputas.mata_mata && disputas.mata_mata.seu_confronto) {
         const mm = disputas.mata_mata;
+        const isClassificado = mm.seu_confronto.resultado === "classificado";
         disputasHTML.push(`
-            <div class="rxray-disputa-card">
-                <div class="rxray-disputa-header">🏆 MATA-MATA (${escapeHtml(mm.fase_atual)})</div>
+            <div class="rxray-disputa-card mod-mm">
+                <div class="rxray-disputa-header">
+                    <span class="material-icons">emoji_events</span>
+                    <span class="rxray-disputa-label">Mata-Mata (${escapeHtml(mm.fase_atual)})</span>
+                </div>
                 <div class="rxray-disputa-status">
-                    ${mm.seu_confronto.resultado === "classificado" ? "✅ Classificado" : "❌ Eliminado"}
+                    <span class="material-icons ${isClassificado ? 'status-classificado' : 'status-eliminado'}">${isClassificado ? 'check_circle' : 'cancel'}</span>
+                    <span class="${isClassificado ? 'status-classificado' : 'status-eliminado'}">${isClassificado ? 'Classificado' : 'Eliminado'}</span>
                 </div>
             </div>
         `);
@@ -559,23 +591,31 @@ function renderizarDisputas(disputas) {
     if (disputas.artilheiro) {
         const art = disputas.artilheiro;
         disputasHTML.push(`
-            <div class="rxray-disputa-card">
-                <div class="rxray-disputa-header">🎯 ARTILHEIRO CAMPEÃO</div>
+            <div class="rxray-disputa-card mod-art">
+                <div class="rxray-disputa-header">
+                    <span class="material-icons">military_tech</span>
+                    <span class="rxray-disputa-label">Artilheiro Campeao</span>
+                </div>
                 <div class="rxray-disputa-status">
-                    ${art.sua_posicao}º lugar • ${art.seus_gols || 0} gols
+                    <span class="material-icons">leaderboard</span>
+                    ${art.sua_posicao}o lugar &bull; ${art.seus_gols || 0} gols
                 </div>
             </div>
         `);
     }
 
-    // Capitão de Luxo
+    // Capitao de Luxo
     if (disputas.capitao_luxo) {
         const cap = disputas.capitao_luxo;
         disputasHTML.push(`
-            <div class="rxray-disputa-card">
-                <div class="rxray-disputa-header">👑 CAPITÃO DE LUXO</div>
+            <div class="rxray-disputa-card mod-cap">
+                <div class="rxray-disputa-header">
+                    <span class="material-icons">shield</span>
+                    <span class="rxray-disputa-label">Capitao de Luxo</span>
+                </div>
                 <div class="rxray-disputa-status">
-                    ${cap.sua_posicao}º lugar • ${(Math.trunc((cap.seus_pontos || 0) * 10) / 10).toFixed(1)} pts
+                    <span class="material-icons">leaderboard</span>
+                    ${cap.sua_posicao}o lugar &bull; ${(Math.trunc((cap.seus_pontos || 0) * 10) / 10).toFixed(1)} pts
                 </div>
             </div>
         `);
@@ -590,23 +630,36 @@ function renderizarPerformance(performance) {
     const container = document.getElementById("rxrayPerformance");
     const positiveClass = performance.vs_media >= 0 ? "positive" : "negative";
     const finClass = performance.financeiro >= 0 ? "positive" : "negative";
+    const vsMediaTrunc = (Math.trunc((performance.vs_media || 0) * 10) / 10).toFixed(1);
 
     container.innerHTML = `
-        <div class="stat-card">
-            <div class="stat-label">Posição</div>
-            <div class="stat-value">🏆 ${performance.posicao}º de ${performance.total_participantes}</div>
+        <div class="rxray-stat-card stat-posicao">
+            <div class="rxray-stat-icon"><span class="material-icons">emoji_events</span></div>
+            <div class="rxray-stat-info">
+                <div class="rxray-stat-label">Posicao</div>
+                <div class="rxray-stat-value">${performance.posicao}o de ${performance.total_participantes}</div>
+            </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-label">Pontos</div>
-            <div class="stat-value">⭐ ${truncarPontos(performance.pontos)}</div>
+        <div class="rxray-stat-card stat-pontos">
+            <div class="rxray-stat-icon"><span class="material-icons">star</span></div>
+            <div class="rxray-stat-info">
+                <div class="rxray-stat-label">Pontos</div>
+                <div class="rxray-stat-value">${truncarPontos(performance.pontos)}</div>
+            </div>
         </div>
-        <div class="stat-card ${positiveClass}">
-            <div class="stat-label">vs Média</div>
-            <div class="stat-value">📈 ${performance.vs_media >= 0 ? "+" : ""}${performance.vs_media.toFixed(1)}</div>
+        <div class="rxray-stat-card stat-media ${positiveClass}">
+            <div class="rxray-stat-icon"><span class="material-icons">trending_up</span></div>
+            <div class="rxray-stat-info">
+                <div class="rxray-stat-label">vs Media</div>
+                <div class="rxray-stat-value">${performance.vs_media >= 0 ? "+" : ""}${vsMediaTrunc}</div>
+            </div>
         </div>
-        <div class="stat-card ${finClass}">
-            <div class="stat-label">Financeiro</div>
-            <div class="stat-value">💰 ${performance.financeiro >= 0 ? "+" : ""}R$ ${Math.abs(performance.financeiro)}</div>
+        <div class="rxray-stat-card stat-financeiro ${finClass}">
+            <div class="rxray-stat-icon"><span class="material-icons">account_balance_wallet</span></div>
+            <div class="rxray-stat-info">
+                <div class="rxray-stat-label">Financeiro</div>
+                <div class="rxray-stat-value">${performance.financeiro >= 0 ? "+" : ""}R$ ${Math.abs(performance.financeiro)}</div>
+            </div>
         </div>
     `;
 }
@@ -616,11 +669,11 @@ function renderizarMovimentacoes(movimentacoes) {
     const subEl = document.getElementById("rxrayMovSub");
 
     if (subEl) {
-        subEl.textContent = `Variações de posição após a Rodada ${RXrayState.rodadaConsolidada}`;
+        subEl.textContent = `Variacoes de posicao apos a Rodada ${RXrayState.rodadaConsolidada}`;
     }
 
     if (!movimentacoes || movimentacoes.length === 0) {
-        container.innerHTML = '<p class="rxray-empty">Sem mudanças significativas nesta rodada.</p>';
+        container.innerHTML = '<p class="rxray-empty">Sem mudancas significativas nesta rodada.</p>';
         return;
     }
 
@@ -629,9 +682,21 @@ function renderizarMovimentacoes(movimentacoes) {
     const movHTML = movimentacoes.slice(0, 5).map(mov => {
         const isMe = Number(mov.timeId) === Number(meuTimeId);
         const meClass = isMe ? " mov-item-me" : "";
-        const icon = mov.tipo === "subida" ? "↗️" : "↘️";
-        const label = isMe ? "Você" : escapeHtml(mov.time);
-        return `<div class="mov-item${meClass}">${icon} ${label}: ${mov.de}º → ${mov.para}º</div>`;
+        const tipoClass = mov.tipo === "subida" ? "subida" : "descida";
+        const tipoIcon = mov.tipo === "subida" ? "trending_up" : "trending_down";
+        const label = isMe ? "Voce" : escapeHtml(mov.time);
+        return `
+            <div class="rxray-mov-item${meClass}">
+                <div class="rxray-mov-icon ${tipoClass}">
+                    <span class="material-icons">${tipoIcon}</span>
+                </div>
+                <span class="rxray-mov-name">${label}</span>
+                <span class="rxray-mov-positions">
+                    ${mov.de}o
+                    <span class="material-icons">arrow_forward</span>
+                    ${mov.para}o
+                </span>
+            </div>`;
     }).join("");
 
     container.innerHTML = movHTML;
