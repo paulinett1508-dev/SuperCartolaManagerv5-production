@@ -322,8 +322,17 @@
 }
 
 .resta-um-row.eliminado {
-    opacity: 0.5;
-    filter: grayscale(0.4);
+    opacity: 0.45;
+    filter: grayscale(0.5);
+}
+
+.resta-um-row.eliminado .resta-um-nome {
+    text-decoration: line-through;
+    color: var(--app-text-dim);
+}
+
+.resta-um-pos-elim {
+    color: var(--app-restaum-eliminado);
 }
 
 .resta-um-row.lanterna {

@@ -279,20 +279,28 @@ function _renderizarDisputa(dados, timeId) {
         `;
     }
 
-    // Lista de sobreviventes
-    if (vivos.length > 0) {
+    // Lista unificada: vivos primeiro, depois eliminados (esmaecidos in-loco)
+    const todosParticipantes = [...vivos, ...eliminados];
+    if (todosParticipantes.length > 0) {
         html += `
             <div class="resta-um-lista">
                 <div class="resta-um-lista-title">
-                    <span class="material-icons" style="font-size: 16px; vertical-align: middle; color: var(--app-restaum-vivo); margin-right: 4px;">favorite</span>
-                    Sobreviventes
+                    <span class="material-icons" style="font-size: 16px; vertical-align: middle; color: var(--app-restaum-vivo); margin-right: 4px;">groups</span>
+                    Participantes
                 </div>
         `;
 
-        vivos.forEach((p, idx) => {
+        let posVivo = 0;
+        todosParticipantes.forEach((p) => {
             const isMeuTime = String(p.timeId) === String(timeId);
-            const isLanternaRow = idx === vivos.length - 1 && vivos.length > 1;
+            const isElim = p.status === 'eliminado';
+            const isVivoStatus = p.status === 'vivo' || p.status === 'campeao';
+
+            if (isVivoStatus) posVivo++;
+            const isLanternaRow = isVivoStatus && posVivo === vivos.length && vivos.length > 1;
+
             const classes = ['resta-um-row'];
+            if (isElim) classes.push('eliminado');
             if (isMeuTime) classes.push('meu-time');
             if (isLanternaRow) classes.push('lanterna');
 
@@ -300,47 +308,23 @@ function _renderizarDisputa(dados, timeId) {
                 ? (Math.trunc(p.pontosRodada * 100) / 100).toFixed(2)
                 : '--';
 
+            const posHtml = isElim
+                ? `<span class="resta-um-pos resta-um-pos-elim"><span class="material-icons" style="font-size: 14px;">close</span></span>`
+                : `<span class="resta-um-pos">${posVivo}</span>`;
+
+            const rightHtml = isElim
+                ? `<span class="resta-um-eliminado-rodada">R${p.rodadaEliminacao || '?'}</span>`
+                : `<span class="resta-um-pontos">${pontosRodada}</span>${isLanternaRow ? '<span class="material-icons" style="font-size: 16px; color: var(--app-restaum-eliminado);" title="Zona de eliminação">warning</span>' : ''}`;
+
             html += `
                 <div class="${classes.join(' ')}">
-                    <span class="resta-um-pos">${idx + 1}</span>
+                    ${posHtml}
                     <img class="resta-um-escudo"
                          src="/escudos/${p.escudoId || 'default'}.png"
                          alt=""
                          onerror="this.src='/escudos/default.png'">
                     <span class="resta-um-nome">${p.nomeTime || 'Time'}</span>
-                    <span class="resta-um-pontos">${pontosRodada}</span>
-                    ${isLanternaRow ? '<span class="material-icons" style="font-size: 16px; color: var(--app-restaum-eliminado);" title="Zona de eliminação">warning</span>' : ''}
-                </div>
-            `;
-        });
-
-        html += '</div>';
-    }
-
-    // Lista de eliminados
-    if (eliminados.length > 0) {
-        html += `
-            <div class="resta-um-eliminados-section">
-                <div class="resta-um-lista-title">
-                    <span class="material-icons" style="font-size: 16px; vertical-align: middle; color: var(--app-restaum-eliminado); margin-right: 4px;">person_off</span>
-                    Eliminados (${eliminados.length})
-                </div>
-        `;
-
-        eliminados.forEach((p) => {
-            const isMeuTime = String(p.timeId) === String(timeId);
-
-            html += `
-                <div class="resta-um-row eliminado${isMeuTime ? ' meu-time' : ''}">
-                    <span class="resta-um-pos" style="color: var(--app-restaum-eliminado);">
-                        <span class="material-icons" style="font-size: 14px;">close</span>
-                    </span>
-                    <img class="resta-um-escudo"
-                         src="/escudos/${p.escudoId || 'default'}.png"
-                         alt=""
-                         onerror="this.src='/escudos/default.png'">
-                    <span class="resta-um-nome">${p.nomeTime || 'Time'}</span>
-                    <span class="resta-um-eliminado-rodada">R${p.rodadaEliminacao || '?'}</span>
+                    ${rightHtml}
                 </div>
             `;
         });
