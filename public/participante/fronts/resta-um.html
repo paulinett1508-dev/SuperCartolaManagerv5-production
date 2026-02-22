@@ -1,6 +1,81 @@
-<!-- PARTICIPANTE RESTA UM - Interface v1.1 (Anti-Frank Compliant) -->
-<!-- v1.1: CSS extraído para resta-um.css, tokens via _app-tokens.css, zero inline styles -->
+<!-- PARTICIPANTE RESTA UM - Interface v1.2 LP -->
+<!-- v1.2: Landing page sections (Hero, Meu Status, Destaque, Accordions) -->
 <div class="resta-um-participante">
+
+    <!-- ============================================================
+         LP SECTIONS — Hero, Meu Status, Destaque, Accordions
+         ============================================================ -->
+    <div class="module-lp module-lp-resta-um" id="restaum-lp-wrapper">
+
+        <!-- HERO -->
+        <div class="module-lp-hero">
+            <div class="module-lp-hero-icon-wrap">
+                <span class="material-icons">person_off</span>
+            </div>
+            <h1 class="module-lp-hero-title">Resta Um</h1>
+            <p class="module-lp-hero-tagline">O último a ser eliminado vence</p>
+        </div>
+
+        <!-- MEU STATUS (populated by JS after data loads) -->
+        <div id="lp-meu-status-resta-um" class="module-lp-meu-status" style="display:none"></div>
+
+        <!-- DESTAQUE (populated by JS) -->
+        <div id="lp-destaque-resta-um" class="module-lp-destaque" style="display:none"></div>
+
+        <!-- ACCORDION: Como Funciona -->
+        <div class="module-lp-accordion">
+            <button class="module-lp-accordion-btn" aria-expanded="false" id="btn-accordion-regras-resta-um">
+                <div class="module-lp-accordion-btn-inner">
+                    <span class="material-icons">menu_book</span>
+                    <span class="module-lp-accordion-btn-label">Como Funciona</span>
+                </div>
+                <span class="material-icons module-lp-accordion-chevron">expand_more</span>
+            </button>
+            <div class="module-lp-accordion-body">
+                <div class="module-lp-accordion-inner">
+                    <ul class="module-lp-regras-list">
+                        <li class="module-lp-regras-item">
+                            <span class="material-icons">person_off</span>
+                            A cada rodada, o participante com a <strong>menor pontuação</strong> é eliminado da disputa.
+                        </li>
+                        <li class="module-lp-regras-item">
+                            <span class="material-icons">calendar_today</span>
+                            A disputa começa na rodada configurada pelo admin e segue até sobrar um participante.
+                        </li>
+                        <li class="module-lp-regras-item">
+                            <span class="material-icons">warning</span>
+                            Fique atento — ser o lanterna em uma rodada significa eliminação imediata.
+                        </li>
+                        <li class="module-lp-regras-item">
+                            <span class="material-icons">workspace_premium</span>
+                            O último sobrevivente é declarado o campeão do Resta Um.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACCORDION: Premiações (hidden until JS loads data) -->
+        <div class="module-lp-accordion" id="lp-premiacoes-accordion-resta-um" style="display:none">
+            <button class="module-lp-accordion-btn" aria-expanded="false" id="btn-accordion-premiacoes-resta-um">
+                <div class="module-lp-accordion-btn-inner">
+                    <span class="material-icons">emoji_events</span>
+                    <span class="module-lp-accordion-btn-label">Premiações</span>
+                </div>
+                <span class="material-icons module-lp-accordion-chevron">expand_more</span>
+            </button>
+            <div class="module-lp-accordion-body">
+                <div class="module-lp-accordion-inner">
+                    <div id="lp-premiacoes-body-resta-um" class="module-lp-premiacoes-grid"></div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /module-lp-resta-um -->
+
+    <!-- DIVIDER between LP and data section -->
+    <div class="module-lp-divider module-lp-resta-um"></div>
+
     <div id="resta-um-content">
         <!-- Loading State -->
         <div id="restaUmLoading" class="loading-participante text-center py-10">

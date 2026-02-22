@@ -1,6 +1,81 @@
-<!-- PARTICIPANTE CAPITÃO DE LUXO - Interface v1.0 Russo One Brand Typography -->
-<!-- v1.0: Russo One Typography + Card Desempenho + CSS Variables -->
+<!-- PARTICIPANTE CAPITÃO DE LUXO - Interface v1.1 LP -->
+<!-- v1.1: Landing page sections (Hero, Meu Status, Destaque, Accordions) -->
 <div class="capitao-participante">
+
+    <!-- ============================================================
+         LP SECTIONS — Hero, Meu Status, Destaque, Accordions
+         ============================================================ -->
+    <div class="module-lp module-lp-capitao" id="capitao-lp-wrapper">
+
+        <!-- HERO -->
+        <div class="module-lp-hero">
+            <div class="module-lp-hero-icon-wrap">
+                <span class="material-icons">emoji_events</span>
+            </div>
+            <h1 class="module-lp-hero-title">Capitão de Luxo</h1>
+            <p class="module-lp-hero-tagline">A arte de escolher o capitão certo</p>
+        </div>
+
+        <!-- MEU STATUS (populated by JS after data loads) -->
+        <div id="lp-meu-status-capitao" class="module-lp-meu-status" style="display:none"></div>
+
+        <!-- DESTAQUE TOP 3 (populated by JS) -->
+        <div id="lp-destaque-capitao" class="module-lp-destaque" style="display:none"></div>
+
+        <!-- ACCORDION: Como Funciona -->
+        <div class="module-lp-accordion">
+            <button class="module-lp-accordion-btn" aria-expanded="false" id="btn-accordion-regras-capitao">
+                <div class="module-lp-accordion-btn-inner">
+                    <span class="material-icons">menu_book</span>
+                    <span class="module-lp-accordion-btn-label">Como Funciona</span>
+                </div>
+                <span class="material-icons module-lp-accordion-chevron">expand_more</span>
+            </button>
+            <div class="module-lp-accordion-body">
+                <div class="module-lp-accordion-inner">
+                    <ul class="module-lp-regras-list">
+                        <li class="module-lp-regras-item">
+                            <span class="material-icons">sports_score</span>
+                            A pontuação do capitão escolhido em cada rodada é somada ao longo da temporada.
+                        </li>
+                        <li class="module-lp-regras-item">
+                            <span class="material-icons">bolt</span>
+                            A dupla pontuação do Cartola FC é considerada: se o capitão jogar bem, os pontos dobram.
+                        </li>
+                        <li class="module-lp-regras-item">
+                            <span class="material-icons">leaderboard</span>
+                            O ranking acumula os pontos reais do capitão (com bônus já aplicado) rodada a rodada.
+                        </li>
+                        <li class="module-lp-regras-item">
+                            <span class="material-icons">workspace_premium</span>
+                            Vence quem tiver a maior soma de pontos de capitão ao final da temporada.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACCORDION: Premiações (hidden until JS loads data) -->
+        <div class="module-lp-accordion" id="lp-premiacoes-accordion-capitao" style="display:none">
+            <button class="module-lp-accordion-btn" aria-expanded="false" id="btn-accordion-premiacoes-capitao">
+                <div class="module-lp-accordion-btn-inner">
+                    <span class="material-icons">emoji_events</span>
+                    <span class="module-lp-accordion-btn-label">Premiações</span>
+                </div>
+                <span class="material-icons module-lp-accordion-chevron">expand_more</span>
+            </button>
+            <div class="module-lp-accordion-body">
+                <div class="module-lp-accordion-inner">
+                    <div id="lp-premiacoes-body-capitao" class="module-lp-premiacoes-grid"></div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /module-lp-capitao -->
+
+    <!-- DIVIDER between LP and data section -->
+    <div class="module-lp-divider module-lp-capitao"></div>
+
     <!-- Container para conteúdo dinâmico -->
     <div id="capitaoContent">
         <div class="loading-participante text-center py-10">

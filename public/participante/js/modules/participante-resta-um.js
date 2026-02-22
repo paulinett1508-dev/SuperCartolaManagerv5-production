@@ -29,6 +29,10 @@ export async function inicializarRestaUmParticipante({ participante, ligaId, tim
     _currentParticipante = participante;
     _wasLanterna = false;
 
+    // ✅ LP: Init acordeons + carregar premiações (non-blocking)
+    _initLPAccordions('restaum-lp-wrapper');
+    _lpCarregarPremiacoes(ligaId, 'resta_um', 'lp-premiacoes-body-resta-um', 'lp-premiacoes-accordion-resta-um');
+
     const container = document.getElementById('resta-um-content');
     if (!container) {
         if (window.Log) Log.error('[PARTICIPANTE-RESTA-UM] Container não encontrado');
@@ -69,6 +73,8 @@ async function _carregarDados() {
 
         // Renderizar disputa ativa
         _renderizarDisputa(dados, _currentTimeId);
+        // ✅ LP: Atualizar seções de status
+        _lpRenderRestaUmStatus(dados, _currentTimeId);
 
     } catch (error) {
         if (window.Log) Log.error('[PARTICIPANTE-RESTA-UM] Erro ao carregar:', error);
@@ -416,3 +422,157 @@ export function destruirRestaUmParticipante() {
 }
 
 if (window.Log) Log.info('[PARTICIPANTE-RESTA-UM] Módulo v2.0 carregado');
+
+// =====================================================================
+// MODULE LP — Landing Page Utils (Resta Um)
+// =====================================================================
+
+function _initLPAccordions(wrapperId) {
+    const wrapper = document.getElementById(wrapperId);
+    if (!wrapper) return;
+    wrapper.querySelectorAll('.module-lp-accordion-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const isOpen = btn.getAttribute('aria-expanded') === 'true';
+            btn.setAttribute('aria-expanded', String(!isOpen));
+        });
+    });
+}
+
+function _lpFormatCurrency(val) {
+    const n = parseFloat(val) || 0;
+    return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function _lpRenderPremiacoes(fo, bodyId, accordionId) {
+    const body = document.getElementById(bodyId);
+    const accordion = document.getElementById(accordionId);
+    if (!body || !accordion || !fo) return;
+    const posLabels = { '1': '1º Lugar', '2': '2º Lugar', '3': '3º Lugar', '4': '4º Lugar', '5': '5º Lugar' };
+    const posClasses = { '1': 'pos-1', '2': 'pos-2', '3': 'pos-3' };
+    const keyLabels = { vitoria: 'Vitória', derrota: 'Derrota', empate: 'Empate', campeao: 'Campeão' };
+    let html = '';
+    if (fo.valores_por_posicao && Object.keys(fo.valores_por_posicao).length) {
+        Object.entries(fo.valores_por_posicao)
+            .sort(([a], [b]) => Number(a) - Number(b))
+            .forEach(([pos, val]) => {
+                html += `<div class="module-lp-premiacoes-item">
+                    <span class="module-lp-premiacoes-pos ${posClasses[pos] || ''}">${posLabels[pos] || pos + 'º'}</span>
+                    <span class="module-lp-premiacoes-val">${_lpFormatCurrency(val)}</span>
+                </div>`;
+            });
+    } else if (fo.valores_simples && Object.keys(fo.valores_simples).length) {
+        Object.entries(fo.valores_simples).forEach(([key, val]) => {
+            html += `<div class="module-lp-premiacoes-item">
+                <span class="module-lp-premiacoes-pos">${keyLabels[key] || key}</span>
+                <span class="module-lp-premiacoes-val">${_lpFormatCurrency(val)}</span>
+            </div>`;
+        });
+    } else if (fo.valores_por_fase) {
+        Object.entries(fo.valores_por_fase).forEach(([fase, vals]) => {
+            if (vals?.vitoria !== undefined) {
+                html += `<div class="module-lp-premiacoes-item">
+                    <span class="module-lp-premiacoes-pos">${fase} — Vitória</span>
+                    <span class="module-lp-premiacoes-val">${_lpFormatCurrency(vals.vitoria)}</span>
+                </div>`;
+            }
+        });
+    }
+    if (!html) return;
+    body.innerHTML = html;
+    accordion.style.display = '';
+}
+
+function _lpCarregarPremiacoes(ligaId, moduloSlug, bodyId, accordionId) {
+    fetch(`/api/liga/${ligaId}/modulos/${moduloSlug}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+            if (!data) return;
+            const fo = data.config?.financeiro_override || data.financeiro_override;
+            if (!fo) return;
+            _lpRenderPremiacoes(fo, bodyId, accordionId);
+        })
+        .catch(() => {});
+}
+
+/**
+ * Render Meu Status + Destaque for Resta Um module.
+ * Uses different data structure (status: 'vivo'/'eliminado'/'campeao').
+ */
+function _lpRenderRestaUmStatus(dados, timeId) {
+    if (!dados?.edicao) return;
+    const participantes = dados.participantes || [];
+    const vivos = participantes.filter(p => p.status === 'vivo' || p.status === 'campeao');
+    const meu = participantes.find(p => String(p.timeId || p.time_id || '') === String(timeId));
+    const edicao = dados.edicao;
+
+    // --- Meu Status ---
+    const statusEl = document.getElementById('lp-meu-status-resta-um');
+    if (statusEl && meu) {
+        const isCampeao = meu.status === 'campeao';
+        const isVivo = meu.status === 'vivo';
+        const isEliminado = meu.status === 'eliminado';
+        const sobreviventes = vivos.length;
+        const total = participantes.length;
+        const rodadaElim = meu.rodadaEliminacao || meu.rodada_eliminacao;
+
+        let badgeHtml;
+        if (isCampeao) {
+            badgeHtml = `<div class="module-lp-status-badge campeao">
+                <span class="material-icons">emoji_events</span>Campeão
+            </div>`;
+        } else if (isVivo) {
+            badgeHtml = `<div class="module-lp-status-badge vivo">
+                <span class="material-icons">check_circle</span>Vivo
+            </div>`;
+        } else {
+            badgeHtml = `<div class="module-lp-status-badge eliminado">
+                <span class="material-icons">cancel</span>Eliminado${rodadaElim ? ' R' + rodadaElim : ''}
+            </div>`;
+        }
+
+        const html = `<p class="module-lp-section-label"><span class="material-icons">person</span>Minha Situação</p>
+        <div class="module-lp-status-grid">
+            <div class="module-lp-stat-card" style="grid-column: span 3; display:flex; justify-content:center; align-items:center; padding: var(--app-space-4);">
+                ${badgeHtml}
+            </div>
+        </div>
+        <div class="module-lp-status-grid" style="margin-top: var(--app-space-3);">
+            <div class="module-lp-stat-card">
+                <span class="module-lp-stat-value">${sobreviventes}</span>
+                <span class="module-lp-stat-label">vivos</span>
+            </div>
+            <div class="module-lp-stat-card">
+                <span class="module-lp-stat-value">${total}</span>
+                <span class="module-lp-stat-label">total</span>
+            </div>
+            <div class="module-lp-stat-card">
+                <span class="module-lp-stat-value">${dados.rodadaAtual || edicao.rodada_atual || '—'}</span>
+                <span class="module-lp-stat-label">rodada</span>
+            </div>
+        </div>`;
+        statusEl.innerHTML = html;
+        statusEl.style.display = '';
+    }
+
+    // --- Destaque: últimos vivos ---
+    const destaqueEl = document.getElementById('lp-destaque-resta-um');
+    if (destaqueEl && vivos.length > 0) {
+        const top = vivos.slice(0, 3);
+        let html = `<p class="module-lp-section-label"><span class="material-icons">shield</span>Sobreviventes (${vivos.length})</p>
+        <div class="module-lp-destaque-list">`;
+        top.forEach((item, i) => {
+            const nome = item?.nomeTime || item?.nomeCartoleiro || item?.nome_time || item?.nome || 'N/D';
+            const isMe = String(item?.timeId || item?.time_id || '') === String(timeId);
+            html += `<div class="module-lp-destaque-item${isMe ? ' is-me' : ''}">
+                <span class="module-lp-destaque-pos">
+                    <span class="material-icons" style="font-size:14px;color:var(--app-success-light)">shield</span>
+                </span>
+                <span class="module-lp-destaque-nome">${nome}</span>
+                <span class="module-lp-destaque-valor" style="color:var(--app-success-light)">Vivo</span>
+            </div>`;
+        });
+        html += `</div>`;
+        destaqueEl.innerHTML = html;
+        destaqueEl.style.display = '';
+    }
+}

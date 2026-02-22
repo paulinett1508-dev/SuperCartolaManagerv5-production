@@ -34,6 +34,10 @@ export async function inicializarCapitaoParticipante(params) {
     estadoCapitao.timeId = params.timeId;
     estadoCapitao.temporada = window.ParticipanteConfig?.CURRENT_SEASON || new Date().getFullYear();
 
+    // ✅ LP: Init acordeons + carregar premiações (non-blocking)
+    _initLPAccordions('capitao-lp-wrapper');
+    _lpCarregarPremiacoes(params.ligaId, 'capitao_luxo', 'lp-premiacoes-body-capitao', 'lp-premiacoes-accordion-capitao');
+
     // 1. Verificar se módulo está ativo na liga
     const moduloAtivo = await verificarModuloAtivo();
     if (!moduloAtivo) {
@@ -58,6 +62,7 @@ export async function inicializarCapitaoParticipante(params) {
         estadoCapitao.rankingAtual = dadosCache;
         renderizarRanking(dadosCache);
         renderizarCardDesempenho(dadosCache);
+        _lpRenderRankingStatus({ ranking: dadosCache }, estadoCapitao.timeId, 'capitao', ['pontuacao_total'], 'pts');
     }
 
     // 5. Buscar dados frescos (sempre, mesmo com cache)
@@ -195,6 +200,8 @@ async function carregarRanking() {
         estadoCapitao.rankingAtual = data.ranking;
         renderizarRanking(data.ranking);
         renderizarCardDesempenho(data.ranking);
+        // ✅ LP: Atualizar seções de status com dados frescos
+        _lpRenderRankingStatus({ ranking: data.ranking }, estadoCapitao.timeId, 'capitao', ['pontuacao_total'], 'pts');
 
         // Salvar no cache (apenas dados consolidados, não live)
         if (!estadoCapitao.modeLive) {
@@ -507,3 +514,168 @@ window._abrirHistoricoCapitao = function(participante) {
 window.inicializarCapitaoParticipante = inicializarCapitaoParticipante;
 
 if (window.Log) Log.info('PARTICIPANTE-CAPITAO', 'Módulo v2.0 pronto');
+
+// =============================================
+// MODULE LP — Landing Page Utils (Capitão)
+// =============================================
+
+function _initLPAccordions(wrapperId) {
+    const wrapper = document.getElementById(wrapperId);
+    if (!wrapper) return;
+    wrapper.querySelectorAll('.module-lp-accordion-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const isOpen = btn.getAttribute('aria-expanded') === 'true';
+            btn.setAttribute('aria-expanded', String(!isOpen));
+        });
+    });
+}
+
+function _lpFormatCurrency(val) {
+    const n = parseFloat(val) || 0;
+    return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function _lpRenderPremiacoes(fo, bodyId, accordionId) {
+    const body = document.getElementById(bodyId);
+    const accordion = document.getElementById(accordionId);
+    if (!body || !accordion || !fo) return;
+    const posLabels = { '1': '1º Lugar', '2': '2º Lugar', '3': '3º Lugar', '4': '4º Lugar', '5': '5º Lugar' };
+    const posClasses = { '1': 'pos-1', '2': 'pos-2', '3': 'pos-3' };
+    const keyLabels = { vitoria: 'Vitória', derrota: 'Derrota', empate: 'Empate', por_gol: 'Por Gol', campeao: 'Campeão' };
+    let html = '';
+    if (fo.valores_por_posicao && Object.keys(fo.valores_por_posicao).length) {
+        Object.entries(fo.valores_por_posicao)
+            .sort(([a], [b]) => Number(a) - Number(b))
+            .forEach(([pos, val]) => {
+                html += `<div class="module-lp-premiacoes-item">
+                    <span class="module-lp-premiacoes-pos ${posClasses[pos] || ''}">${posLabels[pos] || pos + 'º'}</span>
+                    <span class="module-lp-premiacoes-val">${_lpFormatCurrency(val)}</span>
+                </div>`;
+            });
+    } else if (fo.valores_simples && Object.keys(fo.valores_simples).length) {
+        Object.entries(fo.valores_simples).forEach(([key, val]) => {
+            html += `<div class="module-lp-premiacoes-item">
+                <span class="module-lp-premiacoes-pos">${keyLabels[key] || key}</span>
+                <span class="module-lp-premiacoes-val">${_lpFormatCurrency(val)}</span>
+            </div>`;
+        });
+    } else if (fo.valores_por_fase) {
+        Object.entries(fo.valores_por_fase).forEach(([fase, vals]) => {
+            if (vals?.vitoria !== undefined) {
+                html += `<div class="module-lp-premiacoes-item">
+                    <span class="module-lp-premiacoes-pos">${fase} — Vitória</span>
+                    <span class="module-lp-premiacoes-val">${_lpFormatCurrency(vals.vitoria)}</span>
+                </div>`;
+            }
+        });
+    }
+    if (!html) return;
+    body.innerHTML = html;
+    accordion.style.display = '';
+}
+
+function _lpCarregarPremiacoes(ligaId, moduloSlug, bodyId, accordionId) {
+    fetch(`/api/liga/${ligaId}/modulos/${moduloSlug}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+            if (!data) return;
+            const fo = data.config?.financeiro_override || data.financeiro_override;
+            if (!fo) return;
+            _lpRenderPremiacoes(fo, bodyId, accordionId);
+        })
+        .catch(() => {});
+}
+
+function _lpGetValor(item, fields) {
+    for (const f of fields) {
+        if (item?.[f] !== undefined && item[f] !== null) return item[f];
+    }
+    return 0;
+}
+
+function _lpRenderRankingStatus(data, timeId, module, valueFields, valueUnit) {
+    const ranking = data?.ranking || data?.data?.ranking || [];
+    if (!ranking.length) return;
+
+    const meuIdx = ranking.findIndex(item =>
+        String(item?.timeId || item?.participanteId || item?.time_id || '') === String(timeId)
+    );
+
+    const statusEl = document.getElementById(`lp-meu-status-${module}`);
+    if (statusEl) {
+        const posicao = meuIdx >= 0 ? meuIdx + 1 : null;
+        const lider = ranking[0];
+        const meu = meuIdx >= 0 ? ranking[meuIdx] : null;
+        const liderValor = _lpGetValor(lider, valueFields);
+        const meuValor = meu ? _lpGetValor(meu, valueFields) : null;
+        const total = ranking.length;
+        const iAmLider = meuIdx === 0;
+        const diff = (meu && !iAmLider) ? (liderValor - meuValor) : null;
+
+        let html = `<p class="module-lp-section-label"><span class="material-icons">person</span>Meu Desempenho</p>
+        <div class="module-lp-status-grid">`;
+
+        if (posicao !== null) {
+            html += `<div class="module-lp-stat-card highlight">
+                <span class="module-lp-stat-value">${posicao}º</span>
+                <span class="module-lp-stat-label">de ${total}</span>
+            </div>`;
+        } else {
+            html += `<div class="module-lp-stat-card">
+                <span class="module-lp-stat-value">—</span>
+                <span class="module-lp-stat-label">posição</span>
+            </div>`;
+        }
+
+        const meuValorFormatado = (meuValor !== null && typeof truncarPontos === 'function')
+            ? truncarPontos(meuValor) : (meuValor !== null ? meuValor : '—');
+        const liderValorFormatado = (typeof truncarPontos === 'function')
+            ? truncarPontos(liderValor) : liderValor;
+
+        html += `<div class="module-lp-stat-card">
+            <span class="module-lp-stat-value">${meuValorFormatado}</span>
+            <span class="module-lp-stat-label">${valueUnit}</span>
+        </div>`;
+
+        if (iAmLider) {
+            html += `<div class="module-lp-stat-card">
+                <span class="module-lp-stat-value" style="font-size:var(--app-font-md);color:var(--lp-primary)">Líder</span>
+                <span class="module-lp-stat-label">${liderValorFormatado} ${valueUnit}</span>
+            </div>`;
+        } else {
+            const diffFormatado = (diff !== null && typeof truncarPontos === 'function')
+                ? truncarPontos(diff) : diff;
+            html += `<div class="module-lp-stat-card">
+                <span class="module-lp-stat-value" style="${diff > 0 ? 'color:var(--app-danger)' : ''}">
+                    ${diff !== null && diff > 0 ? '-' + diffFormatado : liderValorFormatado}
+                </span>
+                <span class="module-lp-stat-label">${diff !== null && diff > 0 ? 'do líder' : 'líder'}</span>
+            </div>`;
+        }
+        html += `</div>`;
+        statusEl.innerHTML = html;
+        statusEl.style.display = '';
+    }
+
+    const destaqueEl = document.getElementById(`lp-destaque-${module}`);
+    if (destaqueEl) {
+        const top3 = ranking.slice(0, 3);
+        let html = `<p class="module-lp-section-label"><span class="material-icons">leaderboard</span>Top 3</p>
+        <div class="module-lp-destaque-list">`;
+        top3.forEach((item, i) => {
+            const pos = i + 1;
+            const nome = item?.nome_cartola || item?.nomeTime || item?.nomeCartoleiro || item?.nome_time || item?.nome || 'N/D';
+            const valor = _lpGetValor(item, valueFields);
+            const valorFmt = typeof truncarPontos === 'function' ? truncarPontos(valor) : valor;
+            const isMe = String(item?.timeId || item?.participanteId || item?.time_id || '') === String(timeId);
+            html += `<div class="module-lp-destaque-item${isMe ? ' is-me' : ''}">
+                <span class="module-lp-destaque-pos pos-${pos}">${pos}º</span>
+                <span class="module-lp-destaque-nome">${nome}</span>
+                <span class="module-lp-destaque-valor">${valorFmt}<span class="module-lp-destaque-unit"> ${valueUnit}</span></span>
+            </div>`;
+        });
+        html += `</div>`;
+        destaqueEl.innerHTML = html;
+        destaqueEl.style.display = '';
+    }
+}

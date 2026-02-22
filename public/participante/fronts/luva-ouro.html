@@ -1,6 +1,81 @@
-<!-- PARTICIPANTE LUVA DE OURO - Interface v3.8 Russo One Brand Typography -->
-<!-- v3.8: Russo One Typography + Card Desempenho -->
+<!-- PARTICIPANTE LUVA DE OURO - Interface v3.9 LP -->
+<!-- v3.9: Landing page sections (Hero, Meu Status, Destaque, Accordions) -->
 <div class="luva-ouro-participante">
+
+    <!-- ============================================================
+         LP SECTIONS — Hero, Meu Status, Destaque, Accordions
+         ============================================================ -->
+    <div class="module-lp module-lp-luva" id="luva-lp-wrapper">
+
+        <!-- HERO -->
+        <div class="module-lp-hero">
+            <div class="module-lp-hero-icon-wrap">
+                <span class="material-icons">sports_handball</span>
+            </div>
+            <h1 class="module-lp-hero-title">Luva de Ouro</h1>
+            <p class="module-lp-hero-tagline">O melhor goleiro de todos os tempos</p>
+        </div>
+
+        <!-- MEU STATUS (populated by JS after data loads) -->
+        <div id="lp-meu-status-luva" class="module-lp-meu-status" style="display:none"></div>
+
+        <!-- DESTAQUE TOP 3 (populated by JS) -->
+        <div id="lp-destaque-luva" class="module-lp-destaque" style="display:none"></div>
+
+        <!-- ACCORDION: Como Funciona -->
+        <div class="module-lp-accordion">
+            <button class="module-lp-accordion-btn" aria-expanded="false" id="btn-accordion-regras-luva">
+                <div class="module-lp-accordion-btn-inner">
+                    <span class="material-icons">menu_book</span>
+                    <span class="module-lp-accordion-btn-label">Como Funciona</span>
+                </div>
+                <span class="material-icons module-lp-accordion-chevron">expand_more</span>
+            </button>
+            <div class="module-lp-accordion-body">
+                <div class="module-lp-accordion-inner">
+                    <ul class="module-lp-regras-list">
+                        <li class="module-lp-regras-item">
+                            <span class="material-icons">sports_handball</span>
+                            Acumula as defesas difíceis (scouts) do goleiro escalado no Cartola FC em cada rodada.
+                        </li>
+                        <li class="module-lp-regras-item">
+                            <span class="material-icons">leaderboard</span>
+                            O ranking é ordenado pela soma total de defesas difíceis na temporada.
+                        </li>
+                        <li class="module-lp-regras-item">
+                            <span class="material-icons">swap_vert</span>
+                            Você pode trocar de goleiro a cada rodada — o desempenho acumulado é de todos os goleiros escalados.
+                        </li>
+                        <li class="module-lp-regras-item">
+                            <span class="material-icons">workspace_premium</span>
+                            Vence quem tiver o maior número total de defesas difíceis ao final da temporada.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACCORDION: Premiações (hidden until JS loads data) -->
+        <div class="module-lp-accordion" id="lp-premiacoes-accordion-luva" style="display:none">
+            <button class="module-lp-accordion-btn" aria-expanded="false" id="btn-accordion-premiacoes-luva">
+                <div class="module-lp-accordion-btn-inner">
+                    <span class="material-icons">emoji_events</span>
+                    <span class="module-lp-accordion-btn-label">Premiações</span>
+                </div>
+                <span class="material-icons module-lp-accordion-chevron">expand_more</span>
+            </button>
+            <div class="module-lp-accordion-body">
+                <div class="module-lp-accordion-inner">
+                    <div id="lp-premiacoes-body-luva" class="module-lp-premiacoes-grid"></div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /module-lp-luva -->
+
+    <!-- DIVIDER between LP and data section -->
+    <div class="module-lp-divider module-lp-luva"></div>
+
     <!-- Container para conteúdo dinâmico -->
     <div id="luvaOuroContainer">
         <div class="loading-participante text-center py-10">

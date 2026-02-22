@@ -1,0 +1,536 @@
+/**
+ * MODULE LP — Landing Page Template
+ * ===================================
+ * Shared styles for module landing pages (Artilheiro, Capitão de Luxo,
+ * Luva de Ouro, Resta Um). Provides Hero, Meu Status, Destaque, Accordions,
+ * Premiações grid and Divider sections.
+ *
+ * Depends on: _app-tokens.css
+ * Anti-Frank: /public/participante/css/module-lp.css
+ * Author: auto-generated (claude/add-module-landing-pages-ffev8)
+ */
+
+/* ============================================================
+   1. PER-MODULE COLOR SCOPING
+   Each class scopes --lp-* variables. All other styles consume these.
+   Zero hardcoded hex values — only var(--app-*) with fallbacks.
+   ============================================================ */
+
+.module-lp-artilheiro {
+    --lp-primary: var(--app-success-light, #22c55e);
+    --lp-muted: rgba(34, 197, 94, 0.12);
+    --lp-muted-strong: rgba(34, 197, 94, 0.2);
+    --lp-border: rgba(34, 197, 94, 0.25);
+    --lp-gradient-hero: linear-gradient(145deg, rgba(34, 197, 94, 0.18) 0%, rgba(34, 197, 94, 0.05) 60%, transparent 100%);
+    --lp-gradient-card: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(34, 197, 94, 0.03));
+    --lp-glow: 0 0 20px rgba(34, 197, 94, 0.15);
+}
+
+.module-lp-capitao {
+    --lp-primary: var(--app-purple, #8b5cf6);
+    --lp-muted: rgba(139, 92, 246, 0.12);
+    --lp-muted-strong: rgba(139, 92, 246, 0.2);
+    --lp-border: rgba(139, 92, 246, 0.25);
+    --lp-gradient-hero: linear-gradient(145deg, rgba(139, 92, 246, 0.18) 0%, rgba(139, 92, 246, 0.05) 60%, transparent 100%);
+    --lp-gradient-card: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(139, 92, 246, 0.03));
+    --lp-glow: 0 0 20px rgba(139, 92, 246, 0.15);
+}
+
+.module-lp-luva {
+    --lp-primary: var(--app-gold, #ffd700);
+    --lp-muted: rgba(255, 215, 0, 0.12);
+    --lp-muted-strong: rgba(255, 215, 0, 0.22);
+    --lp-border: rgba(255, 215, 0, 0.28);
+    --lp-gradient-hero: linear-gradient(145deg, rgba(255, 215, 0, 0.16) 0%, rgba(255, 215, 0, 0.04) 60%, transparent 100%);
+    --lp-gradient-card: linear-gradient(135deg, rgba(255, 215, 0, 0.08), rgba(255, 215, 0, 0.03));
+    --lp-glow: 0 0 20px rgba(255, 215, 0, 0.15);
+}
+
+.module-lp-resta-um {
+    --lp-primary: var(--app-restaum-primary, #f43f5e);
+    --lp-muted: rgba(244, 63, 94, 0.10);
+    --lp-muted-strong: rgba(244, 63, 94, 0.18);
+    --lp-border: rgba(244, 63, 94, 0.25);
+    --lp-gradient-hero: linear-gradient(145deg, rgba(244, 63, 94, 0.16) 0%, rgba(244, 63, 94, 0.04) 60%, transparent 100%);
+    --lp-gradient-card: linear-gradient(135deg, rgba(244, 63, 94, 0.08), rgba(244, 63, 94, 0.03));
+    --lp-glow: 0 0 20px rgba(244, 63, 94, 0.15);
+}
+
+/* ============================================================
+   2. WRAPPER
+   ============================================================ */
+
+.module-lp {
+    padding: 0 0 var(--app-space-4) 0;
+}
+
+/* ============================================================
+   3. HERO SECTION
+   ============================================================ */
+
+.module-lp-hero {
+    position: relative;
+    overflow: hidden;
+    padding: var(--app-space-8) var(--app-space-5);
+    margin: 0 -1px;  /* Flush with viewport on mobile */
+    text-align: center;
+    background: var(--lp-gradient-hero);
+    border-bottom: 1px solid var(--lp-border);
+    animation: app-fade-in-up var(--app-duration-normal) ease-out;
+}
+
+/* Subtle noise texture overlay */
+.module-lp-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 50% at 50% 0%, var(--lp-muted-strong), transparent);
+    pointer-events: none;
+}
+
+.module-lp-hero-icon-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: var(--app-radius-xl);
+    background: var(--lp-muted-strong);
+    border: 1px solid var(--lp-border);
+    margin-bottom: var(--app-space-4);
+    position: relative;
+    box-shadow: var(--lp-glow);
+}
+
+.module-lp-hero-icon-wrap .material-icons {
+    font-size: 32px;
+    color: var(--lp-primary);
+}
+
+.module-lp-hero-title {
+    font-family: var(--app-font-brand);
+    font-size: var(--app-font-2xl);
+    font-weight: 400;
+    color: var(--app-text-primary);
+    letter-spacing: 0.5px;
+    line-height: var(--app-leading-tight);
+    margin: 0 0 var(--app-space-2) 0;
+    position: relative;
+}
+
+.module-lp-hero-tagline {
+    font-family: var(--app-font-base);
+    font-size: var(--app-font-sm);
+    color: var(--lp-primary);
+    opacity: 0.85;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin: 0;
+    position: relative;
+}
+
+/* ============================================================
+   4. MEU STATUS SECTION
+   ============================================================ */
+
+.module-lp-meu-status {
+    padding: var(--app-space-5) var(--app-space-5) 0;
+    animation: app-fade-in-up var(--app-duration-normal) 0.1s ease-out both;
+}
+
+.module-lp-section-label {
+    font-family: var(--app-font-brand);
+    font-size: var(--app-font-xs);
+    color: var(--lp-primary);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin: 0 0 var(--app-space-3) 0;
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-2);
+}
+
+.module-lp-section-label .material-icons {
+    font-size: 14px;
+    color: var(--lp-primary);
+}
+
+.module-lp-status-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--app-space-3);
+}
+
+.module-lp-stat-card {
+    background: var(--lp-gradient-card);
+    border: 1px solid var(--lp-border);
+    border-radius: var(--app-radius-lg);
+    padding: var(--app-space-4) var(--app-space-3);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.module-lp-stat-card.highlight {
+    background: var(--lp-muted-strong);
+    border-color: var(--lp-primary);
+    box-shadow: var(--lp-glow);
+}
+
+.module-lp-stat-card.highlight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--lp-primary);
+    opacity: 0.7;
+}
+
+.module-lp-stat-value {
+    font-family: var(--app-font-brand);
+    font-size: var(--app-font-xl);
+    color: var(--lp-primary);
+    line-height: 1;
+    letter-spacing: -0.5px;
+    margin-bottom: var(--app-space-1);
+    display: block;
+}
+
+.module-lp-stat-card.highlight .module-lp-stat-value {
+    font-size: var(--app-font-2xl);
+}
+
+.module-lp-stat-label {
+    font-family: var(--app-font-base);
+    font-size: var(--app-font-xs);
+    color: var(--app-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    display: block;
+}
+
+.module-lp-stat-badge {
+    display: inline-block;
+    font-size: 9px;
+    font-family: var(--app-font-brand);
+    padding: 2px 6px;
+    border-radius: var(--app-radius-full);
+    background: var(--lp-muted);
+    color: var(--lp-primary);
+    margin-top: var(--app-space-1);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* Status badge Vivo/Eliminado (Resta Um) */
+.module-lp-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: var(--app-radius-full);
+    font-family: var(--app-font-brand);
+    font-size: var(--app-font-xs);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    line-height: 1;
+}
+
+.module-lp-status-badge.vivo {
+    background: var(--app-restaum-vivo-gradient, rgba(34, 197, 94, 0.12));
+    border: 1px solid var(--app-restaum-vivo-border, rgba(34, 197, 94, 0.3));
+    color: var(--app-success-light, #22c55e);
+}
+
+.module-lp-status-badge.vivo .material-icons { font-size: 12px; color: var(--app-success-light, #22c55e); }
+
+.module-lp-status-badge.eliminado {
+    background: var(--app-restaum-eliminado-gradient, rgba(239, 68, 68, 0.08));
+    border: 1px solid var(--app-restaum-eliminado-border, rgba(239, 68, 68, 0.3));
+    color: var(--app-danger, #ef4444);
+}
+
+.module-lp-status-badge.eliminado .material-icons { font-size: 12px; color: var(--app-danger, #ef4444); }
+
+.module-lp-status-badge.campeao {
+    background: rgba(255, 215, 0, 0.12);
+    border: 1px solid rgba(255, 215, 0, 0.35);
+    color: var(--app-gold, #ffd700);
+}
+
+/* ============================================================
+   5. DESTAQUE / TOP3 SECTION
+   ============================================================ */
+
+.module-lp-destaque {
+    padding: var(--app-space-4) var(--app-space-5) 0;
+    animation: app-fade-in-up var(--app-duration-normal) 0.15s ease-out both;
+}
+
+.module-lp-destaque-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-space-2);
+}
+
+.module-lp-destaque-item {
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-3);
+    padding: var(--app-space-3) var(--app-space-4);
+    background: var(--app-surface, #1a1a1a);
+    border: 1px solid var(--app-border, #333);
+    border-radius: var(--app-radius-md);
+    transition: border-color var(--app-transition-fast);
+}
+
+.module-lp-destaque-item.is-me {
+    background: var(--lp-gradient-card);
+    border-color: var(--lp-border);
+}
+
+.module-lp-destaque-pos {
+    font-family: var(--app-font-brand);
+    font-size: var(--app-font-md);
+    color: var(--app-text-muted);
+    min-width: 28px;
+    text-align: center;
+    line-height: 1;
+}
+
+.module-lp-destaque-pos.pos-1 { color: var(--app-gold, #ffd700); }
+.module-lp-destaque-pos.pos-2 { color: var(--app-silver, #c0c0c0); }
+.module-lp-destaque-pos.pos-3 { color: var(--app-bronze, #cd7f32); }
+
+.module-lp-destaque-nome {
+    flex: 1;
+    font-family: var(--app-font-base);
+    font-size: var(--app-font-md);
+    color: var(--app-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.module-lp-destaque-item.is-me .module-lp-destaque-nome {
+    color: var(--app-text-primary);
+    font-weight: 600;
+}
+
+.module-lp-destaque-valor {
+    font-family: var(--app-font-mono);
+    font-size: var(--app-font-md);
+    color: var(--lp-primary);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.module-lp-destaque-unit {
+    font-family: var(--app-font-base);
+    font-size: var(--app-font-xs);
+    color: var(--app-text-muted);
+    margin-left: 2px;
+}
+
+/* ============================================================
+   6. ACCORDION (Regras + Premiações)
+   ============================================================ */
+
+.module-lp-accordion {
+    margin: var(--app-space-4) var(--app-space-5) 0;
+    border-radius: var(--app-radius-lg);
+    border: 1px solid var(--app-border, #333);
+    overflow: hidden;
+    background: var(--app-surface, #1a1a1a);
+}
+
+.module-lp-accordion-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--app-space-4) var(--app-space-5);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--app-text-secondary);
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+    transition: background var(--app-transition-fast);
+}
+
+.module-lp-accordion-btn:active {
+    background: var(--app-surface-hover, #333);
+}
+
+.module-lp-accordion-btn-inner {
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-3);
+}
+
+.module-lp-accordion-btn-inner .material-icons {
+    font-size: 18px;
+    color: var(--lp-primary);
+    flex-shrink: 0;
+}
+
+.module-lp-accordion-btn-label {
+    font-family: var(--app-font-brand);
+    font-size: var(--app-font-md);
+    color: var(--app-text-secondary);
+    letter-spacing: 0.2px;
+}
+
+.module-lp-accordion-chevron {
+    font-size: 20px;
+    color: var(--app-text-dim);
+    transition: transform var(--app-transition-normal);
+    flex-shrink: 0;
+}
+
+.module-lp-accordion-btn[aria-expanded="true"] .module-lp-accordion-chevron {
+    transform: rotate(180deg);
+}
+
+/* Accordion body — max-height transition for CSS-driven animation */
+.module-lp-accordion-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.module-lp-accordion-btn[aria-expanded="true"] ~ .module-lp-accordion-body {
+    max-height: 600px;
+}
+
+.module-lp-accordion-inner {
+    padding: 0 var(--app-space-5) var(--app-space-5);
+    border-top: 1px solid var(--app-border, #333);
+}
+
+/* ============================================================
+   7. REGRAS CONTENT (inside accordion)
+   ============================================================ */
+
+.module-lp-regras-list {
+    list-style: none;
+    margin: var(--app-space-4) 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-space-3);
+}
+
+.module-lp-regras-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--app-space-3);
+    font-family: var(--app-font-base);
+    font-size: var(--app-font-md);
+    color: var(--app-text-secondary);
+    line-height: var(--app-leading-relaxed);
+}
+
+.module-lp-regras-item .material-icons {
+    font-size: 16px;
+    color: var(--lp-primary);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+/* ============================================================
+   8. PREMIAÇÕES CONTENT (inside accordion)
+   ============================================================ */
+
+.module-lp-premiacoes-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-space-2);
+    margin-top: var(--app-space-4);
+}
+
+.module-lp-premiacoes-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--app-space-3) var(--app-space-4);
+    border-radius: var(--app-radius-md);
+    background: var(--lp-gradient-card);
+    border: 1px solid var(--lp-border);
+}
+
+.module-lp-premiacoes-pos {
+    font-family: var(--app-font-base);
+    font-size: var(--app-font-md);
+    color: var(--app-text-secondary);
+}
+
+.module-lp-premiacoes-pos.pos-1 { color: var(--app-gold, #ffd700); font-weight: 700; }
+.module-lp-premiacoes-pos.pos-2 { color: var(--app-silver, #c0c0c0); }
+.module-lp-premiacoes-pos.pos-3 { color: var(--app-bronze, #cd7f32); }
+
+.module-lp-premiacoes-val {
+    font-family: var(--app-font-mono);
+    font-size: var(--app-font-md);
+    font-weight: 700;
+    color: var(--lp-primary);
+}
+
+/* ============================================================
+   9. DIVIDER
+   ============================================================ */
+
+.module-lp-divider {
+    margin: var(--app-space-6) var(--app-space-5);
+    height: 1px;
+    background: linear-gradient(
+        to right,
+        transparent,
+        var(--lp-border, rgba(255, 255, 255, 0.08)),
+        var(--lp-border, rgba(255, 255, 255, 0.08)),
+        transparent
+    );
+    position: relative;
+}
+
+.module-lp-divider::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--app-surface, #1a1a1a);
+    border: 1px solid var(--lp-border, rgba(255, 255, 255, 0.08));
+}
+
+/* ============================================================
+   10. RESPONSIVE — Mobile-First (already designed for 360px+)
+   ============================================================ */
+
+@media (max-width: 360px) {
+    .module-lp-status-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--app-space-2);
+    }
+
+    .module-lp-stat-card {
+        padding: var(--app-space-3) var(--app-space-2);
+    }
+
+    .module-lp-hero {
+        padding: var(--app-space-6) var(--app-space-4);
+    }
+}
+
+@media (min-width: 480px) {
+    .module-lp-status-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--app-space-4);
+    }
+}
