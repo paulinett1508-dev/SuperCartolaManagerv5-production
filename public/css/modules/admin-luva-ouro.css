@@ -61,6 +61,26 @@
 .lo-btn-primary:hover:not(:disabled) { opacity: 0.9; }
 .lo-btn-ghost { background: none; border: 1px solid var(--app-border); color: var(--app-text-muted); border-radius: var(--app-radius-md); padding: 4px 10px; cursor: pointer; font-size: var(--app-font-xs); display: inline-flex; align-items: center; gap: 4px; transition: 0.15s ease; }
 .lo-btn-ghost:hover { color: white; border-color: var(--app-text-muted); }
+.lo-btn-salvar { background: var(--color-success); color: white; }
+.lo-btn-salvar:hover:not(:disabled) { opacity: 0.9; }
+
+/* === Form === */
+.lo-form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--app-space-3); margin-bottom: var(--app-space-3); }
+.lo-form-row label { font-size: var(--app-font-xs); color: var(--app-text-muted); display: block; margin-bottom: 0.25rem; }
+.lo-form-row input, .lo-form-row select {
+    width: 100%; padding: 0.5rem; background: var(--app-bg); color: white;
+    border: 1px solid var(--app-border); border-radius: var(--app-radius-md);
+    font-family: var(--app-font-mono); font-size: var(--app-font-sm);
+}
+.lo-form-section {
+    font-family: var(--app-font-brand); font-size: var(--app-font-xs);
+    color: var(--module-luva-primary); text-transform: uppercase; letter-spacing: 0.05em;
+    margin: var(--app-space-3) 0 var(--app-space-2); padding-bottom: var(--app-space-1);
+    border-bottom: 1px solid var(--module-luva-border);
+}
+.lo-form-checkbox { display: flex; align-items: center; gap: var(--app-space-2); padding-top: 1.25rem; }
+.lo-form-checkbox input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--module-luva-primary); cursor: pointer; }
+.lo-form-checkbox span { font-size: var(--app-font-sm); color: white; }
 
 /* === States === */
 .lo-empty { text-align: center; color: var(--app-text-muted); padding: var(--app-space-6); }

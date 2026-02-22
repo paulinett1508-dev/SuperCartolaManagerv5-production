@@ -1,21 +1,20 @@
 /**
- * ADMIN LUVA DE OURO - Dashboard de Gerenciamento
+ * ADMIN LUVA DE OURO - Parametrizacao do Modulo
  *
  * Permite ao admin:
  * - Selecionar liga
- * - Visualizar ranking de goleiros (media de pontos)
- * - Ver estatisticas do modulo
- * - Coletar dados
- * - Consolidar temporada
- * - Executar diagnostico
+ * - Configurar premiacoes (1o, 2o, 3o lugar)
+ * - Salvar configuracoes via API module-config
  *
- * @version 1.0.0
+ * @version 2.0.0
  */
 
 class AdminLuvaOuro {
     constructor() {
         this.ligaId = null;
         this.ligas = [];
+        this.config = null;
+        this.wizard = null;
     }
 
     // ==========================================================================
@@ -57,7 +56,7 @@ class AdminLuvaOuro {
             document.getElementById('loAdminContent').innerHTML = `
                 <div class="lo-empty">
                     <span class="material-icons" style="font-size:3rem;opacity:0.3;">sports_mma</span>
-                    <p>Selecione uma liga para gerenciar a Luva de Ouro</p>
+                    <p>Selecione uma liga para parametrizar a Luva de Ouro</p>
                 </div>`;
             return;
         }
@@ -66,7 +65,7 @@ class AdminLuvaOuro {
     }
 
     // ==========================================================================
-    // DASHBOARD PRINCIPAL
+    // DASHBOARD DE PARAMETRIZACAO
     // ==========================================================================
 
     async carregarDashboard() {
@@ -76,161 +75,167 @@ class AdminLuvaOuro {
         container.innerHTML = `<div class="lo-loading"><span class="material-icons">sync</span> Carregando...</div>`;
 
         try {
-            const [rankingRes, statsRes, rodadaRes] = await Promise.all([
-                fetch(`/api/luva-de-ouro/${this.ligaId}/ranking`),
-                fetch(`/api/luva-de-ouro/${this.ligaId}/estatisticas`),
-                fetch(`/api/luva-de-ouro/${this.ligaId}/detectar-rodada`),
-            ]);
+            const res = await fetch(`/api/liga/${this.ligaId}/modulos/luva_ouro`);
+            const data = res.ok ? await res.json() : {};
 
-            const ranking = rankingRes.ok ? await rankingRes.json() : [];
-            const stats = statsRes.ok ? await statsRes.json() : {};
-            const rodadaData = rodadaRes.ok ? await rodadaRes.json() : {};
+            this.config = data.config || {};
+            this.wizard = data.wizard || data.regras_default?.wizard || null;
 
-            this.renderDashboard(container, ranking, stats, rodadaData);
+            this.renderDashboard(container, data);
         } catch (err) {
-            console.error('[ADMIN-LO] Erro ao carregar dashboard:', err);
-            container.innerHTML = '<div class="lo-empty"><p style="color:var(--app-danger);">Erro ao carregar dados</p></div>';
+            console.error('[ADMIN-LO] Erro ao carregar config:', err);
+            container.innerHTML = '<div class="lo-empty"><p style="color:var(--app-danger);">Erro ao carregar configuracao</p></div>';
         }
     }
 
-    renderDashboard(container, ranking, stats, rodadaData) {
-        const rankingArr = Array.isArray(ranking) ? ranking : (ranking.ranking || []);
-        const totalParticipantes = rankingArr.length;
-        const rodadaAtual = rodadaData.rodada || rodadaData.ultimaRodada || '-';
-        const lider = rankingArr[0];
-        const mediaLider = lider ? (Math.trunc((lider.media || 0) * 100) / 100).toFixed(2) : '-';
+    renderDashboard(container, data) {
+        const config = this.config;
+        const respostas = config.wizard_respostas || {};
+        const perguntas = this.wizard?.perguntas || [];
+
+        const valorCampeao = respostas.valor_campeao ?? this._getDefault(perguntas, 'valor_campeao');
+        const viceHabilitado = respostas.vice_habilitado ?? this._getDefault(perguntas, 'vice_habilitado');
+        const valorVice = respostas.valor_vice ?? this._getDefault(perguntas, 'valor_vice');
+        const terceiroHabilitado = respostas.terceiro_habilitado ?? this._getDefault(perguntas, 'terceiro_habilitado');
+        const valorTerceiro = respostas.valor_terceiro ?? this._getDefault(perguntas, 'valor_terceiro');
+
+        const isAtivo = config.ativo === true;
+        const configuradoPor = config.configurado_por || '-';
+        const temporada = config.temporada || new Date().getFullYear();
 
         container.innerHTML = `
-            <!-- Stats -->
+            <!-- Status do Modulo -->
             <div class="lo-stats-grid">
                 <div class="lo-stat">
-                    <div class="lo-stat-value">${totalParticipantes}</div>
-                    <div class="lo-stat-label">Participantes</div>
+                    <div class="lo-stat-value" style="color:${isAtivo ? 'var(--app-success)' : 'var(--app-text-muted)'};">
+                        ${isAtivo ? 'Ativo' : 'Inativo'}
+                    </div>
+                    <div class="lo-stat-label">Status</div>
                 </div>
                 <div class="lo-stat">
-                    <div class="lo-stat-value">${rodadaAtual}</div>
-                    <div class="lo-stat-label">Ultima Rodada</div>
+                    <div class="lo-stat-value">${temporada}</div>
+                    <div class="lo-stat-label">Temporada</div>
                 </div>
                 <div class="lo-stat">
-                    <div class="lo-stat-value" style="color:var(--module-luva-primary);">${mediaLider}</div>
-                    <div class="lo-stat-label">Media Lider</div>
-                </div>
-                <div class="lo-stat">
-                    <div class="lo-stat-value">${stats.rodadasConsolidadas || '-'}</div>
-                    <div class="lo-stat-label">Rodadas Cons.</div>
+                    <div class="lo-stat-value" style="font-size:var(--app-font-xs);word-break:break-all;">${configuradoPor}</div>
+                    <div class="lo-stat-label">Configurado por</div>
                 </div>
             </div>
 
-            <!-- Acoes Admin -->
+            <!-- Formulario de Configuracao -->
             <div class="lo-card">
                 <div class="lo-card-header">
                     <span class="lo-card-title">
-                        <span class="material-icons">build</span>
-                        Acoes
+                        <span class="material-icons">settings</span>
+                        Premiacao
                     </span>
                 </div>
-                <div style="display:flex;gap:var(--app-space-2);flex-wrap:wrap;">
-                    <button class="lo-btn lo-btn-primary" onclick="window.adminLuvaOuro.coletarDados()">
-                        <span class="material-icons">download</span>
-                        Coletar Dados
-                    </button>
-                    <button class="lo-btn lo-btn-ghost" onclick="window.adminLuvaOuro.consolidar()">
-                        <span class="material-icons">sync</span>
-                        Consolidar
-                    </button>
-                    <button class="lo-btn lo-btn-ghost" onclick="window.adminLuvaOuro.diagnostico()">
-                        <span class="material-icons">troubleshoot</span>
-                        Diagnostico
-                    </button>
-                </div>
-            </div>
 
-            <!-- Ranking -->
-            <div class="lo-card">
-                <div class="lo-card-header">
-                    <span class="lo-card-title">
-                        <span class="material-icons">emoji_events</span>
-                        Ranking Goleiros
-                        <span style="font-size:var(--app-font-xs);color:var(--app-text-muted);">(${totalParticipantes} participantes)</span>
-                    </span>
+                <div class="lo-form-section">Premiacao (R$)</div>
+                <div class="lo-form-row">
+                    <div>
+                        <label>Luva de Ouro (1o lugar)</label>
+                        <input type="number" id="loValorCampeao" value="${valorCampeao}" min="0" max="500" step="5">
+                    </div>
+                    <div>
+                        <label style="display:flex;align-items:center;gap:6px;">
+                            <input type="checkbox" id="loViceHabilitado" ${viceHabilitado ? 'checked' : ''}
+                                   onchange="window.adminLuvaOuro.onToggleVice()"
+                                   style="width:auto;margin:0;">
+                            Vice (2o lugar)
+                        </label>
+                        <input type="number" id="loValorVice" value="${valorVice}" min="0" max="300" step="5"
+                               ${!viceHabilitado ? 'disabled style="opacity:0.4;"' : ''}>
+                    </div>
+                    <div>
+                        <label style="display:flex;align-items:center;gap:6px;">
+                            <input type="checkbox" id="loTerceiroHabilitado" ${terceiroHabilitado ? 'checked' : ''}
+                                   onchange="window.adminLuvaOuro.onToggleTerceiro()"
+                                   style="width:auto;margin:0;">
+                            Terceiro (3o lugar)
+                        </label>
+                        <input type="number" id="loValorTerceiro" value="${valorTerceiro}" min="0" max="200" step="5"
+                               ${!terceiroHabilitado ? 'disabled style="opacity:0.4;"' : ''}>
+                    </div>
                 </div>
-                <div id="loRankingLista">
-                    ${rankingArr.length === 0
-                        ? '<p style="color:var(--app-text-muted);text-align:center;padding:var(--app-space-4);">Nenhum dado consolidado</p>'
-                        : rankingArr.map((r, i) => this.renderRankingRow(r, i + 1)).join('')}
+
+                <div style="display:flex;gap:var(--app-space-2);margin-top:var(--app-space-3);">
+                    <button class="lo-btn lo-btn-salvar" onclick="window.adminLuvaOuro.salvarConfig()">
+                        <span class="material-icons">save</span>
+                        Salvar Configuracoes
+                    </button>
                 </div>
             </div>
         `;
     }
 
-    renderRankingRow(participante, posicao) {
-        const media = (Math.trunc((participante.media || 0) * 100) / 100).toFixed(2);
-        return `
-            <div class="lo-ranking-row">
-                <span class="lo-ranking-pos">${posicao}</span>
-                <img src="/escudos/${participante.escudoId || 'default'}.png"
-                     onerror="this.src='/escudos/default.png'" alt="">
-                <span class="lo-ranking-nome">${participante.nomeTime || participante.nome_time || 'Time'}</span>
-                <span class="lo-ranking-media">${media} pts</span>
-            </div>
-        `;
+    // ==========================================================================
+    // TOGGLES
+    // ==========================================================================
+
+    onToggleVice() {
+        const checkbox = document.getElementById('loViceHabilitado');
+        const input = document.getElementById('loValorVice');
+        if (input) {
+            input.disabled = !checkbox?.checked;
+            input.style.opacity = checkbox?.checked ? '1' : '0.4';
+        }
+    }
+
+    onToggleTerceiro() {
+        const checkbox = document.getElementById('loTerceiroHabilitado');
+        const input = document.getElementById('loValorTerceiro');
+        if (input) {
+            input.disabled = !checkbox?.checked;
+            input.style.opacity = checkbox?.checked ? '1' : '0.4';
+        }
     }
 
     // ==========================================================================
-    // ACOES ADMIN
+    // SALVAR
     // ==========================================================================
 
-    async coletarDados() {
+    async salvarConfig() {
+        const viceHabilitado = document.getElementById('loViceHabilitado')?.checked ?? true;
+        const terceiroHabilitado = document.getElementById('loTerceiroHabilitado')?.checked ?? true;
+
+        const wizard_respostas = {
+            valor_campeao: parseFloat(document.getElementById('loValorCampeao')?.value) || 0,
+            vice_habilitado: viceHabilitado,
+            valor_vice: viceHabilitado ? (parseFloat(document.getElementById('loValorVice')?.value) || 0) : 0,
+            terceiro_habilitado: terceiroHabilitado,
+            valor_terceiro: terceiroHabilitado ? (parseFloat(document.getElementById('loValorTerceiro')?.value) || 0) : 0,
+        };
+
         try {
-            const res = await fetch(`/api/luva-de-ouro/${this.ligaId}/coletar`, { credentials: 'include' });
+            const res = await fetch(`/api/liga/${this.ligaId}/modulos/luva_ouro/config`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ wizard_respostas }),
+            });
+
             const data = await res.json();
-            if (res.ok) {
-                if (window.SuperModal) SuperModal.toast.success(data.mensagem || 'Dados coletados!');
+
+            if (data.sucesso) {
+                if (window.SuperModal) SuperModal.toast.success('Configuracao da Luva de Ouro salva!');
                 await this.carregarDashboard();
             } else {
-                if (window.SuperModal) SuperModal.toast.error(data.error || 'Erro ao coletar');
+                if (window.SuperModal) SuperModal.toast.error(data.erro || 'Erro ao salvar');
             }
         } catch (err) {
-            console.error('[ADMIN-LO] Erro ao coletar:', err);
+            console.error('[ADMIN-LO] Erro ao salvar config:', err);
             if (window.SuperModal) SuperModal.toast.error('Erro de conexao');
         }
     }
 
-    async consolidar() {
-        if (!confirm('Confirma consolidar a temporada da Luva de Ouro?')) return;
+    // ==========================================================================
+    // HELPERS
+    // ==========================================================================
 
-        try {
-            const res = await fetch(`/api/luva-de-ouro/${this.ligaId}/consolidar`, { method: 'POST', credentials: 'include' });
-            const data = await res.json();
-            if (res.ok) {
-                if (window.SuperModal) SuperModal.toast.success(data.mensagem || 'Consolidado!');
-                await this.carregarDashboard();
-            } else {
-                if (window.SuperModal) SuperModal.toast.error(data.error || 'Erro ao consolidar');
-            }
-        } catch (err) {
-            console.error('[ADMIN-LO] Erro ao consolidar:', err);
-            if (window.SuperModal) SuperModal.toast.error('Erro de conexao');
-        }
-    }
-
-    async diagnostico() {
-        try {
-            const res = await fetch(`/api/luva-de-ouro/${this.ligaId}/diagnostico`, { credentials: 'include' });
-            const data = await res.json();
-            if (res.ok) {
-                if (window.SuperModal) {
-                    SuperModal.toast.success('Diagnostico completo - veja o console');
-                }
-                console.log('[ADMIN-LO] Diagnostico:', data);
-                alert(JSON.stringify(data, null, 2));
-            } else {
-                if (window.SuperModal) SuperModal.toast.error(data.error || 'Erro no diagnostico');
-            }
-        } catch (err) {
-            console.error('[ADMIN-LO] Erro no diagnostico:', err);
-            if (window.SuperModal) SuperModal.toast.error('Erro de conexao');
-        }
+    _getDefault(perguntas, id) {
+        const p = perguntas.find(q => q.id === id);
+        return p?.default ?? null;
     }
 }
 

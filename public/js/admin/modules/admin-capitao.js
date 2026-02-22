@@ -1,18 +1,21 @@
 /**
- * ADMIN CAPITAO DE LUXO - Dashboard de Gerenciamento
+ * ADMIN CAPITAO DE LUXO - Parametrizacao do Modulo
  *
  * Permite ao admin:
  * - Selecionar liga
- * - Visualizar ranking de capitaes (pontos acumulados)
- * - Consolidar temporada
+ * - Configurar premiacoes (1o, 2o, 3o lugar)
+ * - Habilitar/desabilitar bonus de rodada
+ * - Salvar configuracoes via API module-config
  *
- * @version 1.0.0
+ * @version 2.0.0
  */
 
 class AdminCapitao {
     constructor() {
         this.ligaId = null;
         this.ligas = [];
+        this.config = null;
+        this.wizard = null;
     }
 
     // ==========================================================================
@@ -54,7 +57,7 @@ class AdminCapitao {
             document.getElementById('clAdminContent').innerHTML = `
                 <div class="cl-empty">
                     <span class="material-icons" style="font-size:3rem;opacity:0.3;">shield</span>
-                    <p>Selecione uma liga para gerenciar o Capitao de Luxo</p>
+                    <p>Selecione uma liga para parametrizar o Capitao de Luxo</p>
                 </div>`;
             return;
         }
@@ -63,7 +66,7 @@ class AdminCapitao {
     }
 
     // ==========================================================================
-    // DASHBOARD PRINCIPAL
+    // DASHBOARD DE PARAMETRIZACAO
     // ==========================================================================
 
     async carregarDashboard() {
@@ -73,109 +76,177 @@ class AdminCapitao {
         container.innerHTML = `<div class="cl-loading"><span class="material-icons">sync</span> Carregando...</div>`;
 
         try {
-            const rankingRes = await fetch(`/api/capitao/${this.ligaId}/ranking`);
-            const ranking = rankingRes.ok ? await rankingRes.json() : [];
+            const res = await fetch(`/api/liga/${this.ligaId}/modulos/capitao_luxo`);
+            const data = res.ok ? await res.json() : {};
 
-            this.renderDashboard(container, ranking);
+            this.config = data.config || {};
+            this.wizard = data.wizard || data.regras_default?.wizard || null;
+
+            this.renderDashboard(container, data);
         } catch (err) {
-            console.error('[ADMIN-CL] Erro ao carregar dashboard:', err);
-            container.innerHTML = '<div class="cl-empty"><p style="color:var(--app-danger);">Erro ao carregar dados</p></div>';
+            console.error('[ADMIN-CL] Erro ao carregar config:', err);
+            container.innerHTML = '<div class="cl-empty"><p style="color:var(--app-danger);">Erro ao carregar configuracao</p></div>';
         }
     }
 
-    renderDashboard(container, ranking) {
-        const rankingArr = Array.isArray(ranking) ? ranking : (ranking.ranking || []);
-        const totalParticipantes = rankingArr.length;
-        const lider = rankingArr[0];
-        const pontosLider = lider ? (Math.trunc((lider.pontos_total || lider.totalPontos || 0) * 100) / 100).toFixed(2) : '-';
-        const mediaLider = lider ? (Math.trunc((lider.media || 0) * 100) / 100).toFixed(2) : '-';
+    renderDashboard(container, data) {
+        const config = this.config;
+        const respostas = config.wizard_respostas || {};
+        const perguntas = this.wizard?.perguntas || [];
+
+        const valorCampeao = respostas.valor_campeao ?? this._getDefault(perguntas, 'valor_campeao');
+        const viceHabilitado = respostas.vice_habilitado ?? this._getDefault(perguntas, 'vice_habilitado');
+        const valorVice = respostas.valor_vice ?? this._getDefault(perguntas, 'valor_vice');
+        const terceiroHabilitado = respostas.terceiro_habilitado ?? this._getDefault(perguntas, 'terceiro_habilitado');
+        const valorTerceiro = respostas.valor_terceiro ?? this._getDefault(perguntas, 'valor_terceiro');
+        const bonusRodada = respostas.bonus_rodada ?? this._getDefault(perguntas, 'bonus_rodada');
+
+        const isAtivo = config.ativo === true;
+        const configuradoPor = config.configurado_por || '-';
+        const temporada = config.temporada || new Date().getFullYear();
 
         container.innerHTML = `
-            <!-- Stats -->
+            <!-- Status do Modulo -->
             <div class="cl-stats-grid">
                 <div class="cl-stat">
-                    <div class="cl-stat-value">${totalParticipantes}</div>
-                    <div class="cl-stat-label">Participantes</div>
+                    <div class="cl-stat-value" style="color:${isAtivo ? 'var(--app-success)' : 'var(--app-text-muted)'};">
+                        ${isAtivo ? 'Ativo' : 'Inativo'}
+                    </div>
+                    <div class="cl-stat-label">Status</div>
                 </div>
                 <div class="cl-stat">
-                    <div class="cl-stat-value" style="color:var(--module-capitao-primary);">${pontosLider}</div>
-                    <div class="cl-stat-label">Pts Lider</div>
+                    <div class="cl-stat-value">${temporada}</div>
+                    <div class="cl-stat-label">Temporada</div>
                 </div>
                 <div class="cl-stat">
-                    <div class="cl-stat-value">${mediaLider}</div>
-                    <div class="cl-stat-label">Media Lider</div>
+                    <div class="cl-stat-value" style="font-size:var(--app-font-xs);word-break:break-all;">${configuradoPor}</div>
+                    <div class="cl-stat-label">Configurado por</div>
                 </div>
             </div>
 
-            <!-- Acoes Admin -->
+            <!-- Formulario de Configuracao -->
             <div class="cl-card">
                 <div class="cl-card-header">
                     <span class="cl-card-title">
-                        <span class="material-icons">build</span>
-                        Acoes
+                        <span class="material-icons">settings</span>
+                        Premiacao
                     </span>
                 </div>
-                <div style="display:flex;gap:var(--app-space-2);flex-wrap:wrap;">
-                    <button class="cl-btn cl-btn-primary" onclick="window.adminCapitao.consolidar()">
-                        <span class="material-icons">sync</span>
-                        Consolidar Temporada
+
+                <div class="cl-form-section">Premiacao (R$)</div>
+                <div class="cl-form-row">
+                    <div>
+                        <label>Capitao de Luxo (1o lugar)</label>
+                        <input type="number" id="clValorCampeao" value="${valorCampeao}" min="0" max="500" step="5">
+                    </div>
+                    <div>
+                        <label style="display:flex;align-items:center;gap:6px;">
+                            <input type="checkbox" id="clViceHabilitado" ${viceHabilitado ? 'checked' : ''}
+                                   onchange="window.adminCapitao.onToggleVice()"
+                                   style="width:auto;margin:0;">
+                            Vice (2o lugar)
+                        </label>
+                        <input type="number" id="clValorVice" value="${valorVice}" min="0" max="300" step="5"
+                               ${!viceHabilitado ? 'disabled style="opacity:0.4;"' : ''}>
+                    </div>
+                    <div>
+                        <label style="display:flex;align-items:center;gap:6px;">
+                            <input type="checkbox" id="clTerceiroHabilitado" ${terceiroHabilitado ? 'checked' : ''}
+                                   onchange="window.adminCapitao.onToggleTerceiro()"
+                                   style="width:auto;margin:0;">
+                            Terceiro (3o lugar)
+                        </label>
+                        <input type="number" id="clValorTerceiro" value="${valorTerceiro}" min="0" max="200" step="5"
+                               ${!terceiroHabilitado ? 'disabled style="opacity:0.4;"' : ''}>
+                    </div>
+                </div>
+
+                <div class="cl-form-section">Regras</div>
+                <div class="cl-form-row">
+                    <div class="cl-form-checkbox">
+                        <input type="checkbox" id="clBonusRodada" ${bonusRodada ? 'checked' : ''}>
+                        <span>Premiar melhor capitao de cada rodada</span>
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:var(--app-space-2);margin-top:var(--app-space-3);">
+                    <button class="cl-btn cl-btn-salvar" onclick="window.adminCapitao.salvarConfig()">
+                        <span class="material-icons">save</span>
+                        Salvar Configuracoes
                     </button>
                 </div>
             </div>
-
-            <!-- Ranking -->
-            <div class="cl-card">
-                <div class="cl-card-header">
-                    <span class="cl-card-title">
-                        <span class="material-icons">emoji_events</span>
-                        Ranking Capitaes
-                        <span style="font-size:var(--app-font-xs);color:var(--app-text-muted);">(${totalParticipantes} participantes)</span>
-                    </span>
-                </div>
-                <div id="clRankingLista">
-                    ${rankingArr.length === 0
-                        ? '<p style="color:var(--app-text-muted);text-align:center;padding:var(--app-space-4);">Nenhum dado consolidado</p>'
-                        : rankingArr.map((r, i) => this.renderRankingRow(r, i + 1)).join('')}
-                </div>
-            </div>
-        `;
-    }
-
-    renderRankingRow(participante, posicao) {
-        const pontos = (Math.trunc((participante.pontos_total || participante.totalPontos || 0) * 100) / 100).toFixed(2);
-        const media = (Math.trunc((participante.media || 0) * 100) / 100).toFixed(2);
-        return `
-            <div class="cl-ranking-row">
-                <span class="cl-ranking-pos">${posicao}</span>
-                <img src="/escudos/${participante.escudoId || 'default'}.png"
-                     onerror="this.src='/escudos/default.png'" alt="">
-                <span class="cl-ranking-nome">${participante.nomeTime || participante.nome_time || 'Time'}</span>
-                <span class="cl-ranking-pontos">${pontos} pts</span>
-                <span style="font-size:var(--app-font-xs);color:var(--app-text-muted);">(${media}/rod)</span>
-            </div>
         `;
     }
 
     // ==========================================================================
-    // ACOES ADMIN
+    // TOGGLES
     // ==========================================================================
 
-    async consolidar() {
-        if (!confirm('Confirma consolidar a temporada do Capitao de Luxo?')) return;
+    onToggleVice() {
+        const checkbox = document.getElementById('clViceHabilitado');
+        const input = document.getElementById('clValorVice');
+        if (input) {
+            input.disabled = !checkbox?.checked;
+            input.style.opacity = checkbox?.checked ? '1' : '0.4';
+        }
+    }
+
+    onToggleTerceiro() {
+        const checkbox = document.getElementById('clTerceiroHabilitado');
+        const input = document.getElementById('clValorTerceiro');
+        if (input) {
+            input.disabled = !checkbox?.checked;
+            input.style.opacity = checkbox?.checked ? '1' : '0.4';
+        }
+    }
+
+    // ==========================================================================
+    // SALVAR
+    // ==========================================================================
+
+    async salvarConfig() {
+        const viceHabilitado = document.getElementById('clViceHabilitado')?.checked ?? true;
+        const terceiroHabilitado = document.getElementById('clTerceiroHabilitado')?.checked ?? true;
+
+        const wizard_respostas = {
+            valor_campeao: parseFloat(document.getElementById('clValorCampeao')?.value) || 0,
+            vice_habilitado: viceHabilitado,
+            valor_vice: viceHabilitado ? (parseFloat(document.getElementById('clValorVice')?.value) || 0) : 0,
+            terceiro_habilitado: terceiroHabilitado,
+            valor_terceiro: terceiroHabilitado ? (parseFloat(document.getElementById('clValorTerceiro')?.value) || 0) : 0,
+            bonus_rodada: document.getElementById('clBonusRodada')?.checked ?? false,
+        };
 
         try {
-            const res = await fetch(`/api/capitao/${this.ligaId}/consolidar`, { method: 'POST', credentials: 'include' });
+            const res = await fetch(`/api/liga/${this.ligaId}/modulos/capitao_luxo/config`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ wizard_respostas }),
+            });
+
             const data = await res.json();
-            if (res.ok) {
-                if (window.SuperModal) SuperModal.toast.success(data.mensagem || 'Consolidado!');
+
+            if (data.sucesso) {
+                if (window.SuperModal) SuperModal.toast.success('Configuracao do Capitao de Luxo salva!');
                 await this.carregarDashboard();
             } else {
-                if (window.SuperModal) SuperModal.toast.error(data.error || 'Erro ao consolidar');
+                if (window.SuperModal) SuperModal.toast.error(data.erro || 'Erro ao salvar');
             }
         } catch (err) {
-            console.error('[ADMIN-CL] Erro ao consolidar:', err);
+            console.error('[ADMIN-CL] Erro ao salvar config:', err);
             if (window.SuperModal) SuperModal.toast.error('Erro de conexao');
         }
+    }
+
+    // ==========================================================================
+    // HELPERS
+    // ==========================================================================
+
+    _getDefault(perguntas, id) {
+        const p = perguntas.find(q => q.id === id);
+        return p?.default ?? null;
     }
 }
 

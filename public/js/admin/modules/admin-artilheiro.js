@@ -1,21 +1,21 @@
 /**
- * ADMIN ARTILHEIRO CAMPEAO - Dashboard de Gerenciamento
+ * ADMIN ARTILHEIRO CAMPEAO - Parametrizacao do Modulo
  *
  * Permite ao admin:
  * - Selecionar liga
- * - Visualizar ranking de gols
- * - Ver estatisticas do modulo
- * - Consolidar rodada
- * - Coletar dados de rodada
- * - Limpar cache
+ * - Configurar premiacoes (1o, 2o, 3o lugar)
+ * - Definir criterio de ranking (saldo_gols ou gols_pro)
+ * - Salvar configuracoes via API module-config
  *
- * @version 1.0.0
+ * @version 2.0.0
  */
 
 class AdminArtilheiro {
     constructor() {
         this.ligaId = null;
         this.ligas = [];
+        this.config = null;
+        this.wizard = null;
     }
 
     // ==========================================================================
@@ -57,7 +57,7 @@ class AdminArtilheiro {
             document.getElementById('acAdminContent').innerHTML = `
                 <div class="ac-empty">
                     <span class="material-icons" style="font-size:3rem;opacity:0.3;">military_tech</span>
-                    <p>Selecione uma liga para gerenciar o Artilheiro Campeao</p>
+                    <p>Selecione uma liga para parametrizar o Artilheiro Campeao</p>
                 </div>`;
             return;
         }
@@ -66,7 +66,7 @@ class AdminArtilheiro {
     }
 
     // ==========================================================================
-    // DASHBOARD PRINCIPAL
+    // DASHBOARD DE PARAMETRIZACAO
     // ==========================================================================
 
     async carregarDashboard() {
@@ -76,163 +76,181 @@ class AdminArtilheiro {
         container.innerHTML = `<div class="ac-loading"><span class="material-icons">sync</span> Carregando...</div>`;
 
         try {
-            const [rankingRes, statsRes, rodadaRes] = await Promise.all([
-                fetch(`/api/artilheiro-campeao/${this.ligaId}/ranking`),
-                fetch(`/api/artilheiro-campeao/${this.ligaId}/estatisticas`),
-                fetch(`/api/artilheiro-campeao/${this.ligaId}/detectar-rodada`),
-            ]);
+            const res = await fetch(`/api/liga/${this.ligaId}/modulos/artilheiro`);
+            const data = res.ok ? await res.json() : {};
 
-            const ranking = rankingRes.ok ? await rankingRes.json() : [];
-            const stats = statsRes.ok ? await statsRes.json() : {};
-            const rodadaData = rodadaRes.ok ? await rodadaRes.json() : {};
+            this.config = data.config || {};
+            this.wizard = data.wizard || data.regras_default?.wizard || null;
 
-            this.renderDashboard(container, ranking, stats, rodadaData);
+            this.renderDashboard(container, data);
         } catch (err) {
-            console.error('[ADMIN-AC] Erro ao carregar dashboard:', err);
-            container.innerHTML = '<div class="ac-empty"><p style="color:var(--app-danger);">Erro ao carregar dados</p></div>';
+            console.error('[ADMIN-AC] Erro ao carregar config:', err);
+            container.innerHTML = '<div class="ac-empty"><p style="color:var(--app-danger);">Erro ao carregar configuracao</p></div>';
         }
     }
 
-    renderDashboard(container, ranking, stats, rodadaData) {
-        const rankingArr = Array.isArray(ranking) ? ranking : (ranking.ranking || []);
-        const totalParticipantes = rankingArr.length;
-        const totalGols = rankingArr.reduce((acc, r) => acc + (r.gols_pro || r.saldo_gols || 0), 0);
-        const rodadaAtual = rodadaData.rodada || rodadaData.ultimaRodada || '-';
-        const lider = rankingArr[0];
+    renderDashboard(container, data) {
+        const config = this.config;
+        const respostas = config.wizard_respostas || {};
+        const perguntas = this.wizard?.perguntas || [];
+
+        // Extrair valores atuais ou defaults do wizard
+        const valorCampeao = respostas.valor_campeao ?? this._getDefault(perguntas, 'valor_campeao');
+        const viceHabilitado = respostas.vice_habilitado ?? this._getDefault(perguntas, 'vice_habilitado');
+        const valorVice = respostas.valor_vice ?? this._getDefault(perguntas, 'valor_vice');
+        const terceiroHabilitado = respostas.terceiro_habilitado ?? this._getDefault(perguntas, 'terceiro_habilitado');
+        const valorTerceiro = respostas.valor_terceiro ?? this._getDefault(perguntas, 'valor_terceiro');
+        const criterioRanking = respostas.criterio_ranking ?? this._getDefault(perguntas, 'criterio_ranking');
+
+        const isAtivo = config.ativo === true;
+        const configuradoPor = config.configurado_por || '-';
+        const temporada = config.temporada || new Date().getFullYear();
 
         container.innerHTML = `
-            <!-- Stats -->
+            <!-- Status do Modulo -->
             <div class="ac-stats-grid">
                 <div class="ac-stat">
-                    <div class="ac-stat-value">${totalParticipantes}</div>
-                    <div class="ac-stat-label">Participantes</div>
+                    <div class="ac-stat-value" style="color:${isAtivo ? 'var(--app-success)' : 'var(--app-text-muted)'};">
+                        ${isAtivo ? 'Ativo' : 'Inativo'}
+                    </div>
+                    <div class="ac-stat-label">Status</div>
                 </div>
                 <div class="ac-stat">
-                    <div class="ac-stat-value" style="color:var(--module-artilheiro-primary);">${totalGols}</div>
-                    <div class="ac-stat-label">Total Gols</div>
+                    <div class="ac-stat-value">${temporada}</div>
+                    <div class="ac-stat-label">Temporada</div>
                 </div>
                 <div class="ac-stat">
-                    <div class="ac-stat-value">${rodadaAtual}</div>
-                    <div class="ac-stat-label">Ultima Rodada</div>
-                </div>
-                <div class="ac-stat">
-                    <div class="ac-stat-value" style="color:var(--app-warning);">${lider ? (lider.gols_pro || lider.saldo_gols || 0) : '-'}</div>
-                    <div class="ac-stat-label">Lider (Gols)</div>
+                    <div class="ac-stat-value" style="font-size:var(--app-font-xs);word-break:break-all;">${configuradoPor}</div>
+                    <div class="ac-stat-label">Configurado por</div>
                 </div>
             </div>
 
-            <!-- Acoes Admin -->
+            <!-- Formulario de Configuracao -->
             <div class="ac-card">
                 <div class="ac-card-header">
                     <span class="ac-card-title">
-                        <span class="material-icons">build</span>
-                        Acoes
+                        <span class="material-icons">settings</span>
+                        Premiacao
                     </span>
                 </div>
-                <div style="display:flex;gap:var(--app-space-2);flex-wrap:wrap;">
-                    <button class="ac-btn ac-btn-primary" onclick="window.adminArtilheiro.consolidarRodada()">
-                        <span class="material-icons">sync</span>
-                        Consolidar Rodada
-                    </button>
-                    <button class="ac-btn ac-btn-ghost" onclick="window.adminArtilheiro.coletarRodada()">
-                        <span class="material-icons">download</span>
-                        Coletar Dados
-                    </button>
-                    <button class="ac-btn ac-btn-ghost" onclick="window.adminArtilheiro.limparCache()">
-                        <span class="material-icons">delete_sweep</span>
-                        Limpar Cache
-                    </button>
-                </div>
-            </div>
 
-            <!-- Ranking -->
-            <div class="ac-card">
-                <div class="ac-card-header">
-                    <span class="ac-card-title">
-                        <span class="material-icons">emoji_events</span>
-                        Ranking
-                        <span style="font-size:var(--app-font-xs);color:var(--app-text-muted);">(${totalParticipantes} participantes)</span>
-                    </span>
+                <div class="ac-form-section">Premiacao (R$)</div>
+                <div class="ac-form-row">
+                    <div>
+                        <label>Campeao (1o lugar)</label>
+                        <input type="number" id="acValorCampeao" value="${valorCampeao}" min="0" max="500" step="5">
+                    </div>
+                    <div>
+                        <label style="display:flex;align-items:center;gap:6px;">
+                            <input type="checkbox" id="acViceHabilitado" ${viceHabilitado ? 'checked' : ''}
+                                   onchange="window.adminArtilheiro.onToggleVice()"
+                                   style="width:auto;margin:0;">
+                            Vice (2o lugar)
+                        </label>
+                        <input type="number" id="acValorVice" value="${valorVice}" min="0" max="300" step="5"
+                               ${!viceHabilitado ? 'disabled style="opacity:0.4;"' : ''}>
+                    </div>
+                    <div>
+                        <label style="display:flex;align-items:center;gap:6px;">
+                            <input type="checkbox" id="acTerceiroHabilitado" ${terceiroHabilitado ? 'checked' : ''}
+                                   onchange="window.adminArtilheiro.onToggleTerceiro()"
+                                   style="width:auto;margin:0;">
+                            Terceiro (3o lugar)
+                        </label>
+                        <input type="number" id="acValorTerceiro" value="${valorTerceiro}" min="0" max="200" step="5"
+                               ${!terceiroHabilitado ? 'disabled style="opacity:0.4;"' : ''}>
+                    </div>
                 </div>
-                <div id="acRankingLista">
-                    ${rankingArr.length === 0
-                        ? '<p style="color:var(--app-text-muted);text-align:center;padding:var(--app-space-4);">Nenhum dado consolidado</p>'
-                        : rankingArr.map((r, i) => this.renderRankingRow(r, i + 1)).join('')}
+
+                <div class="ac-form-section">Regras</div>
+                <div class="ac-form-row">
+                    <div>
+                        <label>Criterio do Ranking</label>
+                        <select id="acCriterioRanking">
+                            <option value="saldo_gols" ${criterioRanking === 'saldo_gols' ? 'selected' : ''}>Saldo de Gols (G - GC)</option>
+                            <option value="gols_pro" ${criterioRanking === 'gols_pro' ? 'selected' : ''}>Apenas Gols Marcados</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:var(--app-space-2);margin-top:var(--app-space-3);">
+                    <button class="ac-btn ac-btn-salvar" onclick="window.adminArtilheiro.salvarConfig()">
+                        <span class="material-icons">save</span>
+                        Salvar Configuracoes
+                    </button>
                 </div>
             </div>
         `;
     }
 
-    renderRankingRow(participante, posicao) {
-        const gols = participante.gols_pro || participante.saldo_gols || 0;
-        return `
-            <div class="ac-ranking-row">
-                <span class="ac-ranking-pos">${posicao}</span>
-                <img src="/escudos/${participante.escudoId || 'default'}.png"
-                     onerror="this.src='/escudos/default.png'" alt="">
-                <span class="ac-ranking-nome">${participante.nomeTime || participante.nome_time || 'Time'}</span>
-                <span class="ac-ranking-gols">${gols} gols</span>
-            </div>
-        `;
+    // ==========================================================================
+    // TOGGLES
+    // ==========================================================================
+
+    onToggleVice() {
+        const checkbox = document.getElementById('acViceHabilitado');
+        const input = document.getElementById('acValorVice');
+        if (input) {
+            input.disabled = !checkbox?.checked;
+            input.style.opacity = checkbox?.checked ? '1' : '0.4';
+        }
+    }
+
+    onToggleTerceiro() {
+        const checkbox = document.getElementById('acTerceiroHabilitado');
+        const input = document.getElementById('acValorTerceiro');
+        if (input) {
+            input.disabled = !checkbox?.checked;
+            input.style.opacity = checkbox?.checked ? '1' : '0.4';
+        }
     }
 
     // ==========================================================================
-    // ACOES ADMIN
+    // SALVAR
     // ==========================================================================
 
-    async consolidarRodada() {
-        const rodada = prompt('Numero da rodada para consolidar:');
-        if (!rodada) return;
+    async salvarConfig() {
+        const viceHabilitado = document.getElementById('acViceHabilitado')?.checked ?? true;
+        const terceiroHabilitado = document.getElementById('acTerceiroHabilitado')?.checked ?? true;
+
+        const wizard_respostas = {
+            valor_campeao: parseFloat(document.getElementById('acValorCampeao')?.value) || 0,
+            vice_habilitado: viceHabilitado,
+            valor_vice: viceHabilitado ? (parseFloat(document.getElementById('acValorVice')?.value) || 0) : 0,
+            terceiro_habilitado: terceiroHabilitado,
+            valor_terceiro: terceiroHabilitado ? (parseFloat(document.getElementById('acValorTerceiro')?.value) || 0) : 0,
+            criterio_ranking: document.getElementById('acCriterioRanking')?.value || 'saldo_gols',
+        };
 
         try {
-            const res = await fetch(`/api/artilheiro-campeao/${this.ligaId}/consolidar/${rodada}`, { method: 'POST', credentials: 'include' });
+            const res = await fetch(`/api/liga/${this.ligaId}/modulos/artilheiro/config`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ wizard_respostas }),
+            });
+
             const data = await res.json();
-            if (res.ok) {
-                if (window.SuperModal) SuperModal.toast.success(data.mensagem || `Rodada ${rodada} consolidada!`);
+
+            if (data.sucesso) {
+                if (window.SuperModal) SuperModal.toast.success('Configuracao do Artilheiro salva!');
                 await this.carregarDashboard();
             } else {
-                if (window.SuperModal) SuperModal.toast.error(data.error || 'Erro ao consolidar');
+                if (window.SuperModal) SuperModal.toast.error(data.erro || 'Erro ao salvar');
             }
         } catch (err) {
-            console.error('[ADMIN-AC] Erro ao consolidar:', err);
+            console.error('[ADMIN-AC] Erro ao salvar config:', err);
             if (window.SuperModal) SuperModal.toast.error('Erro de conexao');
         }
     }
 
-    async coletarRodada() {
-        const rodada = prompt('Numero da rodada para coletar dados:');
-        if (!rodada) return;
+    // ==========================================================================
+    // HELPERS
+    // ==========================================================================
 
-        try {
-            const res = await fetch(`/api/artilheiro-campeao/${this.ligaId}/coletar/${rodada}`, { method: 'POST', credentials: 'include' });
-            const data = await res.json();
-            if (res.ok) {
-                if (window.SuperModal) SuperModal.toast.success(data.mensagem || `Dados da rodada ${rodada} coletados!`);
-            } else {
-                if (window.SuperModal) SuperModal.toast.error(data.error || 'Erro ao coletar');
-            }
-        } catch (err) {
-            console.error('[ADMIN-AC] Erro ao coletar:', err);
-            if (window.SuperModal) SuperModal.toast.error('Erro de conexao');
-        }
-    }
-
-    async limparCache() {
-        if (!confirm('Confirma limpar o cache do Artilheiro para esta liga?')) return;
-
-        try {
-            const res = await fetch(`/api/artilheiro-campeao/${this.ligaId}/cache`, { method: 'DELETE', credentials: 'include' });
-            const data = await res.json();
-            if (res.ok) {
-                if (window.SuperModal) SuperModal.toast.success(data.mensagem || 'Cache limpo!');
-                await this.carregarDashboard();
-            } else {
-                if (window.SuperModal) SuperModal.toast.error(data.error || 'Erro ao limpar cache');
-            }
-        } catch (err) {
-            console.error('[ADMIN-AC] Erro ao limpar cache:', err);
-            if (window.SuperModal) SuperModal.toast.error('Erro de conexao');
-        }
+    _getDefault(perguntas, id) {
+        const p = perguntas.find(q => q.id === id);
+        return p?.default ?? null;
     }
 }
 
