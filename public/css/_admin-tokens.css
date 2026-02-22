@@ -319,6 +319,14 @@
     --module-restaum-border: rgba(244, 63, 94, 0.3);
     --gradient-restaum: linear-gradient(135deg, var(--module-restaum-primary) 0%, var(--module-restaum-dark) 100%);
 
+    /* Tiro Certo - Laranja (representa mira/precisão) */
+    --module-tirocerto-primary: #f97316;
+    --module-tirocerto-dark: #ea580c;
+    --module-tirocerto-light: #fb923c;
+    --module-tirocerto-muted: rgba(249, 115, 22, 0.1);
+    --module-tirocerto-border: rgba(249, 115, 22, 0.3);
+    --gradient-tirocerto: linear-gradient(135deg, var(--module-tirocerto-primary) 0%, var(--module-tirocerto-dark) 100%);
+
     /* Dashboard de Saúde - Verde (representa saúde/monitoramento) */
     --module-saude-primary: #10b981;
     --module-saude-dark: #059669;

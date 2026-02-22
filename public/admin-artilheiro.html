@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiro Certo - Admin - Super Cartola Manager</title>
+    <title>Artilheiro Campeao - Admin - Super Cartola Manager</title>
     <!-- Design Tokens (SEMPRE PRIMEIRO) -->
     <link rel="stylesheet" href="css/_admin-tokens.css" />
     <link rel="stylesheet" href="style.css" />
@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Russo+One&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     <link rel="stylesheet" href="css/modules/super-modal.css" />
-    <link rel="stylesheet" href="css/modules/admin-tiro-certo.css" />
+    <link rel="stylesheet" href="css/modules/admin-artilheiro.css" />
     <script src="js/super-modal.js"></script>
 </head>
 <body>
@@ -24,35 +24,35 @@
         <div id="sidebar-placeholder"></div>
         <main class="main-content">
             <div class="admin-content">
-                <div class="tc-admin-container">
+                <div class="ac-admin-container">
 
                     <!-- Header -->
-                    <div class="tc-admin-header">
+                    <div class="ac-admin-header">
                         <div>
                             <h1>
-                                <span class="material-icons" style="color:var(--module-tirocerto-primary);">gps_fixed</span>
-                                Tiro Certo
+                                <span class="material-icons" style="color:var(--module-artilheiro-primary);">military_tech</span>
+                                Artilheiro Campeao
                             </h1>
-                            <p>Gerenciar edicoes e participantes do modo Survival</p>
+                            <p>Ranking de gols, consolidacao e premiacao</p>
                         </div>
-                        <a href="gerenciar.html" class="tc-btn-voltar">
+                        <a href="gerenciar.html" class="ac-btn-voltar">
                             <span class="material-icons">arrow_back</span>
                             Voltar
                         </a>
                     </div>
 
                     <!-- Seletor de Liga -->
-                    <div class="tc-liga-selector">
-                        <select id="tcLigaSelect" onchange="window.adminTiroCerto.onLigaChange()">
+                    <div class="ac-liga-selector">
+                        <select id="acLigaSelect" onchange="window.adminArtilheiro.onLigaChange()">
                             <option value="">Selecione uma liga...</option>
                         </select>
                     </div>
 
                     <!-- Conteudo principal (carregado via JS) -->
-                    <div id="tcAdminContent">
-                        <div class="tc-empty">
-                            <span class="material-icons" style="font-size:3rem;opacity:0.3;">gps_fixed</span>
-                            <p>Selecione uma liga para gerenciar o Tiro Certo</p>
+                    <div id="acAdminContent">
+                        <div class="ac-empty">
+                            <span class="material-icons" style="font-size:3rem;opacity:0.3;">military_tech</span>
+                            <p>Selecione uma liga para gerenciar o Artilheiro Campeao</p>
                         </div>
                     </div>
 
@@ -94,6 +94,6 @@
     </script>
 
     <!-- Controller JS -->
-    <script src="js/admin/modules/admin-tiro-certo.js"></script>
+    <script src="js/admin/modules/admin-artilheiro.js"></script>
 </body>
 </html>

@@ -1,0 +1,68 @@
+/* ADMIN LUVA DE OURO CSS - Modulo Especifico
+   Arquivo: public/css/modules/admin-luva-ouro.css
+   Baseado em admin-resta-um.css (prefixo lo-)
+*/
+
+/* === Layout === */
+.lo-admin-container { max-width: 900px; margin: 0 auto; padding: var(--app-space-4); }
+.lo-admin-header {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--app-space-3); margin-bottom: var(--app-space-6);
+    background: var(--app-surface); border: 1px solid var(--module-luva-border);
+    border-radius: var(--app-radius-lg); padding: var(--app-space-4) var(--app-space-6);
+    position: relative; overflow: hidden;
+}
+.lo-admin-header::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--gradient-luva);
+}
+.lo-admin-header h1 { font-family: var(--app-font-brand); font-size: 1.5rem; color: white; margin: 0; display: flex; align-items: center; gap: var(--app-space-2); }
+.lo-admin-header p { font-size: var(--app-font-sm); color: var(--app-text-muted); margin: 0.25rem 0 0; }
+
+/* === Botao Voltar === */
+.lo-btn-voltar {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: var(--app-space-2) var(--app-space-3);
+    background: transparent; color: var(--app-text-muted);
+    border: 1px solid var(--app-border); border-radius: var(--app-radius-sm);
+    font-size: var(--app-font-xs); font-weight: 500; text-decoration: none;
+    transition: 0.15s ease; white-space: nowrap;
+}
+.lo-btn-voltar:hover { color: var(--module-luva-primary); border-color: var(--module-luva-border); }
+.lo-btn-voltar .material-icons { font-size: 16px; }
+
+/* === Liga Selector === */
+.lo-liga-selector { margin-bottom: var(--app-space-6); }
+.lo-liga-selector select { width: 100%; padding: 0.625rem 1rem; background: var(--app-surface); color: white; border: 1px solid var(--app-border); border-radius: var(--app-radius-md); font-size: var(--app-font-sm); }
+
+/* === Cards === */
+.lo-card { background: var(--app-surface); border: 1px solid var(--app-border); border-radius: var(--app-radius-lg); padding: var(--app-space-4); margin-bottom: var(--app-space-4); }
+.lo-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--app-space-3); }
+.lo-card-title { font-family: var(--app-font-brand); font-size: 1rem; color: white; display: flex; align-items: center; gap: var(--app-space-2); }
+
+/* === Stats Grid === */
+.lo-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: var(--app-space-3); margin-bottom: var(--app-space-4); }
+.lo-stat { text-align: center; padding: var(--app-space-3); background: var(--app-bg); border-radius: var(--app-radius-md); }
+.lo-stat-value { font-family: var(--app-font-mono); font-size: 1.5rem; font-weight: 700; color: white; }
+.lo-stat-label { font-size: var(--app-font-xs); color: var(--app-text-muted); margin-top: 0.25rem; }
+
+/* === Ranking Row === */
+.lo-ranking-row { display: flex; align-items: center; gap: var(--app-space-2); padding: 0.5rem 0; border-bottom: 1px solid var(--app-border); }
+.lo-ranking-row:last-child { border-bottom: none; }
+.lo-ranking-pos { font-family: var(--app-font-mono); font-size: var(--app-font-sm); font-weight: 700; color: var(--module-luva-primary); min-width: 28px; text-align: center; }
+.lo-ranking-row img { width: 24px; height: 24px; object-fit: contain; }
+.lo-ranking-nome { flex: 1; font-size: var(--app-font-sm); color: white; }
+.lo-ranking-media { font-family: var(--app-font-mono); font-size: var(--app-font-sm); font-weight: 700; color: var(--module-luva-primary); }
+
+/* === Buttons === */
+.lo-btn { padding: 0.5rem 1rem; border: none; border-radius: var(--app-radius-md); font-size: var(--app-font-sm); font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: var(--app-space-1); transition: opacity 0.2s; }
+.lo-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.lo-btn-primary { background: var(--module-luva-primary); color: var(--surface-bg); }
+.lo-btn-primary:hover:not(:disabled) { opacity: 0.9; }
+.lo-btn-ghost { background: none; border: 1px solid var(--app-border); color: var(--app-text-muted); border-radius: var(--app-radius-md); padding: 4px 10px; cursor: pointer; font-size: var(--app-font-xs); display: inline-flex; align-items: center; gap: 4px; transition: 0.15s ease; }
+.lo-btn-ghost:hover { color: white; border-color: var(--app-text-muted); }
+
+/* === States === */
+.lo-empty { text-align: center; color: var(--app-text-muted); padding: var(--app-space-6); }
+.lo-loading { text-align: center; color: var(--app-text-muted); padding: var(--app-space-4); }
+.lo-loading .material-icons { animation: spin 1s linear infinite; }

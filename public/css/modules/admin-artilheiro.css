@@ -1,0 +1,68 @@
+/* ADMIN ARTILHEIRO CSS - Modulo Especifico
+   Arquivo: public/css/modules/admin-artilheiro.css
+   Baseado em admin-resta-um.css (prefixo ac-)
+*/
+
+/* === Layout === */
+.ac-admin-container { max-width: 900px; margin: 0 auto; padding: var(--app-space-4); }
+.ac-admin-header {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--app-space-3); margin-bottom: var(--app-space-6);
+    background: var(--app-surface); border: 1px solid var(--module-artilheiro-border);
+    border-radius: var(--app-radius-lg); padding: var(--app-space-4) var(--app-space-6);
+    position: relative; overflow: hidden;
+}
+.ac-admin-header::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--gradient-artilheiro);
+}
+.ac-admin-header h1 { font-family: var(--app-font-brand); font-size: 1.5rem; color: white; margin: 0; display: flex; align-items: center; gap: var(--app-space-2); }
+.ac-admin-header p { font-size: var(--app-font-sm); color: var(--app-text-muted); margin: 0.25rem 0 0; }
+
+/* === Botao Voltar === */
+.ac-btn-voltar {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: var(--app-space-2) var(--app-space-3);
+    background: transparent; color: var(--app-text-muted);
+    border: 1px solid var(--app-border); border-radius: var(--app-radius-sm);
+    font-size: var(--app-font-xs); font-weight: 500; text-decoration: none;
+    transition: 0.15s ease; white-space: nowrap;
+}
+.ac-btn-voltar:hover { color: var(--module-artilheiro-primary); border-color: var(--module-artilheiro-border); }
+.ac-btn-voltar .material-icons { font-size: 16px; }
+
+/* === Liga Selector === */
+.ac-liga-selector { margin-bottom: var(--app-space-6); }
+.ac-liga-selector select { width: 100%; padding: 0.625rem 1rem; background: var(--app-surface); color: white; border: 1px solid var(--app-border); border-radius: var(--app-radius-md); font-size: var(--app-font-sm); }
+
+/* === Cards === */
+.ac-card { background: var(--app-surface); border: 1px solid var(--app-border); border-radius: var(--app-radius-lg); padding: var(--app-space-4); margin-bottom: var(--app-space-4); }
+.ac-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--app-space-3); }
+.ac-card-title { font-family: var(--app-font-brand); font-size: 1rem; color: white; display: flex; align-items: center; gap: var(--app-space-2); }
+
+/* === Stats Grid === */
+.ac-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: var(--app-space-3); margin-bottom: var(--app-space-4); }
+.ac-stat { text-align: center; padding: var(--app-space-3); background: var(--app-bg); border-radius: var(--app-radius-md); }
+.ac-stat-value { font-family: var(--app-font-mono); font-size: 1.5rem; font-weight: 700; color: white; }
+.ac-stat-label { font-size: var(--app-font-xs); color: var(--app-text-muted); margin-top: 0.25rem; }
+
+/* === Ranking Row === */
+.ac-ranking-row { display: flex; align-items: center; gap: var(--app-space-2); padding: 0.5rem 0; border-bottom: 1px solid var(--app-border); }
+.ac-ranking-row:last-child { border-bottom: none; }
+.ac-ranking-pos { font-family: var(--app-font-mono); font-size: var(--app-font-sm); font-weight: 700; color: var(--module-artilheiro-primary); min-width: 28px; text-align: center; }
+.ac-ranking-row img { width: 24px; height: 24px; object-fit: contain; }
+.ac-ranking-nome { flex: 1; font-size: var(--app-font-sm); color: white; }
+.ac-ranking-gols { font-family: var(--app-font-mono); font-size: var(--app-font-sm); font-weight: 700; color: var(--module-artilheiro-primary); }
+
+/* === Buttons === */
+.ac-btn { padding: 0.5rem 1rem; border: none; border-radius: var(--app-radius-md); font-size: var(--app-font-sm); font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: var(--app-space-1); transition: opacity 0.2s; }
+.ac-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.ac-btn-primary { background: var(--module-artilheiro-primary); color: white; }
+.ac-btn-primary:hover:not(:disabled) { opacity: 0.9; }
+.ac-btn-ghost { background: none; border: 1px solid var(--app-border); color: var(--app-text-muted); border-radius: var(--app-radius-md); padding: 4px 10px; cursor: pointer; font-size: var(--app-font-xs); display: inline-flex; align-items: center; gap: 4px; transition: 0.15s ease; }
+.ac-btn-ghost:hover { color: white; border-color: var(--app-text-muted); }
+
+/* === States === */
+.ac-empty { text-align: center; color: var(--app-text-muted); padding: var(--app-space-6); }
+.ac-loading { text-align: center; color: var(--app-text-muted); padding: var(--app-space-4); }
+.ac-loading .material-icons { animation: spin 1s linear infinite; }

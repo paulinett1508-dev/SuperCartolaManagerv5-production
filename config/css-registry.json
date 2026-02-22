@@ -217,6 +217,24 @@
         "path": "public/css/modules/admin-resta-um.css",
         "loadedBy": ["admin-resta-um.html"],
         "description": "Gerenciamento admin do modo Resta Um (Eliminacao Progressiva)"
+      },
+      {
+        "path": "public/css/modules/admin-artilheiro.css",
+        "loadedBy": ["admin-artilheiro.html"],
+        "description": "Gerenciamento admin do modo Artilheiro Campeao",
+        "moduleColor": "--module-artilheiro-*"
+      },
+      {
+        "path": "public/css/modules/admin-luva-ouro.css",
+        "loadedBy": ["admin-luva-ouro.html"],
+        "description": "Gerenciamento admin do modo Luva de Ouro",
+        "moduleColor": "--module-luva-*"
+      },
+      {
+        "path": "public/css/modules/admin-capitao.css",
+        "loadedBy": ["admin-capitao.html"],
+        "description": "Gerenciamento admin do modo Capitao de Luxo",
+        "moduleColor": "--module-capitao-*"
       }
     ]
   },
