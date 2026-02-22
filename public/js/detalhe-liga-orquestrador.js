@@ -411,6 +411,41 @@ class DetalheLigaOrquestrador {
                     }
                     break;
 
+                case "resta-um": {
+                    console.log('[ORQUESTRADOR] Iniciando resta-um...');
+                    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+                    try {
+                        if (!this.modules.restaUm) {
+                            await import("./admin/modules/admin-resta-um.js");
+                            this.modules.restaUm = true;
+                        }
+                        // Injetar ligaId do contexto e carregar direto
+                        if (window.adminRestaUm) {
+                            const ligaId = obterLigaIdCache();
+                            if (ligaId) {
+                                // Carregar ligas para sugestão de rodadas funcionar
+                                await window.adminRestaUm.carregarLigas();
+                                window.adminRestaUm.ligaId = ligaId;
+                                await window.adminRestaUm.carregarDashboard();
+                            } else {
+                                await window.adminRestaUm.init();
+                            }
+                        }
+                    } catch (error) {
+                        console.error("[ORQUESTRADOR] Erro resta-um:", error);
+                        const ruContainer = document.getElementById("ruAdminContent");
+                        if (ruContainer) {
+                            ruContainer.innerHTML = `
+                                <div style="padding: 20px; text-align: center; color: rgba(255,255,255,0.6);">
+                                    <p><span class="material-icons" style="vertical-align: middle; color: #f43f5e;">warning</span> Erro ao carregar Resta Um</p>
+                                    <p style="font-size: 12px;">${error.message}</p>
+                                </div>
+                            `;
+                        }
+                    }
+                    break;
+                }
+
                 case "capitao-luxo": {
                     // ✅ v2.0: JS admin dedicado (capitao-luxo.js)
                     console.log('[ORQUESTRADOR] Iniciando capitao-luxo...');
@@ -473,6 +508,7 @@ class DetalheLigaOrquestrador {
             "fluxo-financeiro": `<div id="fluxo-financeiro-content"><div class="loading-state">Carregando fluxo financeiro...</div></div>`,
             participantes: `<div id="participantes-content"><div class="loading-state">Carregando participantes...</div></div>`,
             "capitao-luxo": `<div id="capitao-luxo-content"><div class="capitao-luxo-loading"><div class="spinner"></div><p>Carregando Capitão de Luxo...</p></div></div>`,
+            "resta-um": `<div class="ru-admin-container" id="ru-admin-container"><div id="ruAdminContent"><div style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);"><div class="spinner"></div><p>Carregando Resta Um...</p></div></div></div>`,
             regras: `<div id="regras-admin-container"><div style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">Carregando regras...</div></div>`,
         };
 
@@ -620,7 +656,7 @@ class DetalheLigaOrquestrador {
 
     // Verifica se módulo é 2026 (em breve)
     isModule2026(module) {
-        const modules2026 = ["tiro-certo", "bolao-copa", "resta-um"];
+        const modules2026 = ["tiro-certo", "bolao-copa"];
         return modules2026.includes(module);
     }
 
