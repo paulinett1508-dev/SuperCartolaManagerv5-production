@@ -176,7 +176,60 @@ class AdminRestaUm {
     }
 
     /**
-     * Chamado quando o admin altera manualmente o campo de rodada
+     * Chamado quando o admin digita a rodada inicial.
+     * Recalcula automaticamente a rodada final = inicial + rodadasNecessarias - 1 (max 38).
+     */
+    onRodadaInicialChange() {
+        const inputInicial = document.getElementById('ruRodadaInicial');
+        const inputFinal = document.getElementById('ruRodadaFinal');
+        if (!inputInicial || !inputFinal) return;
+
+        inputInicial.dataset.editadoManualmente = 'true';
+
+        const rodadaInicial = parseInt(inputInicial.value);
+        if (!rodadaInicial || rodadaInicial < 1 || rodadaInicial > 38) return;
+
+        const liga = this.ligas.find(l => l._id === this.ligaId);
+        const totalParticipantes = (liga?.participantes || liga?.times || []).filter(t => t.ativo !== false).length;
+        const eliminadosPorRodada = parseInt(document.getElementById('ruEliminadosPorRodada')?.value) || 1;
+        const protecao = document.getElementById('ruProtecao')?.checked || false;
+
+        if (totalParticipantes < 2) return;
+
+        const eliminacoesNecessarias = totalParticipantes - 1;
+        const rodadasDeEliminacao = Math.ceil(eliminacoesNecessarias / eliminadosPorRodada);
+        const rodadasNecessarias = rodadasDeEliminacao + (protecao ? 1 : 0);
+        const rodadaFinalCalculada = Math.min(rodadaInicial + rodadasNecessarias - 1, 38);
+
+        inputFinal.value = rodadaFinalCalculada;
+        delete inputFinal.dataset.editadoManualmente;
+
+        // Atualizar painel de sugestao com alerta se necessario
+        const painelSugestao = document.getElementById('ruSugestaoRodadas');
+        if (painelSugestao) {
+            const rodadasDisponiveis = 38 - rodadaInicial + 1;
+            const cabe = rodadasNecessarias <= rodadasDisponiveis;
+            const alertaHtml = !cabe
+                ? `<div style="color:var(--app-warning);margin-top:4px;font-weight:600;">
+                       <span class="material-icons" style="font-size:14px;vertical-align:middle;">warning</span>
+                       Precisa de ${rodadasNecessarias} rodadas mas so restam ${rodadasDisponiveis} a partir de R${rodadaInicial}. Aumente eliminados/rodada.
+                   </div>`
+                : '';
+
+            painelSugestao.innerHTML = `
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                    <span class="material-icons" style="font-size:16px;color:var(--module-restaum-primary);">auto_awesome</span>
+                    <strong style="color:var(--app-text-primary);">R${rodadaInicial} a R${rodadaFinalCalculada}</strong>
+                    <span style="font-size:var(--app-font-xs);color:var(--app-text-muted);">(${rodadasNecessarias} rodadas necessarias para ${totalParticipantes} participantes)</span>
+                </div>
+                ${alertaHtml}
+            `;
+            painelSugestao.style.display = '';
+        }
+    }
+
+    /**
+     * Chamado quando o admin altera manualmente o campo de rodada final
      */
     onRodadaManualChange(inputId) {
         const input = document.getElementById(inputId);
@@ -322,20 +375,13 @@ class AdminRestaUm {
                     <div>
                         <label>Rodada Inicial</label>
                         <input type="number" id="ruRodadaInicial" value="" min="1" max="38" placeholder="Ex: 1"
-                               onfocus="window.adminRestaUm.onRodadaManualChange('ruRodadaInicial')">
+                               oninput="window.adminRestaUm.onRodadaInicialChange()">
                     </div>
                     <div>
                         <label>Rodada Final</label>
                         <input type="number" id="ruRodadaFinal" value="" min="1" max="38" placeholder="Ex: 19"
                                onfocus="window.adminRestaUm.onRodadaManualChange('ruRodadaFinal')">
                     </div>
-                </div>
-
-                <div style="text-align:right;margin-bottom:var(--app-space-2);">
-                    <button class="ru-btn-link" onclick="window.adminRestaUm.resetarSugestao()" style="font-size:var(--app-font-xs);color:var(--module-restaum-primary);background:none;border:none;cursor:pointer;text-decoration:underline;">
-                        <span class="material-icons" style="font-size:14px;vertical-align:middle;">refresh</span>
-                        Recalcular sugestao
-                    </button>
                 </div>
 
                 <div class="ru-form-section">Premiacao (R$)</div>
