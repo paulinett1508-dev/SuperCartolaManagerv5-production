@@ -34,7 +34,7 @@ const RXrayState = {
     rodadaConsolidada: null,
     temporada: null,
     contexto: null, // Dados da API /rodada-contexto
-    fabPosition: { right: 16, bottom: 80 },
+    fabPosition: { right: 16, bottom: 148 },
 };
 
 // ============================================
@@ -564,9 +564,9 @@ function renderizarDisputas(disputas) {
                     <span class="rxray-disputa-label">Pontos Corridos</span>
                 </div>
                 <div class="rxray-disputa-confronto">
-                    <span class="voce">Voce ${(Math.trunc((pc.seu_confronto.voce||0) * 10) / 10).toFixed(1)}</span>
+                    <span class="voce">Voce ${truncarPontos(pc.seu_confronto.voce||0)}</span>
                     <span class="vs">&times;</span>
-                    <span class="adv">${(Math.trunc((pc.seu_confronto.adversario.pontos||0) * 10) / 10).toFixed(1)} ${escapeHtml(pc.seu_confronto.adversario.nome)}</span>
+                    <span class="adv">${truncarPontos(pc.seu_confronto.adversario.pontos||0)} ${escapeHtml(pc.seu_confronto.adversario.nome)}</span>
                     <span class="resultado ${resultadoClass}"><span class="material-icons">${resultadoIcon}</span></span>
                 </div>
                 <div class="rxray-disputa-status">
@@ -623,7 +623,7 @@ function renderizarDisputas(disputas) {
                 </div>
                 <div class="rxray-disputa-status">
                     <span class="material-icons">leaderboard</span>
-                    ${cap.sua_posicao}o lugar &bull; ${(Math.trunc((cap.seus_pontos || 0) * 10) / 10).toFixed(1)} pts
+                    ${cap.sua_posicao}o lugar &bull; ${truncarPontos(cap.seus_pontos || 0)} pts
                 </div>
             </div>
         `);
@@ -638,7 +638,7 @@ function renderizarPerformance(performance) {
     const container = document.getElementById("rxrayPerformance");
     const positiveClass = performance.vs_media >= 0 ? "positive" : "negative";
     const finClass = performance.financeiro >= 0 ? "positive" : "negative";
-    const vsMediaTrunc = (Math.trunc((performance.vs_media || 0) * 10) / 10).toFixed(1);
+    const vsMediaTrunc = truncarPontos(performance.vs_media || 0);
 
     container.innerHTML = `
         <div class="rxray-stat-card stat-posicao">

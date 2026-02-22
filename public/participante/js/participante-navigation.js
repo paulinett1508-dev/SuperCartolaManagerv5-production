@@ -366,6 +366,12 @@ class ParticipanteNavigation {
             return;
         }
 
+        // Verificar se módulo está ativo na liga
+        if (!this.verificarModuloAtivo('whatsHappening')) {
+            if (window.Log) Log.debug('PARTICIPANTE-NAV', '⏭️ Widget WH ignorado (módulo desativado)');
+            return;
+        }
+
         try {
             const module = await import('/participante/js/widgets/whats-happening-widget.js');
 
