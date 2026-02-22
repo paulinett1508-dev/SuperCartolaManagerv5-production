@@ -642,7 +642,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                 <span class="material-symbols-outlined" style="font-size: 24px; color: var(--app-gold);">emoji_events</span>
                 <div>
                     <div style="font-size: 10px; color: var(--app-gold); font-weight: 700; text-transform: uppercase;">${labelLider}</div>
-                    <div style="font-size: 14px; font-weight: 700; color: var(--app-text-primary);">${campeao.nomeCartoleiro || campeao.nome_cartola || campeao.nome || 'N/D'}</div>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--app-text-primary);">${campeao.participanteNome || campeao.nomeCartoleiro || campeao.nome || 'N/D'}</div>
                     <div style="font-size: 11px; color: #888;">${campeao.nomeTime || campeao.nome_time || ''}</div>
                 </div>
             </div>
@@ -682,7 +682,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span style="font-size: ${pos === 1 ? "16px" : "12px"}; width: 26px; ${pos === 1 ? "" : "color: #888;"}">${posicaoDisplay}</span>
                             <div>
-                                <div style="color: ${isMeuTime ? "var(--app-gold)" : "var(--app-text-primary)"}; font-weight: ${isMeuTime ? "700" : "500"}; font-size: 12px;">${time.nomeCartoleiro || time.nome_cartola || time.nome || 'N/D'}</div>
+                                <div style="color: ${isMeuTime ? "var(--app-gold)" : "var(--app-text-primary)"}; font-weight: ${isMeuTime ? "700" : "500"}; font-size: 12px;">${time.participanteNome || time.nomeCartoleiro || time.nome || 'N/D'}</div>
                                 <div style="color: #888; font-size: 11px;">${time.nomeTime || time.nome_time || ''}</div>
                             </div>
                         </div>
@@ -710,7 +710,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <span style="font-size: 12px; width: 26px; color: #555;">—</span>
                                 <div>
-                                    <div style="color: #666; font-weight: 400; font-size: 12px;">${time.nomeCartoleiro || time.nome_cartola || time.nome || 'N/D'}</div>
+                                    <div style="color: #666; font-weight: 400; font-size: 12px;">${time.participanteNome || time.nomeCartoleiro || time.nome || 'N/D'}</div>
                                     <div style="color: #555; font-size: 11px;">${time.nomeTime || time.nome_time || ''}</div>
                                 </div>
                             </div>
