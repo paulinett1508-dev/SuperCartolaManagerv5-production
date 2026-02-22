@@ -155,7 +155,7 @@ export async function iniciarEdicao(req, res) {
             timeId: p.time_id,
             nomeTime: p.nome_time || p.nome_cartola,
             nomeCartoleiro: p.nome_cartola,
-            escudoId: p.escudo_id || null,
+            escudoId: p.clube_id || null,
             status: 'vivo',
             pontosAcumulados: 0,
             rodadaEliminacao: null,
