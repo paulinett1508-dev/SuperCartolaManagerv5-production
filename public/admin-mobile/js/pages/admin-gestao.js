@@ -94,12 +94,6 @@ function renderPage(container) {
         </button>
       </div>
 
-      <!-- Link web -->
-      <div style="margin-top:var(--spacing-lg);text-align:center;">
-        <button class="btn btn-ghost btn-sm" onclick="window.open('/admin-gestao.html','_blank')">
-          Gestao completa (Web)
-        </button>
-      </div>
     </div>
   `;
 }

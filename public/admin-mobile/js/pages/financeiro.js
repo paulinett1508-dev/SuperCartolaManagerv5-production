@@ -1,5 +1,6 @@
 /**
- * Financeiro Page - Acertos financeiros e quitações
+ * Financeiro Page - Acertos financeiros
+ * Redesign v2 - Sem header duplicado, sem links externos, layout mobile-first
  */
 
 import API from '../api.js';
@@ -11,11 +12,10 @@ let ligas = [];
 export async function render(params = {}) {
   const container = document.getElementById('page-content');
 
-  // Atualiza top bar
   const titleEl = document.getElementById('page-title');
   const subtitleEl = document.getElementById('page-subtitle');
   const backBtn = document.getElementById('btn-back');
-  if (titleEl) titleEl.textContent = 'Acertos Financeiros';
+  if (titleEl) titleEl.textContent = 'Acertos';
   if (subtitleEl) subtitleEl.textContent = 'Pagamentos e recebimentos';
   if (backBtn) backBtn.classList.remove('hidden');
 
@@ -32,36 +32,23 @@ async function loadFinanceiroPage(container) {
   try {
     const response = await API.getLigas();
     ligas = Array.isArray(response) ? response : (response.ligas || []);
-
     renderFinanceiroPage(container);
-
     if (ligaSelecionada) {
       await carregarAcertos(ligaSelecionada);
     }
   } catch (error) {
     console.error('Erro ao carregar financeiro:', error);
-    showError(container, error.message || 'Erro ao carregar página.');
+    showError(container, error.message || 'Erro ao carregar pagina.');
   }
 }
 
 function renderFinanceiroPage(container) {
   container.innerHTML = `
     <div class="container">
-      <!-- Header -->
-      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: var(--spacing-md);">
-        <button onclick="window.router.navigate('/')" class="btn btn-ghost btn-sm" style="min-width: 44px; padding: 8px;">
-          <span class="material-icons">arrow_back</span>
-        </button>
-        <div style="flex: 1;">
-          <h2 class="card-title" style="margin: 0; font-size: 20px;"><span class="material-icons mi-inline">payments</span> Acertos Financeiros</h2>
-          <p class="text-muted" style="margin: 0; font-size: 14px;">Registrar pagamentos e recebimentos</p>
-        </div>
-      </div>
-
       <!-- Liga Selector -->
       <div class="card">
-        <label class="text-muted" style="font-size: 13px; display: block; margin-bottom: 4px;">Liga</label>
-        <select id="fin-liga-select" class="form-input" style="width: 100%; padding: 12px; font-size: 14px;">
+        <label class="form-label" style="font-size:13px;">Liga</label>
+        <select id="fin-liga-select" class="form-input" style="font-size:14px;">
           <option value="">Selecione uma liga...</option>
           ${ligas.map(liga => `
             <option value="${liga.id}" ${ligaSelecionada === liga.id ? 'selected' : ''}>
@@ -72,52 +59,56 @@ function renderFinanceiroPage(container) {
       </div>
 
       <!-- Resumo Financeiro -->
-      <div id="resumo-financeiro" style="display: none;"></div>
+      <div id="resumo-financeiro" style="display:none;"></div>
 
-      <!-- Formulário Novo Acerto -->
-      <div id="form-acerto" style="display: none;">
+      <!-- Formulario Novo Acerto -->
+      <div id="form-acerto" style="display:none;">
         <div class="card">
-          <h3 class="card-title" style="font-size: 16px; margin-bottom: var(--spacing-md);">Novo Acerto</h3>
+          <h3 class="card-title" style="font-size:16px;margin-bottom:var(--spacing-md);">
+            <span class="material-icons mi-inline">add_circle</span> Novo Acerto
+          </h3>
 
-          <div style="margin-bottom: 12px;">
-            <label class="text-muted" style="font-size: 13px; display: block; margin-bottom: 4px;">Participante</label>
-            <select id="fin-time-select" class="form-input" style="width: 100%; padding: 12px; font-size: 14px;">
+          <div class="form-group">
+            <label class="form-label" style="font-size:13px;">Participante</label>
+            <select id="fin-time-select" class="form-input" style="font-size:14px;">
               <option value="">Selecione...</option>
             </select>
           </div>
 
-          <div style="margin-bottom: 12px;">
-            <label class="text-muted" style="font-size: 13px; display: block; margin-bottom: 4px;">Tipo</label>
-            <select id="fin-tipo-select" class="form-input" style="width: 100%; padding: 12px; font-size: 14px;">
-              <option value="pagamento">Pagamento (participante pagou)</option>
-              <option value="recebimento">Recebimento (participante recebeu)</option>
-            </select>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="form-group">
+              <label class="form-label" style="font-size:13px;">Tipo</label>
+              <select id="fin-tipo-select" class="form-input" style="font-size:14px;">
+                <option value="pagamento">Pagamento</option>
+                <option value="recebimento">Recebimento</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-size:13px;">Valor (R$)</label>
+              <input type="number" id="fin-valor-input" class="form-input" style="font-size:14px;"
+                min="0.01" step="0.01" placeholder="0,00">
+            </div>
           </div>
 
-          <div style="margin-bottom: 12px;">
-            <label class="text-muted" style="font-size: 13px; display: block; margin-bottom: 4px;">Valor (R$)</label>
-            <input type="number" id="fin-valor-input" class="form-input" style="width: 100%; padding: 12px; font-size: 14px;"
-              min="0.01" step="0.01" placeholder="0,00">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="form-group">
+              <label class="form-label" style="font-size:13px;">Metodo</label>
+              <select id="fin-metodo-select" class="form-input" style="font-size:14px;">
+                <option value="pix">PIX</option>
+                <option value="transferencia">Transferencia</option>
+                <option value="dinheiro">Dinheiro</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-size:13px;">Descricao</label>
+              <input type="text" id="fin-descricao-input" class="form-input" style="font-size:14px;"
+                placeholder="Opcional">
+            </div>
           </div>
 
-          <div style="margin-bottom: 12px;">
-            <label class="text-muted" style="font-size: 13px; display: block; margin-bottom: 4px;">Método</label>
-            <select id="fin-metodo-select" class="form-input" style="width: 100%; padding: 12px; font-size: 14px;">
-              <option value="pix">PIX</option>
-              <option value="transferencia">Transferência</option>
-              <option value="dinheiro">Dinheiro</option>
-              <option value="outro">Outro</option>
-            </select>
-          </div>
-
-          <div style="margin-bottom: 16px;">
-            <label class="text-muted" style="font-size: 13px; display: block; margin-bottom: 4px;">Descrição (opcional)</label>
-            <input type="text" id="fin-descricao-input" class="form-input" style="width: 100%; padding: 12px; font-size: 14px;"
-              placeholder="Ex: Pagamento inscrição 2026">
-          </div>
-
-          <button id="btn-registrar-acerto" class="btn btn-primary" style="width: 100%;" onclick="window.registrarNovoAcerto()" disabled>
-            <span class="material-icons mi-inline">savings</span> Registrar Acerto
+          <button id="btn-registrar-acerto" class="btn btn-primary btn-block" onclick="window.registrarNovoAcerto()" disabled>
+            <span class="material-icons mi-inline">savings</span> Registrar
           </button>
         </div>
       </div>
@@ -137,7 +128,6 @@ function setupFinanceiroListeners() {
 
   ligaSelect.addEventListener('change', async (e) => {
     ligaSelecionada = e.target.value ? parseInt(e.target.value) : null;
-
     if (ligaSelecionada) {
       document.getElementById('form-acerto').style.display = 'block';
       await carregarParticipantes(ligaSelecionada);
@@ -176,7 +166,7 @@ async function carregarParticipantes(ligaId) {
         `).join('')}
       `;
     } else {
-      timeSelect.innerHTML = '<option value="">Nenhum participante encontrado</option>';
+      timeSelect.innerHTML = '<option value="">Nenhum participante</option>';
     }
   } catch (error) {
     console.error('Erro ao carregar participantes:', error);
@@ -190,20 +180,23 @@ async function carregarAcertos(ligaId) {
   try {
     const data = await API.getAcertos(ligaId);
 
-    // Resumo
     if (data.resumo) {
       resumoContainer.style.display = 'block';
       resumoContainer.innerHTML = `
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: var(--spacing-md);">
-          <div class="card" style="padding: 12px; text-align: center;">
-            <p class="text-muted" style="font-size: 11px; margin: 0;">Pagamentos</p>
-            <p class="text-success" style="font-size: 18px; font-weight: 700; margin: 4px 0 0; font-family: var(--font-mono);">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:var(--spacing-md);">
+          <div class="card" style="padding:12px;text-align:center;margin-bottom:0;">
+            <p class="text-muted" style="font-size:11px;margin:0;">
+              <span class="material-icons" style="font-size:14px;vertical-align:-2px;color:var(--accent-success);">north_east</span> Pagamentos
+            </p>
+            <p class="text-success" style="font-size:18px;font-weight:700;margin:4px 0 0;font-family:var(--font-mono);">
               R$ ${data.resumo.totalPagamentos.toFixed(2)}
             </p>
           </div>
-          <div class="card" style="padding: 12px; text-align: center;">
-            <p class="text-muted" style="font-size: 11px; margin: 0;">Recebimentos</p>
-            <p class="text-warning" style="font-size: 18px; font-weight: 700; margin: 4px 0 0; font-family: var(--font-mono);">
+          <div class="card" style="padding:12px;text-align:center;margin-bottom:0;">
+            <p class="text-muted" style="font-size:11px;margin:0;">
+              <span class="material-icons" style="font-size:14px;vertical-align:-2px;color:var(--accent-warning);">south_west</span> Recebimentos
+            </p>
+            <p class="text-warning" style="font-size:18px;font-weight:700;margin:4px 0 0;font-family:var(--font-mono);">
               R$ ${data.resumo.totalRecebimentos.toFixed(2)}
             </p>
           </div>
@@ -211,12 +204,11 @@ async function carregarAcertos(ligaId) {
       `;
     }
 
-    // Lista de acertos
     if (!data.acertos || data.acertos.length === 0) {
       listaContainer.innerHTML = `
-        <div class="empty-state" style="margin-top: var(--spacing-lg);">
+        <div class="empty-state" style="margin-top:var(--spacing-lg);">
           <div class="empty-state-icon"><span class="material-icons mi-xl">receipt_long</span></div>
-          <h3 class="empty-state-title">Nenhum acerto registrado</h3>
+          <h3 class="empty-state-title">Nenhum acerto</h3>
           <p class="empty-state-text">Registre o primeiro acerto acima</p>
         </div>
       `;
@@ -224,11 +216,9 @@ async function carregarAcertos(ligaId) {
     }
 
     listaContainer.innerHTML = `
-      <div style="margin-top: var(--spacing-md);">
-        <h3 class="card-title" style="font-size: 16px; margin-bottom: var(--spacing-sm);">
-          Histórico (${data.acertos.length})
-        </h3>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="margin-top:var(--spacing-sm);">
+        <div class="section-header">Historico (${data.acertos.length})</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
           ${data.acertos.map(acerto => renderAcertoItem(acerto)).join('')}
         </div>
       </div>
@@ -237,7 +227,7 @@ async function carregarAcertos(ligaId) {
     console.error('Erro ao carregar acertos:', error);
     listaContainer.innerHTML = `
       <div class="card">
-        <p class="text-danger" style="margin: 0;">Erro ao carregar acertos</p>
+        <p class="text-danger" style="margin:0;">Erro ao carregar acertos</p>
       </div>
     `;
   }
@@ -250,22 +240,21 @@ function renderAcertoItem(acerto) {
   });
 
   return `
-    <div class="card" style="padding: 12px;">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span class="badge ${isPagamento ? 'badge-success' : 'badge-warning'}" style="font-size: 11px;">
-            ${isPagamento ? '<span class="material-icons" style="font-size:12px;vertical-align:-2px;">north_east</span> Pagamento' : '<span class="material-icons" style="font-size:12px;vertical-align:-2px;">south_west</span> Recebimento'}
+    <div class="card" style="padding:12px;margin-bottom:0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="badge ${isPagamento ? 'badge-success' : 'badge-warning'}" style="font-size:10px;padding:2px 8px;">
+            ${isPagamento ? 'Pag.' : 'Rec.'}
           </span>
-          <span style="font-size: 13px; font-weight: 600;">${acerto.nomeTime}</span>
+          <span style="font-size:13px;font-weight:600;">${acerto.nomeTime}</span>
         </div>
-        <span style="font-size: 16px; font-weight: 700; font-family: var(--font-mono); color: ${isPagamento ? 'var(--accent-success)' : 'var(--accent-warning)'};">
+        <span style="font-size:15px;font-weight:700;font-family:var(--font-mono);color:${isPagamento ? 'var(--accent-success)' : 'var(--accent-warning)'};">
           R$ ${acerto.valor.toFixed(2)}
         </span>
       </div>
-      ${acerto.descricao ? `<p class="text-muted" style="font-size: 12px; margin: 4px 0 0;">${acerto.descricao}</p>` : ''}
-      <div style="display: flex; justify-content: space-between; margin-top: 4px;">
-        <span class="text-muted" style="font-size: 11px;">${acerto.metodoPagamento || 'pix'}</span>
-        <span class="text-muted" style="font-size: 11px;">${dataFormatada}</span>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span class="text-muted" style="font-size:11px;">${acerto.metodoPagamento || 'pix'}${acerto.descricao ? ' - ' + acerto.descricao : ''}</span>
+        <span class="text-muted" style="font-size:11px;">${dataFormatada}</span>
       </div>
     </div>
   `;
@@ -285,30 +274,20 @@ async function registrarNovoAcerto() {
   btn.textContent = 'Registrando...';
 
   try {
-    await API.registrarAcerto({
-      ligaId: ligaSelecionada,
-      timeId,
-      tipo,
-      valor,
-      descricao,
-      metodoPagamento
-    });
+    await API.registrarAcerto({ ligaId: ligaSelecionada, timeId, tipo, valor, descricao, metodoPagamento });
+    showToast('Acerto registrado!', 'success');
 
-    showToast('Acerto registrado com sucesso!', 'success');
-
-    // Limpa formulário
     document.getElementById('fin-valor-input').value = '';
     document.getElementById('fin-descricao-input').value = '';
     document.getElementById('fin-time-select').value = '';
 
-    // Recarrega lista
     await carregarAcertos(ligaSelecionada);
   } catch (error) {
     console.error('Erro ao registrar acerto:', error);
     showToast('Erro: ' + error.message, 'error');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '<span class="material-icons mi-inline">savings</span> Registrar Acerto';
+    btn.innerHTML = '<span class="material-icons mi-inline">savings</span> Registrar';
     validarFormAcerto();
   }
 }

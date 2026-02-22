@@ -83,12 +83,6 @@ function renderPage(container, ligas, stats) {
         </button>
       </div>
 
-      <!-- Link para versao completa -->
-      <div style="margin-top:var(--spacing-lg);text-align:center;">
-        <button class="btn btn-ghost btn-sm" onclick="window.open('/notificador.html','_blank')">
-          Notificador completo (Web)
-        </button>
-      </div>
     </div>
   `;
 
