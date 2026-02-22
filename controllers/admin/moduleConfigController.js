@@ -306,6 +306,16 @@ async function processarRespostasWizard(moduloId, respostas) {
         if (afeta.startsWith('regras_override.')) {
             const campo = afeta.replace('regras_override.', '');
             config.regras_override[campo] = valor;
+        } else if (afeta.startsWith('financeiro_override.valores_por_posicao.')) {
+            const pos = afeta.replace('financeiro_override.valores_por_posicao.', '');
+            const numVal = Number(valor);
+            // Ignorar posições opcionais sem valor ou com valor 0
+            if (valor === '' || valor === null || isNaN(numVal)) continue;
+            if (numVal === 0 && !pergunta.required) continue;
+            if (!config.financeiro_override.valores_por_posicao) {
+                config.financeiro_override.valores_por_posicao = {};
+            }
+            config.financeiro_override.valores_por_posicao[pos] = numVal;
         } else if (afeta.startsWith('financeiro_override.valores_simples.')) {
             const campo = afeta.replace('financeiro_override.valores_simples.', '');
             config.financeiro_override.valores_simples[campo] = Number(valor);

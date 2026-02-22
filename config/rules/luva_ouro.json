@@ -126,24 +126,24 @@
         "id": "valor_vice",
         "tipo": "number",
         "label": "Premio do 2o lugar (R$)",
-        "descricao": "Valor para o vice",
+        "descricao": "Deixe em branco para nao premiar o 2o lugar",
         "default": 20,
         "min": 0,
         "max": 300,
         "step": 5,
-        "required": true,
+        "required": false,
         "afeta": "financeiro_override.valores_por_posicao.2"
       },
       {
         "id": "valor_terceiro",
         "tipo": "number",
         "label": "Premio do 3o lugar (R$)",
-        "descricao": "Valor para o terceiro colocado",
+        "descricao": "Deixe em branco para nao premiar o 3o lugar",
         "default": 10,
         "min": 0,
         "max": 200,
         "step": 5,
-        "required": true,
+        "required": false,
         "afeta": "financeiro_override.valores_por_posicao.3"
       }
     ]

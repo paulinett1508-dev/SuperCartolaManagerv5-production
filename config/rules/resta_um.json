@@ -141,12 +141,12 @@
         "id": "valor_vice",
         "tipo": "number",
         "label": "Premio do vice (R$)",
-        "descricao": "Valor para o ultimo eliminado",
+        "descricao": "Deixe em branco para nao premiar o ultimo eliminado",
         "default": 50,
         "min": 0,
         "max": 300,
         "step": 10,
-        "required": true,
+        "required": false,
         "afeta": "financeiro_override.valores_por_posicao.2"
       },
       {
