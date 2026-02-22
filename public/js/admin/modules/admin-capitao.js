@@ -164,7 +164,7 @@ class AdminCapitao {
         if (!confirm('Confirma consolidar a temporada do Capitao de Luxo?')) return;
 
         try {
-            const res = await fetch(`/api/capitao/${this.ligaId}/consolidar`, { method: 'POST' });
+            const res = await fetch(`/api/capitao/${this.ligaId}/consolidar`, { method: 'POST', credentials: 'include' });
             const data = await res.json();
             if (res.ok) {
                 if (window.SuperModal) SuperModal.toast.success(data.mensagem || 'Consolidado!');

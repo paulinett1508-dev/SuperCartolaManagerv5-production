@@ -182,7 +182,7 @@ class AdminLuvaOuro {
 
     async coletarDados() {
         try {
-            const res = await fetch(`/api/luva-de-ouro/${this.ligaId}/coletar`);
+            const res = await fetch(`/api/luva-de-ouro/${this.ligaId}/coletar`, { credentials: 'include' });
             const data = await res.json();
             if (res.ok) {
                 if (window.SuperModal) SuperModal.toast.success(data.mensagem || 'Dados coletados!');
@@ -200,7 +200,7 @@ class AdminLuvaOuro {
         if (!confirm('Confirma consolidar a temporada da Luva de Ouro?')) return;
 
         try {
-            const res = await fetch(`/api/luva-de-ouro/${this.ligaId}/consolidar`, { method: 'POST' });
+            const res = await fetch(`/api/luva-de-ouro/${this.ligaId}/consolidar`, { method: 'POST', credentials: 'include' });
             const data = await res.json();
             if (res.ok) {
                 if (window.SuperModal) SuperModal.toast.success(data.mensagem || 'Consolidado!');
@@ -216,7 +216,7 @@ class AdminLuvaOuro {
 
     async diagnostico() {
         try {
-            const res = await fetch(`/api/luva-de-ouro/${this.ligaId}/diagnostico`);
+            const res = await fetch(`/api/luva-de-ouro/${this.ligaId}/diagnostico`, { credentials: 'include' });
             const data = await res.json();
             if (res.ok) {
                 if (window.SuperModal) {

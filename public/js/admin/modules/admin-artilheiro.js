@@ -185,7 +185,7 @@ class AdminArtilheiro {
         if (!rodada) return;
 
         try {
-            const res = await fetch(`/api/artilheiro-campeao/${this.ligaId}/consolidar/${rodada}`, { method: 'POST' });
+            const res = await fetch(`/api/artilheiro-campeao/${this.ligaId}/consolidar/${rodada}`, { method: 'POST', credentials: 'include' });
             const data = await res.json();
             if (res.ok) {
                 if (window.SuperModal) SuperModal.toast.success(data.mensagem || `Rodada ${rodada} consolidada!`);
@@ -204,7 +204,7 @@ class AdminArtilheiro {
         if (!rodada) return;
 
         try {
-            const res = await fetch(`/api/artilheiro-campeao/${this.ligaId}/coletar/${rodada}`, { method: 'POST' });
+            const res = await fetch(`/api/artilheiro-campeao/${this.ligaId}/coletar/${rodada}`, { method: 'POST', credentials: 'include' });
             const data = await res.json();
             if (res.ok) {
                 if (window.SuperModal) SuperModal.toast.success(data.mensagem || `Dados da rodada ${rodada} coletados!`);
@@ -221,7 +221,7 @@ class AdminArtilheiro {
         if (!confirm('Confirma limpar o cache do Artilheiro para esta liga?')) return;
 
         try {
-            const res = await fetch(`/api/artilheiro-campeao/${this.ligaId}/cache`, { method: 'DELETE' });
+            const res = await fetch(`/api/artilheiro-campeao/${this.ligaId}/cache`, { method: 'DELETE', credentials: 'include' });
             const data = await res.json();
             if (res.ok) {
                 if (window.SuperModal) SuperModal.toast.success(data.mensagem || 'Cache limpo!');
