@@ -81,7 +81,13 @@ export async function obterStatus(req, res) {
             participantes: [...vivos, ...eliminados],
             rodadaAtual: edicao.rodadaAtual,
             historicoEliminacoes: edicao.historicoEliminacoes || [],
-            premiacao: edicao.premiacao,
+            premiacao: {
+                campeao: edicao.premiacao?.campeao || 0,
+                vice: edicao.premiacao?.viceHabilitado !== false ? (edicao.premiacao?.vice || 0) : null,
+                viceHabilitado: edicao.premiacao?.viceHabilitado !== false,
+                terceiro: edicao.premiacao?.terceiroHabilitado !== false ? (edicao.premiacao?.terceiro || 0) : null,
+                terceiroHabilitado: edicao.premiacao?.terceiroHabilitado !== false,
+            },
         });
 
     } catch (error) {
@@ -163,7 +169,9 @@ export async function iniciarEdicao(req, res) {
             premiacao: {
                 campeao: premiacao.campeao || 100,
                 vice: premiacao.vice || 50,
+                viceHabilitado: premiacao.viceHabilitado !== false,
                 terceiro: premiacao.terceiro || 25,
+                terceiroHabilitado: premiacao.terceiroHabilitado !== false,
             },
             bonusSobrevivencia: {
                 habilitado: bonusSobrevivencia.habilitado !== false,

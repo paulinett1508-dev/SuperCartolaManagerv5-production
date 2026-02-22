@@ -68,7 +68,9 @@ const RestaUmCacheSchema = new mongoose.Schema({
     premiacao: {
         campeao: { type: Number, default: 100 },
         vice: { type: Number, default: 50 },
+        viceHabilitado: { type: Boolean, default: true },
         terceiro: { type: Number, default: 25 },
+        terceiroHabilitado: { type: Boolean, default: true },
     },
     bonusSobrevivencia: {
         habilitado: { type: Boolean, default: true },

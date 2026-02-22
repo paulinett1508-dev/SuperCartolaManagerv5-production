@@ -7,8 +7,10 @@
  * - Criar nova edicao (inscreve todos participantes)
  * - Ver participantes com status (vivo/eliminado/campeao)
  * - Ver historico de eliminacoes (timeline)
+ * - Sugestao inteligente de rodadas baseada na qtd de participantes
+ * - Premiacao de vice/terceiro opcionais
  *
- * @version 1.0.0
+ * @version 2.0.0
  */
 
 class AdminRestaUm {
@@ -65,6 +67,153 @@ class AdminRestaUm {
         }
 
         await this.carregarDashboard();
+    }
+
+    // ==========================================================================
+    // INTELIGENCIA DE SUGESTAO DE RODADAS
+    // ==========================================================================
+
+    /**
+     * Calcula a sugestao de rodadas baseada na quantidade de participantes,
+     * eliminados por rodada, protecao e edicoes ja existentes.
+     *
+     * @returns {{ rodadaInicial: number, rodadaFinal: number, rodadasNecessarias: number, info: string, alerta: string|null }}
+     */
+    calcularSugestaoRodadas() {
+        const liga = this.ligas.find(l => l._id === this.ligaId);
+        const totalParticipantes = (liga?.participantes || liga?.times || []).filter(t => t.ativo !== false).length;
+
+        const eliminadosPorRodada = parseInt(document.getElementById('ruEliminadosPorRodada')?.value) || 1;
+        const protecao = document.getElementById('ruProtecao')?.checked || false;
+
+        if (totalParticipantes < 2) {
+            return { rodadaInicial: 1, rodadaFinal: 38, rodadasNecessarias: 0, info: 'Participantes insuficientes', alerta: 'Minimo 8 participantes' };
+        }
+
+        // Eliminacoes necessarias = participantes - 1 (sobra o campeao)
+        const eliminacoesNecessarias = totalParticipantes - 1;
+        const rodadasDeEliminacao = Math.ceil(eliminacoesNecessarias / eliminadosPorRodada);
+        const rodadasNecessarias = rodadasDeEliminacao + (protecao ? 1 : 0);
+
+        // Encontrar rodadas ja ocupadas por edicoes existentes
+        const rodadasOcupadas = [];
+        for (const ed of this.edicoes) {
+            if (ed.status !== 'finalizada' || true) { // Considerar todas as edicoes
+                for (let r = (ed.rodadaInicial || 1); r <= (ed.rodadaFinal || 38); r++) {
+                    rodadasOcupadas.push(r);
+                }
+            }
+        }
+
+        // Encontrar primeiro bloco livre de tamanho suficiente
+        let rodadaInicial = 1;
+        let rodadaFinal = rodadaInicial + rodadasNecessarias - 1;
+        let alerta = null;
+
+        // Tentar encontrar bloco livre
+        for (let inicio = 1; inicio <= 38 - rodadasNecessarias + 1; inicio++) {
+            let blocoLivre = true;
+            for (let r = inicio; r < inicio + rodadasNecessarias; r++) {
+                if (rodadasOcupadas.includes(r)) {
+                    blocoLivre = false;
+                    break;
+                }
+            }
+            if (blocoLivre) {
+                rodadaInicial = inicio;
+                rodadaFinal = inicio + rodadasNecessarias - 1;
+                break;
+            }
+        }
+
+        if (rodadaFinal > 38) {
+            rodadaFinal = 38;
+            alerta = `Precisa de ${rodadasNecessarias} rodadas mas so restam ${38 - rodadaInicial + 1} disponiveis. Considere aumentar eliminados/rodada.`;
+        }
+
+        const rodadasLivresRestantes = 38 - rodadaFinal;
+        const info = `${totalParticipantes} participantes, ${eliminacoesNecessarias} eliminacoes, ${rodadasNecessarias} rodadas necessarias` +
+            (rodadasLivresRestantes > 0 ? ` (sobram ${rodadasLivresRestantes} rodadas para outra edicao)` : '');
+
+        return { rodadaInicial, rodadaFinal, rodadasNecessarias, info, alerta };
+    }
+
+    /**
+     * Atualiza os campos de rodada e o painel de sugestao no form
+     */
+    atualizarSugestaoRodadas() {
+        const sugestao = this.calcularSugestaoRodadas();
+        const inputInicial = document.getElementById('ruRodadaInicial');
+        const inputFinal = document.getElementById('ruRodadaFinal');
+        const painelSugestao = document.getElementById('ruSugestaoRodadas');
+
+        if (inputInicial && !inputInicial.dataset.editadoManualmente) {
+            inputInicial.value = sugestao.rodadaInicial;
+        }
+        if (inputFinal && !inputFinal.dataset.editadoManualmente) {
+            inputFinal.value = sugestao.rodadaFinal;
+        }
+
+        if (painelSugestao) {
+            const alertaHtml = sugestao.alerta
+                ? `<div style="color:var(--app-warning);margin-top:4px;font-weight:600;">
+                       <span class="material-icons" style="font-size:14px;vertical-align:middle;">warning</span>
+                       ${sugestao.alerta}
+                   </div>`
+                : '';
+
+            painelSugestao.innerHTML = `
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                    <span class="material-icons" style="font-size:16px;color:var(--module-restaum-primary);">auto_awesome</span>
+                    <strong style="color:var(--app-text-primary);">Sugestao: R${sugestao.rodadaInicial} a R${sugestao.rodadaFinal}</strong>
+                    <span style="font-size:var(--app-font-xs);color:var(--app-text-muted);">(${sugestao.rodadasNecessarias} rodadas)</span>
+                </div>
+                <div style="font-size:var(--app-font-xs);color:var(--app-text-muted);">${sugestao.info}</div>
+                ${alertaHtml}
+            `;
+            painelSugestao.style.display = '';
+        }
+    }
+
+    /**
+     * Chamado quando o admin altera manualmente o campo de rodada
+     */
+    onRodadaManualChange(inputId) {
+        const input = document.getElementById(inputId);
+        if (input) input.dataset.editadoManualmente = 'true';
+    }
+
+    /**
+     * Reseta flags de edicao manual e recalcula sugestao
+     */
+    resetarSugestao() {
+        const inputInicial = document.getElementById('ruRodadaInicial');
+        const inputFinal = document.getElementById('ruRodadaFinal');
+        if (inputInicial) delete inputInicial.dataset.editadoManualmente;
+        if (inputFinal) delete inputFinal.dataset.editadoManualmente;
+        this.atualizarSugestaoRodadas();
+    }
+
+    // ==========================================================================
+    // TOGGLES DE PREMIACAO
+    // ==========================================================================
+
+    onToggleVice() {
+        const checkbox = document.getElementById('ruViceHabilitado');
+        const input = document.getElementById('ruPremiacaoVice');
+        if (input) {
+            input.disabled = !checkbox?.checked;
+            input.style.opacity = checkbox?.checked ? '1' : '0.4';
+        }
+    }
+
+    onToggleTerceiro() {
+        const checkbox = document.getElementById('ruTerceiroHabilitado');
+        const input = document.getElementById('ruPremiacaoTerceiro');
+        if (input) {
+            input.disabled = !checkbox?.checked;
+            input.style.opacity = checkbox?.checked ? '1' : '0.4';
+        }
     }
 
     // ==========================================================================
@@ -147,6 +296,24 @@ class AdminRestaUm {
                     </span>
                 </div>
 
+                <div class="ru-form-row-2col">
+                    <div>
+                        <label>Eliminados por Rodada</label>
+                        <select id="ruEliminadosPorRodada" onchange="window.adminRestaUm.resetarSugestao()">
+                            <option value="1" selected>1 eliminado</option>
+                            <option value="2">2 eliminados</option>
+                            <option value="3">3 eliminados</option>
+                        </select>
+                    </div>
+                    <div class="ru-form-checkbox">
+                        <input type="checkbox" id="ruProtecao" onchange="window.adminRestaUm.resetarSugestao()">
+                        <span>Protecao na 1a rodada</span>
+                    </div>
+                </div>
+
+                <!-- Painel de Sugestao Inteligente -->
+                <div id="ruSugestaoRodadas" class="ru-sugestao-rodadas" style="display:none;"></div>
+
                 <div class="ru-form-row">
                     <div>
                         <label>Numero da Edicao</label>
@@ -154,27 +321,21 @@ class AdminRestaUm {
                     </div>
                     <div>
                         <label>Rodada Inicial</label>
-                        <input type="number" id="ruRodadaInicial" value="" min="1" max="38" placeholder="Ex: 1">
+                        <input type="number" id="ruRodadaInicial" value="" min="1" max="38" placeholder="Ex: 1"
+                               onfocus="window.adminRestaUm.onRodadaManualChange('ruRodadaInicial')">
                     </div>
                     <div>
                         <label>Rodada Final</label>
-                        <input type="number" id="ruRodadaFinal" value="" min="1" max="38" placeholder="Ex: 19">
+                        <input type="number" id="ruRodadaFinal" value="" min="1" max="38" placeholder="Ex: 19"
+                               onfocus="window.adminRestaUm.onRodadaManualChange('ruRodadaFinal')">
                     </div>
                 </div>
 
-                <div class="ru-form-row-2col">
-                    <div>
-                        <label>Eliminados por Rodada</label>
-                        <select id="ruEliminadosPorRodada">
-                            <option value="1" selected>1 eliminado</option>
-                            <option value="2">2 eliminados</option>
-                            <option value="3">3 eliminados</option>
-                        </select>
-                    </div>
-                    <div class="ru-form-checkbox">
-                        <input type="checkbox" id="ruProtecao">
-                        <span>Protecao na 1a rodada</span>
-                    </div>
+                <div style="text-align:right;margin-bottom:var(--app-space-2);">
+                    <button class="ru-btn-link" onclick="window.adminRestaUm.resetarSugestao()" style="font-size:var(--app-font-xs);color:var(--module-restaum-primary);background:none;border:none;cursor:pointer;text-decoration:underline;">
+                        <span class="material-icons" style="font-size:14px;vertical-align:middle;">refresh</span>
+                        Recalcular sugestao
+                    </button>
                 </div>
 
                 <div class="ru-form-section">Premiacao (R$)</div>
@@ -184,11 +345,21 @@ class AdminRestaUm {
                         <input type="number" id="ruPremiacaoCampeao" value="100" min="0" step="10">
                     </div>
                     <div>
-                        <label>Vice</label>
+                        <label style="display:flex;align-items:center;gap:6px;">
+                            <input type="checkbox" id="ruViceHabilitado" checked
+                                   onchange="window.adminRestaUm.onToggleVice()"
+                                   style="width:auto;margin:0;">
+                            Vice
+                        </label>
                         <input type="number" id="ruPremiacaoVice" value="50" min="0" step="10">
                     </div>
                     <div>
-                        <label>Terceiro</label>
+                        <label style="display:flex;align-items:center;gap:6px;">
+                            <input type="checkbox" id="ruTerceiroHabilitado" checked
+                                   onchange="window.adminRestaUm.onToggleTerceiro()"
+                                   style="width:auto;margin:0;">
+                            Terceiro
+                        </label>
                         <input type="number" id="ruPremiacaoTerceiro" value="25" min="0" step="5">
                     </div>
                 </div>
@@ -239,6 +410,9 @@ class AdminRestaUm {
                 <div id="ruHistoricoLista" class="ru-timeline"></div>
             </div>
         `;
+
+        // Disparar calculo de sugestao apos render
+        this.atualizarSugestaoRodadas();
     }
 
     renderEdicaoCard(edicao) {
@@ -366,8 +540,10 @@ class AdminRestaUm {
         const eliminadosPorRodada = parseInt(document.getElementById('ruEliminadosPorRodada')?.value) || 1;
         const protecaoPrimeiraRodada = document.getElementById('ruProtecao')?.checked || false;
         const premiacaoCampeao = parseFloat(document.getElementById('ruPremiacaoCampeao')?.value) || 100;
-        const premiacaoVice = parseFloat(document.getElementById('ruPremiacaoVice')?.value) || 50;
-        const premiacaoTerceiro = parseFloat(document.getElementById('ruPremiacaoTerceiro')?.value) || 25;
+        const viceHabilitado = document.getElementById('ruViceHabilitado')?.checked !== false;
+        const premiacaoVice = viceHabilitado ? (parseFloat(document.getElementById('ruPremiacaoVice')?.value) || 50) : 0;
+        const terceiroHabilitado = document.getElementById('ruTerceiroHabilitado')?.checked !== false;
+        const premiacaoTerceiro = terceiroHabilitado ? (parseFloat(document.getElementById('ruPremiacaoTerceiro')?.value) || 25) : 0;
         const bonusHabilitado = document.getElementById('ruBonusHabilitado')?.checked !== false;
         const bonusValorBase = parseFloat(document.getElementById('ruBonusValorBase')?.value) || 2;
         const bonusIncremento = parseFloat(document.getElementById('ruBonusIncremento')?.value) || 0.5;
@@ -390,6 +566,23 @@ class AdminRestaUm {
             return;
         }
 
+        // Validar se rodadas sao suficientes para a disputa acontecer
+        const liga = this.ligas.find(l => l._id === this.ligaId);
+        const totalParticipantes = (liga?.participantes || liga?.times || []).filter(t => t.ativo !== false).length;
+        const eliminacoesNecessarias = totalParticipantes - 1;
+        const rodadasDisponiveis = rodadaFinal - rodadaInicial + 1 - (protecaoPrimeiraRodada ? 1 : 0);
+        const eliminacoesPossiveis = rodadasDisponiveis * eliminadosPorRodada;
+
+        if (eliminacoesPossiveis < eliminacoesNecessarias) {
+            const msg = `Rodadas insuficientes! ${totalParticipantes} participantes precisam de ${eliminacoesNecessarias} eliminacoes, mas o intervalo R${rodadaInicial}-R${rodadaFinal} so comporta ${eliminacoesPossiveis} eliminacoes (${eliminadosPorRodada}/rodada).`;
+            if (window.SuperModal) {
+                SuperModal.toast.warn(msg);
+            } else {
+                alert(msg);
+            }
+            return;
+        }
+
         try {
             const res = await fetch(`/api/resta-um/${this.ligaId}/iniciar`, {
                 method: 'POST',
@@ -400,7 +593,13 @@ class AdminRestaUm {
                     rodadaFinal,
                     eliminadosPorRodada,
                     protecaoPrimeiraRodada,
-                    premiacao: { campeao: premiacaoCampeao, vice: premiacaoVice, terceiro: premiacaoTerceiro },
+                    premiacao: {
+                        campeao: premiacaoCampeao,
+                        vice: premiacaoVice,
+                        viceHabilitado,
+                        terceiro: premiacaoTerceiro,
+                        terceiroHabilitado,
+                    },
                     bonusSobrevivencia: { habilitado: bonusHabilitado, valorBase: bonusValorBase, incremento: bonusIncremento },
                 }),
             });
