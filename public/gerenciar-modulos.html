@@ -272,7 +272,8 @@
                     descricao: 'Modo Survival — escolha o time vencedor ou seja eliminado',
                     base: false,
                     backendId: 'tiro_certo',
-                    status: 'active'
+                    status: 'active',
+                    adminPage: 'admin-tiro-certo.html'
                 },
                 restaUm: {
                     icon: 'sports_kabaddi',
@@ -281,7 +282,7 @@
                     base: false,
                     backendId: 'resta_um',
                     status: 'active',
-                    hasWizard: false  // Usa configurações padrão (admin inicia edições via API)
+                    adminPage: 'admin-resta-um.html'
                 }
             };
 
@@ -418,7 +419,8 @@
                                     ${config.titulo}
                                     ${config.base ? '<span class="badge-base">Base</span>' : ''}
                                     ${config.status === 'planned' ? '<span class="badge-planned">Em Breve</span>' : ''}
-                                    ${config.hasWizard === false && !config.base ? '<span class="badge-no-config">Sem Config</span>' : ''}
+                                    ${config.adminPage ? '<span class="badge-no-config">Admin</span>' : ''}
+                                    ${config.hasWizard === false && !config.base && !config.adminPage ? '<span class="badge-no-config">Sem Config</span>' : ''}
                                 </span>
                             </div>
                             <label class="toggle-switch" onclick="event.stopPropagation();">
@@ -433,7 +435,8 @@
                             ${config.descricao}
                             ${config.base ? ' <span class="badge-always-active"><span class="material-icons" style="font-size: 12px; vertical-align: middle;">check_circle</span> Sempre Ativo</span>' : ''}
                             ${config.status === 'planned' ? '<br><small class="modulo-planned-note"><span class="material-icons" style="font-size: 14px; vertical-align: middle;">rocket_launch</span> Modulo em desenvolvimento</small>' : ''}
-                            ${config.hasWizard === false && !config.base ? '<br><small class="modulo-noconfig-note"><span class="material-icons" style="font-size: 14px; vertical-align: middle;">settings</span> Usa configuracoes padrao</small>' : ''}
+                            ${config.adminPage ? '<br><small class="modulo-noconfig-note"><span class="material-icons" style="font-size: 14px; vertical-align: middle;">open_in_new</span> Clique para abrir painel admin</small>' : ''}
+                            ${config.hasWizard === false && !config.base && !config.adminPage ? '<br><small class="modulo-noconfig-note"><span class="material-icons" style="font-size: 14px; vertical-align: middle;">settings</span> Usa configuracoes padrao</small>' : ''}
                         </div>
                     `;
 
@@ -577,9 +580,15 @@
                     return;
                 }
 
-                // ✅ Verificar se módulo tem wizard de configuração
+                // Módulos com página admin dedicada → redirecionar
+                if (config.adminPage) {
+                    window.location.href = config.adminPage;
+                    return;
+                }
+
+                // Módulos sem wizard de configuração
                 if (config.hasWizard === false) {
-                    showMessage('ℹ️ Este módulo funciona com configurações padrão. Use o toggle para ativar/desativar.', 'info');
+                    showMessage('Este módulo funciona com configurações padrão. Use o toggle para ativar/desativar.', 'info');
                     return;
                 }
 
