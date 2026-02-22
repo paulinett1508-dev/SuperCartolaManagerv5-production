@@ -441,6 +441,53 @@
     margin-top: 2px;
 }
 
+/* Conteúdo dinâmico de regras (via API regras-modulos) */
+.module-lp-regras-dynamic {
+    padding: var(--app-space-2) 0;
+}
+
+.module-lp-regras-content {
+    font-family: var(--app-font-base);
+    font-size: var(--app-font-md);
+    color: var(--app-text-secondary);
+    line-height: var(--app-leading-relaxed);
+}
+
+.module-lp-regras-content h3,
+.module-lp-regras-content h4 {
+    font-family: var(--app-font-brand);
+    font-size: var(--app-font-md);
+    color: var(--app-text-primary);
+    margin: var(--app-space-4) 0 var(--app-space-2) 0;
+}
+
+.module-lp-regras-content h3:first-child {
+    margin-top: 0;
+}
+
+.module-lp-regras-content p {
+    margin: 0 0 var(--app-space-3) 0;
+}
+
+.module-lp-regras-content ul,
+.module-lp-regras-content ol {
+    margin: 0 0 var(--app-space-3) 0;
+    padding-left: var(--app-space-5);
+}
+
+.module-lp-regras-content li {
+    margin-bottom: var(--app-space-2);
+}
+
+.module-lp-regras-content em {
+    color: var(--lp-primary);
+    font-style: italic;
+}
+
+.module-lp-regras-content strong {
+    color: var(--app-text-primary);
+}
+
 /* ============================================================
    8. PREMIAÇÕES CONTENT (inside accordion)
    ============================================================ */

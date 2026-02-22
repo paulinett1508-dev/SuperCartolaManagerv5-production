@@ -34,8 +34,9 @@ export async function inicializarCapitaoParticipante(params) {
     estadoCapitao.timeId = params.timeId;
     estadoCapitao.temporada = window.ParticipanteConfig?.CURRENT_SEASON || new Date().getFullYear();
 
-    // ✅ LP: Init acordeons + carregar premiações (non-blocking)
+    // ✅ LP: Init acordeons + carregar regras e premiações (non-blocking)
     _initLPAccordions('capitao-lp-wrapper');
+    _lpCarregarComoFunciona(params.ligaId, 'capitao_luxo', 'lp-regras-body-capitao');
     _lpCarregarPremiacoes(params.ligaId, 'capitao_luxo', 'lp-premiacoes-body-capitao', 'lp-premiacoes-accordion-capitao');
 
     // 1. Verificar se módulo está ativo na liga
@@ -518,6 +519,24 @@ if (window.Log) Log.info('PARTICIPANTE-CAPITAO', 'Módulo v2.0 pronto');
 // =============================================
 // MODULE LP — Landing Page Utils (Capitão)
 // =============================================
+
+/** Carrega "Como Funciona" da API regras-modulos (admin editável) */
+function _lpCarregarComoFunciona(ligaId, moduloKey, bodyId) {
+    const body = document.getElementById(bodyId);
+    if (!body || !ligaId) return;
+    fetch(`/api/regras-modulos/${ligaId}/${moduloKey}`)
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(data => {
+            if (data?.regra?.conteudo_html) {
+                body.innerHTML = `<div class="module-lp-regras-content">${data.regra.conteudo_html}</div>`;
+            } else {
+                body.innerHTML = '<p style="color:var(--app-text-muted);font-size:var(--app-font-sm);">Regras ainda nao configuradas pelo admin.</p>';
+            }
+        })
+        .catch(() => {
+            body.innerHTML = '<p style="color:var(--app-text-muted);font-size:var(--app-font-sm);">Nao foi possivel carregar as regras.</p>';
+        });
+}
 
 function _initLPAccordions(wrapperId) {
     const wrapper = document.getElementById(wrapperId);

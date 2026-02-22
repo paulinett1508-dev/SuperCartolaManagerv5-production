@@ -32,8 +32,9 @@ export async function inicializarLuvaOuroParticipante({
         timeId,
     });
 
-    // ✅ LP: Init acordeons + carregar premiações (non-blocking)
+    // ✅ LP: Init acordeons + carregar regras e premiações (non-blocking)
     _initLPAccordions('luva-lp-wrapper');
+    _lpCarregarComoFunciona(ligaId, 'luva_ouro', 'lp-regras-body-luva');
     _lpCarregarPremiacoes(ligaId, 'luva_ouro', 'lp-premiacoes-body-luva', 'lp-premiacoes-accordion-luva');
 
     const container = document.getElementById("luvaOuroContainer");
@@ -733,6 +734,24 @@ if (window.Log) Log.info("[PARTICIPANTE-LUVA-OURO] Módulo v4.0 carregado (Cache
 // =====================================================================
 // MODULE LP — Landing Page Utils (Luva de Ouro)
 // =====================================================================
+
+/** Carrega "Como Funciona" da API regras-modulos (admin editável) */
+function _lpCarregarComoFunciona(ligaId, moduloKey, bodyId) {
+    const body = document.getElementById(bodyId);
+    if (!body || !ligaId) return;
+    fetch(`/api/regras-modulos/${ligaId}/${moduloKey}`)
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(data => {
+            if (data?.regra?.conteudo_html) {
+                body.innerHTML = `<div class="module-lp-regras-content">${data.regra.conteudo_html}</div>`;
+            } else {
+                body.innerHTML = '<p style="color:var(--app-text-muted);font-size:var(--app-font-sm);">Regras ainda nao configuradas pelo admin.</p>';
+            }
+        })
+        .catch(() => {
+            body.innerHTML = '<p style="color:var(--app-text-muted);font-size:var(--app-font-sm);">Nao foi possivel carregar as regras.</p>';
+        });
+}
 
 function _initLPAccordions(wrapperId) {
     const wrapper = document.getElementById(wrapperId);

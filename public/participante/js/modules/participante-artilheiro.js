@@ -42,8 +42,9 @@ export async function inicializarArtilheiroParticipante({
     _currentTimeId = timeId;
     _currentParticipante = participante;
 
-    // ✅ LP: Init acordeons + carregar premiações (non-blocking)
+    // ✅ LP: Init acordeons + carregar regras e premiações (non-blocking)
     _initLPAccordions('artilheiro-lp-wrapper');
+    _lpCarregarComoFunciona(ligaId, 'artilheiro', 'lp-regras-body-artilheiro');
     _lpCarregarPremiacoes(ligaId, 'artilheiro', 'lp-premiacoes-body-artilheiro', 'lp-premiacoes-accordion-artilheiro');
 
     const container = document.getElementById("artilheiro-content");
@@ -895,6 +896,24 @@ if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Módulo v4.1 carregado (Reor
 // =====================================================================
 // MODULE LP — Landing Page Utils (Artilheiro)
 // =====================================================================
+
+/** Carrega "Como Funciona" da API regras-modulos (admin editável) */
+function _lpCarregarComoFunciona(ligaId, moduloKey, bodyId) {
+    const body = document.getElementById(bodyId);
+    if (!body || !ligaId) return;
+    fetch(`/api/regras-modulos/${ligaId}/${moduloKey}`)
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(data => {
+            if (data?.regra?.conteudo_html) {
+                body.innerHTML = `<div class="module-lp-regras-content">${data.regra.conteudo_html}</div>`;
+            } else {
+                body.innerHTML = '<p style="color:var(--app-text-muted);font-size:var(--app-font-sm);">Regras ainda nao configuradas pelo admin.</p>';
+            }
+        })
+        .catch(() => {
+            body.innerHTML = '<p style="color:var(--app-text-muted);font-size:var(--app-font-sm);">Nao foi possivel carregar as regras.</p>';
+        });
+}
 
 /** Init accordion toggle behavior for a module LP wrapper */
 function _initLPAccordions(wrapperId) {

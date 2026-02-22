@@ -29,8 +29,9 @@ export async function inicializarRestaUmParticipante({ participante, ligaId, tim
     _currentParticipante = participante;
     _wasLanterna = false;
 
-    // ✅ LP: Init acordeons (premiações carregadas após dados do status)
+    // ✅ LP: Init acordeons + carregar regras (premiações carregadas após dados do status)
     _initLPAccordions('restaum-lp-wrapper');
+    _lpCarregarComoFunciona(ligaId, 'resta_um', 'lp-regras-body-resta-um');
 
     const container = document.getElementById('resta-um-content');
     if (!container) {
@@ -426,6 +427,24 @@ if (window.Log) Log.info('[PARTICIPANTE-RESTA-UM] Módulo v2.0 carregado');
 // =====================================================================
 // MODULE LP — Landing Page Utils (Resta Um)
 // =====================================================================
+
+/** Carrega "Como Funciona" da API regras-modulos (admin editável) */
+function _lpCarregarComoFunciona(ligaId, moduloKey, bodyId) {
+    const body = document.getElementById(bodyId);
+    if (!body || !ligaId) return;
+    fetch(`/api/regras-modulos/${ligaId}/${moduloKey}`)
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(data => {
+            if (data?.regra?.conteudo_html) {
+                body.innerHTML = `<div class="module-lp-regras-content">${data.regra.conteudo_html}</div>`;
+            } else {
+                body.innerHTML = '<p style="color:var(--app-text-muted);font-size:var(--app-font-sm);">Regras ainda nao configuradas pelo admin.</p>';
+            }
+        })
+        .catch(() => {
+            body.innerHTML = '<p style="color:var(--app-text-muted);font-size:var(--app-font-sm);">Nao foi possivel carregar as regras.</p>';
+        });
+}
 
 function _initLPAccordions(wrapperId) {
     const wrapper = document.getElementById(wrapperId);
