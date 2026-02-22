@@ -212,6 +212,11 @@
         "path": "public/css/modules/admin-tiro-certo.css",
         "loadedBy": ["admin-tiro-certo.html"],
         "description": "Gerenciamento admin do modo Tiro Certo (Survival)"
+      },
+      {
+        "path": "public/css/modules/admin-resta-um.css",
+        "loadedBy": ["admin-resta-um.html"],
+        "description": "Gerenciamento admin do modo Resta Um (Eliminacao Progressiva)"
       }
     ]
   },

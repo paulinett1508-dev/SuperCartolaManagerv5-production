@@ -210,7 +210,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="gerenciar-modulos.html" class="sidebar-accordion-item" data-page="gerenciar-modulos.html">
+                                <a href="#" class="sidebar-accordion-item" data-page="gerenciar-modulos.html" onclick="navegarGerenciarModulos(event)">
                                     <span class="material-icons">widgets</span>
                                     <span>Gerenciar Módulos</span>
                                 </a>
@@ -266,6 +266,12 @@
                                 <a href="admin-tiro-certo.html" class="sidebar-accordion-item" data-page="admin-tiro-certo.html">
                                     <span class="material-icons">gps_fixed</span>
                                     <span>Tiro Certo</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="admin-resta-um.html" class="sidebar-accordion-item" data-page="admin-resta-um.html">
+                                    <span class="material-icons">sports_kabaddi</span>
+                                    <span>Resta Um</span>
                                 </a>
                             </li>
                         </ul>
@@ -726,6 +732,7 @@
                         'admin-orchestrator.html': 'operacoes',
                         // Módulos
                         'admin-tiro-certo.html': 'modulos',
+                        'admin-resta-um.html': 'modulos',
                         // Analytics
                         'github-analytics-unified.html': 'analytics',
                         'dashboard-saude.html': 'analytics',
@@ -975,6 +982,7 @@
                         "analisar-participantes.html": { title: "Analisar Participantes", subtitle: "Gestao Unificada de Participantes" },
                         "admin-orchestrator.html": { title: "Orchestrator", subtitle: "Round-Market Orchestrator" },
                         "admin-tiro-certo.html": { title: "Tiro Certo", subtitle: "Gerenciar Modo Survival" },
+                        "admin-resta-um.html": { title: "Resta Um", subtitle: "Gerenciar Eliminacao Progressiva" },
                         // Fase 1 - Páginas integradas ao orquestrador
                         "github-analytics-unified.html": { title: "Repositório", subtitle: "Analytics do GitHub" },
                         "notificador.html": { title: "Notificador", subtitle: "Sistema de Avisos In-App" },
@@ -1062,7 +1070,8 @@
                     'admin-validacao-migracao.html',
                     'migrar-localstorage-mongodb.html',
                     'modo-manutencao-avancado.html',
-                    'admin-tiro-certo.html'
+                    'admin-tiro-certo.html',
+                    'admin-resta-um.html'
                 ],
 
                 init() {
@@ -1227,6 +1236,14 @@
                             window.__gerenciar_state.initialized = false;
                             window.__gerenciar_state.lastInitTimestamp = 0;
                         }
+                        // ✅ FIX: Reset guards do gerenciar-modulos.html
+                        if (window.__gm_state) {
+                            window.__gm_state.initRunning = false;
+                        }
+                        if (pageName === 'gerenciar-modulos.html') {
+                            window.__gm_ready_guard = false;
+                            window.__gm_domcontent_guard = false;
+                        }
 
                         setTimeout(() => {
                             window.dispatchEvent(new CustomEvent('spa:navigated', {
@@ -1315,6 +1332,29 @@
                     SPANavigation.navigate('painel.html');
                 } else {
                     window.location.href = "painel.html";
+                }
+            }
+
+            /**
+             * Navega para Gerenciar Módulos passando o ID da liga atual
+             * @param {Event} event - Evento de clique
+             */
+            function navegarGerenciarModulos(event) {
+                event.preventDefault();
+                const urlParams = new URLSearchParams(window.location.search);
+                const ligaId = urlParams.get('id');
+
+                if (!ligaId) {
+                    // Se não tem liga selecionada, mostrar alerta
+                    alert('Selecione uma liga primeiro clicando em uma liga no menu lateral.');
+                    return;
+                }
+
+                const url = `gerenciar-modulos.html?id=${ligaId}`;
+                if (SPANavigation && SPANavigation.enabled) {
+                    SPANavigation.navigate(url);
+                } else {
+                    window.location.href = url;
                 }
             }
 

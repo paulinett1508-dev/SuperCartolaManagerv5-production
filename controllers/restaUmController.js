@@ -19,20 +19,24 @@ export async function obterStatus(req, res) {
     try {
         const { ligaId } = req.params;
         const temporada = parseInt(req.query.temporada) || CURRENT_SEASON;
+        const edicaoNum = parseInt(req.query.edicao) || null;
 
-        const edicao = await RestaUmCache.findOne({
-            liga_id: ligaId,
-            temporada,
-            status: { $in: ['em_andamento', 'finalizada'] },
-        }).sort({ edicao: -1 }).lean();
+        // Se edicao especifica foi pedida (admin), buscar direto
+        const queryAtiva = { liga_id: ligaId, temporada };
+        if (edicaoNum) {
+            queryAtiva.edicao = edicaoNum;
+        } else {
+            queryAtiva.status = { $in: ['em_andamento', 'finalizada'] };
+        }
+
+        const edicao = await RestaUmCache.findOne(queryAtiva).sort({ edicao: -1 }).lean();
 
         if (!edicao) {
             // Tentar buscar edição pendente
-            const pendente = await RestaUmCache.findOne({
-                liga_id: ligaId,
-                temporada,
-                status: 'pendente',
-            }).sort({ edicao: -1 }).lean();
+            const queryPendente = { liga_id: ligaId, temporada, status: 'pendente' };
+            if (edicaoNum) queryPendente.edicao = edicaoNum;
+
+            const pendente = await RestaUmCache.findOne(queryPendente).sort({ edicao: -1 }).lean();
 
             if (pendente) {
                 return res.json({

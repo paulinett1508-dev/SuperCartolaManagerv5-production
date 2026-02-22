@@ -285,6 +285,14 @@
     --module-luva-border: rgba(255, 215, 0, 0.3);
     --gradient-luva: linear-gradient(135deg, var(--module-luva-primary) 0%, var(--module-luva-dark) 100%);
 
+    /* Resta Um - Rose (representa eliminação/perigo) */
+    --module-restaum-primary: #f43f5e;
+    --module-restaum-dark: #e11d48;
+    --module-restaum-light: #fb7185;
+    --module-restaum-muted: rgba(244, 63, 94, 0.1);
+    --module-restaum-border: rgba(244, 63, 94, 0.3);
+    --gradient-restaum: linear-gradient(135deg, var(--module-restaum-primary) 0%, var(--module-restaum-dark) 100%);
+
     /* Dashboard de Saúde - Verde (representa saúde/monitoramento) */
     --module-saude-primary: #10b981;
     --module-saude-dark: #059669;

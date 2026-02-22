@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resta Um - Admin - Super Cartola Manager</title>
+    <!-- Design Tokens (SEMPRE PRIMEIRO) -->
+    <link rel="stylesheet" href="css/_admin-tokens.css" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="css/modules/dashboard-redesign.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Russo+One&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="stylesheet" href="css/modules/super-modal.css" />
+    <link rel="stylesheet" href="css/modules/admin-resta-um.css" />
+    <script src="js/super-modal.js"></script>
+</head>
+<body>
+    <!-- Mobile Sidebar Toggle -->
+    <button class="mobile-sidebar-toggle" id="mobileSidebarToggle" onclick="toggleMobileSidebar()">
+        <span class="material-icons">menu</span>
+    </button>
+
+    <div class="admin-page">
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content">
+            <div class="admin-content">
+                <div class="ru-admin-container">
+
+                    <!-- Header -->
+                    <div class="ru-admin-header">
+                        <div>
+                            <h1>
+                                <span class="material-icons" style="color:var(--module-restaum-primary);">sports_kabaddi</span>
+                                Resta Um
+                            </h1>
+                            <p>Gerenciar edicoes da Eliminacao Progressiva</p>
+                        </div>
+                    </div>
+
+                    <!-- Seletor de Liga -->
+                    <div class="ru-liga-selector">
+                        <select id="ruLigaSelect" onchange="window.adminRestaUm.onLigaChange()">
+                            <option value="">Selecione uma liga...</option>
+                        </select>
+                    </div>
+
+                    <!-- Conteudo principal (carregado via JS) -->
+                    <div id="ruAdminContent">
+                        <div class="ru-empty">
+                            <span class="material-icons" style="font-size:3rem;opacity:0.3;">sports_kabaddi</span>
+                            <p>Selecione uma liga para gerenciar o Resta Um</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Carregar sidebar do layout -->
+    <script>
+        async function carregarLayout() {
+            try {
+                const response = await fetch('layout.html');
+                const layoutHtml = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(layoutHtml, 'text/html');
+                const sidebar = doc.querySelector('.app-sidebar');
+                if (sidebar) {
+                    document.getElementById('sidebar-placeholder')?.replaceWith(sidebar);
+                }
+                const scripts = doc.querySelectorAll('script');
+                scripts.forEach(script => {
+                    if (script.textContent.trim()) {
+                        const newScript = document.createElement('script');
+                        newScript.textContent = `(function(){${script.textContent}})();`;
+                        document.head.appendChild(newScript);
+                    }
+                });
+                setTimeout(() => {
+                    if (typeof window.verificarMenuSuperAdmin === 'function') {
+                        window.verificarMenuSuperAdmin();
+                    }
+                }, 150);
+            } catch (error) {
+                console.error('Erro ao carregar layout:', error);
+            }
+        }
+        carregarLayout();
+    </script>
+
+    <!-- Controller JS -->
+    <script src="js/admin/modules/admin-resta-um.js"></script>
+</body>
+</html>
