@@ -23,13 +23,6 @@
         "NODE_ENV": "production"
       }
     },
-    "figma": {
-      "command": "npx",
-      "args": ["-y", "@anthropic/mcp-server-figma"],
-      "env": {
-        "FIGMA_ACCESS_TOKEN": "SEU_FIGMA_TOKEN_AQUI"
-      }
-    },
     "stitch": {
       "command": "npx",
       "args": ["-y", "@_davideast/stitch-mcp", "proxy"],
