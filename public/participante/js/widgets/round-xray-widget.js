@@ -4,7 +4,11 @@
  * Widget flutuante pós-rodada com análise de disputas internas
  * Aparece quando rodada encerra (consolidada + mercado aberto)
  *
- * @version 1.1.0 - Botão refresh no modal compacto
+ * @version 2.0.0 - Conformidade com Design System
+ *   - Usa tokens de _app-tokens.css (zero variáveis próprias)
+ *   - Material Icons em vez de emojis
+ *   - Truncamento correto de pontos (Math.trunc)
+ *   - Aria-labels e role="dialog" para acessibilidade
  *   - FAB bola estática (sem animações)
  *   - Modal com narrativa inteligente
  *   - Foco em disputas (PC, MM, Artilheiro, Luva, Capitão)
@@ -140,6 +144,8 @@ function criarFAB() {
     const fab = document.createElement("div");
     fab.id = "rxrayFab";
     fab.className = "rxray-fab";
+    fab.setAttribute("role", "button");
+    fab.setAttribute("aria-label", "Abrir Raio-X da Rodada");
     fab.innerHTML = `
         <div class="rxray-fab-icon"><span class="material-icons">sports_soccer</span></div>
         <div class="rxray-fab-badge" id="rxrayBadge">${RXrayState.rodadaConsolidada || ""}</div>
@@ -321,6 +327,8 @@ function criarModal() {
     const modal = document.createElement("div");
     modal.id = "rxrayModal";
     modal.className = "rxray-modal";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-label", "Raio-X da Rodada");
     modal.innerHTML = `
         <div class="rxray-modal-overlay"></div>
         <div class="rxray-modal-content">
@@ -328,10 +336,10 @@ function criarModal() {
             <div class="rxray-modal-header">
                 <h3><span class="material-icons">biotech</span> Raio-X da Rodada <span id="rxrayModalRodada"></span></h3>
                 <div class="rxray-header-actions">
-                    <button id="rxrayRefreshBtn" class="rxray-refresh-btn" title="Atualizar dados">
+                    <button id="rxrayRefreshBtn" class="rxray-refresh-btn" title="Atualizar dados" aria-label="Atualizar dados do raio-x">
                         <span class="material-icons">refresh</span>
                     </button>
-                    <button id="rxrayCloseBtn" class="rxray-close-btn">
+                    <button id="rxrayCloseBtn" class="rxray-close-btn" aria-label="Fechar modal raio-x">
                         <span class="material-icons">close</span>
                     </button>
                 </div>
