@@ -5,7 +5,48 @@
  * Mostra disputas internas ativas nos módulos da liga
  *
  * v1.0 - Criação inicial
+ * v1.1 - Conformidade design system: hardcoded → CSS vars
  */
+
+/* ========================================
+   0. FIRE PALETTE — Widget-scoped variables
+   Cores do efeito fogo centralizadas aqui.
+   Tokens do app usados onde possível.
+   ======================================== */
+:root {
+    /* Fire: tons quentes (base = --app-primary #FF5500) */
+    --wh-fire-hot: var(--app-primary);
+    --wh-fire-warm: var(--app-primary-light);
+    --wh-fire-mid: #ff8c00;
+    --wh-fire-gold: var(--app-gold);
+
+    /* Fire: shadows/glows (RGB do --app-primary: 255,85,0) */
+    --wh-glow-strong: rgba(255, 85, 0, 0.7);
+    --wh-glow-medium: rgba(255, 85, 0, 0.6);
+    --wh-glow-soft: rgba(255, 85, 0, 0.5);
+    --wh-glow-subtle: rgba(255, 85, 0, 0.4);
+    --wh-glow-faint: rgba(255, 85, 0, 0.08);
+    --wh-gold-glow: rgba(255, 215, 0, 0.8);
+    --wh-gold-soft: rgba(255, 215, 0, 0.6);
+    --wh-gold-subtle: rgba(255, 215, 0, 0.2);
+
+    /* Gray: estados dimmed (WAITING/FINISHED) */
+    --wh-gray-700: #374151;
+    --wh-gray-600: #4b5563;
+    --wh-gray-500: #6b7280;
+    --wh-gray-400: #9ca3af;
+    --wh-gray-300: #d1d5db;
+
+    /* Interval: laranja intermediário */
+    --wh-interval-base: #f97316;
+    --wh-interval-mid: #fb923c;
+    --wh-interval-light: #fdba74;
+
+    /* Cooling: âmbar escuro → cinza */
+    --wh-cooling-dark: #b45309;
+    --wh-cooling-deep: #92400e;
+    --wh-cooling-stone: #78716c;
+}
 
 /* ========================================
    1. FAB BUTTON (Floating Action Button)
@@ -18,12 +59,12 @@
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #ff4500 0%, #ff6b00 50%, #ff8c00 100%);
+    background: linear-gradient(135deg, var(--wh-fire-hot) 0%, var(--wh-fire-warm) 50%, var(--wh-fire-mid) 100%);
     background-size: 200% 200%;
     border: 3px solid rgba(255, 255, 255, 0.3);
     box-shadow:
-        0 4px 20px rgba(255, 69, 0, 0.6),
-        0 0 40px rgba(255, 69, 0, 0.4),
+        0 4px 20px var(--wh-glow-medium),
+        0 0 40px var(--wh-glow-subtle),
         inset 0 -2px 10px rgba(0, 0, 0, 0.2);
     cursor: grab;
     z-index: 1000;
@@ -45,8 +86,8 @@
     cursor: grabbing;
     transform: scale(1.1);
     box-shadow:
-        0 8px 30px rgba(255, 69, 0, 0.7),
-        0 0 60px rgba(255, 69, 0, 0.5);
+        0 8px 30px var(--wh-glow-strong),
+        0 0 60px var(--wh-glow-soft);
     animation: none; /* Pausar animações durante drag */
     opacity: 0.9;
 }
@@ -89,7 +130,7 @@
     position: absolute;
     inset: -4px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #ff4500, #ff8c00, #ffd700, #ff4500);
+    background: linear-gradient(135deg, var(--wh-fire-hot), var(--wh-fire-mid), var(--wh-fire-gold), var(--wh-fire-hot));
     background-size: 300% 300%;
     animation: wh-ring-rotate 2s linear infinite;
     z-index: -1;
@@ -101,7 +142,7 @@
     position: absolute;
     inset: -8px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(255, 69, 0, 0.4) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--wh-glow-subtle) 0%, transparent 70%);
     animation: wh-glow-pulse 1.5s ease-in-out infinite;
     z-index: -2;
 }
@@ -109,8 +150,8 @@
 .wh-fab:hover {
     transform: scale(1.15) rotate(-5deg);
     box-shadow:
-        0 8px 30px rgba(255, 69, 0, 0.7),
-        0 0 60px rgba(255, 69, 0, 0.5);
+        0 8px 30px var(--wh-glow-strong),
+        0 0 60px var(--wh-glow-soft);
     border-color: rgba(255, 255, 255, 0.5);
 }
 
@@ -186,8 +227,8 @@
     0%, 100% {
         transform: scale(1) rotate(0deg);
         box-shadow:
-            0 4px 20px rgba(255, 69, 0, 0.6),
-            0 0 40px rgba(255, 69, 0, 0.4);
+            0 4px 20px var(--wh-glow-medium),
+            0 0 40px var(--wh-glow-subtle);
     }
     25% {
         transform: scale(1.1) rotate(-5deg);
@@ -195,8 +236,8 @@
     50% {
         transform: scale(1.15) rotate(0deg);
         box-shadow:
-            0 8px 40px rgba(255, 69, 0, 0.8),
-            0 0 80px rgba(255, 69, 0, 0.6);
+            0 8px 40px rgba(255, 85, 0, 0.8),
+            0 0 80px var(--wh-glow-medium);
     }
     75% {
         transform: scale(1.1) rotate(5deg);
@@ -287,7 +328,7 @@
 
 /* --- WAITING: Fogo dim/cinza, sem animação forte --- */
 .wh-fab--waiting {
-    background: linear-gradient(135deg, #6b7280 0%, #9ca3af 50%, #6b7280 100%) !important;
+    background: linear-gradient(135deg, var(--wh-gray-500) 0%, var(--wh-gray-400) 50%, var(--wh-gray-500) 100%) !important;
     background-size: 200% 200% !important;
     border-color: rgba(156, 163, 175, 0.4) !important;
     box-shadow:
@@ -297,7 +338,7 @@
 }
 
 .wh-fab--waiting::before {
-    background: linear-gradient(135deg, #6b7280, #9ca3af, #d1d5db, #6b7280) !important;
+    background: linear-gradient(135deg, var(--wh-gray-500), var(--wh-gray-400), var(--wh-gray-300), var(--wh-gray-500)) !important;
     opacity: 0.3 !important;
     animation: wh-ring-rotate 6s linear infinite !important;
 }
@@ -315,32 +356,32 @@
 
 /* --- LIVE: Fogo vibrante máximo, todas animações ativas --- */
 .wh-fab--live {
-    background: linear-gradient(135deg, #ff4500 0%, #ff6b00 30%, #ff8c00 60%, #ffd700 100%) !important;
+    background: linear-gradient(135deg, var(--wh-fire-hot) 0%, var(--wh-fire-warm) 30%, var(--wh-fire-mid) 60%, var(--wh-fire-gold) 100%) !important;
     background-size: 300% 300% !important;
-    border-color: rgba(255, 215, 0, 0.6) !important;
+    border-color: var(--wh-gold-soft) !important;
     box-shadow:
-        0 4px 25px rgba(255, 69, 0, 0.7),
-        0 0 50px rgba(255, 69, 0, 0.5),
+        0 4px 25px var(--wh-glow-strong),
+        0 0 50px var(--wh-glow-soft),
         0 0 80px rgba(255, 140, 0, 0.3),
         inset 0 -2px 10px rgba(0, 0, 0, 0.2) !important;
     animation: wh-gradient-shift 1.5s ease infinite, wh-breathe 1.2s ease-in-out infinite !important;
 }
 
 .wh-fab--live::before {
-    background: linear-gradient(135deg, #ff4500, #ff8c00, #ffd700, #ff4500) !important;
+    background: linear-gradient(135deg, var(--wh-fire-hot), var(--wh-fire-mid), var(--wh-fire-gold), var(--wh-fire-hot)) !important;
     opacity: 0.9 !important;
     animation: wh-ring-rotate 1s linear infinite !important;
 }
 
 .wh-fab--live::after {
-    background: radial-gradient(circle, rgba(255, 69, 0, 0.6) 0%, rgba(255, 215, 0, 0.2) 50%, transparent 70%) !important;
+    background: radial-gradient(circle, var(--wh-glow-medium) 0%, var(--wh-gold-subtle) 50%, transparent 70%) !important;
     animation: wh-glow-pulse 0.8s ease-in-out infinite !important;
 }
 
 .wh-fab--live .wh-fab-icon {
     color: var(--app-text-primary) !important;
     animation: wh-icon-dance-intense 0.3s ease-in-out infinite alternate !important;
-    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8)) !important;
+    filter: drop-shadow(0 0 8px var(--wh-gold-glow)) !important;
 }
 
 @keyframes wh-icon-dance-intense {
@@ -350,7 +391,7 @@
 
 /* --- INTERVAL: Fogo sutil, pulsação lenta --- */
 .wh-fab--interval {
-    background: linear-gradient(135deg, #f97316 0%, #fb923c 50%, #fdba74 100%) !important;
+    background: linear-gradient(135deg, var(--wh-interval-base) 0%, var(--wh-interval-mid) 50%, var(--wh-interval-light) 100%) !important;
     background-size: 200% 200% !important;
     border-color: rgba(249, 115, 22, 0.3) !important;
     box-shadow:
@@ -360,7 +401,7 @@
 }
 
 .wh-fab--interval::before {
-    background: linear-gradient(135deg, #f97316, #fb923c, #fdba74, #f97316) !important;
+    background: linear-gradient(135deg, var(--wh-interval-base), var(--wh-interval-mid), var(--wh-interval-light), var(--wh-interval-base)) !important;
     opacity: 0.4 !important;
     animation: wh-ring-rotate 4s linear infinite !important;
 }
@@ -378,7 +419,7 @@
 
 /* --- COOLING: Fogo diminuindo, laranja → cinza gradual --- */
 .wh-fab--cooling {
-    background: linear-gradient(135deg, #b45309 0%, #92400e 50%, #78716c 100%) !important;
+    background: linear-gradient(135deg, var(--wh-cooling-dark) 0%, var(--wh-cooling-deep) 50%, var(--wh-cooling-stone) 100%) !important;
     background-size: 200% 200% !important;
     border-color: rgba(180, 83, 9, 0.3) !important;
     box-shadow:
@@ -388,7 +429,7 @@
 }
 
 .wh-fab--cooling::before {
-    background: linear-gradient(135deg, #b45309, #92400e, #78716c, #b45309) !important;
+    background: linear-gradient(135deg, var(--wh-cooling-dark), var(--wh-cooling-deep), var(--wh-cooling-stone), var(--wh-cooling-dark)) !important;
     opacity: 0.3 !important;
     animation: wh-ring-rotate 5s linear infinite !important;
 }
@@ -412,7 +453,7 @@
 
 /* --- FINISHED: Fogo apagado, ícone cinza estático --- */
 .wh-fab--finished {
-    background: linear-gradient(135deg, #374151 0%, #4b5563 50%, #374151 100%) !important;
+    background: linear-gradient(135deg, var(--wh-gray-700) 0%, var(--wh-gray-600) 50%, var(--wh-gray-700) 100%) !important;
     background-size: 100% 100% !important;
     border-color: rgba(75, 85, 99, 0.3) !important;
     box-shadow:
@@ -421,7 +462,7 @@
 }
 
 .wh-fab--finished::before {
-    background: linear-gradient(135deg, #374151, #4b5563, #6b7280, #374151) !important;
+    background: linear-gradient(135deg, var(--wh-gray-700), var(--wh-gray-600), var(--wh-gray-500), var(--wh-gray-700)) !important;
     opacity: 0.15 !important;
     animation: none !important;
 }

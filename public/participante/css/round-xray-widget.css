@@ -42,7 +42,7 @@
 
 .rxray-fab-icon .material-icons {
     font-size: 28px;
-    color: #fff;
+    color: var(--app-text-white);
     filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
 }
 
@@ -74,7 +74,7 @@
     display: none;
     align-items: center;
     justify-content: center;
-    z-index: 10000;
+    z-index: var(--app-z-modal);
     padding: 16px;
 }
 
