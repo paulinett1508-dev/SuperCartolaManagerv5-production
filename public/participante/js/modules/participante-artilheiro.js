@@ -45,7 +45,7 @@ export async function inicializarArtilheiroParticipante({
     // ✅ LP: Init acordeons + carregar regras e premiações (non-blocking)
     _initLPAccordions('artilheiro-lp-wrapper');
     _lpCarregarComoFunciona(ligaId, 'artilheiro', 'lp-regras-body-artilheiro');
-    _lpCarregarPremiacoes(ligaId, 'artilheiro', 'lp-premiacoes-body-artilheiro', 'lp-premiacoes-accordion-artilheiro');
+    _lpCarregarPremiacoesHibrida(ligaId, 'artilheiro', 'artilheiro_premiacao', 'lp-premiacoes-body-artilheiro');
 
     const container = document.getElementById("artilheiro-content");
     if (!container) {
@@ -933,11 +933,40 @@ function _lpFormatCurrency(val) {
     return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-/** Render financeiro_override into premiações accordion */
-function _lpRenderPremiacoes(fo, bodyId, accordionId) {
+/**
+ * Híbrida: tenta carregar valores reais de financeiro_override (ModuleConfig),
+ * se não existir usa texto descritivo de regras-modulos como fallback.
+ */
+function _lpCarregarPremiacoesHibrida(ligaId, moduloSlug, regraKey, bodyId) {
     const body = document.getElementById(bodyId);
-    const accordion = document.getElementById(accordionId);
-    if (!body || !accordion || !fo) return;
+    if (!body || !ligaId) return;
+
+    // 1. Tentar ModuleConfig (valores financeiros reais)
+    fetch(`/api/liga/${ligaId}/modulos/${moduloSlug}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+            const fo = data?.config?.financeiro_override || data?.financeiro_override;
+            const html = fo ? _lpRenderFinanceiroHtml(fo) : '';
+            if (html) {
+                body.innerHTML = html;
+                return;
+            }
+            // 2. Fallback: texto descritivo de regras-modulos
+            return fetch(`/api/regras-modulos/${ligaId}/${regraKey}`)
+                .then(r => r.ok ? r.json() : null)
+                .then(rd => {
+                    if (rd?.regra?.conteudo_html) {
+                        body.innerHTML = `<div class="module-lp-premiacoes-content">${rd.regra.conteudo_html}</div>`;
+                    } else {
+                        body.innerHTML = '<p style="color:var(--app-text-muted);font-size:var(--app-font-sm);text-align:center;">Premiacoes ainda nao configuradas pelo admin.</p>';
+                    }
+                });
+        })
+        .catch(() => { body.innerHTML = '<p style="color:var(--app-text-muted);font-size:var(--app-font-sm);text-align:center;">Nao foi possivel carregar as premiacoes.</p>'; });
+}
+
+/** Render financeiro_override into HTML grid */
+function _lpRenderFinanceiroHtml(fo) {
     const posLabels = { '1': '1º Lugar', '2': '2º Lugar', '3': '3º Lugar', '4': '4º Lugar', '5': '5º Lugar' };
     const posClasses = { '1': 'pos-1', '2': 'pos-2', '3': 'pos-3' };
     const keyLabels = { vitoria: 'Vitória', derrota: 'Derrota', empate: 'Empate', por_gol: 'Por Gol', campeao: 'Campeão' };
@@ -968,22 +997,7 @@ function _lpRenderPremiacoes(fo, bodyId, accordionId) {
             }
         });
     }
-    if (!html) return;
-    body.innerHTML = html;
-    accordion.style.display = '';
-}
-
-/** Load premiações from ModuleConfig API (non-blocking) */
-function _lpCarregarPremiacoes(ligaId, moduloSlug, bodyId, accordionId) {
-    fetch(`/api/liga/${ligaId}/modulos/${moduloSlug}`)
-        .then(r => r.ok ? r.json() : null)
-        .then(data => {
-            if (!data) return;
-            const fo = data.config?.financeiro_override || data.financeiro_override;
-            if (!fo) return;
-            _lpRenderPremiacoes(fo, bodyId, accordionId);
-        })
-        .catch(() => {});
+    return html ? `<div class="module-lp-premiacoes-grid">${html}</div>` : '';
 }
 
 /** Extract ranking array from various API response shapes */

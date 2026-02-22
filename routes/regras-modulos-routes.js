@@ -268,6 +268,66 @@ const MODULOS_DEFAULT = [
 <p><em>Cada rodada é uma final. Não dá pra relaxar nunca!</em></p>`
     },
     {
+        modulo: 'artilheiro_premiacao',
+        titulo: 'Premiação Artilheiro Campeão',
+        icone: 'emoji_events',
+        cor: '#22c55e',
+        ordem: 107,
+        conteudo_html: `<h4>Premiação — Artilheiro Campeão</h4>
+<p>Os participantes com <strong>maior saldo de gols</strong> ao final da temporada recebem prêmios em dinheiro:</p>
+<ul>
+<li><strong>1º lugar</strong> — Maior prêmio</li>
+<li><strong>2º lugar</strong> — Prêmio intermediário</li>
+<li><strong>3º lugar</strong> — Menor prêmio</li>
+</ul>
+<p><em>Valores definidos pelo administrador da liga. Consulte as regras da sua liga para saber os valores exatos.</em></p>`
+    },
+    {
+        modulo: 'luva_ouro_premiacao',
+        titulo: 'Premiação Luva de Ouro',
+        icone: 'emoji_events',
+        cor: '#ffd700',
+        ordem: 108,
+        conteudo_html: `<h4>Premiação — Luva de Ouro</h4>
+<p>Os participantes cujos <strong>goleiros acumularam mais pontos</strong> ao longo da temporada são premiados:</p>
+<ul>
+<li><strong>1º lugar</strong> — Maior prêmio</li>
+<li><strong>2º lugar</strong> — Prêmio intermediário</li>
+<li><strong>3º lugar</strong> — Menor prêmio</li>
+</ul>
+<p><em>Valores definidos pelo administrador da liga. Consulte as regras da sua liga para saber os valores exatos.</em></p>`
+    },
+    {
+        modulo: 'capitao_luxo_premiacao',
+        titulo: 'Premiação Capitão de Luxo',
+        icone: 'emoji_events',
+        cor: '#8b5cf6',
+        ordem: 109,
+        conteudo_html: `<h4>Premiação — Capitão de Luxo</h4>
+<p>Os participantes que acumularem <strong>mais pontos com seus capitães</strong> ao final da temporada levam o prêmio:</p>
+<ul>
+<li><strong>1º lugar</strong> — Maior prêmio</li>
+<li><strong>2º lugar</strong> — Prêmio intermediário</li>
+<li><strong>3º lugar</strong> — Menor prêmio</li>
+</ul>
+<p><em>Valores definidos pelo administrador da liga. Consulte as regras da sua liga para saber os valores exatos.</em></p>`
+    },
+    {
+        modulo: 'resta_um_premiacao',
+        titulo: 'Premiação Resta Um',
+        icone: 'emoji_events',
+        cor: '#f43f5e',
+        ordem: 115,
+        conteudo_html: `<h4>Premiação — Resta Um</h4>
+<p>O <strong>último sobrevivente</strong> é coroado campeão e leva o maior prêmio!</p>
+<ul>
+<li><strong>Campeão</strong> — Prêmio principal</li>
+<li><strong>Vice-campeão</strong> — Prêmio secundário (se habilitado)</li>
+<li><strong>Terceiro lugar</strong> — Prêmio menor (se habilitado)</li>
+</ul>
+<p><em>Valores e posições premiadas definidos pelo administrador da liga a cada edição.</em></p>`
+    },
+    {
         modulo: 'tiro_certo',
         titulo: 'Tiro Certo',
         icone: 'gps_fixed',

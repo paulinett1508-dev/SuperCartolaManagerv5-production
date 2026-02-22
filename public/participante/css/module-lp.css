@@ -488,8 +488,56 @@
     color: var(--app-text-primary);
 }
 
+/* Conteúdo dinâmico de premiações (via API regras-modulos, análogo ao regras-content) */
+.module-lp-premiacoes-dynamic {
+    padding: var(--app-space-2) 0;
+}
+
+.module-lp-premiacoes-content {
+    font-family: var(--app-font-base);
+    font-size: var(--app-font-md);
+    color: var(--app-text-secondary);
+    line-height: var(--app-leading-relaxed);
+}
+
+.module-lp-premiacoes-content h3,
+.module-lp-premiacoes-content h4 {
+    font-family: var(--app-font-brand);
+    font-size: var(--app-font-md);
+    color: var(--lp-primary);
+    margin: var(--app-space-4) 0 var(--app-space-2) 0;
+}
+
+.module-lp-premiacoes-content h3:first-child,
+.module-lp-premiacoes-content h4:first-child {
+    margin-top: 0;
+}
+
+.module-lp-premiacoes-content p {
+    margin: 0 0 var(--app-space-3) 0;
+}
+
+.module-lp-premiacoes-content ul,
+.module-lp-premiacoes-content ol {
+    margin: 0 0 var(--app-space-3) 0;
+    padding-left: var(--app-space-5);
+}
+
+.module-lp-premiacoes-content li {
+    margin-bottom: var(--app-space-2);
+}
+
+.module-lp-premiacoes-content em {
+    color: var(--lp-primary);
+    font-style: italic;
+}
+
+.module-lp-premiacoes-content strong {
+    color: var(--app-text-primary);
+}
+
 /* ============================================================
-   8. PREMIAÇÕES CONTENT (inside accordion)
+   8. PREMIAÇÕES CONTENT (inside accordion) — legacy grid
    ============================================================ */
 
 .module-lp-premiacoes-grid {

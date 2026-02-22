@@ -35,18 +35,20 @@
             </div>
         </div>
 
-        <!-- ACCORDION: Premiações (colapsado, hidden ate JS carregar) -->
-        <div class="module-lp-accordion" id="lp-premiacoes-accordion-resta-um" style="display:none">
+        <!-- ACCORDION: Premiações (dinâmico via regras-modulos API) -->
+        <div class="module-lp-accordion">
             <button class="module-lp-accordion-btn" aria-expanded="false" id="btn-accordion-premiacoes-resta-um">
                 <div class="module-lp-accordion-btn-inner">
                     <span class="material-icons">emoji_events</span>
-                    <span class="module-lp-accordion-btn-label">Premiacoes</span>
+                    <span class="module-lp-accordion-btn-label">Premiações</span>
                 </div>
                 <span class="material-icons module-lp-accordion-chevron">expand_more</span>
             </button>
             <div class="module-lp-accordion-body">
                 <div class="module-lp-accordion-inner">
-                    <div id="lp-premiacoes-body-resta-um" class="module-lp-premiacoes-grid"></div>
+                    <div id="lp-premiacoes-body-resta-um" class="module-lp-premiacoes-dynamic">
+                        <p style="color:var(--app-text-muted);font-size:var(--app-font-sm);text-align:center;">Carregando premiações...</p>
+                    </div>
                 </div>
             </div>
         </div>

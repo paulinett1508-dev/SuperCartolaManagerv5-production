@@ -29,9 +29,10 @@ export async function inicializarRestaUmParticipante({ participante, ligaId, tim
     _currentParticipante = participante;
     _wasLanterna = false;
 
-    // ✅ LP: Init acordeons + carregar regras (premiações carregadas após dados do status)
+    // ✅ LP: Init acordeons + carregar regras e premiações (non-blocking via regras-modulos)
     _initLPAccordions('restaum-lp-wrapper');
     _lpCarregarComoFunciona(ligaId, 'resta_um', 'lp-regras-body-resta-um');
+    _lpCarregarPremiacoesDynamic(ligaId, 'resta_um_premiacao', 'lp-premiacoes-body-resta-um');
 
     const container = document.getElementById('resta-um-content');
     if (!container) {
@@ -73,9 +74,10 @@ async function _carregarDados() {
 
         // Renderizar disputa ativa
         _renderizarDisputa(dados, _currentTimeId);
-        // ✅ LP: Atualizar seções de status e premiações
+        // ✅ LP: Atualizar seção de status
         _lpRenderRestaUmStatus(dados, _currentTimeId);
-        _lpRenderRestaUmPremiacoes(dados.premiacao);
+        // ✅ LP: Se dados reais de premiação existem, sobrescreve o fallback de regras-modulos
+        if (dados.premiacao) _lpRenderRestaUmPremiacoes(dados.premiacao);
 
     } catch (error) {
         if (window.Log) Log.error('[PARTICIPANTE-RESTA-UM] Erro ao carregar:', error);
@@ -526,41 +528,52 @@ function _lpRenderRestaUmStatus(dados, timeId) {
 }
 
 /**
- * Render Premiações from RestaUmCache data (not ModuleConfig).
+ * Fallback: carrega texto descritivo de regras-modulos (exibido até dados reais do status chegarem).
+ * Se _carregarDados encontrar dados.premiacao, _lpRenderRestaUmPremiacoes sobrescreve.
+ */
+function _lpCarregarPremiacoesDynamic(ligaId, moduloKey, bodyId) {
+    const body = document.getElementById(bodyId);
+    if (!body || !ligaId) return;
+    fetch(`/api/regras-modulos/${ligaId}/${moduloKey}`)
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(data => {
+            if (data?.regra?.conteudo_html) {
+                body.innerHTML = `<div class="module-lp-premiacoes-content">${data.regra.conteudo_html}</div>`;
+            } else {
+                body.innerHTML = '<p style="color:var(--app-text-muted);font-size:var(--app-font-sm);text-align:center;">Premiacoes ainda nao configuradas pelo admin.</p>';
+            }
+        })
+        .catch(() => { body.innerHTML = '<p style="color:var(--app-text-muted);font-size:var(--app-font-sm);text-align:center;">Nao foi possivel carregar as premiacoes.</p>'; });
+}
+
+/**
+ * Render premiações com valores reais do RestaUmCache (sobrescreve fallback de regras-modulos).
  * Respects viceHabilitado/terceiroHabilitado flags.
  */
 function _lpRenderRestaUmPremiacoes(premiacao) {
     const body = document.getElementById('lp-premiacoes-body-resta-um');
-    const accordion = document.getElementById('lp-premiacoes-accordion-resta-um');
-    if (!body || !accordion || !premiacao) return;
+    if (!body || !premiacao) return;
 
     let html = '';
-
-    // Campeao (sempre)
     if (premiacao.campeao) {
         html += `<div class="module-lp-premiacoes-item">
             <span class="module-lp-premiacoes-pos pos-1">Campeao</span>
             <span class="module-lp-premiacoes-val">${_lpFormatCurrency(premiacao.campeao)}</span>
         </div>`;
     }
-
-    // Vice (condicional)
     if (premiacao.viceHabilitado && premiacao.vice) {
         html += `<div class="module-lp-premiacoes-item">
             <span class="module-lp-premiacoes-pos pos-2">Vice</span>
             <span class="module-lp-premiacoes-val">${_lpFormatCurrency(premiacao.vice)}</span>
         </div>`;
     }
-
-    // Terceiro (condicional)
     if (premiacao.terceiroHabilitado && premiacao.terceiro) {
         html += `<div class="module-lp-premiacoes-item">
             <span class="module-lp-premiacoes-pos pos-3">Terceiro</span>
             <span class="module-lp-premiacoes-val">${_lpFormatCurrency(premiacao.terceiro)}</span>
         </div>`;
     }
-
-    if (!html) return;
-    body.innerHTML = html;
-    accordion.style.display = '';
+    if (html) {
+        body.innerHTML = `<div class="module-lp-premiacoes-grid">${html}</div>`;
+    }
 }
