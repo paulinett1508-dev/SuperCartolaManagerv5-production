@@ -1,9 +1,10 @@
-<!-- PARTICIPANTE RESTA UM - Interface v1.2 LP -->
-<!-- v1.2: Landing page sections (Hero, Meu Status, Destaque, Accordions) -->
+<!-- PARTICIPANTE RESTA UM - Interface v2.0 LP Redesign -->
+<!-- v2.0: Reordenado — Hero → Como Funciona → Premiações → Meu Status -->
+<!--        Removida seção Destaque (redundante com lista de sobreviventes) -->
 <div class="resta-um-participante">
 
     <!-- ============================================================
-         LP SECTIONS — Hero, Meu Status, Destaque, Accordions
+         LP SECTIONS — Hero, Como Funciona, Premiações, Meu Status
          ============================================================ -->
     <div class="module-lp module-lp-resta-um" id="restaum-lp-wrapper">
 
@@ -13,16 +14,10 @@
                 <span class="material-icons">person_off</span>
             </div>
             <h1 class="module-lp-hero-title">Resta Um</h1>
-            <p class="module-lp-hero-tagline">O último a ser eliminado vence</p>
+            <p class="module-lp-hero-tagline">O ultimo a ser eliminado vence</p>
         </div>
 
-        <!-- MEU STATUS (populated by JS after data loads) -->
-        <div id="lp-meu-status-resta-um" class="module-lp-meu-status" style="display:none"></div>
-
-        <!-- DESTAQUE (populated by JS) -->
-        <div id="lp-destaque-resta-um" class="module-lp-destaque" style="display:none"></div>
-
-        <!-- ACCORDION: Como Funciona -->
+        <!-- ACCORDION: Como Funciona (PRIMEIRO, colapsado) -->
         <div class="module-lp-accordion">
             <button class="module-lp-accordion-btn" aria-expanded="false" id="btn-accordion-regras-resta-um">
                 <div class="module-lp-accordion-btn-inner">
@@ -36,31 +31,31 @@
                     <ul class="module-lp-regras-list">
                         <li class="module-lp-regras-item">
                             <span class="material-icons">person_off</span>
-                            A cada rodada, o participante com a <strong>menor pontuação</strong> é eliminado da disputa.
+                            A cada rodada, o participante com a <strong>menor pontuacao</strong> e eliminado da disputa.
                         </li>
                         <li class="module-lp-regras-item">
                             <span class="material-icons">calendar_today</span>
-                            A disputa começa na rodada configurada pelo admin e segue até sobrar um participante.
+                            A disputa comeca na rodada configurada pelo admin e segue ate sobrar um participante.
                         </li>
                         <li class="module-lp-regras-item">
                             <span class="material-icons">warning</span>
-                            Fique atento — ser o lanterna em uma rodada significa eliminação imediata.
+                            Fique atento — ser o lanterna em uma rodada significa eliminacao imediata.
                         </li>
                         <li class="module-lp-regras-item">
                             <span class="material-icons">workspace_premium</span>
-                            O último sobrevivente é declarado o campeão do Resta Um.
+                            O ultimo sobrevivente e declarado o campeao do Resta Um.
                         </li>
                     </ul>
                 </div>
             </div>
         </div>
 
-        <!-- ACCORDION: Premiações (hidden until JS loads data) -->
+        <!-- ACCORDION: Premiações (colapsado, hidden ate JS carregar) -->
         <div class="module-lp-accordion" id="lp-premiacoes-accordion-resta-um" style="display:none">
             <button class="module-lp-accordion-btn" aria-expanded="false" id="btn-accordion-premiacoes-resta-um">
                 <div class="module-lp-accordion-btn-inner">
                     <span class="material-icons">emoji_events</span>
-                    <span class="module-lp-accordion-btn-label">Premiações</span>
+                    <span class="module-lp-accordion-btn-label">Premiacoes</span>
                 </div>
                 <span class="material-icons module-lp-accordion-chevron">expand_more</span>
             </button>
@@ -70,6 +65,9 @@
                 </div>
             </div>
         </div>
+
+        <!-- MEU STATUS (populated by JS after data loads) -->
+        <div id="lp-meu-status-resta-um" class="module-lp-meu-status" style="display:none"></div>
 
     </div><!-- /module-lp-resta-um -->
 
@@ -89,11 +87,11 @@
                 <span class="material-icons resta-um-state-icon">person_off</span>
                 <h3 class="resta-um-state-title">Resta Um</h3>
                 <p id="restaUmNaoIniciadoMsg" class="resta-um-state-msg">
-                    A disputa ainda n&atilde;o foi iniciada. Aguarde o in&iacute;cio da pr&oacute;xima edi&ccedil;&atilde;o.
+                    A disputa ainda nao foi iniciada. Aguarde o inicio da proxima edicao.
                 </p>
                 <div class="resta-um-state-hint">
                     <span class="material-icons resta-um-state-hint-icon">schedule</span>
-                    <span id="restaUmProximaEdicao" class="resta-um-state-hint-text">Aguardando configura&ccedil;&atilde;o do admin</span>
+                    <span id="restaUmProximaEdicao" class="resta-um-state-hint-text">Aguardando configuracao do admin</span>
                 </div>
             </div>
         </div>
@@ -101,8 +99,8 @@
         <!-- Empty State (módulo não configurado) -->
         <div id="restaUmEmpty" class="resta-um-state-container" style="display: none;">
             <span class="material-icons resta-um-empty-icon">person_off</span>
-            <h3 class="resta-um-empty-title">Resta Um n&atilde;o configurado</h3>
-            <p class="resta-um-empty-msg">O administrador da liga precisa configurar este m&oacute;dulo.</p>
+            <h3 class="resta-um-empty-title">Resta Um nao configurado</h3>
+            <p class="resta-um-empty-msg">O administrador da liga precisa configurar este modulo.</p>
         </div>
 
         <!-- Error State -->
