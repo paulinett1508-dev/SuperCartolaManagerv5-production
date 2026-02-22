@@ -31,7 +31,7 @@ const AppVersion = {
         try {
             // Limpar apenas caches com nomes antigos (não o atual do SW)
             // ⚠️ MANTER SINCRONIZADO com CACHE_NAME em service-worker.js
-            const CURRENT_SW_CACHE = 'super-cartola-v25-copa2026-modal';
+            const CURRENT_SW_CACHE = 'super-cartola-v26-copa2026-estadios';
             const cacheNames = await caches.keys();
             const obsoletos = cacheNames.filter(name => name !== CURRENT_SW_CACHE);
 
@@ -402,7 +402,7 @@ const AppVersion = {
         if ('caches' in window) {
             try {
                 // ⚠️ MANTER SINCRONIZADO com CACHE_NAME em service-worker.js
-                const CURRENT_SW_CACHE = 'super-cartola-v25-copa2026-modal';
+                const CURRENT_SW_CACHE = 'super-cartola-v26-copa2026-estadios';
                 const names = await caches.keys();
                 const obsoletos = names.filter(name => name !== CURRENT_SW_CACHE);
                 if (obsoletos.length > 0) {
