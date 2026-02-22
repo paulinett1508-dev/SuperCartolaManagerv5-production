@@ -19,41 +19,49 @@
 .module-lp-artilheiro {
     --lp-primary: var(--app-success-light, #22c55e);
     --lp-muted: rgba(34, 197, 94, 0.12);
-    --lp-muted-strong: rgba(34, 197, 94, 0.2);
+    --lp-muted-strong: rgba(34, 197, 94, 0.22);
     --lp-border: rgba(34, 197, 94, 0.25);
-    --lp-gradient-hero: linear-gradient(145deg, rgba(34, 197, 94, 0.18) 0%, rgba(34, 197, 94, 0.05) 60%, transparent 100%);
+    --lp-gradient-hero:
+        linear-gradient(145deg, rgba(34, 197, 94, 0.22) 0%, rgba(16, 185, 129, 0.06) 55%, transparent 90%),
+        radial-gradient(ellipse 55% 40% at 85% 90%, rgba(34, 197, 94, 0.10), transparent);
     --lp-gradient-card: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(34, 197, 94, 0.03));
-    --lp-glow: 0 0 20px rgba(34, 197, 94, 0.15);
+    --lp-glow: 0 0 20px rgba(34, 197, 94, 0.22), 0 0 48px rgba(34, 197, 94, 0.08);
 }
 
 .module-lp-capitao {
     --lp-primary: var(--app-purple, #8b5cf6);
     --lp-muted: rgba(139, 92, 246, 0.12);
-    --lp-muted-strong: rgba(139, 92, 246, 0.2);
+    --lp-muted-strong: rgba(139, 92, 246, 0.22);
     --lp-border: rgba(139, 92, 246, 0.25);
-    --lp-gradient-hero: linear-gradient(145deg, rgba(139, 92, 246, 0.18) 0%, rgba(139, 92, 246, 0.05) 60%, transparent 100%);
+    --lp-gradient-hero:
+        linear-gradient(145deg, rgba(139, 92, 246, 0.22) 0%, rgba(99, 102, 241, 0.06) 55%, transparent 90%),
+        radial-gradient(ellipse 55% 40% at 85% 90%, rgba(139, 92, 246, 0.10), transparent);
     --lp-gradient-card: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(139, 92, 246, 0.03));
-    --lp-glow: 0 0 20px rgba(139, 92, 246, 0.15);
+    --lp-glow: 0 0 20px rgba(139, 92, 246, 0.22), 0 0 48px rgba(139, 92, 246, 0.08);
 }
 
 .module-lp-luva {
     --lp-primary: var(--app-gold, #ffd700);
     --lp-muted: rgba(255, 215, 0, 0.12);
-    --lp-muted-strong: rgba(255, 215, 0, 0.22);
+    --lp-muted-strong: rgba(255, 215, 0, 0.24);
     --lp-border: rgba(255, 215, 0, 0.28);
-    --lp-gradient-hero: linear-gradient(145deg, rgba(255, 215, 0, 0.16) 0%, rgba(255, 215, 0, 0.04) 60%, transparent 100%);
+    --lp-gradient-hero:
+        linear-gradient(145deg, rgba(255, 215, 0, 0.20) 0%, rgba(245, 158, 11, 0.06) 55%, transparent 90%),
+        radial-gradient(ellipse 50% 35% at 80% 90%, rgba(255, 215, 0, 0.10), transparent);
     --lp-gradient-card: linear-gradient(135deg, rgba(255, 215, 0, 0.08), rgba(255, 215, 0, 0.03));
-    --lp-glow: 0 0 20px rgba(255, 215, 0, 0.15);
+    --lp-glow: 0 0 20px rgba(255, 215, 0, 0.24), 0 0 48px rgba(255, 215, 0, 0.08);
 }
 
 .module-lp-resta-um {
     --lp-primary: var(--app-restaum-primary, #f43f5e);
     --lp-muted: rgba(244, 63, 94, 0.10);
-    --lp-muted-strong: rgba(244, 63, 94, 0.18);
+    --lp-muted-strong: rgba(244, 63, 94, 0.22);
     --lp-border: rgba(244, 63, 94, 0.25);
-    --lp-gradient-hero: linear-gradient(145deg, rgba(244, 63, 94, 0.16) 0%, rgba(244, 63, 94, 0.04) 60%, transparent 100%);
+    --lp-gradient-hero:
+        linear-gradient(135deg, rgba(244, 63, 94, 0.26) 0%, rgba(239, 68, 68, 0.08) 50%, transparent 85%),
+        radial-gradient(ellipse 60% 45% at 12% 60%, rgba(244, 63, 94, 0.14), transparent);
     --lp-gradient-card: linear-gradient(135deg, rgba(244, 63, 94, 0.08), rgba(244, 63, 94, 0.03));
-    --lp-glow: 0 0 20px rgba(244, 63, 94, 0.15);
+    --lp-glow: 0 0 20px rgba(244, 63, 94, 0.26), 0 0 48px rgba(244, 63, 94, 0.10);
 }
 
 /* ============================================================
@@ -76,72 +84,36 @@
     text-align: center;
     background: var(--lp-gradient-hero);
     border-bottom: 1px solid var(--lp-border);
+    box-shadow: 0 12px 40px -12px var(--lp-muted-strong);
     animation: app-fade-in-up var(--app-duration-normal) ease-out;
 }
 
-/* Subtle noise texture overlay */
+/* Dual-radial burst overlay: top center + bottom-right accent */
 .module-lp-hero::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse 80% 50% at 50% 0%, var(--lp-muted-strong), transparent);
+    background:
+        radial-gradient(ellipse 72% 60% at 50% -5%, var(--lp-muted-strong), transparent 65%),
+        radial-gradient(ellipse 40% 30% at 90% 108%, var(--lp-muted), transparent 65%);
     pointer-events: none;
 }
 
-/* ============================================================
-   3.1 HERO WITH BACKGROUND IMAGE
-   Opt-in via --hero-bg-url CSS variable or data-hero-bg attribute.
-   Uses layered approach: gradient overlay + image + darkening layer.
-   ============================================================ */
-
-/* Hero com imagem de fundo (ativado via style="--hero-bg-url: url(...)") */
-.module-lp-hero[style*="--hero-bg-url"] {
-    background:
-        var(--lp-gradient-hero),
-        var(--hero-bg-url);
-    background-size: cover, cover;
-    background-position: center, center;
-    background-repeat: no-repeat, no-repeat;
-}
-
-/* Overlay escurecedor sobre a imagem */
-.module-lp-hero[style*="--hero-bg-url"]::after {
+/* Dot-grid texture — depth sem imagem */
+.module-lp-hero::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-        to bottom,
-        rgba(0, 0, 0, 0.55) 0%,
-        rgba(0, 0, 0, 0.7) 100%
-    );
+    background-image: radial-gradient(circle, var(--lp-muted) 1px, transparent 1px);
+    background-size: 28px 28px;
+    opacity: 0.5;
     pointer-events: none;
-    z-index: 0;
 }
 
-/* Garantir que conteúdo fique acima do overlay */
-.module-lp-hero[style*="--hero-bg-url"] > * {
+/* Garantir que conteúdo fique acima dos overlays */
+.module-lp-hero > * {
     position: relative;
     z-index: 1;
-}
-
-/* Variante dramática: blur sutil na imagem */
-.module-lp-hero[data-hero-style="dramatic"] {
-    /* Aumenta padding para dar mais respiro */
-    padding: var(--app-space-10) var(--app-space-5);
-}
-
-.module-lp-hero[data-hero-style="dramatic"]::after {
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
-}
-
-/* Variante minimal: overlay mais leve */
-.module-lp-hero[data-hero-style="minimal"]::after {
-    background: linear-gradient(
-        to bottom,
-        rgba(0, 0, 0, 0.35) 0%,
-        rgba(0, 0, 0, 0.5) 100%
-    );
 }
 
 .module-lp-hero-icon-wrap {
@@ -156,6 +128,12 @@
     margin-bottom: var(--app-space-4);
     position: relative;
     box-shadow: var(--lp-glow);
+    animation: lp-icon-pulse 3.5s ease-in-out infinite;
+}
+
+@keyframes lp-icon-pulse {
+    0%, 100% { box-shadow: var(--lp-glow); }
+    50%       { box-shadow: 0 0 32px rgba(255,255,255,0.04), var(--lp-glow); transform: scale(1.04); }
 }
 
 .module-lp-hero-icon-wrap .material-icons {
@@ -172,6 +150,7 @@
     line-height: var(--app-leading-tight);
     margin: 0 0 var(--app-space-2) 0;
     position: relative;
+    text-shadow: 0 2px 24px var(--lp-muted-strong);
 }
 
 .module-lp-hero-tagline {
