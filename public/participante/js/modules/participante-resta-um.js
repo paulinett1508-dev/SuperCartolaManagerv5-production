@@ -218,7 +218,7 @@ function _renderizarDisputa(dados, timeId) {
                 ${isLive ? '<span class="resta-um-live-indicator"><span class="resta-um-live-dot"></span>AO VIVO</span>' : ''}
             </div>
             <div class="resta-um-header-subtitle">
-                Rodada ${rodadaAtual || '?'} | ${vivos.length} sobrevivente${vivos.length !== 1 ? 's' : ''}
+                Rodada ${rodadaAtual || edicao.rodadaInicial || '?'} | ${vivos.length} sobrevivente${vivos.length !== 1 ? 's' : ''}
             </div>
         </div>
     `;
@@ -368,7 +368,7 @@ function _getStatusLabel(status) {
 
 function _getStatusIcon(status) {
     const icons = {
-        'vivo': 'favorite',
+        'vivo': 'shield',
         'zona_perigo': 'warning',
         'eliminado': 'person_off',
         'campeao': 'emoji_events',

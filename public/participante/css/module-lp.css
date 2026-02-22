@@ -88,6 +88,62 @@
     pointer-events: none;
 }
 
+/* ============================================================
+   3.1 HERO WITH BACKGROUND IMAGE
+   Opt-in via --hero-bg-url CSS variable or data-hero-bg attribute.
+   Uses layered approach: gradient overlay + image + darkening layer.
+   ============================================================ */
+
+/* Hero com imagem de fundo (ativado via style="--hero-bg-url: url(...)") */
+.module-lp-hero[style*="--hero-bg-url"] {
+    background:
+        var(--lp-gradient-hero),
+        var(--hero-bg-url);
+    background-size: cover, cover;
+    background-position: center, center;
+    background-repeat: no-repeat, no-repeat;
+}
+
+/* Overlay escurecedor sobre a imagem */
+.module-lp-hero[style*="--hero-bg-url"]::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.55) 0%,
+        rgba(0, 0, 0, 0.7) 100%
+    );
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Garantir que conteúdo fique acima do overlay */
+.module-lp-hero[style*="--hero-bg-url"] > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Variante dramática: blur sutil na imagem */
+.module-lp-hero[data-hero-style="dramatic"] {
+    /* Aumenta padding para dar mais respiro */
+    padding: var(--app-space-10) var(--app-space-5);
+}
+
+.module-lp-hero[data-hero-style="dramatic"]::after {
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+}
+
+/* Variante minimal: overlay mais leve */
+.module-lp-hero[data-hero-style="minimal"]::after {
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.35) 0%,
+        rgba(0, 0, 0, 0.5) 100%
+    );
+}
+
 .module-lp-hero-icon-wrap {
     display: inline-flex;
     align-items: center;

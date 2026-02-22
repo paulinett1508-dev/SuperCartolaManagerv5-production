@@ -329,6 +329,12 @@
         "moduleColor": "--app-restaum-*"
       },
       {
+        "path": "public/participante/css/module-lp.css",
+        "loadedBy": ["participante/index.html"],
+        "description": "Landing pages de modulos (Hero, Stats, Accordions). Suporta hero com imagem via --hero-bg-url",
+        "features": ["hero-background-image", "per-module-color-scoping", "accordions"]
+      },
+      {
         "path": "public/participante/css/copa-mundo-2026.css",
         "loadedBy": ["participante/index.html"],
         "description": "Tema Copa do Mundo 2026 com identidade visual do mundial"

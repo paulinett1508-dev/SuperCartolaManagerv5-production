@@ -10,6 +10,7 @@
  */
 import BaseManager from './BaseManager.js';
 import RestaUmCache from '../../../models/RestaUmCache.js';
+import Rodada from '../../../models/Rodada.js';
 import { CURRENT_SEASON } from '../../../config/seasons.js';
 
 export default class RestaUmManager extends BaseManager {
@@ -32,12 +33,32 @@ export default class RestaUmManager extends BaseManager {
      * @param {Object} ctx - Contexto da rodada
      * @param {string} ctx.ligaId - ID da liga
      * @param {number} ctx.rodada - Número da rodada
-     * @param {Array} ctx.pontuacoes - Pontuações da rodada [{timeId, pontos}]
-     * @param {Array} ctx.rankingGeral - Ranking geral [{timeId, pontuacaoTotal}]
      */
     async onRoundFinalize(ctx) {
-        const { ligaId, rodada, pontuacoes, rankingGeral } = ctx;
+        const { ligaId, rodada } = ctx;
         console.log(`[RESTA-UM] Processando R${rodada} para liga ${ligaId}`);
+
+        // Buscar pontuações da rodada da collection Rodada
+        const rodadasDb = await Rodada.find({
+            ligaId,
+            rodada,
+            temporada: CURRENT_SEASON,
+        }).lean();
+
+        const pontuacoes = rodadasDb.map(r => ({
+            timeId: r.timeId,
+            pontos: r.pontos || 0,
+        }));
+
+        // Calcular ranking geral (soma de todas as rodadas até agora) para desempate
+        const todasRodadas = await Rodada.aggregate([
+            { $match: { ligaId: ligaId.toString ? ligaId : ligaId, temporada: CURRENT_SEASON, rodada: { $lte: rodada } } },
+            { $group: { _id: '$timeId', pontuacaoTotal: { $sum: '$pontos' } } },
+            { $sort: { pontuacaoTotal: -1 } },
+        ]);
+        const rankingGeral = todasRodadas.map(r => ({ timeId: r._id, pontuacaoTotal: r.pontuacaoTotal }));
+
+        console.log(`[RESTA-UM] Dados: ${pontuacoes.length} pontuações, ${rankingGeral.length} no ranking`);
 
         try {
             // Buscar edição em andamento
