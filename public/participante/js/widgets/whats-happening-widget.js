@@ -1369,10 +1369,10 @@ function resolverEscudo(item) {
  */
 function getConfrontoInsight(diff) {
     if (diff === 0) return { text: "Empatado! Qualquer lance decide", icon: "balance", level: "tied" };
-    if (diff < 3) return { text: `Ponto a ponto! Apenas ${diff.toFixed(1)} pts`, icon: "local_fire_department", level: "inferno" };
-    if (diff < 5) return { text: `Virada iminente! ${diff.toFixed(1)} pts de diferença`, icon: "whatshot", level: "hot" };
-    if (diff < 10) return { text: `Disputa acirrada! ${diff.toFixed(1)} pts`, icon: "trending_flat", level: "warm" };
-    if (diff >= 25) return { text: `Goleada à vista! ${diff.toFixed(1)} pts`, icon: "rocket_launch", level: "blowout" };
+    if (diff < 3) return { text: `Ponto a ponto! Apenas ${(Math.trunc(diff * 10) / 10).toFixed(1)} pts`, icon: "local_fire_department", level: "inferno" };
+    if (diff < 5) return { text: `Virada iminente! ${(Math.trunc(diff * 10) / 10).toFixed(1)} pts de diferença`, icon: "whatshot", level: "hot" };
+    if (diff < 10) return { text: `Disputa acirrada! ${(Math.trunc(diff * 10) / 10).toFixed(1)} pts`, icon: "trending_flat", level: "warm" };
+    if (diff >= 25) return { text: `Goleada à vista! ${(Math.trunc(diff * 10) / 10).toFixed(1)} pts`, icon: "rocket_launch", level: "blowout" };
     return null;
 }
 
@@ -1636,7 +1636,7 @@ function renderMataMataSection() {
                     </div>
                     <div class="wh-vs">
                         <span class="wh-vs-text">VS</span>
-                        <span class="wh-vs-diff">${diff.toFixed(1)}</span>
+                        <span class="wh-vs-diff">${(Math.trunc(diff * 10) / 10).toFixed(1)}</span>
                     </div>
                     <div class="wh-time wh-time--away ${bWinning ? "winning" : aWinning ? "losing" : ""}">
                         <div class="wh-time-pontos">${(Math.trunc((pontosB||0) * 10) / 10).toFixed(1)}</div>
@@ -1819,7 +1819,7 @@ function renderMeuConfrontoPontosCorridos() {
     const perdendo = diff < 0;
 
     const statusClass = vencendo ? "winning" : perdendo ? "losing" : "tied";
-    const statusEmoji = vencendo ? "🔥" : perdendo ? "😰" : "⚔️";
+    const statusEmoji = vencendo ? '<span class="material-icons" style="color: var(--app-danger)">local_fire_department</span>' : perdendo ? '<span class="material-icons" style="color: var(--app-warning)">sentiment_stressed</span>' : '<span class="material-icons" style="color: var(--app-info)">compare_arrows</span>';
     const statusText = vencendo ? "Vencendo!" : perdendo ? "Perdendo..." : "Empatado";
 
     const isLive = isJogosAoVivo();
@@ -1832,7 +1832,7 @@ function renderMeuConfrontoPontosCorridos() {
                 </div>
                 <div class="wh-section-title">Seu Confronto</div>
                 <span class="wh-module-badge wh-module-badge--pc">PC · R${rodada}</span>
-                ${isLive ? '<span class="wh-live-badge">🔴 AO VIVO</span>' : ''}
+                ${isLive ? '<span class="wh-live-badge"><span class="material-icons" style="font-size:12px; color: var(--app-danger)">sensors</span> AO VIVO</span>' : ''}
             </div>
             <div class="wh-section-body">
                 <div class="wh-meu-confronto">
@@ -1848,7 +1848,7 @@ function renderMeuConfrontoPontosCorridos() {
 
                         <div class="wh-mc-vs">
                             <span class="wh-mc-vs-emoji">${statusEmoji}</span>
-                            <span class="wh-mc-vs-diff ${statusClass}">${diff > 0 ? '+' : ''}${diff.toFixed(1)}</span>
+                            <span class="wh-mc-vs-diff ${statusClass}">${diff > 0 ? '+' : ''}${(Math.trunc(diff * 10) / 10).toFixed(1)}</span>
                         </div>
 
                         <div class="wh-mc-time wh-mc-time--adv ${perdendo ? 'winning' : ''}">
@@ -1863,7 +1863,7 @@ function renderMeuConfrontoPontosCorridos() {
 
                     <div class="wh-mc-status ${statusClass}">
                         <span class="material-icons">${vencendo ? 'trending_up' : perdendo ? 'trending_down' : 'trending_flat'}</span>
-                        ${statusText} por ${Math.abs(diff).toFixed(1)} pts
+                        ${statusText} por ${(Math.trunc(Math.abs(diff) * 10) / 10).toFixed(1)} pts
                     </div>
                 </div>
             </div>
@@ -1893,17 +1893,17 @@ function renderMeuConfrontoMataMata() {
     const perdendo = diff < 0;
 
     const statusClass = vencendo ? "winning" : perdendo ? "losing" : "tied";
-    const statusEmoji = vencendo ? "🏆" : perdendo ? "⚠️" : "⚔️";
+    const statusEmoji = vencendo ? '<span class="material-icons" style="color: var(--app-warning)">emoji_events</span>' : perdendo ? '<span class="material-icons" style="color: var(--app-danger)">warning</span>' : '<span class="material-icons" style="color: var(--app-info)">compare_arrows</span>';
 
     const faseLabel = {
         primeira: "1ª Fase",
         oitavas: "Oitavas",
         quartas: "Quartas",
-        semis: "Semifinal", // ✅ FIX: "semi" → "semis"
+        semis: "Semifinal",
         final: "FINAL"
     }[fase] || fase;
 
-    const isLive = isJogosAoVivo(); // v2.1: usa game-status real
+    const isLive = isJogosAoVivo();
 
     return `
         <div class="wh-section wh-section--meu-confronto wh-section--mata-mata ${statusClass}" data-navigate="mata-mata">
@@ -1913,7 +1913,7 @@ function renderMeuConfrontoMataMata() {
                 </div>
                 <div class="wh-section-title">Seu Confronto</div>
                 <span class="wh-module-badge wh-module-badge--mm">MM · ${faseLabel}</span>
-                ${isLive ? '<span class="wh-live-badge">🔴 AO VIVO</span>' : ''}
+                ${isLive ? '<span class="wh-live-badge"><span class="material-icons" style="font-size:12px; color: var(--app-danger)">sensors</span> AO VIVO</span>' : ''}
             </div>
             <div class="wh-section-body">
                 <div class="wh-meu-confronto">
@@ -1929,7 +1929,7 @@ function renderMeuConfrontoMataMata() {
 
                         <div class="wh-mc-vs">
                             <span class="wh-mc-vs-emoji">${statusEmoji}</span>
-                            <span class="wh-mc-vs-diff ${statusClass}">${diff > 0 ? '+' : ''}${diff.toFixed(1)}</span>
+                            <span class="wh-mc-vs-diff ${statusClass}">${diff > 0 ? '+' : ''}${(Math.trunc(diff * 10) / 10).toFixed(1)}</span>
                         </div>
 
                         <div class="wh-mc-time wh-mc-time--adv ${perdendo ? 'winning' : ''}">

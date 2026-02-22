@@ -53,7 +53,7 @@
 
 /* Hint de drag (primeira vez) */
 .wh-fab.show-drag-hint::after {
-    content: '↕️';
+    content: '\2195';
     position: absolute;
     bottom: -24px;
     left: 50%;
