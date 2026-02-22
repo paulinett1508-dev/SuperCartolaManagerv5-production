@@ -273,7 +273,6 @@ function _renderizarDisputa(dados, timeId) {
                 <span class="material-icons resta-um-meu-status-icon" style="color: ${statusColor};">${statusIcon}</span>
                 <div style="flex: 1;">
                     <div class="resta-um-meu-status-label">Seu status</div>
-                    <div class="resta-um-meu-status-text">${statusLabel}</div>
                 </div>
                 <span class="resta-um-status-badge ${statusClass}">${statusLabel}</span>
             </div>
