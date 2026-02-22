@@ -230,6 +230,32 @@
     --text-dim: #6b7280;
     --radius-md: 10px;
 
+    /* Aliases --app-* para admin pages (admin-resta-um.css, admin-tiro-certo.css) */
+    /* CRÍTICO: sem esses aliases os tokens ficam undefined e o CSS falha silenciosamente */
+    --app-primary: var(--color-primary);
+    --app-bg: var(--surface-bg);
+    --app-surface: var(--surface-card);
+    --app-border: #333333;
+    --app-success: var(--color-success);
+    --app-danger: var(--color-danger);
+    --app-warning: var(--color-warning);
+    --app-text-primary: var(--text-primary);
+    --app-text-muted: #9ca3af;
+    --app-font-brand: var(--font-family-brand);
+    --app-font-mono: var(--font-family-mono);
+    --app-font-sm: var(--font-size-sm);
+    --app-font-xs: var(--font-size-xs);
+    --app-space-1: var(--space-1);
+    --app-space-2: var(--space-2);
+    --app-space-3: var(--space-3);
+    --app-space-4: var(--space-4);
+    --app-space-5: var(--space-5);
+    --app-space-6: var(--space-6);
+    --app-radius-sm: var(--radius-sm);
+    --app-radius-md: var(--radius-md);
+    --app-radius-lg: var(--radius-lg);
+    --app-radius-xl: var(--radius-xl);
+
     /* ========================================
        14. COMPONENTES ESPECÍFICOS
        ======================================== */
