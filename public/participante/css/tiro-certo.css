@@ -1,12 +1,20 @@
 /* =====================================================================
    TIRO CERTO - ESTILOS TEMÁTICOS
    =====================================================================
-   v1.0: Tema laranja/survival para o módulo Tiro Certo
+   v1.1: Tema laranja/survival para o módulo Tiro Certo
    Cores principais: Laranja (var(--app-primary)), Status (--app-success-light,
                      --app-danger, --app-warning)
    Background: Dark mode (gray-900, slate-900) — OLED-safe
-   Tipografia: Russo One (títulos), Inter (corpo)
+   Tipografia: Formula1 Display (títulos/stats), Inter (corpo)
+
+   FONTES F1: Para ROLLBACK, comente a linha @import abaixo
 */
+
+/* ═══════════════════════════════════════════════════════════════════
+   FONTES FORMULA1 DISPLAY - IDENTIDADE VISUAL EXCLUSIVA
+   Comente esta linha para rollback rápido
+   ═══════════════════════════════════════════════════════════════════ */
+@import url('./fonts/tiro-certo-f1-fonts.css');
 
 /* =====================================================================
    VARIÁVEIS CSS - TEMA TIRO CERTO
@@ -132,7 +140,7 @@
 
 .tc-badge-label {
     color: var(--tc-primary);
-    font-family: var(--app-font-brand), sans-serif;
+    font-family: var(--tc-font-f1, var(--app-font-brand)), sans-serif;
     font-weight: 700;
     font-size: 0.875rem;
     letter-spacing: 0.1em;
@@ -270,20 +278,22 @@
 }
 
 .tc-stat-value {
-    font-family: var(--app-font-brand), sans-serif;
+    font-family: var(--tc-font-f1-wide, var(--app-font-brand)), sans-serif;
     font-size: var(--app-font-xs);
     font-weight: 700;
     color: var(--app-text-primary);
+    letter-spacing: 0.02em;
 }
 
 /* =====================================================================
    TÍTULO SEGUNDO TURNO
    ===================================================================== */
 .tc-section-title {
-    font-family: var(--app-font-brand), sans-serif;
+    font-family: var(--tc-font-f1, var(--app-font-brand)), sans-serif;
     font-size: clamp(1.5rem, 3vw, 2rem);
     font-weight: 700;
     color: var(--tc-primary);
+    letter-spacing: 0.02em;
 }
 
 /* =====================================================================
@@ -299,10 +309,11 @@
    TÍTULO PRINCIPAL
    ===================================================================== */
 .tc-title-main {
-    font-family: var(--app-font-brand), sans-serif;
+    font-family: var(--tc-font-f1, var(--app-font-brand)), sans-serif;
     font-size: clamp(2.5rem, 8vw, 4rem);
     font-weight: 700;
     line-height: 1.2;
+    letter-spacing: 0.03em;
 }
 
 /* =====================================================================
@@ -351,11 +362,12 @@
 }
 
 .tc-header-title {
-    font-family: var(--app-font-brand), sans-serif;
+    font-family: var(--tc-font-f1, var(--app-font-brand)), sans-serif;
     font-size: 1.25rem;
     font-weight: 700;
     color: var(--app-text-primary);
     line-height: 1.2;
+    letter-spacing: 0.02em;
 }
 
 .tc-header-subtitle {
@@ -364,13 +376,13 @@
 }
 
 .tc-status-badge {
-    font-family: var(--app-font-brand), sans-serif;
+    font-family: var(--tc-font-f1, var(--app-font-brand)), sans-serif;
     font-size: var(--app-font-xs);
     font-weight: 700;
     padding: 0.25rem 0.75rem;
     border-radius: var(--app-radius-full);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
 }
 
 .tc-status-badge.vivo {
@@ -408,14 +420,15 @@
 }
 
 .tc-section-header-ativo h2 {
-    font-family: var(--app-font-brand), sans-serif;
+    font-family: var(--tc-font-f1, var(--app-font-brand)), sans-serif;
     font-size: 1rem;
     font-weight: 700;
     color: var(--app-text-primary);
+    letter-spacing: 0.02em;
 }
 
 .tc-rodada-badge {
-    font-family: var(--app-font-mono), monospace;
+    font-family: var(--tc-font-f1-wide, var(--app-font-mono)), monospace;
     font-size: var(--app-font-xs);
     font-weight: 700;
     padding: 0.15rem 0.5rem;
@@ -423,10 +436,11 @@
     background: var(--tc-primary-muted);
     color: var(--tc-primary);
     border: 1px solid var(--tc-primary-border);
+    letter-spacing: 0.02em;
 }
 
 .tc-vivos-badge {
-    font-family: var(--app-font-mono), monospace;
+    font-family: var(--tc-font-f1-wide, var(--app-font-mono)), monospace;
     font-size: var(--app-font-xs);
     font-weight: 700;
     padding: 0.15rem 0.5rem;
@@ -434,6 +448,7 @@
     background: rgba(34,197,94,0.15);
     color: var(--tc-vivo);
     border: 1px solid rgba(34,197,94,0.3);
+    letter-spacing: 0.02em;
 }
 
 .tc-loading-placeholder {
@@ -568,11 +583,13 @@
     border-radius: var(--app-radius-lg);
     background: var(--tc-primary);
     color: var(--app-text-primary);
-    font-family: var(--app-font-brand), sans-serif;
+    font-family: var(--tc-font-f1, var(--app-font-brand)), sans-serif;
     font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
     transition: all var(--app-transition-normal);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
 }
 
 .tc-btn-confirmar:hover {
@@ -615,11 +632,12 @@
 }
 
 .tc-escolha-rodada {
-    font-family: var(--app-font-mono), monospace;
+    font-family: var(--tc-font-f1-wide, var(--app-font-mono)), monospace;
     font-size: var(--app-font-xs);
     font-weight: 700;
     color: var(--app-text-muted);
     min-width: 2rem;
+    letter-spacing: 0.02em;
 }
 
 .tc-escolha-time {
@@ -650,11 +668,12 @@
 }
 
 .tc-escolha-atual-time {
-    font-family: var(--app-font-brand), sans-serif;
+    font-family: var(--tc-font-f1, var(--app-font-brand)), sans-serif;
     font-size: 1.25rem;
     font-weight: 700;
     color: var(--app-text-primary);
     margin-top: 0.5rem;
+    letter-spacing: 0.02em;
 }
 
 .tc-escolha-atual-label {
