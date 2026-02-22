@@ -10,6 +10,7 @@ import RestaUmCache from '../models/RestaUmCache.js';
 import Liga from '../models/Liga.js';
 import { CURRENT_SEASON } from '../config/seasons.js';
 import logger from '../utils/logger.js';
+import { truncarPontosNum } from '../utils/type-helpers.js';
 
 /**
  * GET /:ligaId/status
@@ -58,7 +59,8 @@ export async function obterStatus(req, res) {
         // Separar vivos e eliminados, ordenar por pontos
         const participantes = (edicao.participantes || []).map(p => ({
             ...p,
-            pontosRodada: p.pontosRodada || null,
+            pontosRodada: p.pontosRodada != null ? truncarPontosNum(p.pontosRodada) : null,
+            pontosAcumulados: truncarPontosNum(p.pontosAcumulados || 0),
         }));
 
         const vivos = participantes
@@ -252,7 +254,8 @@ export async function obterParciais(req, res) {
 
         const participantes = (edicao.participantes || []).map(p => ({
             ...p,
-            pontosRodada: p.pontosRodada || null,
+            pontosRodada: p.pontosRodada != null ? truncarPontosNum(p.pontosRodada) : null,
+            pontosAcumulados: truncarPontosNum(p.pontosAcumulados || 0),
         }));
 
         const vivos = participantes
