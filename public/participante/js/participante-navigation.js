@@ -60,6 +60,7 @@ class ParticipanteNavigation {
             regras: "/participante/fronts/regras.html",
             "rodada-xray": "/participante/fronts/rodada-xray.html",
             "tiro-certo": "/participante/fronts/tiro-certo.html",
+            "resta-um": "/participante/fronts/resta-um.html",
         };
 
         // ✅ v3.0: Controles simplificados (apenas debounce por tempo)
