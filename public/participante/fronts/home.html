@@ -152,15 +152,23 @@
          DESTAQUES DA RODADA (Colapsável)
          ======================================== -->
     <section id="home-destaques-section" class="home-destaques-section hidden">
-        <!-- Header Colapsável -->
+        <!-- Header Colapsável (segue padrão visual dos stat-cards) -->
         <button class="home-destaques-header" id="home-destaques-toggle" onclick="window.toggleDestaquesRodada && window.toggleDestaquesRodada()">
             <div class="home-destaques-header-left">
-                <span class="material-icons home-destaques-icon">emoji_events</span>
-                <span class="home-destaques-header-title">Meus Destaques da Rodada</span>
-                <span class="home-destaques-rodada-badge" id="home-destaques-rodada">Rodada --</span>
-                <span class="home-destaques-live-badge" id="home-destaques-live-badge" style="display:none">AO VIVO</span>
+                <div class="home-stat-icon-wrapper home-destaques-icon-wrapper">
+                    <span class="material-icons">emoji_events</span>
+                </div>
+                <div class="home-destaques-header-info">
+                    <span class="home-destaques-header-label">MEUS DESTAQUES DA RODADA</span>
+                    <div class="home-destaques-header-value-row">
+                        <span class="home-destaques-rodada-badge" id="home-destaques-rodada">Rodada --</span>
+                        <span class="home-destaques-live-badge" id="home-destaques-live-badge" style="display:none">AO VIVO</span>
+                    </div>
+                </div>
             </div>
-            <span class="material-icons home-destaques-chevron" id="home-destaques-chevron">expand_more</span>
+            <div class="home-destaques-header-right">
+                <span class="material-icons home-destaques-chevron" id="home-destaques-chevron">expand_more</span>
+            </div>
         </button>
 
         <!-- Conteúdo Colapsável (JS controla estado expanded/collapsed) -->
@@ -621,56 +629,69 @@
     color: var(--app-text-secondary, rgba(255, 255, 255, 0.85));
 }
 
-/* === DESTAQUES DA RODADA (Colapsável) === */
+/* === DESTAQUES DA RODADA (Colapsável — segue padrão stat-cards) === */
 .home-destaques-section {
     padding: 0 16px 16px;
 }
 
-/* Header Colapsável */
+/* Header Colapsável — mesma base visual de .home-stat-card */
 .home-destaques-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 14px 16px;
-    background: linear-gradient(135deg, #1f1f1f 0%, #171717 100%);
+    padding: 16px;
+    background: var(--app-surface, var(--app-surface));
     border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 12px;
+    border-radius: 16px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
 }
 
 .home-destaques-header:active {
-    transform: scale(0.99);
-    background: #252525;
+    transform: scale(0.98);
+    background: var(--app-surface-hover, var(--app-surface-hover));
 }
 
 .home-destaques-header-left {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 
-.home-destaques-icon {
-    font-size: 20px;
-    color: var(--app-primary);
+/* Ícone wrapper — reutiliza .home-stat-icon-wrapper do stat-card */
+.home-destaques-icon-wrapper {
+    background: linear-gradient(135deg, var(--app-primary) 0%, #c2410c 100%);
 }
 
-.home-destaques-header-title {
-    font-family: 'Russo One', sans-serif;
-    font-size: 13px;
-    color: var(--app-text-primary);
-    letter-spacing: 0.3px;
+.home-destaques-header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.home-destaques-header-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.6));
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.home-destaques-header-value-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .home-destaques-rodada-badge {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.5);
-    background: rgba(255,255,255,0.08);
-    padding: 3px 8px;
-    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--app-text-primary);
+    letter-spacing: -0.3px;
 }
 
 .home-destaques-live-badge {
@@ -692,9 +713,15 @@
     50% { opacity: 0.6; }
 }
 
+.home-destaques-header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
 .home-destaques-chevron {
-    font-size: 22px;
-    color: rgba(255,255,255,0.5);
+    font-size: 24px;
+    color: rgba(255,255,255,0.4);
     transition: transform 0.3s ease;
 }
 
@@ -703,6 +730,7 @@
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
     border-bottom: none;
+    box-shadow: none;
 }
 
 .home-destaques-section.expanded .home-destaques-chevron {
@@ -714,11 +742,11 @@
     max-height: 400px;
     overflow: hidden;
     transition: max-height 0.35s ease, opacity 0.3s ease, padding 0.3s ease;
-    background: linear-gradient(180deg, var(--app-surface) 0%, #131313 100%);
+    background: var(--app-surface, var(--app-surface));
     border: 1px solid rgba(255,255,255,0.08);
     border-top: none;
-    border-radius: 0 0 12px 12px;
-    padding: 12px;
+    border-radius: 0 0 16px 16px;
+    padding: 14px 16px;
     opacity: 1;
 }
 
