@@ -721,6 +721,7 @@ export async function obterRankingGoleiros(
     for (const participanteInfo of participantes) {
       const timeId = participanteInfo.id;
       const nome = participanteInfo.nome;
+      const nomeTime = participanteInfo.nomeTime || '';
       const clubeId = participanteInfo.clubeId;
 
       // ✅ NOVO: Obter status do participante
@@ -766,6 +767,7 @@ export async function obterRankingGoleiros(
       ranking.push({
         participanteId: timeId,
         participanteNome: nome,
+        nomeTime: nomeTime,
         clubeId: clubeId,
         pontosTotais: truncarPontosNum(pontosTotais),
         rodadasJogadas,
