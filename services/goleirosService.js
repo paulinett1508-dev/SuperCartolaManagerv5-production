@@ -791,19 +791,19 @@ export async function obterRankingGoleiros(
       );
     }
 
-    // ✅ v3.0: Ordenar com critérios de desempate padronizados
-    // 1º pontosTotais DESC, 2º melhorRodada DESC (melhor goleiro single), 3º mediaPontos DESC
+    // ✅ v3.1: Desempate conforme luva_ouro.json
+    // 1º pontosTotais DESC, 2º maior_media_pontos, 3º maior_rodadas_com_goleiro, 4º participanteId (proxy ranking_geral)
     const sortFn = (a, b) => {
       // 1º critério: maior pontuação total
       if (b.pontosTotais !== a.pontosTotais) return b.pontosTotais - a.pontosTotais;
-      // 2º critério: melhor goleiro em uma rodada (single best)
-      const melhorA = a.rodadas?.reduce((max, r) => Math.max(max, r.pontos || 0), 0) || 0;
-      const melhorB = b.rodadas?.reduce((max, r) => Math.max(max, r.pontos || 0), 0) || 0;
-      if (melhorB !== melhorA) return melhorB - melhorA;
-      // 3º critério: maior média
+      // 2º critério: maior média de pontos
       const mediaA = a.rodadasJogadas > 0 ? a.pontosTotais / a.rodadasJogadas : 0;
       const mediaB = b.rodadasJogadas > 0 ? b.pontosTotais / b.rodadasJogadas : 0;
-      return mediaB - mediaA;
+      if (mediaB !== mediaA) return mediaB - mediaA;
+      // 3º critério: maior número de rodadas com goleiro escalado
+      if (b.rodadasJogadas !== a.rodadasJogadas) return b.rodadasJogadas - a.rodadasJogadas;
+      // 4º critério: posicao_ranking_geral (proxy: menor participanteId)
+      return (a.participanteId || 0) - (b.participanteId || 0);
     };
     const rankingOrdenado = ordenarRankingComInativos(ranking, sortFn);
 
