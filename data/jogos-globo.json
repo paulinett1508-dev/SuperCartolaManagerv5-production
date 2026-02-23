@@ -209,8 +209,8 @@
     "logoMandante": "https://s.sde.globo.com/media/organizations/2015/11/10/portuguesa-escudo-30.png",
     "logoVisitante": "https://s.sde.globo.com/media/organizations/2024/10/09/Corinthians-2024-30_AnBKqU3.png",
     "golsMandante": 1,
-    "golsVisitante": 0,
-    "placar": "1 x 0",
+    "golsVisitante": 1,
+    "placar": "1 x 1",
     "placarHT": null,
     "tempo": "",
     "tempoExtra": null,
@@ -227,36 +227,6 @@
     "fonte": "globo",
     "transmissao": [
       "HBO Max"
-    ]
-  },
-  {
-    "id": 349806,
-    "mandante": "Flamengo",
-    "visitante": "Madureira",
-    "logoMandante": "https://s.sde.globo.com/media/organizations/2018/04/09/Flamengo-30.png",
-    "logoVisitante": "https://s.sde.globo.com/media/organizations/2017/01/24/Madureira-30.png",
-    "golsMandante": 2,
-    "golsVisitante": 0,
-    "placar": "2 x 0",
-    "placarHT": null,
-    "tempo": "",
-    "tempoExtra": null,
-    "status": "Ao vivo",
-    "statusRaw": "LIVE",
-    "liga": "Campeonato Carioca",
-    "ligaId": null,
-    "ligaOriginal": "Campeonato Carioca",
-    "ligaLogo": null,
-    "estadio": "Maracanã",
-    "cidade": null,
-    "horario": "20:30",
-    "timestamp": 1771803000000,
-    "fonte": "globo",
-    "transmissao": [
-      "sportv",
-      "Premiere",
-      "globoplay",
-      "Ge TV"
     ]
   },
   {
@@ -2197,6 +2167,36 @@
     "transmissao": [
       "sportv",
       "globoplay"
+    ]
+  },
+  {
+    "id": 349806,
+    "mandante": "Flamengo",
+    "visitante": "Madureira",
+    "logoMandante": "https://s.sde.globo.com/media/organizations/2018/04/09/Flamengo-30.png",
+    "logoVisitante": "https://s.sde.globo.com/media/organizations/2017/01/24/Madureira-30.png",
+    "golsMandante": 3,
+    "golsVisitante": 0,
+    "placar": "3 x 0",
+    "placarHT": null,
+    "tempo": "",
+    "tempoExtra": null,
+    "status": "Encerrado",
+    "statusRaw": "FT",
+    "liga": "Campeonato Carioca",
+    "ligaId": null,
+    "ligaOriginal": "Campeonato Carioca",
+    "ligaLogo": null,
+    "estadio": "Maracanã",
+    "cidade": null,
+    "horario": "20:30",
+    "timestamp": 1771803000000,
+    "fonte": "globo",
+    "transmissao": [
+      "sportv",
+      "Premiere",
+      "globoplay",
+      "Ge TV"
     ]
   }
 ]
