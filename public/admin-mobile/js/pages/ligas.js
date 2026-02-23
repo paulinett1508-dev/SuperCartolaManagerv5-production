@@ -147,9 +147,6 @@ function renderLigaDetalhes(container, liga) {
         <button onclick="window.router.navigate('/consolidacao', { ligaId: ${liga.id} })" class="btn btn-primary" style="flex: 1;">
           <span class="material-icons mi-inline">settings</span> Consolidar
         </button>
-        <button onclick="window.router.navigate('/financeiro', { ligaId: ${liga.id} })" class="btn btn-secondary" style="flex: 1;">
-          <span class="material-icons mi-inline">payments</span> Acertos
-        </button>
       </div>
     </div>
   `;

@@ -146,17 +146,6 @@ class API {
     return this.get(`/consolidacao/historico/${ligaId}`, params);
   }
 
-  /**
-   * Acertos Financeiros
-   */
-  async getAcertos(ligaId, params = {}) {
-    return this.get(`/acertos/${ligaId}`, params);
-  }
-
-  async registrarAcerto(data) {
-    return this.post('/acertos', data);
-  }
-
   async getQuitacoesPendentes() {
     return this.get('/quitacoes/pendentes');
   }

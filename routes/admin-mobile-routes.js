@@ -68,22 +68,6 @@ router.get('/consolidacao/status/:ligaId/:rodada', controller.getConsolidacaoSta
  */
 router.get('/consolidacao/historico/:ligaId', controller.getConsolidacaoHistorico);
 
-// ========== ACERTOS FINANCEIROS ========== //
-
-/**
- * POST /api/admin/mobile/acertos
- * Registra novo acerto financeiro
- * Body: { ligaId, timeId, tipo, valor, descricao, temporada }
- */
-router.post('/acertos', controller.registrarAcerto);
-
-/**
- * GET /api/admin/mobile/acertos/:ligaId
- * Histórico de acertos de uma liga
- * Query params: limit, temporada, timeId
- */
-router.get('/acertos/:ligaId', controller.getAcertos);
-
 /**
  * GET /api/admin/mobile/quitacoes/pendentes
  * Lista quitações pendentes de aprovação

@@ -81,12 +81,6 @@ router.addRoute('/consolidacao', async (params) => {
   await render(params);
 });
 
-// Financeiro (Acertos)
-router.addRoute('/financeiro', async (params) => {
-  const { render } = await import('./pages/financeiro.js');
-  await render(params);
-});
-
 // Auditoria
 router.addRoute('/auditoria', async (params) => {
   const { render } = await import('./pages/auditoria.js');
@@ -141,8 +135,6 @@ if (action === 'consolidar') {
   } else {
     router.navigate('/consolidacao');
   }
-} else if (action === 'acerto') {
-  router.navigate('/financeiro');
 } else if (action === 'health') {
   router.navigate('/health');
 } else if (action === 'manutencao') {
