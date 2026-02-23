@@ -90,6 +90,68 @@ router.put('/quitacoes/:id/recusar', controller.recusarQuitacao);
  */
 router.get('/health', controller.getHealth);
 
+// ========== CACHE SENTINEL ========== //
+
+/**
+ * GET /api/admin/mobile/cache/status
+ * Status de todas as camadas de cache
+ */
+router.get('/cache/status', controller.getCacheStatus);
+
+/**
+ * POST /api/admin/mobile/cache/flush
+ * Flush seletivo de caches
+ * Body: { targets: ['marketgate', 'cartola', 'jogos', 'ranking', 'top10'] }
+ */
+router.post('/cache/flush', controller.flushCache);
+
+// ========== FORCE UPDATE APP ========== //
+
+/**
+ * GET /api/admin/mobile/version-status
+ * Status atual das versoes (participante + admin + override)
+ */
+router.get('/version-status', controller.getVersionStatus);
+
+/**
+ * POST /api/admin/mobile/force-update
+ * Forca atualizacao do app para todos os clientes
+ * Body: { scope: 'app' | 'admin' | 'all' }
+ */
+router.post('/force-update', controller.forceAppUpdate);
+
+// ========== CHECKLIST PRE-RODADA ========== //
+
+/**
+ * GET /api/admin/mobile/checklist
+ * Checklist de prontidao pre-rodada
+ */
+router.get('/checklist', controller.getChecklist);
+
+// ========== TOGGLE MODULOS ========== //
+
+/**
+ * GET /api/admin/mobile/modulos/:ligaId
+ * Lista modulos de uma liga
+ */
+router.get('/modulos/:ligaId', controller.getModulos);
+
+/**
+ * POST /api/admin/mobile/modulos/:ligaId/:modulo/toggle
+ * Toggle modulo on/off
+ * Body: { ativo: boolean }
+ */
+router.post('/modulos/:ligaId/:modulo/toggle', controller.toggleModulo);
+
+// ========== ACTIVITY LOGS ========== //
+
+/**
+ * GET /api/admin/mobile/logs
+ * Busca logs de atividade admin
+ * Query: ?limit=50&offset=0&action=login
+ */
+router.get('/logs', controller.getActivityLogs);
+
 // ========== ANALYTICS - BRANCHES, MERGES E FUNCIONALIDADES ========== //
 
 /**

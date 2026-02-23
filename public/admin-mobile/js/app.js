@@ -111,6 +111,42 @@ router.addRoute('/orchestrator', async (params) => {
   await render(params);
 });
 
+// Cache Sentinel
+router.addRoute('/cache-sentinel', async (params) => {
+  const { render } = await import('./pages/cache-sentinel.js');
+  await render(params);
+});
+
+// Force Update
+router.addRoute('/force-update', async (params) => {
+  const { render } = await import('./pages/force-update.js');
+  await render(params);
+});
+
+// Checklist Pre-Rodada
+router.addRoute('/checklist', async (params) => {
+  const { render } = await import('./pages/checklist.js');
+  await render(params);
+});
+
+// Toggle Modulos
+router.addRoute('/modulos', async (params) => {
+  const { render } = await import('./pages/modulos.js');
+  await render(params);
+});
+
+// Jogos Monitor
+router.addRoute('/jogos-monitor', async (params) => {
+  const { render } = await import('./pages/jogos-monitor.js');
+  await render(params);
+});
+
+// Activity Logs
+router.addRoute('/logs', async (params) => {
+  const { render } = await import('./pages/logs.js');
+  await render(params);
+});
+
 // Perfil
 router.addRoute('/profile', async (params) => {
   const { render } = await import('./pages/profile.js');

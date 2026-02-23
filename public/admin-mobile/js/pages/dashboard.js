@@ -184,6 +184,38 @@ function renderQuickActions() {
         <div class="action-card-label">Auditoria</div>
       </div>
     </div>
+
+    <div class="section-header">Ferramentas</div>
+    <div class="action-grid">
+      <div class="action-card action-card--green" onclick="window.router.navigate('/checklist')" role="button" tabindex="0">
+        <div class="action-card-icon">${mi('checklist')}</div>
+        <div class="action-card-label">Checklist</div>
+      </div>
+      <div class="action-card action-card--purple" onclick="window.router.navigate('/cache-sentinel')" role="button" tabindex="0">
+        <div class="action-card-icon">${mi('delete_sweep')}</div>
+        <div class="action-card-label">Cache</div>
+      </div>
+      <div class="action-card action-card--cyan" onclick="window.router.navigate('/modulos')" role="button" tabindex="0">
+        <div class="action-card-icon">${mi('extension')}</div>
+        <div class="action-card-label">Modulos</div>
+      </div>
+      <div class="action-card action-card--orange" onclick="window.router.navigate('/jogos-monitor')" role="button" tabindex="0">
+        <div class="action-card-icon">${mi('live_tv')}</div>
+        <div class="action-card-label">Jogos</div>
+      </div>
+    </div>
+
+    <div class="section-header">Sistema</div>
+    <div class="action-grid">
+      <div class="action-card action-card--blue" onclick="window.router.navigate('/force-update')" role="button" tabindex="0">
+        <div class="action-card-icon">${mi('system_update')}</div>
+        <div class="action-card-label">Force Update</div>
+      </div>
+      <div class="action-card action-card--pink" onclick="window.router.navigate('/logs')" role="button" tabindex="0">
+        <div class="action-card-icon">${mi('history')}</div>
+        <div class="action-card-label">Logs</div>
+      </div>
+    </div>
   `;
 }
 

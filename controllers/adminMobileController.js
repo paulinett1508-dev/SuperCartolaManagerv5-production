@@ -6,6 +6,10 @@
 import { generateToken, isAdminAutorizado } from '../middleware/adminMobileAuth.js';
 import { getDB } from '../config/database.js';
 import logger from '../utils/logger.js';
+import marketGate from '../utils/marketGate.js';
+import cartolaApiService from '../services/cartolaApiService.js';
+import Liga from '../models/Liga.js';
+import { CURRENT_SEASON } from '../config/seasons.js';
 
 /**
  * POST /api/admin/mobile/auth
@@ -870,6 +874,558 @@ async function getHealth(req, res) {
   }
 }
 
+// ========== CACHE SENTINEL ========== //
+
+/**
+ * POST /api/admin/mobile/cache/flush
+ * Flush seletivo de caches do sistema
+ * Body: { targets: ['marketgate', 'cartola', 'jogos', 'ranking', 'top10'] }
+ */
+async function flushCache(req, res) {
+  try {
+    const { targets = [] } = req.body;
+    const adminEmail = req.admin?.email || 'sistema';
+    const results = [];
+
+    // MarketGate
+    if (targets.includes('marketgate')) {
+      try {
+        marketGate.clearCache();
+        results.push({ target: 'marketgate', success: true, label: 'MarketGate' });
+      } catch (err) {
+        results.push({ target: 'marketgate', success: false, label: 'MarketGate', error: err.message });
+      }
+    }
+
+    // Cartola API Service
+    if (targets.includes('cartola')) {
+      try {
+        cartolaApiService.limparCache();
+        results.push({ target: 'cartola', success: true, label: 'API Cartola' });
+      } catch (err) {
+        results.push({ target: 'cartola', success: false, label: 'API Cartola', error: err.message });
+      }
+    }
+
+    // Jogos ao Vivo (via internal fetch)
+    if (targets.includes('jogos')) {
+      try {
+        const port = process.env.PORT || 3000;
+        const resp = await fetch(`http://localhost:${port}/api/jogos-ao-vivo/invalidar`);
+        const data = await resp.json();
+        results.push({ target: 'jogos', success: true, label: 'Jogos ao Vivo' });
+      } catch (err) {
+        results.push({ target: 'jogos', success: false, label: 'Jogos ao Vivo', error: err.message });
+      }
+    }
+
+    // Ranking cache (per league)
+    if (targets.includes('ranking')) {
+      try {
+        const db = req.app.locals.db || getDB();
+        const ligas = await db.collection('ligas').find({ ativa: true }).project({ _id: 1 }).toArray();
+        let cleared = 0;
+        for (const liga of ligas) {
+          const port = process.env.PORT || 3000;
+          try {
+            await fetch(`http://localhost:${port}/api/ranking-cache/${liga._id}`, { method: 'DELETE' });
+            cleared++;
+          } catch (_) { /* skip */ }
+        }
+        results.push({ target: 'ranking', success: true, label: 'Ranking Cache', detail: `${cleared} ligas` });
+      } catch (err) {
+        results.push({ target: 'ranking', success: false, label: 'Ranking Cache', error: err.message });
+      }
+    }
+
+    // Top10 cache (per league)
+    if (targets.includes('top10')) {
+      try {
+        const db = req.app.locals.db || getDB();
+        const ligas = await db.collection('ligas').find({ ativa: true }).project({ _id: 1 }).toArray();
+        let cleared = 0;
+        for (const liga of ligas) {
+          const port = process.env.PORT || 3000;
+          try {
+            await fetch(`http://localhost:${port}/api/top10/cache/${liga._id}`, { method: 'DELETE' });
+            cleared++;
+          } catch (_) { /* skip */ }
+        }
+        results.push({ target: 'top10', success: true, label: 'Top 10 Cache', detail: `${cleared} ligas` });
+      } catch (err) {
+        results.push({ target: 'top10', success: false, label: 'Top 10 Cache', error: err.message });
+      }
+    }
+
+    // Log activity
+    const db = req.app.locals.db || getDB();
+    await db.collection('adminactivitylogs').insertOne({
+      email: adminEmail,
+      action: 'cache_flush',
+      details: { targets, results },
+      result: results.every(r => r.success) ? 'success' : 'partial',
+      timestamp: new Date()
+    });
+
+    res.json({
+      success: true,
+      results,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    logger.error('[adminMobile] Erro no flushCache:', error);
+    res.status(500).json({ error: 'Erro ao limpar cache', code: 'INTERNAL_ERROR' });
+  }
+}
+
+/**
+ * GET /api/admin/mobile/cache/status
+ * Status de todas as camadas de cache
+ */
+async function getCacheStatus(req, res) {
+  try {
+    const port = process.env.PORT || 3000;
+    const layers = [];
+
+    // MarketGate
+    try {
+      const mgStatus = marketGate.getStatus ? marketGate.getStatus() : { hasCache: !!marketGate._cache };
+      layers.push({
+        id: 'marketgate',
+        label: 'MarketGate',
+        icon: 'storefront',
+        description: 'Cache do mercado Cartola',
+        status: mgStatus.hasCache || mgStatus.has_cache ? 'cached' : 'empty'
+      });
+    } catch (_) {
+      layers.push({ id: 'marketgate', label: 'MarketGate', icon: 'storefront', description: 'Cache do mercado Cartola', status: 'unknown' });
+    }
+
+    // Cartola API
+    layers.push({
+      id: 'cartola',
+      label: 'API Cartola',
+      icon: 'sports_soccer',
+      description: 'Cache de dados da API Cartola FC',
+      status: 'active'
+    });
+
+    // Jogos ao Vivo
+    try {
+      const resp = await fetch(`http://localhost:${port}/api/jogos-ao-vivo/status`);
+      const data = await resp.json();
+      const hasCache = data.cache?.temJogos || data.cacheGeral?.jogosEmCache > 0;
+      layers.push({
+        id: 'jogos',
+        label: 'Jogos ao Vivo',
+        icon: 'live_tv',
+        description: `Fonte: ${data.cacheGeral?.fonte || 'N/A'}`,
+        status: hasCache ? 'cached' : 'empty'
+      });
+    } catch (_) {
+      layers.push({ id: 'jogos', label: 'Jogos ao Vivo', icon: 'live_tv', description: 'Cache de jogos do dia', status: 'unknown' });
+    }
+
+    // Ranking
+    layers.push({
+      id: 'ranking',
+      label: 'Ranking Cache',
+      icon: 'leaderboard',
+      description: 'Cache consolidado de rankings',
+      status: 'active'
+    });
+
+    // Top10
+    layers.push({
+      id: 'top10',
+      label: 'Top 10 Cache',
+      icon: 'emoji_events',
+      description: 'Cache do Top 10 (Mito/Mico)',
+      status: 'active'
+    });
+
+    res.json({ layers, timestamp: new Date().toISOString() });
+  } catch (error) {
+    logger.error('[adminMobile] Erro no getCacheStatus:', error);
+    res.status(500).json({ error: 'Erro ao buscar status do cache', code: 'INTERNAL_ERROR' });
+  }
+}
+
+// ========== FORCE UPDATE APP ========== //
+
+// Mutable version override (persists in memory between requests, resets on server restart)
+let _versionOverride = null;
+
+/**
+ * POST /api/admin/mobile/force-update
+ * Gera nova versao forçada para invalidar cache dos clientes
+ * Body: { scope: 'app' | 'admin' | 'all' }
+ */
+async function forceAppUpdate(req, res) {
+  try {
+    const { scope = 'all' } = req.body;
+    const adminEmail = req.admin?.email || 'sistema';
+    const now = new Date();
+
+    // Gerar version string baseado no timestamp atual de Brasilia
+    const brDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+    const version = [
+      String(brDate.getDate()).padStart(2, '0'),
+      String(brDate.getMonth() + 1).padStart(2, '0'),
+      String(brDate.getFullYear()).slice(-2),
+      String(brDate.getHours()).padStart(2, '0') + String(brDate.getMinutes()).padStart(2, '0')
+    ].join('.');
+
+    _versionOverride = { version, scope, timestamp: now.toISOString(), by: adminEmail };
+
+    // Log activity
+    const db = req.app.locals.db || getDB();
+    await db.collection('adminactivitylogs').insertOne({
+      email: adminEmail,
+      action: 'force_app_update',
+      details: { scope, version },
+      result: 'success',
+      timestamp: now
+    });
+
+    res.json({
+      success: true,
+      version,
+      scope,
+      message: `Versao forcada: ${version} (${scope})`,
+      timestamp: now.toISOString()
+    });
+  } catch (error) {
+    logger.error('[adminMobile] Erro no forceAppUpdate:', error);
+    res.status(500).json({ error: 'Erro ao forcar atualizacao', code: 'INTERNAL_ERROR' });
+  }
+}
+
+/**
+ * GET /api/admin/mobile/version-status
+ * Status atual das versoes (participante + admin + override)
+ */
+async function getVersionStatus(req, res) {
+  try {
+    const port = process.env.PORT || 3000;
+    let participante = null, admin = null;
+
+    try {
+      const resp = await fetch(`http://localhost:${port}/api/app/versao/all`);
+      const data = await resp.json();
+      participante = data.participante;
+      admin = data.admin;
+    } catch (_) { /* fallback */ }
+
+    res.json({
+      participante,
+      admin,
+      override: _versionOverride,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    logger.error('[adminMobile] Erro no getVersionStatus:', error);
+    res.status(500).json({ error: 'Erro ao buscar versoes', code: 'INTERNAL_ERROR' });
+  }
+}
+
+// Export version override for use by appVersionRoutes
+export function getVersionOverride() {
+  return _versionOverride;
+}
+
+// ========== CHECKLIST PRE-RODADA ========== //
+
+/**
+ * GET /api/admin/mobile/checklist
+ * Aggregates multiple system checks for pre-round readiness
+ */
+async function getChecklist(req, res) {
+  try {
+    const port = process.env.PORT || 3000;
+    const db = req.app.locals.db || getDB();
+    const checks = [];
+
+    // 1. Orchestrator rodando?
+    try {
+      const resp = await fetch(`http://localhost:${port}/api/orchestrator/status`);
+      const data = await resp.json();
+      const ativo = data.success && data.live;
+      checks.push({
+        id: 'orchestrator',
+        label: 'Orchestrator',
+        description: ativo ? `Fase: ${data.live?.faseRodada || 'idle'}` : 'Indisponivel',
+        status: ativo ? 'ok' : 'error',
+        icon: 'precision_manufacturing'
+      });
+    } catch (_) {
+      checks.push({ id: 'orchestrator', label: 'Orchestrator', description: 'Sem resposta', status: 'error', icon: 'precision_manufacturing' });
+    }
+
+    // 2. Ultima rodada consolidada?
+    try {
+      const resp = await fetch(`http://localhost:${port}/api/orchestrator/status`);
+      const data = await resp.json();
+      const rodadaAtual = data.live?.rodadaAtual || 0;
+      const lastConsolidacao = await db.collection('adminactivitylogs')
+        .findOne({ action: 'consolidacao_manual' }, { sort: { timestamp: -1 } });
+      const consolidadaEm = lastConsolidacao?.timestamp;
+      checks.push({
+        id: 'consolidacao',
+        label: 'Consolidacao',
+        description: consolidadaEm ? `Ultima: ${new Date(consolidadaEm).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}` : 'Nenhuma registrada',
+        status: consolidadaEm ? 'ok' : 'warning',
+        icon: 'sync'
+      });
+    } catch (_) {
+      checks.push({ id: 'consolidacao', label: 'Consolidacao', description: 'Erro ao verificar', status: 'error', icon: 'sync' });
+    }
+
+    // 3. APIs de jogos saudaveis?
+    try {
+      const resp = await fetch(`http://localhost:${port}/api/jogos-ao-vivo/status`);
+      const data = await resp.json();
+      const fontes = data.fontes || {};
+      const apiFootball = fontes['api-football'] || {};
+      const quota = apiFootball.quota || {};
+      const restante = quota.restante ?? '?';
+      checks.push({
+        id: 'apis_jogos',
+        label: 'APIs de Jogos',
+        description: `API-Football: ${restante} req restantes`,
+        status: quota.circuitBreaker ? 'error' : (restante > 20 ? 'ok' : 'warning'),
+        icon: 'live_tv'
+      });
+    } catch (_) {
+      checks.push({ id: 'apis_jogos', label: 'APIs de Jogos', description: 'Sem resposta', status: 'error', icon: 'live_tv' });
+    }
+
+    // 4. Banco de dados OK?
+    try {
+      const collections = await db.listCollections().toArray();
+      checks.push({
+        id: 'database',
+        label: 'Banco de Dados',
+        description: `${collections.length} collections`,
+        status: 'ok',
+        icon: 'storage'
+      });
+    } catch (_) {
+      checks.push({ id: 'database', label: 'Banco de Dados', description: 'Conexao falhou', status: 'error', icon: 'storage' });
+    }
+
+    // 5. Ligas ativas com modulos?
+    try {
+      const ligas = await db.collection('ligas').find({ ativa: true }).toArray();
+      const totalModulosAtivos = ligas.reduce((sum, l) => {
+        const mods = l.modulos_ativos || {};
+        return sum + Object.values(mods).filter(v => v === true).length;
+      }, 0);
+      checks.push({
+        id: 'ligas_modulos',
+        label: 'Ligas & Modulos',
+        description: `${ligas.length} ligas, ${totalModulosAtivos} modulos ativos`,
+        status: ligas.length > 0 ? 'ok' : 'warning',
+        icon: 'groups'
+      });
+    } catch (_) {
+      checks.push({ id: 'ligas_modulos', label: 'Ligas & Modulos', description: 'Erro ao verificar', status: 'error', icon: 'groups' });
+    }
+
+    // 6. Manutencao ativa?
+    try {
+      const resp = await fetch(`http://localhost:${port}/api/admin/manutencao`);
+      const data = await resp.json();
+      const ativo = data.ativo || data.manutencao?.ativo;
+      checks.push({
+        id: 'manutencao',
+        label: 'Modo Manutencao',
+        description: ativo ? 'ATIVO - participantes bloqueados' : 'Desativado',
+        status: ativo ? 'warning' : 'ok',
+        icon: 'build'
+      });
+    } catch (_) {
+      checks.push({ id: 'manutencao', label: 'Modo Manutencao', description: 'Erro ao verificar', status: 'warning', icon: 'build' });
+    }
+
+    // 7. Participantes sincronizados? (absorbs ligas-gerenciar)
+    try {
+      const ligas = await db.collection('ligas').find({ ativa: true }).toArray();
+      let totalTimes = 0;
+      for (const liga of ligas) {
+        const count = await db.collection('times').countDocuments({
+          liga_id: liga._id.toString(),
+          ativo: true
+        });
+        totalTimes += count;
+      }
+      checks.push({
+        id: 'participantes',
+        label: 'Participantes',
+        description: `${totalTimes} participantes ativos`,
+        status: totalTimes > 0 ? 'ok' : 'warning',
+        icon: 'people'
+      });
+    } catch (_) {
+      checks.push({ id: 'participantes', label: 'Participantes', description: 'Erro ao verificar', status: 'error', icon: 'people' });
+    }
+
+    const score = checks.filter(c => c.status === 'ok').length;
+    const total = checks.length;
+    const allOk = checks.every(c => c.status === 'ok');
+
+    res.json({
+      ready: allOk,
+      score: `${score}/${total}`,
+      checks,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    logger.error('[adminMobile] Erro no getChecklist:', error);
+    res.status(500).json({ error: 'Erro ao gerar checklist', code: 'INTERNAL_ERROR' });
+  }
+}
+
+// ========== TOGGLE MODULOS ========== //
+
+/**
+ * GET /api/admin/mobile/modulos/:ligaId
+ * Lista modulos de uma liga com status
+ */
+async function getModulos(req, res) {
+  try {
+    const { ligaId } = req.params;
+    const temporada = Number(req.query.temporada) || CURRENT_SEASON;
+
+    const liga = await Liga.findById(ligaId).select('nome modulos_ativos').lean();
+    if (!liga) {
+      return res.status(404).json({ error: 'Liga nao encontrada', code: 'NOT_FOUND' });
+    }
+
+    const modulos_ativos = liga.modulos_ativos || {};
+
+    // Map to a clean list
+    const modulosList = [
+      { id: 'extrato', label: 'Extrato', icon: 'receipt_long', base: true },
+      { id: 'ranking', label: 'Ranking', icon: 'leaderboard', base: true },
+      { id: 'rodadas', label: 'Rodadas', icon: 'calendar_month', base: true },
+      { id: 'historico', label: 'Historico', icon: 'history', base: true },
+      { id: 'top10', label: 'Top 10', icon: 'star', base: false },
+      { id: 'melhorMes', label: 'Melhor do Mes', icon: 'workspace_premium', base: false },
+      { id: 'pontosCorridos', label: 'Pontos Corridos', icon: 'format_list_numbered', base: false },
+      { id: 'mataMata', label: 'Mata-Mata', icon: 'account_tree', base: false },
+      { id: 'artilheiro', label: 'Artilheiro', icon: 'sports_soccer', base: false },
+      { id: 'luvaOuro', label: 'Luva de Ouro', icon: 'sports_handball', base: false },
+      { id: 'capitaoLuxo', label: 'Capitao de Luxo', icon: 'military_tech', base: false },
+      { id: 'campinho', label: 'Campinho', icon: 'grid_on', base: false },
+      { id: 'dicas', label: 'Dicas', icon: 'lightbulb', base: false },
+    ];
+
+    const result = modulosList.map(m => ({
+      ...m,
+      ativo: modulos_ativos[m.id] === true || (m.base && modulos_ativos[m.id] !== false)
+    }));
+
+    res.json({
+      liga: { id: ligaId, nome: liga.nome },
+      modulos: result,
+      temporada,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    logger.error('[adminMobile] Erro no getModulos:', error);
+    res.status(500).json({ error: 'Erro ao listar modulos', code: 'INTERNAL_ERROR' });
+  }
+}
+
+/**
+ * POST /api/admin/mobile/modulos/:ligaId/:modulo/toggle
+ * Toggle a module on/off
+ * Body: { ativo: boolean }
+ */
+async function toggleModulo(req, res) {
+  try {
+    const { ligaId, modulo } = req.params;
+    const { ativo } = req.body;
+    const adminEmail = req.admin?.email || 'sistema';
+
+    if (typeof ativo !== 'boolean') {
+      return res.status(400).json({ error: 'Campo ativo (boolean) obrigatorio', code: 'INVALID_INPUT' });
+    }
+
+    const result = await Liga.updateOne(
+      { _id: ligaId },
+      { $set: { [`modulos_ativos.${modulo}`]: ativo } }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Liga nao encontrada', code: 'NOT_FOUND' });
+    }
+
+    // Log activity
+    const db = req.app.locals.db || getDB();
+    await db.collection('adminactivitylogs').insertOne({
+      email: adminEmail,
+      action: 'modulo_toggle',
+      details: { ligaId, modulo, ativo },
+      result: 'success',
+      timestamp: new Date()
+    });
+
+    res.json({
+      success: true,
+      modulo,
+      ativo,
+      message: `Modulo ${modulo} ${ativo ? 'ativado' : 'desativado'}`,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    logger.error('[adminMobile] Erro no toggleModulo:', error);
+    res.status(500).json({ error: 'Erro ao alterar modulo', code: 'INTERNAL_ERROR' });
+  }
+}
+
+// ========== ACTIVITY LOGS ========== //
+
+/**
+ * GET /api/admin/mobile/logs
+ * Query admin activity logs
+ * Query: ?limit=50&offset=0&action=login
+ */
+async function getActivityLogs(req, res) {
+  try {
+    const db = req.app.locals.db || getDB();
+    const limit = Math.min(Number(req.query.limit) || 50, 100);
+    const offset = Number(req.query.offset) || 0;
+    const actionFilter = req.query.action;
+
+    const query = {};
+    if (actionFilter) query.action = actionFilter;
+
+    const [logs, total] = await Promise.all([
+      db.collection('adminactivitylogs')
+        .find(query)
+        .sort({ timestamp: -1 })
+        .skip(offset)
+        .limit(limit)
+        .toArray(),
+      db.collection('adminactivitylogs').countDocuments(query)
+    ]);
+
+    res.json({
+      logs,
+      total,
+      limit,
+      offset,
+      hasMore: offset + limit < total,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    logger.error('[adminMobile] Erro no getActivityLogs:', error);
+    res.status(500).json({ error: 'Erro ao buscar logs', code: 'INTERNAL_ERROR' });
+  }
+}
+
 export {
   authenticate,
   getDashboard,
@@ -880,5 +1436,13 @@ export {
   getQuitacoesPendentes,
   aprovarQuitacao,
   recusarQuitacao,
-  getHealth
+  getHealth,
+  flushCache,
+  getCacheStatus,
+  forceAppUpdate,
+  getVersionStatus,
+  getChecklist,
+  getModulos,
+  toggleModulo,
+  getActivityLogs
 };

@@ -1025,6 +1025,7 @@
 .action-card--red .action-card-icon { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
 .action-card--orange .action-card-icon { background: rgba(249, 115, 22, 0.15); color: #f97316; }
 .action-card--purple .action-card-icon { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+.action-card--cyan .action-card-icon { background: rgba(6, 182, 212, 0.15); color: #06b6d4; }
 
 /* ========== SECTION HEADER ========== */
 .section-header {
