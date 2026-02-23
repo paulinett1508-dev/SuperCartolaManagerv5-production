@@ -2183,7 +2183,8 @@
                                     time_id: p.time_id,
                                     nome_cartola: p.nome_cartoleiro || p.nome_cartola || 'Sem nome',
                                     nome_time: p.nome_time || 'Sem time',
-                                    clube_id: p.clube_id || 'default'
+                                    clube_id: p.clube_id || 'default',
+                                    escudo: p.escudo || ''
                                 }));
                             fonte = data.fonte || 'api';
                         }
@@ -2202,7 +2203,8 @@
                                     time_id: p.time_id,
                                     nome_cartola: p.nome_cartola || p.nome_cartoleiro || 'Sem nome',
                                     nome_time: p.nome_time || 'Sem time',
-                                    clube_id: p.clube_id || 'default'
+                                    clube_id: p.clube_id || 'default',
+                                    escudo: p.foto_time || p.escudo || ''
                                 }));
                         }
                     }
@@ -2222,16 +2224,28 @@
                     subtitulo.textContent = `${participantes.length} participantes`;
                     console.log(`[PARTICIPANTES] ${participantes.length} carregados (fonte: ${fonte})`);
 
+                    // Carregar nomes dos clubes para time do coração
+                    let clubesNomeMap = {};
+                    try {
+                        const { CLUBES } = await import('/js/shared/clubes-data.js');
+                        for (const [id, info] of Object.entries(CLUBES)) {
+                            clubesNomeMap[Number(id)] = info.nome;
+                        }
+                    } catch (e) {
+                        console.warn('[PARTICIPANTES] Falha ao carregar clubes-data.js', e);
+                    }
+
+                    // Guardar dados para uso no mostrarInfoParticipante
+                    window._participantesData = { participantes, clubesNomeMap };
+
                     // Renderizar lista com escudo do time do coracao
-                    // ✅ v2.1: Clique abre escalação do participante
-                    lista.innerHTML = participantes.map(p => {
+                    // ✅ v3.0: Clique abre info do participante (dados do perfil)
+                    lista.innerHTML = participantes.map((p, idx) => {
                         const clubeId = p.clube_id || 'default';
                         const escudoUrl = `/escudos/${clubeId}.png`;
-                        const nomeEscapado = (p.nome_cartola || '').replace(/'/g, "\\'").replace(/"/g, "&quot;");
-                        const timeEscapado = (p.nome_time || '').replace(/'/g, "\\'").replace(/"/g, "&quot;");
                         return `
                             <div class="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:bg-white/10 active:scale-[0.98] transition-all"
-                                 onclick="abrirEscalacaoParticipante(${p.time_id}, '${nomeEscapado}', '${timeEscapado}')">
+                                 onclick="mostrarInfoParticipante(${idx})">
                                 <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
                                     <img src="${escudoUrl}"
                                          alt="Escudo"
@@ -2242,7 +2256,7 @@
                                     <p class="text-sm font-semibold text-white truncate">${p.nome_cartola}</p>
                                     <p class="text-xs text-white/50 truncate">${p.nome_time}</p>
                                 </div>
-                                <span class="material-icons text-white/30 text-lg">chevron_right</span>
+                                <span class="material-icons text-white/30 text-lg">expand_more</span>
                             </div>
                         `;
                     }).join('');
@@ -2258,11 +2272,118 @@
                 if (e.target === this) fecharParticipantes2026();
             });
 
+            // =====================================================================
+            // MOSTRAR INFO DO PARTICIPANTE - v3.0
+            // Exibe dados do perfil (nome, time + brasão, time do coração + brasão)
+            // =====================================================================
+            function mostrarInfoParticipante(idx) {
+                const data = window._participantesData;
+                if (!data) return;
+
+                const p = data.participantes[idx];
+                if (!p) return;
+
+                const clubesMap = data.clubesNomeMap || {};
+                const clubeId = p.clube_id || 'default';
+                const nomeClube = clubesMap[Number(clubeId)] || '';
+                const escudoCoracaoUrl = `/escudos/${clubeId}.png`;
+                const escudoTimeUrl = p.escudo || `/escudos/${clubeId}.png`;
+
+                // Encontrar o chip clicado e inserir/toggle info abaixo dele
+                const lista = document.getElementById('lista-participantes-2026');
+                if (!lista) return;
+
+                const chips = lista.querySelectorAll('[onclick^="mostrarInfoParticipante"]');
+                const chipEl = chips[idx];
+                if (!chipEl) return;
+
+                // Toggle: se já tem info aberta neste chip, fechar
+                const infoExistente = chipEl.nextElementSibling;
+                if (infoExistente && infoExistente.classList.contains('participant-info-panel')) {
+                    infoExistente.remove();
+                    chipEl.querySelector('.material-icons:last-child').textContent = 'expand_more';
+                    return;
+                }
+
+                // Fechar qualquer info aberta em outro chip
+                lista.querySelectorAll('.participant-info-panel').forEach(el => {
+                    const prevChip = el.previousElementSibling;
+                    if (prevChip) {
+                        const icon = prevChip.querySelector('.material-icons:last-child');
+                        if (icon) icon.textContent = 'expand_more';
+                    }
+                    el.remove();
+                });
+
+                // Trocar ícone do chip para expand_less
+                chipEl.querySelector('.material-icons:last-child').textContent = 'expand_less';
+
+                // Criar painel de info
+                const infoPanel = document.createElement('div');
+                infoPanel.className = 'participant-info-panel';
+                infoPanel.style.cssText = `
+                    background: var(--app-surface-elevated, #1a1a1a);
+                    border: 1px solid var(--app-border-subtle, rgba(255,255,255,0.08));
+                    border-top: none;
+                    border-radius: 0 0 12px 12px;
+                    padding: 16px;
+                    margin-top: -8px;
+                    margin-bottom: 8px;
+                    animation: infoSlideDown 0.2s ease-out;
+                `;
+
+                infoPanel.innerHTML = `
+                    <div style="display:flex; flex-direction:column; gap:14px;">
+                        <!-- Nome -->
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span class="material-icons" style="font-size:20px; color:var(--app-primary, #ff6d00); flex-shrink:0;">person</span>
+                            <div style="min-width:0;">
+                                <div style="font-family:var(--app-font-base, Inter),sans-serif; font-size:10px; font-weight:600; color:rgba(255,255,255,0.45); text-transform:uppercase; letter-spacing:0.5px;">Nome</div>
+                                <div style="font-family:var(--app-font-brand, 'Russo One'),sans-serif; font-size:14px; color:#fff; letter-spacing:0.2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.nome_cartola}</div>
+                            </div>
+                        </div>
+                        <!-- Nome do Time + Brasão -->
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <div style="width:44px; height:44px; border-radius:var(--app-radius-md, 8px); background:rgba(255,255,255,0.04); display:flex; align-items:center; justify-content:center; flex-shrink:0; border:1px solid rgba(255,255,255,0.08);">
+                                <img src="${escudoTimeUrl}"
+                                     alt="Brasao do Time"
+                                     style="width:36px; height:36px; object-fit:contain;"
+                                     onerror="this.onerror=null;this.src='/escudos/default.png'">
+                            </div>
+                            <div style="min-width:0;">
+                                <div style="font-family:var(--app-font-base, Inter),sans-serif; font-size:10px; font-weight:600; color:rgba(255,255,255,0.45); text-transform:uppercase; letter-spacing:0.5px;">Nome do Time</div>
+                                <div style="font-family:var(--app-font-brand, 'Russo One'),sans-serif; font-size:14px; color:#fff; letter-spacing:0.2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.nome_time}</div>
+                            </div>
+                        </div>
+                        <!-- Time do Coração + Brasão -->
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <div style="width:44px; height:44px; border-radius:var(--app-radius-md, 8px); background:rgba(255,255,255,0.04); display:flex; align-items:center; justify-content:center; flex-shrink:0; border:1px solid rgba(255,255,255,0.08);">
+                                <img src="${escudoCoracaoUrl}"
+                                     alt="Time do Coracao"
+                                     style="width:36px; height:36px; object-fit:contain;"
+                                     onerror="this.onerror=null;this.src='/escudos/default.png'">
+                            </div>
+                            <div style="min-width:0;">
+                                <div style="font-family:var(--app-font-base, Inter),sans-serif; font-size:10px; font-weight:600; color:rgba(255,255,255,0.45); text-transform:uppercase; letter-spacing:0.5px;">Time do Coração</div>
+                                <div style="font-family:var(--app-font-brand, 'Russo One'),sans-serif; font-size:14px; color:#fff; letter-spacing:0.2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${nomeClube || 'N/D'}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Inserir após o chip
+                chipEl.after(infoPanel);
+
+                // Scroll suave para o painel ficar visível
+                infoPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
             // Expor globalmente
+            window.mostrarInfoParticipante = mostrarInfoParticipante;
             window.abrirParticipantes2026 = abrirParticipantes2026;
             window.fecharParticipantes2026 = fecharParticipantes2026;
 
-            console.log('[PARTICIPANTES] Modal Participantes 2026 carregado');
+            console.log('[PARTICIPANTES] Modal Participantes 2026 v3.0 carregado');
 
             // Função global "Aguarde..." para cards não-premium
             window.mostrarAguarde = function(nomeCard) {
@@ -2306,6 +2427,12 @@
             .aguarde-toast-show {
                 opacity: 1;
                 transform: translateX(-50%) translateY(0);
+            }
+
+            /* Animação do painel de info do participante */
+            @keyframes infoSlideDown {
+                from { opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; }
+                to { opacity: 1; max-height: 300px; }
             }
         </style>
 
