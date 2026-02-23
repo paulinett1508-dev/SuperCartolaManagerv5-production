@@ -317,6 +317,31 @@ function renderizarCardDesempenho(ranking) {
     const pior = meusDados.pior_capitao;
     const distintos = meusDados.capitaes_distintos || 0;
 
+    // Extrair HTML nested para evitar backtick nesting (causa SyntaxError)
+    const melhorPts = melhor ? (typeof truncarPontos === 'function' ? truncarPontos(melhor.pontuacao || 0) : (melhor.pontuacao || 0).toFixed(2)) : '';
+    const piorPts = pior ? (typeof truncarPontos === 'function' ? truncarPontos(pior.pontuacao || 0) : (pior.pontuacao || 0).toFixed(2)) : '';
+
+    let melhorPiorHtml = '';
+    if (melhor) {
+        const piorHtml = pior
+            ? '<div style="font-size: 11px;">'
+                + '<span style="color: var(--capitao-danger);">Pior:</span> '
+                + '<span style="color: #e5e7eb;">' + (pior.atleta_nome || '---') + ' (R' + pior.rodada + ')</span> '
+                + '<span style="font-family: var(--capitao-font-mono); color: var(--capitao-danger); font-weight: 700;">' + piorPts + '</span>'
+                + '</div>'
+            : '';
+        melhorPiorHtml = '<div style="display: flex; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--capitao-border);">'
+            + '<div style="font-size: 11px;">'
+            + '<span style="color: var(--capitao-success);">Melhor:</span> '
+            + '<span style="color: #e5e7eb;">' + (melhor.atleta_nome || '---') + ' (R' + melhor.rodada + ')</span> '
+            + '<span style="font-family: var(--capitao-font-mono); color: var(--capitao-success); font-weight: 700;">' + melhorPts + '</span>'
+            + '</div>'
+            + piorHtml
+            + '</div>';
+    }
+
+    const historicoHtml = _renderHistoricoDesempenho(meusDados.historico_rodadas);
+
     mainContainer.insertAdjacentHTML('afterbegin', `
         <div class="capitao-card" style="border-color: var(--capitao-primary); background: rgba(139, 92, 246, 0.08);">
             <div style="width: 100%;">
@@ -339,29 +364,14 @@ function renderizarCardDesempenho(ranking) {
                         <span style="font-family: var(--capitao-font-mono); font-size: 16px; color: #e5e7eb;">${rodadas}</span>
                     </div>
                 </div>
-                ${melhor ? `
-                <div style="display: flex; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--capitao-border);">
-                    <div style="font-size: 11px;">
-                        <span style="color: var(--capitao-success);">Melhor:</span>
-                        <span style="color: #e5e7eb;">${melhor.atleta_nome || '---'} (R${melhor.rodada})</span>
-                        <span style="font-family: var(--capitao-font-mono); color: var(--capitao-success); font-weight: 700;">${typeof truncarPontos === 'function' ? truncarPontos(melhor.pontuacao || 0) : (melhor.pontuacao || 0).toFixed(2)}</span>
-                    </div>
-                    ${pior ? `
-                    <div style="font-size: 11px;">
-                        <span style="color: var(--capitao-danger);">Pior:</span>
-                        <span style="color: #e5e7eb;">${pior.atleta_nome || '---'} (R${pior.rodada})</span>
-                        <span style="font-family: var(--capitao-font-mono); color: var(--capitao-danger); font-weight: 700;">${typeof truncarPontos === 'function' ? truncarPontos(pior.pontuacao || 0) : (pior.pontuacao || 0).toFixed(2)}</span>
-                    </div>
-                    ` : ''}
-                </div>
-                ` : ''}
+                ${melhorPiorHtml}
                 <div style="margin-top: 8px; font-size: 11px; color: var(--capitao-text-muted);">
                     Capitães distintos utilizados: <strong style="color: #e5e7eb;">${distintos}</strong>
                 </div>
-                ${_renderHistoricoDesempenho(meusDados.historico_rodadas)}
+                ${historicoHtml}
             </div>
         </div>
-    `;
+    `);
 }
 
 // =============================================
