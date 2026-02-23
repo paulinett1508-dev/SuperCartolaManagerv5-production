@@ -1104,12 +1104,12 @@ function renderizarHome(container, data, ligaId) {
         if (rodadaParaDestaques > 0 && ultimaRodada) {
             destaquesSection.classList.remove('hidden');
 
-            // ✅ FIX: Sempre expandido por padrão (especialmente durante jogos ao vivo)
+            // Colapsado por padrão — usuário expande manualmente
             const status = mercadoStatus?.status_mercado;
             const isJogosAoVivo = status === 2;
 
-            destaquesSection.classList.add('expanded');
-            if (destaquesContent) destaquesContent.classList.remove('collapsed');
+            destaquesSection.classList.remove('expanded');
+            if (destaquesContent) destaquesContent.classList.add('collapsed');
 
             carregarDestaquesRodada(ligaId, rodadaParaDestaques, timeId, isJogosAoVivo);
         } else {
@@ -1292,13 +1292,10 @@ function _renderizarDestaques(escalacao, rodada) {
     let maiorPontuador = atletas.reduce((max, a) => (a.pontos_num > (max?.pontos_num || -999) ? a : max), null);
     let menorPontuador = atletas.reduce((min, a) => (a.pontos_num < (min?.pontos_num || 999) ? a : min), null);
 
-    // Popular cards de destaques (Capitão / Maior / Menor)
+    // Popular card-strips de destaques (Capitão / Maior / Menor)
     popularDestaqueCard('capitao', capitao, true);
     popularDestaqueCard('maior', maiorPontuador, false);
     popularDestaqueCard('menor', menorPontuador, false);
-
-    // Popular card de módulos (Artilheiro / Luva / Capitão de Luxo)
-    popularCardModulos(atletas, capitao);
 
     // Atualizar badge da rodada (caso fallback)
     const rodadaBadgeEl = document.getElementById('home-destaques-rodada');
@@ -1333,15 +1330,9 @@ function popularDestaqueCard(tipo, atleta, isCapitao = false) {
     if (pontosEl) {
         const pontos = parseFloat(atleta.pontos_num || 0);
         if (isCapitao) {
-            // Capitão: mostrar pontos x1.5
+            // Capitão: mostrar pontos x1.5 (truncado, nunca arredondado)
             const pontosCapitao = pontos * 1.5;
             pontosEl.textContent = (Math.trunc((pontosCapitao||0) * 100) / 100).toFixed(2);
-
-            // Pontos base
-            const pontosBaseEl = document.getElementById('home-pontos-base-capitao');
-            if (pontosBaseEl) {
-                pontosBaseEl.textContent = (Math.trunc((pontos||0) * 100) / 100).toFixed(2);
-            }
         } else {
             pontosEl.textContent = (Math.trunc((pontos||0) * 100) / 100).toFixed(2);
         }
@@ -1357,87 +1348,6 @@ function popularDestaqueCard(tipo, atleta, isCapitao = false) {
             };
         }
     }
-}
-
-// =====================================================================
-// POPULAR CARD DE MÓDULOS (Artilheiro / Luva de Ouro / Capitão)
-// =====================================================================
-function popularCardModulos(atletas, capitao) {
-    const section = document.getElementById('home-modulos-section');
-    if (!section || !atletas?.length) return;
-
-    // === ARTILHEIRO: Atacante/Meia com mais gols (scout "G") ===
-    let artilheiro = null;
-    let maxGols = 0;
-    for (const a of atletas) {
-        const gols = parseInt(a.scout?.G || a.scouts?.G || 0);
-        if (gols > maxGols) {
-            maxGols = gols;
-            artilheiro = a;
-        }
-    }
-    // Fallback: maior pontuador entre atacantes (posicao_id 5)
-    if (!artilheiro) {
-        const atacantes = atletas.filter(a => a.posicao_id === 5);
-        if (atacantes.length > 0) {
-            artilheiro = atacantes.reduce((max, a) =>
-                (parseFloat(a.pontos_num || 0) > parseFloat(max.pontos_num || 0)) ? a : max, atacantes[0]);
-        }
-    }
-
-    const artNomeEl = document.getElementById('home-modulo-artilheiro-nome');
-    const artStatsEl = document.getElementById('home-modulo-artilheiro-stats');
-    if (artilheiro) {
-        if (artNomeEl) artNomeEl.textContent = artilheiro.apelido || artilheiro.nome || '--';
-        if (artStatsEl) {
-            const gols = parseInt(artilheiro.scout?.G || artilheiro.scouts?.G || 0);
-            const pts = (Math.trunc(parseFloat(artilheiro.pontos_num || 0) * 10) / 10).toFixed(1);
-            artStatsEl.textContent = gols > 0 ? `${gols} gol${gols > 1 ? 's' : ''} • ${pts} pts` : `${pts} pts`;
-        }
-    } else {
-        if (artNomeEl) artNomeEl.textContent = 'Sem gols';
-        if (artStatsEl) artStatsEl.textContent = '--';
-    }
-
-    // === LUVA DE OURO: Goleiro (posicao_id 1) ===
-    const goleiro = atletas.find(a => a.posicao_id === 1);
-    const luvaNomeEl = document.getElementById('home-modulo-luva-nome');
-    const luvaStatsEl = document.getElementById('home-modulo-luva-stats');
-    if (goleiro) {
-        if (luvaNomeEl) luvaNomeEl.textContent = goleiro.apelido || goleiro.nome || '--';
-        if (luvaStatsEl) {
-            const gs = parseInt(goleiro.scout?.GS || goleiro.scouts?.GS || 0);
-            const dd = parseInt(goleiro.scout?.DD || goleiro.scouts?.DD || 0);
-            const sg = parseInt(goleiro.scout?.SG || goleiro.scouts?.SG || 0);
-            const pts = (Math.trunc(parseFloat(goleiro.pontos_num || 0) * 10) / 10).toFixed(1);
-            let info = '';
-            if (sg > 0) info = `SG • ${pts} pts`;
-            else if (gs > 0) info = `${gs} gol${gs > 1 ? 's' : ''} sofrido${gs > 1 ? 's' : ''} • ${pts} pts`;
-            else info = `${dd > 0 ? dd + ' DD • ' : ''}${pts} pts`;
-            luvaStatsEl.textContent = info;
-        }
-    } else {
-        if (luvaNomeEl) luvaNomeEl.textContent = '--';
-        if (luvaStatsEl) luvaStatsEl.textContent = '--';
-    }
-
-    // === CAPITÃO DE LUXO: Capitão com multiplicador ===
-    const capNomeEl = document.getElementById('home-modulo-capitao-nome');
-    const capStatsEl = document.getElementById('home-modulo-capitao-stats');
-    if (capitao) {
-        if (capNomeEl) capNomeEl.textContent = capitao.apelido || capitao.nome || '--';
-        if (capStatsEl) {
-            const pts = parseFloat(capitao.pontos_num || 0);
-            const ptsCapitao = (pts * 1.5).toFixed(1);
-            capStatsEl.textContent = `${pts.toFixed(1)} ×1.5 = ${ptsCapitao} pts`;
-        }
-    } else {
-        if (capNomeEl) capNomeEl.textContent = '--';
-        if (capStatsEl) capStatsEl.textContent = '--';
-    }
-
-    // Mostrar seção
-    section.classList.remove('hidden');
 }
 
 // =====================================================================
