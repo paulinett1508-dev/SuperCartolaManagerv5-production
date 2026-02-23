@@ -209,6 +209,44 @@ router.post('/endpoint',
 
 ---
 
+## Validacoes de Performance
+
+### Queries MongoDB
+- [ ] Queries de leitura usam `.lean()` (sem overhead do Mongoose)
+- [ ] Sem N+1 queries (carregar lista e depois buscar cada item em loop)
+- [ ] Indices adequados para os campos filtrados na feature
+
+**Queries a verificar:**
+```javascript
+// CORRETO — leitura com .lean()
+Model.find({ liga_id: ligaId, temporada }).lean()
+
+// ERRADO — N+1 query
+const times = await Time.find({ liga_id });
+for (const time of times) {
+  time.extrato = await Extrato.findOne({ time_id: time.id }); // N queries!
+}
+
+// CORRETO — buscar tudo de uma vez
+const extratos = await Extrato.find({ liga_id, time_id: { $in: timeIds } }).lean();
+```
+
+### Indices Necessarios
+- [ ] Listar indices que a feature exige (campos em `.find()`)
+- [ ] Verificar se ja existem em produção ou precisam ser criados
+
+```javascript
+// Exemplo: se a feature filtra por liga_id + temporada + time_id
+// o indice composto deve existir:
+db.collection.createIndex({ liga_id: 1, temporada: 1, time_id: 1 });
+```
+
+### Volume de Dados
+- [ ] Queries com potencial de retornar > 100 documentos tem `.limit()` ou paginacao
+- [ ] Agregacoes pesadas tem `.allowDiskUse(true)` se necessario
+
+---
+
 ## Casos de Teste
 
 ### Teste 1: [Cenario Positivo]

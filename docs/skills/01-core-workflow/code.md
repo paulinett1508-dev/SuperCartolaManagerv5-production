@@ -32,16 +32,26 @@ cat .claude/docs/SPEC-[nome-tarefa].md
 - [ ] Arquivos listados existem
 - [ ] Mudancas linha por linha definidas
 - [ ] Rollback plan documentado
+- [ ] Branch de feature criado (OBRIGATORIO antes de qualquer modificacao)
 
 #### 1.2 Preparar Ambiente
+
+**PASSO 0 — BRANCHING (NAO PULAR)**
 ```bash
-# Verificar branch atual
+# Verificar branch atual — NUNCA implementar direto na main/develop
 git branch --show-current
 
-# Criar branch para feature (se nao existir)
+# Criar branch de feature ANTES de qualquer alteracao
+# Nomenclatura: feat/[nome-tarefa-kebab-case]
 git checkout -b feat/[nome-tarefa]
+# Exemplo: git checkout -b feat/export-pdf-extrato
 
-# Backup de arquivos criticos (se destrutivo)
+# Se branch ja existe, apenas trocar para ela
+git checkout feat/[nome-tarefa]
+```
+
+**Backup de arquivos criticos (apenas se refatoracao destrutiva)**
+```bash
 cp [arquivo-critico].js [arquivo-critico].js.backup
 ```
 
