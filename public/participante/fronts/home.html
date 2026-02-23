@@ -164,52 +164,67 @@
         </button>
 
         <!-- Conteúdo Colapsável (JS controla estado expanded/collapsed) -->
-        <div class="home-destaques-content" id="home-destaques-content">
-            <div class="home-destaques-grid">
-                <!-- Capitão -->
-                <div class="home-destaque-card" id="home-destaque-capitao">
-                    <span class="home-destaque-titulo">CAPITÃO</span>
-                    <div class="home-destaque-escudo-wrapper">
-                        <div class="home-destaque-escudo" id="home-escudo-capitao">
+        <div class="home-destaques-content collapsed" id="home-destaques-content">
+            <div class="home-destaques-strips">
+                <!-- Capitão (card-strip) -->
+                <div class="home-destaque-strip" id="home-destaque-capitao">
+                    <div class="home-destaque-strip-left">
+                        <div class="home-destaque-strip-escudo" id="home-escudo-capitao">
                             <img src="/escudos/default.png" alt="Escudo" loading="lazy">
+                            <span class="home-destaque-strip-badge home-destaque-strip-badge--capitao">C</span>
                         </div>
-                        <span class="home-badge-capitao-icon">C</span>
+                        <div class="home-destaque-strip-info">
+                            <span class="home-destaque-strip-label">CAPITÃO</span>
+                            <div class="home-destaque-strip-value-row">
+                                <span class="home-destaque-strip-nome" id="home-nome-capitao">--</span>
+                                <span class="home-destaque-strip-multiplicador" id="home-badge-multiplicador">×1.5</span>
+                            </div>
+                        </div>
                     </div>
-                    <span class="home-destaque-nome" id="home-nome-capitao">--</span>
-                    <span class="home-destaque-posicao" id="home-posicao-capitao">--</span>
-                    <div class="home-destaque-pontos-row">
-                        <span class="home-destaque-pontos-base" id="home-pontos-base-capitao">0.00</span>
-                        <span class="home-destaque-multiplicador">×1.5</span>
-                        <span class="home-destaque-pontos-total" id="home-pontos-capitao">0.00</span>
+                    <div class="home-destaque-strip-right">
+                        <span class="home-destaque-strip-right-label" id="home-posicao-capitao">--</span>
+                        <span class="home-destaque-strip-pontos" id="home-pontos-capitao">0.00</span>
                     </div>
                 </div>
 
-                <!-- Maior Pontuador -->
-                <div class="home-destaque-card" id="home-destaque-maior">
-                    <span class="home-destaque-titulo">MAIOR PONTUADOR</span>
-                    <div class="home-destaque-escudo-wrapper">
-                        <div class="home-destaque-escudo" id="home-escudo-maior">
+                <!-- Maior Pontuador (card-strip) -->
+                <div class="home-destaque-strip" id="home-destaque-maior">
+                    <div class="home-destaque-strip-left">
+                        <div class="home-destaque-strip-escudo" id="home-escudo-maior">
                             <img src="/escudos/default.png" alt="Escudo" loading="lazy">
+                            <span class="home-destaque-strip-badge home-destaque-strip-badge--up">
+                                <i class="material-icons" style="font-size:12px">thumb_up</i>
+                            </span>
                         </div>
-                        <span class="home-badge-like"><i class="material-icons" style="font-size:16px">thumb_up</i></span>
+                        <div class="home-destaque-strip-info">
+                            <span class="home-destaque-strip-label">MAIOR PONTUADOR</span>
+                            <span class="home-destaque-strip-nome" id="home-nome-maior">--</span>
+                        </div>
                     </div>
-                    <span class="home-destaque-nome" id="home-nome-maior">--</span>
-                    <span class="home-destaque-posicao" id="home-posicao-maior">--</span>
-                    <span class="home-destaque-pontos-total destaque-verde" id="home-pontos-maior">0.00</span>
+                    <div class="home-destaque-strip-right">
+                        <span class="home-destaque-strip-right-label" id="home-posicao-maior">--</span>
+                        <span class="home-destaque-strip-pontos destaque-strip--verde" id="home-pontos-maior">0.00</span>
+                    </div>
                 </div>
 
-                <!-- Menor Pontuador -->
-                <div class="home-destaque-card" id="home-destaque-menor">
-                    <span class="home-destaque-titulo">MENOR PONTUADOR</span>
-                    <div class="home-destaque-escudo-wrapper">
-                        <div class="home-destaque-escudo" id="home-escudo-menor">
+                <!-- Menor Pontuador (card-strip) -->
+                <div class="home-destaque-strip" id="home-destaque-menor">
+                    <div class="home-destaque-strip-left">
+                        <div class="home-destaque-strip-escudo" id="home-escudo-menor">
                             <img src="/escudos/default.png" alt="Escudo" loading="lazy">
+                            <span class="home-destaque-strip-badge home-destaque-strip-badge--down">
+                                <i class="material-icons" style="font-size:12px">thumb_down</i>
+                            </span>
                         </div>
-                        <span class="home-badge-dislike"><i class="material-icons" style="font-size:16px">thumb_down</i></span>
+                        <div class="home-destaque-strip-info">
+                            <span class="home-destaque-strip-label">MENOR PONTUADOR</span>
+                            <span class="home-destaque-strip-nome" id="home-nome-menor">--</span>
+                        </div>
                     </div>
-                    <span class="home-destaque-nome" id="home-nome-menor">--</span>
-                    <span class="home-destaque-posicao" id="home-posicao-menor">--</span>
-                    <span class="home-destaque-pontos-total destaque-vermelho" id="home-pontos-menor">0.00</span>
+                    <div class="home-destaque-strip-right">
+                        <span class="home-destaque-strip-right-label" id="home-posicao-menor">--</span>
+                        <span class="home-destaque-strip-pontos destaque-strip--vermelho" id="home-pontos-menor">0.00</span>
+                    </div>
                 </div>
             </div>
 
@@ -220,45 +235,6 @@
                 Ver escalação completa
                 <span class="material-icons home-destaques-ver-chevron">chevron_right</span>
             </a>
-        </div>
-    </section>
-
-    <!-- ========================================
-         CARD MÓDULOS: Artilheiro / Luva / Capitão
-         ======================================== -->
-    <section id="home-modulos-section" class="home-modulos-section hidden">
-        <div class="home-modulos-card">
-            <!-- Artilheiro -->
-            <div class="home-modulo-item home-modulo-artilheiro">
-                <div class="home-modulo-icon-wrap home-modulo-icon--artilheiro">
-                    <span class="material-icons home-modulo-icon-color--artilheiro">sports_soccer</span>
-                </div>
-                <span class="home-modulo-label">ARTILHEIRO</span>
-                <span class="home-modulo-nome" id="home-modulo-artilheiro-nome">--</span>
-                <span class="home-modulo-stats" id="home-modulo-artilheiro-stats">--</span>
-            </div>
-            <!-- Divisor -->
-            <div class="home-modulo-divider"></div>
-            <!-- Luva de Ouro -->
-            <div class="home-modulo-item home-modulo-luva">
-                <div class="home-modulo-icon-wrap home-modulo-icon--luva">
-                    <span class="material-icons home-modulo-icon-color--luva">sports_handball</span>
-                </div>
-                <span class="home-modulo-label">LUVA DE OURO</span>
-                <span class="home-modulo-nome" id="home-modulo-luva-nome">--</span>
-                <span class="home-modulo-stats" id="home-modulo-luva-stats">--</span>
-            </div>
-            <!-- Divisor -->
-            <div class="home-modulo-divider"></div>
-            <!-- Capitão de Luxo -->
-            <div class="home-modulo-item home-modulo-capitao">
-                <div class="home-modulo-icon-wrap home-modulo-icon--capitao">
-                    <span class="material-icons home-modulo-icon-color--capitao">military_tech</span>
-                </div>
-                <span class="home-modulo-label">CAPITÃO</span>
-                <span class="home-modulo-nome" id="home-modulo-capitao-nome">--</span>
-                <span class="home-modulo-stats" id="home-modulo-capitao-stats">--</span>
-            </div>
         </div>
     </section>
 
@@ -735,10 +711,10 @@
 
 /* Conteúdo Colapsável */
 .home-destaques-content {
-    max-height: 300px;
+    max-height: 400px;
     overflow: hidden;
-    transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
-    background: linear-gradient(180deg, var(--app-surface) 0%, #151515 100%);
+    transition: max-height 0.35s ease, opacity 0.3s ease, padding 0.3s ease;
+    background: linear-gradient(180deg, var(--app-surface) 0%, #131313 100%);
     border: 1px solid rgba(255,255,255,0.08);
     border-top: none;
     border-radius: 0 0 12px 12px;
@@ -753,10 +729,162 @@
     border: none;
 }
 
-.home-destaques-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+/* === DESTAQUE STRIPS (padrão card-faixa) === */
+.home-destaques-strips {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.home-destaque-strip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #1a1a1a 0%, #141414 100%);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 14px 16px;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.home-destaque-strip:active {
+    transform: scale(0.98);
+}
+
+.home-destaque-strip-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.home-destaque-strip-escudo {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.home-destaque-strip-escudo img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.home-destaque-strip-badge {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #141414;
+}
+
+.home-destaque-strip-badge--capitao {
+    background: var(--app-primary);
+    font-family: 'Russo One', sans-serif;
+    font-size: 10px;
+    color: var(--app-text-primary);
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(255, 85, 0, 0.35);
+}
+
+.home-destaque-strip-badge--up {
+    background: var(--app-success-light);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(34, 197, 94, 0.35);
+}
+
+.home-destaque-strip-badge--down {
+    background: var(--app-danger);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.35);
+}
+
+.home-destaque-strip-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.home-destaque-strip-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--app-text-muted, rgba(255,255,255,0.5));
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.home-destaque-strip-value-row {
+    display: flex;
+    align-items: center;
     gap: 8px;
+}
+
+.home-destaque-strip-nome {
+    font-family: 'Russo One', sans-serif;
+    font-size: 13px;
+    color: var(--app-text-primary);
+    letter-spacing: 0.3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.home-destaque-strip-multiplicador {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--app-primary);
+    padding: 2px 6px;
+    background: rgba(255, 85, 0, 0.12);
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.home-destaque-strip-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+    flex-shrink: 0;
+}
+
+.home-destaque-strip-right-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--app-text-dim, rgba(255,255,255,0.4));
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.home-destaque-strip-pontos {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--app-text-primary);
+    letter-spacing: -0.5px;
+}
+
+.home-destaque-strip-pontos.destaque-strip--verde {
+    color: var(--app-success-light);
+}
+
+.home-destaque-strip-pontos.destaque-strip--vermelho {
+    color: var(--app-danger);
 }
 
 .home-destaques-ver-escalacao {
@@ -784,225 +912,6 @@
     margin-left: auto;
     font-size: 16px !important;
     color: rgba(255,255,255,0.2);
-}
-
-.home-destaque-card {
-    background: linear-gradient(180deg, #1f1f1f 0%, #151515 100%);
-    border-radius: 12px;
-    padding: 12px 8px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    border: 1px solid rgba(255,255,255,0.06);
-}
-
-.home-destaque-titulo {
-    font-family: 'Inter', sans-serif;
-    font-size: 8px;
-    font-weight: 700;
-    color: rgba(255,255,255,0.5);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.home-destaque-escudo-wrapper {
-    position: relative;
-    width: 64px;
-    height: 72px;
-}
-
-.home-destaque-escudo {
-    width: 56px;
-    height: 56px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-}
-
-.home-destaque-escudo img {
-    width: 48px;
-    height: 48px;
-    object-fit: contain;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-}
-
-/* Badge Capitão */
-.home-badge-capitao-icon {
-    position: absolute;
-    bottom: 0;
-    left: 4px;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: var(--app-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Russo One', sans-serif;
-    font-size: 11px;
-    color: var(--app-text-primary);
-    font-weight: 700;
-    box-shadow: 0 2px 8px rgba(255, 85, 0, 0.4);
-}
-
-/* Badge Like/Dislike */
-.home-badge-like,
-.home-badge-dislike {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 18px;
-}
-
-.home-destaque-nome {
-    font-family: 'Russo One', sans-serif;
-    font-size: 10px;
-    color: var(--app-text-primary);
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.home-destaque-posicao {
-    font-family: 'Inter', sans-serif;
-    font-size: 8px;
-    color: rgba(255,255,255,0.5);
-    text-transform: uppercase;
-}
-
-.home-destaque-pontos-row {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.home-destaque-pontos-base {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    color: rgba(255,255,255,0.5);
-}
-
-.home-destaque-multiplicador {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 8px;
-    color: var(--app-primary);
-    padding: 1px 4px;
-    background: rgba(255, 85, 0, 0.15);
-    border-radius: 4px;
-}
-
-.home-destaque-pontos-total {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--app-text-primary);
-}
-
-.home-destaque-pontos-total.destaque-verde {
-    color: var(--app-success-light);
-}
-
-.home-destaque-pontos-total.destaque-vermelho {
-    color: var(--app-danger);
-}
-
-/* === CARD MÓDULOS (Artilheiro / Luva / Capitão) === */
-.home-modulo-icon--artilheiro { background: var(--app-success-muted); }
-.home-modulo-icon-color--artilheiro { color: var(--app-success-light); font-size: 20px; }
-.home-modulo-icon--luva { background: var(--app-gold-muted); }
-.home-modulo-icon-color--luva { color: var(--app-gold); font-size: 20px; }
-.home-modulo-icon--capitao { background: var(--app-purple-muted); }
-.home-modulo-icon-color--capitao { color: var(--app-purple); font-size: 20px; }
-
-.home-modulos-section {
-    padding: 0 16px 16px;
-}
-
-.home-modulos-card {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr auto 1fr;
-    align-items: stretch;
-    background: linear-gradient(135deg, #1f1f1f 0%, #151515 100%);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 12px;
-    padding: 14px 8px;
-}
-
-.home-modulo-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    text-align: center;
-    padding: 0 4px;
-}
-
-.home-modulo-icon-wrap {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 2px;
-}
-
-.home-modulo-label {
-    font-family: 'Russo One', sans-serif;
-    font-size: 8px;
-    color: rgba(255,255,255,0.45);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.home-modulo-nome {
-    font-family: 'Inter', sans-serif;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--app-text-primary);
-    max-width: 90px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.home-modulo-stats {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    color: rgba(255,255,255,0.5);
-}
-
-.home-modulo-divider {
-    width: 1px;
-    background: rgba(255,255,255,0.1);
-    margin: 4px 0;
-}
-
-@media (max-width: 360px) {
-    .home-modulos-card {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-    .home-modulo-divider {
-        width: 100%;
-        height: 1px;
-        margin: 0;
-    }
-    .home-modulo-item {
-        flex-direction: row;
-        gap: 10px;
-        text-align: left;
-    }
 }
 
 /* === ATALHOS RÁPIDOS === */
