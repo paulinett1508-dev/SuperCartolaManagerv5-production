@@ -2,10 +2,9 @@
  * Dashboard Page - Torre de Controle Admin
  * Redesign v3 - Monitoramento + Acoes Rapidas
  *
- * Filosofia: O admin mobile responde 3 perguntas:
+ * Filosofia: O admin mobile responde 2 perguntas:
  * 1. "Ta tudo OK?" (status card)
- * 2. "Preciso fazer algo?" (alertas)
- * 3. "Como estao minhas ligas?" (liga cards)
+ * 2. "Preciso fazer algo?" (alertas + acoes rapidas)
  */
 
 import API from '../api.js';
@@ -65,11 +64,6 @@ function renderDashboard(container, data) {
 
       <div class="section-header">Acoes Rapidas</div>
       ${renderQuickActions()}
-
-      ${ligas.length > 0 ? `
-        <div class="section-header">Suas Ligas</div>
-        ${ligas.map(liga => renderLigaCard(liga)).join('')}
-      ` : ''}
 
     </div>
   `;
@@ -188,34 +182,6 @@ function renderQuickActions() {
       <div class="action-card action-card--orange" onclick="window.router.navigate('/auditoria')" role="button" tabindex="0">
         <div class="action-card-icon">${mi('fact_check')}</div>
         <div class="action-card-label">Auditoria</div>
-      </div>
-    </div>
-  `;
-}
-
-// ========== LIGA CARD ========== //
-function renderLigaCard(liga) {
-  const saldoFormatted = (liga.saldoTotal || 0).toFixed(2).replace('.', ',');
-  const saldoColor = (liga.saldoTotal || 0) >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)';
-  const inadimplentes = liga.inadimplentes || 0;
-
-  return `
-    <div class="liga-card" onclick="window.router.navigate('/ligas', { ligaId: '${liga.id}' })">
-      <div class="liga-card-header">
-        <div class="liga-card-name">
-          ${mi('emoji_events', 'mi-sm')}
-          <span>${liga.nome}</span>
-        </div>
-        ${inadimplentes > 0 ? `<span class="badge badge-warning" style="font-size:10px;padding:2px 8px;">${inadimplentes} inadimpl.</span>` : ''}
-      </div>
-      <div class="liga-card-stats">
-        <span class="liga-card-stat">${mi('groups')} ${liga.participantesAtivos}/${liga.participantesTotais}</span>
-        <span class="liga-card-stat">${mi('calendar_month')} R${liga.rodadaAtual}</span>
-        <span class="liga-card-stat">${mi('date_range')} T${liga.temporada}</span>
-      </div>
-      <div class="liga-card-footer">
-        <span class="liga-card-saldo" style="color:${saldoColor};">R$ ${saldoFormatted}</span>
-        <span class="material-icons" style="color:var(--text-muted);font-size:18px;">chevron_right</span>
       </div>
     </div>
   `;

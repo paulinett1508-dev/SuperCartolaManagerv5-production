@@ -63,12 +63,6 @@ router.addRoute('/', async (params) => {
   await render();
 });
 
-// Liga detalhes
-router.addRoute('/ligas', async (params) => {
-  const { render } = await import('./pages/ligas.js');
-  await render(params);
-});
-
 // Gerenciar ligas
 router.addRoute('/ligas-gerenciar', async (params) => {
   const { render } = await import('./pages/ligas-gerenciar.js');

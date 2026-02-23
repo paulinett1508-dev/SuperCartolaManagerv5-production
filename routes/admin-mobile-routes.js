@@ -40,12 +40,6 @@ router.get('/dashboard', controller.getDashboard);
  */
 router.get('/ligas', controller.getLigas);
 
-/**
- * GET /api/admin/mobile/ligas/:ligaId
- * Detalhes de uma liga específica
- */
-router.get('/ligas/:ligaId', controller.getLigaDetalhes);
-
 // ========== CONSOLIDAÇÃO ========== //
 
 /**

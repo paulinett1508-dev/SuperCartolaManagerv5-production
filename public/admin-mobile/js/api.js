@@ -127,10 +127,6 @@ class API {
     return this.get('/ligas', params);
   }
 
-  async getLiga(ligaId) {
-    return this.get(`/ligas/${ligaId}`);
-  }
-
   /**
    * Consolidação
    */
