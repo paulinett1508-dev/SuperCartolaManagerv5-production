@@ -26,7 +26,8 @@ const router = express.Router();
 router.get("/:ligaId/times/:timeId/cache", getExtratoCache);
 
 // Salvar/atualizar cache de um time
-router.post("/:ligaId/times/:timeId/cache", salvarExtratoCache);
+// 🔒 SEC-FIX: Escrita de cache requer admin
+router.post("/:ligaId/times/:timeId/cache", verificarAdmin, salvarExtratoCache);
 
 // Verificar se cache é válido (validação inteligente)
 router.get("/:ligaId/times/:timeId/cache/valido", verificarCacheValido);

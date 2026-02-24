@@ -176,7 +176,11 @@
       "mcp__stitch__get_screen",
       "WebFetch(domain:lh3.googleusercontent.com)",
       "WebFetch(domain:unsplash.com)",
-      "Bash(convert:*)"
+      "Bash(convert:*)",
+      "Bash(gh repo view anthropics/claude-code-security-review --json description,url,name 2>/dev/null || echo \"Repo not found via gh\")",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(for f in index.js routes/extratoFinanceiroCacheRoutes.js routes/fluxoFinanceiroRoutes.js routes/inscricoes-routes.js routes/renovacoes-routes.js routes/ajustes-routes.js routes/times-admin.js routes/consolidacao-routes.js routes/cartola-proxy.js; do node -e \"import\\('./$f'\\)\" 2>&1 | grep -i error | head -1 && echo \"FAIL: $f\" || echo \"OK: $f\"; done)",
+      "Skill(security-review)"
     ]
   },
   "enableAllProjectMcpServers": true,

@@ -251,7 +251,7 @@ async function renderizarTodasLigas() {
                 <div class="liga-header">
                     <span class="material-icons">shield</span>
                     <div class="liga-header-text">
-                        <div class="liga-nome">${ligaData.nome || 'Liga'}</div>
+                        <div class="liga-nome">${escapeHtml(ligaData.nome || 'Liga')}</div>
                         <div class="liga-ano">Temporada ${tempRecente.ano}</div>
                     </div>
                 </div>
@@ -377,7 +377,7 @@ async function renderizarTodasLigas() {
                     const confrontosHtml = (ed.confrontos || []).map(c => `
                         <div class="mm-confronto ${c.venceu ? 'vitoria' : 'derrota'}">
                             <span class="mm-fase">${c.fase}</span>
-                            <span class="mm-vs">vs ${c.adversario}</span>
+                            <span class="mm-vs">vs ${escapeHtml(c.adversario)}</span>
                             <span class="mm-resultado">${c.venceu ? 'V' : 'D'}</span>
                         </div>
                     `).join('');
@@ -499,7 +499,7 @@ async function renderizarTodasLigas() {
                             <div class="achievement-item">
                                 <span class="material-icons achievement-icon">emoji_events</span>
                                 <div class="achievement-content">
-                                    <div class="achievement-title">Campeao ${m.nome || ''}</div>
+                                    <div class="achievement-title">Campeao ${escapeHtml(m.nome || '')}</div>
                                     <div class="achievement-value">${m.pontos ? formatarPontos(m.pontos) + ' pts' : ''}</div>
                                 </div>
                             </div>
@@ -1144,7 +1144,7 @@ function mostrarErro(msg) {
             <div class="empty-state">
                 <span class="material-icons">error_outline</span>
                 <h3>Erro ao carregar</h3>
-                <p>${msg}</p>
+                <p>${escapeHtml(msg)}</p>
             </div>
         `;
     }
@@ -1397,7 +1397,7 @@ async function renderizarDadosTempoReal(ligaId) {
                     const confrontosHtml = (ed.confrontos || []).map(c => `
                         <div class="mm-confronto ${c.venceu ? 'vitoria' : 'derrota'}">
                             <span class="mm-fase">${c.fase}</span>
-                            <span class="mm-vs">vs ${c.adversario}</span>
+                            <span class="mm-vs">vs ${escapeHtml(c.adversario)}</span>
                             <span class="mm-resultado">${c.venceu ? 'V' : 'D'}</span>
                         </div>
                     `).join('');
@@ -1519,7 +1519,7 @@ async function renderizarDadosTempoReal(ligaId) {
                             <div class="achievement-item">
                                 <span class="material-icons achievement-icon">emoji_events</span>
                                 <div class="achievement-content">
-                                    <div class="achievement-title">Campeao ${m.nome || ''}</div>
+                                    <div class="achievement-title">Campeao ${escapeHtml(m.nome || '')}</div>
                                     <div class="achievement-value">${m.pontos ? formatarPontos(m.pontos) + ' pts' : ''}</div>
                                 </div>
                             </div>

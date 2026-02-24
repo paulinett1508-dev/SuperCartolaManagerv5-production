@@ -384,10 +384,10 @@ function renderizarCardApp(rank, index, posLabel, banco, isParcial = false) {
       <img src="${escudoUrl}" class="rc-shield" onerror="this.onerror=null;this.src='/escudos/default.png'">
       <div class="rc-team">
         <div class="rc-info">
-          <div class="rc-team-name">${rank.nome_time || "Time Sem Nome"}</div>
-          <div class="rc-manager">${rank.nome_cartola || "Cartoleiro"}</div>
+          <div class="rc-team-name">${escapeHtml(rank.nome_time || "Time Sem Nome")}</div>
+          <div class="rc-manager">${escapeHtml(rank.nome_cartola || "Cartoleiro")}</div>
           <div class="rc-captain">
-             <div class="rc-captain-icon">C</div> ${captainName}
+             <div class="rc-captain-icon">C</div> ${escapeHtml(captainName)}
           </div>
         </div>
       </div>
@@ -491,8 +491,8 @@ export async function exibirRanking(rankingsDaRodada, rodadaSelecionada, ligaId)
             <img src="${escudoUrl}" class="rc-shield" onerror="this.onerror=null;this.src='/escudos/default.png'">
             <div class="rc-team">
                <div class="rc-info">
-                  <div class="rc-team-name">${rank.nome_time || "N/D"}</div>
-                  <div class="rc-manager">${rank.nome_cartola || "N/D"} (Inativo)</div>
+                  <div class="rc-team-name">${escapeHtml(rank.nome_time || "N/D")}</div>
+                  <div class="rc-manager">${escapeHtml(rank.nome_cartola || "N/D")} (Inativo)</div>
                </div>
             </div>
             <div class="rc-stats">
@@ -569,8 +569,8 @@ export async function exibirRankingParciais(
             <img src="${escudoUrl}" class="rc-shield" onerror="this.onerror=null;this.src='/escudos/default.png'">
             <div class="rc-team">
                <div class="rc-info">
-                  <div class="rc-team-name">${rank.nome_time || "N/D"}</div>
-                  <div class="rc-manager">${rank.nome_cartola || "N/D"} (Inativo)</div>
+                  <div class="rc-team-name">${escapeHtml(rank.nome_time || "N/D")}</div>
+                  <div class="rc-manager">${escapeHtml(rank.nome_cartola || "N/D")} (Inativo)</div>
                </div>
             </div>
             <div class="rc-stats">
@@ -791,12 +791,12 @@ function renderizarEstatisticasResumo(dados) {
     <div class="stat-card">
       <div class="stat-card-title"><span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle; color: #ffd700;">emoji_events</span> Maior MITO</div>
       <div class="stat-card-value">${mitoMaisVezes.count}x</div>
-      <div class="stat-card-subtitle">${mitoMaisVezes.nome}</div>
+      <div class="stat-card-subtitle">${escapeHtml(mitoMaisVezes.nome)}</div>
     </div>
     <div class="stat-card">
       <div class="stat-card-title"><span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle; color: #ef4444;">pest_control</span> Maior MICO</div>
       <div class="stat-card-value">${micoMaisVezes.count}x</div>
-      <div class="stat-card-subtitle">${micoMaisVezes.nome}</div>
+      <div class="stat-card-subtitle">${escapeHtml(micoMaisVezes.nome)}</div>
     </div>
     <div class="stat-card">
       <div class="stat-card-title">Média Pontos MITO</div>
@@ -938,8 +938,8 @@ function renderizarConteudoRelatorio(dados, filtro) {
         <div class="resultado-row mito">
           <div class="resultado-badge mito"><span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle; color: #ffd700;">emoji_events</span> MITO</div>
           <div class="resultado-info">
-            <div>${mito.nome_cartola || "N/D"}</div>
-            <div style="font-size: 9px; color: var(--text-muted);">${mito.nome_time || "N/D"}</div>
+            <div>${escapeHtml(mito.nome_cartola || "N/D")}</div>
+            <div style="font-size: 9px; color: var(--text-muted);">${escapeHtml(mito.nome_time || "N/D")}</div>
           </div>
           <div class="resultado-pontos">${(Math.trunc((parseFloat(mito.pontos || 0)) * 100) / 100).toFixed(2)}</div>
         </div>
@@ -951,8 +951,8 @@ function renderizarConteudoRelatorio(dados, filtro) {
         <div class="resultado-row mico">
           <div class="resultado-badge mico"><span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle; color: #ef4444;">pest_control</span> MICO</div>
           <div class="resultado-info">
-            <div>${mico.nome_cartola || "N/D"}</div>
-            <div style="font-size: 9px; color: var(--text-muted);">${mico.nome_time || "N/D"}</div>
+            <div>${escapeHtml(mico.nome_cartola || "N/D")}</div>
+            <div style="font-size: 9px; color: var(--text-muted);">${escapeHtml(mico.nome_time || "N/D")}</div>
           </div>
           <div class="resultado-pontos">${(Math.trunc((parseFloat(mico.pontos || 0)) * 100) / 100).toFixed(2)}</div>
         </div>

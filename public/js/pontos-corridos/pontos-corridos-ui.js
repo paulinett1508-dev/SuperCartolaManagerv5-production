@@ -515,10 +515,10 @@ export function renderTabelaRodada(
           <div style="display: flex; align-items: center; justify-content: space-between;">
             <!-- Time A - Alinhado à esquerda -->
             <div style="display: flex; align-items: center; gap: 12px; flex: 1; justify-content: flex-start;">
-              <img src="${brasaoA}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: contain;" alt="${timeA.nome}" onerror="this.onerror=null;this.src='/escudos/default.png'">
+              <img src="${brasaoA}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: contain;" alt="${escapeHtml(timeA.nome)}" onerror="this.onerror=null;this.src='/escudos/default.png'">
               <div style="text-align: left;">
-                <div style="font-weight: 600; font-size: 14px; color: var(--text-primary);">${timeA.nome}</div>
-                ${timeA.nome_cartola ? `<div style="font-size: 11px; color: var(--text-muted);">${timeA.nome_cartola}</div>` : ""}
+                <div style="font-weight: 600; font-size: 14px; color: var(--text-primary);">${escapeHtml(timeA.nome)}</div>
+                ${timeA.nome_cartola ? `<div style="font-size: 11px; color: var(--text-muted);">${escapeHtml(timeA.nome_cartola)}</div>` : ""}
               </div>
             </div>
 
@@ -539,10 +539,10 @@ export function renderTabelaRodada(
             <!-- Time B - Alinhado à direita -->
             <div style="display: flex; align-items: center; gap: 12px; flex: 1; justify-content: flex-end;">
               <div style="text-align: right;">
-                <div style="font-weight: 600; font-size: 14px; color: var(--text-primary);">${timeB.nome}</div>
-                ${timeB.nome_cartola ? `<div style="font-size: 11px; color: var(--text-muted);">${timeB.nome_cartola}</div>` : ""}
+                <div style="font-weight: 600; font-size: 14px; color: var(--text-primary);">${escapeHtml(timeB.nome)}</div>
+                ${timeB.nome_cartola ? `<div style="font-size: 11px; color: var(--text-muted);">${escapeHtml(timeB.nome_cartola)}</div>` : ""}
               </div>
-              <img src="${brasaoB}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: contain;" alt="${timeB.nome}" onerror="this.onerror=null;this.src='/escudos/default.png'">
+              <img src="${brasaoB}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: contain;" alt="${escapeHtml(timeB.nome)}" onerror="this.onerror=null;this.src='/escudos/default.png'">
             </div>
           </div>
         </td>
@@ -607,13 +607,13 @@ function renderizarCelebracaoCampeao(campeao) {
         <div class="campeao-time">
           <img 
             src="${dados.escudo || escudoFallback}" 
-            alt="${dados.nome}"
+            alt="${escapeHtml(dados.nome)}"
             class="campeao-escudo"
             onerror="this.onerror=null;this.src='${escudoFallback}'"
           >
           <div class="campeao-info">
-            <span class="campeao-nome">${dados.nome}</span>
-            ${dados.nome_cartola ? `<span class="campeao-cartola">${dados.nome_cartola}</span>` : ""}
+            <span class="campeao-nome">${escapeHtml(dados.nome)}</span>
+            ${dados.nome_cartola ? `<span class="campeao-cartola">${escapeHtml(dados.nome_cartola)}</span>` : ""}
           </div>
         </div>
         <div class="campeao-stats">
@@ -796,13 +796,13 @@ export function renderTabelaClassificacao(
           <div style="display: flex; align-items: center; gap: 10px;">
             <img 
               src="${escudoUrl}" 
-              alt="${time.nome}" 
+              alt="${escapeHtml(time.nome)}"
               style="width: 32px; height: 32px; border-radius: 4px; object-fit: cover;${ligaEncerrou && posicao === 1 ? " border: 2px solid #ffd700;" : ""}"
               onerror="this.onerror=null;this.src='${escudoFallback}'"
             >
             <div style="display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
-              <span style="font-weight: 500;${ligaEncerrou && posicao === 1 ? " color: #ffd700;" : ""}">${time.nome}${badgeCampeao}</span>
-              ${time.nome_cartola ? `<span style="font-size: 11px; color: var(--text-muted, #888); margin-top: 2px;">${time.nome_cartola}</span>` : ""}
+              <span style="font-weight: 500;${ligaEncerrou && posicao === 1 ? " color: #ffd700;" : ""}">${escapeHtml(time.nome)}${badgeCampeao}</span>
+              ${time.nome_cartola ? `<span style="font-size: 11px; color: var(--text-muted, #888); margin-top: 2px;">${escapeHtml(time.nome_cartola)}</span>` : ""}
             </div>
           </div>
         </td>

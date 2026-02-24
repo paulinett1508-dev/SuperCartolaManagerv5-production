@@ -1088,8 +1088,8 @@ export class FluxoFinanceiroUI {
 
         return `
             <tr class="linha-participante ${situacao === 'devedor' ? 'row-devedor' : ''} ${isNovato ? 'row-novato' : ''}"
-                data-nome="${(p.nome_cartola || '').toLowerCase()}"
-                data-time="${(p.nome_time || '').toLowerCase()}"
+                data-nome="${escapeHtml((p.nome_cartola || '').toLowerCase())}"
+                data-time="${escapeHtml((p.nome_time || '').toLowerCase())}"
                 data-time-id="${timeId}"
                 data-situacao="${situacao}"
                 data-novato="${isNovato}">
@@ -1103,8 +1103,8 @@ export class FluxoFinanceiroUI {
                             }
                         </div>
                         <div class="info-participante">
-                            <span class="nome">${p.nome_cartola || 'N/D'} ${badgeNovato}</span>
-                            <span class="time">${p.nome_time || '-'}</span>
+                            <span class="nome">${escapeHtml(p.nome_cartola || 'N/D')} ${badgeNovato}</span>
+                            <span class="time">${escapeHtml(p.nome_time || '-')}</span>
                         </div>
                     </div>
                 </td>
@@ -1125,7 +1125,7 @@ export class FluxoFinanceiroUI {
                                 class="btn-acao btn-extrato" title="Ver Extrato">
                             <span class="material-icons">receipt_long</span>
                         </button>
-                        <button onclick="window.abrirAuditoriaFinanceira('${timeId}', '${ligaId}', '${(p.nome_cartola || '').replace(/'/g, "\\'")}')"
+                        <button onclick="window.abrirAuditoriaFinanceira('${timeId}', '${ligaId}', '${escapeHtml((p.nome_cartola || '').replace(/'/g, "\\'"))}')"
                                 class="btn-acao btn-auditoria" title="Auditoria Financeira">
                             <span class="material-icons">fact_check</span>
                         </button>
@@ -1138,15 +1138,15 @@ export class FluxoFinanceiroUI {
                             const isTemporadaRenovacao = tempAtual >= (tempRenovacao - 1);
                             const mostrarBotaoQuitar = !isQuitado && Math.abs(saldoFinal) >= 0.01 && !isTemporadaRenovacao;
                             return mostrarBotaoQuitar ? `
-                            <button onclick="window.abrirModalQuitacao('${ligaId}', '${timeId}', ${saldoFinal}, ${tempAtual}, '${(p.nome_cartola || '').replace(/'/g, "\\'")}')"
+                            <button onclick="window.abrirModalQuitacao('${ligaId}', '${timeId}', ${saldoFinal}, ${tempAtual}, '${escapeHtml((p.nome_cartola || '').replace(/'/g, "\\'"))}')"
                                     class="btn-acao btn-quitar" title="Quitar ${tempAtual}">
                                 <span class="material-icons">lock</span>
                             </button>
                             ` : '';
                         })()}
                         ${p.contato ? `
-                        <button onclick="window.abrirWhatsApp('${p.contato.replace(/'/g, "\\'")}', '${(p.nome_cartola || '').replace(/'/g, "\\'")}')"
-                                class="btn-acao btn-whatsapp" title="Enviar WhatsApp para ${p.nome_cartola || 'participante'}">
+                        <button onclick="window.abrirWhatsApp('${p.contato.replace(/'/g, "\\'")}', '${escapeHtml((p.nome_cartola || '').replace(/'/g, "\\'"))}')"
+                                class="btn-acao btn-whatsapp" title="Enviar WhatsApp para ${escapeHtml(p.nome_cartola || 'participante')}">
                             <span class="material-icons">chat</span>
                         </button>
                         ` : ''}
@@ -1241,8 +1241,8 @@ export class FluxoFinanceiroUI {
 
         return `
             <tr class="linha-participante ${classeLinha}"
-                data-nome="${(p.nome_cartola || '').toLowerCase()}"
-                data-time="${(p.nome_time || '').toLowerCase()}"
+                data-nome="${escapeHtml((p.nome_cartola || '').toLowerCase())}"
+                data-time="${escapeHtml((p.nome_time || '').toLowerCase())}"
                 data-time-id="${timeId}"
                 data-situacao="${statusClass}">
                 <td class="col-num">${idx + 1}</td>
@@ -1255,8 +1255,8 @@ export class FluxoFinanceiroUI {
                             }
                         </div>
                         <div class="info-participante">
-                            <span class="nome">${p.nome_cartola || 'N/D'}</span>
-                            <span class="time">${p.nome_time || '-'}</span>
+                            <span class="nome">${escapeHtml(p.nome_cartola || 'N/D')}</span>
+                            <span class="time">${escapeHtml(p.nome_time || '-')}</span>
                         </div>
                     </div>
                 </td>
@@ -1277,17 +1277,17 @@ export class FluxoFinanceiroUI {
                                 class="btn-acao btn-extrato" title="Ver Extrato ${temporadaNum}">
                             <span class="material-icons">receipt_long</span>
                         </button>
-                        <button onclick="window.abrirModalAcertoFinanceiro && window.abrirModalAcertoFinanceiro('${ligaId}', '${timeId}', '${(p.nome_cartola || '').replace(/'/g, "\\'")}', ${temporadaNum})"
+                        <button onclick="window.abrirModalAcertoFinanceiro && window.abrirModalAcertoFinanceiro('${ligaId}', '${timeId}', '${escapeHtml((p.nome_cartola || '').replace(/'/g, "\\'"))}', ${temporadaNum})"
                                 class="btn-acao btn-acerto" title="Registrar Acerto">
                             <span class="material-icons">payments</span>
                         </button>
-                        <button onclick="window.abrirAuditoriaFinanceira('${timeId}', '${ligaId}', '${(p.nome_cartola || '').replace(/'/g, "\\'")}')"
+                        <button onclick="window.abrirAuditoriaFinanceira('${timeId}', '${ligaId}', '${escapeHtml((p.nome_cartola || '').replace(/'/g, "\\'"))}')"
                                 class="btn-acao btn-auditoria" title="Auditoria Financeira">
                             <span class="material-icons">fact_check</span>
                         </button>
                         ${p.contato ? `
-                        <button onclick="window.abrirWhatsApp('${p.contato.replace(/'/g, "\\'")}', '${(p.nome_cartola || '').replace(/'/g, "\\'")}')"
-                                class="btn-acao btn-whatsapp" title="Enviar WhatsApp para ${p.nome_cartola || 'participante'}">
+                        <button onclick="window.abrirWhatsApp('${p.contato.replace(/'/g, "\\'")}', '${escapeHtml((p.nome_cartola || '').replace(/'/g, "\\'"))}')"
+                                class="btn-acao btn-whatsapp" title="Enviar WhatsApp para ${escapeHtml(p.nome_cartola || 'participante')}">
                             <span class="material-icons">chat</span>
                         </button>
                         ` : ''}
@@ -1327,7 +1327,7 @@ export class FluxoFinanceiroUI {
             <span class="renovacao-badge ${status.badgeClass}"
                   data-time-id="${timeId}"
                   data-status="${status.status}"
-                  onclick="window.abrirAcaoRenovacao && window.abrirAcaoRenovacao(${timeId}, '${(p.nome_time || '').replace(/'/g, "\\'")}', '${(p.nome_cartola || '').replace(/'/g, "\\'")}', '${p.url_escudo_png || ''}')"
+                  onclick="window.abrirAcaoRenovacao && window.abrirAcaoRenovacao(${timeId}, '${escapeHtml((p.nome_time || '').replace(/'/g, "\\'"))}', '${escapeHtml((p.nome_cartola || '').replace(/'/g, "\\'"))}', '${p.url_escudo_png || ''}')"
                   style="cursor: pointer;"
                   title="${tooltip}">
                 <span class="material-icons" style="font-size: 14px; vertical-align: middle;">${status.badgeIcon}</span>
@@ -2687,8 +2687,8 @@ export class FluxoFinanceiroUI {
                         <div class="campo-item">
                             ${
                                 readOnly
-                                    ? `<label class="campo-label-permanente">${c.nome}</label>`
-                                    : `<input type="text" value="${c.nome}"
+                                    ? `<label class="campo-label-permanente">${escapeHtml(c.nome)}</label>`
+                                    : `<input type="text" value="${escapeHtml(c.nome)}"
                                            class="input-titulo-campo"
                                            data-campo="${c.id}"
                                            data-time-id="${timeId}"
@@ -2984,8 +2984,8 @@ export class FluxoFinanceiroUI {
                                                 : '<span class="material-icons escudo-placeholder">person</span>'
                                             }
                                             <div class="participante-info">
-                                                <span class="nome-time">${p.time || 'Time'}</span>
-                                                <span class="nome-cartola">${p.nome || ''}</span>
+                                                <span class="nome-time">${escapeHtml(p.time || 'Time')}</span>
+                                                <span class="nome-cartola">${escapeHtml(p.nome || '')}</span>
                                             </div>
                                         </div>
                                     </td>
@@ -3556,7 +3556,7 @@ window.mostrarDetalhamentoGanhos = function () {
                                   .map(
                                       (item) => `
                         <div style="display: flex; justify-content: space-between; padding: 12px; background: var(--color-success-muted); border-radius: 8px; border-left: 3px solid var(--color-success-light);">
-                            <span style="color: var(--text-secondary);">${item.nome}</span>
+                            <span style="color: var(--text-secondary);">${escapeHtml(item.nome)}</span>
                             <span style="color: var(--color-success-light); font-weight: 600;">+${formatarMoedaBR(item.valor)}</span>
                         </div>
                     `,
@@ -3671,7 +3671,7 @@ window.mostrarDetalhamentoPerdas = function () {
                                   .map(
                                       (item) => `
                         <div style="display: flex; justify-content: space-between; padding: 12px; background: var(--color-danger-muted); border-radius: 8px; border-left: 3px solid var(--color-danger);">
-                            <span style="color: var(--text-secondary);">${item.nome}</span>
+                            <span style="color: var(--text-secondary);">${escapeHtml(item.nome)}</span>
                             <span style="color: var(--color-danger); font-weight: 600;">-${formatarMoedaBR(item.valor)}</span>
                         </div>
                     `,

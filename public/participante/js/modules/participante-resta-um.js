@@ -212,7 +212,7 @@ function _renderizarDisputa(dados, timeId) {
         <div class="resta-um-header">
             <div class="resta-um-header-title">
                 <span class="material-icons" style="font-size: 20px; vertical-align: middle; color: var(--app-restaum-primary); margin-right: 4px;">person_off</span>
-                ${edicao.nome || 'Resta Um'}
+                ${escapeHtml(edicao.nome || 'Resta Um')}
                 ${isLive ? '<span class="resta-um-live-indicator"><span class="resta-um-live-dot"></span>AO VIVO</span>' : ''}
             </div>
             <div class="resta-um-header-subtitle">
@@ -322,8 +322,8 @@ function _renderizarDisputa(dados, timeId) {
                          alt=""
                          onerror="this.src='/escudos/default.png'">
                     <div class="resta-um-nome">
-                        <div>${p.nomeCartoleiro || p.nome_cartola || p.nome || 'N/D'}</div>
-                        <div style="font-size: 11px; opacity: 0.7;">${p.nomeTime || ''}</div>
+                        <div>${escapeHtml(p.nomeCartoleiro || p.nome_cartola || p.nome || 'N/D')}</div>
+                        <div style="font-size: 11px; opacity: 0.7;">${escapeHtml(p.nomeTime || '')}</div>
                     </div>
                     ${rightHtml}
                 </div>

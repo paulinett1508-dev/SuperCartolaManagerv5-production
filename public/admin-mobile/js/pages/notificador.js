@@ -60,7 +60,7 @@ function renderPage(container, ligas, stats) {
           <label class="form-label" style="font-size:13px;">Liga (opcional)</label>
           <select id="notif-liga" class="form-input" style="font-size:14px;">
             <option value="">Todas as ligas</option>
-            ${ligas.map(l => `<option value="${l.id}">${l.nome}</option>`).join('')}
+            ${ligas.map(l => `<option value="${l.id}">${escapeHtml(l.nome)}</option>`).join('')}
           </select>
         </div>
 

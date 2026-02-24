@@ -824,8 +824,8 @@ function renderClassificados(classificados, container) {
         <span class="mm-classificado-pos">${time.rankR2 || "?"}</span>
         <img class="mm-classificado-escudo" src="${getEscudoUrl(time)}" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
         <div class="mm-classificado-info">
-          <div class="mm-classificado-nome">${truncate(time.nome_time || "Time", 18)}</div>
-          <div class="mm-classificado-cartola">${truncate(time.nome_cartola || time.nome_cartoleiro || "", 20)}</div>
+          <div class="mm-classificado-nome">${escapeHtml(truncate(time.nome_time || "Time", 18))}</div>
+          <div class="mm-classificado-cartola">${escapeHtml(truncate(time.nome_cartola || time.nome_cartoleiro || "", 20))}</div>
         </div>
         <div class="mm-classificado-adversario">
           vs <strong>${posAdv}º</strong>
@@ -1146,8 +1146,8 @@ function renderMeuConfrontoCard(confronto, meuTimeId) {
           <img class="mm-mc-escudo-card" src="${getEscudoUrl(eu)}" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
           <div class="mm-mc-time-info">
             <span class="mm-mc-label">Você</span>
-            <span class="mm-mc-nome-cartoleiro">${truncate(eu?.nome_cartola || eu?.nome_cartoleiro || "", 14)}</span>
-            <span class="mm-mc-nome">${truncate(eu?.nome_time || "Meu Time", 16)}</span>
+            <span class="mm-mc-nome-cartoleiro">${escapeHtml(truncate(eu?.nome_cartola || eu?.nome_cartoleiro || "", 14))}</span>
+            <span class="mm-mc-nome">${escapeHtml(truncate(eu?.nome_time || "Meu Time", 16))}</span>
           </div>
           <span class="mm-mc-pts ${ganhando ? "vencedor" : perdendo ? "perdedor" : "empate"}">${typeof truncarPontos === 'function' ? truncarPontos(meusPts) : meusPts.toFixed(2)}</span>
         </div>
@@ -1159,8 +1159,8 @@ function renderMeuConfrontoCard(confronto, meuTimeId) {
           <img class="mm-mc-escudo-card" src="${getEscudoUrl(adv)}" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
           <div class="mm-mc-time-info">
             <span class="mm-mc-label">Adversário</span>
-            <span class="mm-mc-nome-cartoleiro">${truncate(adv?.nome_cartola || adv?.nome_cartoleiro || "", 14)}</span>
-            <span class="mm-mc-nome">${truncate(adv?.nome_time || "Adversário", 16)}</span>
+            <span class="mm-mc-nome-cartoleiro">${escapeHtml(truncate(adv?.nome_cartola || adv?.nome_cartoleiro || "", 14))}</span>
+            <span class="mm-mc-nome">${escapeHtml(truncate(adv?.nome_time || "Adversário", 16))}</span>
           </div>
           <span class="mm-mc-pts ${perdendo ? "vencedor" : ganhando ? "perdedor" : "empate"}">${typeof truncarPontos === 'function' ? truncarPontos(advPts) : advPts.toFixed(2)}</span>
         </div>
@@ -1200,8 +1200,8 @@ function renderConfrontosListaCards(confrontos, meuTimeId, fase) {
           <div class="mm-campeao-time">
             <img class="mm-campeao-escudo" src="${getEscudoUrl(campeao)}" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
             <div class="mm-campeao-info">
-              <p class="mm-campeao-nome">${campeao.nome_time || "Time"}</p>
-              <p class="mm-campeao-cartola">${campeao.nome_cartola || campeao.nome_cartoleiro || ""}</p>
+              <p class="mm-campeao-nome">${escapeHtml(campeao.nome_time || "Time")}</p>
+              <p class="mm-campeao-cartola">${escapeHtml(campeao.nome_cartola || campeao.nome_cartoleiro || "")}</p>
               <p class="mm-campeao-pts">${typeof truncarPontos === 'function' ? truncarPontos(ptsCampeao) : ptsCampeao.toFixed(2)} pts</p>
             </div>
           </div>
@@ -1242,8 +1242,8 @@ function renderConfrontosListaCards(confrontos, meuTimeId, fase) {
           <div class="mm-conf-time ${vencedorA ? "vencedor" : vencedorB ? "perdedor" : ""}">
             <img class="mm-conf-escudo" src="${getEscudoUrl(timeA)}" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
             <div class="mm-conf-info">
-              <span class="mm-conf-nome">${truncate(timeA.nome_time || "A definir", 14)}</span>
-              <span class="mm-conf-cartola">${truncate(timeA.nome_cartola || timeA.nome_cartoleiro || "", 16)}</span>
+              <span class="mm-conf-nome">${escapeHtml(truncate(timeA.nome_time || "A definir", 14))}</span>
+              <span class="mm-conf-cartola">${escapeHtml(truncate(timeA.nome_cartola || timeA.nome_cartoleiro || "", 16))}</span>
             </div>
             <span class="mm-conf-pts ${vencedorA ? "vencedor" : vencedorB ? "perdedor" : "empate"}">${typeof truncarPontos === 'function' ? truncarPontos(ptsA) : ptsA.toFixed(2)}</span>
           </div>
@@ -1254,8 +1254,8 @@ function renderConfrontosListaCards(confrontos, meuTimeId, fase) {
           <div class="mm-conf-time ${vencedorB ? "vencedor" : vencedorA ? "perdedor" : ""}">
             <img class="mm-conf-escudo" src="${getEscudoUrl(timeB)}" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
             <div class="mm-conf-info">
-              <span class="mm-conf-nome">${truncate(timeB.nome_time || "A definir", 14)}</span>
-              <span class="mm-conf-cartola">${truncate(timeB.nome_cartola || timeB.nome_cartoleiro || "", 16)}</span>
+              <span class="mm-conf-nome">${escapeHtml(truncate(timeB.nome_time || "A definir", 14))}</span>
+              <span class="mm-conf-cartola">${escapeHtml(truncate(timeB.nome_cartola || timeB.nome_cartoleiro || "", 16))}</span>
             </div>
             <span class="mm-conf-pts ${vencedorB ? "vencedor" : vencedorA ? "perdedor" : "empate"}">${typeof truncarPontos === 'function' ? truncarPontos(ptsB) : ptsB.toFixed(2)}</span>
           </div>
@@ -1542,8 +1542,8 @@ async function carregarClassificadosParciais(container, edicao) {
           <span class="mm-parciais-pos">${i + 1}º</span>
           <img class="mm-parciais-escudo" src="/escudos/${t.clube_id}.png" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
           <div class="mm-parciais-rank-info">
-            <span class="mm-parciais-rank-nome">${truncate(t.nome_time || "—", 16)}</span>
-            <span class="mm-parciais-rank-cartola">${truncate(t.nome_cartola || "—", 18)}</span>
+            <span class="mm-parciais-rank-nome">${escapeHtml(truncate(t.nome_time || "—", 16))}</span>
+            <span class="mm-parciais-rank-cartola">${escapeHtml(truncate(t.nome_cartola || "—", 18))}</span>
           </div>
           <span class="mm-parciais-rank-pts">${typeof truncarPontos === 'function' ? truncarPontos(t.pontos_rodada_atual ?? t.pontos ?? 0) : ((t.pontos_rodada_atual ?? t.pontos)?.toFixed(2) || "0.00")}</span>
         </div>`;
@@ -1557,8 +1557,8 @@ async function carregarClassificadosParciais(container, edicao) {
             <span class="mm-parciais-pos">${tamanho + i + 1}º</span>
             <img class="mm-parciais-escudo" src="/escudos/${t.clube_id}.png" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
             <div class="mm-parciais-rank-info">
-              <span class="mm-parciais-rank-nome">${truncate(t.nome_time || "—", 16)}</span>
-              <span class="mm-parciais-rank-cartola">${truncate(t.nome_cartola || "—", 18)}</span>
+              <span class="mm-parciais-rank-nome">${escapeHtml(truncate(t.nome_time || "—", 16))}</span>
+              <span class="mm-parciais-rank-cartola">${escapeHtml(truncate(t.nome_cartola || "—", 18))}</span>
             </div>
             <span class="mm-parciais-rank-pts">${typeof truncarPontos === 'function' ? truncarPontos(t.pontos_rodada_atual ?? t.pontos ?? 0) : ((t.pontos_rodada_atual ?? t.pontos)?.toFixed(2) || "0.00")}</span>
           </div>`;
@@ -1708,8 +1708,8 @@ async function carregarConfrontosParciais(container, edicao) {
             <div class="mm-conf-time">
               <img class="mm-conf-escudo" src="${getEscudoUrl(timeA)}" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
               <div class="mm-conf-info">
-                <span class="mm-conf-nome">${truncate(timeA.nome_time || "A definir", 14)}</span>
-                <span class="mm-conf-cartola">${truncate(timeA.nome_cartola || "", 16)}</span>
+                <span class="mm-conf-nome">${escapeHtml(truncate(timeA.nome_time || "A definir", 14))}</span>
+                <span class="mm-conf-cartola">${escapeHtml(truncate(timeA.nome_cartola || "", 16))}</span>
               </div>
               <span class="mm-conf-pts empate">${posA}º</span>
             </div>
@@ -1717,8 +1717,8 @@ async function carregarConfrontosParciais(container, edicao) {
             <div class="mm-conf-time">
               <img class="mm-conf-escudo" src="${getEscudoUrl(timeB)}" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
               <div class="mm-conf-info">
-                <span class="mm-conf-nome">${truncate(timeB.nome_time || "A definir", 14)}</span>
-                <span class="mm-conf-cartola">${truncate(timeB.nome_cartola || "", 16)}</span>
+                <span class="mm-conf-nome">${escapeHtml(truncate(timeB.nome_time || "A definir", 14))}</span>
+                <span class="mm-conf-cartola">${escapeHtml(truncate(timeB.nome_cartola || "", 16))}</span>
               </div>
               <span class="mm-conf-pts empate">${posB}º</span>
             </div>

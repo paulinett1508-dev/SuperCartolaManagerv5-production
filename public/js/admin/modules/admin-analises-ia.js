@@ -40,7 +40,7 @@ async function carregarLigas() {
         const data = await res.json();
         if (data.success && data.ligas.length > 0) {
             select.innerHTML = '<option value="">Selecione uma liga...</option>' +
-                data.ligas.map(l => `<option value="${l._id}">${l.nome}</option>`).join('');
+                data.ligas.map(l => `<option value="${l._id}">${escapeHtml(l.nome)}</option>`).join('');
         } else {
             select.innerHTML = '<option value="">Nenhuma liga encontrada</option>';
         }
@@ -137,7 +137,7 @@ function renderRaioXFinanceiro(d, tempoMs) {
     return `
         <div class="rx-resultado">
             <div class="rx-resultado-header">
-                <h3><span class="material-icons">account_balance</span> Raio-X Financeiro — ${d.ligaNome}</h3>
+                <h3><span class="material-icons">account_balance</span> Raio-X Financeiro — ${escapeHtml(d.ligaNome)}</h3>
                 <span class="rx-tempo">${tempoMs}ms</span>
             </div>
             <div class="rx-kpi-grid">
@@ -155,7 +155,7 @@ function renderRaioXFinanceiro(d, tempoMs) {
                     <thead><tr><th>Participante</th><th>Saldo</th><th>Pago</th><th>Quitado</th></tr></thead>
                     <tbody>${d.maiores_devedores.map(p => `
                         <tr>
-                            <td>${p.nome}</td>
+                            <td>${escapeHtml(p.nome)}</td>
                             <td class="rx-val-neg">${formatMoeda(p.saldo_consolidado)}</td>
                             <td>${formatMoeda(p.total_pago)}</td>
                             <td>${p.quitado ? '<span class="rx-badge green">Sim</span>' : '<span class="rx-badge red">Não</span>'}</td>
@@ -170,7 +170,7 @@ function renderRaioXFinanceiro(d, tempoMs) {
                     <thead><tr><th>Participante</th><th>Saldo</th><th>Ganhos</th></tr></thead>
                     <tbody>${d.maiores_credores.map(p => `
                         <tr>
-                            <td>${p.nome}</td>
+                            <td>${escapeHtml(p.nome)}</td>
                             <td class="rx-val-pos">${formatMoeda(p.saldo_consolidado)}</td>
                             <td>${formatMoeda(p.ganhos)}</td>
                         </tr>`).join('')}
@@ -181,7 +181,7 @@ function renderRaioXFinanceiro(d, tempoMs) {
             <div class="rx-section">
                 <h4><span class="material-icons">bug_report</span> Anomalias (${d.anomalias.length})</h4>
                 <p class="rx-text-muted">Participantes com rodadas jogadas mas saldo/ganhos/perdas zerados</p>
-                <ul class="rx-list">${d.anomalias.map(a => `<li>${a.nome} (rodada ${a.ultima_rodada})</li>`).join('')}</ul>
+                <ul class="rx-list">${d.anomalias.map(a => `<li>${escapeHtml(a.nome)} (rodada ${a.ultima_rodada})</li>`).join('')}</ul>
             </div>` : ''}
         </div>`;
 }
@@ -192,7 +192,7 @@ function renderSaudeLiga(d, tempoMs) {
     return `
         <div class="rx-resultado">
             <div class="rx-resultado-header">
-                <h3><span class="material-icons">favorite</span> Saúde da Liga — ${d.ligaNome}</h3>
+                <h3><span class="material-icons">favorite</span> Saúde da Liga — ${escapeHtml(d.ligaNome)}</h3>
                 <span class="rx-tempo">${tempoMs}ms</span>
             </div>
             <div class="rx-kpi-grid">
@@ -226,7 +226,7 @@ function renderSaudeLiga(d, tempoMs) {
                 <table class="rx-table">
                     <thead><tr><th>Participante</th><th>Rodada Desistência</th></tr></thead>
                     <tbody>${p.lista_desistentes.map(d => `
-                        <tr><td>${d.nome}</td><td>Rodada ${d.rodada_desistencia}</td></tr>`).join('')}
+                        <tr><td>${escapeHtml(d.nome)}</td><td>Rodada ${d.rodada_desistencia}</td></tr>`).join('')}
                     </tbody>
                 </table>
             </div>` : ''}
@@ -238,7 +238,7 @@ function renderPerformance(d, tempoMs) {
     return `
         <div class="rx-resultado">
             <div class="rx-resultado-header">
-                <h3><span class="material-icons">emoji_events</span> Performance — ${d.ligaNome}</h3>
+                <h3><span class="material-icons">emoji_events</span> Performance — ${escapeHtml(d.ligaNome)}</h3>
                 <span class="rx-tempo">${tempoMs}ms</span>
             </div>
             <div class="rx-kpi-grid">
@@ -287,7 +287,7 @@ function renderDiagnostico(d, tempoMs) {
                     <thead><tr><th>Liga</th><th>Última Rodada</th><th>Consolidada</th><th>Gap</th></tr></thead>
                     <tbody>${d.consolidacao.detalhes.map(c => `
                         <tr>
-                            <td>${c.ligaNome}</td>
+                            <td>${escapeHtml(c.ligaNome)}</td>
                             <td>${c.ultima_rodada_dados}</td>
                             <td>${c.ultima_rodada_consolidada}</td>
                             <td class="${c.gap > 0 ? 'rx-val-neg' : ''}">${c.gap > 0 ? '+' + c.gap : '0'}</td>
@@ -328,7 +328,7 @@ function rankingTable(items) {
             <tbody>${items.map(r => `
                 <tr>
                     <td>${r.posicao}</td>
-                    <td>${r.nome}</td>
+                    <td>${escapeHtml(r.nome)}</td>
                     <td><strong>${(Math.trunc((r.total_pontos || 0) * 10) / 10).toFixed(1)}</strong></td>
                     <td>${r.media_pontos}</td>
                     <td>${r.desvio_padrao}</td>

@@ -616,8 +616,8 @@ function criarCardLider(lider, turnoLabel, rodadaAtual) {
             <div class="lider-info">
                 ${escudoHTML}
                 <div class="lider-dados">
-                    <div class="lider-nome">${lider.nome_cartola}</div>
-                    <div class="lider-time">${lider.nome_time}</div>
+                    <div class="lider-nome">${escapeHtml(lider.nome_cartola)}</div>
+                    <div class="lider-time">${escapeHtml(lider.nome_time)}</div>
                 </div>
             </div>
             <div class="lider-pontos">
@@ -715,8 +715,8 @@ function criarCardSeuDesempenho(participantes, participanteLogado, turnoLabel) {
                 <div class="seu-info">
                     ${escudoHTML}
                     <div class="seu-dados">
-                        <div class="seu-nome">${meusDados.nome_cartola}</div>
-                        <div class="seu-time">${meusDados.nome_time}</div>
+                        <div class="seu-nome">${escapeHtml(meusDados.nome_cartola)}</div>
+                        <div class="seu-time">${escapeHtml(meusDados.nome_time)}</div>
                     </div>
                 </div>
                 <div class="seu-pontos">
@@ -739,7 +739,7 @@ function criarCardSeuDesempenho(participantes, participanteLogado, turnoLabel) {
             <div class="seu-footer lider">
                 <span class="lider-badge">
                     <span class="material-icons" style="font-size: 16px; vertical-align: middle; margin-right: 4px;">emoji_events</span>
-                    ${meusDados.nome_time} está sendo o grande campeão do Super Cartola
+                    ${escapeHtml(meusDados.nome_time)} está sendo o grande campeão do Super Cartola
                 </span>
             </div>
             `
@@ -1283,10 +1283,10 @@ function criarLinhaParticipante(
                 }
             </td>
             <td style="text-align:left; padding:8px 4px;">
-                ${participante.nome_cartola || "N/D"}${badgeInativo}${ehMinhaLinha ? ' <span style="color:#3b82f6; font-size:0.7em; display:inline-flex; align-items:center;"><span class="material-icons" style="font-size:14px;">person</span> VOCÊ</span>' : ""}
+                ${escapeHtml(participante.nome_cartola || "N/D")}${badgeInativo}${ehMinhaLinha ? ' <span style="color:#3b82f6; font-size:0.7em; display:inline-flex; align-items:center;"><span class="material-icons" style="font-size:14px;">person</span> VOCÊ</span>' : ""}
             </td>
             <td style="text-align:left; padding:8px 4px;">
-                ${participante.nome_time || "N/D"}
+                ${escapeHtml(participante.nome_time || "N/D")}
             </td>
             <td style="text-align:center; padding:8px 2px;">
                 <span class="pontos-valor" style="font-weight:${estaInativo ? "400" : "600"};">

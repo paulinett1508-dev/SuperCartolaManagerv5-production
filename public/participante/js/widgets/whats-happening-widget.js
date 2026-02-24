@@ -1320,7 +1320,7 @@ function renderRankingSection() {
             <div class="wh-rank-card ${i < 3 ? posColors[i] : ''} ${isMe ? 'me' : ''}">
                 <div class="wh-rank-pos">${i + 1}</div>
                 <img class="wh-rank-escudo" src="${r.escudo}" onerror="this.src='/escudos/default.png'" alt="">
-                <div class="wh-rank-nome">${r.nome_time}</div>
+                <div class="wh-rank-nome">${escapeHtml(r.nome_time)}</div>
                 <div class="wh-rank-pontos">${(Math.trunc((r.pontos||0) * 10) / 10).toFixed(1)}</div>
             </div>
         `;
@@ -1334,7 +1334,7 @@ function renderRankingSection() {
             <div class="wh-rank-card me">
                 <div class="wh-rank-pos">${minhaPosicao}o</div>
                 <img class="wh-rank-escudo" src="${meuTime.escudo}" onerror="this.src='/escudos/default.png'" alt="">
-                <div class="wh-rank-nome">${meuTime.nome_time}</div>
+                <div class="wh-rank-nome">${escapeHtml(meuTime.nome_time)}</div>
                 <div class="wh-rank-pontos">${(Math.trunc((meuTime.pontos||0) * 10) / 10).toFixed(1)}</div>
             </div>
         `;
@@ -1494,7 +1494,7 @@ function renderPontosCorridosSection() {
                     <div class="wh-time wh-time--home ${aWinning ? "winning" : bWinning ? "losing" : ""}">
                         <img class="wh-time-escudo" src="${t1.escudo || "/escudos/default.png"}" onerror="this.src='/escudos/default.png'" alt="">
                         <div class="wh-time-info">
-                            <div class="wh-time-nome">${t1.nome || t1.nome_cartola || "Time 1"}</div>
+                            <div class="wh-time-nome">${escapeHtml(t1.nome || t1.nome_cartola || "Time 1")}</div>
                         </div>
                         <div class="wh-time-pontos">${(Math.trunc((pontosA||0) * 10) / 10).toFixed(1)}</div>
                     </div>
@@ -1504,7 +1504,7 @@ function renderPontosCorridosSection() {
                     <div class="wh-time wh-time--away ${bWinning ? "winning" : aWinning ? "losing" : ""}">
                         <div class="wh-time-pontos">${(Math.trunc((pontosB||0) * 10) / 10).toFixed(1)}</div>
                         <div class="wh-time-info">
-                            <div class="wh-time-nome">${t2.nome || t2.nome_cartola || "Time 2"}</div>
+                            <div class="wh-time-nome">${escapeHtml(t2.nome || t2.nome_cartola || "Time 2")}</div>
                         </div>
                         <img class="wh-time-escudo" src="${t2.escudo || "/escudos/default.png"}" onerror="this.src='/escudos/default.png'" alt="">
                     </div>
@@ -1653,7 +1653,7 @@ function renderMataMataSection() {
             const vencedorNome = String(c.vencedor) === idA
                 ? (c.timeA?.nome_time || c.timeA?.nome || 'Time A')
                 : (c.timeB?.nome_time || c.timeB?.nome || 'Time B');
-            decisionHtml = `<div class="wh-mm-decided"><span class="material-icons">check_circle</span> ${vencedorNome} classificado</div>`;
+            decisionHtml = `<div class="wh-mm-decided"><span class="material-icons">check_circle</span> ${escapeHtml(vencedorNome)} classificado</div>`;
         }
 
         return `
@@ -1667,8 +1667,8 @@ function renderMataMataSection() {
                     <div class="wh-time wh-time--home ${aWinning ? "winning" : bWinning ? "losing" : ""}">
                         <img class="wh-time-escudo" src="${resolverEscudo({timeId: idA, escudo: c.timeA?.escudo || c.timeA?.url_escudo_png})}" onerror="this.src='/escudos/default.png'" alt="">
                         <div class="wh-time-info">
-                            <div class="wh-time-nome">${c.timeA?.nome_time || c.timeA?.nome || "Time A"}</div>
-                            ${c.timeA?.nome_cartola ? `<div class="wh-time-cartola">${c.timeA.nome_cartola}</div>` : ''}
+                            <div class="wh-time-nome">${escapeHtml(c.timeA?.nome_time || c.timeA?.nome || "Time A")}</div>
+                            ${c.timeA?.nome_cartola ? `<div class="wh-time-cartola">${escapeHtml(c.timeA.nome_cartola)}</div>` : ''}
                         </div>
                         <div class="wh-time-pontos">${(Math.trunc((pontosA||0) * 10) / 10).toFixed(1)}</div>
                     </div>
@@ -1679,8 +1679,8 @@ function renderMataMataSection() {
                     <div class="wh-time wh-time--away ${bWinning ? "winning" : aWinning ? "losing" : ""}">
                         <div class="wh-time-pontos">${(Math.trunc((pontosB||0) * 10) / 10).toFixed(1)}</div>
                         <div class="wh-time-info">
-                            <div class="wh-time-nome">${c.timeB?.nome_time || c.timeB?.nome || "Time B"}</div>
-                            ${c.timeB?.nome_cartola ? `<div class="wh-time-cartola">${c.timeB.nome_cartola}</div>` : ''}
+                            <div class="wh-time-nome">${escapeHtml(c.timeB?.nome_time || c.timeB?.nome || "Time B")}</div>
+                            ${c.timeB?.nome_cartola ? `<div class="wh-time-cartola">${escapeHtml(c.timeB.nome_cartola)}</div>` : ''}
                         </div>
                         <img class="wh-time-escudo" src="${resolverEscudo({timeId: idB, escudo: c.timeB?.escudo || c.timeB?.url_escudo_png})}" onerror="this.src='/escudos/default.png'" alt="">
                     </div>
@@ -1864,7 +1864,7 @@ function renderRestaUmSection() {
             <tr class="${isMe ? 'me' : ''}">
                 <td class="wh-podium-pos">${i + 1}</td>
                 <td class="wh-podium-escudo"><img src="${resolverEscudo(p)}" onerror="this.src='/escudos/default.png'" alt=""></td>
-                <td class="wh-podium-nome">${p.nomeTime || p.nomeCartoleiro || 'Time'}</td>
+                <td class="wh-podium-nome">${escapeHtml(p.nomeTime || p.nomeCartoleiro || 'Time')}</td>
                 <td class="wh-podium-valor" style="color:var(--app-success)">
                     <span class="material-icons" style="font-size:12px;vertical-align:middle;">favorite</span> Vivo
                 </td>
@@ -1881,7 +1881,7 @@ function renderRestaUmSection() {
                 <span class="material-icons" style="font-size:14px;color:var(--app-danger);">warning</span>
                 <img src="${resolverEscudo(lanterna)}" onerror="this.src='/escudos/default.png'" style="width:18px;height:18px;object-fit:contain;">
                 <span style="flex:1;font-size:var(--app-font-xs);color:${isMe ? 'var(--app-danger)' : 'var(--app-text-muted)'};">
-                    ${isMe ? 'VOCE esta na zona!' : (lanterna.nomeTime || 'Time')}
+                    ${isMe ? 'VOCE esta na zona!' : escapeHtml(lanterna.nomeTime || 'Time')}
                 </span>
                 <span style="font-size:var(--app-font-xs);color:var(--app-danger);font-weight:600;">Zona de eliminacao</span>
             </div>
@@ -1897,7 +1897,7 @@ function renderRestaUmSection() {
                 <div class="wh-my-position-badge">
                     <span class="wh-mpb-pos">#${meuIndex + 1}</span>
                     <img class="wh-mpb-escudo" src="${resolverEscudo(meu)}" onerror="this.src='/escudos/default.png'" alt="">
-                    <span class="wh-mpb-nome">${meu.nomeTime || 'Meu Time'}</span>
+                    <span class="wh-mpb-nome">${escapeHtml(meu.nomeTime || 'Meu Time')}</span>
                     <span class="wh-mpb-valor" style="color:var(--app-success)">Vivo</span>
                 </div>
             `;
@@ -1909,7 +1909,7 @@ function renderRestaUmSection() {
                     <span class="material-icons" style="font-size:14px;">close</span>
                 </span>
                 <img class="wh-mpb-escudo" src="${resolverEscudo(meu)}" onerror="this.src='/escudos/default.png'" alt="">
-                <span class="wh-mpb-nome">${meu.nomeTime || 'Meu Time'}</span>
+                <span class="wh-mpb-nome">${escapeHtml(meu.nomeTime || 'Meu Time')}</span>
                 <span class="wh-mpb-valor" style="color:var(--app-danger)">Eliminado R${meu.rodadaEliminacao || '?'}</span>
             </div>
         `;
@@ -1982,7 +1982,7 @@ function renderMeuConfrontoPontosCorridos() {
                             <img class="wh-mc-escudo" src="${eu?.escudo || '/escudos/default.png'}" onerror="this.src='/escudos/default.png'" alt="">
                             <div class="wh-mc-info">
                                 <div class="wh-mc-label">VOCÊ</div>
-                                <div class="wh-mc-nome">${eu?.nome || 'Meu Time'}</div>
+                                <div class="wh-mc-nome">${escapeHtml(eu?.nome || 'Meu Time')}</div>
                             </div>
                             <div class="wh-mc-pontos ${vencendo ? 'winning' : ''}">${(Math.trunc((meusPontos||0) * 10) / 10).toFixed(1)}</div>
                         </div>
@@ -1996,7 +1996,7 @@ function renderMeuConfrontoPontosCorridos() {
                             <img class="wh-mc-escudo" src="${adversario?.escudo || '/escudos/default.png'}" onerror="this.src='/escudos/default.png'" alt="">
                             <div class="wh-mc-info">
                                 <div class="wh-mc-label">ADVERSÁRIO</div>
-                                <div class="wh-mc-nome">${adversario?.nome || adversario?.nome_cartola || 'Rival'}</div>
+                                <div class="wh-mc-nome">${escapeHtml(adversario?.nome || adversario?.nome_cartola || 'Rival')}</div>
                             </div>
                             <div class="wh-mc-pontos ${perdendo ? 'winning' : ''}">${(Math.trunc((pontosAdv||0) * 10) / 10).toFixed(1)}</div>
                         </div>
@@ -2063,7 +2063,7 @@ function renderMeuConfrontoMataMata() {
                             <img class="wh-mc-escudo" src="${eu?.url_escudo_png || '/escudos/default.png'}" onerror="this.src='/escudos/default.png'" alt="">
                             <div class="wh-mc-info">
                                 <div class="wh-mc-label">VOCÊ</div>
-                                <div class="wh-mc-nome">${eu?.nome_time || eu?.nome_cartola || 'Meu Time'}</div>
+                                <div class="wh-mc-nome">${escapeHtml(eu?.nome_time || eu?.nome_cartola || 'Meu Time')}</div>
                             </div>
                             <div class="wh-mc-pontos ${vencendo ? 'winning' : ''}">${(Math.trunc((meusPontos||0) * 10) / 10).toFixed(1)}</div>
                         </div>
@@ -2077,7 +2077,7 @@ function renderMeuConfrontoMataMata() {
                             <img class="wh-mc-escudo" src="${adversario?.url_escudo_png || '/escudos/default.png'}" onerror="this.src='/escudos/default.png'" alt="">
                             <div class="wh-mc-info">
                                 <div class="wh-mc-label">ADVERSÁRIO</div>
-                                <div class="wh-mc-nome">${adversario?.nome_time || adversario?.nome_cartola || 'Rival'}</div>
+                                <div class="wh-mc-nome">${escapeHtml(adversario?.nome_time || adversario?.nome_cartola || 'Rival')}</div>
                             </div>
                             <div class="wh-mc-pontos ${perdendo ? 'winning' : ''}">${(Math.trunc((pontosAdv||0) * 10) / 10).toFixed(1)}</div>
                         </div>

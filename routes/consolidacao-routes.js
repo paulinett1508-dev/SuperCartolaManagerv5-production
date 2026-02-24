@@ -20,9 +20,11 @@ router.post(
 );
 
 // 📊 Busca histórico completo consolidado
-router.get("/ligas/:ligaId/historico-completo", buscarHistoricoCompleto);
+// 🔒 SEC-FIX: Apenas admin
+router.get("/ligas/:ligaId/historico-completo", verificarAdmin, buscarHistoricoCompleto);
 
-// ✅ NOVO: Verificar status de consolidação da liga
-router.get("/ligas/:ligaId/status", verificarStatusConsolidacao);
+// Verificar status de consolidação da liga
+// 🔒 SEC-FIX: Apenas admin
+router.get("/ligas/:ligaId/status", verificarAdmin, verificarStatusConsolidacao);
 
 export default router;

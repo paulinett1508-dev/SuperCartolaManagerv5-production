@@ -1083,6 +1083,9 @@
             });
         </script>
 
+        <!-- SEC: Sanitização global XSS (deve vir antes de scripts que usam innerHTML) -->
+        <script src="/js/shared/escape-html.js"></script>
+
         <!-- ✅ LogManager PRIMEIRO (antes de todos os outros scripts) -->
         <script src="/js/core/log-manager.js"></script>
 

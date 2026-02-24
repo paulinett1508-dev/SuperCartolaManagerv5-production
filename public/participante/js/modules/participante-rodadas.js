@@ -871,7 +871,7 @@ function renderizarMinhaEscalacao(rodadaData, isParcial) {
                     <img src="${escudoSrc}" alt="" onerror="this.onerror=null;this.src='/escudos/default.png'" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;">
                 </td>
                 <td style="padding:8px 8px;font-size:13px;color:#e5e7eb;">
-                    <div>${a.apelido || 'Atleta'}${capitaoBadge}${luxoBadge}</div>${subBadge}
+                    <div>${escapeHtml(a.apelido || 'Atleta')}${capitaoBadge}${luxoBadge}</div>${subBadge}
                 </td>
                 <td style="padding:8px 4px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:bold;${pontosClass};">
                     ${pontosAtl}
@@ -913,7 +913,7 @@ function renderizarMinhaEscalacao(rodadaData, isParcial) {
                     <span class="material-icons">sports_soccer</span>
                     <div>
                         <div class="me-toggle-title">Minha Escalação</div>
-                        <div class="me-toggle-subtitle">${nomeTime} • ${pontosFormatados} pts • ${posicao}º/${totalPart}</div>
+                        <div class="me-toggle-subtitle">${escapeHtml(nomeTime)} • ${pontosFormatados} pts • ${posicao}º/${totalPart}</div>
                     </div>
                 </div>
                 <span class="material-icons me-toggle-chevron">expand_more</span>
@@ -923,8 +923,8 @@ function renderizarMinhaEscalacao(rodadaData, isParcial) {
             <div class="me-collapsible-content ${expandedClass}" id="minhaEscalacaoContent">
                 <!-- Header com info do time -->
                 <div style="padding:16px;background:linear-gradient(135deg, rgba(255, 85, 0, 0.08) 0%, transparent 100%);border-bottom:1px solid #1f2937;">
-                    <div style="font-family:'Russo One',sans-serif;font-size:16px;color:var(--app-text-white);">${nomeTime}</div>
-                    <div style="font-size:12px;color:var(--app-text-muted);margin-top:2px;">${nomeCartola}</div>
+                    <div style="font-family:'Russo One',sans-serif;font-size:16px;color:var(--app-text-white);">${escapeHtml(nomeTime)}</div>
+                    <div style="font-size:12px;color:var(--app-text-muted);margin-top:2px;">${escapeHtml(nomeCartola)}</div>
                 </div>
 
                 <!-- Stats -->
@@ -1486,11 +1486,11 @@ function renderizarDetalhamentoRodada(rodadaData, isParcial = false, inativos = 
                 ${escudoHTML}
                 <div class="rk-info">
                     <div class="rk-nome-row">
-                        <div class="rk-nome">${nomeTime}</div>
+                        <div class="rk-nome">${escapeHtml(nomeTime)}</div>
                         ${naoJogouBadge}
                         ${badgeEmCampo}
                     </div>
-                    <div class="rk-cartola">${participante.nome_cartola || ""}</div>
+                    <div class="rk-cartola">${escapeHtml(participante.nome_cartola || "")}</div>
                 </div>
                 <div class="rk-stats">
                     <div class="rk-pts">${pontosFormatados}</div>
@@ -1856,7 +1856,7 @@ function abrirCampinhoModal(targetTimeId, rodada, rodadaData = null) {
                     <img src="${escudoSrc}" alt="" onerror="this.onerror=null;this.src='/escudos/default.png'" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;">
                 </td>
                 <td style="padding:8px 8px;font-size:13px;color:#e5e7eb;">
-                    <div>${a.apelido || 'Atleta'}${capitaoBadge}</div>${subBadge}
+                    <div>${escapeHtml(a.apelido || 'Atleta')}${capitaoBadge}</div>${subBadge}
                 </td>
                 <td style="padding:8px 4px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:bold;${pontosClass};">
                     ${pontosAtl}
@@ -1899,8 +1899,8 @@ function abrirCampinhoModal(targetTimeId, rodada, rodadaData = null) {
             <!-- Header -->
             <div style="position:sticky;top:0;background:#111827;padding:16px 20px;border-bottom:1px solid #1f2937;display:flex;align-items:center;justify-content:space-between;z-index:1;">
                 <div>
-                    <div style="font-family:'Russo One',sans-serif;font-size:16px;color:var(--app-text-white);">${nomeTime}</div>
-                    <div style="font-size:12px;color:var(--app-text-muted);">${nomeCartola}${isMeuTime ? ' (Meu Time)' : ''}</div>
+                    <div style="font-family:'Russo One',sans-serif;font-size:16px;color:var(--app-text-white);">${escapeHtml(nomeTime)}</div>
+                    <div style="font-size:12px;color:var(--app-text-muted);">${escapeHtml(nomeCartola)}${isMeuTime ? ' (Meu Time)' : ''}</div>
                 </div>
                 <button id="fecharCampinhoModal" style="background:none;border:none;color:var(--app-text-muted);cursor:pointer;padding:8px;">
                     <span class="material-icons">close</span>
@@ -2036,8 +2036,8 @@ function renderizarSecaoInativos(inativos, rodadaNum) {
                     <span class="material-icons" style="font-size: 14px;">person_off</span>
                 </div>
                 <div class="ranking-info-pro">
-                    <div class="ranking-nome-time">${nomeTime}</div>
-                    <div class="ranking-nome-cartola">${nomeCartola}</div>
+                    <div class="ranking-nome-time">${escapeHtml(nomeTime)}</div>
+                    <div class="ranking-nome-cartola">${escapeHtml(nomeCartola)}</div>
                 </div>
                 <div class="ranking-stats-pro">
                     <div class="ranking-pontos-pro" style="color: #6b7280;">${pontosFormatados}</div>

@@ -208,8 +208,10 @@ router.post("/:ligaId/:timeId", verificarAdmin, async (req, res) => {
             observacoes,
             dataAcerto,
             temporada = CURRENT_SEASON,
-            registradoPor = "admin",
         } = req.body;
+
+        // 🔒 SEC-FIX: Derivar registradoPor da sessao (impede falsificacao de trilha de auditoria)
+        const registradoPor = req.session?.admin?.email || req.session?.admin?.nome || "admin";
 
         // Validações
         if (!tipo || !["pagamento", "recebimento"].includes(tipo)) {
@@ -436,8 +438,15 @@ router.put("/:id", verificarAdmin, async (req, res) => {
             }
         });
 
-        if (updateObj.valor) {
+        // 🔒 SEC-FIX: Validar valor positivo (previne manipulacao de saldo)
+        if (updateObj.valor !== undefined) {
             updateObj.valor = parseFloat(updateObj.valor);
+            if (isNaN(updateObj.valor) || updateObj.valor <= 0) {
+                return res.status(400).json({
+                    success: false,
+                    error: "Valor deve ser um numero positivo",
+                });
+            }
         }
         if (updateObj.dataAcerto) {
             updateObj.dataAcerto = new Date(updateObj.dataAcerto);
@@ -446,7 +455,7 @@ router.put("/:id", verificarAdmin, async (req, res) => {
         const acertoAtualizado = await AcertoFinanceiro.findByIdAndUpdate(
             id,
             { $set: updateObj },
-            { new: true },
+            { new: true, runValidators: true },
         );
 
         if (!acertoAtualizado) {

@@ -2,6 +2,7 @@ import cron from "node-cron";
 import compression from "compression";
 // Executar scraper de jogos Globo Esporte diariamente às 6h (horário do servidor)
 import { exec } from "child_process";
+import crypto from "crypto";
 
 // ====================================================================
 // 🔄 RECURSOS GLOBAIS PARA GRACEFUL SHUTDOWN
@@ -93,8 +94,8 @@ import { dirname } from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Importar package.json para versão
-const pkg = JSON.parse(readFileSync("./package.json", "utf8"));
+// Importar package.json para versão (usar __dirname para evitar falha por working directory diferente)
+const pkg = JSON.parse(readFileSync(path.join(__dirname, "package.json"), "utf8"));
 
 // Importar rotas do sistema
 import jogosHojeRoutes from "./routes/jogos-hoje-routes.js";
@@ -222,7 +223,7 @@ import orchestratorRoutes from "./routes/orchestrator-routes.js";
 import orchestrator from "./services/orchestrator/roundMarketOrchestrator.js";
 
 // Middleware de proteção
-import { protegerRotas, injetarSessaoDevAdmin } from "./middleware/auth.js";
+import { protegerRotas, injetarSessaoDevAdmin, verificarAdmin } from "./middleware/auth.js";
 
 // dotenv já foi carregado no início do arquivo
 
@@ -426,7 +427,13 @@ app.use(
     store: MongoStore.create({
       clientPromise: mongoose.connection
         .asPromise()
-        .then((conn) => conn.client),
+        .then((conn) => conn.client)
+        .catch((err) => {
+          const logError = IS_PRODUCTION ? originalConsole.error : console.error;
+          logError("[SESSION] ❌ MongoStore falhou ao obter client MongoDB:", err.message);
+          logError("[SESSION] Sessões podem não persistir. Verifique a conexão com o banco.");
+          throw err;
+        }),
       collectionName: "sessions",
       ttl: 14 * 24 * 60 * 60, // 14 dias
       autoRemove: "native",
@@ -590,14 +597,17 @@ app.use("/api/notifications", notificationsRoutes);
 console.log("[SERVER] 🔔 Rotas de Push Notifications registradas em /api/notifications");
 
 // 📊 Analytics - Branches & Merges (session auth, para SPA desktop)
-app.get("/api/admin/analytics/resumo", analyticsController.getAnalyticsResumo);
-app.get("/api/admin/analytics/branch/:nomeBranch", analyticsController.getAnatyticsBranchDetalhes);
-app.get("/api/admin/analytics/merges", analyticsController.getAnalyticsMerges);
-app.get("/api/admin/analytics/pull-requests", analyticsController.getAnalyticsPullRequests);
-app.get("/api/admin/analytics/funcionalidades", analyticsController.getAnalyticsFuncionalidades);
-app.get("/api/admin/analytics/estatisticas", analyticsController.getAnalyticsEstatisticas);
-app.get("/api/admin/analytics/sync-status", analyticsController.getGitSyncStatus);
-app.post("/api/admin/analytics/sync-trigger", analyticsController.postGitSyncTrigger);
+// 🔒 SEC-FIX: Todas as rotas analytics agora exigem autenticação admin
+app.get("/api/admin/analytics/resumo", verificarAdmin, analyticsController.getAnalyticsResumo);
+app.get("/api/admin/analytics/branch/:nomeBranch", verificarAdmin, analyticsController.getAnatyticsBranchDetalhes);
+app.get("/api/admin/analytics/merges", verificarAdmin, analyticsController.getAnalyticsMerges);
+app.get("/api/admin/analytics/pull-requests", verificarAdmin, analyticsController.getAnalyticsPullRequests);
+app.get("/api/admin/analytics/funcionalidades", verificarAdmin, analyticsController.getAnalyticsFuncionalidades);
+app.get("/api/admin/analytics/estatisticas", verificarAdmin, analyticsController.getAnalyticsEstatisticas);
+app.get("/api/admin/analytics/sync-status", verificarAdmin, analyticsController.getGitSyncStatus);
+app.post("/api/admin/analytics/sync-trigger", verificarAdmin, analyticsController.postGitSyncTrigger);
+app.delete("/api/admin/analytics/branch/:nomeBranch", verificarAdmin, analyticsController.deleteBranch);
+app.post("/api/admin/analytics/branches/delete-batch", verificarAdmin, analyticsController.deleteBranchesBatch);
 console.log("[SERVER] 📊 Rotas de Analytics (session) registradas em /api/admin/analytics");
 
 // 📢 Avisos In-App (Notificador)
@@ -636,8 +646,10 @@ app.get(
   "/api/ligas/:ligaId/participantes/:timeId/status",
   verificarStatusParticipante,
 );
+// 🔒 SEC-FIX: Exigir admin para alternar status
 app.post(
   "/api/ligas/:ligaId/participantes/:timeId/status",
+  verificarAdmin,
   alternarStatusParticipante,
 );
 
@@ -704,34 +716,110 @@ p{font-size:.95rem;color:#9ca3af;margin-bottom:1.5rem}
 <body><div class="c">
 <div class="spinner"></div>
 <h1 style="margin-top:1.25rem">Servidor reiniciando</h1>
-<p>Uma atualização foi aplicada. A pagina sera recarregada automaticamente.</p>
+<p>Uma atualiza\u00e7\u00e3o foi aplicada. A p\u00e1gina ser\u00e1 recarregada automaticamente.</p>
 <div id="status"></div>
 <button id="retry-btn" onclick="location.reload()">Toque para recarregar</button>
 </div>
 <script>
 (function(){
-  var tentativas=0, max=60, intervalo=3000;
+  // =====================================================================
+  // FIX: Usa /api/app/check-version como health check em vez de HEAD na
+  // mesma rota HTML. O endpoint da API funciona da memoria (nao le HTML
+  // do disco), evitando o loop infinito quando o filesystem tem EIO
+  // intermitente pos-Republish.
+  //
+  // FIX: Detecta loops de reload via sessionStorage. Se a pagina foi
+  // recarregada muitas vezes sem sucesso (EIO intermitente: HEAD ok mas
+  // GET falha), para o auto-reload e mostra botao manual.
+  //
+  // FIX: Backoff progressivo (2s, 3s, 4s... cap 8s) em vez de fixo 3s,
+  // dando mais tempo ao servidor para estabilizar o filesystem.
+  // =====================================================================
+  var HEALTH_URL='/api/app/check-version';
+  var MAX_TENTATIVAS=60;
+  var INTERVALO_INICIAL=2000;
+  var INTERVALO_MAX=8000;
+  var INTERVALO_STEP=500;
+  var MAX_RELOADS=4;
+  var RELOAD_WINDOW_MS=90000;
+
+  var tentativas=0;
+  var intervaloAtual=INTERVALO_INICIAL;
   var status=document.getElementById('status');
   var btn=document.getElementById('retry-btn');
-  function tentar(){
-    tentativas++;
-    if(status)status.textContent='Tentativa '+tentativas+'...';
-    fetch(location.href,{method:'HEAD',cache:'no-store'}).then(function(r){
-      if(r.ok||r.status===304){location.reload();}
-      else if(tentativas<max){setTimeout(tentar,intervalo);}
-      else{mostrarBotao();}
-    }).catch(function(){
-      if(tentativas<max){setTimeout(tentar,intervalo);}
-      else{mostrarBotao();}
-    });
-  }
-  function mostrarBotao(){
-    if(status)status.textContent='Servidor ainda indisponivel.';
+
+  // --- Deteccao de loop de reload via sessionStorage ---
+  var RELOAD_KEY='_scm_restart_reloads';
+  var RELOAD_TS_KEY='_scm_restart_ts';
+  var loopDetectado=false;
+  try{
+    var agora=Date.now();
+    var tsInicio=parseInt(sessionStorage.getItem(RELOAD_TS_KEY)||'0',10);
+    var reloads=parseInt(sessionStorage.getItem(RELOAD_KEY)||'0',10);
+    // Resetar contador se a janela de tempo expirou
+    if(agora-tsInicio>RELOAD_WINDOW_MS){reloads=0;tsInicio=agora;}
+    if(!tsInicio){tsInicio=agora;}
+    sessionStorage.setItem(RELOAD_TS_KEY,String(tsInicio));
+    sessionStorage.setItem(RELOAD_KEY,String(reloads));
+    if(reloads>=MAX_RELOADS){loopDetectado=true;}
+  }catch(e){/* sessionStorage indisponivel, prosseguir sem deteccao */}
+
+  function mostrarBotao(msg){
+    if(status)status.textContent=msg||'Servidor ainda indisponivel.';
     if(btn)btn.style.display='inline-block';
   }
-  setTimeout(tentar,intervalo);
-  // Botao manual visivel apos 30s independente das tentativas
-  setTimeout(function(){if(btn)btn.style.display='inline-block';},30000);
+
+  // Se loop detectado, parar auto-retry e mostrar botao manual
+  if(loopDetectado){
+    mostrarBotao('Varias tentativas sem sucesso. Toque para recarregar.');
+    // Limpar contador para que o botao manual tenha chance de funcionar
+    try{sessionStorage.removeItem(RELOAD_KEY);sessionStorage.removeItem(RELOAD_TS_KEY);}catch(e){}
+  } else {
+    function recarregar(){
+      // Incrementar contador de reloads antes de recarregar
+      try{
+        var r=parseInt(sessionStorage.getItem(RELOAD_KEY)||'0',10)+1;
+        sessionStorage.setItem(RELOAD_KEY,String(r));
+      }catch(e){}
+      location.reload();
+    }
+
+    function tentar(){
+      tentativas++;
+      if(status)status.textContent='Reconectando... ('+tentativas+')';
+      fetch(HEALTH_URL,{cache:'no-store'}).then(function(r){
+        if(r.ok){
+          if(status)status.textContent='Servidor online! Recarregando...';
+          setTimeout(recarregar,300);
+        }
+        else if(tentativas<MAX_TENTATIVAS){agendar();}
+        else{mostrarBotao();}
+      }).catch(function(){
+        if(tentativas<MAX_TENTATIVAS){agendar();}
+        else{mostrarBotao();}
+      });
+    }
+
+    function agendar(){
+      setTimeout(tentar,intervaloAtual);
+      // Backoff progressivo ate o cap
+      if(intervaloAtual<INTERVALO_MAX)intervaloAtual+=INTERVALO_STEP;
+    }
+
+    // Primeira tentativa apos intervalo inicial
+    setTimeout(tentar,INTERVALO_INICIAL);
+    // Botao manual visivel apos 15s (era 30s - reduzido para melhor UX)
+    setTimeout(function(){if(btn)btn.style.display='inline-block';},15000);
+  }
+
+  // Limpar contadores quando o usuario navegar para outra pagina com sucesso
+  // (evento beforeunload so dispara se a navegacao realmente acontece)
+  window.addEventListener('pageshow',function(e){
+    // pageshow com persisted=true significa bfcache — limpar contadores
+    if(e.persisted){
+      try{sessionStorage.removeItem(RELOAD_KEY);sessionStorage.removeItem(RELOAD_TS_KEY);}catch(ex){}
+    }
+  });
 })();
 </script>
 </body></html>`;
@@ -809,27 +897,30 @@ if (process.env.NODE_ENV !== "test") {
 // ✅ FIX: connectDB() já fez await, conexão já está aberta neste ponto.
 // Usar IIFE em vez de .once("open") que nunca dispara (evento já passou).
 (async () => {
-  console.log("🔧 Sincronizando índices do banco de dados (Mongoose 8.x)...");
+  const logInit = IS_PRODUCTION ? originalConsole.log : console.log;
+  const logInitError = IS_PRODUCTION ? originalConsole.error : console.error;
+
+  logInit("[INIT-ASYNC] Sincronizando índices do banco de dados (Mongoose 8.x)...");
   try {
     // Preview das mudanças antes de aplicar
     const diff = await ExtratoFinanceiroCache.diffIndexes();
 
     if (diff.toDrop.length > 0 || diff.toCreate.length > 0) {
-      console.log("📋 Índices a remover:", diff.toDrop);
-      console.log("📋 Índices a criar:", diff.toCreate);
+      logInit("[INIT-ASYNC] Índices a remover:", diff.toDrop);
+      logInit("[INIT-ASYNC] Índices a criar:", diff.toCreate);
 
       // Sincroniza: remove extras, cria faltantes
       const dropped = await ExtratoFinanceiroCache.syncIndexes();
       if (dropped.length > 0) {
-        console.log("✅ Índices removidos:", dropped);
+        logInit("[INIT-ASYNC] Índices removidos:", dropped);
       }
-      console.log("✅ Índices sincronizados com sucesso!");
+      logInit("[INIT-ASYNC] Índices sincronizados com sucesso!");
     } else {
-      console.log("✅ Índices já estão sincronizados.");
+      logInit("[INIT-ASYNC] Índices já estão sincronizados.");
     }
   } catch (error) {
     if (error.codeName !== "NamespaceNotFound") {
-      console.error("⚠️ Erro na sincronização de índices (Extrato):", error.message);
+      logInitError("[INIT-ASYNC] ⚠️ Erro na sincronização de índices (Extrato):", error.message);
     }
   }
 
@@ -837,17 +928,17 @@ if (process.env.NODE_ENV !== "test") {
   try {
     const rodadaDiff = await Rodada.diffIndexes();
     if (rodadaDiff.toDrop.length > 0 || rodadaDiff.toCreate.length > 0) {
-      console.log("📋 [Rodada] Índices a remover:", rodadaDiff.toDrop);
-      console.log("📋 [Rodada] Índices a criar:", rodadaDiff.toCreate);
+      logInit("[INIT-ASYNC] [Rodada] Índices a remover:", rodadaDiff.toDrop);
+      logInit("[INIT-ASYNC] [Rodada] Índices a criar:", rodadaDiff.toCreate);
       const droppedRodada = await Rodada.syncIndexes();
       if (droppedRodada.length > 0) {
-        console.log("✅ [Rodada] Índices removidos:", droppedRodada);
+        logInit("[INIT-ASYNC] [Rodada] Índices removidos:", droppedRodada);
       }
-      console.log("✅ [Rodada] Índices sincronizados (multi-temporada)!");
+      logInit("[INIT-ASYNC] [Rodada] Índices sincronizados (multi-temporada)!");
     }
   } catch (error) {
     if (error.codeName !== "NamespaceNotFound") {
-      console.error("⚠️ Erro na sincronização de índices (Rodada):", error.message);
+      logInitError("[INIT-ASYNC] ⚠️ Erro na sincronização de índices (Rodada):", error.message);
     }
   }
 
@@ -908,7 +999,11 @@ if (process.env.NODE_ENV !== "test") {
   });
   cronJobs.push(cronLimpezaCache);
   console.log("[SERVER] 🔔 Cron de limpeza de cache agendado (diário 4h)");
-})();
+})().catch((err) => {
+  const logFatal = IS_PRODUCTION ? originalConsole.error : console.error;
+  logFatal("[INIT-ASYNC] ❌ ERRO FATAL na inicialização assíncrona:", err.message);
+  logFatal("[INIT-ASYNC] Stack:", err.stack);
+});
 
 // ====================================================================
 // 🛑 GRACEFUL SHUTDOWN - Fecha recursos antes de encerrar processo
@@ -1019,18 +1114,47 @@ export default app;
 
 
 // Webhook para GitHub Actions
+// 🔒 SEC-FIX: Validação HMAC SHA-256 obrigatória
 app.post('/github-sync', express.json(), (req, res) => {
-  console.log('🔔 Webhook do GitHub recebido:', req.body);
-  
+  const webhookSecret = process.env.GITHUB_WEBHOOK_SECRET;
+
+  // Em produção, exigir secret configurado
+  if (!webhookSecret) {
+    if (process.env.NODE_ENV === 'production') {
+      console.error('[WEBHOOK] GITHUB_WEBHOOK_SECRET nao configurado - bloqueando em producao');
+      return res.status(403).json({ error: 'Webhook secret nao configurado' });
+    }
+    console.warn('[WEBHOOK] GITHUB_WEBHOOK_SECRET nao configurado - permitindo apenas em dev');
+  }
+
+  // Validar assinatura HMAC se secret configurado
+  if (webhookSecret) {
+    const signature = req.headers['x-hub-signature-256'];
+    if (!signature) {
+      console.warn('[WEBHOOK] Requisicao sem assinatura X-Hub-Signature-256');
+      return res.status(401).json({ error: 'Assinatura ausente' });
+    }
+
+    const payload = JSON.stringify(req.body);
+    const expectedSig = 'sha256=' + crypto.createHmac('sha256', webhookSecret).update(payload).digest('hex');
+
+    if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSig))) {
+      console.warn('[WEBHOOK] Assinatura HMAC invalida');
+      return res.status(401).json({ error: 'Assinatura invalida' });
+    }
+  }
+
+  console.log('[WEBHOOK] GitHub sync autorizado');
+
   exec('bash scripts/sync-replit.sh', (error, stdout, stderr) => {
     if (error) {
-      console.error('❌ Erro no sync:', error);
+      console.error('[WEBHOOK] Erro no sync:', error);
       return res.status(500).json({ error: error.message });
     }
-    
-    console.log('✅ Sync concluído:', stdout);
-    res.json({ 
-      success: true, 
+
+    console.log('[WEBHOOK] Sync concluido:', stdout);
+    res.json({
+      success: true,
       message: 'Sync executado',
       timestamp: new Date().toISOString()
     });

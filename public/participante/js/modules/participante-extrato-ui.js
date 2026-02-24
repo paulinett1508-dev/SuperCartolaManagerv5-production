@@ -344,7 +344,7 @@ function renderTransactionTimeline(rodadas, acertos, lancamentosIniciais, ligaId
                         <span class="material-icons">${iconName}</span>
                     </div>
                     <div class="extrato-timeline__item-content">
-                        <div class="extrato-timeline__item-title">${l.descricao || l.tipo}</div>
+                        <div class="extrato-timeline__item-title">${escapeHtml(l.descricao || l.tipo)}</div>
                     </div>
                     <div class="extrato-timeline__item-value" style="color: ${isDebit ? 'var(--app-danger-light)' : 'var(--app-success-light)'}">
                         ${isDebit ? '-' : '+'}${formatarMoeda(l.valor)}
@@ -487,7 +487,7 @@ function renderTransactionTimeline(rodadas, acertos, lancamentosIniciais, ligaId
                         <span class="material-icons">${isPagamento ? 'arrow_upward' : 'arrow_downward'}</span>
                     </div>
                     <div class="extrato-timeline__item-content">
-                        <div class="extrato-timeline__item-title">${acerto.descricao || (isPagamento ? 'Pagamento' : 'Recebimento')}</div>
+                        <div class="extrato-timeline__item-title">${escapeHtml(acerto.descricao || (isPagamento ? 'Pagamento' : 'Recebimento'))}</div>
                         ${subtitleParts ? `<div class="extrato-timeline__item-subtitle">${subtitleParts}</div>` : ''}
                     </div>
                     <div class="extrato-timeline__item-value" style="color: ${isPagamento ? 'var(--app-success-light)' : 'var(--app-danger-light)'}">
@@ -684,7 +684,7 @@ function renderBottomSheetAcertos(listaAcertos, resumoAcertos, saldoTemporada, s
                                 <span class="material-icons" style="font-size:18px">${isPagamento ? 'arrow_upward' : 'arrow_downward'}</span>
                             </div>
                             <div>
-                                <p style="font-size:14px;color:var(--app-text-primary);font-weight:500">${acerto.descricao || (isPagamento ? 'Você pagou' : 'Você recebeu')}</p>
+                                <p style="font-size:14px;color:var(--app-text-primary);font-weight:500">${escapeHtml(acerto.descricao || (isPagamento ? 'Você pagou' : 'Você recebeu'))}</p>
                                 <div style="display:flex;align-items:center;gap:8px;font-size:10px;color:var(--app-text-dim)">
                                     <span style="display:flex;align-items:center;gap:4px">
                                         <span class="material-icons" style="font-size:10px">${metodo.icon}</span>

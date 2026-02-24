@@ -274,8 +274,8 @@ function renderizarRanking(ranking) {
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'">
                 <span class="material-icons" style="display: none; font-size: 32px; color: #666;">emoji_events</span>
                 <div class="capitao-info">
-                    <div class="capitao-nome">${participante.nome_cartola || '---'}</div>
-                    <div class="capitao-time-nome">${participante.nome_time || ''}</div>
+                    <div class="capitao-nome">${escapeHtml(participante.nome_cartola || '---')}</div>
+                    <div class="capitao-time-nome">${escapeHtml(participante.nome_time || '')}</div>
                     ${btnHistoricoHtml}
                 </div>
                 <div class="capitao-stats">
@@ -326,14 +326,14 @@ function renderizarCardDesempenho(ranking) {
         const piorHtml = pior
             ? '<div style="font-size: 11px;">'
                 + '<span style="color: var(--capitao-danger);">Pior:</span> '
-                + '<span style="color: #e5e7eb;">' + (pior.atleta_nome || '---') + ' (R' + pior.rodada + ')</span> '
+                + '<span style="color: #e5e7eb;">' + escapeHtml(pior.atleta_nome || '---') + ' (R' + pior.rodada + ')</span> '
                 + '<span style="font-family: var(--capitao-font-mono); color: var(--capitao-danger); font-weight: 700;">' + piorPts + '</span>'
                 + '</div>'
             : '';
         melhorPiorHtml = '<div style="display: flex; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--capitao-border);">'
             + '<div style="font-size: 11px;">'
             + '<span style="color: var(--capitao-success);">Melhor:</span> '
-            + '<span style="color: #e5e7eb;">' + (melhor.atleta_nome || '---') + ' (R' + melhor.rodada + ')</span> '
+            + '<span style="color: #e5e7eb;">' + escapeHtml(melhor.atleta_nome || '---') + ' (R' + melhor.rodada + ')</span> '
             + '<span style="font-family: var(--capitao-font-mono); color: var(--capitao-success); font-weight: 700;">' + melhorPts + '</span>'
             + '</div>'
             + piorHtml
@@ -397,7 +397,7 @@ function _renderChipHtml(r) {
         }
     }
 
-    return `<span class="cap-chip${isParcial && r.jogou === false ? ' cap-chip-pending' : ''}"><span class="cap-chip-rod">R${r.rodada}</span> ${r.atleta_nome || '?'} <span style="color:${corPts}; font-family:var(--capitao-font-mono); font-weight:600;">${pts}</span>${dotHtml}</span>`;
+    return `<span class="cap-chip${isParcial && r.jogou === false ? ' cap-chip-pending' : ''}"><span class="cap-chip-rod">R${r.rodada}</span> ${escapeHtml(r.atleta_nome || '?')} <span style="color:${corPts}; font-family:var(--capitao-font-mono); font-weight:600;">${pts}</span>${dotHtml}</span>`;
 }
 
 // =============================================

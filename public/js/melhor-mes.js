@@ -127,7 +127,7 @@ function renderSelectEdicoesFallback(containerId = "edicoesContainer") {
       <select id="edicaoSelect" class="melhor-mes-select" style="font-size: 1.1em; padding: 8px 12px; border-radius: 6px;">
         ${EDICOES_FALLBACK.map(
           (ed, idx) =>
-            `<option value="${idx}">${ed.nome} (Rod. ${ed.inicio} a ${ed.fim})</option>`,
+            `<option value="${idx}">${escapeHtml(ed.nome)} (Rod. ${ed.inicio} a ${ed.fim})</option>`,
         ).join("")}
       </select>
     </div>
@@ -148,7 +148,7 @@ async function carregarRankingEdicaoFallback(idxEdicao) {
 
   container.innerHTML = `
     <div style="text-align: center; padding: 40px; color: #666;">
-      <div>Carregando ${edicao.nome}...</div>
+      <div>Carregando ${escapeHtml(edicao.nome)}...</div>
     </div>
   `;
 
@@ -166,7 +166,7 @@ async function carregarRankingEdicaoFallback(idxEdicao) {
     if (ultimaRodadaCompleta < edicao.inicio) {
       container.innerHTML = `
         <div style="text-align: center; padding: 40px; background: #fff3cd; border-radius: 8px; color: #856404;">
-          <h4>${edicao.nome}</h4>
+          <h4>${escapeHtml(edicao.nome)}</h4>
           <p>Edição ainda não iniciou</p>
         </div>
       `;
@@ -260,8 +260,8 @@ function renderTabelaFallback(ranking, edicao) {
       return `
       <tr style="${i === 0 ? "background:#e3f2fd;font-weight:bold;" : i === ranking.length - 1 && hasPremios && valorUltimo !== 0 ? "background:#ffebee;" : ""}">
         <td style="text-align:center; padding:8px 2px;">${i === 0 ? "🏆" : i + 1}</td>
-        <td style="text-align:left; padding:8px 4px;">${t.nome_cartola}</td>
-        <td style="text-align:left; padding:8px 4px;">${t.nome_time}</td>
+        <td style="text-align:left; padding:8px 4px;">${escapeHtml(t.nome_cartola)}</td>
+        <td style="text-align:left; padding:8px 4px;">${escapeHtml(t.nome_time)}</td>
         <td style="text-align:center;">
           ${t.clube_id ? `<img src="/escudos/${t.clube_id}.png" alt="Escudo" style="width:24px; height:24px; border-radius:50%; background:#fff; border:1px solid #eee;" onerror="this.style.display='none'"/>` : "—"}
         </td>
@@ -275,7 +275,7 @@ function renderTabelaFallback(ranking, edicao) {
   container.innerHTML = `
     <div style="max-width: 700px; margin: 0 auto;">
       <div style="text-align: center; margin-bottom: 20px;">
-        <h3>${edicao.nome} - Ranking (Fallback)</h3>
+        <h3>${escapeHtml(edicao.nome)} - Ranking (Fallback)</h3>
       </div>
       <table id="melhorMesTable" style="margin: 0 auto; min-width: 320px; max-width: 100%;">
         <thead>

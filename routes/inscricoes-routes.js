@@ -28,8 +28,9 @@ const router = express.Router();
 // =============================================================================
 // GET /api/inscricoes/:ligaId/:temporada
 // Listar todas as inscrições de uma liga
+// 🔒 SEC-FIX: Apenas admin pode listar inscricoes
 // =============================================================================
-router.get("/:ligaId/:temporada?", async (req, res) => {
+router.get("/:ligaId/:temporada?", verificarAdmin, async (req, res) => {
     try {
         const { ligaId } = req.params;
         const temporada = Number(req.params.temporada) || CURRENT_SEASON;
@@ -79,9 +80,9 @@ router.get("/:ligaId/:temporada?", async (req, res) => {
 
 // =============================================================================
 // GET /api/inscricoes/:ligaId/:temporada/estatisticas
-// Resumo de inscrições (pendentes, renovados, etc)
+// 🔒 SEC-FIX: Apenas admin
 // =============================================================================
-router.get("/:ligaId/:temporada/estatisticas", async (req, res) => {
+router.get("/:ligaId/:temporada/estatisticas", verificarAdmin, async (req, res) => {
     try {
         const { ligaId, temporada } = req.params;
 
@@ -118,9 +119,9 @@ router.get("/:ligaId/:temporada/estatisticas", async (req, res) => {
 
 // =============================================================================
 // GET /api/inscricoes/:ligaId/:temporada/:timeId
-// Buscar inscrição específica de um participante
+// 🔒 SEC-FIX: Apenas admin
 // =============================================================================
-router.get("/:ligaId/:temporada/:timeId", async (req, res) => {
+router.get("/:ligaId/:temporada/:timeId", verificarAdmin, async (req, res) => {
     try {
         const { ligaId, temporada, timeId } = req.params;
 
@@ -488,9 +489,9 @@ router.delete("/:ligaId/:temporada/:timeId", verificarAdmin, async (req, res) =>
 
 // =============================================================================
 // GET /api/inscricoes/:ligaId/:temporada/decisao-preview/:timeId
-// Busca dados completos para o modal de decisao unificada
+// 🔒 SEC-FIX: Apenas admin
 // =============================================================================
-router.get("/:ligaId/:temporada/decisao-preview/:timeId", async (req, res) => {
+router.get("/:ligaId/:temporada/decisao-preview/:timeId", verificarAdmin, async (req, res) => {
     try {
         const { ligaId, temporada, timeId } = req.params;
 

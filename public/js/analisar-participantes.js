@@ -137,7 +137,7 @@
       .map(
         (liga) => `
       <div class="liga-resumo-card ${ligaSelecionada === liga.ligaId ? "selected" : ""}" data-liga-id="${liga.ligaId}">
-        <div class="liga-resumo-nome">${liga.nome}</div>
+        <div class="liga-resumo-nome">${escapeHtml(liga.nome)}</div>
         <div class="liga-resumo-stats">
           <span><span class="material-icons">people</span> ${liga.total}</span>
           <span style="color: ${liga.semSenha > 0 ? "#f59e0b" : "#22c55e"}">

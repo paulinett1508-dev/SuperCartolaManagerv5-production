@@ -929,6 +929,171 @@ export async function postGitSyncTrigger(req, res) {
   }
 }
 
+// =====================================================================
+// CONTROLLER: DELETE Branch via GitHub API
+// =====================================================================
+function fazerRequisicaoGithubComBody(endpoint, metodo = 'DELETE') {
+  return new Promise((resolve, reject) => {
+    const owner = GITHUB_OWNER;
+    const repo = GITHUB_REPO;
+
+    if (!owner || !repo) {
+      return reject(new Error('GitHub config não configurado: GITHUB_OWNER e GITHUB_REPO requeridos'));
+    }
+
+    if (!GITHUB_TOKEN) {
+      return reject(new Error('GITHUB_TOKEN não configurado — deleção requer autenticação'));
+    }
+
+    const caminho = `/repos/${owner}/${repo}${endpoint}`;
+    const opcoes = {
+      hostname: 'api.github.com',
+      path: caminho,
+      method: metodo,
+      headers: {
+        'User-Agent': 'Super-Cartola-Manager',
+        'Accept': 'application/vnd.github.v3+json',
+        'Authorization': `token ${GITHUB_TOKEN}`
+      },
+      timeout: 30000
+    };
+
+    const req = https.request(opcoes, (res) => {
+      let dados = '';
+
+      res.on('data', (chunk) => {
+        dados += chunk;
+      });
+
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve({ statusCode: res.statusCode, dados });
+        } else {
+          reject(new Error(`GitHub API ${res.statusCode}: ${dados || res.statusMessage}`));
+        }
+      });
+    });
+
+    req.on('error', reject);
+    req.on('timeout', () => {
+      req.destroy();
+      reject(new Error('Timeout na requisição GitHub API'));
+    });
+
+    req.end();
+  });
+}
+
+/**
+ * DELETE /api/admin/analytics/branch/:nomeBranch
+ * Deleta uma branch remota via GitHub API
+ */
+export async function deleteBranch(req, res) {
+  try {
+    const { nomeBranch } = req.params;
+
+    if (!nomeBranch) {
+      return res.status(400).json({ success: false, error: 'Nome da branch não fornecido' });
+    }
+
+    // Proteção: nunca deletar main/master
+    const branchLower = nomeBranch.toLowerCase();
+    if (branchLower === 'main' || branchLower === 'master') {
+      return res.status(403).json({ success: false, error: 'Não é permitido deletar a branch main/master' });
+    }
+
+    const branchEncoded = encodeURIComponent(nomeBranch);
+    await fazerRequisicaoGithubComBody(`/git/refs/heads/${branchEncoded}`);
+
+    logger.info(`[Analytics] Branch deletada com sucesso: ${nomeBranch}`);
+
+    res.json({
+      success: true,
+      message: `Branch "${nomeBranch}" deletada com sucesso`,
+      branch: nomeBranch
+    });
+  } catch (erro) {
+    logger.error(`[Analytics] Erro ao deletar branch ${req.params.nomeBranch}:`, erro.message);
+
+    const status = erro.message.includes('422') ? 422 :
+                   erro.message.includes('404') ? 404 :
+                   erro.message.includes('403') ? 403 : 500;
+
+    res.status(status).json({
+      success: false,
+      error: status === 404 ? 'Branch não encontrada' :
+             status === 403 ? 'Sem permissão para deletar esta branch' :
+             'Erro ao deletar branch',
+      message: erro.message
+    });
+  }
+}
+
+/**
+ * POST /api/admin/analytics/branches/delete-batch
+ * Deleta múltiplas branches de uma vez
+ * Body: { branches: ['branch1', 'branch2', ...] }
+ */
+export async function deleteBranchesBatch(req, res) {
+  try {
+    const { branches } = req.body;
+
+    if (!Array.isArray(branches) || branches.length === 0) {
+      return res.status(400).json({ success: false, error: 'Lista de branches não fornecida' });
+    }
+
+    // Limite de segurança
+    if (branches.length > 20) {
+      return res.status(400).json({ success: false, error: 'Máximo de 20 branches por vez' });
+    }
+
+    // Proteção: nunca deletar main/master
+    const protegidas = branches.filter(b => {
+      const lower = b.toLowerCase();
+      return lower === 'main' || lower === 'master';
+    });
+
+    if (protegidas.length > 0) {
+      return res.status(403).json({
+        success: false,
+        error: `Não é permitido deletar: ${protegidas.join(', ')}`
+      });
+    }
+
+    const resultados = [];
+
+    for (const branch of branches) {
+      try {
+        const branchEncoded = encodeURIComponent(branch);
+        await fazerRequisicaoGithubComBody(`/git/refs/heads/${branchEncoded}`);
+        resultados.push({ branch, success: true });
+        logger.info(`[Analytics] Branch deletada: ${branch}`);
+      } catch (erro) {
+        resultados.push({ branch, success: false, error: erro.message });
+        logger.error(`[Analytics] Falha ao deletar branch ${branch}:`, erro.message);
+      }
+    }
+
+    const deletadas = resultados.filter(r => r.success).length;
+    const falhas = resultados.filter(r => !r.success).length;
+
+    res.json({
+      success: true,
+      message: `${deletadas} branch(es) deletada(s)${falhas > 0 ? `, ${falhas} falha(s)` : ''}`,
+      resultados,
+      deletadas,
+      falhas
+    });
+  } catch (erro) {
+    logger.error('[Analytics] Erro em deleteBranchesBatch:', erro.message);
+    res.status(500).json({
+      success: false,
+      error: 'Erro ao deletar branches em lote',
+      message: erro.message
+    });
+  }
+}
+
 export default {
   getAnalyticsResumo,
   getAnatyticsBranchDetalhes,
@@ -937,5 +1102,7 @@ export default {
   getAnalyticsFuncionalidades,
   getAnalyticsEstatisticas,
   getGitSyncStatus,
-  postGitSyncTrigger
+  postGitSyncTrigger,
+  deleteBranch,
+  deleteBranchesBatch
 };

@@ -307,7 +307,7 @@ function renderizarEscolhaRodada(escolhas, status) {
                 <div style="display:flex;align-items:center;justify-content:center;gap:0.75rem;margin-top:0.75rem;">
                     <img src="/escudos/${escolhaFeita.timeEscolhidoId}.png" class="tc-time-escudo"
                          onerror="this.src='/escudos/default.png'" alt="">
-                    <span class="tc-escolha-atual-time">${escolhaFeita.timeEscolhidoNome}</span>
+                    <span class="tc-escolha-atual-time">${escapeHtml(escolhaFeita.timeEscolhidoNome)}</span>
                 </div>
                 <p style="font-size:var(--app-font-xs);color:var(--app-text-muted);margin-top:0.75rem;">
                     Aguardando resultado...
@@ -329,11 +329,11 @@ function renderizarEscolhaRodada(escolhas, status) {
                 const usado = timesUsados.includes(t.id);
                 return `
                     <div class="tc-time-card ${usado ? 'usado' : ''}"
-                         data-time-id="${t.id}" data-time-nome="${t.nome}"
-                         ${usado ? '' : `onclick="window._tcSelecionarTime(${t.id}, '${t.nome}')"` }>
+                         data-time-id="${t.id}" data-time-nome="${escapeHtml(t.nome)}"
+                         ${usado ? '' : `onclick="window._tcSelecionarTime(${t.id}, '${escapeHtml(t.nome)}')"` }>
                         <img src="/escudos/${t.id}.png" class="tc-time-escudo"
-                             onerror="this.src='/escudos/default.png'" alt="${t.nome}">
-                        <span class="tc-time-nome">${t.nome}</span>
+                             onerror="this.src='/escudos/default.png'" alt="${escapeHtml(t.nome)}">
+                        <span class="tc-time-nome">${escapeHtml(t.nome)}</span>
                     </div>
                 `;
             }).join('')}
@@ -362,7 +362,7 @@ function renderizarHistorico(escolhas) {
             <span class="tc-escolha-rodada">R${e.rodada}</span>
             <img src="/escudos/${e.timeEscolhidoId}.png" style="width:20px;height:20px;object-fit:contain;"
                  onerror="this.src='/escudos/default.png'" alt="">
-            <span class="tc-escolha-time">${e.timeEscolhidoNome || 'Time'}</span>
+            <span class="tc-escolha-time">${escapeHtml(e.timeEscolhidoNome || 'Time')}</span>
             ${e.placarMandante != null ? `<span style="font-family:var(--app-font-mono);font-size:var(--app-font-xs);color:var(--app-text-muted);">${e.placarMandante}-${e.placarVisitante}</span>` : ''}
             <span class="tc-escolha-resultado ${e.resultado}">${traduzirResultado(e.resultado)}</span>
         </div>
@@ -386,7 +386,7 @@ function renderizarParticipantes(data) {
              style="${p.timeId === _timeId ? 'border-color:var(--tc-primary);' : ''}">
             <img src="/escudos/${p.escudoId || 'default'}.png" class="tc-participante-escudo"
                  onerror="this.src='/escudos/default.png'" alt="">
-            <span class="tc-participante-nome">${p.nomeTime || p.nomeCartoleiro || 'Time'}</span>
+            <span class="tc-participante-nome">${escapeHtml(p.nomeTime || p.nomeCartoleiro || 'Time')}</span>
             <span style="font-family:var(--app-font-mono);font-size:var(--app-font-xs);color:var(--app-text-muted);">
                 ${p.rodadasSobrevividas || 0}R
             </span>

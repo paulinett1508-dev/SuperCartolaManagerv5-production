@@ -289,7 +289,7 @@ function renderizarCardJogador(j) {
             </div>
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2">
-                    <span class="text-sm font-medium text-white truncate">${j.nome}</span>
+                    <span class="text-sm font-medium text-white truncate">${escapeHtml(j.nome)}</span>
                     <span class="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/50">${j.posicao}</span>
                 </div>
                 <div class="flex items-center gap-3 text-xs text-white/40 mt-0.5">
@@ -357,7 +357,7 @@ function renderizarTabConfrontos() {
                         <div class="flex items-center gap-3">
                             <span class="w-6 text-center text-xs font-bold ${i < 3 ? 'text-red-400' : 'text-white/40'}">${i + 1}</span>
                             <img src="/escudos/${c.clubeId}.png" onerror="this.onerror=null;this.src='/escudos/default.png'" class="w-8 h-8" alt="">
-                            <span class="text-sm text-white">${c.clubeNome}</span>
+                            <span class="text-sm text-white">${escapeHtml(c.clubeNome)}</span>
                         </div>
                         <div class="text-right">
                             <span class="text-lg font-bold text-red-400" style="font-family: 'JetBrains Mono', monospace;">
@@ -469,7 +469,7 @@ async function calcularMPV() {
     } catch (error) {
         resultado.innerHTML = `
             <div class="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
-                ${error.message}
+                ${escapeHtml(error.message)}
             </div>
         `;
     }
@@ -570,7 +570,7 @@ async function atualizarSugestaoModo() {
                      onclick="document.querySelector('.modo-btn[data-modo=\\'${data.modo}\\']')?.click()">
                     <span class="material-icons text-xs text-yellow-400">lightbulb</span>
                     <span class="text-xs text-white/60">
-                        Sugerido: <strong class="text-white/80">${data.config.nome}</strong> — ${data.razao}
+                        Sugerido: <strong class="text-white/80">${escapeHtml(data.config.nome)}</strong> — ${escapeHtml(data.razao)}
                     </span>
                 </div>
             `;
@@ -639,7 +639,7 @@ async function gerarSugestaoEscalacao() {
         if (window.Log) Log.error("PARTICIPANTE-DICAS", "Erro sugestao:", error);
         resultado.innerHTML = `
             <div class="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
-                ${error.message}
+                ${escapeHtml(error.message)}
             </div>
         `;
     }
@@ -759,7 +759,7 @@ function renderizarErro(mensagem) {
     return `
         <div class="text-center py-16 px-5">
             <span class="material-icons text-5xl text-red-500 mb-4 block">error</span>
-            <p class="text-white/70">${mensagem || 'Erro ao carregar dados'}</p>
+            <p class="text-white/70">${escapeHtml(mensagem || 'Erro ao carregar dados')}</p>
             <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-white/10 rounded-lg text-white text-sm">
                 Tentar novamente
             </button>

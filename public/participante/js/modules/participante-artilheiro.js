@@ -1,13 +1,15 @@
 // =====================================================================
-// PARTICIPANTE-ARTILHEIRO.JS - v4.1
+// PARTICIPANTE-ARTILHEIRO.JS - v4.3
 // =====================================================================
+// ✅ v4.3: MatchdayService integration — ranking-live endpoint + auto-refresh
+// ✅ v4.2: FIX pull-to-refresh loop — AbortController, scrollY, destrutor
 // ✅ v4.1: Reordenação - RODADA X → Seu Desempenho → Seus Artilheiros
 // ✅ v4.0: Skeleton loading, pull-to-refresh, MutationObserver
 // ✅ v3.7: Cache-first com IndexedDB para carregamento instantâneo
 // ✅ v3.5: Detecção de temporada encerrada (R38 + mercado fechado)
 // =====================================================================
 
-if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Carregando módulo v4.0...");
+if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Carregando módulo v4.3...");
 
 // ✅ v4.0: RODADA_FINAL dinâmico - obtido da API, fallback 38
 let RODADA_FINAL = 38;
@@ -17,6 +19,7 @@ let estadoArtilheiro = {
     temporadaEncerrada: false,
     rodadaAtual: null,
     mercadoAberto: true,
+    modeLive: false, // ✅ v4.3: MatchdayService live mode
 };
 
 // =====================================================================
@@ -26,6 +29,9 @@ let estadoArtilheiro = {
 let _currentLigaId = null;
 let _currentTimeId = null;
 let _currentParticipante = null;
+
+// ✅ v4.2: AbortController para cleanup de event listeners do pull-to-refresh
+let _pullToRefreshAbortController = null;
 
 export async function inicializarArtilheiroParticipante({
     participante,
@@ -89,6 +95,13 @@ export async function inicializarArtilheiroParticipante({
             // v2.0: Módulo OPCIONAL, só habilita se === true
             const artilheiroAtivo = modulosAtivos.artilheiro === true;
 
+            // ✅ v4.3: Verificar matchday (parciais ao vivo)
+            if (window.MatchdayService && window.MatchdayService.isActive) {
+                estadoArtilheiro.modeLive = true;
+                _subscribeMatchdayEvents();
+                if (window.Log) Log.info('[PARTICIPANTE-ARTILHEIRO] MatchdayService ATIVO — modo live');
+            }
+
             if (!artilheiroAtivo) {
                 container.innerHTML = `
                     <div style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(34, 197, 94, 0.02) 100%); border-radius: 12px; border: 2px dashed rgba(34, 197, 94, 0.3);">
@@ -101,12 +114,23 @@ export async function inicializarArtilheiroParticipante({
             }
         }
 
-        const response = await fetch(
-            `/api/artilheiro-campeao/${ligaId}/ranking`,
-        );
+        // ✅ v4.3: Endpoint live quando MatchdayService ativo
+        let endpoint = estadoArtilheiro.modeLive
+            ? `/api/artilheiro-campeao/${ligaId}/ranking-live`
+            : `/api/artilheiro-campeao/${ligaId}/ranking`;
+        let response = await fetch(endpoint);
         if (!response.ok) throw new Error("Dados não disponíveis");
 
-        const responseData = await response.json();
+        let responseData = await response.json();
+
+        // ✅ v4.3: Fallback — se live não disponível, buscar ranking consolidado
+        if (estadoArtilheiro.modeLive && responseData.disponivel === false) {
+            if (window.Log) Log.info('[PARTICIPANTE-ARTILHEIRO] Live indisponível, fallback para ranking consolidado');
+            estadoArtilheiro.modeLive = false;
+            response = await fetch(`/api/artilheiro-campeao/${ligaId}/ranking`);
+            if (!response.ok) throw new Error("Dados não disponíveis");
+            responseData = await response.json();
+        }
 
         if (window.Log) Log.info(
             "[PARTICIPANTE-ARTILHEIRO] 📦 Dados recebidos da API",
@@ -273,7 +297,7 @@ function renderizarBannerRodadaFinal(
                 <div class="art-campeao-info">
                     <div>
                         <div class="art-campeao-label">Campeão</div>
-                        <div class="art-campeao-nome">${liderNome}</div>
+                        <div class="art-campeao-nome">${escapeHtml(liderNome)}</div>
                     </div>
                     <div class="art-campeao-gols">
                         <div class="art-campeao-gols-valor">${liderGols}</div>
@@ -385,7 +409,7 @@ function renderizarBannerRodadaFinal(
             <div class="art-banner-lider">
                 <div>
                     <div class="art-banner-lider-badge">Possível Campeão</div>
-                    <div class="art-banner-lider-nome">${liderNome}</div>
+                    <div class="art-banner-lider-nome">${escapeHtml(liderNome)}</div>
                 </div>
                 <div class="art-banner-lider-gols">
                     <div class="art-banner-lider-valor">${liderGols}</div>
@@ -632,7 +656,7 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: rgba(0,0,0,0.2); border-radius: 8px;">
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <span class="material-symbols-outlined" style="font-size: 18px; color: ${idx === 0 ? "var(--app-gold)" : idx === 1 ? "var(--app-silver)" : "var(--app-bronze)"};">workspace_premium</span>
-                        <span style="color: var(--app-text-primary); font-size: 12px; font-weight: 500;">${j.nome}</span>
+                        <span style="color: var(--app-text-primary); font-size: 12px; font-weight: 500;">${escapeHtml(j.nome)}</span>
                     </div>
                     <span style="color: var(--app-success-light); font-weight: 800; font-size: 14px;">${j.gols} gols</span>
                 </div>
@@ -696,8 +720,8 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
                 <span class="material-symbols-outlined" style="font-size: 24px; color: var(--app-success-light);">emoji_events</span>
                 <div>
                     <div style="font-size: 10px; color: var(--app-success-light); font-weight: 700; text-transform: uppercase;">${labelLider}</div>
-                    <div style="font-size: 14px; font-weight: 700; color: var(--app-text-primary);">${campeao.nomeCartoleiro || campeao.nome_cartola || campeao.nome || 'N/D'}</div>
-                    <div style="font-size: 11px; color: #888;">${campeao.nomeTime || campeao.nome_time || ''}</div>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--app-text-primary);">${escapeHtml(campeao.nomeCartoleiro || campeao.nome_cartola || campeao.nome || 'N/D')}</div>
+                    <div style="font-size: 11px; color: #888;">${escapeHtml(campeao.nomeTime || campeao.nome_time || '')}</div>
                 </div>
             </div>
             <div style="text-align: right;">
@@ -737,8 +761,8 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span style="font-size: ${pos === 1 ? "16px" : "12px"}; width: 26px; ${pos === 1 ? "" : "color: #888;"}">${posicaoDisplay}</span>
                             <div>
-                                <div style="color: ${isMeuTime ? "var(--app-success-light)" : "var(--app-text-primary)"}; font-weight: ${isMeuTime ? "700" : "500"}; font-size: 12px;">${time.nomeCartoleiro || time.nome_cartola || time.nome || 'N/D'}</div>
-                                <div style="color: #888; font-size: 11px;">${time.nomeTime || time.nome_time || ''}</div>
+                                <div style="color: ${isMeuTime ? "var(--app-success-light)" : "var(--app-text-primary)"}; font-weight: ${isMeuTime ? "700" : "500"}; font-size: 12px;">${escapeHtml(time.nomeCartoleiro || time.nome_cartola || time.nome || 'N/D')}</div>
+                                <div style="color: #888; font-size: 11px;">${escapeHtml(time.nomeTime || time.nome_time || '')}</div>
                             </div>
                         </div>
                         <div style="display: flex; gap: 12px; align-items: center;">
@@ -769,8 +793,8 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <span style="font-size: 12px; width: 26px; color: #555;">—</span>
                                 <div>
-                                    <div style="color: #666; font-weight: 400; font-size: 12px;">${time.nomeCartoleiro || time.nome_cartola || time.nome || 'N/D'}</div>
-                                    <div style="color: #555; font-size: 11px;">${time.nomeTime || time.nome_time || ''}</div>
+                                    <div style="color: #666; font-weight: 400; font-size: 12px;">${escapeHtml(time.nomeCartoleiro || time.nome_cartola || time.nome || 'N/D')}</div>
+                                    <div style="color: #555; font-size: 11px;">${escapeHtml(time.nomeTime || time.nome_time || '')}</div>
                                 </div>
                             </div>
                             <div style="display: flex; gap: 12px; align-items: center;">
@@ -842,26 +866,40 @@ function renderSkeleton() {
 }
 
 // =====================================================================
-// ✅ v4.0: PULL-TO-REFRESH
+// ✅ v4.2: PULL-TO-REFRESH (FIX: AbortController + scrollY correto)
 // =====================================================================
 function setupPullToRefresh(container) {
+    // ✅ v4.2: Abortar listeners anteriores para evitar acumulação
+    if (_pullToRefreshAbortController) {
+        _pullToRefreshAbortController.abort();
+    }
+    _pullToRefreshAbortController = new AbortController();
+    const signal = _pullToRefreshAbortController.signal;
+
+    // ✅ v4.2: Remover indicador órfão que possa existir no DOM
+    document.getElementById('art-pull-indicator')?.remove();
+
     const parentEl = container.closest('.artilheiro-participante') || container;
     let startY = 0;
     let pulling = false;
     let indicator = null;
+    let refreshing = false; // ✅ v4.2: Guard contra refresh concorrente
 
     parentEl.addEventListener('touchstart', (e) => {
-        if (parentEl.scrollTop === 0) {
+        // ✅ v4.2: FIX — usar window.scrollY (scroll container real, não o div)
+        if (window.scrollY === 0 && !refreshing) {
             startY = e.touches[0].clientY;
             pulling = true;
         }
-    }, { passive: true });
+    }, { passive: true, signal });
 
     parentEl.addEventListener('touchmove', (e) => {
-        if (!pulling) return;
+        if (!pulling || refreshing) return;
         const diff = e.touches[0].clientY - startY;
         if (diff > 50 && diff < 150) {
             if (!indicator) {
+                // ✅ v4.2: Garantir que só exista 1 indicador no DOM
+                document.getElementById('art-pull-indicator')?.remove();
                 indicator = document.createElement('div');
                 indicator.id = 'art-pull-indicator';
                 indicator.style.cssText = 'text-align:center;padding:8px;color:var(--app-success-light);font-size:11px;font-weight:600;transition:opacity 0.2s;';
@@ -869,10 +907,11 @@ function setupPullToRefresh(container) {
                 parentEl.prepend(indicator);
             }
         }
-    }, { passive: true });
+    }, { passive: true, signal });
 
     parentEl.addEventListener('touchend', async () => {
-        if (indicator) {
+        if (indicator && !refreshing) {
+            refreshing = true;
             indicator.innerHTML = '<span class="material-icons" style="font-size:18px;vertical-align:middle;animation:spin 1s linear infinite;">sync</span> Atualizando...';
             try {
                 if (_currentLigaId && _currentTimeId) {
@@ -887,12 +926,107 @@ function setupPullToRefresh(container) {
             }
             indicator?.remove();
             indicator = null;
+            refreshing = false;
         }
         pulling = false;
-    }, { passive: true });
+    }, { passive: true, signal });
 }
 
-if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Módulo v4.1 carregado (Reordenação + Skeleton + Pull-to-Refresh)");
+// =====================================================================
+// ✅ v4.3: MATCHDAY EVENTS — Live experience integration
+// =====================================================================
+// Referências para cleanup
+let _matchdayParciaisHandler = null;
+let _matchdayStopHandler = null;
+
+function _subscribeMatchdayEvents() {
+    if (!window.MatchdayService) return;
+
+    // Handler: novos dados parciais disponíveis → re-fetch ranking live
+    _matchdayParciaisHandler = async () => {
+        if (window.Log) Log.info('[PARTICIPANTE-ARTILHEIRO] Atualizando com parciais (MatchdayService)');
+        if (!_currentLigaId || !_currentTimeId) return;
+
+        try {
+            const container = document.getElementById('artilheiro-content');
+            if (!container) return;
+
+            const response = await fetch(`/api/artilheiro-campeao/${_currentLigaId}/ranking-live`);
+            if (!response.ok) return;
+
+            const responseData = await response.json();
+            if (responseData.disponivel === false) return;
+
+            // Salvar cache
+            if (window.OfflineCache) {
+                try { await window.OfflineCache.set('artilheiro', _currentLigaId, responseData); } catch (e) { /* silent */ }
+            }
+
+            await renderizarArtilheiro(container, responseData, _currentTimeId);
+        } catch (e) {
+            if (window.Log) Log.warn('[PARTICIPANTE-ARTILHEIRO] Erro ao atualizar parciais:', e);
+        }
+    };
+
+    // Handler: matchday encerrou → voltar para ranking consolidado
+    _matchdayStopHandler = async () => {
+        if (window.Log) Log.info('[PARTICIPANTE-ARTILHEIRO] Matchday encerrado — voltando para consolidado');
+        estadoArtilheiro.modeLive = false;
+
+        if (!_currentLigaId || !_currentTimeId) return;
+
+        try {
+            const container = document.getElementById('artilheiro-content');
+            if (!container) return;
+
+            const response = await fetch(`/api/artilheiro-campeao/${_currentLigaId}/ranking`);
+            if (!response.ok) return;
+
+            const responseData = await response.json();
+
+            if (window.OfflineCache) {
+                try { await window.OfflineCache.set('artilheiro', _currentLigaId, responseData); } catch (e) { /* silent */ }
+            }
+
+            await renderizarArtilheiro(container, responseData, _currentTimeId);
+        } catch (e) {
+            if (window.Log) Log.warn('[PARTICIPANTE-ARTILHEIRO] Erro ao atualizar pós-matchday:', e);
+        }
+    };
+
+    window.MatchdayService.on('data:parciais', _matchdayParciaisHandler);
+    window.MatchdayService.on('matchday:stop', _matchdayStopHandler);
+}
+
+// =====================================================================
+// ✅ v4.2: DESTRUTOR — Cleanup ao navegar para outro módulo
+// =====================================================================
+export function destruirArtilheiroParticipante() {
+    if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Destruindo modulo (cleanup)");
+
+    // Abortar todos os listeners do pull-to-refresh
+    if (_pullToRefreshAbortController) {
+        _pullToRefreshAbortController.abort();
+        _pullToRefreshAbortController = null;
+    }
+
+    // Remover indicador órfão
+    document.getElementById('art-pull-indicator')?.remove();
+
+    // ✅ v4.3: Reset live state
+    estadoArtilheiro.modeLive = false;
+    _matchdayParciaisHandler = null;
+    _matchdayStopHandler = null;
+
+    // Limpar refs
+    _currentLigaId = null;
+    _currentTimeId = null;
+    _currentParticipante = null;
+}
+
+window.destruirArtilheiroParticipante = destruirArtilheiroParticipante;
+
+if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Modulo v4.3 carregado (MatchdayService integration)");
 
 // =====================================================================
 // MODULE LP — Landing Page Utils (Artilheiro)

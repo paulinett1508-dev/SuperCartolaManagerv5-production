@@ -751,8 +751,8 @@ function renderizarBannerCampeao() {
                         <span class="material-symbols-outlined absolute -bottom-1 -right-1 text-yellow-400" style="font-size: 20px;">military_tech</span>
                     </div>
                     <div class="text-left">
-                        <p class="font-bold text-white text-base ${souCampeao ? "text-yellow-400" : ""}">${nomeCampeao}</p>
-                        ${nomeCartoleiro ? `<p class="text-white/60 text-xs">${nomeCartoleiro}</p>` : ""}
+                        <p class="font-bold text-white text-base ${souCampeao ? "text-yellow-400" : ""}">${escapeHtml(nomeCampeao)}</p>
+                        ${nomeCartoleiro ? `<p class="text-white/60 text-xs">${escapeHtml(nomeCartoleiro)}</p>` : ""}
                         ${souCampeao ? '<p class="text-yellow-400 text-xs font-semibold mt-1"><span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">celebration</span> Você é o campeão!</p>' : ""}
                         <div class="flex gap-3 mt-1">
                             <div class="text-center"><span class="text-yellow-400 font-bold text-lg">${pontosCampeao}</span><span class="text-white/50 text-[9px] block">PTS</span></div>
@@ -1086,16 +1086,16 @@ function buildLinhaConfronto(confronto, meuTimeId) {
             <div class="flex items-center min-w-0 flex-1 ${vencedor === 2 ? "opacity-60" : ""}">
                 <img src="${esc1}" class="w-10 h-10 rounded-full mr-3 shrink-0 bg-zinc-700 object-cover" onerror="this.onerror=null;this.src='/escudos/default.png'">
                 <div class="min-w-0 flex-1">
-                    <p class="font-semibold text-sm truncate ${isMeu1 ? "text-primary" : "text-white"}">${nome1}</p>
-                    <p class="text-[10px] text-gray-500 truncate">${cartoleiro1}</p>
+                    <p class="font-semibold text-sm truncate ${isMeu1 ? "text-primary" : "text-white"}">${escapeHtml(nome1)}</p>
+                    <p class="text-[10px] text-gray-500 truncate">${escapeHtml(cartoleiro1)}</p>
                     <div class="flex items-center space-x-1.5 mt-0.5"><p class="text-sm font-bold ${cor1}">${p1 !== null ? p1.toFixed(1) : "-"}</p>${modal1}</div>
                 </div>
             </div>
             <span class="text-sm text-white/30 mx-2 shrink-0">x</span>
             <div class="flex items-center min-w-0 flex-1 justify-end ${vencedor === 1 ? "opacity-60" : ""}">
                 <div class="min-w-0 flex-1 text-right">
-                    <p class="font-semibold text-sm truncate ${isMeu2 ? "text-primary" : "text-white"}">${nome2}</p>
-                    <p class="text-[10px] text-gray-500 truncate">${cartoleiro2}</p>
+                    <p class="font-semibold text-sm truncate ${isMeu2 ? "text-primary" : "text-white"}">${escapeHtml(nome2)}</p>
+                    <p class="text-[10px] text-gray-500 truncate">${escapeHtml(cartoleiro2)}</p>
                     <div class="flex items-center justify-end space-x-1.5 mt-0.5"><p class="text-sm font-bold ${cor2}">${p2 !== null ? p2.toFixed(1) : "-"}</p>${modal2}</div>
                 </div>
                 <img src="${esc2}" class="w-10 h-10 rounded-full ml-3 shrink-0 bg-zinc-700 object-cover" onerror="this.onerror=null;this.src='/escudos/default.png'">
@@ -1212,8 +1212,8 @@ function buildLinhaClassificacao(
             <div class="flex items-center gap-2.5 pl-2 min-w-0 flex-1">
                 <img src="${esc}" class="w-8 h-8 rounded-full bg-zinc-700 object-cover shrink-0 ${isCampeao ? "ring-2 ring-yellow-500" : ""}" onerror="this.onerror=null;this.src='/escudos/default.png'">
                 <div class="min-w-0 flex-1">
-                    <span class="text-xs font-medium truncate block ${isCampeao ? "text-yellow-400 font-bold" : isMeu && !isInativo ? "text-primary font-bold" : isInativo ? "text-gray-500" : "text-white"}">${nome}${nomeSufixo}</span>
-                    <span class="text-[10px] ${isInativo ? "text-gray-600" : "text-gray-500"} truncate block">${cartoleiro}</span>
+                    <span class="text-xs font-medium truncate block ${isCampeao ? "text-yellow-400 font-bold" : isMeu && !isInativo ? "text-primary font-bold" : isInativo ? "text-gray-500" : "text-white"}">${escapeHtml(nome)}${nomeSufixo}</span>
+                    <span class="text-[10px] ${isInativo ? "text-gray-600" : "text-gray-500"} truncate block">${escapeHtml(cartoleiro)}</span>
                 </div>
             </div>
             <div class="w-6 text-center ${isInativo ? "text-gray-600" : "text-white/60"} text-[10px]">${time.jogos || 0}</div>

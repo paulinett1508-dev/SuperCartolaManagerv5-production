@@ -209,7 +209,7 @@ export class FerramentasManager {
                     .map(
                         (liga) => `
                     <div class="liga-modal-item" data-liga-id="${liga._id}">
-                        <strong>${liga.nome}</strong>
+                        <strong>${escapeHtml(liga.nome)}</strong>
                         <span>${liga.times ? liga.times.length : 0} times</span>
                         <button class="btn-primary" onclick="popularRodadas('${liga._id}')">
                             Popular Rodadas

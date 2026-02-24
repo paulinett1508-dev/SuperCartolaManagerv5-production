@@ -188,4 +188,19 @@ router.get('/analytics/funcionalidades', analyticsController.getAnalyticsFuncion
  */
 router.get('/analytics/estatisticas', analyticsController.getAnalyticsEstatisticas);
 
+// ========== BRANCH MANAGEMENT ========== //
+
+/**
+ * DELETE /api/admin/mobile/analytics/branch/:nomeBranch
+ * Deleta uma branch remota via GitHub API
+ */
+router.delete('/analytics/branch/:nomeBranch', analyticsController.deleteBranch);
+
+/**
+ * POST /api/admin/mobile/analytics/branches/delete-batch
+ * Deleta múltiplas branches de uma vez
+ * Body: { branches: ['branch1', 'branch2', ...] }
+ */
+router.post('/analytics/branches/delete-batch', analyticsController.deleteBranchesBatch);
+
 export default router;

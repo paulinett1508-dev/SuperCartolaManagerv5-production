@@ -120,13 +120,60 @@
                             <span class="material-icons">delete_sweep</span>
                             Branches para Limpeza
                         </div>
-                        <span class="repo-text-muted" id="branchCleanupSummary"></span>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span class="repo-text-muted" id="branchCleanupSummary"></span>
+                        </div>
+                    </div>
+                    <!-- Toolbar de ações em massa -->
+                    <div class="repo-cleanup-toolbar" id="cleanupToolbar" style="display: none;">
+                        <label class="repo-checkbox-label repo-select-all-label">
+                            <input type="checkbox" id="selectAllBranches" class="repo-checkbox" />
+                            <span>Selecionar todas</span>
+                        </label>
+                        <div class="repo-cleanup-toolbar-right">
+                            <span class="repo-text-muted" id="selectedCount">0 selecionadas</span>
+                            <button class="repo-delete-batch-btn" id="deleteBatchBtn" disabled>
+                                <span class="material-icons">delete</span>
+                                Deletar Selecionadas
+                            </button>
+                        </div>
                     </div>
                     <div id="branchCleanupContent">
                         <div class="repo-loading">
                             <div class="repo-spinner"></div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Modal de Confirmação de Deleção -->
+                <div class="repo-modal-overlay" id="deleteConfirmModal" style="display: none;">
+                    <div class="repo-modal">
+                        <div class="repo-modal-header">
+                            <span class="material-icons" style="color: var(--app-danger, #ef4444); font-size: 28px;">warning</span>
+                            <h3>Confirmar Deleção</h3>
+                        </div>
+                        <div class="repo-modal-body">
+                            <p>Você está prestes a deletar <strong id="deleteModalCount">0</strong> branch(es):</p>
+                            <div class="repo-modal-branch-list" id="deleteModalList"></div>
+                            <p class="repo-modal-warning">
+                                <span class="material-icons" style="font-size: 16px; vertical-align: middle;">info</span>
+                                Esta ação é irreversível. As branches serão removidas do repositório remoto.
+                            </p>
+                        </div>
+                        <div class="repo-modal-actions">
+                            <button class="repo-modal-btn repo-modal-btn-cancel" id="deleteModalCancel">Cancelar</button>
+                            <button class="repo-modal-btn repo-modal-btn-confirm" id="deleteModalConfirm">
+                                <span class="material-icons">delete</span>
+                                Confirmar Deleção
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Toast de feedback -->
+                <div class="repo-toast" id="repoToast" style="display: none;">
+                    <span class="material-icons repo-toast-icon" id="repoToastIcon">check_circle</span>
+                    <span id="repoToastMessage">Operação concluída</span>
                 </div>
 
                 <!-- Lista de PRs -->
@@ -502,6 +549,10 @@
                 }
 
                 document.getElementById('branchCleanupContent').innerHTML = html;
+
+                // Initialize checkbox/deletion functionality
+                initCleanupCheckboxes();
+                updateSelectionUI();
             }
 
             function renderCleanupCategory(titulo, branches, badgeClass) {
@@ -512,13 +563,21 @@
                             <span class="repo-badge ${badgeClass}">${branches.length}</span>
                         </div>
                         <table class="repo-table">
-                            <thead><tr><th>Branch</th><th>Dias</th><th>PR</th></tr></thead>
+                            <thead><tr><th style="width: 36px;"></th><th>Branch</th><th>Dias</th><th>PR</th><th style="width: 40px;"></th></tr></thead>
                             <tbody>
                                 ${branches.map(b => `
-                                    <tr>
+                                    <tr class="repo-cleanup-row" data-branch="${b.nome}">
+                                        <td>
+                                            <input type="checkbox" class="repo-checkbox repo-branch-checkbox" data-branch="${b.nome}" />
+                                        </td>
                                         <td><span class="repo-branch">${b.nome}</span></td>
                                         <td>${b.diasDesdeUltimoCommit || '-'}</td>
                                         <td>${b.pr ? `<a href="${b.pr.url}" target="_blank" class="repo-link">#${b.pr.numero}</a>` : '-'}</td>
+                                        <td>
+                                            <button class="repo-delete-single-btn" data-branch="${b.nome}" title="Deletar branch">
+                                                <span class="material-icons">delete_outline</span>
+                                            </button>
+                                        </td>
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -540,6 +599,260 @@
                         carregarBranchCleanup();
                     }
                 });
+            }
+
+            // === Branch Deletion Logic ===
+            let selectedBranches = new Set();
+
+            function updateSelectionUI() {
+                const count = selectedBranches.size;
+                const toolbar = document.getElementById('cleanupToolbar');
+                const countEl = document.getElementById('selectedCount');
+                const deleteBtn = document.getElementById('deleteBatchBtn');
+
+                toolbar.style.display = 'flex';
+                countEl.textContent = count === 0 ? '0 selecionadas' :
+                    count === 1 ? '1 selecionada' : `${count} selecionadas`;
+                deleteBtn.disabled = count === 0;
+
+                // Update select-all checkbox state
+                const allCheckboxes = document.querySelectorAll('.repo-branch-checkbox');
+                const selectAll = document.getElementById('selectAllBranches');
+                if (allCheckboxes.length > 0) {
+                    selectAll.checked = selectedBranches.size === allCheckboxes.length;
+                    selectAll.indeterminate = selectedBranches.size > 0 && selectedBranches.size < allCheckboxes.length;
+                }
+            }
+
+            function initCleanupCheckboxes() {
+                selectedBranches.clear();
+
+                // Individual checkboxes
+                document.getElementById('branchCleanupContent').addEventListener('change', (e) => {
+                    if (e.target.classList.contains('repo-branch-checkbox')) {
+                        const branch = e.target.dataset.branch;
+                        if (e.target.checked) {
+                            selectedBranches.add(branch);
+                        } else {
+                            selectedBranches.delete(branch);
+                        }
+                        updateSelectionUI();
+                    }
+                });
+
+                // Single delete buttons
+                document.getElementById('branchCleanupContent').addEventListener('click', (e) => {
+                    const btn = e.target.closest('.repo-delete-single-btn');
+                    if (btn) {
+                        const branch = btn.dataset.branch;
+                        showDeleteConfirmModal([branch]);
+                    }
+                });
+
+                // Select all
+                document.getElementById('selectAllBranches').addEventListener('change', (e) => {
+                    const allCheckboxes = document.querySelectorAll('.repo-branch-checkbox');
+                    allCheckboxes.forEach(cb => {
+                        cb.checked = e.target.checked;
+                        if (e.target.checked) {
+                            selectedBranches.add(cb.dataset.branch);
+                        } else {
+                            selectedBranches.delete(cb.dataset.branch);
+                        }
+                    });
+                    updateSelectionUI();
+                });
+
+                // Batch delete button
+                document.getElementById('deleteBatchBtn').addEventListener('click', () => {
+                    if (selectedBranches.size > 0) {
+                        showDeleteConfirmModal([...selectedBranches]);
+                    }
+                });
+            }
+
+            function showDeleteConfirmModal(branches) {
+                const modal = document.getElementById('deleteConfirmModal');
+                document.getElementById('deleteModalCount').textContent = branches.length;
+                document.getElementById('deleteModalList').innerHTML = branches
+                    .map(b => `<span class="repo-branch">${b}</span>`)
+                    .join('');
+
+                modal.style.display = 'flex';
+
+                // Cancel handler
+                const cancelHandler = () => {
+                    modal.style.display = 'none';
+                    cleanup();
+                };
+
+                // Confirm handler
+                const confirmHandler = async () => {
+                    modal.style.display = 'none';
+                    cleanup();
+                    await executarDelecao(branches);
+                };
+
+                // Overlay click to close
+                const overlayHandler = (e) => {
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                        cleanup();
+                    }
+                };
+
+                function cleanup() {
+                    document.getElementById('deleteModalCancel').removeEventListener('click', cancelHandler);
+                    document.getElementById('deleteModalConfirm').removeEventListener('click', confirmHandler);
+                    modal.removeEventListener('click', overlayHandler);
+                }
+
+                document.getElementById('deleteModalCancel').addEventListener('click', cancelHandler);
+                document.getElementById('deleteModalConfirm').addEventListener('click', confirmHandler);
+                modal.addEventListener('click', overlayHandler);
+            }
+
+            async function executarDelecao(branches) {
+                // Disable all controls during operation
+                const deleteBtn = document.getElementById('deleteBatchBtn');
+                deleteBtn.disabled = true;
+                deleteBtn.innerHTML = '<span class="material-icons repo-spin">hourglass_empty</span> Deletando...';
+
+                // Disable single delete buttons for affected branches
+                branches.forEach(branch => {
+                    const row = document.querySelector(`.repo-cleanup-row[data-branch="${branch}"]`);
+                    if (row) {
+                        row.classList.add('repo-row-deleting');
+                    }
+                });
+
+                try {
+                    let response;
+
+                    if (branches.length === 1) {
+                        const branchEncoded = encodeURIComponent(branches[0]);
+                        response = await fetch(`/api/admin/analytics/branch/${branchEncoded}`, {
+                            method: 'DELETE'
+                        });
+                    } else {
+                        response = await fetch('/api/admin/analytics/branches/delete-batch', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ branches })
+                        });
+                    }
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Single delete
+                        if (branches.length === 1 && !data.resultados) {
+                            removeBranchFromUI(branches[0]);
+                            showToast(`Branch "${branches[0]}" deletada com sucesso`, 'success');
+                        } else {
+                            // Batch delete
+                            const resultados = data.resultados || [];
+                            resultados.forEach(r => {
+                                if (r.success) {
+                                    removeBranchFromUI(r.branch);
+                                    selectedBranches.delete(r.branch);
+                                }
+                            });
+                            showToast(data.message, data.falhas > 0 ? 'warning' : 'success');
+                        }
+
+                        updateSelectionUI();
+                        updateCleanupCounts();
+                    } else {
+                        showToast(data.error || 'Erro ao deletar', 'error');
+                        // Remove deleting state
+                        branches.forEach(branch => {
+                            const row = document.querySelector(`.repo-cleanup-row[data-branch="${branch}"]`);
+                            if (row) row.classList.remove('repo-row-deleting');
+                        });
+                    }
+                } catch (error) {
+                    showToast('Erro de conexão ao deletar branches', 'error');
+                    branches.forEach(branch => {
+                        const row = document.querySelector(`.repo-cleanup-row[data-branch="${branch}"]`);
+                        if (row) row.classList.remove('repo-row-deleting');
+                    });
+                } finally {
+                    deleteBtn.innerHTML = '<span class="material-icons">delete</span> Deletar Selecionadas';
+                    deleteBtn.disabled = selectedBranches.size === 0;
+                }
+            }
+
+            function removeBranchFromUI(branchName) {
+                const row = document.querySelector(`.repo-cleanup-row[data-branch="${branchName}"]`);
+                if (row) {
+                    row.classList.add('repo-row-deleted');
+                    setTimeout(() => {
+                        row.remove();
+
+                        // Check if the category table is now empty
+                        document.querySelectorAll('.repo-cleanup-category').forEach(cat => {
+                            const rows = cat.querySelectorAll('.repo-cleanup-row');
+                            if (rows.length === 0) {
+                                cat.remove();
+                            } else {
+                                // Update category count badge
+                                const badge = cat.querySelector('.repo-badge');
+                                if (badge) badge.textContent = rows.length;
+                            }
+                        });
+
+                        // If all categories removed
+                        const content = document.getElementById('branchCleanupContent');
+                        if (!content.querySelector('.repo-cleanup-category')) {
+                            content.innerHTML = '<div class="repo-empty">Nenhuma branch precisa de limpeza</div>';
+                            document.getElementById('cleanupToolbar').style.display = 'none';
+                        }
+                    }, 300);
+                }
+            }
+
+            function updateCleanupCounts() {
+                const remaining = document.querySelectorAll('.repo-cleanup-row').length;
+                const badge = document.getElementById('branchCleanupCount');
+                const summary = document.getElementById('branchCleanupSummary');
+
+                if (remaining > 0) {
+                    badge.textContent = remaining;
+                    badge.style.display = 'inline-block';
+                    summary.textContent = `${remaining} branch${remaining !== 1 ? 'es' : ''} identificada${remaining !== 1 ? 's' : ''}`;
+                } else {
+                    badge.style.display = 'none';
+                    summary.textContent = 'Tudo limpo';
+                }
+            }
+
+            function showToast(message, type = 'success') {
+                const toast = document.getElementById('repoToast');
+                const icon = document.getElementById('repoToastIcon');
+                const msg = document.getElementById('repoToastMessage');
+
+                msg.textContent = message;
+                toast.className = `repo-toast repo-toast-${type}`;
+
+                const iconMap = {
+                    success: 'check_circle',
+                    error: 'error',
+                    warning: 'warning'
+                };
+                icon.textContent = iconMap[type] || 'info';
+
+                toast.style.display = 'flex';
+
+                // Auto-hide after 4s
+                clearTimeout(toast._hideTimeout);
+                toast._hideTimeout = setTimeout(() => {
+                    toast.classList.add('repo-toast-hiding');
+                    setTimeout(() => {
+                        toast.style.display = 'none';
+                        toast.classList.remove('repo-toast-hiding');
+                    }, 300);
+                }, 4000);
             }
 
             // === Search Functionality ===
