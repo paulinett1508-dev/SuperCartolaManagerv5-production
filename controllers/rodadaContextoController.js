@@ -9,6 +9,7 @@ import MataMataCache from "../models/MataMataCache.js";
 import ArtilheiroCampeao from "../models/ArtilheiroCampeao.js";
 import CapitaoCaches from "../models/CapitaoCaches.js";
 import MelhorMesCache from "../models/MelhorMesCache.js";
+import ExtratoFinanceiroCache from "../models/ExtratoFinanceiroCache.js";
 import mongoose from "mongoose";
 import { CURRENT_SEASON } from "../config/seasons.js";
 import * as disputasService from "../services/disputasService.js";
@@ -64,7 +65,26 @@ export const obterContextoRodada = async (req, res) => {
 
         console.log(`${LOG_PREFIX} Módulos ativos:`, Object.keys(modulosAtivos).filter(k => modulosAtivos[k]));
 
-        // 3. Construir contexto baseado em módulos ativos
+        // 3. Buscar saldo financeiro real da rodada (extrato)
+        let financeiroRodada = 0;
+        try {
+            const extrato = await ExtratoFinanceiroCache.findOne({
+                liga_id: ligaIdObj,
+                time_id: numTimeId,
+                temporada: numTemporada,
+            }).lean();
+
+            if (extrato?.historico_transacoes) {
+                const entrada = extrato.historico_transacoes.find(t => t.rodada === numRodada);
+                if (entrada != null) {
+                    financeiroRodada = entrada.saldo ?? 0;
+                }
+            }
+        } catch (errExtrato) {
+            console.warn(`${LOG_PREFIX} Não foi possível buscar extrato financeiro:`, errExtrato.message);
+        }
+
+        // 4. Construir contexto baseado em módulos ativos
         const contexto = {
             // Metadados
             rodada: numRodada,
@@ -82,7 +102,7 @@ export const obterContextoRodada = async (req, res) => {
                 pontos: meuTime.pontos || 0,
                 posicao: meuTime.posicao || 0,
                 total_participantes: meuTime.totalParticipantesAtivos || 0,
-                financeiro: meuTime.valorFinanceiro || 0,
+                financeiro: financeiroRodada,
                 vs_media: 0, // Será calculado
                 vs_melhor: 0, // Será calculado
             },
@@ -100,7 +120,7 @@ export const obterContextoRodada = async (req, res) => {
             },
         };
 
-        // 4. Calcular vs média e vs melhor
+        // 5. Calcular vs média e vs melhor
         const todosParticipantes = await Rodada.find({
             ligaId: ligaIdObj,
             rodada: numRodada,
@@ -118,7 +138,7 @@ export const obterContextoRodada = async (req, res) => {
             contexto.performance.vs_melhor = truncarPontosNum((meuTime.pontos || 0) - melhor);
         }
 
-        // 5. Buscar dados de cada módulo ativo usando service
+        // 6. Buscar dados de cada módulo ativo usando service
         // Nomes usam camelCase conforme Liga.modulos_ativos
         if (modulosAtivos.pontosCorridos) {
             contexto.disputas.pontos_corridos = await disputasService.calcularPontosCorridos(
@@ -174,7 +194,7 @@ export const obterContextoRodada = async (req, res) => {
             );
         }
 
-        // 6. Calcular movimentações (quem subiu/caiu)
+        // 7. Calcular movimentações (quem subiu/caiu)
         contexto.movimentacoes = await calcularMovimentacoes(
             ligaIdObj,
             numRodada,
@@ -182,7 +202,7 @@ export const obterContextoRodada = async (req, res) => {
             numTemporada
         );
 
-        // 7. Gerar narrativa inteligente
+        // 8. Gerar narrativa inteligente
         const { gerarNarrativa } = await import("../services/narrativaService.js");
         const narrativas = gerarNarrativa(contexto);
         contexto.narrativa = narrativas;
