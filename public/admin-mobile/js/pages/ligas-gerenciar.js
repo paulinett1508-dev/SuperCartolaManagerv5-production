@@ -73,10 +73,6 @@ function renderLigaManageCard(liga) {
       </div>
 
       <div style="display:flex;gap:8px;">
-        <button class="btn btn-ghost btn-sm" style="flex:1;font-size:12px;padding:8px 10px;"
-          onclick="window.router.navigate('/ligas', { ligaId: '${liga.id}' })">
-          <span class="material-icons mi-inline" style="font-size:14px;">visibility</span> Detalhes
-        </button>
         <button class="btn btn-primary btn-sm" style="flex:1;font-size:12px;padding:8px 10px;"
           onclick="window.syncLiga('${liga.id}')">
           <span class="material-icons mi-inline" style="font-size:14px;">sync</span> Sincronizar

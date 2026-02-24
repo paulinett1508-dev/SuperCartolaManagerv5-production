@@ -6,6 +6,10 @@
 import { generateToken, isAdminAutorizado } from '../middleware/adminMobileAuth.js';
 import { getDB } from '../config/database.js';
 import logger from '../utils/logger.js';
+import marketGate from '../utils/marketGate.js';
+import cartolaApiService from '../services/cartolaApiService.js';
+import Liga from '../models/Liga.js';
+import { CURRENT_SEASON } from '../config/seasons.js';
 
 /**
  * POST /api/admin/mobile/auth
@@ -244,175 +248,6 @@ async function getLigas(req, res) {
     logger.error('[adminMobile] Erro no getLigas:', error);
     res.status(500).json({
       error: 'Erro ao listar ligas',
-      code: 'INTERNAL_ERROR'
-    });
-  }
-}
-
-/**
- * GET /api/admin/mobile/ligas/:ligaId
- * Detalhes de uma liga específica
- */
-async function getLigaDetalhes(req, res) {
-  try {
-    const db = req.app.locals.db || getDB();
-    const ligaId = req.params.ligaId;
-
-    // Busca liga por _id (ObjectId string)
-    let liga;
-    try {
-      const { ObjectId } = await import('mongodb');
-      liga = await db.collection('ligas').findOne({ _id: new ObjectId(ligaId) });
-    } catch {
-      liga = await db.collection('ligas').findOne({ _id: ligaId });
-    }
-
-    if (!liga) {
-      return res.status(404).json({
-        error: 'Liga não encontrada',
-        code: 'LIGA_NOT_FOUND'
-      });
-    }
-
-    // Participantes estão no array liga.participantes[]
-    const todosParticipantes = liga.participantes || [];
-    const participantesAtivos = todosParticipantes.filter(p => p.ativo !== false).length;
-    const participantesTotais = todosParticipantes.length;
-
-    // Busca extratos financeiros
-    const extratos = await db.collection('extratofinanceirocaches').find({
-      liga_id: liga._id,
-      temporada: liga.temporada || 2026
-    }).toArray();
-
-    // Mapeia extratos por time_id
-    const extratosMap = {};
-    extratos.forEach(extrato => {
-      extratosMap[extrato.time_id] = extrato;
-    });
-
-    // Busca ranking atual (pontoscorridoscaches)
-    const ranking = await db.collection('pontoscorridoscaches').find({
-      liga_id: liga._id,
-      temporada: liga.temporada || 2026
-    }).sort({ posicao: 1 }).toArray();
-
-    // Mapeia ranking por time_id
-    const rankingMap = {};
-    ranking.forEach(r => {
-      rankingMap[r.time_id] = r;
-    });
-
-    // Monta lista de participantes com dados completos (a partir de liga.participantes[])
-    const participantesComDados = todosParticipantes.map(p => {
-      const extrato = extratosMap[p.time_id] || {};
-      const rank = rankingMap[p.time_id] || {};
-
-      return {
-        id: p.time_id,
-        nome: p.nome_cartola || p.nome_cartoleiro,
-        nomeTime: p.nome_time,
-        ativo: p.ativo !== false,
-        escudo: p.clube_id || '262',
-        saldo: extrato.saldo_consolidado || extrato.saldo_final || 0,
-        inadimplente: (extrato.saldo_consolidado || extrato.saldo_final || 0) < 0,
-        pontos: rank.pontos_total || 0,
-        posicao: rank.posicao || null,
-        patrimonio: rank.patrimonio || 0,
-        rodadasParticipadas: rank.rodadas_participadas || 0
-      };
-    });
-
-    // Calcula saldo total e inadimplentes
-    let saldoTotal = 0;
-    let inadimplentes = 0;
-    participantesComDados.forEach(p => {
-      saldoTotal += p.saldo;
-      if (p.inadimplente) inadimplentes++;
-    });
-
-    // Busca última consolidação
-    const ultimaConsolidacao = await db.collection('adminactivitylogs')
-      .find({
-        action: 'consolidacao_manual',
-        'details.ligaId': ligaId,
-        result: 'success'
-      })
-      .sort({ timestamp: -1 })
-      .limit(1)
-      .toArray();
-
-    let ultimaConsolidacaoData = null;
-    if (ultimaConsolidacao.length > 0) {
-      ultimaConsolidacaoData = {
-        rodada: ultimaConsolidacao[0].details?.rodada || 0,
-        timestamp: ultimaConsolidacao[0].timestamp,
-        status: 'success'
-      };
-    }
-
-    // Módulos ativos
-    const modulosAtivos = {};
-    if (liga.modulos_ativos) {
-      Object.entries(liga.modulos_ativos).forEach(([modulo, ativo]) => {
-        modulosAtivos[modulo] = ativo;
-      });
-    }
-
-    // Calcula estatísticas
-    const participantesComPontos = participantesComDados.filter(p => p.pontos > 0);
-    const mediaPontos = participantesComPontos.length > 0
-      ? participantesComPontos.reduce((sum, p) => sum + p.pontos, 0) / participantesComPontos.length
-      : 0;
-
-    const participantesComPatrimonio = participantesComDados.filter(p => p.patrimonio > 0);
-    const mediaPatrimonio = participantesComPatrimonio.length > 0
-      ? participantesComPatrimonio.reduce((sum, p) => sum + p.patrimonio, 0) / participantesComPatrimonio.length
-      : 0;
-
-    // Busca total de pagamentos e premiações
-    const ligaIdStr = liga._id.toString();
-    const acertos = await db.collection('acertofinanceiros').find({
-      ligaId: ligaIdStr,
-      temporada: liga.temporada || 2026,
-      ativo: true
-    }).toArray();
-
-    let totalPagamentos = 0;
-    let totalPremiacoes = 0;
-
-    acertos.forEach(a => {
-      if (a.tipo === 'pagamento') {
-        totalPagamentos += a.valor;
-      } else {
-        totalPremiacoes += a.valor;
-      }
-    });
-
-    res.json({
-      id: ligaIdStr,
-      nome: liga.nome,
-      temporada: liga.temporada || 2026,
-      ativa: liga.ativa,
-      rodadaAtual: liga.rodada_atual || 0,
-      participantesAtivos,
-      participantesTotais,
-      saldoTotal: parseFloat(saldoTotal.toFixed(2)),
-      inadimplentes,
-      ultimaConsolidacao: ultimaConsolidacaoData,
-      modulosAtivos,
-      participantes: participantesComDados,
-      estatisticas: {
-        totalPagamentos: parseFloat(totalPagamentos.toFixed(2)),
-        totalPremiacoes: parseFloat(totalPremiacoes.toFixed(2)),
-        mediaPontos: parseFloat(mediaPontos.toFixed(2)),
-        mediaPatrimonio: parseFloat(mediaPatrimonio.toFixed(2))
-      }
-    });
-  } catch (error) {
-    logger.error('[adminMobile] Erro no getLigaDetalhes:', error);
-    res.status(500).json({
-      error: 'Erro ao buscar detalhes da liga',
       code: 'INTERNAL_ERROR'
     });
   }
@@ -734,196 +569,6 @@ async function getConsolidacaoHistorico(req, res) {
 }
 
 /**
- * POST /api/admin/mobile/acertos
- * Registra novo acerto financeiro
- */
-async function registrarAcerto(req, res) {
-  try {
-    const { ligaId, timeId, tipo, valor, descricao, temporada, metodoPagamento } = req.body;
-    const db = req.app.locals.db || getDB();
-
-    // Validações
-    if (!ligaId || !timeId || !tipo || !valor) {
-      return res.status(400).json({
-        error: 'ligaId, timeId, tipo e valor são obrigatórios',
-        code: 'MISSING_PARAMS'
-      });
-    }
-
-    if (!['pagamento', 'recebimento'].includes(tipo)) {
-      return res.status(400).json({
-        error: 'tipo deve ser "pagamento" ou "recebimento"',
-        code: 'INVALID_TIPO'
-      });
-    }
-
-    const valorNum = parseFloat(valor);
-    if (isNaN(valorNum) || valorNum <= 0) {
-      return res.status(400).json({
-        error: 'valor deve ser um número positivo',
-        code: 'INVALID_VALOR'
-      });
-    }
-
-    // Verifica liga
-    const liga = await db.collection('ligas').findOne({ id: parseInt(ligaId) });
-    if (!liga) {
-      return res.status(404).json({ error: 'Liga não encontrada', code: 'LIGA_NOT_FOUND' });
-    }
-
-    // Verifica participante
-    const time = await db.collection('times').findOne({ id: parseInt(timeId), liga_id: parseInt(ligaId) });
-    if (!time) {
-      return res.status(404).json({ error: 'Participante não encontrado', code: 'TIME_NOT_FOUND' });
-    }
-
-    // Idempotência: verifica duplicata nos últimos 60s
-    const agora = new Date();
-    const duplicata = await db.collection('acertofinanceiros').findOne({
-      ligaId: String(ligaId),
-      timeId: String(timeId),
-      tipo,
-      valor: valorNum,
-      ativo: true,
-      createdAt: { $gte: new Date(agora.getTime() - 60000) }
-    });
-
-    if (duplicata) {
-      return res.status(409).json({
-        error: 'Acerto duplicado detectado (mesma operação nos últimos 60s)',
-        code: 'DUPLICATE_ACERTO'
-      });
-    }
-
-    const tempAtual = temporada ? parseInt(temporada) : (liga.temporada || 2026);
-
-    const novoAcerto = {
-      ligaId: String(ligaId),
-      timeId: String(timeId),
-      nomeTime: time.nome_cartoleiro || time.nome_time,
-      temporada: tempAtual,
-      tipo,
-      valor: valorNum,
-      descricao: descricao || '',
-      metodoPagamento: metodoPagamento || 'pix',
-      registradoPor: req.admin.email,
-      dataAcerto: agora,
-      ativo: true,
-      createdAt: agora,
-      updatedAt: agora
-    };
-
-    const result = await db.collection('acertofinanceiros').insertOne(novoAcerto);
-
-    // Log de auditoria
-    await db.collection('adminactivitylogs').insertOne({
-      action: 'novo_acerto',
-      user: req.admin.email,
-      timestamp: agora,
-      details: {
-        ligaId: parseInt(ligaId),
-        ligaNome: liga.nome,
-        timeId: parseInt(timeId),
-        participante: novoAcerto.nomeTime,
-        tipo,
-        valor: valorNum
-      },
-      result: 'success'
-    });
-
-    res.status(201).json({
-      id: result.insertedId,
-      ...novoAcerto
-    });
-  } catch (error) {
-    logger.error('[adminMobile] Erro no registrarAcerto:', error);
-    res.status(500).json({
-      error: 'Erro ao registrar acerto',
-      code: 'INTERNAL_ERROR'
-    });
-  }
-}
-
-/**
- * GET /api/admin/mobile/acertos/:ligaId
- * Histórico de acertos
- */
-async function getAcertos(req, res) {
-  try {
-    const ligaId = parseInt(req.params.ligaId);
-    const db = req.app.locals.db || getDB();
-    const { temporada, limit, timeId } = req.query;
-
-    // Busca liga
-    const liga = await db.collection('ligas').findOne({ id: ligaId });
-    if (!liga) {
-      return res.status(404).json({ error: 'Liga não encontrada', code: 'LIGA_NOT_FOUND' });
-    }
-
-    const tempAtual = temporada ? parseInt(temporada) : (liga.temporada || 2026);
-    const limitNum = limit ? parseInt(limit) : 100;
-
-    const filtro = {
-      ligaId: String(ligaId),
-      temporada: tempAtual,
-      ativo: true
-    };
-
-    if (timeId) {
-      filtro.timeId = String(timeId);
-    }
-
-    const acertos = await db.collection('acertofinanceiros')
-      .find(filtro)
-      .sort({ createdAt: -1 })
-      .limit(limitNum)
-      .toArray();
-
-    // Calcula resumo
-    let totalPagamentos = 0;
-    let totalRecebimentos = 0;
-
-    acertos.forEach(a => {
-      if (a.tipo === 'pagamento') {
-        totalPagamentos += a.valor;
-      } else {
-        totalRecebimentos += a.valor;
-      }
-    });
-
-    res.json({
-      ligaId,
-      ligaNome: liga.nome,
-      temporada: tempAtual,
-      acertos: acertos.map(a => ({
-        id: a._id,
-        timeId: a.timeId,
-        nomeTime: a.nomeTime,
-        tipo: a.tipo,
-        valor: a.valor,
-        descricao: a.descricao,
-        metodoPagamento: a.metodoPagamento,
-        registradoPor: a.registradoPor,
-        dataAcerto: a.dataAcerto,
-        createdAt: a.createdAt
-      })),
-      resumo: {
-        totalPagamentos: parseFloat(totalPagamentos.toFixed(2)),
-        totalRecebimentos: parseFloat(totalRecebimentos.toFixed(2)),
-        saldo: parseFloat((totalPagamentos - totalRecebimentos).toFixed(2)),
-        totalOperacoes: acertos.length
-      }
-    });
-  } catch (error) {
-    logger.error('[adminMobile] Erro no getAcertos:', error);
-    res.status(500).json({
-      error: 'Erro ao buscar acertos',
-      code: 'INTERNAL_ERROR'
-    });
-  }
-}
-
-/**
  * GET /api/admin/mobile/quitacoes/pendentes
  * Lista quitações pendentes
  */
@@ -1229,18 +874,575 @@ async function getHealth(req, res) {
   }
 }
 
+// ========== CACHE SENTINEL ========== //
+
+/**
+ * POST /api/admin/mobile/cache/flush
+ * Flush seletivo de caches do sistema
+ * Body: { targets: ['marketgate', 'cartola', 'jogos', 'ranking', 'top10'] }
+ */
+async function flushCache(req, res) {
+  try {
+    const { targets = [] } = req.body;
+    const adminEmail = req.admin?.email || 'sistema';
+    const results = [];
+
+    // MarketGate
+    if (targets.includes('marketgate')) {
+      try {
+        marketGate.clearCache();
+        results.push({ target: 'marketgate', success: true, label: 'MarketGate' });
+      } catch (err) {
+        results.push({ target: 'marketgate', success: false, label: 'MarketGate', error: err.message });
+      }
+    }
+
+    // Cartola API Service
+    if (targets.includes('cartola')) {
+      try {
+        cartolaApiService.limparCache();
+        results.push({ target: 'cartola', success: true, label: 'API Cartola' });
+      } catch (err) {
+        results.push({ target: 'cartola', success: false, label: 'API Cartola', error: err.message });
+      }
+    }
+
+    // Jogos ao Vivo (via internal fetch)
+    if (targets.includes('jogos')) {
+      try {
+        const port = process.env.PORT || 3000;
+        const resp = await fetch(`http://localhost:${port}/api/jogos-ao-vivo/invalidar`);
+        const data = await resp.json();
+        results.push({ target: 'jogos', success: true, label: 'Jogos ao Vivo' });
+      } catch (err) {
+        results.push({ target: 'jogos', success: false, label: 'Jogos ao Vivo', error: err.message });
+      }
+    }
+
+    // Ranking cache (per league)
+    if (targets.includes('ranking')) {
+      try {
+        const db = req.app.locals.db || getDB();
+        const ligas = await db.collection('ligas').find({ ativa: true }).project({ _id: 1 }).toArray();
+        let cleared = 0;
+        for (const liga of ligas) {
+          const port = process.env.PORT || 3000;
+          try {
+            await fetch(`http://localhost:${port}/api/ranking-cache/${liga._id}`, { method: 'DELETE' });
+            cleared++;
+          } catch (_) { /* skip */ }
+        }
+        results.push({ target: 'ranking', success: true, label: 'Ranking Cache', detail: `${cleared} ligas` });
+      } catch (err) {
+        results.push({ target: 'ranking', success: false, label: 'Ranking Cache', error: err.message });
+      }
+    }
+
+    // Top10 cache (per league)
+    if (targets.includes('top10')) {
+      try {
+        const db = req.app.locals.db || getDB();
+        const ligas = await db.collection('ligas').find({ ativa: true }).project({ _id: 1 }).toArray();
+        let cleared = 0;
+        for (const liga of ligas) {
+          const port = process.env.PORT || 3000;
+          try {
+            await fetch(`http://localhost:${port}/api/top10/cache/${liga._id}`, { method: 'DELETE' });
+            cleared++;
+          } catch (_) { /* skip */ }
+        }
+        results.push({ target: 'top10', success: true, label: 'Top 10 Cache', detail: `${cleared} ligas` });
+      } catch (err) {
+        results.push({ target: 'top10', success: false, label: 'Top 10 Cache', error: err.message });
+      }
+    }
+
+    // Log activity
+    const db = req.app.locals.db || getDB();
+    await db.collection('adminactivitylogs').insertOne({
+      email: adminEmail,
+      action: 'cache_flush',
+      details: { targets, results },
+      result: results.every(r => r.success) ? 'success' : 'partial',
+      timestamp: new Date()
+    });
+
+    res.json({
+      success: true,
+      results,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    logger.error('[adminMobile] Erro no flushCache:', error);
+    res.status(500).json({ error: 'Erro ao limpar cache', code: 'INTERNAL_ERROR' });
+  }
+}
+
+/**
+ * GET /api/admin/mobile/cache/status
+ * Status de todas as camadas de cache
+ */
+async function getCacheStatus(req, res) {
+  try {
+    const port = process.env.PORT || 3000;
+    const layers = [];
+
+    // MarketGate
+    try {
+      const mgStatus = marketGate.getStatus ? marketGate.getStatus() : { hasCache: !!marketGate._cache };
+      layers.push({
+        id: 'marketgate',
+        label: 'MarketGate',
+        icon: 'storefront',
+        description: 'Cache do mercado Cartola',
+        status: mgStatus.hasCache || mgStatus.has_cache ? 'cached' : 'empty'
+      });
+    } catch (_) {
+      layers.push({ id: 'marketgate', label: 'MarketGate', icon: 'storefront', description: 'Cache do mercado Cartola', status: 'unknown' });
+    }
+
+    // Cartola API
+    layers.push({
+      id: 'cartola',
+      label: 'API Cartola',
+      icon: 'sports_soccer',
+      description: 'Cache de dados da API Cartola FC',
+      status: 'active'
+    });
+
+    // Jogos ao Vivo
+    try {
+      const resp = await fetch(`http://localhost:${port}/api/jogos-ao-vivo/status`);
+      const data = await resp.json();
+      const hasCache = data.cache?.temJogos || data.cacheGeral?.jogosEmCache > 0;
+      layers.push({
+        id: 'jogos',
+        label: 'Jogos ao Vivo',
+        icon: 'live_tv',
+        description: `Fonte: ${data.cacheGeral?.fonte || 'N/A'}`,
+        status: hasCache ? 'cached' : 'empty'
+      });
+    } catch (_) {
+      layers.push({ id: 'jogos', label: 'Jogos ao Vivo', icon: 'live_tv', description: 'Cache de jogos do dia', status: 'unknown' });
+    }
+
+    // Ranking
+    layers.push({
+      id: 'ranking',
+      label: 'Ranking Cache',
+      icon: 'leaderboard',
+      description: 'Cache consolidado de rankings',
+      status: 'active'
+    });
+
+    // Top10
+    layers.push({
+      id: 'top10',
+      label: 'Top 10 Cache',
+      icon: 'emoji_events',
+      description: 'Cache do Top 10 (Mito/Mico)',
+      status: 'active'
+    });
+
+    res.json({ layers, timestamp: new Date().toISOString() });
+  } catch (error) {
+    logger.error('[adminMobile] Erro no getCacheStatus:', error);
+    res.status(500).json({ error: 'Erro ao buscar status do cache', code: 'INTERNAL_ERROR' });
+  }
+}
+
+// ========== FORCE UPDATE APP ========== //
+
+// Mutable version override (persists in memory between requests, resets on server restart)
+let _versionOverride = null;
+
+/**
+ * POST /api/admin/mobile/force-update
+ * Gera nova versao forçada para invalidar cache dos clientes
+ * Body: { scope: 'app' | 'admin' | 'all' }
+ */
+async function forceAppUpdate(req, res) {
+  try {
+    const { scope = 'all' } = req.body;
+    const adminEmail = req.admin?.email || 'sistema';
+    const now = new Date();
+
+    // Gerar version string baseado no timestamp atual de Brasilia
+    const brDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+    const version = [
+      String(brDate.getDate()).padStart(2, '0'),
+      String(brDate.getMonth() + 1).padStart(2, '0'),
+      String(brDate.getFullYear()).slice(-2),
+      String(brDate.getHours()).padStart(2, '0') + String(brDate.getMinutes()).padStart(2, '0')
+    ].join('.');
+
+    _versionOverride = { version, scope, timestamp: now.toISOString(), by: adminEmail };
+
+    // Log activity
+    const db = req.app.locals.db || getDB();
+    await db.collection('adminactivitylogs').insertOne({
+      email: adminEmail,
+      action: 'force_app_update',
+      details: { scope, version },
+      result: 'success',
+      timestamp: now
+    });
+
+    res.json({
+      success: true,
+      version,
+      scope,
+      message: `Versao forcada: ${version} (${scope})`,
+      timestamp: now.toISOString()
+    });
+  } catch (error) {
+    logger.error('[adminMobile] Erro no forceAppUpdate:', error);
+    res.status(500).json({ error: 'Erro ao forcar atualizacao', code: 'INTERNAL_ERROR' });
+  }
+}
+
+/**
+ * GET /api/admin/mobile/version-status
+ * Status atual das versoes (participante + admin + override)
+ */
+async function getVersionStatus(req, res) {
+  try {
+    const port = process.env.PORT || 3000;
+    let participante = null, admin = null;
+
+    try {
+      const resp = await fetch(`http://localhost:${port}/api/app/versao/all`);
+      const data = await resp.json();
+      participante = data.participante;
+      admin = data.admin;
+    } catch (_) { /* fallback */ }
+
+    res.json({
+      participante,
+      admin,
+      override: _versionOverride,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    logger.error('[adminMobile] Erro no getVersionStatus:', error);
+    res.status(500).json({ error: 'Erro ao buscar versoes', code: 'INTERNAL_ERROR' });
+  }
+}
+
+// Export version override for use by appVersionRoutes
+export function getVersionOverride() {
+  return _versionOverride;
+}
+
+// ========== CHECKLIST PRE-RODADA ========== //
+
+/**
+ * GET /api/admin/mobile/checklist
+ * Aggregates multiple system checks for pre-round readiness
+ */
+async function getChecklist(req, res) {
+  try {
+    const port = process.env.PORT || 3000;
+    const db = req.app.locals.db || getDB();
+    const checks = [];
+
+    // 1. Orchestrator rodando?
+    try {
+      const resp = await fetch(`http://localhost:${port}/api/orchestrator/status`);
+      const data = await resp.json();
+      const ativo = data.success && data.live;
+      checks.push({
+        id: 'orchestrator',
+        label: 'Orchestrator',
+        description: ativo ? `Fase: ${data.live?.faseRodada || 'idle'}` : 'Indisponivel',
+        status: ativo ? 'ok' : 'error',
+        icon: 'precision_manufacturing'
+      });
+    } catch (_) {
+      checks.push({ id: 'orchestrator', label: 'Orchestrator', description: 'Sem resposta', status: 'error', icon: 'precision_manufacturing' });
+    }
+
+    // 2. Ultima rodada consolidada?
+    try {
+      const resp = await fetch(`http://localhost:${port}/api/orchestrator/status`);
+      const data = await resp.json();
+      const rodadaAtual = data.live?.rodadaAtual || 0;
+      const lastConsolidacao = await db.collection('adminactivitylogs')
+        .findOne({ action: 'consolidacao_manual' }, { sort: { timestamp: -1 } });
+      const consolidadaEm = lastConsolidacao?.timestamp;
+      checks.push({
+        id: 'consolidacao',
+        label: 'Consolidacao',
+        description: consolidadaEm ? `Ultima: ${new Date(consolidadaEm).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}` : 'Nenhuma registrada',
+        status: consolidadaEm ? 'ok' : 'warning',
+        icon: 'sync'
+      });
+    } catch (_) {
+      checks.push({ id: 'consolidacao', label: 'Consolidacao', description: 'Erro ao verificar', status: 'error', icon: 'sync' });
+    }
+
+    // 3. APIs de jogos saudaveis?
+    try {
+      const resp = await fetch(`http://localhost:${port}/api/jogos-ao-vivo/status`);
+      const data = await resp.json();
+      const fontes = data.fontes || {};
+      const apiFootball = fontes['api-football'] || {};
+      const quota = apiFootball.quota || {};
+      const restante = quota.restante ?? '?';
+      checks.push({
+        id: 'apis_jogos',
+        label: 'APIs de Jogos',
+        description: `API-Football: ${restante} req restantes`,
+        status: quota.circuitBreaker ? 'error' : (restante > 20 ? 'ok' : 'warning'),
+        icon: 'live_tv'
+      });
+    } catch (_) {
+      checks.push({ id: 'apis_jogos', label: 'APIs de Jogos', description: 'Sem resposta', status: 'error', icon: 'live_tv' });
+    }
+
+    // 4. Banco de dados OK?
+    try {
+      const collections = await db.listCollections().toArray();
+      checks.push({
+        id: 'database',
+        label: 'Banco de Dados',
+        description: `${collections.length} collections`,
+        status: 'ok',
+        icon: 'storage'
+      });
+    } catch (_) {
+      checks.push({ id: 'database', label: 'Banco de Dados', description: 'Conexao falhou', status: 'error', icon: 'storage' });
+    }
+
+    // 5. Ligas ativas com modulos?
+    try {
+      const ligas = await db.collection('ligas').find({ ativa: true }).toArray();
+      const totalModulosAtivos = ligas.reduce((sum, l) => {
+        const mods = l.modulos_ativos || {};
+        return sum + Object.values(mods).filter(v => v === true).length;
+      }, 0);
+      checks.push({
+        id: 'ligas_modulos',
+        label: 'Ligas & Modulos',
+        description: `${ligas.length} ligas, ${totalModulosAtivos} modulos ativos`,
+        status: ligas.length > 0 ? 'ok' : 'warning',
+        icon: 'groups'
+      });
+    } catch (_) {
+      checks.push({ id: 'ligas_modulos', label: 'Ligas & Modulos', description: 'Erro ao verificar', status: 'error', icon: 'groups' });
+    }
+
+    // 6. Manutencao ativa?
+    try {
+      const resp = await fetch(`http://localhost:${port}/api/admin/manutencao`);
+      const data = await resp.json();
+      const ativo = data.ativo || data.manutencao?.ativo;
+      checks.push({
+        id: 'manutencao',
+        label: 'Modo Manutencao',
+        description: ativo ? 'ATIVO - participantes bloqueados' : 'Desativado',
+        status: ativo ? 'warning' : 'ok',
+        icon: 'build'
+      });
+    } catch (_) {
+      checks.push({ id: 'manutencao', label: 'Modo Manutencao', description: 'Erro ao verificar', status: 'warning', icon: 'build' });
+    }
+
+    // 7. Participantes sincronizados? (absorbs ligas-gerenciar)
+    try {
+      const ligas = await db.collection('ligas').find({ ativa: true }).toArray();
+      let totalTimes = 0;
+      for (const liga of ligas) {
+        const count = await db.collection('times').countDocuments({
+          liga_id: liga._id.toString(),
+          ativo: true
+        });
+        totalTimes += count;
+      }
+      checks.push({
+        id: 'participantes',
+        label: 'Participantes',
+        description: `${totalTimes} participantes ativos`,
+        status: totalTimes > 0 ? 'ok' : 'warning',
+        icon: 'people'
+      });
+    } catch (_) {
+      checks.push({ id: 'participantes', label: 'Participantes', description: 'Erro ao verificar', status: 'error', icon: 'people' });
+    }
+
+    const score = checks.filter(c => c.status === 'ok').length;
+    const total = checks.length;
+    const allOk = checks.every(c => c.status === 'ok');
+
+    res.json({
+      ready: allOk,
+      score: `${score}/${total}`,
+      checks,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    logger.error('[adminMobile] Erro no getChecklist:', error);
+    res.status(500).json({ error: 'Erro ao gerar checklist', code: 'INTERNAL_ERROR' });
+  }
+}
+
+// ========== TOGGLE MODULOS ========== //
+
+/**
+ * GET /api/admin/mobile/modulos/:ligaId
+ * Lista modulos de uma liga com status
+ */
+async function getModulos(req, res) {
+  try {
+    const { ligaId } = req.params;
+    const temporada = Number(req.query.temporada) || CURRENT_SEASON;
+
+    const liga = await Liga.findById(ligaId).select('nome modulos_ativos').lean();
+    if (!liga) {
+      return res.status(404).json({ error: 'Liga nao encontrada', code: 'NOT_FOUND' });
+    }
+
+    const modulos_ativos = liga.modulos_ativos || {};
+
+    // Map to a clean list
+    const modulosList = [
+      { id: 'extrato', label: 'Extrato', icon: 'receipt_long', base: true },
+      { id: 'ranking', label: 'Ranking', icon: 'leaderboard', base: true },
+      { id: 'rodadas', label: 'Rodadas', icon: 'calendar_month', base: true },
+      { id: 'historico', label: 'Historico', icon: 'history', base: true },
+      { id: 'top10', label: 'Top 10', icon: 'star', base: false },
+      { id: 'melhorMes', label: 'Melhor do Mes', icon: 'workspace_premium', base: false },
+      { id: 'pontosCorridos', label: 'Pontos Corridos', icon: 'format_list_numbered', base: false },
+      { id: 'mataMata', label: 'Mata-Mata', icon: 'account_tree', base: false },
+      { id: 'artilheiro', label: 'Artilheiro', icon: 'sports_soccer', base: false },
+      { id: 'luvaOuro', label: 'Luva de Ouro', icon: 'sports_handball', base: false },
+      { id: 'capitaoLuxo', label: 'Capitao de Luxo', icon: 'military_tech', base: false },
+      { id: 'campinho', label: 'Campinho', icon: 'grid_on', base: false },
+      { id: 'dicas', label: 'Dicas', icon: 'lightbulb', base: false },
+    ];
+
+    const result = modulosList.map(m => ({
+      ...m,
+      ativo: modulos_ativos[m.id] === true || (m.base && modulos_ativos[m.id] !== false)
+    }));
+
+    res.json({
+      liga: { id: ligaId, nome: liga.nome },
+      modulos: result,
+      temporada,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    logger.error('[adminMobile] Erro no getModulos:', error);
+    res.status(500).json({ error: 'Erro ao listar modulos', code: 'INTERNAL_ERROR' });
+  }
+}
+
+/**
+ * POST /api/admin/mobile/modulos/:ligaId/:modulo/toggle
+ * Toggle a module on/off
+ * Body: { ativo: boolean }
+ */
+async function toggleModulo(req, res) {
+  try {
+    const { ligaId, modulo } = req.params;
+    const { ativo } = req.body;
+    const adminEmail = req.admin?.email || 'sistema';
+
+    if (typeof ativo !== 'boolean') {
+      return res.status(400).json({ error: 'Campo ativo (boolean) obrigatorio', code: 'INVALID_INPUT' });
+    }
+
+    const result = await Liga.updateOne(
+      { _id: ligaId },
+      { $set: { [`modulos_ativos.${modulo}`]: ativo } }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Liga nao encontrada', code: 'NOT_FOUND' });
+    }
+
+    // Log activity
+    const db = req.app.locals.db || getDB();
+    await db.collection('adminactivitylogs').insertOne({
+      email: adminEmail,
+      action: 'modulo_toggle',
+      details: { ligaId, modulo, ativo },
+      result: 'success',
+      timestamp: new Date()
+    });
+
+    res.json({
+      success: true,
+      modulo,
+      ativo,
+      message: `Modulo ${modulo} ${ativo ? 'ativado' : 'desativado'}`,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    logger.error('[adminMobile] Erro no toggleModulo:', error);
+    res.status(500).json({ error: 'Erro ao alterar modulo', code: 'INTERNAL_ERROR' });
+  }
+}
+
+// ========== ACTIVITY LOGS ========== //
+
+/**
+ * GET /api/admin/mobile/logs
+ * Query admin activity logs
+ * Query: ?limit=50&offset=0&action=login
+ */
+async function getActivityLogs(req, res) {
+  try {
+    const db = req.app.locals.db || getDB();
+    const limit = Math.min(Number(req.query.limit) || 50, 100);
+    const offset = Number(req.query.offset) || 0;
+    const actionFilter = req.query.action;
+
+    const query = {};
+    if (actionFilter) query.action = actionFilter;
+
+    const [logs, total] = await Promise.all([
+      db.collection('adminactivitylogs')
+        .find(query)
+        .sort({ timestamp: -1 })
+        .skip(offset)
+        .limit(limit)
+        .toArray(),
+      db.collection('adminactivitylogs').countDocuments(query)
+    ]);
+
+    res.json({
+      logs,
+      total,
+      limit,
+      offset,
+      hasMore: offset + limit < total,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    logger.error('[adminMobile] Erro no getActivityLogs:', error);
+    res.status(500).json({ error: 'Erro ao buscar logs', code: 'INTERNAL_ERROR' });
+  }
+}
+
 export {
   authenticate,
   getDashboard,
   getLigas,
-  getLigaDetalhes,
   consolidarRodada,
   getConsolidacaoStatus,
   getConsolidacaoHistorico,
-  registrarAcerto,
-  getAcertos,
   getQuitacoesPendentes,
   aprovarQuitacao,
   recusarQuitacao,
-  getHealth
+  getHealth,
+  flushCache,
+  getCacheStatus,
+  forceAppUpdate,
+  getVersionStatus,
+  getChecklist,
+  getModulos,
+  toggleModulo,
+  getActivityLogs
 };

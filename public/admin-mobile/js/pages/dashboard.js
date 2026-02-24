@@ -2,10 +2,9 @@
  * Dashboard Page - Torre de Controle Admin
  * Redesign v3 - Monitoramento + Acoes Rapidas
  *
- * Filosofia: O admin mobile responde 3 perguntas:
+ * Filosofia: O admin mobile responde 2 perguntas:
  * 1. "Ta tudo OK?" (status card)
- * 2. "Preciso fazer algo?" (alertas)
- * 3. "Como estao minhas ligas?" (liga cards)
+ * 2. "Preciso fazer algo?" (alertas + acoes rapidas)
  */
 
 import API from '../api.js';
@@ -65,11 +64,6 @@ function renderDashboard(container, data) {
 
       <div class="section-header">Acoes Rapidas</div>
       ${renderQuickActions()}
-
-      ${ligas.length > 0 ? `
-        <div class="section-header">Suas Ligas</div>
-        ${ligas.map(liga => renderLigaCard(liga)).join('')}
-      ` : ''}
 
     </div>
   `;
@@ -194,32 +188,36 @@ function renderQuickActions() {
         <div class="action-card-label">Repositorio</div>
       </div>
     </div>
-  `;
-}
 
-// ========== LIGA CARD ========== //
-function renderLigaCard(liga) {
-  const saldoFormatted = (liga.saldoTotal || 0).toFixed(2).replace('.', ',');
-  const saldoColor = (liga.saldoTotal || 0) >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)';
-  const inadimplentes = liga.inadimplentes || 0;
+    <div class="section-header">Ferramentas</div>
+    <div class="action-grid">
+      <div class="action-card action-card--green" onclick="window.router.navigate('/checklist')" role="button" tabindex="0">
+        <div class="action-card-icon">${mi('checklist')}</div>
+        <div class="action-card-label">Checklist</div>
+      </div>
+      <div class="action-card action-card--purple" onclick="window.router.navigate('/cache-sentinel')" role="button" tabindex="0">
+        <div class="action-card-icon">${mi('delete_sweep')}</div>
+        <div class="action-card-label">Cache</div>
+      </div>
+      <div class="action-card action-card--cyan" onclick="window.router.navigate('/modulos')" role="button" tabindex="0">
+        <div class="action-card-icon">${mi('extension')}</div>
+        <div class="action-card-label">Modulos</div>
+      </div>
+      <div class="action-card action-card--orange" onclick="window.router.navigate('/jogos-monitor')" role="button" tabindex="0">
+        <div class="action-card-icon">${mi('live_tv')}</div>
+        <div class="action-card-label">Jogos</div>
+      </div>
+    </div>
 
-  return `
-    <div class="liga-card" onclick="window.router.navigate('/ligas', { ligaId: '${liga.id}' })">
-      <div class="liga-card-header">
-        <div class="liga-card-name">
-          ${mi('emoji_events', 'mi-sm')}
-          <span>${escapeHtml(liga.nome)}</span>
-        </div>
-        ${inadimplentes > 0 ? `<span class="badge badge-warning" style="font-size:10px;padding:2px 8px;">${inadimplentes} inadimpl.</span>` : ''}
+    <div class="section-header">Sistema</div>
+    <div class="action-grid">
+      <div class="action-card action-card--blue" onclick="window.router.navigate('/force-update')" role="button" tabindex="0">
+        <div class="action-card-icon">${mi('system_update')}</div>
+        <div class="action-card-label">Force Update</div>
       </div>
-      <div class="liga-card-stats">
-        <span class="liga-card-stat">${mi('groups')} ${liga.participantesAtivos}/${liga.participantesTotais}</span>
-        <span class="liga-card-stat">${mi('calendar_month')} R${liga.rodadaAtual}</span>
-        <span class="liga-card-stat">${mi('date_range')} T${liga.temporada}</span>
-      </div>
-      <div class="liga-card-footer">
-        <span class="liga-card-saldo" style="color:${saldoColor};">R$ ${saldoFormatted}</span>
-        <span class="material-icons" style="color:var(--text-muted);font-size:18px;">chevron_right</span>
+      <div class="action-card action-card--pink" onclick="window.router.navigate('/logs')" role="button" tabindex="0">
+        <div class="action-card-icon">${mi('history')}</div>
+        <div class="action-card-label">Logs</div>
       </div>
     </div>
   `;

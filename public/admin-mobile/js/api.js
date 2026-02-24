@@ -127,10 +127,6 @@ class API {
     return this.get('/ligas', params);
   }
 
-  async getLiga(ligaId) {
-    return this.get(`/ligas/${ligaId}`);
-  }
-
   /**
    * Consolidação
    */
@@ -144,17 +140,6 @@ class API {
 
   async getConsolidacaoHistorico(ligaId, params = {}) {
     return this.get(`/consolidacao/historico/${ligaId}`, params);
-  }
-
-  /**
-   * Acertos Financeiros
-   */
-  async getAcertos(ligaId, params = {}) {
-    return this.get(`/acertos/${ligaId}`, params);
-  }
-
-  async registrarAcerto(data) {
-    return this.post('/acertos', data);
   }
 
   async getQuitacoesPendentes() {

@@ -65,18 +65,6 @@
       ]
     },
     {
-      "name": "Novo Acerto",
-      "short_name": "Acerto",
-      "description": "Registrar acerto financeiro",
-      "url": "/admin-mobile/?action=acerto",
-      "icons": [
-        {
-          "src": "/admin-mobile/icons/icon-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
       "name": "Dashboard Saúde",
       "short_name": "Saúde",
       "description": "Ver saúde do sistema",
