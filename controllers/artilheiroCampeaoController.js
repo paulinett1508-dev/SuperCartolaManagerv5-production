@@ -376,6 +376,204 @@ class ArtilheiroCampeaoController {
     }
 
     /**
+     * ✅ v5.4: Endpoint LIVE - Ranking com parciais em tempo real
+     * GET /api/artilheiro-campeao/:ligaId/ranking-live
+     *
+     * Segue o mesmo padr\u00e3o do Capit\u00e3o de Luxo:
+     * 1. Verifica mercado fechado (status_mercado === 2)
+     * 2. Busca /atletas/pontuados (scouts ao vivo) UMA vez
+     * 3. Combina dados consolidados (DB) + gols da rodada atual (live)
+     * 4. Retorna ranking unificado ordenado
+     */
+    static async getRankingLive(req, res) {
+        try {
+            const { ligaId } = req.params;
+
+            // 1. Validar liga
+            const { valid, liga, error } = await validarLigaArtilheiro(ligaId);
+            if (!valid) {
+                return res.status(liga ? 400 : 404).json({ success: false, error });
+            }
+
+            // 2. Verificar se mercado est\u00e1 fechado (rodada ativa)
+            const statusMercado = await ArtilheiroCampeaoController.detectarStatusMercado();
+
+            if (statusMercado.mercadoAberto || statusMercado.temporadaEncerrada) {
+                return res.json({
+                    success: false,
+                    disponivel: false,
+                    motivo: statusMercado.temporadaEncerrada ? 'temporada_encerrada' : 'mercado_aberto',
+                });
+            }
+
+            const rodadaAtual = statusMercado.rodadaAtual;
+
+            // 3. Buscar atletas pontuados (scores ao vivo) UMA vez
+            const atletasPontuados = await ArtilheiroCampeaoController.buscarAtletasPontuados();
+
+            if (!atletasPontuados || Object.keys(atletasPontuados).length === 0) {
+                return res.json({
+                    success: false,
+                    disponivel: false,
+                    motivo: 'sem_pontuados',
+                });
+            }
+
+            // 4. Buscar participantes da liga
+            const participantes = await getParticipantesLiga(liga);
+            if (participantes.length === 0) {
+                return res.json({
+                    success: false,
+                    disponivel: false,
+                    motivo: 'sem_participantes',
+                });
+            }
+
+            // 5. Buscar criterio_ranking do ModuleConfig
+            let criterioRanking = 'saldo_gols';
+            try {
+                const moduleConfig = await ModuleConfig.buscarConfig(ligaId, 'artilheiro', CURRENT_SEASON);
+                if (moduleConfig?.wizard_respostas?.criterio_ranking) {
+                    criterioRanking = moduleConfig.wizard_respostas.criterio_ranking;
+                }
+            } catch (e) {
+                // fallback silencioso
+            }
+
+            // 6. Buscar status de participa\u00e7\u00e3o (ativos/inativos)
+            const statusParticipantes = await buscarStatusParticipantes(ligaId, CURRENT_SEASON);
+
+            // 7. Para cada participante, combinar hist\u00f3rico consolidado + live da rodada atual
+            const RODADA_FINAL = statusMercado.rodadaTotal || SEASON_CONFIG.rodadaFinal || 38;
+            const rodadaFimHistorico = Math.max(1, rodadaAtual - 1);
+
+            const rankingLive = await Promise.all(
+                participantes.map(async (p) => {
+                    try {
+                        // 7a. Dados consolidados (rodadas anteriores) do MongoDB
+                        const consolidados = await GolsConsolidados.find({
+                            ligaId,
+                            timeId: p.timeId,
+                            temporada: CURRENT_SEASON,
+                            rodada: { $lte: rodadaFimHistorico },
+                        }).lean();
+
+                        let golsProHistorico = 0;
+                        let golsContraHistorico = 0;
+                        const rodadasProcessadas = consolidados.length;
+
+                        for (const doc of consolidados) {
+                            golsProHistorico += doc.golsPro || 0;
+                            golsContraHistorico += doc.golsContra || 0;
+                        }
+
+                        // 7b. Gols da rodada atual (live via /atletas/pontuados)
+                        const golsLive = await ArtilheiroCampeaoController.calcularGolsRodadaParcial(
+                            p.timeId,
+                            rodadaAtual,
+                            atletasPontuados,
+                        );
+
+                        const golsProRodada = golsLive?.golsPro || 0;
+                        const golsContraRodada = golsLive?.golsContra || 0;
+
+                        // 7c. Totais combinados
+                        const golsProTotal = golsProHistorico + golsProRodada;
+                        const golsContraTotal = golsContraHistorico + golsContraRodada;
+                        const saldoTotal = golsProTotal - golsContraTotal;
+
+                        // 7d. Status do participante (ativo/inativo)
+                        const statusP = statusParticipantes.find(s => s.timeId === p.timeId);
+                        const ativo = statusP ? statusP.ativo : (p.ativo !== false);
+                        const rodada_desistencia = statusP?.rodada_desistencia || null;
+
+                        return {
+                            timeId: p.timeId,
+                            nome: p.nome,
+                            nomeTime: p.nomeTime,
+                            escudo: p.escudo,
+                            clubeId: p.clubeId,
+                            // Hist\u00f3rico (rodadas anteriores)
+                            golsPro_historico: golsProHistorico,
+                            golsContra_historico: golsContraHistorico,
+                            saldo_historico: golsProHistorico - golsContraHistorico,
+                            // Rodada atual (live)
+                            golsPro_rodada: golsProRodada,
+                            golsContra_rodada: golsContraRodada,
+                            jogadores_rodada: golsLive?.jogadores || [],
+                            // Totais combinados
+                            golsPro: golsProTotal,
+                            golsContra: golsContraTotal,
+                            saldoGols: saldoTotal,
+                            rodadasProcessadas: rodadasProcessadas + (golsProRodada > 0 || golsContraRodada > 0 ? 1 : 0),
+                            // Status
+                            ativo,
+                            rodada_desistencia,
+                        };
+                    } catch (err) {
+                        logger.warn(`\u26a0\ufe0f [ARTILHEIRO-LIVE] Erro ao processar time ${p.timeId}:`, err.message);
+                        return {
+                            timeId: p.timeId,
+                            nome: p.nome,
+                            nomeTime: p.nomeTime,
+                            escudo: p.escudo,
+                            clubeId: p.clubeId,
+                            golsPro_historico: 0, golsContra_historico: 0, saldo_historico: 0,
+                            golsPro_rodada: 0, golsContra_rodada: 0, jogadores_rodada: [],
+                            golsPro: 0, golsContra: 0, saldoGols: 0,
+                            rodadasProcessadas: 0,
+                            ativo: p.ativo !== false,
+                            rodada_desistencia: null,
+                        };
+                    }
+                })
+            );
+
+            // 8. Separar ativos e inativos
+            const ativos = rankingLive.filter(p => p.ativo !== false);
+            const inativos = rankingLive.filter(p => p.ativo === false);
+
+            // 9. Ordenar por crit\u00e9rio configurado
+            const sortFn = criterioRanking === 'gols_pro'
+                ? (a, b) => b.golsPro - a.golsPro || b.saldoGols - a.saldoGols || a.timeId - b.timeId
+                : (a, b) => b.saldoGols - a.saldoGols || b.golsPro - a.golsPro || a.timeId - b.timeId;
+
+            ativos.sort(sortFn);
+            inativos.sort(sortFn);
+
+            // 10. Atribuir posi\u00e7\u00f5es
+            ativos.forEach((p, i) => { p.posicao = i + 1; });
+            inativos.forEach((p, i) => { p.posicao = ativos.length + i + 1; });
+
+            const rankingFinal = [...ativos, ...inativos];
+
+            res.json({
+                success: true,
+                disponivel: true,
+                ranking: rankingFinal,
+                estatisticas: {
+                    totalGolsPro: ativos.reduce((s, p) => s + p.golsPro, 0),
+                    totalGolsContra: ativos.reduce((s, p) => s + p.golsContra, 0),
+                    totalSaldo: ativos.reduce((s, p) => s + p.saldoGols, 0),
+                    participantes: rankingFinal.length,
+                    participantesAtivos: ativos.length,
+                    participantesInativos: inativos.length,
+                },
+                rodada: rodadaAtual,
+                live: true,
+                atualizado_em: new Date().toISOString(),
+            });
+        } catch (error) {
+            logger.error('\u274c [ARTILHEIRO-LIVE] Erro no ranking live:', error);
+            res.status(500).json({
+                success: false,
+                error: 'Erro interno do servidor',
+                message: error.message,
+            });
+        }
+    }
+
+    /**
      * ✅ v4.4: Detectar status do mercado COM DETECÇÃO DE TEMPORADA ENCERRADA
      */
     static async detectarStatusMercado() {

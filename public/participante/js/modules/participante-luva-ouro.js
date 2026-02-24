@@ -1,6 +1,10 @@
 // =====================================================================
-// PARTICIPANTE-LUVA-OURO.JS - v4.0 (Cache-First IndexedDB)
+// PARTICIPANTE-LUVA-OURO.JS - v4.1 (MatchdayService + Cache-First)
 // =====================================================================
+// ✅ v4.1: MatchdayService integration (paridade com Capitão)
+//    - modeLive state, subscribeMatchdayEvents, endpoint switching
+//    - Fallback live → consolidado se mercado aberto
+//    - Cleanup/destrutor para navegação SPA
 // ✅ v4.0: Cache-first com IndexedDB para carregamento instantâneo
 // ✅ v3.8: Detecção de temporada encerrada (R38 + mercado fechado)
 //    - Badge "CAMPEÃO" quando temporada encerrada
@@ -8,15 +12,21 @@
 // ✅ v3.7: Card Desempenho ao final
 // =====================================================================
 
-if (window.Log) Log.info("[PARTICIPANTE-LUVA-OURO] Carregando módulo v4.0...");
+if (window.Log) Log.info("[PARTICIPANTE-LUVA-OURO] Carregando módulo v4.1...");
 
 const RODADA_FINAL = 38;
 
 // Estado do módulo
 let estadoLuva = {
+    ligaId: null,
+    timeId: null,
+    modeLive: false,
     temporadaEncerrada: false,
     rodadaAtual: null,
     mercadoAberto: true,
+    rankingAtual: null,
+    _onParciais: null,
+    _onMatchdayStop: null,
 };
 
 // =====================================================================
@@ -27,10 +37,23 @@ export async function inicializarLuvaOuroParticipante({
     ligaId,
     timeId,
 }) {
-    if (window.Log) Log.info("[PARTICIPANTE-LUVA-OURO] 🚀 Inicializando v4.0...", {
+    if (window.Log) Log.info("[PARTICIPANTE-LUVA-OURO] 🚀 Inicializando v4.1...", {
         ligaId,
         timeId,
     });
+
+    // Salvar no estado para uso interno
+    estadoLuva.ligaId = ligaId;
+    estadoLuva.timeId = timeId;
+    estadoLuva.modeLive = false;
+    estadoLuva.rankingAtual = null;
+
+    // ✅ v4.1: Verificar matchday (parciais) — paridade com Capitão
+    if (window.MatchdayService && window.MatchdayService.isActive) {
+        estadoLuva.modeLive = true;
+        _subscribeMatchdayEvents();
+        if (window.Log) Log.info("[PARTICIPANTE-LUVA-OURO] 🔥 MatchdayService ATIVO — modo live");
+    }
 
     // ✅ LP: Init acordeons + carregar regras e premiações (non-blocking)
     _initLPAccordions('luva-lp-wrapper');
@@ -96,10 +119,24 @@ export async function inicializarLuvaOuroParticipante({
             }
         }
 
-        const response = await fetch(`/api/luva-de-ouro/${ligaId}/ranking`);
+        // ✅ v4.1: Endpoint dinâmico (live vs consolidado) — paridade com Capitão
+        const endpoint = estadoLuva.modeLive
+            ? `/api/luva-de-ouro/${ligaId}/ranking-live`
+            : `/api/luva-de-ouro/${ligaId}/ranking`;
+
+        const response = await fetch(endpoint);
         if (!response.ok) throw new Error("Dados não disponíveis");
 
-        const responseData = await response.json();
+        let responseData = await response.json();
+
+        // ✅ v4.1: Se live retornou indisponível, fallback para consolidado
+        if (estadoLuva.modeLive && responseData.disponivel === false) {
+            if (window.Log) Log.info("[PARTICIPANTE-LUVA-OURO] ⚠️ Live indisponível, fallback consolidado");
+            const fallbackResp = await fetch(`/api/luva-de-ouro/${ligaId}/ranking`);
+            if (fallbackResp.ok) {
+                responseData = await fallbackResp.json();
+            }
+        }
 
         if (window.Log) Log.info(
             "[PARTICIPANTE-LUVA-OURO] 📦 Dados recebidos da API",
@@ -730,7 +767,99 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
     container.innerHTML = html;
 }
 
-if (window.Log) Log.info("[PARTICIPANTE-LUVA-OURO] Módulo v4.0 carregado (Cache-First IndexedDB)");
+// =====================================================================
+// ✅ v4.1: MATCHDAY EVENTS — Paridade com Capitão
+// =====================================================================
+function _subscribeMatchdayEvents() {
+    if (!window.MatchdayService) return;
+
+    // Handler para atualização de parciais
+    estadoLuva._onParciais = () => {
+        if (window.Log) Log.info('[PARTICIPANTE-LUVA-OURO]', 'Atualizando com parciais');
+        _recarregarRanking();
+    };
+
+    // Handler para fim do matchday (mercado abriu)
+    estadoLuva._onMatchdayStop = () => {
+        if (window.Log) Log.info('[PARTICIPANTE-LUVA-OURO]', 'Matchday encerrado — voltando p/ consolidado');
+        estadoLuva.modeLive = false;
+        _recarregarRanking();
+    };
+
+    window.MatchdayService.on('data:parciais', estadoLuva._onParciais);
+    window.MatchdayService.on('matchday:stop', estadoLuva._onMatchdayStop);
+}
+
+/**
+ * Recarrega ranking usando o estado salvo (ligaId, timeId).
+ * Chamada pelos eventos do MatchdayService.
+ */
+async function _recarregarRanking() {
+    const { ligaId, timeId } = estadoLuva;
+    if (!ligaId) return;
+
+    const container = document.getElementById("luvaOuroContainer");
+    if (!container) return;
+
+    try {
+        const endpoint = estadoLuva.modeLive
+            ? `/api/luva-de-ouro/${ligaId}/ranking-live`
+            : `/api/luva-de-ouro/${ligaId}/ranking`;
+
+        const response = await fetch(endpoint);
+        if (!response.ok) return;
+
+        let responseData = await response.json();
+
+        // Fallback se live indisponível
+        if (estadoLuva.modeLive && responseData.disponivel === false) {
+            const fallbackResp = await fetch(`/api/luva-de-ouro/${ligaId}/ranking`);
+            if (fallbackResp.ok) {
+                responseData = await fallbackResp.json();
+            }
+        }
+
+        // Salvar no cache se consolidado
+        if (!estadoLuva.modeLive && window.OfflineCache) {
+            try {
+                await window.OfflineCache.set('luvaOuro', ligaId, responseData);
+            } catch (e) { /* cache não é crítico */ }
+        }
+
+        await renderizarLuvaOuro(container, responseData, timeId);
+    } catch (error) {
+        if (window.Log) Log.error("[PARTICIPANTE-LUVA-OURO] Erro ao recarregar:", error);
+    }
+}
+
+/**
+ * Cleanup — chamado na navegação SPA para evitar memory leaks.
+ * Exposto via window para participante-navigation.js.
+ */
+export function destruirLuvaOuroParticipante() {
+    if (window.Log) Log.info('[PARTICIPANTE-LUVA-OURO]', 'Destruindo módulo (cleanup)');
+
+    // Remover listeners do MatchdayService
+    if (window.MatchdayService) {
+        if (estadoLuva._onParciais) {
+            window.MatchdayService.off('data:parciais', estadoLuva._onParciais);
+        }
+        if (estadoLuva._onMatchdayStop) {
+            window.MatchdayService.off('matchday:stop', estadoLuva._onMatchdayStop);
+        }
+    }
+
+    // Reset estado
+    estadoLuva.modeLive = false;
+    estadoLuva.ligaId = null;
+    estadoLuva.timeId = null;
+    estadoLuva.rankingAtual = null;
+    estadoLuva._onParciais = null;
+    estadoLuva._onMatchdayStop = null;
+}
+window.destruirLuvaOuroParticipante = destruirLuvaOuroParticipante;
+
+if (window.Log) Log.info("[PARTICIPANTE-LUVA-OURO] Módulo v4.1 carregado (MatchdayService + Cache-First)");
 
 // =====================================================================
 // MODULE LP — Landing Page Utils (Luva de Ouro)

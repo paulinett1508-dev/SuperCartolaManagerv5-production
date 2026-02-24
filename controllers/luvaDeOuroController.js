@@ -1,4 +1,5 @@
-// controllers/luvaDeOuroController.js v3.0.0 - SaaS DINÂMICO
+// controllers/luvaDeOuroController.js v3.1.0 - SaaS DINÂMICO
+// v3.1.0: ranking-live com MatchdayService (paridade com Capitão)
 // v3.0.0: ranking-live, consolidar, temporada, desempate
 // v2.0.0: Configurações dinâmicas via liga.configuracoes (White Label)
 import {
@@ -8,6 +9,10 @@ import {
   consolidarRodada,
 } from "../services/goleirosService.js";
 import Liga from "../models/Liga.js";
+import Goleiros from "../models/Goleiros.js";
+import cartolaApiService from '../services/cartolaApiService.js';
+import { truncarPontosNum } from '../utils/type-helpers.js';
+import { CURRENT_SEASON } from '../config/seasons.js';
 import logger from '../utils/logger.js';
 
 // =====================================================================
@@ -439,6 +444,7 @@ class LuvaDeOuroController {
   }
 
   // GET /api/luva-de-ouro/:ligaId/ranking-live
+  // v3.1.0: Lógica live real com MatchdayService (paridade com Capitão)
   static async getRankingLive(req, res) {
     try {
       const { ligaId } = req.params;
@@ -454,13 +460,104 @@ class LuvaDeOuroController {
         });
       }
 
-      // Obter ranking com forcar_coleta para parciais mais frescos
-      const resultado = await obterRankingGoleiros(ligaId, 1, null);
+      // 1. Verificar se mercado está fechado (rodada ativa)
+      let rodadaAtual;
+      try {
+        const statusResp = await cartolaApiService.httpClient.get(
+          `${cartolaApiService.baseUrl}/mercado/status`
+        );
+        const mercadoStatus = statusResp.data;
+        if (mercadoStatus.status_mercado !== 2) {
+          return res.json({ success: false, disponivel: false, motivo: 'mercado_aberto' });
+        }
+        rodadaAtual = mercadoStatus.rodada_atual;
+      } catch (err) {
+        return res.json({ success: false, disponivel: false, motivo: 'erro_mercado' });
+      }
+
+      // 2. Buscar pontuados (scores ao vivo) UMA vez
+      let pontuadosMap;
+      try {
+        const pontuadosResp = await cartolaApiService.httpClient.get(
+          `${cartolaApiService.baseUrl}/atletas/pontuados`
+        );
+        pontuadosMap = pontuadosResp.data?.atletas || {};
+      } catch (err) {
+        return res.json({ success: false, disponivel: false, motivo: 'sem_pontuados' });
+      }
+
+      if (Object.keys(pontuadosMap).length === 0) {
+        return res.json({ success: false, disponivel: false, motivo: 'sem_pontuados' });
+      }
+
+      // 3. Buscar ranking consolidado (rodadas anteriores) do MongoDB
+      const rankingConsolidado = await obterRankingGoleiros(ligaId, 1, rodadaAtual - 1);
+
+      if (!rankingConsolidado || !rankingConsolidado.ranking || rankingConsolidado.ranking.length === 0) {
+        return res.json({ success: false, disponivel: false, motivo: 'sem_cache_consolidado' });
+      }
+
+      // 4. Para cada participante, buscar pontos do GOLEIRO na rodada atual
+      const rankingLive = await Promise.all(
+        rankingConsolidado.ranking.map(async (cached) => {
+          const goleiroVivo = await LuvaDeOuroController._buscarGoleiroRodadaLive(
+            cached.participanteId, rodadaAtual, pontuadosMap
+          );
+
+          const pontosHistorico = cached.pontosTotais || 0;
+          const pontosRodadaAtual = goleiroVivo.pontuacao || 0;
+
+          return {
+            participanteId: cached.participanteId,
+            participanteNome: cached.participanteNome,
+            nomeTime: cached.nomeTime || '',
+            clubeId: cached.clubeId,
+            pontosTotais: truncarPontosNum(pontosHistorico + pontosRodadaAtual),
+            pontuacao_historica: truncarPontosNum(pontosHistorico),
+            pontos_goleiro_rodada: truncarPontosNum(pontosRodadaAtual),
+            goleiro_nome: goleiroVivo.goleiro_nome,
+            goleiro_clube: goleiroVivo.goleiro_clube,
+            goleiro_jogou: goleiroVivo.jogou,
+            rodadasJogadas: (cached.rodadasJogadas || 0) + (goleiroVivo.jogou !== false ? 1 : 0),
+            rodadas: [
+              ...(cached.rodadas || []),
+              {
+                rodada: rodadaAtual,
+                pontos: truncarPontosNum(pontosRodadaAtual),
+                goleiroNome: goleiroVivo.goleiro_nome || 'N/D',
+                goleiroClube: goleiroVivo.goleiro_clube || '',
+                parcial: true,
+                jogou: goleiroVivo.jogou,
+              }
+            ],
+            ativo: cached.ativo,
+            ultimaRodada: {
+              rodada: rodadaAtual,
+              goleiroNome: goleiroVivo.goleiro_nome || 'N/D',
+              goleiroClube: goleiroVivo.goleiro_clube || '',
+              pontos: truncarPontosNum(pontosRodadaAtual),
+              parcial: true,
+            },
+          };
+        })
+      );
+
+      // 5. Ordenar por pontuação total (histórico + rodada atual)
+      rankingLive.sort((a, b) => b.pontosTotais - a.pontosTotais);
 
       res.json({
         success: true,
-        data: resultado,
+        disponivel: true,
+        data: {
+          ranking: rankingLive,
+          rodadaInicio: 1,
+          rodadaFim: rodadaAtual,
+          rodadaParcial: rodadaAtual,
+          mercadoFechado: true,
+          totalParticipantes: rankingLive.length,
+        },
         live: true,
+        rodada: rodadaAtual,
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
@@ -471,6 +568,60 @@ class LuvaDeOuroController {
         message: error.message,
         timestamp: new Date().toISOString(),
       });
+    }
+  }
+
+  /**
+   * Busca pontuação LIVE do goleiro de um participante na rodada atual.
+   * Equivalente ao buscarCapitaoRodada do Capitão.
+   * @param {number} timeId - ID do time/participante
+   * @param {number} rodada - Rodada atual
+   * @param {Object} pontuadosMap - Mapa de atletas pontuados (buscado uma vez)
+   * @returns {Object} { pontuacao, goleiro_nome, goleiro_clube, jogou }
+   */
+  static async _buscarGoleiroRodadaLive(timeId, rodada, pontuadosMap) {
+    try {
+      // Buscar escalação do time na rodada atual
+      const resp = await cartolaApiService.httpClient.get(
+        `${cartolaApiService.baseUrl}/time/id/${timeId}/${rodada}`
+      );
+      const dados = resp.data;
+
+      if (!dados || !dados.atletas) {
+        return { pontuacao: 0, goleiro_nome: null, goleiro_clube: null, jogou: false };
+      }
+
+      // Encontrar goleiro (posicao_id === 1)
+      const atletas = Array.isArray(dados.atletas) ? dados.atletas : Object.values(dados.atletas);
+      const goleiro = atletas.find(a => a.posicao_id === 1);
+
+      if (!goleiro) {
+        return { pontuacao: 0, goleiro_nome: 'Sem goleiro', goleiro_clube: null, jogou: false };
+      }
+
+      const atletaId = String(goleiro.atleta_id);
+      const pontuado = pontuadosMap[atletaId];
+
+      // Se está nos pontuados, pegamos a pontuação live
+      if (pontuado) {
+        return {
+          pontuacao: parseFloat(pontuado.pontuacao) || 0,
+          goleiro_nome: goleiro.apelido || goleiro.nome || 'Goleiro',
+          goleiro_clube: goleiro.clube?.nome || null,
+          jogou: true,
+        };
+      }
+
+      // Goleiro escalado mas ainda não jogou (jogo não começou)
+      return {
+        pontuacao: 0,
+        goleiro_nome: goleiro.apelido || goleiro.nome || 'Goleiro',
+        goleiro_clube: goleiro.clube?.nome || null,
+        jogou: false,
+      };
+    } catch (error) {
+      logger.warn(`⚠️ [LUVA-OURO] Erro ao buscar goleiro live do time ${timeId}:`, error.message);
+      return { pontuacao: 0, goleiro_nome: null, goleiro_clube: null, jogou: false };
     }
   }
 

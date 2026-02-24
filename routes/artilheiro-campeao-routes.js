@@ -1,7 +1,8 @@
-// routes/artilheiro-campeao-routes.js - VERSÃO 5.3
+// routes/artilheiro-campeao-routes.js - VERSÃO 5.4
 // Rotas do módulo Artilheiro Campeão com persistência MongoDB
 // ✅ v5.2: Session validation, audit logging, premiação endpoint
 // ✅ v5.3: verificarAdmin middleware nas rotas mutantes (fix auth bug)
+// ✅ v5.4: Endpoint ranking-live para integração com MatchdayService
 
 import express from "express";
 import { verificarAdmin } from "../middleware/auth.js";
@@ -9,7 +10,7 @@ import ArtilheiroCampeaoController from "../controllers/artilheiroCampeaoControl
 
 const router = express.Router();
 
-console.log("[ROUTES] Carregando rotas do Artilheiro Campeao v5.3...");
+console.log("[ROUTES] Carregando rotas do Artilheiro Campeao v5.4...");
 
 // ========================================
 // ROTAS PÚBLICAS (GET)
@@ -17,6 +18,10 @@ console.log("[ROUTES] Carregando rotas do Artilheiro Campeao v5.3...");
 
 router.get("/:ligaId/ranking", async (req, res) => {
     await ArtilheiroCampeaoController.obterRanking(req, res);
+});
+
+router.get("/:ligaId/ranking-live", async (req, res) => {
+    await ArtilheiroCampeaoController.getRankingLive(req, res);
 });
 
 router.get("/:ligaId/detectar-rodada", async (req, res) => {
@@ -63,6 +68,6 @@ router.get("/:ligaId/acumulado", async (req, res) => {
     await ArtilheiroCampeaoController.obterRanking(req, res);
 });
 
-console.log("[ROUTES] Rotas do Artilheiro Campeao v5.3 carregadas");
+console.log("[ROUTES] Rotas do Artilheiro Campeao v5.4 carregadas");
 
 export default router;
