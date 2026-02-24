@@ -2,6 +2,7 @@ import cron from "node-cron";
 import compression from "compression";
 // Executar scraper de jogos Globo Esporte diariamente às 6h (horário do servidor)
 import { exec } from "child_process";
+import crypto from "crypto";
 
 // ====================================================================
 // 🔄 RECURSOS GLOBAIS PARA GRACEFUL SHUTDOWN
@@ -222,7 +223,7 @@ import orchestratorRoutes from "./routes/orchestrator-routes.js";
 import orchestrator from "./services/orchestrator/roundMarketOrchestrator.js";
 
 // Middleware de proteção
-import { protegerRotas, injetarSessaoDevAdmin } from "./middleware/auth.js";
+import { protegerRotas, injetarSessaoDevAdmin, verificarAdmin } from "./middleware/auth.js";
 
 // dotenv já foi carregado no início do arquivo
 
@@ -596,16 +597,17 @@ app.use("/api/notifications", notificationsRoutes);
 console.log("[SERVER] 🔔 Rotas de Push Notifications registradas em /api/notifications");
 
 // 📊 Analytics - Branches & Merges (session auth, para SPA desktop)
-app.get("/api/admin/analytics/resumo", analyticsController.getAnalyticsResumo);
-app.get("/api/admin/analytics/branch/:nomeBranch", analyticsController.getAnatyticsBranchDetalhes);
-app.get("/api/admin/analytics/merges", analyticsController.getAnalyticsMerges);
-app.get("/api/admin/analytics/pull-requests", analyticsController.getAnalyticsPullRequests);
-app.get("/api/admin/analytics/funcionalidades", analyticsController.getAnalyticsFuncionalidades);
-app.get("/api/admin/analytics/estatisticas", analyticsController.getAnalyticsEstatisticas);
-app.get("/api/admin/analytics/sync-status", analyticsController.getGitSyncStatus);
-app.post("/api/admin/analytics/sync-trigger", analyticsController.postGitSyncTrigger);
-app.delete("/api/admin/analytics/branch/:nomeBranch", analyticsController.deleteBranch);
-app.post("/api/admin/analytics/branches/delete-batch", analyticsController.deleteBranchesBatch);
+// 🔒 SEC-FIX: Todas as rotas analytics agora exigem autenticação admin
+app.get("/api/admin/analytics/resumo", verificarAdmin, analyticsController.getAnalyticsResumo);
+app.get("/api/admin/analytics/branch/:nomeBranch", verificarAdmin, analyticsController.getAnatyticsBranchDetalhes);
+app.get("/api/admin/analytics/merges", verificarAdmin, analyticsController.getAnalyticsMerges);
+app.get("/api/admin/analytics/pull-requests", verificarAdmin, analyticsController.getAnalyticsPullRequests);
+app.get("/api/admin/analytics/funcionalidades", verificarAdmin, analyticsController.getAnalyticsFuncionalidades);
+app.get("/api/admin/analytics/estatisticas", verificarAdmin, analyticsController.getAnalyticsEstatisticas);
+app.get("/api/admin/analytics/sync-status", verificarAdmin, analyticsController.getGitSyncStatus);
+app.post("/api/admin/analytics/sync-trigger", verificarAdmin, analyticsController.postGitSyncTrigger);
+app.delete("/api/admin/analytics/branch/:nomeBranch", verificarAdmin, analyticsController.deleteBranch);
+app.post("/api/admin/analytics/branches/delete-batch", verificarAdmin, analyticsController.deleteBranchesBatch);
 console.log("[SERVER] 📊 Rotas de Analytics (session) registradas em /api/admin/analytics");
 
 // 📢 Avisos In-App (Notificador)
@@ -1110,18 +1112,47 @@ export default app;
 
 
 // Webhook para GitHub Actions
+// 🔒 SEC-FIX: Validação HMAC SHA-256 obrigatória
 app.post('/github-sync', express.json(), (req, res) => {
-  console.log('🔔 Webhook do GitHub recebido:', req.body);
-  
+  const webhookSecret = process.env.GITHUB_WEBHOOK_SECRET;
+
+  // Em produção, exigir secret configurado
+  if (!webhookSecret) {
+    if (process.env.NODE_ENV === 'production') {
+      console.error('[WEBHOOK] GITHUB_WEBHOOK_SECRET nao configurado - bloqueando em producao');
+      return res.status(403).json({ error: 'Webhook secret nao configurado' });
+    }
+    console.warn('[WEBHOOK] GITHUB_WEBHOOK_SECRET nao configurado - permitindo apenas em dev');
+  }
+
+  // Validar assinatura HMAC se secret configurado
+  if (webhookSecret) {
+    const signature = req.headers['x-hub-signature-256'];
+    if (!signature) {
+      console.warn('[WEBHOOK] Requisicao sem assinatura X-Hub-Signature-256');
+      return res.status(401).json({ error: 'Assinatura ausente' });
+    }
+
+    const payload = JSON.stringify(req.body);
+    const expectedSig = 'sha256=' + crypto.createHmac('sha256', webhookSecret).update(payload).digest('hex');
+
+    if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSig))) {
+      console.warn('[WEBHOOK] Assinatura HMAC invalida');
+      return res.status(401).json({ error: 'Assinatura invalida' });
+    }
+  }
+
+  console.log('[WEBHOOK] GitHub sync autorizado');
+
   exec('bash scripts/sync-replit.sh', (error, stdout, stderr) => {
     if (error) {
-      console.error('❌ Erro no sync:', error);
+      console.error('[WEBHOOK] Erro no sync:', error);
       return res.status(500).json({ error: error.message });
     }
-    
-    console.log('✅ Sync concluído:', stdout);
-    res.json({ 
-      success: true, 
+
+    console.log('[WEBHOOK] Sync concluido:', stdout);
+    res.json({
+      success: true,
       message: 'Sync executado',
       timestamp: new Date().toISOString()
     });

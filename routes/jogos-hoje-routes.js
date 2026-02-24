@@ -28,7 +28,7 @@ router.get('/', async (req, res) => {
         let jogos = [];
         try {
             const response = await fetch(url, {
-                headers: { 'X-Auth-Token': process.env.FOOTBALL_API_KEY || 'cc99ba935fe4423fa2c3e46b5de636df' },
+                headers: { 'X-Auth-Token': process.env.FOOTBALL_API_KEY || '' },
                 timeout: 5000
             });
             const data = await response.json();
