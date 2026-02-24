@@ -155,8 +155,14 @@ const ManutencaoConfig = {
 
         const ativo = this.estadoAtual?.ativo === true;
         indicator.innerHTML = ativo
-            ? '<span class="w-3 h-3 rounded-full bg-red-500 animate-pulse"></span><span class="text-sm text-red-400">ATIVO</span>'
-            : '<span class="w-3 h-3 rounded-full bg-green-500"></span><span class="text-sm text-green-400">Inativo</span>';
+            ? `<span class="mav-status-badge ativo">
+                   <span class="mav-status-dot"></span>
+                   ATIVO
+               </span>`
+            : `<span class="mav-status-badge inativo">
+                   <span class="mav-status-dot"></span>
+                   Inativo
+               </span>`;
     },
 
     atualizarStatusAtual() {

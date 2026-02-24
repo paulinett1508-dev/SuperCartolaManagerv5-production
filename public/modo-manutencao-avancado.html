@@ -4,293 +4,289 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modo Manutenção Avançado - Super Cartola Manager</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Design Tokens (SEMPRE PRIMEIRO) -->
+    <link rel="stylesheet" href="/css/_admin-tokens.css">
+    <!-- Base CSS -->
+    <link rel="stylesheet" href="/style.css">
+    <!-- Módulo específico -->
+    <link rel="stylesheet" href="/css/modules/manutencao-avancado.css">
+    <!-- Sistema de modais -->
+    <link rel="stylesheet" href="/css/modules/super-modal.css">
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Fontes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/_admin-tokens.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="/css/modules/super-modal.css">
-    <style>
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-        }
-        h1, h2, h3 {
-            font-family: 'Russo One', sans-serif;
-        }
-        .mono {
-            font-family: 'JetBrains Mono', monospace;
-        }
-    </style>
+
+    <script src="/js/super-modal.js"></script>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen">
+<body>
     <div id="sidebar-placeholder"></div>
-    <!-- Header -->
-    <header class="bg-gray-800 border-b border-gray-700 sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <a href="painel.html" class="text-gray-400 hover:text-white transition-colors">
-                        ← Voltar
+
+    <main class="app-main mav-page">
+        <div class="mav-container">
+
+            <!-- Header -->
+            <header class="mav-header">
+                <div class="mav-header-left">
+                    <a href="painel.html" class="mav-btn-voltar">
+                        <span class="material-icons">arrow_back</span>
+                        Voltar
                     </a>
-                    <h1 class="text-2xl flex items-center gap-2">
-                        <span class="material-icons" style="color:var(--app-warning)">build</span>
+                    <h1 class="mav-title">
+                        <span class="material-icons">build</span>
                         Modo Manutenção Avançado
                     </h1>
                 </div>
-                <div id="statusIndicator" class="flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-gray-500"></span>
-                    <span class="text-sm text-gray-400">Carregando...</span>
+                <div id="statusIndicator">
+                    <span class="mav-status-badge carregando">
+                        <span class="mav-status-dot"></span>
+                        Carregando...
+                    </span>
                 </div>
-            </div>
-        </div>
-    </header>
+            </header>
 
-    <main class="app-main container mx-auto px-4 py-8 max-w-6xl">
-        <!-- Status Atual -->
-        <section id="statusAtual" class="bg-gray-800 rounded-lg p-6 mb-8 border border-gray-700">
-            <h2 class="text-xl mb-4 flex items-center gap-2">
-                <span class="material-icons" style="color:var(--app-info)">monitoring</span>
-                Status Atual
-            </h2>
-            <div id="statusContent" class="text-gray-400">
-                Carregando...
-            </div>
-        </section>
-
-        <!-- Configuração -->
-        <section class="bg-gray-800 rounded-lg p-6 mb-8 border border-gray-700">
-            <h2 class="text-xl mb-6 flex items-center gap-2">
-                <span class="material-icons" style="color:var(--app-primary)">settings</span>
-                Configuração
-            </h2>
-
-            <!-- Modo de Operação -->
-            <div class="mb-6">
-                <label class="block text-sm font-medium mb-3">Modo de Operação:</label>
-                <div class="space-y-2">
-                    <label class="flex items-center gap-3 p-3 bg-gray-700 rounded cursor-pointer hover:bg-gray-600 transition-colors">
-                        <input type="radio" name="modo" value="global" class="w-4 h-4" checked>
-                        <div>
-                            <div class="font-medium">Global</div>
-                            <div class="text-sm text-gray-400">Bloqueia todo o app para todos os usuários</div>
-                        </div>
-                    </label>
-                    <label class="flex items-center gap-3 p-3 bg-gray-700 rounded cursor-pointer hover:bg-gray-600 transition-colors">
-                        <input type="radio" name="modo" value="modulos" class="w-4 h-4">
-                        <div>
-                            <div class="font-medium">Módulos Específicos</div>
-                            <div class="text-sm text-gray-400">Bloqueia apenas módulos selecionados</div>
-                        </div>
-                    </label>
-                    <label class="flex items-center gap-3 p-3 bg-gray-700 rounded cursor-pointer hover:bg-gray-600 transition-colors">
-                        <input type="radio" name="modo" value="usuarios" class="w-4 h-4">
-                        <div>
-                            <div class="font-medium">Usuários Específicos</div>
-                            <div class="text-sm text-gray-400">Bloqueia apenas IDs selecionados (blacklist)</div>
-                        </div>
-                    </label>
+            <!-- Status Atual -->
+            <section class="mav-card">
+                <h2 class="mav-card-title">
+                    <span class="material-icons" style="color:var(--color-info)">monitoring</span>
+                    Status Atual
+                </h2>
+                <div id="statusContent" class="mav-status-content">
+                    <span style="color:var(--text-disabled)">Carregando...</span>
                 </div>
-            </div>
+            </section>
 
-            <!-- Template -->
-            <div class="mb-6">
-                <label class="block text-sm font-medium mb-3">Template:</label>
-                <select id="templateSelect" class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">Carregando templates...</option>
-                </select>
-            </div>
+            <!-- Configuração -->
+            <section class="mav-card">
+                <h2 class="mav-card-title">
+                    <span class="material-icons" style="color:var(--color-primary)">settings</span>
+                    Configuração
+                </h2>
 
-            <!-- Customização -->
-            <div class="mb-6 p-4 bg-gray-700 rounded">
-                <h3 class="text-lg mb-4 flex items-center gap-2">
-                    <span class="material-icons" style="color:var(--app-indigo)">palette</span>
-                    Customização
-                </h3>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label class="block text-sm mb-2">Título:</label>
-                        <input type="text" id="customTitulo" placeholder="Calma aê!" class="w-full bg-gray-600 border border-gray-500 rounded px-3 py-2 text-white">
-                    </div>
-                    <div>
-                        <label class="block text-sm mb-2">Emoji:</label>
-                        <input type="text" id="customEmoji" placeholder="🛠️" maxlength="2" class="w-full bg-gray-600 border border-gray-500 rounded px-3 py-2 text-white text-2xl text-center">
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <label class="block text-sm mb-2">Mensagem:</label>
-                    <textarea id="customMensagem" rows="3" placeholder="Estamos aplicando melhorias no app. Voltamos em breve!" class="w-full bg-gray-600 border border-gray-500 rounded px-3 py-2 text-white"></textarea>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label class="block text-sm mb-2">Cor Primária:</label>
-                        <div class="flex gap-2">
-                            <input type="color" id="customCorPrimaria" value="#f97316" class="w-16 h-10 bg-gray-600 border border-gray-500 rounded cursor-pointer">
-                            <input type="text" id="customCorPrimariaText" value="#f97316" class="flex-1 bg-gray-600 border border-gray-500 rounded px-3 py-2 text-white mono text-sm">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm mb-2">Cor Secundária:</label>
-                        <div class="flex gap-2">
-                            <input type="color" id="customCorSecundaria" value="#ea580c" class="w-16 h-10 bg-gray-600 border border-gray-500 rounded cursor-pointer">
-                            <input type="text" id="customCorSecundariaText" value="#ea580c" class="flex-1 bg-gray-600 border border-gray-500 rounded px-3 py-2 text-white mono text-sm">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <label class="block text-sm mb-2">Imagem / Banner:</label>
-                    <div class="flex gap-2">
-                        <input type="file" id="uploadImagem" accept="image/*" class="hidden">
-                        <button onclick="ManutencaoConfig.selecionarImagem()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition-colors flex items-center gap-1">
-                            <span class="material-icons text-base">attach_file</span> Upload
-                        </button>
-                        <button onclick="ManutencaoConfig.removerImagem()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded transition-colors flex items-center gap-1">
-                            <span class="material-icons text-base">delete</span> Remover
-                        </button>
-                        <div id="imagemStatus" class="flex-1 bg-gray-600 border border-gray-500 rounded px-3 py-2 text-sm text-gray-400">
-                            Nenhuma imagem selecionada
-                        </div>
-                    </div>
-                    <div id="imagemPreview" class="mt-2 hidden">
-                        <img src="" alt="Preview" class="max-w-full h-32 object-cover rounded">
-                    </div>
-                </div>
-
-                <div class="space-y-2">
-                    <label class="block text-sm mb-2">Opções de Exibição:</label>
-                    <label class="flex items-center gap-2">
-                        <input type="checkbox" id="customMostrarRanking" checked class="w-4 h-4">
-                        <span class="text-sm">Mostrar ranking</span>
-                    </label>
-                    <label class="flex items-center gap-2">
-                        <input type="checkbox" id="customMostrarNoticias" checked class="w-4 h-4">
-                        <span class="text-sm">Mostrar notícias do time</span>
-                    </label>
-                    <label class="flex items-center gap-2">
-                        <input type="checkbox" id="customMostrarUltimaRodada" checked class="w-4 h-4">
-                        <span class="text-sm">Mostrar última rodada</span>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Controle de Acesso -->
-            <div id="controleAcessoSection" class="mb-6 p-4 bg-gray-700 rounded">
-                <h3 class="text-lg mb-4 flex items-center gap-2">
-                    <span class="material-icons" style="color:var(--app-danger)">lock</span>
-                    Controle de Acesso
-                </h3>
-
-                <div class="mb-4">
-                    <label class="block text-sm mb-3">Tipo de Lista:</label>
-                    <div class="space-y-2">
-                        <label class="flex items-center gap-2">
-                            <input type="radio" name="modoLista" value="whitelist" class="w-4 h-4" checked>
-                            <span class="text-sm">Whitelist (liberar IDs específicos)</span>
+                <!-- Modo de Operação -->
+                <div class="mav-field">
+                    <label class="mav-form-label">Modo de Operação</label>
+                    <div class="mav-radio-group">
+                        <label class="mav-radio-item">
+                            <input type="radio" name="modo" value="global" checked>
+                            <div class="mav-radio-label">
+                                <strong>Global</strong>
+                                <span>Bloqueia todo o app para todos os usuários</span>
+                            </div>
                         </label>
-                        <label class="flex items-center gap-2">
-                            <input type="radio" name="modoLista" value="blacklist" class="w-4 h-4">
-                            <span class="text-sm">Blacklist (bloquear IDs específicos)</span>
+                        <label class="mav-radio-item">
+                            <input type="radio" name="modo" value="modulos">
+                            <div class="mav-radio-label">
+                                <strong>Módulos Específicos</strong>
+                                <span>Bloqueia apenas módulos selecionados</span>
+                            </div>
+                        </label>
+                        <label class="mav-radio-item">
+                            <input type="radio" name="modo" value="usuarios">
+                            <div class="mav-radio-label">
+                                <strong>Usuários Específicos</strong>
+                                <span>Bloqueia apenas IDs selecionados (blacklist)</span>
+                            </div>
                         </label>
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-sm mb-2">IDs (separados por vírgula):</label>
-                    <input type="text" id="listaIds" placeholder="13935277, 987654, 123456" class="w-full bg-gray-600 border border-gray-500 rounded px-3 py-2 text-white mono">
-                    <p class="text-xs text-gray-400 mt-1">Os IDs podem ser encontrados na URL do time no Cartola FC</p>
+                <!-- Template -->
+                <div class="mav-field">
+                    <label class="mav-form-label">Template</label>
+                    <select id="templateSelect" class="mav-select">
+                        <option value="">Carregando templates...</option>
+                    </select>
                 </div>
-            </div>
 
-            <!-- Módulos Bloqueados -->
-            <div id="modulosBloqueadosSection" class="mb-6 p-4 bg-gray-700 rounded hidden">
-                <h3 class="text-lg mb-4 flex items-center gap-2">
-                    <span class="material-icons" style="color:var(--app-warning)">inventory_2</span>
-                    Módulos Bloqueados
-                </h3>
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-3" id="modulosCheckboxes">
-                    <label class="flex items-center gap-2">
-                        <input type="checkbox" value="extrato" class="w-4 h-4 modulo-checkbox">
-                        <span class="text-sm">Extrato</span>
-                    </label>
-                    <label class="flex items-center gap-2">
-                        <input type="checkbox" value="ranking" class="w-4 h-4 modulo-checkbox">
-                        <span class="text-sm">Ranking</span>
-                    </label>
-                    <label class="flex items-center gap-2">
-                        <input type="checkbox" value="rodadas" class="w-4 h-4 modulo-checkbox">
-                        <span class="text-sm">Rodadas</span>
-                    </label>
-                    <label class="flex items-center gap-2">
-                        <input type="checkbox" value="top10" class="w-4 h-4 modulo-checkbox">
-                        <span class="text-sm">Top 10</span>
-                    </label>
-                    <label class="flex items-center gap-2">
-                        <input type="checkbox" value="artilheiro" class="w-4 h-4 modulo-checkbox">
-                        <span class="text-sm">Artilheiro</span>
-                    </label>
-                    <label class="flex items-center gap-2">
-                        <input type="checkbox" value="luvaOuro" class="w-4 h-4 modulo-checkbox">
-                        <span class="text-sm">Luva de Ouro</span>
-                    </label>
-                    <label class="flex items-center gap-2">
-                        <input type="checkbox" value="capitaoLuxo" class="w-4 h-4 modulo-checkbox">
-                        <span class="text-sm">Capitão de Luxo</span>
-                    </label>
-                    <label class="flex items-center gap-2">
-                        <input type="checkbox" value="pontosCorridos" class="w-4 h-4 modulo-checkbox">
-                        <span class="text-sm">Pontos Corridos</span>
-                    </label>
-                    <label class="flex items-center gap-2">
-                        <input type="checkbox" value="mataMata" class="w-4 h-4 modulo-checkbox">
-                        <span class="text-sm">Mata-Mata</span>
-                    </label>
+                <!-- Customização -->
+                <div class="mav-subsection">
+                    <h3 class="mav-subsection-title">
+                        <span class="material-icons" style="color:var(--color-primary-light)">palette</span>
+                        Customização
+                    </h3>
+
+                    <div class="mav-grid-2">
+                        <div class="mav-field">
+                            <label class="mav-form-label">Título</label>
+                            <input type="text" id="customTitulo" placeholder="Calma aê!" class="mav-input">
+                        </div>
+                        <div class="mav-field">
+                            <label class="mav-form-label">Emoji</label>
+                            <input type="text" id="customEmoji" placeholder="🛠️" maxlength="2" class="mav-input-emoji">
+                        </div>
+                    </div>
+
+                    <div class="mav-field">
+                        <label class="mav-form-label">Mensagem</label>
+                        <textarea id="customMensagem" rows="3" placeholder="Estamos aplicando melhorias no app. Voltamos em breve!" class="mav-textarea"></textarea>
+                    </div>
+
+                    <div class="mav-grid-2">
+                        <div class="mav-field">
+                            <label class="mav-form-label">Cor Primária</label>
+                            <div class="mav-color-row">
+                                <input type="color" id="customCorPrimaria" value="#f97316" class="mav-color-picker">
+                                <input type="text" id="customCorPrimariaText" value="#f97316" class="mav-input mono">
+                            </div>
+                        </div>
+                        <div class="mav-field">
+                            <label class="mav-form-label">Cor Secundária</label>
+                            <div class="mav-color-row">
+                                <input type="color" id="customCorSecundaria" value="#ea580c" class="mav-color-picker">
+                                <input type="text" id="customCorSecundariaText" value="#ea580c" class="mav-input mono">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mav-field">
+                        <label class="mav-form-label">Imagem / Banner</label>
+                        <div class="mav-upload-row">
+                            <input type="file" id="uploadImagem" accept="image/*" style="display:none">
+                            <button onclick="ManutencaoConfig.selecionarImagem()" class="mav-btn--upload">
+                                <span class="material-icons">attach_file</span>
+                                Upload
+                            </button>
+                            <button onclick="ManutencaoConfig.removerImagem()" class="mav-btn--remove">
+                                <span class="material-icons">delete</span>
+                                Remover
+                            </button>
+                            <div id="imagemStatus" class="mav-upload-status">
+                                Nenhuma imagem selecionada
+                            </div>
+                        </div>
+                        <div id="imagemPreview" class="mav-image-preview">
+                            <img src="" alt="Preview">
+                        </div>
+                    </div>
+
+                    <div class="mav-field">
+                        <label class="mav-form-label">Opções de Exibição</label>
+                        <div class="mav-checkbox-group">
+                            <label class="mav-checkbox-item">
+                                <input type="checkbox" id="customMostrarRanking" checked>
+                                <span class="mav-checkbox-label">Mostrar ranking</span>
+                            </label>
+                            <label class="mav-checkbox-item">
+                                <input type="checkbox" id="customMostrarNoticias" checked>
+                                <span class="mav-checkbox-label">Mostrar notícias do time</span>
+                            </label>
+                            <label class="mav-checkbox-item">
+                                <input type="checkbox" id="customMostrarUltimaRodada" checked>
+                                <span class="mav-checkbox-label">Mostrar última rodada</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Preview -->
-            <div class="mb-6">
-                <button onclick="ManutencaoConfig.mostrarPreview()" class="w-full bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded font-medium transition-colors flex items-center justify-center gap-2">
-                    <span class="material-icons">visibility</span> Visualizar Preview
-                </button>
-            </div>
+                <!-- Controle de Acesso -->
+                <div id="controleAcessoSection" class="mav-subsection">
+                    <h3 class="mav-subsection-title">
+                        <span class="material-icons" style="color:var(--color-danger)">lock</span>
+                        Controle de Acesso
+                    </h3>
 
-            <!-- Ações -->
-            <div class="mb-4">
-                <button onclick="ManutencaoConfig.salvar()" class="w-full bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded font-medium transition-colors flex items-center justify-center gap-2">
-                    <span class="material-icons">save</span> Salvar Configuração
-                </button>
-            </div>
-            <div class="flex gap-4">
-                <button onclick="ManutencaoConfig.ativar()" class="flex-1 bg-green-600 hover:bg-green-700 px-6 py-3 rounded font-medium transition-colors flex items-center justify-center gap-2">
-                    <span class="material-icons">check_circle</span> Ativar Manutenção
-                </button>
-                <button onclick="ManutencaoConfig.desativar()" class="flex-1 bg-red-600 hover:bg-red-700 px-6 py-3 rounded font-medium transition-colors flex items-center justify-center gap-2">
-                    <span class="material-icons">cancel</span> Desativar Manutenção
-                </button>
-            </div>
-        </section>
+                    <div class="mav-field">
+                        <label class="mav-form-label">Tipo de Lista</label>
+                        <div class="mav-radio-group">
+                            <label class="mav-radio-item">
+                                <input type="radio" name="modoLista" value="whitelist" checked>
+                                <span class="mav-checkbox-label">Whitelist — liberar IDs específicos</span>
+                            </label>
+                            <label class="mav-radio-item">
+                                <input type="radio" name="modoLista" value="blacklist">
+                                <span class="mav-checkbox-label">Blacklist — bloquear IDs específicos</span>
+                            </label>
+                        </div>
+                    </div>
 
-        <!-- Modal Preview -->
-        <div id="previewModal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
-            <div class="bg-gray-800 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-                <div class="sticky top-0 bg-gray-800 border-b border-gray-700 p-4 flex justify-between items-center">
-                    <h3 class="text-lg font-medium">Preview do Modal</h3>
-                    <button onclick="ManutencaoConfig.fecharPreview()" class="text-gray-400 hover:text-white text-2xl">×</button>
+                    <div class="mav-field">
+                        <label class="mav-form-label">IDs (separados por vírgula)</label>
+                        <input type="text" id="listaIds" placeholder="13935277, 987654, 123456" class="mav-input mono">
+                        <p class="mav-field-help">Os IDs podem ser encontrados na URL do time no Cartola FC</p>
+                    </div>
                 </div>
-                <div id="previewContent" class="p-6"></div>
-            </div>
+
+                <!-- Módulos Bloqueados -->
+                <div id="modulosBloqueadosSection" class="mav-subsection" style="display:none">
+                    <h3 class="mav-subsection-title">
+                        <span class="material-icons" style="color:var(--color-warning)">inventory_2</span>
+                        Módulos Bloqueados
+                    </h3>
+                    <div class="mav-modulos-grid">
+                        <label class="mav-checkbox-item">
+                            <input type="checkbox" value="extrato" class="modulo-checkbox">
+                            <span class="mav-checkbox-label">Extrato</span>
+                        </label>
+                        <label class="mav-checkbox-item">
+                            <input type="checkbox" value="ranking" class="modulo-checkbox">
+                            <span class="mav-checkbox-label">Ranking</span>
+                        </label>
+                        <label class="mav-checkbox-item">
+                            <input type="checkbox" value="rodadas" class="modulo-checkbox">
+                            <span class="mav-checkbox-label">Rodadas</span>
+                        </label>
+                        <label class="mav-checkbox-item">
+                            <input type="checkbox" value="top10" class="modulo-checkbox">
+                            <span class="mav-checkbox-label">Top 10</span>
+                        </label>
+                        <label class="mav-checkbox-item">
+                            <input type="checkbox" value="artilheiro" class="modulo-checkbox">
+                            <span class="mav-checkbox-label">Artilheiro</span>
+                        </label>
+                        <label class="mav-checkbox-item">
+                            <input type="checkbox" value="luvaOuro" class="modulo-checkbox">
+                            <span class="mav-checkbox-label">Luva de Ouro</span>
+                        </label>
+                        <label class="mav-checkbox-item">
+                            <input type="checkbox" value="capitaoLuxo" class="modulo-checkbox">
+                            <span class="mav-checkbox-label">Capitão de Luxo</span>
+                        </label>
+                        <label class="mav-checkbox-item">
+                            <input type="checkbox" value="pontosCorridos" class="modulo-checkbox">
+                            <span class="mav-checkbox-label">Pontos Corridos</span>
+                        </label>
+                        <label class="mav-checkbox-item">
+                            <input type="checkbox" value="mataMata" class="modulo-checkbox">
+                            <span class="mav-checkbox-label">Mata-Mata</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Ações -->
+                <div class="mav-field" style="margin-top:var(--space-5)">
+                    <button onclick="ManutencaoConfig.mostrarPreview()" class="mav-btn mav-btn--secondary">
+                        <span class="material-icons">visibility</span>
+                        Visualizar Preview
+                    </button>
+                </div>
+                <div class="mav-field">
+                    <button onclick="ManutencaoConfig.salvar()" class="mav-btn mav-btn--primary">
+                        <span class="material-icons">save</span>
+                        Salvar Configuração
+                    </button>
+                </div>
+                <div class="mav-actions-row">
+                    <button onclick="ManutencaoConfig.ativar()" class="mav-btn mav-btn--success">
+                        <span class="material-icons">check_circle</span>
+                        Ativar Manutenção
+                    </button>
+                    <button onclick="ManutencaoConfig.desativar()" class="mav-btn mav-btn--danger">
+                        <span class="material-icons">cancel</span>
+                        Desativar Manutenção
+                    </button>
+                </div>
+            </section>
+
         </div>
     </main>
 
     <script src="js/admin-shell.js"></script>
-    <script src="/js/super-modal.js"></script>
     <script src="/js/manutencao-config.js"></script>
     <script>
-        // Inicializar ao carregar a página
         function initManutencaoAvancado() {
             ManutencaoConfig.inicializar();
         }
@@ -309,14 +305,11 @@
                 const controleSection = document.getElementById('controleAcessoSection');
 
                 if (modo === 'modulos') {
-                    modulosSection.classList.remove('hidden');
-                    controleSection.classList.add('hidden');
-                } else if (modo === 'usuarios') {
-                    modulosSection.classList.add('hidden');
-                    controleSection.classList.remove('hidden');
+                    modulosSection.style.display = 'block';
+                    controleSection.style.display = 'none';
                 } else {
-                    modulosSection.classList.add('hidden');
-                    controleSection.classList.remove('hidden');
+                    modulosSection.style.display = 'none';
+                    controleSection.style.display = 'block';
                 }
             });
         });

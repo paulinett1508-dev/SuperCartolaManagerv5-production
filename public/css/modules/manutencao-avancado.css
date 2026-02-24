@@ -1,0 +1,570 @@
+/**
+ * manutencao-avancado.css — Página de Modo Manutenção Avançado (Admin)
+ * Namespace: .mav-*
+ * Design System: _admin-tokens.css
+ * Carregado por: modo-manutencao-avancado.html
+ */
+
+/* ═══════════════════════════════════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════════════════════════════════ */
+
+.mav-page {
+    background: var(--surface-bg);
+    min-height: 100vh;
+    font-family: var(--font-family-base);
+    padding: var(--space-8) var(--space-4);
+    flex: 1;
+}
+
+.mav-container {
+    max-width: 860px;
+    margin: 0 auto;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HEADER
+   ═══════════════════════════════════════════════════════════════ */
+
+.mav-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-8);
+    padding-bottom: var(--space-5);
+    border-bottom: var(--border-subtle);
+}
+
+.mav-header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.mav-title {
+    font-family: var(--font-family-brand);
+    font-size: var(--font-size-2xl);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0;
+}
+
+.mav-title .material-icons {
+    font-size: 28px;
+    color: var(--color-warning);
+}
+
+.mav-btn-voltar {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    background: var(--surface-card-elevated);
+    color: var(--text-muted);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: var(--transition-fast);
+}
+
+.mav-btn-voltar:hover {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.mav-btn-voltar .material-icons {
+    font-size: 16px;
+}
+
+/* Status indicator no header */
+.mav-status-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mav-status-badge.ativo {
+    background: var(--color-danger-muted);
+    color: var(--color-danger);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.mav-status-badge.inativo {
+    background: var(--color-success-muted);
+    color: var(--color-success);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.mav-status-badge.carregando {
+    background: var(--color-neutral-bg);
+    color: var(--text-muted);
+}
+
+.mav-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.mav-status-badge.ativo .mav-status-dot {
+    animation: mav-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes mav-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CARDS (Seções)
+   ═══════════════════════════════════════════════════════════════ */
+
+.mav-card {
+    background: var(--surface-card);
+    border-radius: var(--radius-lg);
+    border: var(--border-subtle);
+    padding: var(--space-6);
+    margin-bottom: var(--space-5);
+}
+
+.mav-card-title {
+    font-family: var(--font-family-brand);
+    font-size: var(--font-size-xl);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-5) 0;
+}
+
+.mav-card-title .material-icons {
+    font-size: 20px;
+}
+
+.mav-subsection {
+    background: var(--surface-card-elevated);
+    border-radius: var(--radius-md);
+    border: var(--border-subtle);
+    padding: var(--space-5);
+    margin-bottom: var(--space-4);
+}
+
+.mav-subsection-title {
+    font-family: var(--font-family-brand);
+    font-size: var(--font-size-lg);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-4) 0;
+}
+
+.mav-subsection-title .material-icons {
+    font-size: 18px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   STATUS ATUAL
+   ═══════════════════════════════════════════════════════════════ */
+
+.mav-status-content {
+    color: var(--text-muted);
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-normal);
+}
+
+.mav-status-content .status-ok {
+    color: var(--color-success);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.mav-status-content .status-alerta {
+    color: var(--color-danger);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+}
+
+.mav-status-content .status-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+    font-size: var(--font-size-sm);
+}
+
+.mav-status-content .status-label {
+    color: var(--text-muted);
+}
+
+.mav-status-content .status-value {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.mav-status-content .status-meta {
+    font-size: var(--font-size-xs);
+    color: var(--text-disabled);
+    margin-top: var(--space-3);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FORMULÁRIO — Radio/Checkbox
+   ═══════════════════════════════════════════════════════════════ */
+
+.mav-form-label {
+    display: block;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    margin-bottom: var(--space-3);
+}
+
+.mav-radio-group,
+.mav-checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.mav-radio-item,
+.mav-checkbox-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface-card-elevated);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.mav-radio-item:hover,
+.mav-checkbox-item:hover {
+    border-color: var(--color-primary-border);
+    background: var(--color-primary-hover-bg);
+}
+
+.mav-radio-item input,
+.mav-checkbox-item input {
+    accent-color: var(--color-primary);
+    width: 16px;
+    height: 16px;
+    margin-top: 2px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.mav-radio-label strong {
+    display: block;
+    font-size: var(--font-size-md);
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.mav-radio-label span,
+.mav-checkbox-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    line-height: var(--line-height-normal);
+}
+
+/* Módulos: grid 3 colunas */
+.mav-modulos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-2);
+}
+
+@media (max-width: 640px) {
+    .mav-modulos-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FORMULÁRIO — Inputs
+   ═══════════════════════════════════════════════════════════════ */
+
+.mav-field {
+    margin-bottom: var(--space-4);
+}
+
+.mav-input,
+.mav-textarea,
+.mav-select {
+    width: 100%;
+    background: var(--surface-card-elevated);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    color: var(--text-primary);
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-md);
+    transition: var(--transition-fast);
+    box-sizing: border-box;
+}
+
+.mav-input:focus,
+.mav-textarea:focus,
+.mav-select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px var(--color-primary-muted);
+}
+
+.mav-input::placeholder,
+.mav-textarea::placeholder {
+    color: var(--text-disabled);
+}
+
+.mav-input.mono {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+}
+
+.mav-input-emoji {
+    width: 100%;
+    background: var(--surface-card-elevated);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    text-align: center;
+    transition: var(--transition-fast);
+    box-sizing: border-box;
+}
+
+.mav-input-emoji:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.mav-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.mav-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23a0a0a0' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--space-4) center;
+    padding-right: var(--space-10);
+    cursor: pointer;
+}
+
+.mav-select option {
+    background: var(--surface-card-elevated);
+    color: var(--text-primary);
+}
+
+.mav-field-help {
+    font-size: var(--font-size-xs);
+    color: var(--text-disabled);
+    margin-top: var(--space-1);
+}
+
+/* Grid 2 colunas para campos pequenos */
+.mav-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+}
+
+@media (max-width: 540px) {
+    .mav-grid-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Color picker row */
+.mav-color-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.mav-color-picker {
+    width: 48px;
+    height: 40px;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    background: transparent;
+    padding: 2px;
+    flex-shrink: 0;
+}
+
+/* Upload de imagem */
+.mav-upload-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.mav-upload-status {
+    flex: 1;
+    background: var(--surface-card-elevated);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--font-size-sm);
+    color: var(--text-disabled);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mav-image-preview {
+    margin-top: var(--space-3);
+    display: none;
+}
+
+.mav-image-preview img {
+    max-width: 100%;
+    height: 128px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    border: var(--border-subtle);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BOTÕES DE AÇÃO
+   ═══════════════════════════════════════════════════════════════ */
+
+.mav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-6);
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    text-decoration: none;
+}
+
+.mav-btn .material-icons {
+    font-size: 18px;
+}
+
+.mav-btn--primary {
+    background: var(--gradient-primary);
+    color: #fff;
+    width: 100%;
+}
+
+.mav-btn--primary:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-primary);
+}
+
+.mav-btn--secondary {
+    background: var(--surface-card-elevated);
+    color: var(--text-primary);
+    border: var(--border-default);
+    width: 100%;
+}
+
+.mav-btn--secondary:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.mav-btn--success {
+    background: linear-gradient(135deg, var(--color-success) 0%, #059669 100%);
+    color: #fff;
+    flex: 1;
+}
+
+.mav-btn--success:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.mav-btn--danger {
+    background: linear-gradient(135deg, var(--color-danger) 0%, var(--color-danger-dark) 100%);
+    color: #fff;
+    flex: 1;
+}
+
+.mav-btn--danger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.mav-btn--upload {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    background: var(--color-info-muted);
+    color: var(--color-info);
+    border: 1px solid var(--color-info-border);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    white-space: nowrap;
+}
+
+.mav-btn--upload:hover {
+    background: rgba(59, 130, 246, 0.25);
+}
+
+.mav-btn--remove {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    background: var(--color-danger-muted);
+    color: var(--color-danger);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    white-space: nowrap;
+}
+
+.mav-btn--remove:hover {
+    background: rgba(239, 68, 68, 0.25);
+}
+
+.mav-btn--upload .material-icons,
+.mav-btn--remove .material-icons {
+    font-size: 16px;
+}
+
+.mav-actions-row {
+    display: flex;
+    gap: var(--space-4);
+    margin-top: var(--space-2);
+}

@@ -235,6 +235,12 @@
         "loadedBy": ["admin-capitao.html"],
         "description": "Gerenciamento admin do modo Capitao de Luxo",
         "moduleColor": "--module-capitao-*"
+      },
+      {
+        "path": "public/css/modules/manutencao-avancado.css",
+        "loadedBy": ["modo-manutencao-avancado.html"],
+        "description": "Pagina de Modo Manutencao Avancado — namespace .mav-*. Layout, header, cards, formulario, botoes e status badge. Sem Tailwind.",
+        "namespace": ".mav-"
       }
     ]
   },
