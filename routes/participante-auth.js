@@ -1087,11 +1087,12 @@ function gerarHtmlPopupSucesso(glbToken, timeId, timeData) {
             };
 
             // Enviar para janela pai
+            // 🔒 SEC-FIX: Restringir postMessage ao proprio origin (impede roubo de token)
             if (window.opener) {
                 window.opener.postMessage({
                     type: 'GLOBO_AUTH_SUCCESS',
                     data: resultado
-                }, '*');
+                }, window.location.origin);
 
                 // Fechar popup após 2 segundos
                 setTimeout(() => window.close(), 2000);
