@@ -304,11 +304,11 @@ class WizardPrimeiraLiga {
         container.innerHTML = this.dados.times.map(time => `
             <div class="time-item">
                 <img src="${time.foto || 'https://s.sde.globo.com/media/organizations/2024/04/11/Cartola_Escudo.svg'}"
-                     alt="${time.nome}"
+                     alt="${escapeHtml(time.nome)}"
                      onerror="this.onerror=null;this.src='https://s.sde.globo.com/media/organizations/2024/04/11/Cartola_Escudo.svg'">
                 <div class="time-info">
-                    <div class="nome">${time.nome}</div>
-                    <div class="cartoleiro">${time.cartoleiro} (ID: ${time.id})</div>
+                    <div class="nome">${escapeHtml(time.nome)}</div>
+                    <div class="cartoleiro">${escapeHtml(time.cartoleiro)} (ID: ${time.id})</div>
                 </div>
                 <button class="time-remove" onclick="wizard.removerTime(${time.id})" title="Remover">
                     <span class="material-icons">close</span>

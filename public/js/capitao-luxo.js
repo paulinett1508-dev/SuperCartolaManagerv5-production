@@ -435,8 +435,8 @@ const CapitaoLuxo = {
                         <span class="material-icons" style="display: none; font-size: 20px; color: #666;">emoji_events</span>
                     </td>
                     <td class="col-nome">
-                        <span class="nome-cartola">${participante.nome_cartola || "---"}</span>
-                        <span class="nome-time">${participante.nome_time || ""}</span>
+                        <span class="nome-cartola">${escapeHtml(participante.nome_cartola || "---")}</span>
+                        <span class="nome-time">${escapeHtml(participante.nome_time || "")}</span>
                         <div class="capitao-linha-info">
                             ${progressoHtml}
                             ${btnHistoricoHtml}

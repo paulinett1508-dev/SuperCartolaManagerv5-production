@@ -297,7 +297,7 @@ function renderizarBannerRodadaFinal(
                 <div class="art-campeao-info">
                     <div>
                         <div class="art-campeao-label">Campeão</div>
-                        <div class="art-campeao-nome">${liderNome}</div>
+                        <div class="art-campeao-nome">${escapeHtml(liderNome)}</div>
                     </div>
                     <div class="art-campeao-gols">
                         <div class="art-campeao-gols-valor">${liderGols}</div>
@@ -409,7 +409,7 @@ function renderizarBannerRodadaFinal(
             <div class="art-banner-lider">
                 <div>
                     <div class="art-banner-lider-badge">Possível Campeão</div>
-                    <div class="art-banner-lider-nome">${liderNome}</div>
+                    <div class="art-banner-lider-nome">${escapeHtml(liderNome)}</div>
                 </div>
                 <div class="art-banner-lider-gols">
                     <div class="art-banner-lider-valor">${liderGols}</div>
@@ -656,7 +656,7 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: rgba(0,0,0,0.2); border-radius: 8px;">
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <span class="material-symbols-outlined" style="font-size: 18px; color: ${idx === 0 ? "var(--app-gold)" : idx === 1 ? "var(--app-silver)" : "var(--app-bronze)"};">workspace_premium</span>
-                        <span style="color: var(--app-text-primary); font-size: 12px; font-weight: 500;">${j.nome}</span>
+                        <span style="color: var(--app-text-primary); font-size: 12px; font-weight: 500;">${escapeHtml(j.nome)}</span>
                     </div>
                     <span style="color: var(--app-success-light); font-weight: 800; font-size: 14px;">${j.gols} gols</span>
                 </div>
@@ -720,8 +720,8 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
                 <span class="material-symbols-outlined" style="font-size: 24px; color: var(--app-success-light);">emoji_events</span>
                 <div>
                     <div style="font-size: 10px; color: var(--app-success-light); font-weight: 700; text-transform: uppercase;">${labelLider}</div>
-                    <div style="font-size: 14px; font-weight: 700; color: var(--app-text-primary);">${campeao.nomeCartoleiro || campeao.nome_cartola || campeao.nome || 'N/D'}</div>
-                    <div style="font-size: 11px; color: #888;">${campeao.nomeTime || campeao.nome_time || ''}</div>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--app-text-primary);">${escapeHtml(campeao.nomeCartoleiro || campeao.nome_cartola || campeao.nome || 'N/D')}</div>
+                    <div style="font-size: 11px; color: #888;">${escapeHtml(campeao.nomeTime || campeao.nome_time || '')}</div>
                 </div>
             </div>
             <div style="text-align: right;">
@@ -761,8 +761,8 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span style="font-size: ${pos === 1 ? "16px" : "12px"}; width: 26px; ${pos === 1 ? "" : "color: #888;"}">${posicaoDisplay}</span>
                             <div>
-                                <div style="color: ${isMeuTime ? "var(--app-success-light)" : "var(--app-text-primary)"}; font-weight: ${isMeuTime ? "700" : "500"}; font-size: 12px;">${time.nomeCartoleiro || time.nome_cartola || time.nome || 'N/D'}</div>
-                                <div style="color: #888; font-size: 11px;">${time.nomeTime || time.nome_time || ''}</div>
+                                <div style="color: ${isMeuTime ? "var(--app-success-light)" : "var(--app-text-primary)"}; font-weight: ${isMeuTime ? "700" : "500"}; font-size: 12px;">${escapeHtml(time.nomeCartoleiro || time.nome_cartola || time.nome || 'N/D')}</div>
+                                <div style="color: #888; font-size: 11px;">${escapeHtml(time.nomeTime || time.nome_time || '')}</div>
                             </div>
                         </div>
                         <div style="display: flex; gap: 12px; align-items: center;">
@@ -793,8 +793,8 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <span style="font-size: 12px; width: 26px; color: #555;">—</span>
                                 <div>
-                                    <div style="color: #666; font-weight: 400; font-size: 12px;">${time.nomeCartoleiro || time.nome_cartola || time.nome || 'N/D'}</div>
-                                    <div style="color: #555; font-size: 11px;">${time.nomeTime || time.nome_time || ''}</div>
+                                    <div style="color: #666; font-weight: 400; font-size: 12px;">${escapeHtml(time.nomeCartoleiro || time.nome_cartola || time.nome || 'N/D')}</div>
+                                    <div style="color: #555; font-size: 11px;">${escapeHtml(time.nomeTime || time.nome_time || '')}</div>
                                 </div>
                             </div>
                             <div style="display: flex; gap: 12px; align-items: center;">

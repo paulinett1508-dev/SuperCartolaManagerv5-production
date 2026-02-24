@@ -442,7 +442,7 @@ function renderizarEdicaoCard(edicao, meuTimeIdNum) {
             <div class="mm-card-header">
                 <div class="mm-card-icon">${edicaoIcon}</div>
                 <div class="mm-card-info">
-                    <h3 class="mm-card-title">${edicao.nome}</h3>
+                    <h3 class="mm-card-title">${escapeHtml(edicao.nome)}</h3>
                     ${rodadasInfo ? `<span class="mm-card-rodadas">${rodadasInfo}</span>` : ""}
                 </div>
                 <span class="mm-card-status ${statusBgClass}">
@@ -460,7 +460,7 @@ function renderizarEdicaoCard(edicao, meuTimeIdNum) {
                         <span class="mm-campeao-label">${souCampeao ? "VOCÊ É O CAMPEÃO!" : "CAMPEÃO"}</span>
                     </div>
                     <div class="mm-campeao-info">
-                        <span class="mm-campeao-nome">${campeao.nome_time}</span>
+                        <span class="mm-campeao-nome">${escapeHtml(campeao.nome_time)}</span>
                         <span class="mm-campeao-pontos">${pontosFormatados} pts</span>
                     </div>
                 </div>
@@ -499,7 +499,7 @@ function renderizarEdicaoCard(edicao, meuTimeIdNum) {
                             return `
                             <div class="mm-podio-item ${isMeu ? "meu" : ""}">
                                 <span class="mm-podio-medal">${medalha}</span>
-                                <span class="mm-podio-nome">${truncarNome(time.nome_time, 12)}</span>
+                                <span class="mm-podio-nome">${escapeHtml(truncarNome(time.nome_time, 12))}</span>
                                 <span class="mm-podio-pts">${pts}</span>
                             </div>
                         `;
@@ -593,7 +593,7 @@ function renderizarRankingCards(ranking, meuTimeIdNum) {
                 return `
                 <div class="mm-ranking-card-item ${isMeuTime ? "meu" : ""}">
                     <span class="mm-rank-pos">${time.posicao}º</span>
-                    <span class="mm-rank-nome">${time.nome_time}</span>
+                    <span class="mm-rank-nome">${escapeHtml(time.nome_time)}</span>
                     <span class="mm-rank-pts">${pts}</span>
                 </div>
             `;
@@ -613,7 +613,7 @@ function renderizarRankingCards(ranking, meuTimeIdNum) {
                 <span class="mm-minha-pos-label"><span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle; color: #ff5c00;">location_on</span> Sua posição:</span>
                 <div class="mm-ranking-card-item meu destacado">
                     <span class="mm-rank-pos">${minhaPosicao}º</span>
-                    <span class="mm-rank-nome">${meusDados.nome_time}</span>
+                    <span class="mm-rank-nome">${escapeHtml(meusDados.nome_time)}</span>
                     <span class="mm-rank-pts">${pts}</span>
                 </div>
             </div>
@@ -638,7 +638,7 @@ function renderizarRankingCards(ranking, meuTimeIdNum) {
                 return `
                 <div class="mm-ranking-card-item inativo">
                     <span class="mm-rank-pos">—</span>
-                    <span class="mm-rank-nome">${time.nome_time}</span>
+                    <span class="mm-rank-nome">${escapeHtml(time.nome_time)}</span>
                     <span class="mm-rank-pts">${pts}</span>
                 </div>
             `;

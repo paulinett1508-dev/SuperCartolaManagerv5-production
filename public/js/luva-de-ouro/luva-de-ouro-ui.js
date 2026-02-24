@@ -636,7 +636,7 @@ export function mostrarModalDetalhes(dados) {
   modal.innerHTML = `
     <div class="luva-modal-content ${isInativo ? "modal-inativo" : ""}">
       <div class="luva-modal-header">
-        <h3><span class="material-symbols-outlined" style="vertical-align: middle;">bar_chart</span> ${participante.nome} ${badgeInativo}</h3>
+        <h3><span class="material-symbols-outlined" style="vertical-align: middle;">bar_chart</span> ${escapeHtml(participante.nome)} ${badgeInativo}</h3>
         <button class="modal-fechar" onclick="document.getElementById('luva-modal-detalhes').remove()">×</button>
       </div>
       <div class="luva-modal-body">

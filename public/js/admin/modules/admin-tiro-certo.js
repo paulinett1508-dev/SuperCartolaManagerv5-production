@@ -186,7 +186,7 @@ class AdminTiroCerto {
                 <div class="tc-edicao-info" style="cursor:pointer;" onclick="window.adminTiroCerto.selecionarEdicao(${edicao.id})">
                     <span class="material-icons" style="color:var(--app-primary);font-size:1.25rem;">gps_fixed</span>
                     <div>
-                        <div class="tc-edicao-nome">${edicao.nome || edicao.id + 'a Edicao'}</div>
+                        <div class="tc-edicao-nome">${escapeHtml(edicao.nome || edicao.id + 'a Edicao')}</div>
                         <div class="tc-edicao-rodadas">R${edicao.rodadaInicial} - R${edicao.rodadaFinal} | ${edicao.totalParticipantes || 0} participantes | ${edicao.vivosCount || 0} vivos</div>
                     </div>
                 </div>
@@ -227,7 +227,7 @@ class AdminTiroCerto {
                 <div class="tc-participante-row">
                     <img src="/escudos/${p.escudoId || 'default'}.png"
                          onerror="this.src='/escudos/default.png'" alt="">
-                    <span class="tc-participante-nome">${p.nomeTime || p.nomeCartoleiro || 'Time'}</span>
+                    <span class="tc-participante-nome">${escapeHtml(p.nomeTime || p.nomeCartoleiro || 'Time')}</span>
                     <span style="font-family:var(--app-font-mono);font-size:var(--app-font-xs);color:var(--app-text-muted);">
                         ${p.rodadasSobrevividas || 0}R
                     </span>

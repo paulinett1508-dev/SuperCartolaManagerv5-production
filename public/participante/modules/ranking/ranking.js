@@ -194,11 +194,11 @@ function criarItemRanking(participante, posicao, totalAtivos, participanteLogado
                 ${escudoHTML}
                 <div class="time-dados">
                     <div class="time-nome">
-                        ${participante.nome_cartola || 'N/D'}
+                        ${escapeHtml(participante.nome_cartola || 'N/D')}
                         ${badgeInativo}
                         ${badgeVoce}
                     </div>
-                    <div class="time-cartoleiro">${participante.nome_time || 'N/D'}</div>
+                    <div class="time-cartoleiro">${escapeHtml(participante.nome_time || 'N/D')}</div>
                 </div>
             </div>
             <div class="pontos-valor">${truncarPontos(participante.pontos)}</div>

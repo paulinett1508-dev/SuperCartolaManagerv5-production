@@ -195,8 +195,8 @@ function atualizarListaTimes() {
                              onerror="this.onerror=null;this.src='/escudos/default.png'"
                              alt="Escudo do time">
                         <div class="time-details">
-                            <div class="time-nome">${time.nome}</div>
-                            <div class="time-cartoleiro">${time.cartoleiro}</div>
+                            <div class="time-nome">${escapeHtml(time.nome)}</div>
+                            <div class="time-cartoleiro">${escapeHtml(time.cartoleiro)}</div>
                         </div>
                     </div>
                     <button onclick="removerTime(${time.id})" class="btn-remove">
@@ -257,8 +257,8 @@ function atualizarResumo() {
                              onerror="this.onerror=null;this.src='/escudos/default.png'"
                              alt="Escudo do time">
                         <div class="time-details">
-                            <div class="time-nome">${time.nome}</div>
-                            <div class="time-cartoleiro">${time.cartoleiro}</div>
+                            <div class="time-nome">${escapeHtml(time.nome)}</div>
+                            <div class="time-cartoleiro">${escapeHtml(time.cartoleiro)}</div>
                         </div>
                     </div>
                 </li>

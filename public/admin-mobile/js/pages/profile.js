@@ -24,8 +24,8 @@ export async function render(params = {}) {
           <h2 class="card-title"><span class="material-icons mi-inline">person</span> Perfil</h2>
         </div>
         <div class="card-body">
-          <p><strong>Nome:</strong> ${user?.nome || 'N/A'}</p>
-          <p class="mt-sm"><strong>Email:</strong> ${user?.email || 'N/A'}</p>
+          <p><strong>Nome:</strong> ${escapeHtml(user?.nome || 'N/A')}</p>
+          <p class="mt-sm"><strong>Email:</strong> ${escapeHtml(user?.email || 'N/A')}</p>
         </div>
       </div>
 

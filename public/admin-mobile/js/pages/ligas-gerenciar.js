@@ -65,7 +65,7 @@ function renderLigaManageCard(liga) {
         <div style="display:flex;align-items:center;gap:10px;">
           <span class="material-icons" style="font-size:22px;color:var(--accent-warning);">emoji_events</span>
           <div>
-            <div style="font-size:15px;font-weight:600;color:var(--text-primary);">${liga.nome}</div>
+            <div style="font-size:15px;font-weight:600;color:var(--text-primary);">${escapeHtml(liga.nome)}</div>
             <div style="font-size:12px;color:var(--text-muted);">Temporada ${liga.temporada}</div>
           </div>
         </div>

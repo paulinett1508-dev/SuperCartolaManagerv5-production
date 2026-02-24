@@ -52,7 +52,7 @@ function renderFinanceiroPage(container) {
           <option value="">Selecione uma liga...</option>
           ${ligas.map(liga => `
             <option value="${liga.id}" ${ligaSelecionada === liga.id ? 'selected' : ''}>
-              ${liga.nome} (${liga.temporada})
+              ${escapeHtml(liga.nome)} (${liga.temporada})
             </option>
           `).join('')}
         </select>
@@ -162,7 +162,7 @@ async function carregarParticipantes(ligaId) {
       timeSelect.innerHTML = `
         <option value="">Selecione...</option>
         ${participantesAtivos.map(p => `
-          <option value="${p.id}">${p.nome} - ${p.nomeTime}</option>
+          <option value="${p.id}">${escapeHtml(p.nome)} - ${escapeHtml(p.nomeTime)}</option>
         `).join('')}
       `;
     } else {
@@ -246,14 +246,14 @@ function renderAcertoItem(acerto) {
           <span class="badge ${isPagamento ? 'badge-success' : 'badge-warning'}" style="font-size:10px;padding:2px 8px;">
             ${isPagamento ? 'Pag.' : 'Rec.'}
           </span>
-          <span style="font-size:13px;font-weight:600;">${acerto.nomeTime}</span>
+          <span style="font-size:13px;font-weight:600;">${escapeHtml(acerto.nomeTime)}</span>
         </div>
         <span style="font-size:15px;font-weight:700;font-family:var(--font-mono);color:${isPagamento ? 'var(--accent-success)' : 'var(--accent-warning)'};">
           R$ ${acerto.valor.toFixed(2)}
         </span>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <span class="text-muted" style="font-size:11px;">${acerto.metodoPagamento || 'pix'}${acerto.descricao ? ' - ' + acerto.descricao : ''}</span>
+        <span class="text-muted" style="font-size:11px;">${acerto.metodoPagamento || 'pix'}${acerto.descricao ? ' - ' + escapeHtml(acerto.descricao) : ''}</span>
         <span class="text-muted" style="font-size:11px;">${dataFormatada}</span>
       </div>
     </div>

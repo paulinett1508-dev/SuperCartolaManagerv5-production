@@ -36,7 +36,7 @@ export function renderizarInterface(
           .map(
             (edicao) => `
           <option value="${edicao.id}" ${!edicao.ativo ? "disabled" : ""}>
-            ${edicao.nome} (Rodadas ${edicao.rodadaInicial}-${edicao.rodadaInicial + fases.length - 1})
+            ${esc(edicao.nome)} (Rodadas ${edicao.rodadaInicial}-${edicao.rodadaInicial + fases.length - 1})
           </option>
         `,
           )
@@ -220,7 +220,7 @@ export function renderTabelaMataMata(
 
   container.innerHTML = `
     <div class="mata-mata-header">
-      <div class="mata-mata-subtitulo">${getEdicaoMataMata(edicaoAtual)}</div>
+      <div class="mata-mata-subtitulo">${esc(getEdicaoMataMata(edicaoAtual))}</div>
       <div class="mata-mata-confronto">
         ${gerarTextoConfronto(faseLabel)}
       </div>

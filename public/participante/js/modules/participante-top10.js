@@ -546,8 +546,8 @@ function gerarLinhaTabela(
             <td>${posicaoBadge}</td>
             <td class="nome-cell-top10">
                 <div class="nome-wrapper-top10">
-                    <span class="nome-cartoleiro">${item.nome_cartola || "N/D"}</span>
-                    <span class="nome-time">${item.nome_time || "Time sem nome"}</span>
+                    <span class="nome-cartoleiro">${escapeHtml(item.nome_cartola || "N/D")}</span>
+                    <span class="nome-time">${escapeHtml(item.nome_time || "Time sem nome")}</span>
                 </div>
             </td>
             <td class="escudo-cell">${escudoHTML}</td>
@@ -555,7 +555,7 @@ function gerarLinhaTabela(
             <td class="rodada-badge">R${item.rodada ?? "?"}</td>
             <td class="${valorClass}">${valorFormatado}</td>
             <td>
-                <button class="btn-ver-time" onclick="window.abrirModalTop10('${item.nome_time}', ${item.rodada}, ${item.pontos}, ${isMitos})">
+                <button class="btn-ver-time" onclick="window.abrirModalTop10('${escapeHtml(item.nome_time)}', ${item.rodada}, ${item.pontos}, ${isMitos})">
                     <span class="material-symbols-outlined">visibility</span>
                 </button>
             </td>

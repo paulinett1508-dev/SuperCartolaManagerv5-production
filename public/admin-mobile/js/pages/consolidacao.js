@@ -59,7 +59,7 @@ function renderConsolidacaoPage(container, ligas) {
             <option value="">Selecione uma liga...</option>
             ${ligas.map(liga => `
               <option value="${liga.id}" ${ligaSelecionada === liga.id ? 'selected' : ''}>
-                ${liga.nome} (${liga.temporada})
+                ${escapeHtml(liga.nome)} (${liga.temporada})
               </option>
             `).join('')}
           </select>
@@ -251,7 +251,7 @@ function renderHistorico(container, historico) {
   container.innerHTML = `
     <div style="margin-top:var(--spacing-md);">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--spacing-sm);">
-        <span class="section-header" style="margin-bottom:0;">Historico - ${ligaNome}</span>
+        <span class="section-header" style="margin-bottom:0;">Historico - ${escapeHtml(ligaNome)}</span>
         <span class="badge badge-info" style="font-size:10px;">${totalConsolidadas}</span>
       </div>
 
@@ -289,7 +289,7 @@ function renderHistoricoItem(item) {
         ${campeaoRodada ? `
           <div>
             <p class="text-muted" style="font-size:11px;margin:0;">Campeao</p>
-            <p style="font-size:12px;font-weight:600;margin:2px 0 0 0;">${campeaoRodada.nome}</p>
+            <p style="font-size:12px;font-weight:600;margin:2px 0 0 0;">${escapeHtml(campeaoRodada.nome)}</p>
             <p class="text-success" style="font-size:11px;font-weight:600;margin:0;font-family:var(--font-mono);">
               ${(Math.trunc((campeaoRodada.pontos||0) * 100) / 100).toFixed(2)} pts
             </p>
@@ -298,7 +298,7 @@ function renderHistoricoItem(item) {
         ${liderGeral ? `
           <div>
             <p class="text-muted" style="font-size:11px;margin:0;">Lider</p>
-            <p style="font-size:12px;font-weight:600;margin:2px 0 0 0;">${liderGeral.nome}</p>
+            <p style="font-size:12px;font-weight:600;margin:2px 0 0 0;">${escapeHtml(liderGeral.nome)}</p>
             <p style="font-size:11px;font-weight:600;margin:0;font-family:var(--font-mono);color:var(--accent-primary);">
               ${(Math.trunc((liderGeral.pontos||0) * 100) / 100).toFixed(2)} pts
             </p>
@@ -309,8 +309,8 @@ function renderHistoricoItem(item) {
       <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;padding-top:6px;border-top:1px solid var(--border-color);">
         <span class="text-muted" style="font-size:11px;">${totalParticipantes} part.</span>
         <div style="display:flex;gap:6px;">
-          ${mito ? `<span class="badge badge-success" style="font-size:10px;padding:2px 6px;">${mito.nome_time || mito.nome}</span>` : ''}
-          ${mico ? `<span class="badge badge-danger" style="font-size:10px;padding:2px 6px;">${mico.nome_time || mico.nome}</span>` : ''}
+          ${mito ? `<span class="badge badge-success" style="font-size:10px;padding:2px 6px;">${escapeHtml(mito.nome_time || mito.nome)}</span>` : ''}
+          ${mico ? `<span class="badge badge-danger" style="font-size:10px;padding:2px 6px;">${escapeHtml(mico.nome_time || mico.nome)}</span>` : ''}
         </div>
       </div>
     </div>

@@ -65,7 +65,7 @@ const CapitaoHistoricoModal = {
             return `
                 <tr class="${rowClass}">
                     <td class="col-rodada">${r.rodada}</td>
-                    <td class="col-atleta">${r.atleta_nome || 'N/A'}</td>
+                    <td class="col-atleta">${escapeHtml(r.atleta_nome || 'N/A')}</td>
                     <td class="col-pontos" style="color: ${corPontuacao}; font-weight: 700;">${pts}</td>
                     <td class="col-status">${statusHtml}</td>
                 </tr>
@@ -83,7 +83,7 @@ const CapitaoHistoricoModal = {
                                 <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">military_tech</span>
                                 Histórico de Capitães
                             </h2>
-                            <p class="modal-subtitle-capitao">${nomeCartola}${nomeTime ? ` - ${nomeTime}` : ''}</p>
+                            <p class="modal-subtitle-capitao">${escapeHtml(nomeCartola)}${nomeTime ? ` - ${escapeHtml(nomeTime)}` : ''}</p>
                         </div>
                         <button class="modal-close-btn" onclick="CapitaoHistoricoModal.fechar()" aria-label="Fechar">
                             <span class="material-icons">close</span>

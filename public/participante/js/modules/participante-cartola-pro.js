@@ -684,7 +684,7 @@ async function carregarFontesAssistente() {
                             border: 1px solid rgba(${cor === 'green' ? '34,197,94' : cor === 'orange' ? '249,115,22' : '156,163,175'},0.3);
                             color: rgba(${cor === 'green' ? '34,197,94' : cor === 'orange' ? '249,115,22' : '156,163,175'},0.8);">
                     <span class="material-icons" style="font-size:10px;">${icone}</span>
-                    ${f.nome}
+                    ${escapeHtml(f.nome)}
                 </div>
             `;
         }).join('');
@@ -745,7 +745,7 @@ function renderizarCenarios(container, data) {
                     style="background: ${ativo ? cfg.cor + '20' : 'transparent'}; ${ativo ? 'ring-color:' + cfg.cor + '60;' : ''}"
                     onclick="window.CartolaProModule.trocarCenario(${idx})">
                 <span class="material-icons block mx-auto mb-0.5" style="font-size:16px; color:${cfg.cor};">${cfg.icone}</span>
-                <span class="text-[10px] font-bold text-white block">${cfg.nome}</span>
+                <span class="text-[10px] font-bold text-white block">${escapeHtml(cfg.nome)}</span>
                 ${recomendado ? '<span class="text-[8px] text-purple-400 block">Sugerido</span>' : ''}
             </button>
         `;
@@ -822,7 +822,7 @@ function renderizarCardAtletaAssistente(atleta) {
             </div>
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-1.5">
-                    <p class="text-sm font-medium text-white truncate">${atleta.nome}</p>
+                    <p class="text-sm font-medium text-white truncate">${escapeHtml(atleta.nome)}</p>
                     ${atleta.capitao ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 flex-shrink-0">C</span>' : ''}
                 </div>
                 <div class="flex items-center gap-1.5 mt-0.5">
@@ -928,7 +928,7 @@ async function atualizarSugestaoModoPro() {
                 <div class="flex items-center gap-1.5 text-[10px] text-white/50 cursor-pointer"
                      onclick="document.querySelector('.pro-modo-btn[data-modo=\\'${data.modo}\\']')?.click()">
                     <span class="material-icons" style="font-size:12px; color:#eab308;">lightbulb</span>
-                    Sugerido: <strong class="text-white/70">${data.config.nome}</strong>
+                    Sugerido: <strong class="text-white/70">${escapeHtml(data.config.nome)}</strong>
                 </div>
             `;
         }
@@ -1011,7 +1011,7 @@ function renderizarCardAtletaSugerido(atleta, isCapitao) {
             </div>
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2">
-                    <p class="text-sm font-medium text-white truncate">${atleta.nome}</p>
+                    <p class="text-sm font-medium text-white truncate">${escapeHtml(atleta.nome)}</p>
                     ${isCapitao ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400">C</span>' : ''}
                 </div>
                 <p class="text-xs text-white/50">${atleta.posicaoAbreviacao || atleta.posicao} • ${atleta.clubeAbreviacao || atleta.clube}</p>
@@ -1100,8 +1100,8 @@ async function carregarNaoEscalaram(container) {
                                     ${p.clube_id ? `<img src="/escudos/${p.clube_id}.png" onerror="this.onerror=null;this.src='/escudos/default.png'" class="w-5 h-5">` : '<span class="material-icons text-white/30 text-sm">person</span>'}
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-white truncate">${p.nome_time || 'Time'}</p>
-                                    <p class="text-xs text-white/50">${p.nome_cartola || ''}</p>
+                                    <p class="text-sm font-medium text-white truncate">${escapeHtml(p.nome_time || 'Time')}</p>
+                                    <p class="text-xs text-white/50">${escapeHtml(p.nome_cartola || '')}</p>
                                 </div>
                                 <span class="material-icons text-red-400 text-sm">schedule</span>
                             </div>
@@ -1122,7 +1122,7 @@ async function carregarNaoEscalaram(container) {
                         ${escalaram.slice(0, 5).map(p => `
                             <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5">
                                 <span class="material-icons text-green-400 text-sm">check</span>
-                                <span class="text-xs text-white/70 truncate">${p.nome_time || p.nome_cartola}</span>
+                                <span class="text-xs text-white/70 truncate">${escapeHtml(p.nome_time || p.nome_cartola)}</span>
                             </div>
                         `).join('')}
                         ${escalaram.length > 5 ? `<p class="text-xs text-white/30 text-center">+${escalaram.length - 5} outros</p>` : ''}
@@ -1167,8 +1167,8 @@ async function carregarMeuTime(container) {
         <div class="p-4 space-y-4">
             <!-- Info do Time -->
             <div class="p-4 rounded-xl bg-white/5 text-center">
-                <p class="text-lg font-bold text-white" style="font-family: 'Russo One', sans-serif;">${time.nome || 'Meu Time'}</p>
-                <p class="text-xs text-white/50">${time.nomeCartola || ''}</p>
+                <p class="text-lg font-bold text-white" style="font-family: 'Russo One', sans-serif;">${escapeHtml(time.nome || 'Meu Time')}</p>
+                <p class="text-xs text-white/50">${escapeHtml(time.nomeCartola || '')}</p>
                 <div class="flex items-center justify-center gap-4 mt-3">
                     <div>
                         <p class="text-2xl font-bold text-yellow-400">${data.pontosParciais ? (Math.trunc(data.pontosParciais * 10) / 10).toFixed(1) : '0.0'}</p>
@@ -1192,7 +1192,7 @@ async function carregarMeuTime(container) {
                             </div>
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2">
-                                    <p class="text-sm font-medium text-white truncate">${atleta.nome}</p>
+                                    <p class="text-sm font-medium text-white truncate">${escapeHtml(atleta.nome)}</p>
                                     ${atleta.capitao ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400">C</span>' : ''}
                                 </div>
                                 <p class="text-xs text-white/50">${atleta.posicao} • ${atleta.clubeAbreviacao || atleta.clube}</p>

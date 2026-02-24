@@ -945,8 +945,8 @@ const ArtilheiroCampeao = {
                     </td>
                     <td class="col-nome">
                         <div class="participante-info">
-                            <span class="participante-nome">${p.nome}${coroaHtml}</span>
-                            <span class="participante-time">${p.nomeTime}</span>
+                            <span class="participante-nome">${escapeHtml(p.nome)}${coroaHtml}</span>
+                            <span class="participante-time">${escapeHtml(p.nomeTime)}</span>
                         </div>
                     </td>
                     <td class="col-total-gp"><span class="total-gp">${p.golsPro}</span></td>
@@ -1046,8 +1046,8 @@ const ArtilheiroCampeao = {
                     </td>
                     <td class="col-nome">
                         <div class="participante-info">
-                            <span class="participante-nome">${p.nome}</span>
-                            <span class="participante-time">${p.nomeTime}</span>
+                            <span class="participante-nome">${escapeHtml(p.nome)}</span>
+                            <span class="participante-time">${escapeHtml(p.nomeTime)}</span>
                             ${p.rodada_desistencia ? `<span class="desistencia-badge">Saiu R${p.rodada_desistencia}</span>` : ""}
                         </div>
                     </td>
@@ -1194,7 +1194,7 @@ const ArtilheiroCampeao = {
                             .map(
                                 (j) => `
                             <li class="gol-item positivo">
-                                <span class="jogador-nome">${j.nome}</span>
+                                <span class="jogador-nome">${escapeHtml(j.nome)}</span>
                                 <span class="jogador-gols">${j.gols} gol${j.gols > 1 ? "s" : ""}</span>
                             </li>
                         `,
@@ -1215,7 +1215,7 @@ const ArtilheiroCampeao = {
                             .map(
                                 (j) => `
                             <li class="gol-item negativo">
-                                <span class="jogador-nome">${j.nome}</span>
+                                <span class="jogador-nome">${escapeHtml(j.nome)}</span>
                                 <span class="jogador-gols">${j.golsContra} gol${j.golsContra > 1 ? "s" : ""}</span>
                             </li>
                         `,
@@ -1237,8 +1237,8 @@ const ArtilheiroCampeao = {
                 </button>
                 <div class="modal-header">
                     <h3>Rodada ${rodada} ${parcialBadge}</h3>
-                    <p class="modal-participante">${dados.participante}</p>
-                    <p class="modal-time">${dados.nomeTime}</p>
+                    <p class="modal-participante">${escapeHtml(dados.participante)}</p>
+                    <p class="modal-time">${escapeHtml(dados.nomeTime)}</p>
                 </div>
                 <div class="modal-resumo">
                     <div class="resumo-item">

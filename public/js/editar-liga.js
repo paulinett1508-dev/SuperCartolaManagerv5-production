@@ -258,7 +258,7 @@ class EditarLigaManager {
             // Atualizar título com indicador de temporada
             if (this.elements.tituloLiga) {
                 const temporadaLabel = this.temporadaSelecionada ? ` (${this.temporadaSelecionada})` : '';
-                this.elements.tituloLiga.innerHTML = `Editar Times da <span>${this.ligaAtual.nome}</span>${temporadaLabel}`;
+                this.elements.tituloLiga.innerHTML = `Editar Times da <span>${escapeHtml(this.ligaAtual.nome)}</span>${temporadaLabel}`;
             }
 
             // 2. Buscar participantes filtrados por temporada
@@ -343,9 +343,9 @@ class EditarLigaManager {
                               (clube) => `
                     <option value="${clube.id}"
                             data-escudo="/escudos/${clube.id}.png"
-                            data-nome="${clube.nome}"
+                            data-nome="${escapeHtml(clube.nome)}"
                             ${time.clube_id === clube.id ? "selected" : ""}>
-                        ${clube.nome}
+                        ${escapeHtml(clube.nome)}
                     </option>
                 `,
                           )
@@ -360,7 +360,7 @@ class EditarLigaManager {
                 </td>
                 <td class="col-cartoleiro">
                     <span class="cartoleiro-name ${time.error ? "error" : ""}">
-                        ${time.nome_cartoleiro}
+                        ${escapeHtml(time.nome_cartoleiro)}
                     </span>
                 </td>
                 <td class="col-brasao">
@@ -428,8 +428,8 @@ class EditarLigaManager {
                           (clube) => `
                 <option value="${clube.id}"
                         data-escudo="/escudos/${clube.id}.png"
-                        data-nome="${clube.nome}">
-                    ${clube.nome}
+                        data-nome="${escapeHtml(clube.nome)}">
+                    ${escapeHtml(clube.nome)}
                 </option>
             `,
                       )

@@ -535,8 +535,8 @@ function gerarTabelaHTML(dados, tipo, valoresBonusOnus) {
                             <td style="text-align: center; font-weight: 700;">
                                 ${posicao === 1 ? (tipo === "mitos" ? '<span class="material-symbols-outlined" style="color: var(--color-mito);">crown</span>' : '<span class="material-symbols-outlined" style="color: var(--color-mico);">skull</span>') : posicao + "º"}
                             </td>
-                            <td style="text-align: left;">${item.nome_cartola || item.nome_cartoleiro || "N/D"}</td>
-                            <td style="text-align: left;">${item.nome_time || "N/D"}</td>
+                            <td style="text-align: left;">${escapeHtml(item.nome_cartola || item.nome_cartoleiro || "N/D")}</td>
+                            <td style="text-align: left;">${escapeHtml(item.nome_time || "N/D")}</td>
                             <td style="text-align: center;">
                                 ${item.clube_id ? `<img src="/escudos/${item.clube_id}.png" alt="" class="time-escudo" onerror="this.style.display='none'"/>` : '<span class="material-symbols-outlined" style="color: var(--color-mico);">favorite</span>'}
                             </td>

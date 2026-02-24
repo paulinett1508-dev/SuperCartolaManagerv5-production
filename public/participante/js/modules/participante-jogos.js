@@ -334,7 +334,7 @@ function renderizarCardJogo(jogo) {
              onclick="window.expandirJogo && window.expandirJogo(${jogo.id})">
             <!-- Header: Liga + Status -->
             <div class="flex items-center justify-between mb-1.5">
-                <span class="text-[9px] font-brand text-white/50 truncate max-w-[60%] tracking-wide" title="ID:${jogo.ligaId} | API:${jogo.ligaOriginal}">${jogo.liga}</span>
+                <span class="text-[9px] font-brand text-white/50 truncate max-w-[60%] tracking-wide" title="ID:${jogo.ligaId} | API:${jogo.ligaOriginal}">${escapeHtml(jogo.liga)}</span>
                 ${renderizarBadgeStatus(jogo, aoVivo, encerrado)}
             </div>
 
@@ -342,10 +342,10 @@ function renderizarCardJogo(jogo) {
             <div class="flex items-center">
                 <!-- Time Mandante -->
                 <div class="flex items-center gap-2 flex-1 min-w-0">
-                    <img src="${jogo.logoMandante}" alt="${jogo.mandante}"
+                    <img src="${jogo.logoMandante}" alt="${escapeHtml(jogo.mandante)}"
                          class="w-6 h-6 object-contain shrink-0"
                          onerror="this.style.display='none'">
-                    <span class="text-white font-medium text-[11px] truncate">${jogo.mandante}</span>
+                    <span class="text-white font-medium text-[11px] truncate">${escapeHtml(jogo.mandante)}</span>
                 </div>
 
                 <!-- Placar Central -->
@@ -355,8 +355,8 @@ function renderizarCardJogo(jogo) {
 
                 <!-- Time Visitante -->
                 <div class="flex items-center gap-2 flex-1 min-w-0 justify-end">
-                    <span class="text-white font-medium text-[11px] truncate text-right">${jogo.visitante}</span>
-                    <img src="${jogo.logoVisitante}" alt="${jogo.visitante}"
+                    <span class="text-white font-medium text-[11px] truncate text-right">${escapeHtml(jogo.visitante)}</span>
+                    <img src="${jogo.logoVisitante}" alt="${escapeHtml(jogo.visitante)}"
                          class="w-6 h-6 object-contain shrink-0"
                          onerror="this.style.display='none'">
                 </div>
@@ -365,7 +365,7 @@ function renderizarCardJogo(jogo) {
             <!-- Footer: Estadio (se encerrado ou ao vivo) -->
             ${jogo.estadio && (aoVivo || encerrado) ? `
                 <div class="mt-1.5 text-center">
-                    <span class="text-[8px] text-white/25">${jogo.estadio}${jogo.cidade ? `, ${jogo.cidade}` : ''}</span>
+                    <span class="text-[8px] text-white/25">${escapeHtml(jogo.estadio)}${jogo.cidade ? `, ${escapeHtml(jogo.cidade)}` : ''}</span>
                 </div>
             ` : ''}
         </div>
@@ -376,7 +376,7 @@ function renderizarCardJogo(jogo) {
     return `
     <div class="flex items-center py-2 px-3 bg-gray-700/50 rounded-lg">
         <div class="flex-1 min-w-0">
-            <span class="text-white font-medium text-xs truncate block">${jogo.mandante}</span>
+            <span class="text-white font-medium text-xs truncate block">${escapeHtml(jogo.mandante)}</span>
         </div>
         <div class="flex flex-col items-center justify-center min-w-[60px] shrink-0 px-1">
             ${encerrado ? `
@@ -388,7 +388,7 @@ function renderizarCardJogo(jogo) {
             `}
         </div>
         <div class="flex-1 min-w-0">
-            <span class="text-white font-medium text-xs truncate block text-right">${jogo.visitante}</span>
+            <span class="text-white font-medium text-xs truncate block text-right">${escapeHtml(jogo.visitante)}</span>
         </div>
     </div>
     `;
@@ -894,7 +894,7 @@ export function renderizarModalJogo(jogo, detalhes) {
             <!-- Header Fixo -->
             <div class="sticky top-0 bg-gray-900 border-b border-gray-700/50 px-3 py-2 z-10">
                 <div class="flex items-center justify-between">
-                    <span class="text-xs text-white/60 tracking-wide truncate flex-1">${jogo.liga}</span>
+                    <span class="text-xs text-white/60 tracking-wide truncate flex-1">${escapeHtml(jogo.liga)}</span>
                     <button onclick="window.fecharModalJogo()"
                             class="p-1 rounded-full hover:bg-gray-700 transition-colors ml-2">
                         <span class="material-icons text-white/40 text-lg">close</span>
@@ -907,14 +907,14 @@ export function renderizarModalJogo(jogo, detalhes) {
                 <div class="flex items-center justify-center gap-3">
                     <div class="flex flex-col items-center gap-1 flex-1 min-w-0">
                         <img src="${jogo.logoMandante}" class="w-10 h-10 object-contain" alt="" onerror="this.style.display='none'">
-                        <span class="text-[10px] font-medium text-white/80 truncate max-w-[70px]">${jogo.mandante}</span>
+                        <span class="text-[10px] font-medium text-white/80 truncate max-w-[70px]">${escapeHtml(jogo.mandante)}</span>
                     </div>
                     <div class="text-2xl font-brand text-white tabular-nums px-2">
                         ${jogo.golsMandante ?? 0} - ${jogo.golsVisitante ?? 0}
                     </div>
                     <div class="flex flex-col items-center gap-1 flex-1 min-w-0">
                         <img src="${jogo.logoVisitante}" class="w-10 h-10 object-contain" alt="" onerror="this.style.display='none'">
-                        <span class="text-[10px] font-medium text-white/80 truncate max-w-[70px]">${jogo.visitante}</span>
+                        <span class="text-[10px] font-medium text-white/80 truncate max-w-[70px]">${escapeHtml(jogo.visitante)}</span>
                     </div>
                 </div>
                 ${jogo.placarHT ? `<p class="text-[10px] text-white/30 mt-1">(HT: ${jogo.placarHT})</p>` : ''}
@@ -996,13 +996,13 @@ export function renderizarModalJogo(jogo, detalhes) {
                         ${fixture.estadio ? `
                             <span class="flex items-center gap-0.5">
                                 <span class="material-icons text-xs">stadium</span>
-                                ${fixture.estadio}
+                                ${escapeHtml(fixture.estadio)}
                             </span>
                         ` : ''}
                         ${fixture.arbitro ? `
                             <span class="flex items-center gap-0.5">
                                 <span class="material-icons text-xs">sports</span>
-                                ${fixture.arbitro}
+                                ${escapeHtml(fixture.arbitro)}
                             </span>
                         ` : ''}
                     </div>
@@ -1034,8 +1034,8 @@ function renderizarEvento(evento, jogo) {
         <span class="text-[10px] text-white/40 w-6 text-center">${evento.tempo}'${evento.tempoExtra ? `+${evento.tempoExtra}` : ''}</span>
         <span class="material-icons ${iconeConfig.cor} text-sm">${iconeConfig.icon}</span>
         <div class="flex-1 ${isMandante ? '' : 'text-right'}">
-            <span class="text-xs text-white/90">${evento.jogador || 'Desconhecido'}</span>
-            ${evento.assistencia ? `<span class="text-[10px] text-white/30 ml-0.5">(${evento.assistencia})</span>` : ''}
+            <span class="text-xs text-white/90">${escapeHtml(evento.jogador || 'Desconhecido')}</span>
+            ${evento.assistencia ? `<span class="text-[10px] text-white/30 ml-0.5">(${escapeHtml(evento.assistencia)})</span>` : ''}
         </div>
     </div>
     `;
@@ -1086,10 +1086,10 @@ function renderizarEstatisticas(resumoStats, jogo) {
             <div class="flex items-center justify-between mb-4 pb-2 border-b border-gray-700">
                 <div class="flex items-center gap-2">
                     <img src="${jogo.logoMandante}" class="w-6 h-6 object-contain" alt="">
-                    <span class="text-xs text-white/70 truncate max-w-[80px]">${jogo.mandante}</span>
+                    <span class="text-xs text-white/70 truncate max-w-[80px]">${escapeHtml(jogo.mandante)}</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span class="text-xs text-white/70 truncate max-w-[80px]">${jogo.visitante}</span>
+                    <span class="text-xs text-white/70 truncate max-w-[80px]">${escapeHtml(jogo.visitante)}</span>
                     <img src="${jogo.logoVisitante}" class="w-6 h-6 object-contain" alt="">
                 </div>
             </div>
@@ -1127,7 +1127,7 @@ function renderizarEscalacoes(escalacoes, jogo) {
             <div class="flex items-center gap-2 mb-2 pb-2 border-b border-gray-700">
                 <img src="${logo}" class="w-6 h-6 object-contain" alt="" onerror="this.style.display='none'">
                 <div class="flex-1 min-w-0">
-                    <span class="text-xs font-medium text-white truncate block">${nomeTime}</span>
+                    <span class="text-xs font-medium text-white truncate block">${escapeHtml(nomeTime)}</span>
                     ${time.formacao ? `<span class="text-[10px] text-primary">${time.formacao}</span>` : ''}
                 </div>
             </div>
@@ -1136,7 +1136,7 @@ function renderizarEscalacoes(escalacoes, jogo) {
             ${time.tecnico ? `
                 <div class="flex items-center gap-2 mb-2 px-2 py-1 rounded bg-gray-800/50">
                     <span class="material-icons text-xs text-white/30">person</span>
-                    <span class="text-[10px] text-white/50">${time.tecnico}</span>
+                    <span class="text-[10px] text-white/50">${escapeHtml(time.tecnico)}</span>
                 </div>
             ` : ''}
 
@@ -1145,7 +1145,7 @@ function renderizarEscalacoes(escalacoes, jogo) {
                 ${(time.titulares || []).slice(0, 11).map((jogador, idx) => `
                     <div class="flex items-center gap-2 px-2 py-1.5 rounded ${idx % 2 === 0 ? 'bg-gray-800/30' : ''}">
                         <span class="text-[10px] text-white/30 w-5 text-center">${jogador.numero || '-'}</span>
-                        <span class="text-xs text-white truncate flex-1">${jogador.nome}</span>
+                        <span class="text-xs text-white truncate flex-1">${escapeHtml(jogador.nome)}</span>
                         <span class="text-[9px] text-white/30 uppercase">${jogador.posicao || ''}</span>
                     </div>
                 `).join('')}

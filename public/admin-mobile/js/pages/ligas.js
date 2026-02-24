@@ -191,20 +191,20 @@ function renderParticipanteCard(p) {
       <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
         <img
           src="/escudos/${p.escudo}.png"
-          alt="${p.nome}"
+          alt="${escapeHtml(p.nome)}"
           style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;"
           onerror="this.onerror=null;this.src='/escudos/default.png'"
         >
         <div style="flex: 1; min-width: 0;">
           <p style="font-weight: 600; font-size: 13px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-            ${p.nome}
+            ${escapeHtml(p.nome)}
           </p>
           ${statusBadge}
         </div>
       </div>
 
       <p class="text-muted" style="font-size: 11px; margin: 0 0 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-        ${p.nomeTime}
+        ${escapeHtml(p.nomeTime)}
       </p>
 
       <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-color);">
@@ -234,15 +234,15 @@ function renderParticipanteListItem(p, idx) {
       <div class="list-item-avatar">
         <img
           src="/escudos/${p.escudo}.png"
-          alt="${p.nome}"
+          alt="${escapeHtml(p.nome)}"
           style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"
           onerror="this.onerror=null;this.src='/escudos/default.png'"
         >
       </div>
 
       <div class="list-item-content">
-        <div class="list-item-title">${p.nome}</div>
-        <div class="list-item-subtitle">${p.nomeTime}</div>
+        <div class="list-item-title">${escapeHtml(p.nome)}</div>
+        <div class="list-item-subtitle">${escapeHtml(p.nomeTime)}</div>
       </div>
 
       <div style="text-align: right;">

@@ -398,8 +398,8 @@ export class FluxoFinanceiroAuditoria {
                                 : '<div class="audit-escudo-placeholder"><span class="material-icons" style="font-size: 24px;">sports_soccer</span></div>'
                         }
                         <div>
-                            <div class="audit-nome">${participante.nome_cartola}</div>
-                            <div class="audit-time">${participante.nome_time}</div>
+                            <div class="audit-nome">${escapeHtml(participante.nome_cartola)}</div>
+                            <div class="audit-time">${escapeHtml(participante.nome_time)}</div>
                         </div>
                     </div>
                     <div class="audit-periodo">
@@ -521,7 +521,7 @@ export class FluxoFinanceiroAuditoria {
                             .map(
                                 (campo) => `
                             <tr ${resumo.manual[campo].valor === 0 ? 'class="text-muted"' : ""}>
-                                <td>${resumo.manual[campo].nome}</td>
+                                <td>${escapeHtml(resumo.manual[campo].nome)}</td>
                                 <td class="text-right ${resumo.manual[campo].valor >= 0 ? "text-success" : "text-danger"}">
                                     ${resumo.manual[campo].valor !== 0 ? `R$ ${resumo.manual[campo].valor.toFixed(2)}` : "-"}
                                 </td>
@@ -600,7 +600,7 @@ export class FluxoFinanceiroAuditoria {
 
                 return `
                 <div class="audit-section">
-                    <h3>${cat.nome} <span class="badge-count">${dados.totalRegistros} registros</span></h3>
+                    <h3>${escapeHtml(cat.nome)} <span class="badge-count">${dados.totalRegistros} registros</span></h3>
                     <div class="audit-table-scroll">
                         <table class="audit-table compact">
                             <thead>

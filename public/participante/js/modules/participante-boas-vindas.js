@@ -828,19 +828,19 @@ function renderizarBoasVindas(container, data, ligaRules) {
                 <div class="px-4 pb-4">
                     <div class="flex items-center justify-between mb-1">
                         <div class="flex items-center gap-2">
-                            <h1 class="text-xl font-bold leading-tight tracking-tight text-white">Olá, ${primeiroNome}! 👋</h1>
+                            <h1 class="text-xl font-bold leading-tight tracking-tight text-white">Olá, ${escapeHtml(primeiroNome)}! 👋</h1>
                             ${seloPremium}
                         </div>
                         <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide" style="background: linear-gradient(135deg, #ff4500, #e63e00); color: white;">
                             ${TEMPORADA_ATUAL}
                         </span>
                     </div>
-                    <p class="text-sm font-normal text-white/70 flex items-center gap-1.5">${logoLigaHTML}<span>${nomeLiga}</span> • Aguardando 1ª rodada</p>
+                    <p class="text-sm font-normal text-white/70 flex items-center gap-1.5">${logoLigaHTML}<span>${escapeHtml(nomeLiga)}</span> • Aguardando 1ª rodada</p>
                 </div>
 
                 <!-- Card Principal do Time - Aguardando -->
                 <div class="mx-4 mb-4 rounded-xl bg-surface-dark p-4">
-                    <h3 class="mb-4 text-center text-base font-bold leading-tight text-white">${nomeTime}</h3>
+                    <h3 class="mb-4 text-center text-base font-bold leading-tight text-white">${escapeHtml(nomeTime)}</h3>
                     <div class="flex items-center justify-around">
                         <div class="text-center">
                             <p class="text-xs font-medium uppercase leading-normal text-white/70">Posição</p>
@@ -969,19 +969,19 @@ function renderizarBoasVindas(container, data, ligaRules) {
                 <div class="px-4 pb-4">
                     <div class="flex items-center justify-between mb-1">
                         <div class="flex items-center gap-2">
-                            <h1 class="text-xl font-bold leading-tight tracking-tight text-white">Olá, ${primeiroNome}! 👋</h1>
+                            <h1 class="text-xl font-bold leading-tight tracking-tight text-white">Olá, ${escapeHtml(primeiroNome)}! 👋</h1>
                             ${seloPremium}
                         </div>
                         <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide" style="background: linear-gradient(135deg, #ff4500, #e63e00); color: white;">
                             ${TEMPORADA_ATUAL}
                         </span>
                     </div>
-                    <p class="text-sm font-normal text-white/70 flex items-center gap-1.5">${logoLigaHTML}<span>${nomeLiga}</span> • Rodada ${rodadaAtual || "--"}</p>
+                    <p class="text-sm font-normal text-white/70 flex items-center gap-1.5">${logoLigaHTML}<span>${escapeHtml(nomeLiga)}</span> • Rodada ${rodadaAtual || "--"}</p>
                 </div>
 
                 <!-- Card Principal do Time -->
                 <div class="mx-4 mb-4 rounded-xl bg-surface-dark p-4">
-                    <h3 class="mb-4 text-center text-base font-bold leading-tight text-white">${nomeTime}</h3>
+                    <h3 class="mb-4 text-center text-base font-bold leading-tight text-white">${escapeHtml(nomeTime)}</h3>
                     <div class="flex items-center justify-around">
                         <div class="text-center">
                             <p class="text-xs font-medium uppercase leading-normal text-white/70">Posição</p>

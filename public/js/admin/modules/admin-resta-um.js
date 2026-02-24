@@ -499,7 +499,7 @@ class AdminRestaUm {
                 <div class="ru-edicao-info" onclick="window.adminRestaUm.selecionarEdicao(${edicao.edicao})">
                     <span class="material-icons" style="color:var(--module-restaum-primary);font-size:1.25rem;">sports_kabaddi</span>
                     <div>
-                        <div class="ru-edicao-nome">${edicao.nome || edicao.edicao + 'a Edicao'}</div>
+                        <div class="ru-edicao-nome">${escapeHtml(edicao.nome || edicao.edicao + 'a Edicao')}</div>
                         <div class="ru-edicao-rodadas">R${edicao.rodadaInicial} - R${edicao.rodadaFinal} | ${edicao.totalParticipantes || 0} participantes | ${edicao.vivosRestantes || 0} vivos</div>
                     </div>
                 </div>
@@ -583,7 +583,7 @@ class AdminRestaUm {
                     <div class="ru-participante-row">
                         <img src="/escudos/${p.escudoId || 'default'}.png"
                              onerror="this.src='/escudos/default.png'" alt="">
-                        <span class="ru-participante-nome">${p.nomeTime || p.nomeCartoleiro || 'Time'}</span>
+                        <span class="ru-participante-nome">${escapeHtml(p.nomeTime || p.nomeCartoleiro || 'Time')}</span>
                         <span class="ru-participante-pontos">
                             ${(Math.trunc((p.pontosAcumulados || 0) * 100) / 100).toFixed(2)} pts
                         </span>
@@ -633,7 +633,7 @@ class AdminRestaUm {
                     <div class="ru-timeline-content">
                         ${elims.map(e => `
                             <div class="ru-timeline-entry">
-                                <span class="ru-timeline-nome">${e.nomeTime || 'Time'}</span>
+                                <span class="ru-timeline-nome">${escapeHtml(e.nomeTime || 'Time')}</span>
                                 <span class="ru-timeline-pontos">${(Math.trunc((e.pontosRodada || 0) * 100) / 100).toFixed(2)}</span>
                                 <span class="ru-timeline-date">${e.dataEliminacao ? new Date(e.dataEliminacao).toLocaleDateString('pt-BR') : ''}</span>
                             </div>
@@ -663,7 +663,7 @@ class AdminRestaUm {
 
         // Atualizar titulo e banner
         const titulo = document.getElementById('ruFormTitulo');
-        if (titulo) titulo.innerHTML = `<span class="material-icons">edit</span> Editar ${ed.nome || ed.edicao + 'a Edicao'}`;
+        if (titulo) titulo.innerHTML = `<span class="material-icons">edit</span> Editar ${escapeHtml(ed.nome || ed.edicao + 'a Edicao')}`;
 
         const banner = document.getElementById('ruEditBanner');
         const bannerText = document.getElementById('ruEditBannerText');

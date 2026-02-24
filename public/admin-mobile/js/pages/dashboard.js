@@ -208,7 +208,7 @@ function renderLigaCard(liga) {
       <div class="liga-card-header">
         <div class="liga-card-name">
           ${mi('emoji_events', 'mi-sm')}
-          <span>${liga.nome}</span>
+          <span>${escapeHtml(liga.nome)}</span>
         </div>
         ${inadimplentes > 0 ? `<span class="badge badge-warning" style="font-size:10px;padding:2px 8px;">${inadimplentes} inadimpl.</span>` : ''}
       </div>

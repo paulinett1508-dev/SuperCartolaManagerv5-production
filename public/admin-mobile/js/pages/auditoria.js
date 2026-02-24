@@ -42,7 +42,7 @@ function renderPage(container, ligas) {
           <label class="form-label" style="font-size:13px;">Selecione a Liga</label>
           <select id="audit-liga-select" class="form-input" style="font-size:14px;">
             <option value="">Selecione...</option>
-            ${ligas.map(l => `<option value="${l.id}">${l.nome} (${l.temporada})</option>`).join('')}
+            ${ligas.map(l => `<option value="${l.id}">${escapeHtml(l.nome)} (${l.temporada})</option>`).join('')}
           </select>
         </div>
 
@@ -134,7 +134,7 @@ function renderAuditResult(container, data, detalhado) {
         ${discrepancias.slice(0, 20).map(d => `
           <div class="card" style="padding:12px;">
             <div style="font-size:13px;font-weight:600;color:var(--accent-danger);margin-bottom:4px;">
-              ${d.nomeTime || d.nome || d.timeId || 'Participante'}
+              ${escapeHtml(d.nomeTime || d.nome || d.timeId || 'Participante')}
             </div>
             <div style="font-size:12px;color:var(--text-muted);">
               ${d.descricao || d.motivo || d.mensagem || JSON.stringify(d).substring(0, 120)}

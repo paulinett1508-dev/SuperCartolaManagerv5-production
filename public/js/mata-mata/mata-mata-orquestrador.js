@@ -539,8 +539,8 @@ async function carregarClassificadosParciais(contentElement, ligaId, edicaoId, e
           <div class="time-info">
             <img src="/escudos/${t.clube_id}.png" class="escudo-img" onerror="this.onerror=null;this.src='/escudos/default.png'">
             <div class="time-details">
-              <span class="time-nome">${t.nome_time || "—"}</span>
-              <span class="time-cartoleiro">${t.nome_cartola || "—"}</span>
+              <span class="time-nome">${escapeHtml(t.nome_time || "—")}</span>
+              <span class="time-cartoleiro">${escapeHtml(t.nome_cartola || "—")}</span>
             </div>
           </div>
         </td>
@@ -556,8 +556,8 @@ async function carregarClassificadosParciais(contentElement, ligaId, edicaoId, e
           <div class="time-info">
             <img src="/escudos/${t.clube_id}.png" class="escudo-img" onerror="this.onerror=null;this.src='/escudos/default.png'">
             <div class="time-details">
-              <span class="time-nome">${t.nome_time || "—"}</span>
-              <span class="time-cartoleiro">${t.nome_cartola || "—"}</span>
+              <span class="time-nome">${escapeHtml(t.nome_time || "—")}</span>
+              <span class="time-cartoleiro">${escapeHtml(t.nome_cartola || "—")}</span>
             </div>
           </div>
         </td>
@@ -682,7 +682,7 @@ async function carregarConfrontosParciais(contentElement, ligaId, edicaoId, edic
     contentElement.insertAdjacentHTML("afterbegin", `
       <div class="parciais-header">
         <span class="parciais-live-badge">AO VIVO</span>
-        <h4>Confrontos da ${faseLabel} — ${edicaoSelecionada.nome || "Edição " + edicaoId}</h4>
+        <h4>Confrontos da ${faseLabel} — ${escapeHtml(edicaoSelecionada.nome || "Edição " + edicaoId)}</h4>
         <p>Baseado nas parciais da Rodada ${data.rodada}. Sujeito a alteração.</p>
       </div>
     `);
