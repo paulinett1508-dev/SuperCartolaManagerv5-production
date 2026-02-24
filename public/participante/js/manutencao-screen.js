@@ -1,7 +1,9 @@
 // =====================================================================
-// manutencao-screen.js - Tela "Calma aê!" v2.1
+// manutencao-screen.js - Tela "Calma aê!" v2.2
 // =====================================================================
 // Exibe tela de manutenção amigável quando admin ativa o modo.
+// v2.2: Polling automático a cada 30s — detecta liberação sem reload manual
+//       + visibilitychange para re-verificar ao voltar ao foreground
 // v2.1: 4 botões - Ranking Geral, Ranking da Rodada, Jogo de Pênaltis, Atualizar Parciais
 // v2.0: 3 botões - Ranking Geral, Ranking da Rodada, Jogo de Pênaltis
 // =====================================================================
@@ -15,6 +17,26 @@ const ManutencaoScreen = {
     _penaltyAnimFrame: null,
     _penaltyKeyHandler: null,
     _painelAtivo: null, // 'geral' | 'rodada' | 'penalty'
+    // ✅ v2.2: Polling para detectar liberação automática
+    _pollingInterval: null,
+    _visibilityHandler: null,
+
+    // ✅ v2.2: Verifica se manutenção ainda está ativa e recarrega se liberada
+    async _verificarLiberacao() {
+        try {
+            const res = await fetch('/api/participante/manutencao/status', {
+                credentials: 'include',
+                cache: 'no-store', // Nunca usar cache — precisa de resposta fresca
+            });
+            if (!res.ok) return;
+            const data = await res.json();
+            // Liberado = manutenção desativada OU usuário saiu do bloqueio (whitelist, premium, bypass)
+            if (!data.ativo || !data.bloqueado) {
+                if (window.Log) Log.info('MANUTENCAO', '✅ Manutenção liberada — recarregando app...');
+                window.location.reload();
+            }
+        } catch (_) { /* rede indisponível — tentar na próxima rodada */ }
+    },
 
     ativar(config = null) {
         if (this._ativo) return;
@@ -66,7 +88,19 @@ const ManutencaoScreen = {
             this._carregarNoticias();
         }
 
-        if (window.Log) Log.info('MANUTENCAO', 'Tela de manutenção ativada', config);
+        // ✅ v2.2: Polling — verifica liberação a cada 30s automaticamente
+        this._pollingInterval = setInterval(() => this._verificarLiberacao(), 30000);
+
+        // ✅ v2.2: visibilitychange — re-verifica imediatamente ao voltar ao foreground
+        // Sem isso, o participante que minimizou o app ficaria preso até a próxima rodada do polling
+        this._visibilityHandler = () => {
+            if (document.visibilityState === 'visible' && this._ativo) {
+                this._verificarLiberacao();
+            }
+        };
+        document.addEventListener('visibilitychange', this._visibilityHandler);
+
+        if (window.Log) Log.info('MANUTENCAO', 'Tela de manutenção ativada (polling 30s iniciado)', config);
     },
 
     _aplicarCustomizacao(tela, custom) {
@@ -145,6 +179,18 @@ const ManutencaoScreen = {
     desativar() {
         if (!this._ativo) return;
         this._ativo = false;
+
+        // ✅ v2.2: Parar polling de liberação
+        if (this._pollingInterval) {
+            clearInterval(this._pollingInterval);
+            this._pollingInterval = null;
+        }
+
+        // ✅ v2.2: Remover listener de visibilidade
+        if (this._visibilityHandler) {
+            document.removeEventListener('visibilitychange', this._visibilityHandler);
+            this._visibilityHandler = null;
+        }
 
         // Parar observer
         if (this._observer) {
