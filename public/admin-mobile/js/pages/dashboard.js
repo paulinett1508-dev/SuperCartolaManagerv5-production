@@ -189,6 +189,10 @@ function renderQuickActions() {
         <div class="action-card-icon">${mi('fact_check')}</div>
         <div class="action-card-label">Auditoria</div>
       </div>
+      <div class="action-card action-card--purple" onclick="window.router.navigate('/repositorio')" role="button" tabindex="0">
+        <div class="action-card-icon">${mi('account_tree')}</div>
+        <div class="action-card-label">Repositorio</div>
+      </div>
     </div>
   `;
 }

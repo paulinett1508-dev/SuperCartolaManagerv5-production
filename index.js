@@ -604,6 +604,8 @@ app.get("/api/admin/analytics/funcionalidades", analyticsController.getAnalytics
 app.get("/api/admin/analytics/estatisticas", analyticsController.getAnalyticsEstatisticas);
 app.get("/api/admin/analytics/sync-status", analyticsController.getGitSyncStatus);
 app.post("/api/admin/analytics/sync-trigger", analyticsController.postGitSyncTrigger);
+app.delete("/api/admin/analytics/branch/:nomeBranch", analyticsController.deleteBranch);
+app.post("/api/admin/analytics/branches/delete-batch", analyticsController.deleteBranchesBatch);
 console.log("[SERVER] 📊 Rotas de Analytics (session) registradas em /api/admin/analytics");
 
 // 📢 Avisos In-App (Notificador)
