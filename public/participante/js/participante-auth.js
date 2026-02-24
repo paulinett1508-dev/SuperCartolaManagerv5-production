@@ -295,6 +295,13 @@ class ParticipanteAuth {
                     const atuais = window.participanteModulosBloqueados || [];
                     const mudou = JSON.stringify(novosBloquios.sort()) !== JSON.stringify(atuais.slice().sort());
                     if (mudou) {
+                        // ✅ v2.4: Registrar módulos recém-liberados para feedback de UX no módulo
+                        const recemLiberados = atuais.filter(m => !novosBloquios.includes(m));
+                        if (recemLiberados.length > 0) {
+                            window.participanteModulosReativados = window.participanteModulosReativados || {};
+                            recemLiberados.forEach(m => { window.participanteModulosReativados[m] = Date.now(); });
+                            if (window.Log) Log.info('PARTICIPANTE-AUTH', '[POLL] Modulos recém-liberados:', recemLiberados);
+                        }
                         window.participanteModulosBloqueados = novosBloquios;
                         if (window.quickAccessBar && typeof window.quickAccessBar.sincronizarBloqueioManutencao === 'function') {
                             window.quickAccessBar.sincronizarBloqueioManutencao(novosBloquios);
@@ -308,11 +315,14 @@ class ParticipanteAuth {
                 if (!data.ativo) {
                     const atuais = window.participanteModulosBloqueados || [];
                     if (atuais.length > 0) {
+                        // ✅ v2.4: Registrar todos os módulos que estavam bloqueados como recém-liberados
+                        window.participanteModulosReativados = window.participanteModulosReativados || {};
+                        atuais.forEach(m => { window.participanteModulosReativados[m] = Date.now(); });
                         window.participanteModulosBloqueados = [];
                         if (window.quickAccessBar && typeof window.quickAccessBar.sincronizarBloqueioManutencao === 'function') {
                             window.quickAccessBar.sincronizarBloqueioManutencao([]);
                         }
-                        if (window.Log) Log.info('PARTICIPANTE-AUTH', '[POLL] Manutencao desativada — modulos limpos');
+                        if (window.Log) Log.info('PARTICIPANTE-AUTH', '[POLL] Manutencao desativada — modulos limpos, reativados registrados');
                     }
                 }
             } catch (_) { /* rede indisponível — tentar na próxima rodada */ }

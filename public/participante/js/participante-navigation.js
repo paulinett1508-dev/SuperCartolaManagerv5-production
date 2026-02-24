@@ -794,6 +794,39 @@ class ParticipanteNavigation {
         this._ultimaNavegacao = agora;
         this._navegacaoEmAndamento = navegacaoId;
 
+        // ✅ v4.11: Verificação fresca de manutenção para módulos base (fecha gap de 45s do polling)
+        // Evita que o participante carregue um módulo bloqueado durante o gap entre ciclos de polling
+        const MODULOS_BASE_VERIFICACAO_MANUT = ['extrato', 'ranking', 'rodadas'];
+        if (MODULOS_BASE_VERIFICACAO_MANUT.includes(moduloId) && !this._isPremium) {
+            try {
+                const resMt = await fetch('/api/participante/manutencao/status', { cache: 'no-store' });
+                if (resMt.ok) {
+                    const dataMt = await resMt.json();
+                    const anteriormenteBloqueado = (window.participanteModulosBloqueados || []).includes(moduloId);
+                    // Atualizar estado global com dados frescos
+                    if (dataMt.ativo && dataMt.modo === 'modulos' && Array.isArray(dataMt.modulos_bloqueados)) {
+                        window.participanteModulosBloqueados = dataMt.modulos_bloqueados;
+                    } else if (!dataMt.ativo || dataMt.modo !== 'modulos') {
+                        window.participanteModulosBloqueados = [];
+                    }
+                    // Bloquear se ainda em manutenção
+                    if (this.isModuloEmManutencao(moduloId)) {
+                        if (window.Log) Log.info('PARTICIPANTE-NAV', `[CHECK-FRESCO] ${moduloId} em manutencao — bloqueando`);
+                        this.mostrarModalManutencaoModulo(moduloId);
+                        return;
+                    }
+                    // Se o módulo estava bloqueado e agora está liberado: registrar para UX de transição
+                    if (anteriormenteBloqueado && !this.isModuloEmManutencao(moduloId)) {
+                        window.participanteModulosReativados = window.participanteModulosReativados || {};
+                        if (!window.participanteModulosReativados[moduloId]) {
+                            window.participanteModulosReativados[moduloId] = Date.now();
+                            if (window.Log) Log.info('PARTICIPANTE-NAV', `[CHECK-FRESCO] ${moduloId} recém-liberado de manutencao`);
+                        }
+                    }
+                }
+            } catch (_) { /* falha silenciosa — continuar com estado atual do cache */ }
+        }
+
         const container = document.getElementById("moduleContainer");
 
         if (window.Log) Log.info('PARTICIPANTE-NAV', `🧭 Navegando para: ${moduloId}`);

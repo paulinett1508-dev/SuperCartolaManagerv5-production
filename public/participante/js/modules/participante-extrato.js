@@ -380,6 +380,26 @@ async function carregarExtrato(ligaId, timeId) {
         // Abortar fetch de cálculo pendente (sem AbortController → sem hang)
         if (calculoController) { try { calculoController.abort(); } catch (_) {} }
         if (window.Log) Log.error("EXTRATO-PARTICIPANTE", "⏱️ Timeout - requisição demorou demais");
+
+        // ✅ v5.3: Se módulo foi recém-liberado de manutenção, auto-retry em vez de timeout genérico
+        const reativadoEm = window.participanteModulosReativados?.extrato;
+        const foiReativadoRecente = reativadoEm && (Date.now() - reativadoEm < 60000);
+        if (foiReativadoRecente) {
+            delete window.participanteModulosReativados.extrato;
+            if (window.Log) Log.info("EXTRATO-PARTICIPANTE", "🔄 Timeout pós-manutenção — auto-retry em 4s");
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px 20px;">
+                    <span class="material-icons" style="font-size:48px;color:var(--app-primary);display:block;margin-bottom:16px;animation:spin 1.5s linear infinite">sync</span>
+                    <h3 style="color: var(--app-primary); margin-bottom: 8px;">Sincronizando dados...</h3>
+                    <p style="color: #9ca3af; font-size: 13px; margin-bottom: 0;">
+                        Manutenção encerrada. Tentando novamente...
+                    </p>
+                </div>
+            `;
+            setTimeout(() => window.forcarRefreshExtratoParticipante?.(), 4000);
+            return;
+        }
+
         container.innerHTML = `
             <div style="text-align: center; padding: 40px;">
                 <span class="material-icons" style="font-size:48px;color:var(--app-amber);display:block;margin-bottom:16px">timer_off</span>
@@ -1146,6 +1166,23 @@ function mostrarVazio() {
             buscarEExibirProjecao(PARTICIPANTE_IDS.ligaId, PARTICIPANTE_IDS.timeId);
         }
     } else {
+        // ✅ v5.3: Módulo recém-liberado de manutenção — dados ainda sendo sincronizados
+        const reativadoEm = window.participanteModulosReativados?.extrato;
+        const foiReativadoRecente = reativadoEm && (Date.now() - reativadoEm < 30000);
+        if (foiReativadoRecente) {
+            delete window.participanteModulosReativados.extrato;
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px 20px;">
+                    <span class="material-icons" style="font-size:48px;color:var(--app-primary);display:block;margin-bottom:16px;animation:spin 1.5s linear infinite">sync</span>
+                    <h3 style="color: var(--app-primary); margin-bottom: 8px;">Sincronizando dados...</h3>
+                    <p style="color: #9ca3af; font-size: 13px; margin-bottom: 0;">
+                        Manutenção encerrada. Seu extrato está sendo carregado.
+                    </p>
+                </div>
+            `;
+            setTimeout(() => window.forcarRefreshExtratoParticipante?.(), 5000);
+            return;
+        }
         // Mensagem padrao (temporada ativa sem dados ainda)
         container.innerHTML = `
             <div style="text-align: center; padding: 40px 20px; color: #999;">
