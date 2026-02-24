@@ -33,7 +33,10 @@
                     <a href="painel.html" class="text-gray-400 hover:text-white transition-colors">
                         ← Voltar
                     </a>
-                    <h1 class="text-2xl">🛠️ Modo Manutenção Avançado</h1>
+                    <h1 class="text-2xl flex items-center gap-2">
+                        <span class="material-icons" style="color:var(--app-warning)">build</span>
+                        Modo Manutenção Avançado
+                    </h1>
                 </div>
                 <div id="statusIndicator" class="flex items-center gap-2">
                     <span class="w-3 h-3 rounded-full bg-gray-500"></span>
@@ -47,7 +50,8 @@
         <!-- Status Atual -->
         <section id="statusAtual" class="bg-gray-800 rounded-lg p-6 mb-8 border border-gray-700">
             <h2 class="text-xl mb-4 flex items-center gap-2">
-                📊 Status Atual
+                <span class="material-icons" style="color:var(--app-info)">monitoring</span>
+                Status Atual
             </h2>
             <div id="statusContent" class="text-gray-400">
                 Carregando...
@@ -56,7 +60,10 @@
 
         <!-- Configuração -->
         <section class="bg-gray-800 rounded-lg p-6 mb-8 border border-gray-700">
-            <h2 class="text-xl mb-6">⚙️ Configuração</h2>
+            <h2 class="text-xl mb-6 flex items-center gap-2">
+                <span class="material-icons" style="color:var(--app-primary)">settings</span>
+                Configuração
+            </h2>
 
             <!-- Modo de Operação -->
             <div class="mb-6">
@@ -96,7 +103,10 @@
 
             <!-- Customização -->
             <div class="mb-6 p-4 bg-gray-700 rounded">
-                <h3 class="text-lg mb-4">🎨 Customização</h3>
+                <h3 class="text-lg mb-4 flex items-center gap-2">
+                    <span class="material-icons" style="color:var(--app-indigo)">palette</span>
+                    Customização
+                </h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
@@ -135,11 +145,11 @@
                     <label class="block text-sm mb-2">Imagem / Banner:</label>
                     <div class="flex gap-2">
                         <input type="file" id="uploadImagem" accept="image/*" class="hidden">
-                        <button onclick="ManutencaoConfig.selecionarImagem()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition-colors">
-                            📎 Upload
+                        <button onclick="ManutencaoConfig.selecionarImagem()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition-colors flex items-center gap-1">
+                            <span class="material-icons text-base">attach_file</span> Upload
                         </button>
-                        <button onclick="ManutencaoConfig.removerImagem()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded transition-colors">
-                            🗑️ Remover
+                        <button onclick="ManutencaoConfig.removerImagem()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded transition-colors flex items-center gap-1">
+                            <span class="material-icons text-base">delete</span> Remover
                         </button>
                         <div id="imagemStatus" class="flex-1 bg-gray-600 border border-gray-500 rounded px-3 py-2 text-sm text-gray-400">
                             Nenhuma imagem selecionada
@@ -169,7 +179,10 @@
 
             <!-- Controle de Acesso -->
             <div id="controleAcessoSection" class="mb-6 p-4 bg-gray-700 rounded">
-                <h3 class="text-lg mb-4">🔐 Controle de Acesso</h3>
+                <h3 class="text-lg mb-4 flex items-center gap-2">
+                    <span class="material-icons" style="color:var(--app-danger)">lock</span>
+                    Controle de Acesso
+                </h3>
 
                 <div class="mb-4">
                     <label class="block text-sm mb-3">Tipo de Lista:</label>
@@ -194,7 +207,10 @@
 
             <!-- Módulos Bloqueados -->
             <div id="modulosBloqueadosSection" class="mb-6 p-4 bg-gray-700 rounded hidden">
-                <h3 class="text-lg mb-4">📦 Módulos Bloqueados</h3>
+                <h3 class="text-lg mb-4 flex items-center gap-2">
+                    <span class="material-icons" style="color:var(--app-warning)">inventory_2</span>
+                    Módulos Bloqueados
+                </h3>
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3" id="modulosCheckboxes">
                     <label class="flex items-center gap-2">
                         <input type="checkbox" value="extrato" class="w-4 h-4 modulo-checkbox">
@@ -237,23 +253,23 @@
 
             <!-- Preview -->
             <div class="mb-6">
-                <button onclick="ManutencaoConfig.mostrarPreview()" class="w-full bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded font-medium transition-colors">
-                    👁️ Visualizar Preview
+                <button onclick="ManutencaoConfig.mostrarPreview()" class="w-full bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded font-medium transition-colors flex items-center justify-center gap-2">
+                    <span class="material-icons">visibility</span> Visualizar Preview
                 </button>
             </div>
 
             <!-- Ações -->
             <div class="mb-4">
-                <button onclick="ManutencaoConfig.salvar()" class="w-full bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded font-medium transition-colors">
-                    💾 Salvar Configuração
+                <button onclick="ManutencaoConfig.salvar()" class="w-full bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded font-medium transition-colors flex items-center justify-center gap-2">
+                    <span class="material-icons">save</span> Salvar Configuração
                 </button>
             </div>
             <div class="flex gap-4">
-                <button onclick="ManutencaoConfig.ativar()" class="flex-1 bg-green-600 hover:bg-green-700 px-6 py-3 rounded font-medium transition-colors">
-                    ✅ Ativar Manutenção
+                <button onclick="ManutencaoConfig.ativar()" class="flex-1 bg-green-600 hover:bg-green-700 px-6 py-3 rounded font-medium transition-colors flex items-center justify-center gap-2">
+                    <span class="material-icons">check_circle</span> Ativar Manutenção
                 </button>
-                <button onclick="ManutencaoConfig.desativar()" class="flex-1 bg-red-600 hover:bg-red-700 px-6 py-3 rounded font-medium transition-colors">
-                    ❌ Desativar Manutenção
+                <button onclick="ManutencaoConfig.desativar()" class="flex-1 bg-red-600 hover:bg-red-700 px-6 py-3 rounded font-medium transition-colors flex items-center justify-center gap-2">
+                    <span class="material-icons">cancel</span> Desativar Manutenção
                 </button>
             </div>
         </section>

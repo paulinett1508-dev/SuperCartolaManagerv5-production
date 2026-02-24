@@ -166,12 +166,12 @@ const ManutencaoConfig = {
         const ativo = this.estadoAtual.ativo === true;
 
         if (!ativo) {
-            content.innerHTML = '<div class="text-green-400">✅ Modo manutenção está DESATIVADO. O app está funcionando normalmente.</div>';
+            content.innerHTML = '<div class="text-green-400 flex items-center gap-2"><span class="material-icons text-base">check_circle</span> Modo manutenção está DESATIVADO. O app está funcionando normalmente.</div>';
             return;
         }
 
         let html = '<div class="space-y-3">';
-        html += '<div class="text-red-400 font-medium">🚨 Modo manutenção está ATIVO</div>';
+        html += '<div class="text-red-400 font-medium flex items-center gap-2"><span class="material-icons text-base">warning</span> Modo manutenção está ATIVO</div>';
         html += `<div><span class="text-gray-400">Modo:</span> <span class="text-white font-medium">${this.estadoAtual.modo || 'global'}</span></div>`;
 
         if (this.estadoAtual.customizacao) {
@@ -420,10 +420,10 @@ const ManutencaoConfig = {
                 ${config.controle_acesso.modo_lista === 'whitelist' && config.controle_acesso.whitelist_timeIds.length > 0 ? `<div><strong>Whitelist:</strong> ${config.controle_acesso.whitelist_timeIds.join(', ')}</div>` : ''}
                 ${config.controle_acesso.modo_lista === 'blacklist' && config.controle_acesso.blacklist_timeIds.length > 0 ? `<div><strong>Blacklist:</strong> ${config.controle_acesso.blacklist_timeIds.join(', ')}</div>` : ''}
                 <div><strong>Opções:</strong></div>
-                <ul class="list-disc list-inside ml-4">
-                    <li>${config.customizacao.mostrar_ranking ? '✅' : '❌'} Mostrar ranking</li>
-                    <li>${config.customizacao.mostrar_noticias ? '✅' : '❌'} Mostrar notícias</li>
-                    <li>${config.customizacao.mostrar_ultima_rodada ? '✅' : '❌'} Mostrar última rodada</li>
+                <ul class="list-none ml-0 space-y-1">
+                    <li class="flex items-center gap-1"><span class="material-icons text-sm" style="color:${config.customizacao.mostrar_ranking ? 'var(--app-success)' : 'var(--app-danger)'}">${config.customizacao.mostrar_ranking ? 'check_circle' : 'cancel'}</span> Mostrar ranking</li>
+                    <li class="flex items-center gap-1"><span class="material-icons text-sm" style="color:${config.customizacao.mostrar_noticias ? 'var(--app-success)' : 'var(--app-danger)'}">${config.customizacao.mostrar_noticias ? 'check_circle' : 'cancel'}</span> Mostrar notícias</li>
+                    <li class="flex items-center gap-1"><span class="material-icons text-sm" style="color:${config.customizacao.mostrar_ultima_rodada ? 'var(--app-success)' : 'var(--app-danger)'}">${config.customizacao.mostrar_ultima_rodada ? 'check_circle' : 'cancel'}</span> Mostrar última rodada</li>
                 </ul>
             </div>
         `;

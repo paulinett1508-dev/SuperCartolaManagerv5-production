@@ -238,12 +238,18 @@ class QuickAccessBar {
             return modulosAtivos[configKey] === true;
         };
 
-        // Helper: verifica se módulo base está em manutenção (admin desativou)
+        // Helper: verifica se módulo base está em manutenção (admin desativou na liga OU via manutencao.json)
         // ✅ v4.10: Premium bypass - participantes premium veem módulos normalmente
+        // FIX BUG#3: incorpora window.participanteModulosBloqueados (modo modulos do manutencao.json)
         const isPremium = window.participanteNav?._isPremium === true;
+        const modulosBloqueadosManutencao = Array.isArray(window.participanteModulosBloqueados)
+            ? window.participanteModulosBloqueados
+            : [];
         const isEmManutencao = (configKey) => {
             if (isPremium) return false;
-            return modulosBase.includes(configKey) && modulosAtivos[configKey] === false;
+            const bloqueadoLiga = modulosBase.includes(configKey) && modulosAtivos[configKey] === false;
+            const bloqueadoManutencao = modulosBloqueadosManutencao.includes(configKey);
+            return bloqueadoLiga || bloqueadoManutencao;
         };
 
         // Helper: renderiza card do módulo
@@ -584,7 +590,11 @@ class QuickAccessBar {
         modulosBase.forEach(key => {
             const btn = document.querySelector(`.nav-item[data-page="${key}"]`);
             if (!btn) return;
-            if (modulosAtivos[key] === false && !isPremiumNav) {
+            // FIX BUG#3: considerar também bloqueios do manutencao.json (modo módulos)
+            const bloqueadoLiga = modulosAtivos[key] === false;
+            const bloqueadoManutencao = Array.isArray(window.participanteModulosBloqueados) &&
+                window.participanteModulosBloqueados.includes(key);
+            if ((bloqueadoLiga || bloqueadoManutencao) && !isPremiumNav) {
                 btn.style.opacity = '0.35';
                 btn.style.filter = 'grayscale(0.5)';
             } else {
@@ -594,6 +604,34 @@ class QuickAccessBar {
         });
         // ✅ v2.9: Removido renderizarMenuContent() que era no-op (descartava HTML).
         // O menu é re-renderizado de fato em abrirMenu() a cada abertura.
+    }
+
+    /**
+     * FIX BUG#3+4 v2.10: Sincroniza visual de bloqueio pontual (manutencao.json modo 'modulos')
+     * com a bottom nav e o menu. Chamado pelo polling e pelo _verificarManutencao().
+     * @param {string[]} modulosBloqueados — lista de IDs de módulos bloqueados (ex: ['extrato', 'ranking'])
+     */
+    sincronizarBloqueioManutencao(modulosBloqueados) {
+        const isPremiumNav = window.participanteNav?._isPremium === true;
+        if (isPremiumNav) return;
+
+        // IDs da bottom nav (kebab ou direto) que mapeiam para módulos base
+        const modulosBase = ['extrato', 'ranking', 'rodadas'];
+        modulosBase.forEach(key => {
+            const btn = document.querySelector(`.nav-item[data-page="${key}"]`);
+            if (!btn) return;
+            const bloqueadoLiga = this.modulosAtivos?.[key] === false;
+            const bloqueadoManutencao = modulosBloqueados.includes(key);
+            if (bloqueadoLiga || bloqueadoManutencao) {
+                btn.style.opacity = '0.35';
+                btn.style.filter = 'grayscale(0.5)';
+            } else {
+                btn.style.opacity = '';
+                btn.style.filter = '';
+            }
+        });
+
+        if (window.Log) Log.debug('QUICK-BAR', 'Bloqueio manutencao sincronizado:', modulosBloqueados);
     }
 
     /**

@@ -60,6 +60,9 @@ class ParticipanteAuth {
             // ✅ MANUTENÇÃO: Verificar antes de liberar o app
             const emManutencao = await this._verificarManutencao();
 
+            // v2.3: Iniciar polling de ativação de manutenção (45s)
+            this._iniciarPollingManutencao();
+
             // ✅ SPLASH: Mostrar após auth válida (cache) - apenas se não em manutenção
             if (!emManutencao && window.SplashScreen) {
                 window.SplashScreen.show('autenticacao');
@@ -159,6 +162,9 @@ class ParticipanteAuth {
                     .catch(e => { /* Ignorar erros de preload */ });
             }
 
+            // v2.3: Iniciar polling de ativação de manutenção (45s)
+            this._iniciarPollingManutencao();
+
             // ✅ SPLASH: Mostrar após auth válida - apenas se não em manutenção
             if (!emManutencaoFetch && window.SplashScreen) {
                 window.SplashScreen.show('autenticacao');
@@ -190,41 +196,135 @@ class ParticipanteAuth {
      * Verifica se o app está em modo manutenção.
      * Se bloqueado, ativa a tela "Calma aê!" (ManutencaoScreen).
      * Se dev bypass (admin logado via Replit Auth), libera normalmente.
+     * v2.3: Limpa window.participanteModulosBloqueados quando manutenção desativada.
+     *       Detecta ativação em tempo real via polling de 45s.
      * @returns {boolean} true se app está bloqueado por manutenção
      */
     async _verificarManutencao() {
         try {
-            const res = await fetch('/api/participante/manutencao/status', { credentials: 'include' });
+            const res = await fetch('/api/participante/manutencao/status', {
+                credentials: 'include',
+                cache: 'no-store'
+            });
             if (!res.ok) return false;
 
             const data = await res.json();
 
+            // ── BLOQUEIO GLOBAL ──────────────────────────────────────────────
             if (data.ativo && data.bloqueado) {
                 if (window.ManutencaoScreen) {
                     ManutencaoScreen.ativar(data);
-                    if (window.Log) Log.info('PARTICIPANTE-AUTH', '🔧 App em manutenção - splash ativada');
+                    if (window.Log) Log.info('PARTICIPANTE-AUTH', 'App em manutencao - splash ativada');
                 }
                 return true;
             }
 
-            // Dev bypass, whitelist ou modo módulos - desativar splash se estava ativa
+            // ── MODO MÓDULOS (ativo mas não bloqueado globalmente) ────────────
             if (data.ativo && !data.bloqueado) {
-                // Modo módulos: propagar lista de módulos bloqueados para navegação
                 if (data.modo === 'modulos' && data.modulos_bloqueados) {
                     window.participanteModulosBloqueados = data.modulos_bloqueados;
-                    if (window.Log) Log.info('PARTICIPANTE-AUTH', `🔧 Modo módulos: ${data.modulos_bloqueados.length} módulo(s) bloqueado(s):`, data.modulos_bloqueados);
+                    if (window.Log) Log.info('PARTICIPANTE-AUTH', `Modo modulos: ${data.modulos_bloqueados.length} modulo(s) bloqueado(s):`, data.modulos_bloqueados);
+                }
+                // FIX BUG#3: Sincronizar quick-bar com bloqueios pontuais
+                if (window.quickAccessBar && typeof window.quickAccessBar.sincronizarBloqueioManutencao === 'function') {
+                    window.quickAccessBar.sincronizarBloqueioManutencao(data.modulos_bloqueados || []);
                 }
 
                 if (window.ManutencaoScreen && ManutencaoScreen.estaAtivo()) {
                     ManutencaoScreen.desativar();
-                    if (window.Log) Log.info('PARTICIPANTE-AUTH', '🔓 Manutenção: acesso liberado (devBypass, whitelist ou modo módulos)');
+                    if (window.Log) Log.info('PARTICIPANTE-AUTH', 'Manutencao: acesso liberado (devBypass, whitelist ou modo modulos)');
+                }
+            }
+
+            // ── MANUTENÇÃO DESATIVADA (data.ativo === false) ─────────────────
+            // FIX BUG#1: Limpar módulos bloqueados ao desativar
+            if (!data.ativo) {
+                if (window.participanteModulosBloqueados && window.participanteModulosBloqueados.length > 0) {
+                    window.participanteModulosBloqueados = [];
+                    if (window.Log) Log.info('PARTICIPANTE-AUTH', 'Manutencao desativada — modulos_bloqueados limpos');
+                    // Sincronizar quick-bar para remover badges de manutenção
+                    if (window.quickAccessBar && typeof window.quickAccessBar.sincronizarBloqueioManutencao === 'function') {
+                        window.quickAccessBar.sincronizarBloqueioManutencao([]);
+                    }
+                }
+                if (window.ManutencaoScreen && ManutencaoScreen.estaAtivo()) {
+                    ManutencaoScreen.desativar();
                 }
             }
 
             return false;
         } catch (error) {
-            if (window.Log) Log.warn('PARTICIPANTE-AUTH', 'Erro ao verificar manutenção (ignorando):', error);
+            if (window.Log) Log.warn('PARTICIPANTE-AUTH', 'Erro ao verificar manutencao (ignorando):', error);
             return false; // Em caso de erro, não bloquear
+        }
+    }
+
+    /**
+     * FIX BUG#2: Polling de ativação de manutenção.
+     * v2.3: Detecta quando admin ATIVA manutenção enquanto participante usa o app.
+     * Intervalo: 45s (leve — apenas verifica JSON pequeno do servidor).
+     * Só roda quando ManutencaoScreen NÃO está ativo (quando está ativo, o próprio
+     * ManutencaoScreen tem polling de liberação a cada 30s).
+     */
+    _iniciarPollingManutencao() {
+        // Evitar múltiplos pollings
+        if (this._pollingManutencaoInterval) return;
+
+        this._pollingManutencaoInterval = setInterval(async () => {
+            // Se tela de manutenção global já está ativa, o ManutencaoScreen cuida do polling
+            if (window.ManutencaoScreen && ManutencaoScreen.estaAtivo()) return;
+
+            try {
+                const res = await fetch('/api/participante/manutencao/status', {
+                    credentials: 'include',
+                    cache: 'no-store'
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+
+                // Manutenção ativada enquanto participante estava no app
+                if (data.ativo && data.bloqueado && window.ManutencaoScreen) {
+                    if (window.Log) Log.info('PARTICIPANTE-AUTH', '[POLL] Manutencao ativada — exibindo splash');
+                    ManutencaoScreen.ativar(data);
+                    return;
+                }
+
+                // Modo módulos alterado enquanto participante estava no app
+                if (data.ativo && !data.bloqueado && data.modo === 'modulos') {
+                    const novosBloquios = data.modulos_bloqueados || [];
+                    const atuais = window.participanteModulosBloqueados || [];
+                    const mudou = JSON.stringify(novosBloquios.sort()) !== JSON.stringify(atuais.slice().sort());
+                    if (mudou) {
+                        window.participanteModulosBloqueados = novosBloquios;
+                        if (window.quickAccessBar && typeof window.quickAccessBar.sincronizarBloqueioManutencao === 'function') {
+                            window.quickAccessBar.sincronizarBloqueioManutencao(novosBloquios);
+                        }
+                        if (window.Log) Log.info('PARTICIPANTE-AUTH', '[POLL] Modulos bloqueados atualizados:', novosBloquios);
+                    }
+                    return;
+                }
+
+                // Manutenção desativada: limpar estado
+                if (!data.ativo) {
+                    const atuais = window.participanteModulosBloqueados || [];
+                    if (atuais.length > 0) {
+                        window.participanteModulosBloqueados = [];
+                        if (window.quickAccessBar && typeof window.quickAccessBar.sincronizarBloqueioManutencao === 'function') {
+                            window.quickAccessBar.sincronizarBloqueioManutencao([]);
+                        }
+                        if (window.Log) Log.info('PARTICIPANTE-AUTH', '[POLL] Manutencao desativada — modulos limpos');
+                    }
+                }
+            } catch (_) { /* rede indisponível — tentar na próxima rodada */ }
+        }, 45000);
+
+        if (window.Log) Log.info('PARTICIPANTE-AUTH', 'Polling de manutencao iniciado (45s)');
+    }
+
+    _pararPollingManutencao() {
+        if (this._pollingManutencaoInterval) {
+            clearInterval(this._pollingManutencaoInterval);
+            this._pollingManutencaoInterval = null;
         }
     }
 
