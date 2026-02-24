@@ -369,8 +369,11 @@ As keywords ativam a mesma skill automaticamente (ver tabela acima).
 | `/stitch-adapter` | "stitch mcp", "gerar tela no stitch", "design no stitch", "mockup no stitch", "variante no stitch", "adaptar html do stitch" |
 | `/newsession` | "nova sessão", "salvar contexto" |
 | `/liste-pr-github [período]` | "listar PRs", "PRs de hoje", "merges da semana" |
+| `/security-review` | "auditoria segurança", "security review", "revisar segurança do PR" |
 
 > **`/liste-pr-github`** - Lista PRs do GitHub via API. Períodos: `hoje`, `ontem`, `semana`, `mes`, `YYYY-MM-DD` ou range `YYYY-MM-DD YYYY-MM-DD`. Sem argumento lista os últimos 10.
+
+> **`/security-review`** - Auditoria de segurança do diff da branch atual (baseado no [claude-code-security-review](https://github.com/anthropics/claude-code-security-review) da Anthropic). Analisa vulnerabilidades com confiança >80%, gera relatório com severidade e recomendações. Customizado para o projeto: NoSQL injection, XSS innerHTML, session management, idempotência financeira.
 
 ## 🔄 Sistema de Renovação de Temporada
 
