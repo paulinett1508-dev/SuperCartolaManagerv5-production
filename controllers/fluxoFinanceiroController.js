@@ -171,10 +171,13 @@ export function isModuloHabilitado(liga, modulo) {
 
 async function getStatusMercadoInterno() {
     try {
+        // ✅ v8.14.0 FIX: Timeout de 5s para evitar hang pós-republish
+        // Sem timeout, a requisição pode bloquear o endpoint por minutos durante cold start
         const response = await fetch(
             "https://api.cartola.globo.com/mercado/status",
             {
                 headers: { "User-Agent": "SuperCartolaManager/1.0" },
+                signal: AbortSignal.timeout(5000),
             },
         );
         if (!response.ok) throw new Error("Falha na API Cartola");
@@ -615,7 +618,12 @@ export const getExtratoFinanceiro = async (req, res) => {
 
         // ✅ v8.8.0 FIX: Auto-healing - se cache consolidou além do limite validado,
         // pode conter dados incorretos de rodadas não finalizadas. Forçar recálculo.
-        if (cache && cache.ultima_rodada_consolidada > limiteConsolidacao) {
+        // ✅ v8.14.0 FIX CRÍTICO: NUNCA acionar auto-healing com dados de fallback!
+        // Quando getStatusMercadoInterno() falha (cold start pós-republish), retorna
+        // rodada_atual=0 → limiteConsolidacao=0 → cache.ultima_rodada_consolidada(3) > 0
+        // → auto-healing falsamente acionado → CACHE DESTRUÍDO → extrato zerado.
+        // A flag usouFallback já existe (definida acima) e deve blindar este bloco.
+        if (cache && cache.ultima_rodada_consolidada > limiteConsolidacao && !usouFallback) {
             logger.log(
                 `[FLUXO-CONTROLLER] ⚠️ Auto-healing: cache consolidado até R${cache.ultima_rodada_consolidada} > limite R${limiteConsolidacao} - forçando recálculo`,
             );

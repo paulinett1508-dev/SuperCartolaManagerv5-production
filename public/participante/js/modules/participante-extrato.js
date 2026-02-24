@@ -369,13 +369,20 @@ async function carregarExtrato(ligaId, timeId) {
 
     // ✅ v4.6: Timeout de segurança para evitar loading infinito
     // ✅ v4.8: Aumentado de 15s para 25s para redes móveis lentas (iPhone 4G)
+    // ✅ v5.2: Flag timeoutFired — impede que operações tardias sobrescrevam a tela de timeout
     const TIMEOUT_MS = 25000;
     let timeoutId = null;
+    let timeoutFired = false;
+    // ✅ v5.2: AbortController compartilhado para cancelar fetch de cálculo quando timeout dispara
+    let calculoController = null;
     const mostrarTimeoutError = () => {
+        timeoutFired = true;
+        // Abortar fetch de cálculo pendente (sem AbortController → sem hang)
+        if (calculoController) { try { calculoController.abort(); } catch (_) {} }
         if (window.Log) Log.error("EXTRATO-PARTICIPANTE", "⏱️ Timeout - requisição demorou demais");
         container.innerHTML = `
             <div style="text-align: center; padding: 40px;">
-                <div style="font-size: 48px; margin-bottom: 16px;">⏱️</div>
+                <span class="material-icons" style="font-size:48px;color:var(--app-amber);display:block;margin-bottom:16px">timer_off</span>
                 <h3 style="color: var(--app-amber); margin-bottom: 12px;">Carregamento lento</h3>
                 <p style="color: #9ca3af; margin-bottom: 20px;">O servidor está demorando para responder.</p>
                 <button onclick="window.location.reload()"
@@ -639,7 +646,16 @@ async function carregarExtrato(ligaId, timeId) {
             // O recálculo abaixo já sobrescreve o cache, então limpeza prévia é desnecessária
 
             const urlCalculo = `/api/fluxo-financeiro/${ligaId}/extrato/${timeId}?temporada=${temporada}`;
-            const resCalculo = await fetch(urlCalculo);
+            // ✅ v5.2: AbortController com timeout de 20s — evita fetch sem fim após timeout UI
+            calculoController = new AbortController();
+            const calculoTimeout = setTimeout(() => { try { calculoController.abort(); } catch (_) {} }, 20000);
+            let resCalculo;
+            try {
+                resCalculo = await fetch(urlCalculo, { signal: calculoController.signal });
+            } finally {
+                clearTimeout(calculoTimeout);
+                calculoController = null;
+            }
 
             if (resCalculo.ok) {
                 const dadosCalculados = await resCalculo.json();
@@ -672,7 +688,8 @@ async function carregarExtrato(ligaId, timeId) {
                                (extratoData?.temporada >= 2026 && extratoData?.rodadas?.length === 0);
 
         if (!extratoData && !eNovaTemporada) {
-            if (!usouCache) mostrarVazio();
+            // ✅ v5.2: Não sobrescrever tela de timeout com "sem dados"
+            if (!usouCache && !timeoutFired) mostrarVazio();
             return;
         }
 
@@ -757,7 +774,8 @@ async function carregarExtrato(ligaId, timeId) {
         }
 
         // Renderizar se necessário
-        if (deveReRenderizar) {
+        // ✅ v5.2: Não renderizar se timeout já disparou (evita sobrescrever tela de timeout)
+        if (deveReRenderizar && !timeoutFired) {
             if (window.Log)
                 Log.info(
                     "EXTRATO-PARTICIPANTE",
@@ -777,6 +795,8 @@ async function carregarExtrato(ligaId, timeId) {
                 `./participante-extrato-ui.js?v=${Date.now()}`
             );
             uiMod.renderizarExtratoParticipante(extratoData, timeId);
+        } else if (deveReRenderizar && timeoutFired) {
+            if (window.Log) Log.warn("EXTRATO-PARTICIPANTE", "⚠️ Render ignorado — timeout já disparou");
         }
 
         // ✅ v4.6: Limpar timeout de segurança
@@ -801,7 +821,8 @@ async function carregarExtrato(ligaId, timeId) {
         if (timeoutId) clearTimeout(timeoutId);
 
         if (window.Log) Log.error("EXTRATO-PARTICIPANTE", "❌ Erro:", error);
-        if (!usouCache) mostrarErro(error.message);
+        // ✅ v5.2: Não sobrescrever tela de timeout com mensagem de erro genérica
+        if (!usouCache && !timeoutFired) mostrarErro(error.message);
     }
 }
 
