@@ -93,8 +93,8 @@ import { dirname } from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Importar package.json para versão
-const pkg = JSON.parse(readFileSync("./package.json", "utf8"));
+// Importar package.json para versão (usar __dirname para evitar falha por working directory diferente)
+const pkg = JSON.parse(readFileSync(path.join(__dirname, "package.json"), "utf8"));
 
 // Importar rotas do sistema
 import jogosHojeRoutes from "./routes/jogos-hoje-routes.js";
@@ -426,7 +426,13 @@ app.use(
     store: MongoStore.create({
       clientPromise: mongoose.connection
         .asPromise()
-        .then((conn) => conn.client),
+        .then((conn) => conn.client)
+        .catch((err) => {
+          const logError = IS_PRODUCTION ? originalConsole.error : console.error;
+          logError("[SESSION] ❌ MongoStore falhou ao obter client MongoDB:", err.message);
+          logError("[SESSION] Sessões podem não persistir. Verifique a conexão com o banco.");
+          throw err;
+        }),
       collectionName: "sessions",
       ttl: 14 * 24 * 60 * 60, // 14 dias
       autoRemove: "native",
@@ -809,27 +815,30 @@ if (process.env.NODE_ENV !== "test") {
 // ✅ FIX: connectDB() já fez await, conexão já está aberta neste ponto.
 // Usar IIFE em vez de .once("open") que nunca dispara (evento já passou).
 (async () => {
-  console.log("🔧 Sincronizando índices do banco de dados (Mongoose 8.x)...");
+  const logInit = IS_PRODUCTION ? originalConsole.log : console.log;
+  const logInitError = IS_PRODUCTION ? originalConsole.error : console.error;
+
+  logInit("[INIT-ASYNC] Sincronizando índices do banco de dados (Mongoose 8.x)...");
   try {
     // Preview das mudanças antes de aplicar
     const diff = await ExtratoFinanceiroCache.diffIndexes();
 
     if (diff.toDrop.length > 0 || diff.toCreate.length > 0) {
-      console.log("📋 Índices a remover:", diff.toDrop);
-      console.log("📋 Índices a criar:", diff.toCreate);
+      logInit("[INIT-ASYNC] Índices a remover:", diff.toDrop);
+      logInit("[INIT-ASYNC] Índices a criar:", diff.toCreate);
 
       // Sincroniza: remove extras, cria faltantes
       const dropped = await ExtratoFinanceiroCache.syncIndexes();
       if (dropped.length > 0) {
-        console.log("✅ Índices removidos:", dropped);
+        logInit("[INIT-ASYNC] Índices removidos:", dropped);
       }
-      console.log("✅ Índices sincronizados com sucesso!");
+      logInit("[INIT-ASYNC] Índices sincronizados com sucesso!");
     } else {
-      console.log("✅ Índices já estão sincronizados.");
+      logInit("[INIT-ASYNC] Índices já estão sincronizados.");
     }
   } catch (error) {
     if (error.codeName !== "NamespaceNotFound") {
-      console.error("⚠️ Erro na sincronização de índices (Extrato):", error.message);
+      logInitError("[INIT-ASYNC] ⚠️ Erro na sincronização de índices (Extrato):", error.message);
     }
   }
 
@@ -837,17 +846,17 @@ if (process.env.NODE_ENV !== "test") {
   try {
     const rodadaDiff = await Rodada.diffIndexes();
     if (rodadaDiff.toDrop.length > 0 || rodadaDiff.toCreate.length > 0) {
-      console.log("📋 [Rodada] Índices a remover:", rodadaDiff.toDrop);
-      console.log("📋 [Rodada] Índices a criar:", rodadaDiff.toCreate);
+      logInit("[INIT-ASYNC] [Rodada] Índices a remover:", rodadaDiff.toDrop);
+      logInit("[INIT-ASYNC] [Rodada] Índices a criar:", rodadaDiff.toCreate);
       const droppedRodada = await Rodada.syncIndexes();
       if (droppedRodada.length > 0) {
-        console.log("✅ [Rodada] Índices removidos:", droppedRodada);
+        logInit("[INIT-ASYNC] [Rodada] Índices removidos:", droppedRodada);
       }
-      console.log("✅ [Rodada] Índices sincronizados (multi-temporada)!");
+      logInit("[INIT-ASYNC] [Rodada] Índices sincronizados (multi-temporada)!");
     }
   } catch (error) {
     if (error.codeName !== "NamespaceNotFound") {
-      console.error("⚠️ Erro na sincronização de índices (Rodada):", error.message);
+      logInitError("[INIT-ASYNC] ⚠️ Erro na sincronização de índices (Rodada):", error.message);
     }
   }
 
@@ -908,7 +917,11 @@ if (process.env.NODE_ENV !== "test") {
   });
   cronJobs.push(cronLimpezaCache);
   console.log("[SERVER] 🔔 Cron de limpeza de cache agendado (diário 4h)");
-})();
+})().catch((err) => {
+  const logFatal = IS_PRODUCTION ? originalConsole.error : console.error;
+  logFatal("[INIT-ASYNC] ❌ ERRO FATAL na inicialização assíncrona:", err.message);
+  logFatal("[INIT-ASYNC] Stack:", err.stack);
+});
 
 // ====================================================================
 // 🛑 GRACEFUL SHUTDOWN - Fecha recursos antes de encerrar processo
