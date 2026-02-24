@@ -19,7 +19,7 @@
     align-items: center;
     justify-content: center;
     cursor: move;
-    z-index: 999;
+    z-index: 50;
     user-select: none;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -331,56 +331,6 @@
 }
 
 /* ============================================
-   NARRATIVA (Chat Bubble Style)
-   ============================================ */
-.rxray-narrative-box {
-    background: rgba(26, 26, 26, 0.75);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid var(--app-border);
-    border-left: 3px solid var(--app-primary);
-    border-radius: 4px var(--app-radius-lg) var(--app-radius-lg) var(--app-radius-lg);
-    padding: 16px;
-    font-family: 'Inter', -apple-system, sans-serif;
-    font-size: 14px;
-    line-height: 1.6;
-    color: var(--app-text-primary);
-}
-
-.rxray-narrative-box p {
-    margin: 0;
-}
-
-.rxray-narrative-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.rxray-narrative-list li {
-    position: relative;
-    padding-left: 20px;
-    font-size: 13px;
-    line-height: 1.5;
-    color: rgba(255, 255, 255, 0.9);
-}
-
-.rxray-narrative-list li::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 8px;
-    width: 6px;
-    height: 6px;
-    border-radius: var(--app-radius-full);
-    background: var(--app-primary);
-    box-shadow: 0 0 6px rgba(255, 85, 0, 0.25);
-}
-
-/* ============================================
    DISPUTA CARDS (Module-Themed)
    ============================================ */
 .rxray-disputa-card {
@@ -537,6 +487,18 @@
 
 .rxray-disputa-status .status-eliminado {
     color: var(--app-danger);
+}
+
+/* Narrativa inline por módulo */
+.rxray-disputa-narrativa {
+    margin: 10px 0 0 0;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-size: 12px;
+    font-style: italic;
+    color: var(--app-text-muted);
+    line-height: 1.5;
 }
 
 /* ============================================

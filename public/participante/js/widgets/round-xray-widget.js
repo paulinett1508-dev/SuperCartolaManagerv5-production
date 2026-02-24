@@ -362,17 +362,6 @@ function criarModal() {
             <!-- Conteudo -->
             <div id="rxrayContent" class="rxray-content" style="display:none;">
 
-                <!-- NARRATIVA -->
-                <div class="rxray-section">
-                    <div class="rxray-section-header">
-                        <div class="rxray-section-icon icon-narrative">
-                            <span class="material-icons">chat</span>
-                        </div>
-                        <h4>Resumo Inteligente</h4>
-                    </div>
-                    <div id="rxrayNarrativa" class="rxray-narrative-box"></div>
-                </div>
-
                 <!-- DISPUTAS -->
                 <div class="rxray-section">
                     <div class="rxray-section-header">
@@ -528,28 +517,13 @@ function renderizarModal(contexto) {
     // Rodada no header
     document.getElementById("rxrayModalRodada").textContent = contexto.rodada;
 
-    // 1. Narrativa (com bullet points por assunto)
-    const narrativaEl = document.getElementById("rxrayNarrativa");
-    if (contexto.narrativa.eventos && contexto.narrativa.eventos.length > 0) {
-        const abertura = escapeHtml(contexto.narrativa.abertura || "");
-        const bullets = contexto.narrativa.eventos
-            .map(ev => `<li>${escapeHtml(ev)}</li>`)
-            .join("");
-        narrativaEl.innerHTML = `
-            <p style="margin-bottom:8px;">${abertura}</p>
-            <ul class="rxray-narrative-list">${bullets}</ul>
-        `;
-    } else {
-        narrativaEl.innerHTML = `<p>${escapeHtml(contexto.narrativa.resumida)}</p>`;
-    }
-
-    // 2. Disputas
+    // 1. Disputas (com narrativa inline por módulo)
     renderizarDisputas(contexto.disputas);
 
-    // 3. Performance
+    // 2. Performance
     renderizarPerformance(contexto.performance);
 
-    // 4. Movimentações
+    // 3. Movimentações
     renderizarMovimentacoes(contexto.movimentacoes);
 }
 
@@ -564,6 +538,20 @@ function renderizarDisputas(disputas) {
                                pc.seu_confronto.resultado === "derrota" ? "derrota" : "empate";
         const resultadoIcon = pc.seu_confronto.resultado === "vitoria" ? "check_circle" :
                              pc.seu_confronto.resultado === "derrota" ? "cancel" : "drag_handle";
+
+        // Narrativa inline
+        let narrativaPC = "";
+        if (pc.seu_confronto.resultado === "vitoria") {
+            narrativaPC = pc.zona === "G4"
+                ? `Vitoria te manteve no G4 (${pc.minha_posicao}o lugar)`
+                : `Vitoria te levou ao ${pc.minha_posicao}o lugar`;
+        } else if (pc.seu_confronto.resultado === "derrota") {
+            narrativaPC = pc.zona === "Z4"
+                ? `Derrota te colocou na zona de perigo (${pc.minha_posicao}o lugar)`
+                : `Derrota te fez cair para ${pc.minha_posicao}o lugar`;
+        } else {
+            narrativaPC = `Empate — voce segue em ${pc.minha_posicao}o lugar`;
+        }
 
         disputasHTML.push(`
             <div class="rxray-disputa-card mod-pc">
@@ -581,6 +569,7 @@ function renderizarDisputas(disputas) {
                     <span class="material-icons">leaderboard</span>
                     ${pc.minha_posicao}o lugar &bull; ${escapeHtml(pc.zona)}
                 </div>
+                <p class="rxray-disputa-narrativa">${escapeHtml(narrativaPC)}</p>
             </div>
         `);
     }
@@ -589,6 +578,16 @@ function renderizarDisputas(disputas) {
     if (disputas.mata_mata && disputas.mata_mata.seu_confronto) {
         const mm = disputas.mata_mata;
         const isClassificado = mm.seu_confronto.resultado === "classificado";
+
+        // Narrativa inline
+        const adversarioNome = mm.seu_confronto.adversario?.nome || "adversario";
+        const diff = mm.seu_confronto.diferenca != null
+            ? (Math.trunc(parseFloat(mm.seu_confronto.diferenca) * 10) / 10)
+            : null;
+        const narrativaMM = isClassificado
+            ? `Avancou sobre ${adversarioNome}${diff !== null ? ` por ${diff} pts` : ""}`
+            : `Eliminado por ${diff !== null ? `${diff} pts de diferenca para ` : ""}${adversarioNome}`;
+
         disputasHTML.push(`
             <div class="rxray-disputa-card mod-mm">
                 <div class="rxray-disputa-header">
@@ -599,6 +598,7 @@ function renderizarDisputas(disputas) {
                     <span class="material-icons ${isClassificado ? 'status-classificado' : 'status-eliminado'}">${isClassificado ? 'check_circle' : 'cancel'}</span>
                     <span class="${isClassificado ? 'status-classificado' : 'status-eliminado'}">${isClassificado ? 'Classificado' : 'Eliminado'}</span>
                 </div>
+                <p class="rxray-disputa-narrativa">${escapeHtml(narrativaMM)}</p>
             </div>
         `);
     }
@@ -606,6 +606,19 @@ function renderizarDisputas(disputas) {
     // Artilheiro
     if (disputas.artilheiro) {
         const art = disputas.artilheiro;
+        const liderGols = art.classificacao?.[0]?.gols || 0;
+        const meusGols = art.seus_gols || 0;
+
+        // Narrativa inline
+        let narrativaArt = "";
+        if (art.sua_posicao === 1) {
+            narrativaArt = art.classificacao?.length > 1 && art.classificacao[1].gols === liderGols
+                ? `Lider empatado com ${art.classificacao[1].nome} (${meusGols} gols)`
+                : `Lider isolado do Artilheiro com ${meusGols} gols`;
+        } else {
+            narrativaArt = `${meusGols} gols — lider tem ${liderGols}`;
+        }
+
         disputasHTML.push(`
             <div class="rxray-disputa-card mod-art">
                 <div class="rxray-disputa-header">
@@ -614,8 +627,9 @@ function renderizarDisputas(disputas) {
                 </div>
                 <div class="rxray-disputa-status">
                     <span class="material-icons">leaderboard</span>
-                    ${art.sua_posicao}o lugar &bull; ${art.seus_gols || 0} gols
+                    ${art.sua_posicao}o lugar &bull; ${meusGols} gols
                 </div>
+                <p class="rxray-disputa-narrativa">${escapeHtml(narrativaArt)}</p>
             </div>
         `);
     }
@@ -623,6 +637,18 @@ function renderizarDisputas(disputas) {
     // Capitao de Luxo
     if (disputas.capitao_luxo) {
         const cap = disputas.capitao_luxo;
+        const liderPts = cap.classificacao_acumulada?.[0]?.pontos || 0;
+        const meusPts = cap.seus_pontos || 0;
+
+        // Narrativa inline
+        let narrativaCap = "";
+        if (cap.sua_posicao === 1) {
+            narrativaCap = `Lider do Capitao com ${Math.trunc(meusPts * 10) / 10} pts acumulados`;
+        } else {
+            const diff = Math.abs(Math.trunc((meusPts - liderPts) * 10) / 10);
+            narrativaCap = `${Math.trunc(meusPts * 10) / 10} pts — ${diff} pts atras do lider`;
+        }
+
         disputasHTML.push(`
             <div class="rxray-disputa-card mod-cap">
                 <div class="rxray-disputa-header">
@@ -631,8 +657,9 @@ function renderizarDisputas(disputas) {
                 </div>
                 <div class="rxray-disputa-status">
                     <span class="material-icons">leaderboard</span>
-                    ${cap.sua_posicao}o lugar &bull; ${truncarPontos(cap.seus_pontos || 0)} pts
+                    ${cap.sua_posicao}o lugar &bull; ${truncarPontos(meusPts)} pts
                 </div>
+                <p class="rxray-disputa-narrativa">${escapeHtml(narrativaCap)}</p>
             </div>
         `);
     }
