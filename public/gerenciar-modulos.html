@@ -301,22 +301,23 @@
             };
 
             async function init() {
+                console.log('[GERENCIAR-MODULOS] init() chamado, initRunning:', window.__gm_state.initRunning);
                 if (window.__gm_state.initRunning) return;
                 window.__gm_state.initRunning = true;
                 const urlParams = new URLSearchParams(window.location.search);
                 ligaId = urlParams.get('id');
+                console.log('[GERENCIAR-MODULOS] ligaId:', ligaId);
 
                 try {
                     await loadLayout();
 
-                    // ✅ FIX CRÍTICO: Recarregar ligas do sidebar após navegação SPA
+                    // Recarregar ligas do sidebar após navegação SPA
                     if (typeof window.carregarLigasLayout === 'function') {
-                        console.log('[GERENCIAR-MODULOS] Recarregando ligas do sidebar após navegação SPA...');
                         await window.carregarLigasLayout();
                     }
 
                     if (!ligaId) {
-                        // Sem liga na URL — mostrar seletor de ligas
+                        console.log('[GERENCIAR-MODULOS] Sem ligaId, mostrando seletor de ligas...');
                         await mostrarSeletorLigas();
                         return;
                     }
