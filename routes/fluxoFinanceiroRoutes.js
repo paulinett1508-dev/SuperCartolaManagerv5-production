@@ -1,5 +1,5 @@
 import express from "express";
-import { verificarAdmin } from "../middleware/auth.js";
+import { verificarAdmin, verificarAdminOuDono } from "../middleware/auth.js";
 import * as fluxoController from "../controllers/fluxoFinanceiroController.js";
 import * as projecaoController from "../controllers/projecaoFinanceiraController.js";
 
@@ -8,29 +8,25 @@ const router = express.Router();
 // === PROJEÇÃO FINANCEIRA EM TEMPO REAL (v1.0) ===
 // Projeção efêmera durante rodada em andamento (status_mercado === 2)
 // Retorna { projecao: false } quando mercado aberto (rodada finalizada)
-// ✅ GET público - participante pode ver projeção da sua rodada
-router.get("/:ligaId/projecao/:timeId", projecaoController.getProjecaoTime);
+// 🔒 SEC-FIX: Participante pode ver sua propria projecao, admin ve todas
+router.get("/:ligaId/projecao/:timeId", verificarAdminOuDono, projecaoController.getProjecaoTime);
 
 // Projeção de todos os participantes (admin/tesouraria)
-// ✅ GET público - usado pelo admin para visão geral
-router.get("/:ligaId/projecao", projecaoController.getProjecaoLiga);
+// 🔒 SEC-FIX: Apenas admin pode ver projecao de toda a liga
+router.get("/:ligaId/projecao", verificarAdmin, projecaoController.getProjecaoLiga);
 
 // === ROTA PRINCIPAL (EXTRATO FINANCEIRO) ===
-// Esta é a rota que o frontend novo vai chamar para pegar o JSON consolidado
-// ✅ GET público - participante pode ver seu próprio extrato
-router.get("/:ligaId/extrato/:timeId", fluxoController.getExtratoFinanceiro);
+// 🔒 SEC-FIX: Participante pode ver seu proprio extrato, admin ve todos
+router.get("/:ligaId/extrato/:timeId", verificarAdminOuDono, fluxoController.getExtratoFinanceiro);
 
 // === ROTAS DE CAMPOS EDITÁVEIS (MANUAIS) ===
 
-// Buscar campos de um time específico (corrigido para coincidir com frontend)
-// ✅ GET público - participante pode ver seus campos
-router.get("/:ligaId/times/:timeId", fluxoController.getCampos);
-
-// IMPORTANTE: Esta rota funciona em /api/fluxo-financeiro/:ligaId/times/:timeId
+// 🔒 SEC-FIX: Participante pode ver seus campos, admin ve todos
+router.get("/:ligaId/times/:timeId", verificarAdminOuDono, fluxoController.getCampos);
 
 // Buscar campos de todos os times de uma liga
-// ✅ GET público - usado pelo admin mas não precisa proteger leitura
-router.get("/:ligaId", fluxoController.getCamposLiga);
+// 🔒 SEC-FIX: Apenas admin pode ver campos de toda a liga
+router.get("/:ligaId", verificarAdmin, fluxoController.getCamposLiga);
 
 // Salvar/atualizar todos os campos de um time
 // 🔒 ADMIN ONLY - escrita requer autenticação

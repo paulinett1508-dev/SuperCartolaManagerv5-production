@@ -28,14 +28,16 @@ const router = express.Router();
  * GET /api/ajustes/detalhe/:id
  * Obtém detalhes de um ajuste
  */
-router.get("/detalhe/:id", obterAjuste);
+// 🔒 SEC-FIX: Apenas admin
+router.get("/detalhe/:id", verificarAdmin, obterAjuste);
 
 /**
  * GET /api/ajustes/liga/:ligaId
  * Lista todos os ajustes da liga
  * Query: ?temporada=2026
  */
-router.get("/liga/:ligaId", listarAjustesLiga);
+// 🔒 SEC-FIX: Apenas admin
+router.get("/liga/:ligaId", verificarAdmin, listarAjustesLiga);
 
 // =============================================================================
 // ROTAS DE AJUSTE INDIVIDUAL
@@ -63,7 +65,8 @@ router.delete("/:id", verificarAdmin, removerAjuste);
  * Lista ajustes de um participante
  * Query: ?temporada=2026
  */
-router.get("/:ligaId/:timeId", listarAjustes);
+// 🔒 SEC-FIX: Apenas admin
+router.get("/:ligaId/:timeId", verificarAdmin, listarAjustes);
 
 /**
  * POST /api/ajustes/:ligaId/:timeId

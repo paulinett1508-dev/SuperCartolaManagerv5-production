@@ -61,9 +61,9 @@ function saveRegistry(registry) {
 
 /**
  * GET /api/renovacoes/registry
- * Retorna todos os usuários do registry
+ * 🔒 SEC-FIX: Apenas admin (expoe PII: emails, telefones)
  */
-router.get('/registry', (req, res) => {
+router.get('/registry', verificarAdmin, (req, res) => {
     try {
         const registry = loadRegistry();
 
@@ -98,9 +98,9 @@ router.get('/registry', (req, res) => {
 
 /**
  * GET /api/renovacoes/estatisticas
- * Retorna estatísticas consolidadas
+ * 🔒 SEC-FIX: Apenas admin
  */
-router.get('/estatisticas', (req, res) => {
+router.get('/estatisticas', verificarAdmin, (req, res) => {
     try {
         const registry = loadRegistry();
 
@@ -154,9 +154,9 @@ router.get('/estatisticas', (req, res) => {
 
 /**
  * GET /api/renovacoes/:id
- * Retorna um participante específico
+ * 🔒 SEC-FIX: Apenas admin
  */
-router.get('/:id', (req, res) => {
+router.get('/:id', verificarAdmin, (req, res) => {
     try {
         const { id } = req.params;
         const registry = loadRegistry();

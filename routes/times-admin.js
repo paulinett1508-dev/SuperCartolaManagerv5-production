@@ -4,6 +4,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import fetch from "node-fetch";
+import { verificarAdmin } from "../middleware/auth.js";
 import { isSeasonFinished, seasonBlockMiddleware, SEASON_CONFIG, logBlockedOperation } from "../utils/seasonGuard.js";
 
 const router = express.Router();
@@ -36,7 +37,8 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
  * GET /api/times-admin/diagnostico
  * Diagnóstico detalhado dos times
  */
-router.get("/diagnostico", async (req, res) => {
+// 🔒 SEC-FIX: Apenas admin
+router.get("/diagnostico", verificarAdmin, async (req, res) => {
   try {
     const Time = getTimeModel();
 
@@ -90,7 +92,8 @@ router.get("/diagnostico", async (req, res) => {
  * GET /api/times-admin/incompletos
  * Lista times com dados incompletos (N/D)
  */
-router.get("/incompletos", async (req, res) => {
+// 🔒 SEC-FIX: Apenas admin
+router.get("/incompletos", verificarAdmin, async (req, res) => {
   try {
     const Time = getTimeModel();
 
@@ -524,7 +527,8 @@ router.post("/repopular-time/:timeId", seasonBlockMiddleware, async (req, res) =
  * GET /api/times-admin/debug/:timeId
  * 🔍 DEBUG: Retorna documento RAW do MongoDB (bypassa Mongoose)
  */
-router.get("/debug/:timeId", async (req, res) => {
+// 🔒 SEC-FIX: Apenas admin (expoe documento raw incluindo senha)
+router.get("/debug/:timeId", verificarAdmin, async (req, res) => {
   try {
     const timeId = Number(req.params.timeId);
     

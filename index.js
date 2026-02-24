@@ -646,8 +646,10 @@ app.get(
   "/api/ligas/:ligaId/participantes/:timeId/status",
   verificarStatusParticipante,
 );
+// 🔒 SEC-FIX: Exigir admin para alternar status
 app.post(
   "/api/ligas/:ligaId/participantes/:timeId/status",
+  verificarAdmin,
   alternarStatusParticipante,
 );
 
