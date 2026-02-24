@@ -176,7 +176,9 @@
       "mcp__stitch__get_screen",
       "WebFetch(domain:lh3.googleusercontent.com)",
       "WebFetch(domain:unsplash.com)",
-      "Bash(convert:*)"
+      "Bash(convert:*)",
+      "Bash(gh repo view anthropics/claude-code-security-review --json description,url,name 2>/dev/null || echo \"Repo not found via gh\")",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ]
   },
   "enableAllProjectMcpServers": true,
