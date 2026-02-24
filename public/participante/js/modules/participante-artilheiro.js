@@ -1,6 +1,7 @@
 // =====================================================================
-// PARTICIPANTE-ARTILHEIRO.JS - v4.2
+// PARTICIPANTE-ARTILHEIRO.JS - v4.3
 // =====================================================================
+// ✅ v4.3: MatchdayService integration — ranking-live endpoint + auto-refresh
 // ✅ v4.2: FIX pull-to-refresh loop — AbortController, scrollY, destrutor
 // ✅ v4.1: Reordenação - RODADA X → Seu Desempenho → Seus Artilheiros
 // ✅ v4.0: Skeleton loading, pull-to-refresh, MutationObserver
@@ -8,7 +9,7 @@
 // ✅ v3.5: Detecção de temporada encerrada (R38 + mercado fechado)
 // =====================================================================
 
-if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Carregando módulo v4.2...");
+if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Carregando módulo v4.3...");
 
 // ✅ v4.0: RODADA_FINAL dinâmico - obtido da API, fallback 38
 let RODADA_FINAL = 38;
@@ -18,6 +19,7 @@ let estadoArtilheiro = {
     temporadaEncerrada: false,
     rodadaAtual: null,
     mercadoAberto: true,
+    modeLive: false, // ✅ v4.3: MatchdayService live mode
 };
 
 // =====================================================================
@@ -93,6 +95,13 @@ export async function inicializarArtilheiroParticipante({
             // v2.0: Módulo OPCIONAL, só habilita se === true
             const artilheiroAtivo = modulosAtivos.artilheiro === true;
 
+            // ✅ v4.3: Verificar matchday (parciais ao vivo)
+            if (window.MatchdayService && window.MatchdayService.isActive) {
+                estadoArtilheiro.modeLive = true;
+                _subscribeMatchdayEvents();
+                if (window.Log) Log.info('[PARTICIPANTE-ARTILHEIRO] MatchdayService ATIVO — modo live');
+            }
+
             if (!artilheiroAtivo) {
                 container.innerHTML = `
                     <div style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(34, 197, 94, 0.02) 100%); border-radius: 12px; border: 2px dashed rgba(34, 197, 94, 0.3);">
@@ -105,12 +114,23 @@ export async function inicializarArtilheiroParticipante({
             }
         }
 
-        const response = await fetch(
-            `/api/artilheiro-campeao/${ligaId}/ranking`,
-        );
+        // ✅ v4.3: Endpoint live quando MatchdayService ativo
+        let endpoint = estadoArtilheiro.modeLive
+            ? `/api/artilheiro-campeao/${ligaId}/ranking-live`
+            : `/api/artilheiro-campeao/${ligaId}/ranking`;
+        let response = await fetch(endpoint);
         if (!response.ok) throw new Error("Dados não disponíveis");
 
-        const responseData = await response.json();
+        let responseData = await response.json();
+
+        // ✅ v4.3: Fallback — se live não disponível, buscar ranking consolidado
+        if (estadoArtilheiro.modeLive && responseData.disponivel === false) {
+            if (window.Log) Log.info('[PARTICIPANTE-ARTILHEIRO] Live indisponível, fallback para ranking consolidado');
+            estadoArtilheiro.modeLive = false;
+            response = await fetch(`/api/artilheiro-campeao/${ligaId}/ranking`);
+            if (!response.ok) throw new Error("Dados não disponíveis");
+            responseData = await response.json();
+        }
 
         if (window.Log) Log.info(
             "[PARTICIPANTE-ARTILHEIRO] 📦 Dados recebidos da API",
@@ -913,10 +933,76 @@ function setupPullToRefresh(container) {
 }
 
 // =====================================================================
+// ✅ v4.3: MATCHDAY EVENTS — Live experience integration
+// =====================================================================
+// Referências para cleanup
+let _matchdayParciaisHandler = null;
+let _matchdayStopHandler = null;
+
+function _subscribeMatchdayEvents() {
+    if (!window.MatchdayService) return;
+
+    // Handler: novos dados parciais disponíveis → re-fetch ranking live
+    _matchdayParciaisHandler = async () => {
+        if (window.Log) Log.info('[PARTICIPANTE-ARTILHEIRO] Atualizando com parciais (MatchdayService)');
+        if (!_currentLigaId || !_currentTimeId) return;
+
+        try {
+            const container = document.getElementById('artilheiro-content');
+            if (!container) return;
+
+            const response = await fetch(`/api/artilheiro-campeao/${_currentLigaId}/ranking-live`);
+            if (!response.ok) return;
+
+            const responseData = await response.json();
+            if (responseData.disponivel === false) return;
+
+            // Salvar cache
+            if (window.OfflineCache) {
+                try { await window.OfflineCache.set('artilheiro', _currentLigaId, responseData); } catch (e) { /* silent */ }
+            }
+
+            await renderizarArtilheiro(container, responseData, _currentTimeId);
+        } catch (e) {
+            if (window.Log) Log.warn('[PARTICIPANTE-ARTILHEIRO] Erro ao atualizar parciais:', e);
+        }
+    };
+
+    // Handler: matchday encerrou → voltar para ranking consolidado
+    _matchdayStopHandler = async () => {
+        if (window.Log) Log.info('[PARTICIPANTE-ARTILHEIRO] Matchday encerrado — voltando para consolidado');
+        estadoArtilheiro.modeLive = false;
+
+        if (!_currentLigaId || !_currentTimeId) return;
+
+        try {
+            const container = document.getElementById('artilheiro-content');
+            if (!container) return;
+
+            const response = await fetch(`/api/artilheiro-campeao/${_currentLigaId}/ranking`);
+            if (!response.ok) return;
+
+            const responseData = await response.json();
+
+            if (window.OfflineCache) {
+                try { await window.OfflineCache.set('artilheiro', _currentLigaId, responseData); } catch (e) { /* silent */ }
+            }
+
+            await renderizarArtilheiro(container, responseData, _currentTimeId);
+        } catch (e) {
+            if (window.Log) Log.warn('[PARTICIPANTE-ARTILHEIRO] Erro ao atualizar pós-matchday:', e);
+        }
+    };
+
+    window.MatchdayService.on('data:parciais', _matchdayParciaisHandler);
+    window.MatchdayService.on('matchday:stop', _matchdayStopHandler);
+}
+
+// =====================================================================
 // ✅ v4.2: DESTRUTOR — Cleanup ao navegar para outro módulo
 // =====================================================================
 export function destruirArtilheiroParticipante() {
-    if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] 🧹 Destruindo módulo (cleanup)");
+    if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Destruindo modulo (cleanup)");
 
     // Abortar todos os listeners do pull-to-refresh
     if (_pullToRefreshAbortController) {
@@ -927,6 +1013,11 @@ export function destruirArtilheiroParticipante() {
     // Remover indicador órfão
     document.getElementById('art-pull-indicator')?.remove();
 
+    // ✅ v4.3: Reset live state
+    estadoArtilheiro.modeLive = false;
+    _matchdayParciaisHandler = null;
+    _matchdayStopHandler = null;
+
     // Limpar refs
     _currentLigaId = null;
     _currentTimeId = null;
@@ -935,7 +1026,7 @@ export function destruirArtilheiroParticipante() {
 
 window.destruirArtilheiroParticipante = destruirArtilheiroParticipante;
 
-if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Módulo v4.2 carregado (Fix pull-to-refresh loop)");
+if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Modulo v4.3 carregado (MatchdayService integration)");
 
 // =====================================================================
 // MODULE LP — Landing Page Utils (Artilheiro)
