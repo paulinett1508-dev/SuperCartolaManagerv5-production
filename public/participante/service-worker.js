@@ -1,5 +1,5 @@
 // =====================================================================
-// service-worker.js - Service Worker do PWA v4.2 (TTL DINÂMICO)
+// service-worker.js - Service Worker do PWA v4.3 (CACHE FALLBACK 5xx)
 // Destino: /participante/service-worker.js
 // ✅ v4.2: TTL DINÂMICO - Backend usa 30s com jogos ao vivo, 5min sem
 // ✅ v4.1: CACHE BUST - Forçar atualização de tabelas-esportes.js (tempo jogos + refresh 30s)
@@ -111,7 +111,21 @@ self.addEventListener("fetch", (event) => {
                         caches.open(CACHE_NAME).then((cache) => {
                             cache.put(cleanRequest, responseClone);
                         });
+                        return networkResponse;
                     }
+
+                    // ✅ v4.3: Servidor retornou 5xx (ex: 503 pós-republish Replit)
+                    // Antes de entregar o erro, tenta servir do cache (versão anterior ainda válida)
+                    if (networkResponse.status >= 500) {
+                        return caches.match(cleanRequest).then((cachedResponse) => {
+                            if (cachedResponse) {
+                                console.warn('[SW] Servidor 5xx, servindo do cache:', request.url);
+                                return cachedResponse;
+                            }
+                            return networkResponse; // sem cache, entrega o erro
+                        });
+                    }
+
                     return networkResponse;
                 })
                 .catch((fetchError) => {

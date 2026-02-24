@@ -364,6 +364,7 @@ app.get(["/participante/", "/participante/index.html"], async (req, res, next) =
         res.setHeader("Content-Type", "text/html; charset=utf-8");
         return res.send(html);
       } catch (_) {
+        res.set('Cache-Control', 'no-store');
         return res.status(503).send(getRestartingHtml());
       }
     }
@@ -404,11 +405,24 @@ const servePublicAssets = express.static("public", {
     }
   }
 });
+// ✅ FIX EIO: Interceptar erros transitórios de I/O pós-Replit-republish.
+// express.static lança EIO/EMFILE durante a janela de estabilização do filesystem.
+// Uma única retry após 500ms resolve na maioria dos casos sem chegar ao error handler.
 app.use((req, res, next) => {
-  if (/\.(js|mjs|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|map|webp|webmanifest|json)$/i.test(req.path)) {
-    return servePublicAssets(req, res, next);
+  if (!/\.(js|mjs|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|map|webp|webmanifest|json)$/i.test(req.path)) {
+    return next();
   }
-  next();
+  servePublicAssets(req, res, (err) => {
+    if (!err) return next(); // arquivo não encontrado → continua chain normalmente
+    if (err.code !== 'EIO' && err.code !== 'EMFILE') return next(err); // erro não-transitório → propaga
+    // EIO/EMFILE: filesystem ainda estabilizando → retry após 500ms
+    setTimeout(() => {
+      servePublicAssets(req, res, (retryErr) => {
+        if (!retryErr) return next();
+        next(retryErr); // ainda falhando → propaga ao error handler
+      });
+    }, 500);
+  });
 });
 
 // Configuração de Sessão com MongoDB Store (Persistência Real)
@@ -687,6 +701,7 @@ app.get("*", (req, res) => {
       res.sendFile(htmlPath, (retryErr) => {
         if (!retryErr) return;
         originalConsole.error(`[CATCH-ALL] sendFile falhou após retry:`, retryErr.code || retryErr.message);
+        res.set('Cache-Control', 'no-store');
         res.status(503).send(getRestartingHtml());
       });
     }, 500);
@@ -838,6 +853,7 @@ app.use((err, req, res, next) => {
     const isApiRequest = req.path.startsWith('/api/');
     const isTransientIO = err.code === 'EIO' || err.code === 'ENOENT' || err.code === 'EMFILE';
     if (!isApiRequest && isTransientIO) {
+      res.set('Cache-Control', 'no-store');
       return res.status(503).send(getRestartingHtml());
     }
 
