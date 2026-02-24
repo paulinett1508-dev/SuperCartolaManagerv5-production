@@ -217,24 +217,26 @@ function analisarArtilheiro(art) {
 
 /**
  * Analisa Capitão de Luxo
+ * Usa cap.seus_pontos (pontos reais do participante) em vez de buscar
+ * no array classificacao_acumulada que é limitado ao top 5
  */
 function analisarCapitao(cap) {
     if (!cap || !cap.classificacao_acumulada || cap.classificacao_acumulada.length === 0) return null;
 
-    const { sua_posicao, classificacao_acumulada } = cap;
+    const { sua_posicao, classificacao_acumulada, seus_pontos } = cap;
     const lider = classificacao_acumulada[0];
+    const meusPontos = seus_pontos || 0;
 
     let resumido = "";
     let detalhado = "";
 
     if (sua_posicao === 1) {
-        resumido = `👑 Líder do Capitão de Luxo (${truncar1(lider.pontos)} pts)`;
-        detalhado = `Você lidera o Capitão de Luxo com ${truncar1(lider.pontos)} pontos acumulados. `;
+        resumido = `Lider do Capitao de Luxo (${truncar1(meusPontos)} pts)`;
+        detalhado = `Voce lidera o Capitao de Luxo com ${truncar1(meusPontos)} pontos acumulados. `;
     } else {
-        const minhaPosicaoObj = classificacao_acumulada.find(c => c.posicao === sua_posicao);
-        const diferenca = Math.abs(minhaPosicaoObj?.diferenca || 0);
-        resumido = `${sua_posicao}º no Capitão (-${truncar1(diferenca)} pts)`;
-        detalhado = `Capitão de Luxo: ${sua_posicao}º lugar, ${truncar1(diferenca)} pontos atrás do líder. `;
+        const diferenca = Math.abs(truncarPontosNum(meusPontos - (lider.pontos || 0)));
+        resumido = `${sua_posicao}o no Capitao (${truncar1(meusPontos)} pts)`;
+        detalhado = `Capitao de Luxo: ${sua_posicao}o lugar com ${truncar1(meusPontos)} pts, ${truncar1(diferenca)} pontos atras do lider. `;
     }
 
     return { resumido, detalhado };

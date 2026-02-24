@@ -260,6 +260,10 @@ async function abrirModal() {
 
     RXrayState.isModalOpen = true;
 
+    // Esconder FAB enquanto modal está aberto
+    const fab = document.getElementById("rxrayFab");
+    if (fab) fab.style.display = "none";
+
     // Criar modal se não existe
     let modal = document.getElementById("rxrayModal");
     if (!modal) {
@@ -285,6 +289,10 @@ function fecharModal() {
         modal.style.display = "none";
     }
     RXrayState.isModalOpen = false;
+
+    // Mostrar FAB novamente
+    const fab = document.getElementById("rxrayFab");
+    if (fab) fab.style.display = "flex";
 
     // Marcar rodada como vista e esconder badge
     marcarRodadaComoVista();
