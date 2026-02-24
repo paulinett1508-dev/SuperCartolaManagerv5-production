@@ -13,10 +13,10 @@
 // ✅ v3.2: FORCE CACHE CLEAR - Limpar cache antigo que causava erros
 // ✅ v3.1: Network-First com cache fallback (FIX fetch failures)
 // ✅ v3.0: Força limpeza de caches antigos
-// BUILD: 2026-02-11T01:10:00Z
+// BUILD: 2026-02-24T00:00:00Z
 // =====================================================================
 
-const CACHE_NAME = "super-cartola-v26-copa2026-estadios";
+const CACHE_NAME = "super-cartola-v27-20260224";
 
 // Arquivos essenciais para cache inicial
 const STATIC_ASSETS = [
