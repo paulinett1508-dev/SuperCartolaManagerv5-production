@@ -31,7 +31,11 @@
                                 Gerenciar Modulos
                                 <span class="modulos-version-badge">v2.0</span>
                             </h1>
-                            <p>Liga: <span class="liga-name" id="ligaNome">Carregando...</span></p>
+                            <p>Liga:
+                                <select id="ligaSelect" style="background: var(--color-surface, #0f172a); color: var(--color-text-primary, #f1f5f9); border: 1px solid var(--color-border, #334155); border-radius: 6px; padding: 0.25rem 0.5rem; font-family: 'Russo One', sans-serif; font-size: 0.9rem; cursor: pointer;">
+                                    <option value="">Selecione uma liga...</option>
+                                </select>
+                            </p>
                         </div>
                         <a href="gerenciar.html" class="btn-voltar">
                             <span class="material-icons">arrow_back</span>
@@ -76,16 +80,6 @@
                                 <span class="modulos-stat-value" id="statPlanejados">--</span>
                                 <span class="modulos-stat-label">Em Breve</span>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Seletor de Liga (quando não tem ?id=) -->
-                    <div id="ligaSelectorContainer" style="display: none;">
-                        <div style="background: var(--color-surface-elevated, #1e293b); border: 1px solid var(--color-border, #334155); border-radius: 12px; padding: 2rem; text-align: center; max-width: 600px; margin: 2rem auto;">
-                            <span class="material-icons" style="font-size: 48px; color: var(--color-primary); margin-bottom: 1rem;">sports_soccer</span>
-                            <h2 style="color: var(--color-text-primary, #f1f5f9); margin-bottom: 0.5rem;">Selecione uma Liga</h2>
-                            <p style="color: var(--color-text-muted, #94a3b8); margin-bottom: 1.5rem;">Escolha a liga para gerenciar seus módulos</p>
-                            <div id="ligaSelectorList" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
                         </div>
                     </div>
 
@@ -301,12 +295,10 @@
             };
 
             async function init() {
-                console.log('[GERENCIAR-MODULOS] init() chamado, initRunning:', window.__gm_state.initRunning);
                 if (window.__gm_state.initRunning) return;
                 window.__gm_state.initRunning = true;
                 const urlParams = new URLSearchParams(window.location.search);
                 ligaId = urlParams.get('id');
-                console.log('[GERENCIAR-MODULOS] ligaId:', ligaId);
 
                 try {
                     await loadLayout();
@@ -316,76 +308,50 @@
                         await window.carregarLigasLayout();
                     }
 
+                    // Sempre popular o select de ligas no header
+                    await carregarSelectLigas();
+
                     if (!ligaId) {
-                        console.log('[GERENCIAR-MODULOS] Sem ligaId, mostrando seletor de ligas...');
-                        await mostrarSeletorLigas();
+                        // Sem liga — ocultar conteúdo de módulos, aguardar seleção no dropdown
+                        document.getElementById('modulosStatsBar')?.style.setProperty('display', 'none');
+                        document.querySelectorAll('.section-title, .modulos-grid, .action-buttons').forEach(el => el.style.display = 'none');
                         return;
                     }
 
-                    await loadLiga();
                     await loadModulos();
                 } finally {
                     window.__gm_state.initRunning = false;
                 }
             }
 
-            async function mostrarSeletorLigas() {
-                const container = document.getElementById('ligaSelectorContainer');
-                const list = document.getElementById('ligaSelectorList');
-                if (!container || !list) return;
-
-                // Ocultar conteúdo principal (stats, grids, botões)
-                document.getElementById('modulosStatsBar')?.style.setProperty('display', 'none');
-                document.querySelectorAll('.section-title, .modulos-grid, .action-buttons').forEach(el => el.style.display = 'none');
-                document.getElementById('ligaNome').textContent = 'Selecione uma liga';
-
-                container.style.display = 'block';
-                list.innerHTML = '<p style="color: var(--color-text-muted, #94a3b8);">Carregando ligas...</p>';
+            async function carregarSelectLigas() {
+                const select = document.getElementById('ligaSelect');
+                if (!select) return;
 
                 try {
                     const response = await fetch('/api/ligas');
                     if (!response.ok) throw new Error('Erro ao carregar ligas');
                     const ligas = await response.json();
 
-                    if (!ligas.length) {
-                        list.innerHTML = '<p style="color: var(--color-text-muted, #94a3b8);">Nenhuma liga encontrada.</p>';
-                        return;
-                    }
+                    // Manter a opção padrão e adicionar ligas
+                    select.innerHTML = '<option value="">Selecione uma liga...</option>' +
+                        ligas.map(liga =>
+                            `<option value="${liga._id}" ${liga._id === ligaId ? 'selected' : ''}>${liga.nome || 'Liga sem nome'}</option>`
+                        ).join('');
 
-                    list.innerHTML = ligas.map(liga => `
-                        <a href="gerenciar-modulos.html?id=${liga._id}"
-                           class="liga-selector-item"
-                           style="display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem;
-                                  background: var(--color-surface, #0f172a); border: 1px solid var(--color-border, #334155);
-                                  border-radius: 8px; text-decoration: none; color: var(--color-text-primary, #f1f5f9);
-                                  transition: border-color 0.2s, background 0.2s;"
-                           onmouseover="this.style.borderColor='var(--color-primary)'; this.style.background='var(--color-surface-elevated, #1e293b)'"
-                           onmouseout="this.style.borderColor='var(--color-border, #334155)'; this.style.background='var(--color-surface, #0f172a)'"
-                           onclick="event.preventDefault(); navegarParaLiga('${liga._id}')">
-                            ${liga.logo
-                                ? `<img src="${liga.logo}" alt="" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover;">`
-                                : `<span class="material-icons" style="font-size: 40px; color: var(--color-primary);">emoji_events</span>`}
-                            <div style="text-align: left;">
-                                <div style="font-weight: 600; font-family: 'Russo One', sans-serif;">${liga.nome || 'Liga sem nome'}</div>
-                                <div style="font-size: 0.8rem; color: var(--color-text-muted, #94a3b8);">
-                                    Temporada ${liga.temporada || new Date().getFullYear()}
-                                </div>
-                            </div>
-                            <span class="material-icons" style="margin-left: auto; color: var(--color-text-muted, #94a3b8);">chevron_right</span>
-                        </a>
-                    `).join('');
+                    // Navegar ao trocar liga
+                    select.onchange = function() {
+                        const id = this.value;
+                        if (!id) return;
+                        const url = `gerenciar-modulos.html?id=${id}`;
+                        if (typeof SPANavigation !== 'undefined' && SPANavigation.enabled) {
+                            SPANavigation.navigate(url);
+                        } else {
+                            window.location.href = url;
+                        }
+                    };
                 } catch (err) {
-                    console.error('[GERENCIAR-MODULOS] Erro ao carregar ligas:', err);
-                    list.innerHTML = '<p style="color: var(--color-danger, #ef4444);">Erro ao carregar ligas. Tente novamente.</p>';
-                }
-            }
-
-            function navegarParaLiga(id) {
-                const url = `gerenciar-modulos.html?id=${id}`;
-                if (typeof SPANavigation !== 'undefined' && SPANavigation.enabled) {
-                    SPANavigation.navigate(url);
-                } else {
-                    window.location.href = url;
+                    console.error('[GERENCIAR-MODULOS] Erro ao carregar ligas no select:', err);
                 }
             }
 
@@ -438,10 +404,9 @@
                 try {
                     const response = await fetch(`/api/ligas/${ligaId}`);
                     const liga = await response.json();
-                    document.getElementById('ligaNome').textContent = liga.nome;
+                    // Select já mostra a liga selecionada via carregarSelectLigas()
                 } catch (error) {
                     console.error('Erro ao carregar liga:', error);
-                    document.getElementById('ligaNome').textContent = 'Erro ao carregar';
                 }
             }
 
