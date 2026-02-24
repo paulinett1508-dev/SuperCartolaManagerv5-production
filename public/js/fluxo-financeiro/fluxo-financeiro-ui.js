@@ -13,6 +13,17 @@ import {
 } from "./fluxo-financeiro-styles.js";
 import { inicializarPDF } from "./fluxo-financeiro-pdf.js";
 
+/** Escapa caracteres HTML para uso seguro em atributos e conteúdo */
+function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 /**
  * FLUXO-FINANCEIRO-UI.JS - v8.9 (Seção Ajustes Financeiros Removida)
  * ✅ v8.9: Seção "Ajustes Financeiros" REMOVIDA para 2026+ (redundante com botão Acerto no footer)
@@ -4215,17 +4226,6 @@ window.abrirNovoParticipante = function() {
         modoAtual: 'busca-nome',
         buscando: false
     };
-
-    // Helper para escapar HTML
-    function escapeHtml(str) {
-        if (str == null) return '';
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-    }
 
     // Criar modal HTML
     const modalHtml = `
