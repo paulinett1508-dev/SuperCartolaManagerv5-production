@@ -123,6 +123,12 @@ router.addRoute('/orchestrator', async (params) => {
   await render(params);
 });
 
+// Repositorio (Branches & Limpeza)
+router.addRoute('/repositorio', async (params) => {
+  const { render } = await import('./pages/repositorio.js');
+  await render(params);
+});
+
 // Perfil
 router.addRoute('/profile', async (params) => {
   const { render } = await import('./pages/profile.js');

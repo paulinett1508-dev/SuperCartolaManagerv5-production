@@ -198,6 +198,21 @@ class API {
   async updateNotificationPreferences(preferences) {
     return this.put('/notifications/preferences', preferences);
   }
+
+  /**
+   * Analytics - Repositório & Branches
+   */
+  async getAnalyticsResumo(params = {}) {
+    return this.get('/analytics/resumo', params);
+  }
+
+  async deleteBranch(nomeBranch) {
+    return this.request(`/analytics/branch/${encodeURIComponent(nomeBranch)}`, { method: 'DELETE' });
+  }
+
+  async deleteBranchesBatch(branches) {
+    return this.post('/analytics/branches/delete-batch', { branches });
+  }
 }
 
 // Exporta instância única
