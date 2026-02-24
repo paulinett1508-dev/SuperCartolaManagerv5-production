@@ -1,13 +1,14 @@
 // =====================================================================
-// PARTICIPANTE-ARTILHEIRO.JS - v4.1
+// PARTICIPANTE-ARTILHEIRO.JS - v4.2
 // =====================================================================
+// ✅ v4.2: FIX pull-to-refresh loop — AbortController, scrollY, destrutor
 // ✅ v4.1: Reordenação - RODADA X → Seu Desempenho → Seus Artilheiros
 // ✅ v4.0: Skeleton loading, pull-to-refresh, MutationObserver
 // ✅ v3.7: Cache-first com IndexedDB para carregamento instantâneo
 // ✅ v3.5: Detecção de temporada encerrada (R38 + mercado fechado)
 // =====================================================================
 
-if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Carregando módulo v4.0...");
+if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Carregando módulo v4.2...");
 
 // ✅ v4.0: RODADA_FINAL dinâmico - obtido da API, fallback 38
 let RODADA_FINAL = 38;
@@ -26,6 +27,9 @@ let estadoArtilheiro = {
 let _currentLigaId = null;
 let _currentTimeId = null;
 let _currentParticipante = null;
+
+// ✅ v4.2: AbortController para cleanup de event listeners do pull-to-refresh
+let _pullToRefreshAbortController = null;
 
 export async function inicializarArtilheiroParticipante({
     participante,
@@ -842,26 +846,40 @@ function renderSkeleton() {
 }
 
 // =====================================================================
-// ✅ v4.0: PULL-TO-REFRESH
+// ✅ v4.2: PULL-TO-REFRESH (FIX: AbortController + scrollY correto)
 // =====================================================================
 function setupPullToRefresh(container) {
+    // ✅ v4.2: Abortar listeners anteriores para evitar acumulação
+    if (_pullToRefreshAbortController) {
+        _pullToRefreshAbortController.abort();
+    }
+    _pullToRefreshAbortController = new AbortController();
+    const signal = _pullToRefreshAbortController.signal;
+
+    // ✅ v4.2: Remover indicador órfão que possa existir no DOM
+    document.getElementById('art-pull-indicator')?.remove();
+
     const parentEl = container.closest('.artilheiro-participante') || container;
     let startY = 0;
     let pulling = false;
     let indicator = null;
+    let refreshing = false; // ✅ v4.2: Guard contra refresh concorrente
 
     parentEl.addEventListener('touchstart', (e) => {
-        if (parentEl.scrollTop === 0) {
+        // ✅ v4.2: FIX — usar window.scrollY (scroll container real, não o div)
+        if (window.scrollY === 0 && !refreshing) {
             startY = e.touches[0].clientY;
             pulling = true;
         }
-    }, { passive: true });
+    }, { passive: true, signal });
 
     parentEl.addEventListener('touchmove', (e) => {
-        if (!pulling) return;
+        if (!pulling || refreshing) return;
         const diff = e.touches[0].clientY - startY;
         if (diff > 50 && diff < 150) {
             if (!indicator) {
+                // ✅ v4.2: Garantir que só exista 1 indicador no DOM
+                document.getElementById('art-pull-indicator')?.remove();
                 indicator = document.createElement('div');
                 indicator.id = 'art-pull-indicator';
                 indicator.style.cssText = 'text-align:center;padding:8px;color:var(--app-success-light);font-size:11px;font-weight:600;transition:opacity 0.2s;';
@@ -869,10 +887,11 @@ function setupPullToRefresh(container) {
                 parentEl.prepend(indicator);
             }
         }
-    }, { passive: true });
+    }, { passive: true, signal });
 
     parentEl.addEventListener('touchend', async () => {
-        if (indicator) {
+        if (indicator && !refreshing) {
+            refreshing = true;
             indicator.innerHTML = '<span class="material-icons" style="font-size:18px;vertical-align:middle;animation:spin 1s linear infinite;">sync</span> Atualizando...';
             try {
                 if (_currentLigaId && _currentTimeId) {
@@ -887,12 +906,36 @@ function setupPullToRefresh(container) {
             }
             indicator?.remove();
             indicator = null;
+            refreshing = false;
         }
         pulling = false;
-    }, { passive: true });
+    }, { passive: true, signal });
 }
 
-if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Módulo v4.1 carregado (Reordenação + Skeleton + Pull-to-Refresh)");
+// =====================================================================
+// ✅ v4.2: DESTRUTOR — Cleanup ao navegar para outro módulo
+// =====================================================================
+export function destruirArtilheiroParticipante() {
+    if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] 🧹 Destruindo módulo (cleanup)");
+
+    // Abortar todos os listeners do pull-to-refresh
+    if (_pullToRefreshAbortController) {
+        _pullToRefreshAbortController.abort();
+        _pullToRefreshAbortController = null;
+    }
+
+    // Remover indicador órfão
+    document.getElementById('art-pull-indicator')?.remove();
+
+    // Limpar refs
+    _currentLigaId = null;
+    _currentTimeId = null;
+    _currentParticipante = null;
+}
+
+window.destruirArtilheiroParticipante = destruirArtilheiroParticipante;
+
+if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Módulo v4.2 carregado (Fix pull-to-refresh loop)");
 
 // =====================================================================
 // MODULE LP — Landing Page Utils (Artilheiro)
