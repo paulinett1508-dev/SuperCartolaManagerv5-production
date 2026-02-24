@@ -5,6 +5,7 @@ import { Strategy } from "openid-client/passport";
 import passport from "passport";
 import { getGloboOidcConfig } from "../config/globo-oauth.js";
 import cartolaProService from "../services/cartolaProService.js";
+import bcrypt from "bcryptjs";
 
 const router = express.Router();
 
@@ -430,10 +431,36 @@ router.post("/login", async (req, res) => {
                 .json({ error: "Erro ao localizar dados do participante" });
         }
 
-        // Validar senha
-        // Nota: Idealmente usaríamos bcrypt, mas mantendo compatibilidade com texto simples atual
-        if (participanteEncontrado.senha_acesso !== senha) {
-            console.log('[PARTICIPANTE-AUTH] ❌ Senha incorreta');
+        // 🔒 SEC-FIX: Validar senha com bcrypt (retrocompatível com plaintext)
+        const senhaArmazenada = participanteEncontrado.senha_acesso || '';
+        const isBcryptHash = senhaArmazenada.startsWith('$2a$') || senhaArmazenada.startsWith('$2b$');
+
+        let senhaValida = false;
+        if (isBcryptHash) {
+            // Senha já migrada para bcrypt
+            senhaValida = await bcrypt.compare(senha, senhaArmazenada);
+        } else {
+            // Senha ainda em plaintext - comparar diretamente
+            senhaValida = senhaArmazenada === senha;
+
+            // Auto-rehash: migrar para bcrypt no login bem-sucedido
+            if (senhaValida && senha) {
+                try {
+                    const senhaHash = await bcrypt.hash(senha, 10);
+                    const { default: Liga } = await import("../models/Liga.js");
+                    await Liga.updateOne(
+                        { _id: ligaEncontrada._id, "participantes.time_id": parseInt(timeId) },
+                        { $set: { "participantes.$.senha_acesso": senhaHash } }
+                    );
+                    console.log(`[PARTICIPANTE-AUTH] 🔒 Senha migrada para bcrypt (time ${timeId})`);
+                } catch (rehashErr) {
+                    console.error('[PARTICIPANTE-AUTH] Erro ao migrar senha:', rehashErr.message);
+                }
+            }
+        }
+
+        if (!senhaValida) {
+            console.log('[PARTICIPANTE-AUTH] Senha incorreta');
             return res.status(401).json({
                 error: "Senha incorreta",
             });

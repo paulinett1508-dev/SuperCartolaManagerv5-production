@@ -1,5 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 import { obterTimePorId } from "../controllers/timeController.js";
 import {
     inativarParticipante,
@@ -186,10 +187,13 @@ router.put("/:id/senha", async (req, res) => {
                 .json({ erro: "Senha deve ter no mínimo 4 caracteres" });
         }
 
+        // 🔒 SEC-FIX: Hash da senha com bcrypt antes de armazenar
+        const senhaHash = await bcrypt.hash(senha.trim(), 10);
+
         // ✅ Buscar por 'id' (campo correto do schema)
         const time = await Time.findOneAndUpdate(
             { id: timeId },
-            { senha_acesso: senha.trim() },
+            { senha_acesso: senhaHash },
             { new: true },
         );
 

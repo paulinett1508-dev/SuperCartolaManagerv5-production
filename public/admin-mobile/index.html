@@ -63,6 +63,9 @@
     <span class="material-icons">keyboard_arrow_up</span>
   </button>
 
+  <!-- SEC: Sanitização global XSS (deve vir antes de scripts que usam innerHTML) -->
+  <script src="/js/shared/escape-html.js"></script>
+
   <!-- App Script (ES6 Modules) -->
   <script type="module" src="/admin-mobile/js/app.js"></script>
 
