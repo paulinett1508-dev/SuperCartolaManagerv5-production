@@ -79,6 +79,16 @@
                         </div>
                     </div>
 
+                    <!-- Seletor de Liga (quando não tem ?id=) -->
+                    <div id="ligaSelectorContainer" style="display: none;">
+                        <div style="background: var(--color-surface-elevated, #1e293b); border: 1px solid var(--color-border, #334155); border-radius: 12px; padding: 2rem; text-align: center; max-width: 600px; margin: 2rem auto;">
+                            <span class="material-icons" style="font-size: 48px; color: var(--color-primary); margin-bottom: 1rem;">sports_soccer</span>
+                            <h2 style="color: var(--color-text-primary, #f1f5f9); margin-bottom: 0.5rem;">Selecione uma Liga</h2>
+                            <p style="color: var(--color-text-muted, #94a3b8); margin-bottom: 1.5rem;">Escolha a liga para gerenciar seus módulos</p>
+                            <div id="ligaSelectorList" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+                        </div>
+                    </div>
+
                     <!-- Status Message -->
                     <div id="statusMessage" class="status-message"></div>
 
@@ -296,27 +306,85 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 ligaId = urlParams.get('id');
 
-                if (!ligaId) {
-                    showMessage('ID da liga não fornecido', 'error');
-                    window.__gm_state.initRunning = false;
-                    return;
-                }
-
                 try {
                     await loadLayout();
 
                     // ✅ FIX CRÍTICO: Recarregar ligas do sidebar após navegação SPA
-                    // BUG: loadLayout() pula injeção se sidebar existe, mas não recarrega ligas
-                    // Resultado: sidebar fica travado em "Carregando ligas..." ao navegar de volta
                     if (typeof window.carregarLigasLayout === 'function') {
                         console.log('[GERENCIAR-MODULOS] Recarregando ligas do sidebar após navegação SPA...');
                         await window.carregarLigasLayout();
+                    }
+
+                    if (!ligaId) {
+                        // Sem liga na URL — mostrar seletor de ligas
+                        await mostrarSeletorLigas();
+                        return;
                     }
 
                     await loadLiga();
                     await loadModulos();
                 } finally {
                     window.__gm_state.initRunning = false;
+                }
+            }
+
+            async function mostrarSeletorLigas() {
+                const container = document.getElementById('ligaSelectorContainer');
+                const list = document.getElementById('ligaSelectorList');
+                if (!container || !list) return;
+
+                // Ocultar conteúdo principal (stats, grids, botões)
+                document.getElementById('modulosStatsBar')?.style.setProperty('display', 'none');
+                document.querySelectorAll('.section-title, .modulos-grid, .action-buttons').forEach(el => el.style.display = 'none');
+                document.getElementById('ligaNome').textContent = 'Selecione uma liga';
+
+                container.style.display = 'block';
+                list.innerHTML = '<p style="color: var(--color-text-muted, #94a3b8);">Carregando ligas...</p>';
+
+                try {
+                    const response = await fetch('/api/ligas');
+                    if (!response.ok) throw new Error('Erro ao carregar ligas');
+                    const ligas = await response.json();
+
+                    if (!ligas.length) {
+                        list.innerHTML = '<p style="color: var(--color-text-muted, #94a3b8);">Nenhuma liga encontrada.</p>';
+                        return;
+                    }
+
+                    list.innerHTML = ligas.map(liga => `
+                        <a href="gerenciar-modulos.html?id=${liga._id}"
+                           class="liga-selector-item"
+                           style="display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem;
+                                  background: var(--color-surface, #0f172a); border: 1px solid var(--color-border, #334155);
+                                  border-radius: 8px; text-decoration: none; color: var(--color-text-primary, #f1f5f9);
+                                  transition: border-color 0.2s, background 0.2s;"
+                           onmouseover="this.style.borderColor='var(--color-primary)'; this.style.background='var(--color-surface-elevated, #1e293b)'"
+                           onmouseout="this.style.borderColor='var(--color-border, #334155)'; this.style.background='var(--color-surface, #0f172a)'"
+                           onclick="event.preventDefault(); navegarParaLiga('${liga._id}')">
+                            ${liga.logo
+                                ? `<img src="${liga.logo}" alt="" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover;">`
+                                : `<span class="material-icons" style="font-size: 40px; color: var(--color-primary);">emoji_events</span>`}
+                            <div style="text-align: left;">
+                                <div style="font-weight: 600; font-family: 'Russo One', sans-serif;">${liga.nome || 'Liga sem nome'}</div>
+                                <div style="font-size: 0.8rem; color: var(--color-text-muted, #94a3b8);">
+                                    Temporada ${liga.temporada || new Date().getFullYear()}
+                                </div>
+                            </div>
+                            <span class="material-icons" style="margin-left: auto; color: var(--color-text-muted, #94a3b8);">chevron_right</span>
+                        </a>
+                    `).join('');
+                } catch (err) {
+                    console.error('[GERENCIAR-MODULOS] Erro ao carregar ligas:', err);
+                    list.innerHTML = '<p style="color: var(--color-danger, #ef4444);">Erro ao carregar ligas. Tente novamente.</p>';
+                }
+            }
+
+            function navegarParaLiga(id) {
+                const url = `gerenciar-modulos.html?id=${id}`;
+                if (typeof SPANavigation !== 'undefined' && SPANavigation.enabled) {
+                    SPANavigation.navigate(url);
+                } else {
+                    window.location.href = url;
                 }
             }
 

@@ -1309,13 +1309,9 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 const ligaId = urlParams.get('id');
 
-                if (!ligaId) {
-                    // Se não tem liga selecionada, mostrar alerta
-                    alert('Selecione uma liga primeiro clicando em uma liga no menu lateral.');
-                    return;
-                }
-
-                const url = `gerenciar-modulos.html?id=${ligaId}`;
+                // Se já tem liga na URL, navega direto com o id
+                // Senão, navega sem id — a página mostrará seletor de ligas
+                const url = ligaId ? `gerenciar-modulos.html?id=${ligaId}` : 'gerenciar-modulos.html';
                 if (SPANavigation && SPANavigation.enabled) {
                     SPANavigation.navigate(url);
                 } else {
