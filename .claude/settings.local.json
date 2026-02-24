@@ -181,7 +181,9 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(for f in index.js routes/extratoFinanceiroCacheRoutes.js routes/fluxoFinanceiroRoutes.js routes/inscricoes-routes.js routes/renovacoes-routes.js routes/ajustes-routes.js routes/times-admin.js routes/consolidacao-routes.js routes/cartola-proxy.js; do node -e \"import\\('./$f'\\)\" 2>&1 | grep -i error | head -1 && echo \"FAIL: $f\" || echo \"OK: $f\"; done)",
       "Skill(security-review)",
-      "WebFetch(domain:api.github.com)"
+      "WebFetch(domain:api.github.com)",
+      "Bash(apt list --installed)",
+      "Bash(curl -s \"https://api.github.com/repos/paulinett1508-dev/SuperCartolaManagerv5/issues/152/comments\" 2>&1\ncurl -s \"https://api.github.com/repos/paulinett1508-dev/SuperCartolaManagerv5/pulls/152/comments\" 2>&1\ncurl -s \"https://api.github.com/repos/paulinett1508-dev/SuperCartolaManagerv5/pulls/152/commits\" 2>&1 | python3 -c \"import sys,json; commits=json.load\\(sys.stdin\\); [print\\(f'SHA: {c[\\\\\"sha\\\\\"][:8]} | {c[\\\\\"commit\\\\\"][\\\\\"message\\\\\"][:100]}'\\) for c in commits]\")"
     ]
   },
   "enableAllProjectMcpServers": true,
