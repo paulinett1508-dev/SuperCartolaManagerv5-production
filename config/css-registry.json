@@ -326,6 +326,12 @@
         "description": "Tela de boas-vindas/onboarding"
       },
       {
+        "path": "public/participante/css/participante.css (secao manutencao ~L822)",
+        "loadedBy": ["participante/index.html (via participante.css)"],
+        "description": "Tela de manutencao 'Calma ae!' — classes: .manutencao-screen, .manutencao-card-principal, .manutencao-logo, .manutencao-imagem, .manutencao-titulo, .manutencao-texto, .manutencao-botoes, .manutencao-btn, .manutencao-btn--refresh, .manutencao-conteudo, .manutencao-noticias, .manutencao-footer, .manutencao-dev-bypass. NAO criar CSS novo de manutencao sem verificar esta secao primeiro.",
+        "note": "Estilos embutidos em participante.css por design (faz parte do bundle base, sempre carregado)"
+      },
+      {
         "path": "public/participante/css/avisos.css",
         "loadedBy": ["participante/index.html (module)"],
         "description": "Cards de avisos com scroll horizontal"
