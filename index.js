@@ -712,34 +712,110 @@ p{font-size:.95rem;color:#9ca3af;margin-bottom:1.5rem}
 <body><div class="c">
 <div class="spinner"></div>
 <h1 style="margin-top:1.25rem">Servidor reiniciando</h1>
-<p>Uma atualização foi aplicada. A pagina sera recarregada automaticamente.</p>
+<p>Uma atualiza\u00e7\u00e3o foi aplicada. A p\u00e1gina ser\u00e1 recarregada automaticamente.</p>
 <div id="status"></div>
 <button id="retry-btn" onclick="location.reload()">Toque para recarregar</button>
 </div>
 <script>
 (function(){
-  var tentativas=0, max=60, intervalo=3000;
+  // =====================================================================
+  // FIX: Usa /api/app/check-version como health check em vez de HEAD na
+  // mesma rota HTML. O endpoint da API funciona da memoria (nao le HTML
+  // do disco), evitando o loop infinito quando o filesystem tem EIO
+  // intermitente pos-Republish.
+  //
+  // FIX: Detecta loops de reload via sessionStorage. Se a pagina foi
+  // recarregada muitas vezes sem sucesso (EIO intermitente: HEAD ok mas
+  // GET falha), para o auto-reload e mostra botao manual.
+  //
+  // FIX: Backoff progressivo (2s, 3s, 4s... cap 8s) em vez de fixo 3s,
+  // dando mais tempo ao servidor para estabilizar o filesystem.
+  // =====================================================================
+  var HEALTH_URL='/api/app/check-version';
+  var MAX_TENTATIVAS=60;
+  var INTERVALO_INICIAL=2000;
+  var INTERVALO_MAX=8000;
+  var INTERVALO_STEP=500;
+  var MAX_RELOADS=4;
+  var RELOAD_WINDOW_MS=90000;
+
+  var tentativas=0;
+  var intervaloAtual=INTERVALO_INICIAL;
   var status=document.getElementById('status');
   var btn=document.getElementById('retry-btn');
-  function tentar(){
-    tentativas++;
-    if(status)status.textContent='Tentativa '+tentativas+'...';
-    fetch(location.href,{method:'HEAD',cache:'no-store'}).then(function(r){
-      if(r.ok||r.status===304){location.reload();}
-      else if(tentativas<max){setTimeout(tentar,intervalo);}
-      else{mostrarBotao();}
-    }).catch(function(){
-      if(tentativas<max){setTimeout(tentar,intervalo);}
-      else{mostrarBotao();}
-    });
-  }
-  function mostrarBotao(){
-    if(status)status.textContent='Servidor ainda indisponivel.';
+
+  // --- Deteccao de loop de reload via sessionStorage ---
+  var RELOAD_KEY='_scm_restart_reloads';
+  var RELOAD_TS_KEY='_scm_restart_ts';
+  var loopDetectado=false;
+  try{
+    var agora=Date.now();
+    var tsInicio=parseInt(sessionStorage.getItem(RELOAD_TS_KEY)||'0',10);
+    var reloads=parseInt(sessionStorage.getItem(RELOAD_KEY)||'0',10);
+    // Resetar contador se a janela de tempo expirou
+    if(agora-tsInicio>RELOAD_WINDOW_MS){reloads=0;tsInicio=agora;}
+    if(!tsInicio){tsInicio=agora;}
+    sessionStorage.setItem(RELOAD_TS_KEY,String(tsInicio));
+    sessionStorage.setItem(RELOAD_KEY,String(reloads));
+    if(reloads>=MAX_RELOADS){loopDetectado=true;}
+  }catch(e){/* sessionStorage indisponivel, prosseguir sem deteccao */}
+
+  function mostrarBotao(msg){
+    if(status)status.textContent=msg||'Servidor ainda indisponivel.';
     if(btn)btn.style.display='inline-block';
   }
-  setTimeout(tentar,intervalo);
-  // Botao manual visivel apos 30s independente das tentativas
-  setTimeout(function(){if(btn)btn.style.display='inline-block';},30000);
+
+  // Se loop detectado, parar auto-retry e mostrar botao manual
+  if(loopDetectado){
+    mostrarBotao('Varias tentativas sem sucesso. Toque para recarregar.');
+    // Limpar contador para que o botao manual tenha chance de funcionar
+    try{sessionStorage.removeItem(RELOAD_KEY);sessionStorage.removeItem(RELOAD_TS_KEY);}catch(e){}
+  } else {
+    function recarregar(){
+      // Incrementar contador de reloads antes de recarregar
+      try{
+        var r=parseInt(sessionStorage.getItem(RELOAD_KEY)||'0',10)+1;
+        sessionStorage.setItem(RELOAD_KEY,String(r));
+      }catch(e){}
+      location.reload();
+    }
+
+    function tentar(){
+      tentativas++;
+      if(status)status.textContent='Reconectando... ('+tentativas+')';
+      fetch(HEALTH_URL,{cache:'no-store'}).then(function(r){
+        if(r.ok){
+          if(status)status.textContent='Servidor online! Recarregando...';
+          setTimeout(recarregar,300);
+        }
+        else if(tentativas<MAX_TENTATIVAS){agendar();}
+        else{mostrarBotao();}
+      }).catch(function(){
+        if(tentativas<MAX_TENTATIVAS){agendar();}
+        else{mostrarBotao();}
+      });
+    }
+
+    function agendar(){
+      setTimeout(tentar,intervaloAtual);
+      // Backoff progressivo ate o cap
+      if(intervaloAtual<INTERVALO_MAX)intervaloAtual+=INTERVALO_STEP;
+    }
+
+    // Primeira tentativa apos intervalo inicial
+    setTimeout(tentar,INTERVALO_INICIAL);
+    // Botao manual visivel apos 15s (era 30s - reduzido para melhor UX)
+    setTimeout(function(){if(btn)btn.style.display='inline-block';},15000);
+  }
+
+  // Limpar contadores quando o usuario navegar para outra pagina com sucesso
+  // (evento beforeunload so dispara se a navegacao realmente acontece)
+  window.addEventListener('pageshow',function(e){
+    // pageshow com persisted=true significa bfcache — limpar contadores
+    if(e.persisted){
+      try{sessionStorage.removeItem(RELOAD_KEY);sessionStorage.removeItem(RELOAD_TS_KEY);}catch(ex){}
+    }
+  });
 })();
 </script>
 </body></html>`;
