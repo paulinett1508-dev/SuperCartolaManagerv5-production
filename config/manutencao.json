@@ -1,5 +1,5 @@
 {
-  "ativo": true,
+  "ativo": false,
   "modo": "modulos",
   "template_id": "manutencao-tecnica",
   "customizacao": {
@@ -22,9 +22,7 @@
     ],
     "blacklist_timeIds": []
   },
-  "modulos_bloqueados": [
-    "extrato"
-  ],
+  "modulos_bloqueados": [],
   "ativadoEm": "2026-02-17T16:49:35.609Z",
-  "desativadoEm": "2026-02-17T16:20:23.948Z"
+  "desativadoEm": "2026-02-24T20:33:10.132Z"
 }
