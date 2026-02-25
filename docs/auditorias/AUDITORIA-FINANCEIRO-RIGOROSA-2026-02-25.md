@@ -28,10 +28,10 @@
 | A1. Quitacao ignora AjusteFinanceiro | CRITICAL | ✅ CORRIGIDO | `68b9e08` |
 | A2. Inscricao lida de fontes diferentes | CRITICAL | ✅ CORRIGIDO | `9a14839` |
 | A3. Double-counting saldo-calculator | CRITICAL | ✅ CORRIGIDO | `334b6c0` |
-| A4. saldoRodadas semantica com/sem cache | HIGH | 🔴 PENDENTE | — |
-| A5. Acertos calculados de formas diferentes | HIGH | ⚠️ PARCIAL | `853c3d6` (unificado via acertoService) |
+| A4. saldoRodadas semantica com/sem cache | HIGH | ✅ CORRIGIDO | `9b9527b` |
+| A5. Acertos calculados de formas diferentes | HIGH | ✅ CORRIGIDO | `9b9527b` |
 | A6. Consolidacao incompleta | HIGH | ✅ CORRIGIDO | `7065c7b` |
-| A7. PC valores hardcoded | HIGH | 🔴 PENDENTE | Sprint 3 |
+| A7. PC valores hardcoded | HIGH | ✅ CORRIGIDO | `9b9527b` |
 | A8. `\|\|` vs `??` para rodadaInicial | HIGH | ✅ CORRIGIDO | `68b9e08` |
 | B1. limparCachesCorrompidos deleta pre-temporada | HIGH | ✅ CORRIGIDO | `a704868` |
 | B2. DELETE inscricao nao deleta | MEDIUM | ✅ CORRIGIDO | `c480a0f` |
@@ -83,9 +83,9 @@
 
 | Status | Quantidade |
 |--------|-----------|
-| ✅ CORRIGIDO | 50 |
-| ⚠️ PARCIAL | 3 (G2, G3, A5) |
-| 🔴 PENDENTE | 2 (A4, A7) |
+| ✅ CORRIGIDO | 53 |
+| ⚠️ PARCIAL | 2 (G2, G3) |
+| 🔴 PENDENTE | 0 |
 | **Total findings nomeados** | **55** |
 
 > **Nota:** Os 88 findings originais incluem sub-items e achados menores nao nomeados individualmente. Os 55 acima sao os findings com ID explícito no documento.
@@ -128,14 +128,14 @@
 - **Solucao:** Adicionar condicional `Number(temporada) < 2026` antes de incluir FluxoFinanceiroCampos
 
 #### A4. [HIGH] saldoRodadas semantica diferente com/sem cache
-- **Status:** 🔴 PENDENTE
+- **Status:** ✅ CORRIGIDO — 2026-02-25 | commit `9b9527b` (path sem cache inclui InscricaoTemporada.saldo_anterior e taxa_inscricao)
 - **Arquivo:** `controllers/quitacaoController.js:80-101`
 - **Problema:** Com cache: `saldoRodadas = cache.saldo_consolidado` (inclui R0: inscricao, legado). Sem cache: `saldoRodadas = sum(bonus - onus)` (apenas rodadas)
 - **Impacto:** Participantes sem cache tem saldo subestimado (faltam inscricao/legado)
 - **Solucao:** Usar `calcularSaldoParticipante()` de saldo-calculator.js
 
 #### A5. [HIGH] Acertos calculados de formas diferentes
-- **Status:** ⚠️ PARCIAL — 2026-02-25 | commit `853c3d6` (C1/C2 unificaram acertos em acertoService.js; calculos agora consistentes)
+- **Status:** ✅ CORRIGIDO — 2026-02-25 | commit `9b9527b` (quitacaoController agora usa AcertoFinanceiro.calcularSaldoAcertos() — fonte única de verdade)
 - **Arquivo:** `controllers/extratoFinanceiroCacheController.js:86-97` vs `controllers/quitacaoController.js:57-63`
 - **Problema:** extratoCache usa catch-all `else` para nao-pagamento. quitacao checa explicitamente `tipo === 'recebimento'`. Um novo tipo seria tratado diferente.
 - **Solucao:** Ambos devem chamar `AcertoFinanceiro.calcularSaldoAcertos()` (metodo do model)
@@ -148,7 +148,7 @@
 - **Solucao:** Incluir acertos, ajustes e inscricao no calculo de consolidacao
 
 #### A7. [HIGH] Valores de Pontos Corridos hardcoded
-- **Status:** 🔴 PENDENTE — Sprint 3
+- **Status:** ✅ CORRIGIDO — 2026-02-25 | commit `9b9527b` (lê thresholdEmpate, thresholdGoleada, valorEmpate, valorVitoria, bonusGoleada de liga.configuracoes.pontos_corridos com fallback para padrões)
 - **Arquivo:** `controllers/fluxoFinanceiroController.js:458-487`
 - **Problema:** Empate R$3, Vitoria R$5, Goleada R$7, threshold empate 0.3, threshold goleada 50 -- todos hardcoded
 - **Impacto:** Multi-tenancy quebrado: ligas nao podem customizar valores de PC
