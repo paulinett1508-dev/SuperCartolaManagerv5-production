@@ -76,6 +76,26 @@ import logger from '../utils/logger.js';
 
 const RODADA_INICIAL_PONTOS_CORRIDOS = 7;
 
+// ✅ v8.15.0: Cache in-memory para Mata-Mata por liga (evita recalcular para cada participante)
+// Chave: `${ligaId}:${rodadaParam}` | Valor: { data: resultados[], timestamp: Date.now() }
+const _mataMataCache = new Map();
+const MATA_MATA_CACHE_TTL = 5 * 60 * 1000; // 5 minutos
+
+async function getResultadosMataMataComCache(ligaId, rodadaParam) {
+    const cacheKey = `${ligaId}:${rodadaParam}`;
+    const cached = _mataMataCache.get(cacheKey);
+
+    if (cached && (Date.now() - cached.timestamp) < MATA_MATA_CACHE_TTL) {
+        logger.log(`[FLUXO-CONTROLLER] ⚡ MATA-MATA cache HIT (liga=${ligaId}, age=${Math.round((Date.now() - cached.timestamp) / 1000)}s)`);
+        return cached.data;
+    }
+
+    const resultados = await getResultadosMataMataCompleto(ligaId, rodadaParam);
+    _mataMataCache.set(cacheKey, { data: resultados, timestamp: Date.now() });
+    logger.log(`[FLUXO-CONTROLLER] 💾 MATA-MATA cache MISS → calculado e salvo (liga=${ligaId}, ${resultados.length} resultados)`);
+    return resultados;
+}
+
 // ============================================================================
 // ✅ v8.0: FUNÇÕES SaaS DINÂMICAS (Multi-Tenant)
 // ============================================================================
@@ -185,14 +205,35 @@ async function getStatusMercadoInterno() {
         data._fallback = false;
         return data;
     } catch (error) {
+        // ✅ v8.15.0 FIX: Fallback inteligente — buscar rodada do DB ao invés de 0
+        // Bug: rodada_atual=0 bloqueava TODOS os cálculos (Banco, PC, etc) quando
+        // API Cartola falhava, deixando participantes sem dados financeiros.
+        // Solução: Consultar última rodada consolidada no DB como fallback confiável.
+        try {
+            const ultimaRodadaDB = await Rodada.findOne({
+                temporada: CURRENT_SEASON,
+            }).sort({ rodada: -1 }).select('rodada').lean();
+
+            if (ultimaRodadaDB && ultimaRodadaDB.rodada > 0) {
+                logger.warn(
+                    `[FLUXO-CONTROLLER] API Cartola indisponível, fallback DB: rodada_atual=${ultimaRodadaDB.rodada}`,
+                );
+                return {
+                    rodada_atual: ultimaRodadaDB.rodada,
+                    status_mercado: 1, // Assumir mercado aberto (seguro: não consolida rodada atual)
+                    _fallback: true,
+                    _fallbackSource: 'db',
+                };
+            }
+        } catch (dbError) {
+            logger.error("[FLUXO-CONTROLLER] Fallback DB também falhou:", dbError.message);
+        }
+
         logger.warn(
             "[FLUXO-CONTROLLER] Falha ao obter status mercado, usando fallback seguro (rodada_atual: 0).",
         );
         // ✅ v8.13.0 FIX: Fallback seguro — rodada_atual: 0 impede cálculo de módulos
-        // Bug anterior: rodada_atual: 38 fazia calcular MATA_MATA/TOP10 para todas as
-        // edições usando rankings potencialmente de outra temporada, gerando cobranças
-        // indevidas no extratofinanceirocaches.
-        return { rodada_atual: 0, status_mercado: 2, _fallback: true };
+        return { rodada_atual: 0, status_mercado: 2, _fallback: true, _fallbackSource: 'hardcoded' };
     }
 }
 
@@ -566,6 +607,9 @@ export const getExtratoFinanceiro = async (req, res) => {
         const mercadoAberto = statusMercado.status_mercado === 1;
         // ✅ v8.13.0: Flag que indica se dados do mercado vieram do fallback (API indisponível)
         const usouFallback = statusMercado._fallback === true;
+        // ✅ v8.15.0: Distinguir fallback DB (confiável) de fallback hardcoded (rodada=0)
+        // Fallback DB permite cálculo de rodadas (Banco, PC) mas bloqueia Mata-Mata/TOP10
+        const fallbackConfiavel = usouFallback && statusMercado._fallbackSource === 'db';
 
         const limiteConsolidacaoBase = mercadoAberto
             ? rodadaAtualCartola - 1
@@ -729,8 +773,10 @@ export const getExtratoFinanceiro = async (req, res) => {
         let novoSaldo = 0;
         let cacheModificado = false;
 
-        // Só calcular rodadas se NÃO for temporada futura e NÃO for fallback
-        if (!isTemporadaFutura && !usouFallback && cache.ultima_rodada_consolidada < rodadaLimite) {
+        // ✅ v8.15.0: Permitir cálculo de rodadas com fallback DB (confiável)
+        // Bloqueia apenas quando fallback é hardcoded (rodada=0, sem dados confiáveis)
+        const podeCaclularRodadas = !isTemporadaFutura && (!usouFallback || fallbackConfiavel);
+        if (podeCaclularRodadas && cache.ultima_rodada_consolidada < rodadaLimite) {
             logger.log(
                 `[FLUXO-CONTROLLER] Calculando R${cache.ultima_rodada_consolidada + 1} → R${rodadaLimite}`,
             );
@@ -812,8 +858,8 @@ export const getExtratoFinanceiro = async (req, res) => {
 
             logger.log(`[FLUXO-CONTROLLER] Calculando MATA-MATA histórico para time ${timeId}`);
 
-            // Calcular TODOS os resultados de Mata-Mata
-            const resultadosMM = await getResultadosMataMataCompleto(ligaId, rodadaAtualCartola + 1);
+            // ✅ v8.15.0: Usar cache in-memory por liga (evita recalcular para cada participante)
+            const resultadosMM = await getResultadosMataMataComCache(ligaId, rodadaAtualCartola + 1);
 
             // Filtrar apenas resultados deste time E dentro do limite de rodadas
             // ✅ v8.8.0 FIX: rodadaPontos é a rodada do Brasileirão onde a fase é calculada
@@ -1276,9 +1322,8 @@ export const getFluxoFinanceiroLiga = async (ligaId, rodadaNumero) => {
 
                     logger.log(`[FLUXO-CONSOLIDAÇÃO] Recalculando MATA-MATA histórico para time ${timeId}`);
 
-                    // Calcular TODOS os resultados de Mata-Mata
-                    const { getResultadosMataMataCompleto } = await import("./mata-mata-backend.js");
-                    const resultadosMM = await getResultadosMataMataCompleto(ligaId, rodadaNumero + 1);
+                    // ✅ v8.15.0: Usar cache in-memory por liga
+                    const resultadosMM = await getResultadosMataMataComCache(ligaId, rodadaNumero + 1);
 
                     // Filtrar apenas resultados deste time
                     const transacoesMM = resultadosMM
