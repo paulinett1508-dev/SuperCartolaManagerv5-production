@@ -272,7 +272,7 @@ function renderTimelineV2(rodadas, resumo, acertos, lancamentosIniciais) {
     // Calcular saldo acumulado para cada rodada (ordem cronológica)
     const saldosPorRodada = {};
     [...rodadasValidas].sort((a, b) => a.rodada - b.rodada).forEach(r => {
-        const saldoRodada = (r.bonusOnus || 0) + (r.pontosCorridos || 0) + (r.mataMata || 0) + (r.top10 || 0);
+        const saldoRodada = (r.bonusOnus || 0) + (r.pontosCorridos || 0) + (r.mataMata || 0) + (r.top10 || 0) + (r.melhorMes || 0) + (r.artilheiro || 0) + (r.luvaOuro || 0);
         saldoAcumulado += saldoRodada;
         saldosPorRodada[r.rodada] = saldoAcumulado;
     });
@@ -282,7 +282,10 @@ function renderTimelineV2(rodadas, resumo, acertos, lancamentosIniciais) {
         const pontosCorridos = r.pontosCorridos || 0;
         const mataMata = r.mataMata || 0;
         const top10 = r.top10 || 0;
-        const saldoRodada = bonusOnus + pontosCorridos + mataMata + top10;
+        const melhorMes = r.melhorMes || 0;
+        const artilheiro = r.artilheiro || 0;
+        const luvaOuro = r.luvaOuro || 0;
+        const saldoRodada = bonusOnus + pontosCorridos + mataMata + top10 + melhorMes + artilheiro + luvaOuro;
         const saldoAcum = saldosPorRodada[r.rodada] || 0;
 
         // Badges
@@ -301,6 +304,9 @@ function renderTimelineV2(rodadas, resumo, acertos, lancamentosIniciais) {
         if (pontosCorridos !== 0) details.push({ icon: 'sports_soccer', label: 'Pontos Corridos', valor: pontosCorridos });
         if (mataMata !== 0) details.push({ icon: 'emoji_events', label: 'Mata-Mata', valor: mataMata });
         if (top10 !== 0) details.push({ icon: top10 > 0 ? 'military_tech' : 'sentiment_dissatisfied', label: 'Top 10', valor: top10 });
+        if (melhorMes !== 0) details.push({ icon: 'calendar_month', label: 'Melhor Mês', valor: melhorMes });
+        if (artilheiro !== 0) details.push({ icon: 'sports_soccer', label: 'Artilheiro', valor: artilheiro });
+        if (luvaOuro !== 0) details.push({ icon: 'back_hand', label: 'Luva de Ouro', valor: luvaOuro });
 
         const detailsHtml = details.length > 0 ? details.map(d => `
             <div class="extrato-timeline-v2__detail-item">

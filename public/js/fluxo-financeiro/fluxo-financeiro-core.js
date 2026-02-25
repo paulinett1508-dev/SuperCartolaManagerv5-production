@@ -1301,7 +1301,10 @@ export class FluxoFinanceiroCore {
                     (r.bonusOnus || 0) +
                     (r.pontosCorridos || 0) +
                     (r.mataMata || 0) +
-                    (r.top10 || 0);
+                    (r.top10 || 0) +
+                    (r.melhorMes || 0) +
+                    (r.artilheiro || 0) +
+                    (r.luvaOuro || 0);
                 if (val > 0) resumo.totalGanhos += val;
                 else resumo.totalPerdas += val;
             });
