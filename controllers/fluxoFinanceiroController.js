@@ -1194,7 +1194,8 @@ export const getCamposLiga = async (req, res) => {
 };
 
 export const salvarCampos = async (req, res) => {
-    res.json({ message: "Use a rota patch individual para maior precisão" });
+    // ✅ B3 FIX: era 200 mas nada era salvo — 410 Gone indica endpoint descontinuado
+    res.status(410).json({ message: "Use a rota patch individual para maior precisão" });
 };
 
 /**

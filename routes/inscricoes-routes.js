@@ -437,15 +437,15 @@ router.post("/:ligaId/:temporada/inicializar", verificarAdmin, async (req, res) 
 });
 
 // =============================================================================
-// DELETE /api/inscricoes/:ligaId/:temporada/:timeId
-// Cancelar/reverter inscrição (admin only)
+// PATCH /api/inscricoes/:ligaId/:temporada/:timeId/reverter
+// Reverter inscrição para pendente (admin only)
 // =============================================================================
-router.delete("/:ligaId/:temporada/:timeId", verificarAdmin, async (req, res) => {
+router.patch("/:ligaId/:temporada/:timeId/reverter", verificarAdmin, async (req, res) => {
     try {
         const { ligaId, temporada, timeId } = req.params;
         const { motivo } = req.body;
 
-        console.log(`[INSCRICOES] DELETE inscricao liga=${ligaId} time=${timeId} temporada=${temporada}`);
+        console.log(`[INSCRICOES] PATCH reverter liga=${ligaId} time=${timeId} temporada=${temporada}`);
 
         const inscricao = await InscricaoTemporada.findOne({
             liga_id: ligaId,
@@ -479,12 +479,23 @@ router.delete("/:ligaId/:temporada/:timeId", verificarAdmin, async (req, res) =>
         });
 
     } catch (error) {
-        console.error("[INSCRICOES] Erro ao deletar:", error);
+        console.error("[INSCRICOES] Erro ao reverter:", error);
         res.status(500).json({
             success: false,
             error: "Erro ao reverter inscrição"
         });
     }
+});
+
+// DELETE /api/inscricoes/:ligaId/:temporada/:timeId — 410 Gone
+// ✅ B2 FIX: Esta rota não deletava — revertia para pendente (semântica incorreta).
+// Use PATCH /:ligaId/:temporada/:timeId/reverter
+// =============================================================================
+router.delete("/:ligaId/:temporada/:timeId", verificarAdmin, (req, res) => {
+    res.status(410).json({
+        success: false,
+        error: "Este endpoint foi removido. Use PATCH /:ligaId/:temporada/:timeId/reverter para reverter uma inscrição.",
+    });
 });
 
 // =============================================================================
