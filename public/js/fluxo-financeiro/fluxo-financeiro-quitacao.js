@@ -390,13 +390,9 @@ window.confirmarQuitacao = async function() {
 
 /**
  * Formata valor para moeda brasileira
+ * ✅ C5 FIX: alias para formatarMoedaBR canônico (window exposto por fluxo-financeiro-utils.js)
  */
-function formatarMoeda(valor) {
-    return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-    }).format(valor || 0);
-}
+const formatarMoeda = (valor) => (window.formatarMoedaBR || ((v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0)))(valor);
 
 // =============================================================================
 // TEMPLATE DO MODAL

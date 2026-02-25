@@ -15,12 +15,8 @@ const ModulosWizard = (function() {
     // HELPERS
     // =========================================================================
 
-    function formatarMoeda(valor) {
-        return new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-        }).format(valor || 0);
-    }
+    // ✅ C5 FIX: alias para formatarMoedaBR canônico (window exposto por fluxo-financeiro-utils.js)
+    const formatarMoeda = (valor) => (window.formatarMoedaBR || ((v) => 'R$ ' + (parseFloat(v)||0).toFixed(2).replace('.',',')))(valor);
 
     // =========================================================================
     // RENDERIZADORES DE CAMPOS

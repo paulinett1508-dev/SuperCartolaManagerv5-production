@@ -11,11 +11,8 @@
 
 // ===== HELPERS =====
 
-function formatarMoeda(valor) {
-    const v = parseFloat(valor) || 0;
-    const formatted = 'R$ ' + Math.abs(v).toFixed(2).replace('.', ',');
-    return v < 0 ? `-${formatted}` : formatted;
-}
+// ✅ C5 FIX: alias para formatarMoedaBR canônico (window exposto por fluxo-financeiro-utils.js)
+const formatarMoeda = (valor) => (window.formatarMoedaBR || ((v) => { const n = parseFloat(v)||0; return (n<0?'-':'')+'R$ '+Math.abs(n).toFixed(2).replace('.',','); }))(valor);
 
 function sinalMoeda(valor) {
     const v = parseFloat(valor) || 0;

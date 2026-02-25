@@ -13,6 +13,7 @@ import { verificarAdmin } from "../middleware/auth.js";
 import InscricaoTemporada from "../models/InscricaoTemporada.js";
 import LigaRules from "../models/LigaRules.js";
 import Liga from "../models/Liga.js";
+import ExtratoFinanceiroCache from "../models/ExtratoFinanceiroCache.js"; // ✅ E3 FIX: elimina raw db.collection()
 import { CURRENT_SEASON } from "../config/seasons.js";
 import {
     processarRenovacao,
@@ -345,15 +346,10 @@ router.patch("/:ligaId/:temporada/:timeId/marcar-pago", verificarAdmin, async (r
         inscricao.data_pagamento_inscricao = new Date();
         await inscricao.save();
 
-        // ✅ v1.1: Remover/estornar o débito da taxa de inscrição do extrato
-        const mongoose = (await import('mongoose')).default;
-        const db = mongoose.connection.db;
-        const ligaObjId = new mongoose.Types.ObjectId(ligaId);
-        
-        // Remover transação de INSCRICAO_TEMPORADA do extrato cache
-        const updateResult = await db.collection('extratofinanceirocaches').updateOne(
+        // ✅ v1.1 / E3 FIX: Remover/estornar o débito via Mongoose model (era raw db.collection())
+        const updateResult = await ExtratoFinanceiroCache.updateOne(
             {
-                liga_id: ligaObjId,
+                liga_id: String(ligaId),
                 time_id: Number(timeId),
                 temporada: Number(temporada)
             },
@@ -366,7 +362,7 @@ router.patch("/:ligaId/:temporada/:timeId/marcar-pago", verificarAdmin, async (r
                 }
             }
         );
-        
+
         console.log(`[INSCRICOES] Extrato atualizado:`, {
             matched: updateResult.matchedCount,
             modified: updateResult.modifiedCount,
