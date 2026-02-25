@@ -168,8 +168,9 @@ class AdminTesouraria {
             </div>
 
             <!-- Detail Panel Overlay (fora do module para z-index) -->
-            <div class="tesouraria-detail-overlay" id="tesouraria-detail-overlay" onclick="adminTesouraria.fecharDetalhes(event)">
-                <div class="tesouraria-detail-panel" id="tesouraria-detail-panel">
+            <div class="tesouraria-detail-overlay" id="tesouraria-detail-overlay" onclick="adminTesouraria.fecharDetalhes(event)" aria-hidden="true">
+                <div class="tesouraria-detail-panel" id="tesouraria-detail-panel"
+                     role="dialog" aria-modal="true" aria-label="Detalhes financeiros do participante" tabindex="-1">
                     <div class="panel-handle"><div class="panel-handle-bar"></div></div>
                     <div class="panel-header" id="detail-panel-header"></div>
                     <div class="panel-body" id="detail-panel-body"></div>
@@ -834,7 +835,7 @@ class AdminTesouraria {
             const cor = valor > 0 ? 'var(--color-success)' : valor < 0 ? 'var(--color-danger)' : 'var(--text-dim)';
             breakdownRows += `
                 <tr>
-                    <td><span class="material-icons">${icon}</span> ${label}</td>
+                    <th scope="row"><span class="material-icons" aria-hidden="true">${icon}</span> ${label}</th>
                     <td style="color: ${cor}">${this._formatarSaldo(valor)}</td>
                 </tr>
             `;
@@ -856,7 +857,7 @@ class AdminTesouraria {
                 <table class="breakdown-table">
                     ${breakdownRows}
                     <tr style="border-top: 2px solid var(--border-color)">
-                        <td><strong>Saldo Temporada</strong></td>
+                        <th scope="row"><strong>Saldo Temporada</strong></th>
                         <td><strong style="color: ${participante.saldoJogo >= 0 ? 'var(--color-success)' : 'var(--color-danger)'}">${this._formatarSaldo(participante.saldoJogo)}</strong></td>
                     </tr>
                 </table>
@@ -868,15 +869,15 @@ class AdminTesouraria {
                 <div class="panel-section-title">Acertos Financeiros</div>
                 <table class="breakdown-table">
                     <tr>
-                        <td><span class="material-icons">arrow_upward</span> Total Pago</td>
+                        <th scope="row"><span class="material-icons" aria-hidden="true">arrow_upward</span> Total Pago</th>
                         <td style="color: var(--color-success)">+R$ ${participante.totalPago.toFixed(2).replace('.', ',')}</td>
                     </tr>
                     <tr>
-                        <td><span class="material-icons">arrow_downward</span> Total Recebido</td>
+                        <th scope="row"><span class="material-icons" aria-hidden="true">arrow_downward</span> Total Recebido</th>
                         <td style="color: var(--color-danger)">-R$ ${participante.totalRecebido.toFixed(2).replace('.', ',')}</td>
                     </tr>
                     <tr>
-                        <td><strong>Saldo Acertos</strong></td>
+                        <th scope="row"><strong>Saldo Acertos</strong></th>
                         <td><strong style="color: ${participante.saldoAcertos >= 0 ? 'var(--color-success)' : 'var(--color-danger)'}">${this._formatarSaldo(participante.saldoAcertos)}</strong></td>
                     </tr>
                 </table>
@@ -896,12 +897,17 @@ class AdminTesouraria {
 
         // Show overlay
         overlay.classList.add('visible');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.getElementById('tesouraria-detail-panel')?.focus();
     }
 
     fecharDetalhes(event) {
         if (event && event.target !== event.currentTarget) return;
         const overlay = document.getElementById('tesouraria-detail-overlay');
-        if (overlay) overlay.classList.remove('visible');
+        if (overlay) {
+            overlay.classList.remove('visible');
+            overlay.setAttribute('aria-hidden', 'true');
+        }
     }
 
     // ==========================================================================

@@ -170,12 +170,7 @@
                                 <span>Orchestrator</span>
                             </div>
                             <div class="health-section-meta">
-                                <div id="orchStatusBadge" style="
-                                    display: inline-flex; align-items: center; gap: 6px;
-                                    padding: 4px 12px; border-radius: 20px;
-                                    font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600;
-                                    background: rgba(255,255,255,0.05); color: var(--text-secondary, #aaa);
-                                ">
+                                <div id="orchStatusBadge" class="orch-status-badge">
                                     <span id="orchDot" style="width: 8px; height: 8px; border-radius: 50%; background: var(--text-disabled);"></span>
                                     <span id="orchBadgeText">Carregando...</span>
                                 </div>
@@ -184,10 +179,10 @@
                         </div>
                         <div class="health-section-content" id="orchContent">
                             <div class="health-section-inner">
-                                <div id="orchestratorContainer" style="padding: 16px;">
-                                    <div style="text-align: center; color: var(--text-secondary, #aaa); padding: 16px;">
-                                        <span class="material-icons" style="font-size: 24px;">hourglass_empty</span>
-                                        <p style="margin-top: 8px;">Carregando status...</p>
+                                <div id="orchestratorContainer">
+                                    <div class="orch-loading-placeholder">
+                                        <span class="material-icons">hourglass_empty</span>
+                                        <p>Carregando status...</p>
                                     </div>
                                 </div>
                             </div>
@@ -1525,9 +1520,9 @@
                     const container = document.getElementById('orchestratorContainer');
                     if (container) {
                         container.innerHTML = `
-                            <div style="text-align: center; color: var(--color-danger, #ef4444); padding: 16px;">
+                            <div class="orch-error-state">
                                 <span class="material-icons">error_outline</span>
-                                <p style="margin-top: 8px;">Orchestrator indisponivel</p>
+                                <p>Orchestrator indisponivel</p>
                             </div>
                         `;
                     }
@@ -1547,7 +1542,7 @@
                 const badgeText = document.getElementById('orchBadgeText');
 
                 if (dot && badgeText) {
-                    let dotColor = '#555';
+                    let dotColor = 'var(--text-disabled)';
                     if (statusNum === 1) dotColor = 'var(--color-success, #10b981)';
                     else if (statusNum === 2) dotColor = 'var(--color-danger, #ef4444)';
                     else if (statusNum === 4) dotColor = 'var(--color-warning, #eab308)';
@@ -1607,39 +1602,29 @@
                 var errosCor = (db.total_erros || 0) > 0 ? 'var(--color-danger, #ef4444)' : 'var(--text-secondary, #aaa)';
 
                 container.innerHTML = `
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px;">
-                        <div style="
-                            display: flex; align-items: center; gap: 10px;
-                            padding: 12px; border-radius: 10px;
-                            background: var(--surface-card-elevated, #2a2a2a);
-                        ">
-                            <span class="material-icons" style="color: ${acaoCor}; font-size: 28px;">${acaoIcon}</span>
+                    <div class="orch-stats-grid">
+                        <div class="orch-stat-card">
+                            <span class="material-icons" style="color: ${acaoCor}; font-size: 28px;" aria-hidden="true">${acaoIcon}</span>
                             <div>
-                                <div style="font-weight: 600; font-size: 13px; color: ${acaoCor};">${acaoTexto}</div>
-                                <div style="font-size: 11px; color: var(--text-secondary, #aaa);">Consolidacao: ${ultimaConsol}</div>
+                                <div class="orch-action-label" style="color: ${acaoCor};">${acaoTexto}</div>
+                                <div class="orch-action-meta">Consolidacao: ${ultimaConsol}</div>
                             </div>
                         </div>
-                        <div style="
-                            text-align: center; padding: 12px; border-radius: 10px;
-                            background: var(--surface-card-elevated, #2a2a2a);
-                        ">
-                            <div style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: var(--color-primary);">
+                        <div class="orch-stat-card-center">
+                            <div class="orch-stat-value" style="color: var(--color-primary);">
                                 ${db.total_consolidacoes || 0}
                             </div>
-                            <div style="font-size: 11px; color: var(--text-secondary);">Consolidacoes</div>
+                            <div class="orch-stat-label">Consolidacoes</div>
                         </div>
-                        <div style="
-                            text-align: center; padding: 12px; border-radius: 10px;
-                            background: var(--surface-card-elevated, #2a2a2a);
-                        ">
-                            <div style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: ${errosCor};">
+                        <div class="orch-stat-card-center">
+                            <div class="orch-stat-value" style="color: ${errosCor};">
                                 ${db.total_erros || 0}
                             </div>
-                            <div style="font-size: 11px; color: var(--text-secondary, #aaa);">Erros</div>
+                            <div class="orch-stat-label">Erros</div>
                         </div>
                     </div>
 
-                    <div style="display: flex; gap: 3px; margin-bottom: 16px;">
+                    <div class="orch-fases-bar">
                         ${fasesHtml}
                     </div>
 
