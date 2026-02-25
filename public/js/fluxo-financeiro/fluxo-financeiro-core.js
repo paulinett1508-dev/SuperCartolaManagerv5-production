@@ -543,6 +543,9 @@ export class FluxoFinanceiroCore {
                             saldo_acertos: acertos?.resumo?.saldo ?? 0,
                             // ✅ v6.9: Incluir lançamentos iniciais (inscrição, legado) do backend
                             saldo_lancamentos_iniciais: cacheValido?.resumo?.saldo_lancamentos_iniciais || 0,
+                            // ✅ I6 FIX: Propagar saldoAjustes do backend (AjusteFinanceiro 2026+)
+                            // Frontend não conhece AjusteFinanceiro — confiar no valor já calculado pelo backend
+                            saldoAjustes: cacheValido?.resumo?.saldoAjustes ?? 0,
                             // ✅ v6.12: Preservar módulos opcionais do cache (quando existirem)
                             melhorMes: cacheValido?.resumo?.melhorMes ?? resumoRecalculado.melhorMes ?? 0,
                             artilheiro: cacheValido?.resumo?.artilheiro ?? resumoRecalculado.artilheiro ?? 0,
@@ -1286,10 +1289,12 @@ export class FluxoFinanceiroCore {
         // ✅ v6.6: Saldo temporada (histórico) + acertos = saldo pendente
         // ✅ v6.13 FIX: Guard contra NaN (se algum campo do resumo for undefined)
         // ✅ v6.9 FIX: Incluir lançamentos iniciais (inscrição, legado, dívida)
+        // ✅ I6 FIX: Incluir saldoAjustes (AjusteFinanceiro 2026+) propagado do backend
         const saldoTemporada = this._calcularSaldoTemporada(resumo);
         const saldoAcertos = resumo.saldo_acertos || 0;
         const saldoLancamentosIniciais = resumo.saldo_lancamentos_iniciais || 0;
-        return (isNaN(saldoTemporada) ? 0 : saldoTemporada) + saldoAcertos + saldoLancamentosIniciais;
+        const saldoAjustes = resumo.saldoAjustes || 0;
+        return (isNaN(saldoTemporada) ? 0 : saldoTemporada) + saldoAcertos + saldoLancamentosIniciais + saldoAjustes;
     }
 
     _calcularTotaisConsolidados(resumo, rodadas) {
