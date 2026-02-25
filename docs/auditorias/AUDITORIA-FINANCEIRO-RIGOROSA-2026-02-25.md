@@ -60,8 +60,8 @@
 | F6. Batch sem limite de tamanho | MEDIUM | ✅ CORRIGIDO | `8f486d8` |
 | F7. Pagamento renovacao sem idempotencia | MEDIUM | ✅ CORRIGIDO | `4a62e1c` |
 | G1. Fragmentacao de liga_id (6 models) | CRITICAL | ✅ CORRIGIDO | `8d06641` |
-| G2. Fragmentacao de time_id entre models | HIGH | ⚠️ PARCIAL | `4a62e1c` (coercao defensiva; migracao DB pendente) |
-| G3. Naming inconsistente camelCase/snake_case | HIGH | ⚠️ PARCIAL | `4a62e1c` (documentado em CLAUDE.md; migracao pendente) |
+| G2. Fragmentacao de time_id entre models | HIGH | ✅ CORRIGIDO | `b36df67` |
+| G3. Naming inconsistente camelCase/snake_case | HIGH | ✅ CORRIGIDO | `b36df67` |
 | H1. Campos escritos mas NAO no schema | CRITICAL | ✅ CORRIGIDO | `90e45fe` |
 | H2. quitacao.criado_sem_cache nao no schema | MEDIUM | ✅ CORRIGIDO | `b4d5e3e` |
 | H3. versao_calculo duplicado | MEDIUM | ✅ CORRIGIDO | `b4d5e3e` |
@@ -83,8 +83,8 @@
 
 | Status | Quantidade |
 |--------|-----------|
-| ✅ CORRIGIDO | 53 |
-| ⚠️ PARCIAL | 2 (G2, G3) |
+| ✅ CORRIGIDO | 55 |
+| ⚠️ PARCIAL | 0 |
 | 🔴 PENDENTE | 0 |
 | **Total findings nomeados** | **55** |
 
@@ -371,24 +371,27 @@
 
 #### G2. [HIGH] Fragmentacao de time_id entre models
 
-| Model | Campo | Tipo |
-|-------|-------|------|
-| AcertoFinanceiro | `timeId` | String |
-| FluxoFinanceiroCampos | `timeId` | String |
-| AjusteFinanceiro | `time_id` | Number |
-| ExtratoFinanceiroCache | `time_id` | Number |
-| InscricaoTemporada | `time_id` | Number |
+| Model | Campo antes | Campo depois | Tipo |
+|-------|------------|--------------|------|
+| AcertoFinanceiro | `timeId` (String) | `time_id` | Number ✅ |
+| FluxoFinanceiroCampos | `timeId` (String) | `time_id` | Number ✅ |
+| AjusteFinanceiro | `time_id` | `time_id` | Number (sem alteracao) |
+| ExtratoFinanceiroCache | `time_id` | `time_id` | Number (sem alteracao) |
+| InscricaoTemporada | `time_id` | `time_id` | Number (sem alteracao) |
 
-- **Status:** ⚠️ PARCIAL — 2026-02-25 | commit `4a62e1c` (coercao defensiva `timeIds.map(Number)` aplicada; migracao completa do banco pendente Sprint 3)
+- **Migracao DB:** `acertofinanceiros` 30/30 docs | `fluxofinanceirocampos` 72/72 docs (+ drop/recriacao do indice unico composto)
+- **Script:** `scripts/migrate-g2g3-schema.js` (idempotente, suporta `--dry-run`/`--force`)
+- **Status:** ✅ CORRIGIDO — 2026-02-25 | commit `b36df67`
 
 #### G3. [HIGH] Naming inconsistente (camelCase vs snake_case)
 
-| Convencao | Models |
-|-----------|--------|
-| camelCase (`ligaId`, `timeId`) | AcertoFinanceiro, FluxoFinanceiroCampos |
-| snake_case (`liga_id`, `time_id`) | AjusteFinanceiro, ExtratoFinanceiroCache, InscricaoTemporada, LigaRules |
+| Convencao | Models antes | Models depois |
+|-----------|-------------|---------------|
+| camelCase (`ligaId`, `timeId`) | AcertoFinanceiro, FluxoFinanceiroCampos | — (eliminado) |
+| snake_case (`liga_id`, `time_id`) | AjusteFinanceiro, ExtratoFinanceiroCache, InscricaoTemporada, LigaRules | Todos os models financeiros ✅ |
 
-- **Status:** ⚠️ PARCIAL — 2026-02-25 | commit `4a62e1c` (padrao documentado em CLAUDE.md com regras de coercao; migracao de schema pendente Sprint 3)
+- **Arquivos atualizados:** schemas, 4 controllers, routes, utils/saldo-calculator, services/analyticsService
+- **Status:** ✅ CORRIGIDO — 2026-02-25 | commit `b36df67`
 
 ---
 
