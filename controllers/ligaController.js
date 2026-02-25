@@ -848,6 +848,8 @@ const buscarModulosAtivos = async (req, res) => {
       regras: true,
       cartolaPro: false,
       tiroCerto: false,
+      whatsHappening: true,
+      raioX: true,
     };
 
     if (liga.modulos_ativos && Object.keys(liga.modulos_ativos).length > 0) {
