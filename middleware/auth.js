@@ -251,7 +251,8 @@ export function verificarAdminOuDono(req, res, next) {
   // Participante só pode acessar seus próprios dados
   if (req.session?.participante) {
     const timeIdParam = Number(req.params.timeId);
-    const timeIdSessao = Number(req.session.participante.time_id);
+    // Suporta sessões antigas (timeId) e novas (time_id) durante transição
+    const timeIdSessao = Number(req.session.participante.time_id ?? req.session.participante.timeId);
 
     if (timeIdParam === timeIdSessao) {
       return next();
