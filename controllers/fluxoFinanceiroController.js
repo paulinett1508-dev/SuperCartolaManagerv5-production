@@ -1387,25 +1387,42 @@ export const getFluxoFinanceiroLiga = async (ligaId, rodadaNumero) => {
                 await cache.save();
             }
 
-            // ✅ v8.3.0 FIX: Incluir temporada na query (segregação de dados)
-            const camposManuais = await FluxoFinanceiroCampos.findOne({
-                ligaId,
-                timeId,
-                temporada: temporadaAtual,
-            }).lean();
-            let saldoCampos = 0;
+            // ✅ A6 FIX: Incluir acertos e ajustes/campos no saldo_total
+            // Antes: só cache.saldo_consolidado + saldoCampos — acertos e ajustes 2026+ ignorados
+            // Snapshots e Hall da Fama mostravam saldo incompleto
 
-            if (camposManuais?.campos) {
-                camposManuais.campos.forEach((campo) => {
-                    if (campo.valor !== 0) saldoCampos += campo.valor;
-                });
+            // Campos manuais (pré-2026) OU Ajustes dinâmicos (2026+) — mutuamente exclusivos (A3)
+            let saldoExtras = 0;
+            if (temporadaAtual >= 2026) {
+                const ajustesInfo = await AjusteFinanceiro.calcularTotal(
+                    String(ligaId), Number(timeId), temporadaAtual
+                );
+                saldoExtras = ajustesInfo?.total || 0;
+            } else {
+                // ✅ v8.3.0 FIX: Incluir temporada na query (segregação de dados)
+                const camposManuais = await FluxoFinanceiroCampos.findOne({
+                    ligaId,
+                    timeId,
+                    temporada: temporadaAtual,
+                }).lean();
+                if (camposManuais?.campos) {
+                    camposManuais.campos.forEach((campo) => {
+                        if (campo.valor !== 0) saldoExtras += campo.valor;
+                    });
+                }
             }
+
+            // Acertos financeiros (pagamentos/recebimentos em tempo real)
+            const acertosInfo = await AcertoFinanceiro.calcularSaldoAcertos(
+                String(ligaId), String(timeId), temporadaAtual
+            );
+            const saldoAcertos = acertosInfo?.saldoAcertos || 0;
 
             financeiroPorTime.push({
                 time_id: timeId,
                 nome_time: participante.nome_time,
                 nome_cartola: participante.nome_cartola,
-                saldo_total: cache.saldo_consolidado + saldoCampos,
+                saldo_total: cache.saldo_consolidado + saldoExtras + saldoAcertos,
                 ganhos: cache.ganhos_consolidados || 0,
                 perdas: cache.perdas_consolidadas || 0,
                 transacoes: cache.historico_transacoes.length,
