@@ -1130,6 +1130,12 @@ function renderizarHome(container, data, ligaId) {
         });
     }
 
+    // === JOGUINHOS (exclusivo premium) ===
+    const btnJoguinhos = document.getElementById('btn-joguinhos');
+    if (btnJoguinhos) {
+        btnJoguinhos.style.display = isPremium ? '' : 'none';
+    }
+
     // === BOTÕES DE ATALHOS (Módulos Ativos) ===
     // ✅ v4.10: Premium bypass - participantes premium veem todos os atalhos
     const modulosAtivos = window.participanteNav?.modulosAtivos || {};
