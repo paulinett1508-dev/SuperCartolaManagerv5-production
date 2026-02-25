@@ -54,13 +54,17 @@ export async function calcularSaldoParticipante(ligaId, timeId, temporada = CURR
             ligaId
         );
 
-        // ✅ v2.0.0 FIX: Buscar campos manuais COM filtro de temporada
-        const camposDoc = await FluxoFinanceiroCampos.findOne({
-            ligaId: String(ligaId),
-            timeId: String(timeId),
-            temporada: Number(temporada),
-        }).lean();
-        const camposAtivos = camposDoc?.campos?.filter(c => c.valor !== 0) || [];
+        // ✅ A3 FIX: FluxoFinanceiroCampos apenas para pre-2026
+        // Para 2026+, AjusteFinanceiro é o sistema vigente — incluir ambos causava double-count
+        let camposAtivos = [];
+        if (Number(temporada) < 2026) {
+            const camposDoc = await FluxoFinanceiroCampos.findOne({
+                ligaId: String(ligaId),
+                timeId: String(timeId),
+                temporada: Number(temporada),
+            }).lean();
+            camposAtivos = camposDoc?.campos?.filter(c => c.valor !== 0) || [];
+        }
 
         // Calcular resumo completo
         const resumoCalculado = calcularResumoDeRodadas(rodadasProcessadas, camposAtivos);
@@ -90,16 +94,19 @@ export async function calcularSaldoParticipante(ligaId, timeId, temporada = CURR
         // Usar saldo consolidado do cache (fallback)
         saldoConsolidado = cache?.saldo_consolidado || 0;
 
-        // ✅ v2.0.0 FIX: Adicionar campos manuais COM filtro de temporada
-        const camposDoc = await FluxoFinanceiroCampos.findOne({
-            ligaId: String(ligaId),
-            timeId: String(timeId),
-            temporada: Number(temporada),
-        }).lean();
+        // ✅ A3 FIX: FluxoFinanceiroCampos apenas para pre-2026
+        // Para 2026+, AjusteFinanceiro é o sistema vigente — incluir ambos causava double-count
+        if (Number(temporada) < 2026) {
+            const camposDoc = await FluxoFinanceiroCampos.findOne({
+                ligaId: String(ligaId),
+                timeId: String(timeId),
+                temporada: Number(temporada),
+            }).lean();
 
-        if (camposDoc?.campos) {
-            const saldoCampos = camposDoc.campos.reduce((acc, c) => acc + (c.valor || 0), 0);
-            saldoConsolidado += saldoCampos;
+            if (camposDoc?.campos) {
+                const saldoCampos = camposDoc.campos.reduce((acc, c) => acc + (c.valor || 0), 0);
+                saldoConsolidado += saldoCampos;
+            }
         }
     }
 
