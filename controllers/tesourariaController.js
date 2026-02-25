@@ -470,7 +470,8 @@ export async function getLiga(req, res) {
 
         const acertosMap = new Map();
         todosAcertos.forEach(a => {
-            const key = String(a.timeId);
+            // ✅ G2/G3 FIX: AcertoFinanceiro migrado para time_id (Number) — a.timeId seria undefined
+            const key = String(a.time_id ?? a.timeId);
             if (!acertosMap.has(key)) acertosMap.set(key, []);
             acertosMap.get(key).push(a);
         });
@@ -623,6 +624,8 @@ export async function getLiga(req, res) {
                     melhorMes: parseFloat(breakdown.melhorMes.toFixed(2)),
                     artilheiro: parseFloat(breakdown.artilheiro.toFixed(2)),
                     luvaOuro: parseFloat(breakdown.luvaOuro.toFixed(2)),
+                    restaUm: parseFloat((breakdown.restaUm || 0).toFixed(2)),
+                    capitaoLuxo: parseFloat((breakdown.capitaoLuxo || 0).toFixed(2)),
                     campos: parseFloat(saldoCampos.toFixed(2)),
                     ajustes: parseFloat((breakdown.ajustes || 0).toFixed(2)),
                     acertos: parseFloat(breakdown.acertos.toFixed(2)),

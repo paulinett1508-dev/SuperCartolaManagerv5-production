@@ -189,7 +189,9 @@
       "Bash(git mv \\\\\n  scripts/tmp-audit-inscricao-cache-2026.js \\\\\n  scripts/tmp-extrato-antonio.js \\\\\n  scripts/tmp-extrato-maior-devedor.js \\\\\n  scripts/tmp-query-liga-config.js \\\\\n  scripts/tmp-query-pc-config.js \\\\\n  scripts/auditar-caches-sobral.js \\\\\n  scripts/corrigir-caches-sobral.js \\\\\n  scripts/fix-bonus-onus-sobral.js \\\\\n  scripts/fix-top10-extratos-sobral.js \\\\\n  scripts/regenerar-ranking-sobral.js \\\\\n  scripts/applied-fixes/)",
       "Bash(git mv \\\\\n  scripts/verificar-correcao.js \\\\\n  scripts/verificar-correcao-tesouraria.js \\\\\n  scripts/verificar-extrato-2025.js \\\\\n  scripts/verificar-top10-real.js \\\\\n  scripts/audit-totais-geral.js \\\\\n  scripts/applied-fixes/)",
       "Bash(git mv \\\\\n  scripts/corrigir-caches-2025.js \\\\\n  scripts/corrigir-hall-fama.js \\\\\n  scripts/fix-auditoria-extratos-2026.js \\\\\n  scripts/fix-cache-permanente-2025.js \\\\\n  scripts/fix-extrato-2026-rodada-fantasma.js \\\\\n  scripts/fix-extrato-2026-saldo-completo.js \\\\\n  scripts/fix-extrato-duplicados-liga-id.js \\\\\n  scripts/fix-extrato-pc-mm-top10-integration-2026.js \\\\\n  scripts/fix-extratos-2025-modulos-perdidos.js \\\\\n  scripts/fix-ranking-temporada-2026.js \\\\\n  scripts/fix-renovacoes-credito-2026.js \\\\\n  scripts/fix-restum-escudos.js \\\\\n  scripts/fix-times-temporada-2026.js \\\\\n  scripts/applied-fixes/)",
-      "Bash(which mongodump mongorestore 2>/dev/null && mongodump --version 2>/dev/null || echo \"mongodump não disponível\")"
+      "Bash(which mongodump mongorestore 2>/dev/null && mongodump --version 2>/dev/null || echo \"mongodump não disponível\")",
+      "Bash(git cherry-pick 0234c81)",
+      "Bash(git cherry-pick b1b9398)"
     ]
   },
   "enableAllProjectMcpServers": true,
