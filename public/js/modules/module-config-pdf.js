@@ -8,6 +8,8 @@
  * @date 2026-01-28
  */
 
+import { CURRENT_SEASON } from "../config/seasons-client.js";
+
 // =============================================================================
 // CONFIGURAÇÕES DO RELATÓRIO
 // =============================================================================
@@ -258,7 +260,7 @@ class ModuleConfigPDF {
         doc.setTextColor(...PDF_CONFIG.corTextoSecundario);
         doc.setFontSize(10);
         doc.setFont(PDF_CONFIG.fonteNormal, 'normal');
-        doc.text(`Temporada ${this.ligaData.temporada || 2026}`, pw / 2, boxY + 38, { align: 'center' });
+        doc.text(`Temporada ${this.ligaData.temporada || CURRENT_SEASON}`, pw / 2, boxY + 38, { align: 'center' });
 
         // Contadores de módulos
         const ativos = this.modulosConfigs.filter(m => m.ativo).length;

@@ -2,6 +2,7 @@
 // ✅ VERSÃO 4.1 - Integração completa com backend cache + verificação de módulos ativos
 // ✅ VERSÃO 5.0 - SaaS Dinamico - usa LigaConfigService para configs
 
+import { CURRENT_SEASON } from "../config/seasons-client.js";
 import {
     getRankingRodadaEspecifica,
     getRankingsEmLote,
@@ -129,7 +130,7 @@ export class FluxoFinanceiroCache {
     async buscarExtratoCacheado(timeId, rodadaAtual, mercadoAberto = false) {
         try {
             // ✅ v5.3: Usar temporada selecionada
-            const temporada = window.temporadaAtual || 2026;
+            const temporada = window.temporadaAtual || CURRENT_SEASON;
             console.log(
                 `[FLUXO-CACHE] 🔍 Verificando cache MongoDB para time ${timeId} (temporada ${temporada})...`,
             );
@@ -202,7 +203,7 @@ export class FluxoFinanceiroCache {
     ) {
         try {
             // ✅ v5.3: Usar temporada selecionada
-            const temporada = window.temporadaAtual || 2026;
+            const temporada = window.temporadaAtual || CURRENT_SEASON;
             console.log(
                 `[FLUXO-CACHE] 💾 Salvando cache MongoDB para time ${timeId} (temporada ${temporada})...`,
             );
@@ -261,7 +262,7 @@ export class FluxoFinanceiroCache {
     // ===================================================================
     async invalidarCacheTime(timeId) {
         try {
-            const temporada = window.temporadaAtual || 2026;
+            const temporada = window.temporadaAtual || CURRENT_SEASON;
             console.log(
                 `[FLUXO-CACHE] 🗑️ Invalidando cache do time ${timeId} (temporada ${temporada})...`,
             );
@@ -1006,7 +1007,7 @@ export class FluxoFinanceiroCache {
 
     // ✅ v6.0 FIX: Getter para extrato cacheado COM TEMPORADA
     getExtratoCacheado(timeId, temporada = null) {
-        const temp = temporada || window.temporadaAtual || 2026;
+        const temp = temporada || window.temporadaAtual || CURRENT_SEASON;
         const cacheKey = `${timeId}_${temp}`;
         return this.extratosCacheados.get(cacheKey) || null;
     }
@@ -1127,7 +1128,7 @@ export function forceRefresh(ligaId, participante = null) {
 // ✅ v5.3: Passa temporada para invalidar cache correto
 window.invalidarCacheTime = async (ligaId, timeId) => {
     try {
-        const temporada = window.temporadaAtual || 2026;
+        const temporada = window.temporadaAtual || CURRENT_SEASON;
         const response = await fetch(
             `${API_BASE_URL}/api/extrato-cache/${ligaId}/times/${timeId}/cache?temporada=${temporada}`,
             { method: "DELETE" },

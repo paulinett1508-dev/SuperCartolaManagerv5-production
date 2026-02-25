@@ -931,7 +931,7 @@ class DetalheLigaOrquestrador {
 
                 // ✅ v3.1: Para 2026+, usar inscritos ativos da temporada (renovados + novos)
                 const temporadaAtual =
-                    window.temporadaAtual || liga.temporada || 2026;
+                    window.temporadaAtual || liga.temporada || new Date().getFullYear();
                 if (temporadaAtual >= 2026) {
                     try {
                         const respParticipantes = await fetch(

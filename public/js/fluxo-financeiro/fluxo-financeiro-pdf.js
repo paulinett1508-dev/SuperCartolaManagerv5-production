@@ -13,6 +13,7 @@
  * ROLLBACK: git checkout HEAD~1 -- public/js/fluxo-financeiro/fluxo-financeiro-ui.js
  */
 
+import { CURRENT_SEASON } from "../config/seasons-client.js";
 import { injetarEstilosModalAuditoriaFinanceira } from "./fluxo-financeiro-styles.js";
 
 // =============================================================================
@@ -92,7 +93,7 @@ export async function abrirAuditoriaFinanceira(timeId, ligaId, nomeParticipante)
     `;
 
     try {
-        const temporada = window.temporadaAtual || 2026;
+        const temporada = window.temporadaAtual || CURRENT_SEASON;
 
         // Buscar dados via API de tesouraria
         const response = await fetch(`/api/tesouraria/participante/${ligaId}/${timeId}?temporada=${temporada}`);

@@ -2,6 +2,7 @@
 // GERENCIADOR DE CAMPOS EDITÁVEIS - MONGODB
 // ==============================
 
+import { CURRENT_SEASON } from "../config/seasons-client.js";
 import { FluxoFinanceiroAPI } from "./fluxo-financeiro-api.js";
 import { obterLigaId } from "../pontos-corridos-utils.js";
 import { parseMoedaBR } from "./fluxo-financeiro-utils.js";
@@ -58,7 +59,7 @@ export class FluxoFinanceiroCampos {
             const ligaId = obterLigaId();
             const campoIndex = parseInt(nomeCampo.replace("campo", "")) - 1;
             // ✅ v6.10 FIX: Usar temporada atual selecionada
-            const temporadaSelecionada = window.temporadaAtual || 2026;
+            const temporadaSelecionada = window.temporadaAtual || CURRENT_SEASON;
 
             // ✅ CARREGAR DADOS ATUAIS PRIMEIRO
             const camposAtuais =
@@ -110,7 +111,7 @@ export class FluxoFinanceiroCampos {
             const ligaId = obterLigaId();
             const campoIndex = parseInt(nomeCampo.replace("campo", "")) - 1;
             // ✅ v6.10 FIX: Usar temporada atual selecionada
-            const temporadaSelecionada = window.temporadaAtual || 2026;
+            const temporadaSelecionada = window.temporadaAtual || CURRENT_SEASON;
 
             // ✅ CARREGAR DADOS ATUAIS PRIMEIRO
             const camposAtuais =
@@ -154,7 +155,7 @@ export class FluxoFinanceiroCampos {
     static async obterNomeCampo(timeId, nomeCampo) {
         try {
             // ✅ v6.10 FIX: Usar temporada atual selecionada
-            const temporadaSelecionada = window.temporadaAtual || 2026;
+            const temporadaSelecionada = window.temporadaAtual || CURRENT_SEASON;
             const campos = await this.carregarTodosCamposEditaveis(timeId, temporadaSelecionada);
             return campos[nomeCampo]?.nome || `Campo ${nomeCampo.slice(-1)}`;
         } catch (error) {
@@ -194,7 +195,7 @@ export class FluxoFinanceiroCampos {
      */
     static async exportarCampos(timeId, temporada = null) {
         // ✅ v6.10 FIX: Usar temporada atual selecionada
-        const temporadaSelecionada = temporada || window.temporadaAtual || 2026;
+        const temporadaSelecionada = temporada || window.temporadaAtual || CURRENT_SEASON;
         return await this.carregarTodosCamposEditaveis(timeId, temporadaSelecionada);
     }
 
@@ -242,7 +243,7 @@ export class FluxoFinanceiroCampos {
     static async obterEstatisticas(timeId) {
         try {
             // ✅ v6.10 FIX: Usar temporada atual selecionada
-            const temporadaSelecionada = window.temporadaAtual || 2026;
+            const temporadaSelecionada = window.temporadaAtual || CURRENT_SEASON;
             const campos = await this.carregarTodosCamposEditaveis(timeId, temporadaSelecionada);
             const valores = Object.values(campos).map((c) => c.valor);
 

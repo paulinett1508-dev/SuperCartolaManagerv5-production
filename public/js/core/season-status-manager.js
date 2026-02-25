@@ -9,6 +9,8 @@
  * @since 2026-01-31
  */
 
+import { CURRENT_SEASON } from "../config/seasons-client.js";
+
 class SeasonStatusManager {
   constructor() {
     this.cache = null;
@@ -70,7 +72,7 @@ class SeasonStatusManager {
         rodadaAtual: data.mercado.rodada_atual || 1,
         statusMercado: data.mercado.status_mercado || 2,
         mercadoAberto: data.mercado.mercado_aberto === true,
-        temporada: data.mercado.temporada || data.temporada.atual || 2026,
+        temporada: data.mercado.temporada || data.temporada.atual || CURRENT_SEASON,
         temporadaEncerrada: data.mercado.temporada_encerrada === true,
         fechamento: data.mercado.fechamento || null,
 

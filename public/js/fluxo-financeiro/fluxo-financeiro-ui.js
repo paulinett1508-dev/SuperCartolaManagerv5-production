@@ -1,3 +1,4 @@
+import { CURRENT_SEASON } from "../config/seasons-client.js";
 import { FluxoFinanceiroCampos } from "./fluxo-financeiro-campos.js";
 import {
     FluxoFinanceiroAuditoria,
@@ -481,13 +482,13 @@ export class FluxoFinanceiroUI {
                 <div class="extrato-sem-dados-temporada">
                     <span class="material-icons">hourglass_empty</span>
                     <p>Nenhum dado de rodadas para ${temporada}</p>
-                    <p class="hint">${temporada === (window.temporadaAtual || 2026) ? `A temporada ${temporada} ainda não começou. Use o botão "Acerto" no rodapé para registrar valores.` : 'Verifique se o cache foi gerado.'}</p>
+                    <p class="hint">${temporada === (window.temporadaAtual || CURRENT_SEASON) ? `A temporada ${temporada} ainda não começou. Use o botão "Acerto" no rodapé para registrar valores.` : 'Verifique se o cache foi gerado.'}</p>
                 </div>
             `;
         }
 
         // Se tem inscrição da próxima temporada (ao visualizar extrato de temporada anterior), mostrar info
-        const temporadaAtualCtx = window.temporadaAtual || 2026; // ✅ FIX: dinâmico
+        const temporadaAtualCtx = window.temporadaAtual || CURRENT_SEASON; // ✅ FIX: dinâmico
         if (temporada < temporadaAtualCtx && data.inscricao_proxima) {
             const insc = data.inscricao_proxima;
             html += `
@@ -584,7 +585,7 @@ export class FluxoFinanceiroUI {
         // ✅ v5.5 FIX: Passar temporada para sincronizar com outras telas
         let dadosSaldo = null;
         try {
-            const temporada = window.temporadaAtual || 2026;
+            const temporada = window.temporadaAtual || CURRENT_SEASON;
             const response = await fetch(`/api/tesouraria/liga/${ligaId}?temporada=${temporada}`);
             if (response.ok) {
                 dadosSaldo = await response.json();
@@ -618,7 +619,7 @@ export class FluxoFinanceiroUI {
 
         // ✅ v6.5 FIX: Para temporadas >= 2026, usar lista da API de tesouraria (já filtrada por renovados)
         // Temporadas anteriores (2025) usam lista do cache (todos os participantes)
-        const temporadaNum = window.temporadaAtual || 2026;
+        const temporadaNum = window.temporadaAtual || CURRENT_SEASON;
         const usarListaTesouraria = temporadaNum >= 2026 && dadosSaldo?.participantes?.length > 0;
 
         // Determinar lista base de participantes
@@ -693,13 +694,13 @@ export class FluxoFinanceiroUI {
                     </h2>
                     <!-- ✅ v8.8.1: Seletor de Temporada - oculta 2025 se liga foi criada em 2026 -->
                     <div id="temporada-tabs-fluxo" class="temporada-tabs-inline">
-                        <button class="tab-btn-inline ${(window.temporadaAtual || 2026) === 2026 ? 'active' : ''}"
+                        <button class="tab-btn-inline ${(window.temporadaAtual || CURRENT_SEASON) === 2026 ? 'active' : ''}"
                                 data-temporada="2026"
                                 onclick="window.mudarTemporada(2026)">
                             2026
                         </button>
                         ${mostrarTab2025 ? `
-                        <button class="tab-btn-inline ${(window.temporadaAtual || 2026) === 2025 ? 'active' : ''}"
+                        <button class="tab-btn-inline ${(window.temporadaAtual || CURRENT_SEASON) === 2025 ? 'active' : ''}"
                                 data-temporada="2025"
                                 onclick="window.mudarTemporada(2025)">
                             2025
@@ -833,8 +834,8 @@ export class FluxoFinanceiroUI {
                                 <td colspan="15" style="text-align: center; padding: 40px; color: var(--texto-secundario);">
                                     <span class="material-icons" style="font-size: 48px; color: var(--laranja); opacity: 0.5;">group_off</span>
                                     <p style="margin-top: 16px; font-size: 14px;">
-                                        ${(window.temporadaAtual || 2026) >= 2026
-                                            ? 'Nenhum participante renovado para ' + (window.temporadaAtual || 2026) + '.<br><small>Acesse a tela de Renovação para adicionar participantes.</small>'
+                                        ${(window.temporadaAtual || CURRENT_SEASON) >= 2026
+                                            ? 'Nenhum participante renovado para ' + (window.temporadaAtual || CURRENT_SEASON) + '.<br><small>Acesse a tela de Renovação para adicionar participantes.</small>'
                                             : 'Nenhum participante encontrado.'}
                                     </p>
                                 </td>
@@ -1144,8 +1145,8 @@ export class FluxoFinanceiroUI {
                             // v2.14: Botao de quitar removido para temporada 2025+ (coberta pelo modal unificado de renovacao)
                             // Quitacao de 2025 e feita automaticamente no modal de decisao ao renovar para 2026
                             // Manter botao apenas para temporadas retroativas antigas (2024, etc)
-                            const tempAtual = window.temporadaAtual || 2026;
-                            const tempRenovacao = window.temporadaRenovacao || 2026;
+                            const tempAtual = window.temporadaAtual || CURRENT_SEASON;
+                            const tempRenovacao = window.temporadaRenovacao || CURRENT_SEASON;
                             const isTemporadaRenovacao = tempAtual >= (tempRenovacao - 1);
                             const mostrarBotaoQuitar = !isQuitado && Math.abs(saldoFinal) >= 0.01 && !isTemporadaRenovacao;
                             return mostrarBotaoQuitar ? `
@@ -1575,7 +1576,7 @@ export class FluxoFinanceiroUI {
                         valor,
                         descricao: descricao || `Acerto via Fluxo Financeiro - ${tipoAcertoAtual}`,
                         metodoPagamento: metodo,
-                        temporada: window.temporadaAtual || 2026, // Temporada dinamica
+                        temporada: window.temporadaAtual || CURRENT_SEASON, // Temporada dinamica
                     })
                 });
 
@@ -1689,7 +1690,7 @@ export class FluxoFinanceiroUI {
             const tbody = document.getElementById('participantesTableBody');
             if (tbody && window._fluxoUI) {
                 const ui = window._fluxoUI;
-                const temporadaNum = window.temporadaAtual || 2026;
+                const temporadaNum = window.temporadaAtual || CURRENT_SEASON;
                 const isPreTemporada2026 = temporadaNum >= 2026 && !ui._temRodadasConsolidadas;
                 tbody.innerHTML = ordenados.map((p, idx) =>
                     isPreTemporada2026
@@ -1723,7 +1724,7 @@ export class FluxoFinanceiroUI {
         // ✅ v5.5 FIX: Passar temporada
         window.abrirHistoricoAcertos = async (timeId, ligaIdParam) => {
             try {
-                const temporada = window.temporadaAtual || 2026;
+                const temporada = window.temporadaAtual || CURRENT_SEASON;
                 const response = await fetch(`/api/tesouraria/participante/${ligaIdParam}/${timeId}?temporada=${temporada}`);
                 const data = await response.json();
 
@@ -2117,7 +2118,7 @@ export class FluxoFinanceiroUI {
             ` : extrato.preTemporada ? `
             <div class="card-padrao extrato-pretemporada">
                 <span class="material-icons extrato-pretemporada-icone">hourglass_empty</span>
-                <h3 class="extrato-pretemporada-titulo">Pré-Temporada ${window.temporadaAtual || 2026}</h3>
+                <h3 class="extrato-pretemporada-titulo">Pré-Temporada ${window.temporadaAtual || CURRENT_SEASON}</h3>
                 <p class="extrato-pretemporada-subtitulo">O campeonato ainda não começou. Apenas acertos financeiros estão disponíveis.</p>
             </div>
             ` : ''}
@@ -2554,7 +2555,7 @@ export class FluxoFinanceiroUI {
 
         // ✅ v6.7: Determinar label e ícone baseado na origem do saldo
         // ✅ v6.8 FIX: Se pagou inscrição, label é "Saldo Inicial", não "Inscrição"
-        const temporadaAtual = this.temporadaModalExtrato || window.temporadaAtual || 2026;
+        const temporadaAtual = this.temporadaModalExtrato || window.temporadaAtual || CURRENT_SEASON;
         const isPreTemporada = extrato.preTemporada === true;
         const pagouInscricao = extrato.resumo?.pagouInscricao === true || extrato.inscricao?.pagouInscricao === true;
 
@@ -2626,7 +2627,7 @@ export class FluxoFinanceiroUI {
      * - Temporada >= 2026: Seção REMOVIDA (redundante com botão "Acerto" no footer)
      */
     async renderizarCamposEditaveis(timeId) {
-        const temporada = this.temporadaModalExtrato || window.temporadaAtual || 2026;
+        const temporada = this.temporadaModalExtrato || window.temporadaAtual || CURRENT_SEASON;
 
         if (temporada >= 2026) {
             // ✅ v8.9: Seção "Ajustes Financeiros" REMOVIDA para temporada 2026+
@@ -2644,7 +2645,7 @@ export class FluxoFinanceiroUI {
      */
     async renderizarCamposFixos(timeId) {
         // ✅ v8.10 FIX: Usar temporada do modal (legado 2025) ou contexto atual — nunca hardcodar 2025
-        const temporadaSelecionada = this.temporadaModalExtrato || window.temporadaAtual || 2026;
+        const temporadaSelecionada = this.temporadaModalExtrato || window.temporadaAtual || CURRENT_SEASON;
         const campos =
             await FluxoFinanceiroCampos.carregarTodosCamposEditaveis(timeId, temporadaSelecionada);
         const lista = [
@@ -2873,7 +2874,7 @@ export class FluxoFinanceiroUI {
             if (!ligaId || !timeId || !extrato) return;
 
             // ✅ v4.6 FIX: Obter temporada do modal
-            const temporada = this.temporadaModalExtrato || window.temporadaAtual || 2026;
+            const temporada = this.temporadaModalExtrato || window.temporadaAtual || CURRENT_SEASON;
 
             // ✅ v4.6 FIX: NÃO popular cache de 2026 durante pré-temporada
             // O extrato 2026 só deve ter dados quando a temporada começar
@@ -3975,7 +3976,7 @@ window.abrirModalAjusteFinanceiro = function(ligaId, timeId, nomeCartola) {
     const existente = document.getElementById('modalAjusteFinanceiro');
     if (existente) existente.remove();
 
-    const temporada = window.temporadaAtual || 2026;
+    const temporada = window.temporadaAtual || CURRENT_SEASON;
 
     const modal = document.createElement('div');
     modal.id = 'modalAjusteFinanceiro';
@@ -4137,7 +4138,7 @@ window.salvarAjuste = async function() {
     }
 
     // Usar temporada do MODAL (não da lista principal)
-    const temporadaModal = window.fluxoFinanceiroUI?.temporadaModalExtrato || 2026;
+    const temporadaModal = window.fluxoFinanceiroUI?.temporadaModalExtrato || CURRENT_SEASON;
 
     try {
         const response = await fetch(`/api/ajustes/${ligaId}/${timeId}`, {
@@ -4175,7 +4176,7 @@ window.removerAjuste = async function(ajusteId) {
     if (!confirmado) return;
 
     // Usar temporada do MODAL (não da lista principal)
-    const temporadaModal = window.fluxoFinanceiroUI?.temporadaModalExtrato || 2026;
+    const temporadaModal = window.fluxoFinanceiroUI?.temporadaModalExtrato || CURRENT_SEASON;
 
     try {
         const response = await fetch(`/api/ajustes/${ajusteId}`, {
@@ -4209,7 +4210,7 @@ window.removerAjuste = async function(ajusteId) {
 window.abrirNovoParticipante = function() {
     const urlParams = new URLSearchParams(window.location.search);
     const ligaId = urlParams.get('id');
-    const temporada = window.temporadaAtual || 2026;
+    const temporada = window.temporadaAtual || CURRENT_SEASON;
 
     if (!ligaId) {
         SuperModal.toast.error('Liga não identificada');
@@ -4884,7 +4885,7 @@ window.abrirModalNovoAjuste = function(timeId, temporada) {
 
         window._ajusteModalState = {
             timeId: timeId,
-            temporada: temporada || 2026,
+            temporada: temporada || CURRENT_SEASON,
             ajusteId: null,
             modo: 'criar'
         };
@@ -4925,7 +4926,7 @@ window.editarAjusteFinanceiro = function(ajusteId, descricao, valor) {
     // Pegar timeId e temporada do estado atual do modal de extrato
     const timeId = window.fluxoFinanceiroUI?.participanteAtual?.time_id ||
                    window.fluxoFinanceiroUI?.participanteAtual?.id;
-    const temporada = window.fluxoFinanceiroUI?.temporadaModalExtrato || window.temporadaAtual || 2026;
+    const temporada = window.fluxoFinanceiroUI?.temporadaModalExtrato || window.temporadaAtual || CURRENT_SEASON;
 
     window._ajusteModalState = {
         timeId: timeId,

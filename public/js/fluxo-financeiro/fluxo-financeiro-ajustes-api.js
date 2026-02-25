@@ -57,7 +57,7 @@ class FluxoFinanceiroAjustesAPI {
                     body: JSON.stringify({
                         descricao: dados.descricao,
                         valor: Number(dados.valor),
-                        temporada: dados.temporada || 2026
+                        temporada: dados.temporada || new Date().getFullYear()
                     })
                 }
             );

@@ -8,6 +8,7 @@
  * ✅ Export PDF/Excel
  */
 
+import { CURRENT_SEASON } from "../config/seasons-client.js";
 import { obterLigaId } from "../pontos-corridos-utils.js";
 import { FluxoFinanceiroCampos } from "./fluxo-financeiro-campos.js";
 import {
@@ -40,7 +41,7 @@ export class FluxoFinanceiroAuditoria {
     // =========================================================================
     async gerarResumoExecutivo(timeId, extrato) {
         // ✅ v6.10 FIX: Passar temporada correta para buscar campos da temporada selecionada
-        const temporadaSelecionada = window.temporadaAtual || 2026;
+        const temporadaSelecionada = window.temporadaAtual || CURRENT_SEASON;
         const camposEditaveis =
             await FluxoFinanceiroCampos.carregarTodosCamposEditaveis(timeId, temporadaSelecionada);
 

@@ -1,5 +1,5 @@
 // FLUXO-FINANCEIRO-CORE.JS v6.10 - FIX DEFAULTS INCONSISTENTES
-// ✅ v6.10: FIX CRÍTICO - Defaults inconsistentes (|| 2025 → || 2026)
+// ✅ v6.10: FIX CRÍTICO - Defaults inconsistentes (|| 2025 → || CURRENT_SEASON)
 //           Problema: Se window.temporadaAtual não definido, buscava cache 2025
 //           Solução: Todos os defaults agora usam 2026 (consistente com init)
 // ✅ v6.9: FIX CRÍTICO - Usar resumo do backend em pré-temporada
@@ -25,6 +25,7 @@
 // ============================================================================
 // ⚽ IMPORTS E CONFIGURAÇÕES
 // ============================================================================
+import { CURRENT_SEASON } from "../config/seasons-client.js";
 import { seasonStatus } from "../core/season-status-manager.js";
 import { calcularFinanceiroConfronto } from "../pontos-corridos-utils.js";
 import { obterLigaId } from "../pontos-corridos-utils.js";
@@ -56,7 +57,7 @@ export class FluxoFinanceiroCore {
     async _buscarAcertosFinanceiros(ligaId, timeId) {
         try {
             // ✅ FIX v6.10: Default 2026 (temporada atual) - consistente com fluxo-financeiro.js
-            const temporada = window.temporadaAtual || 2026;
+            const temporada = window.temporadaAtual || CURRENT_SEASON;
             const response = await fetch(`${API_BASE_URL}/api/acertos/${ligaId}/${timeId}?temporada=${temporada}`);
             const result = await response.json();
 
@@ -318,7 +319,7 @@ export class FluxoFinanceiroCore {
 
         // ✅ v6.5: Verificar temporada selecionada
         // ✅ FIX v6.10: Default 2026 (temporada atual) - consistente com fluxo-financeiro.js
-        const temporadaSelecionada = window.temporadaAtual || 2026;
+        const temporadaSelecionada = window.temporadaAtual || CURRENT_SEASON;
         const temporadaAtualReal = new Date().getFullYear(); // 2026
         const isTemporadaHistorica = temporadaSelecionada < temporadaAtualReal;
 
@@ -823,7 +824,7 @@ export class FluxoFinanceiroCore {
     async _verificarCacheMongoDB(ligaId, timeId, rodadaAtual, mercadoAberto) {
         try {
             const timestamp = Date.now();
-            const temporada = window.temporadaAtual || 2026;
+            const temporada = window.temporadaAtual || CURRENT_SEASON;
             const url = `${API_BASE_URL}/api/extrato-cache/${ligaId}/times/${timeId}/cache/valido?rodadaAtual=${rodadaAtual}&mercadoAberto=${mercadoAberto}&temporada=${temporada}&_=${timestamp}`;
 
             const response = await fetch(url);
@@ -886,7 +887,7 @@ export class FluxoFinanceiroCore {
             }
 
             // ✅ v6.4: Incluir temporada selecionada no payload
-            const temporada = window.temporadaAtual || 2026;
+            const temporada = window.temporadaAtual || CURRENT_SEASON;
 
             const payload = {
                 historico_transacoes: extrato.rodadas,
@@ -1375,7 +1376,7 @@ export class FluxoFinanceiroCore {
 
 window.forcarRefreshExtrato = async function (timeId) {
     const ligaId = window.obterLigaId();
-    const temporadaAtual = window.temporadaAtual || 2026;
+    const temporadaAtual = window.temporadaAtual || CURRENT_SEASON;
     const TEMPORADA_CARTOLA = 2026; // Temporada atual da API Cartola
 
     console.log(
@@ -1410,4 +1411,4 @@ window.forcarRefreshExtrato = async function (timeId) {
     }
 };
 
-console.log("[FLUXO-CORE] ✅ v6.10 - Fix defaults inconsistentes (|| 2025 → || 2026) + v6.9 FIX lancamentos iniciais no saldo");
+console.log("[FLUXO-CORE] ✅ v6.10 - Fix defaults inconsistentes (|| 2025 → || CURRENT_SEASON) + v6.9 FIX lancamentos iniciais no saldo");
