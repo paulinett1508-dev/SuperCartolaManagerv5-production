@@ -21,10 +21,12 @@
  * - Nova coluna 'Acertos' para exibir pagamentos/recebimentos do participante
  */
 
+import { CURRENT_SEASON } from '../../config/seasons-client.js';
+
 class AdminTesouraria {
     constructor() {
         this.ligaId = null;
-        this.season = '2026';
+        this.season = String(CURRENT_SEASON);
         this.participantes = [];
         this.filtroStatus = 'todos';
         this.searchTerm = '';
@@ -65,7 +67,7 @@ class AdminTesouraria {
     // RENDER PRINCIPAL
     // ==========================================================================
 
-    async render(containerId, ligaId, season = '2026') {
+    async render(containerId, ligaId, season = String(CURRENT_SEASON)) {
         this.container = document.getElementById(containerId.replace('#', ''));
         this.ligaId = ligaId;
         this.season = season;
@@ -120,8 +122,8 @@ class AdminTesouraria {
                         <div class="filter-group">
                             <label>Temporada</label>
                             <select id="filtro-temporada" onchange="adminTesouraria.mudarTemporada(this.value)">
-                                <option value="2025" ${this.season === '2025' ? 'selected' : ''}>2025 (Aposentada)</option>
-                                <option value="2026" ${this.season === '2026' ? 'selected' : ''}>2026 (Atual)</option>
+                                <option value="${CURRENT_SEASON - 1}" ${this.season === String(CURRENT_SEASON - 1) ? 'selected' : ''}>${CURRENT_SEASON - 1} (Aposentada)</option>
+                                <option value="${CURRENT_SEASON}" ${this.season === String(CURRENT_SEASON) ? 'selected' : ''}>${CURRENT_SEASON} (Atual)</option>
                             </select>
                         </div>
                         <div class="filter-group">
