@@ -80,7 +80,7 @@
                     <span class="material-icons">sports_soccer</span>
                 </div>
                 <div class="home-stat-info">
-                    <span class="home-stat-label">ÚLTIMA PONTUAÇÃO</span>
+                    <span class="home-stat-label" id="home-pontuacao-label">ÚLTIMA PONTUAÇÃO</span>
                     <div class="home-stat-value-row">
                         <span id="home-ultima-pontuacao" class="home-stat-value">0.00</span>
                         <span id="home-variacao-pontos" class="home-stat-variacao positivo">↑0.00</span>
@@ -712,6 +712,17 @@
     border-radius: 4px;
     letter-spacing: 0.5px;
     animation: live-pulse 1.5s ease-in-out infinite;
+}
+
+/* IC-01: Estado AGUARDANDO - mercado fechou mas jogos nao comecaram */
+.home-destaques-live-badge.aguardando {
+    background: var(--app-warning, #f59e0b);
+    animation: aguardando-pulse 2s ease-in-out infinite;
+}
+
+@keyframes aguardando-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
 }
 
 @keyframes live-pulse {

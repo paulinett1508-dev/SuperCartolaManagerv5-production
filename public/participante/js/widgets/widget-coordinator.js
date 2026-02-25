@@ -1,15 +1,24 @@
 /**
- * WIDGET COORDINATOR v1.0
+ * WIDGET COORDINATOR v1.1
  * ========================
- * Coordena exibição de widgets flutuantes baseado em estado do mercado
- * Garante que apenas um widget esteja visível por vez
+ * Coordena exibicao de widgets flutuantes baseado em estado do mercado
+ * Garante que apenas um widget esteja visivel por vez
+ *
+ * v1.1 - Fix: usar campos reais da API Cartola (status_mercado)
+ *        em vez de rodada_em_andamento (campo inexistente)
  *
  * Widgets gerenciados:
- * - WhatsHappening (🔥 foguinho): rodada em andamento
- * - RoundXray (⚽ bola): rodada consolidada
+ * - WhatsHappening (foguinho): mercado fechado (status_mercado === 2)
+ * - RoundXray (bola): mercado aberto (status_mercado === 1)
+ *
+ * Campos reais da API /api/cartola/mercado-status:
+ * - status_mercado: 1=ABERTO, 2=FECHADO, 3=DESBLOQUEADO, 4=ENCERRADO, 6=TEMPORADA_ENCERRADA
+ * - rodada_atual: numero da rodada corrente
+ * - bola_rolando: boolean (indica que parciais existem, NAO necessariamente jogos ao vivo)
+ * - temporada: ano da temporada
  */
 
-if (window.Log) Log.info("[WIDGET-COORD] Coordenador v1.0 carregando...");
+if (window.Log) Log.info("[WIDGET-COORD] Coordenador v1.1 carregando...");
 
 class WidgetCoordinator {
     constructor() {
@@ -30,12 +39,12 @@ class WidgetCoordinator {
         // Verificar estado imediatamente
         this.verificarEstadoMercado();
 
-        // Iniciar monitoramento periódico
+        // Iniciar monitoramento periodico
         this.iniciarMonitoramento();
     }
 
     /**
-     * Inicia monitoramento periódico do estado do mercado
+     * Inicia monitoramento periodico do estado do mercado
      */
     iniciarMonitoramento() {
         if (this.checkInterval) {
@@ -88,9 +97,9 @@ class WidgetCoordinator {
     atualizarWidgets() {
         if (!this.mercadoStatus) return;
 
-        const { status_mercado, rodada_em_andamento, rodada_atual } = this.mercadoStatus;
+        const { status_mercado, rodada_atual } = this.mercadoStatus;
 
-        // Decisão: qual widget mostrar?
+        // Decisao: qual widget mostrar?
         if (this.deveExibirRaioX()) {
             // Rodada consolidada + mercado aberto
             this.exibirRaioX();
@@ -100,39 +109,41 @@ class WidgetCoordinator {
             this.exibirWhatsHappening();
             this.esconderRaioX();
         } else {
-            // Nenhum widget (pré-temporada ou outro estado)
+            // Nenhum widget (pre-temporada ou outro estado)
             this.esconderAmbos();
         }
     }
 
     /**
      * Determina se deve exibir Raio-X
+     * Condicao: mercado ABERTO (status=1) + rodada > 0 (tem dados consolidados)
      */
     deveExibirRaioX() {
         if (!this.mercadoStatus) return false;
 
-        // Verificar se módulo está ativo na liga
+        // Verificar se modulo esta ativo na liga
         if (!window.participanteNavigation?.verificarModuloAtivo?.('raioX')) return false;
 
-        // Rodada consolidada (não em andamento)
-        const rodadaConsolidada = this.mercadoStatus.rodada_atual > 0
-            && !this.mercadoStatus.rodada_em_andamento;
+        // Mercado aberto (status === 1) = rodada anterior consolidada
+        const mercadoAberto = this.mercadoStatus.status_mercado === 1;
 
-        // Mercado aberto (aguardando próxima rodada)
-        const mercadoAberto = this.mercadoStatus.status_mercado === 1; // ABERTO
+        // Tem rodada com dados (rodada_atual > 0)
+        const temDados = this.mercadoStatus.rodada_atual > 0;
 
-        return rodadaConsolidada && mercadoAberto;
+        return mercadoAberto && temDados;
     }
 
     /**
      * Determina se deve exibir WhatsHappening
+     * Condicao: mercado FECHADO (status=2) = rodada em andamento
      */
     deveExibirWhatsHappening() {
         if (!this.mercadoStatus) return false;
 
-        // Mercado fechado + rodada em andamento
-        return this.mercadoStatus.status_mercado === 2 // FECHADO
-            && this.mercadoStatus.rodada_em_andamento;
+        // Mercado fechado (status === 2) indica rodada em andamento
+        // O WhatsHappening tem sua propria maquina de estados (WAITING/LIVE/INTERVAL/etc)
+        // que determina a granularidade (jogos ao vivo vs aguardando vs intervalo)
+        return this.mercadoStatus.status_mercado === 2;
     }
 
     /**
@@ -148,8 +159,8 @@ class WidgetCoordinator {
      * Exibe widget WhatsHappening
      */
     exibirWhatsHappening() {
-        // WhatsHappening gerencia seu próprio estado
-        // Apenas garantir que está visível (ele tem lógica interna)
+        // WhatsHappening gerencia seu proprio estado
+        // Apenas garantir que esta visivel (ele tem logica interna)
     }
 
     /**
@@ -165,8 +176,8 @@ class WidgetCoordinator {
      * Esconde widget WhatsHappening
      */
     esconderWhatsHappening() {
-        // WhatsHappening gerencia seu próprio estado
-        // Não forçar hide aqui para não interferir com lógica interna
+        // WhatsHappening gerencia seu proprio estado
+        // Nao forcar hide aqui para nao interferir com logica interna
     }
 
     /**
@@ -174,7 +185,7 @@ class WidgetCoordinator {
      */
     esconderAmbos() {
         this.esconderRaioX();
-        // WhatsHappening se esconde sozinho quando não há dados
+        // WhatsHappening se esconde sozinho quando nao ha dados
     }
 }
 
