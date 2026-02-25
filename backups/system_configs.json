@@ -1,0 +1,16 @@
+[
+  {
+    "_id": "current_season",
+    "created_at": "2026-01-01T22:53:02.460Z",
+    "features": {
+      "inscricoes_abertas": false,
+      "mercado_ativo": false,
+      "rodadas_ativas": false
+    },
+    "migrated_at": "2026-01-01T22:53:02.460Z",
+    "migrated_by": "turn_key_2026.js",
+    "previous_season": 2025,
+    "season": 2026,
+    "status": "setup_mode"
+  }
+]

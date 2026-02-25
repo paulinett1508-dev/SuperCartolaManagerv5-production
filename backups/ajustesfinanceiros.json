@@ -1,0 +1,58 @@
+[
+  {
+    "_id": "6962abcd40738ad4e1559180",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "time_id": 645089,
+    "temporada": 2026,
+    "descricao": "Entrada Inscrição 2026",
+    "valor": 60,
+    "criado_por": "paulinete.miranda@laboratoriosobral.com.br",
+    "atualizado_por": "paulinete.miranda@laboratoriosobral.com.br",
+    "ativo": false,
+    "criado_em": "2026-01-10T19:43:09.661Z",
+    "atualizado_em": "2026-01-10T20:05:51.891Z",
+    "__v": 0
+  },
+  {
+    "_id": "6962b22ab96bd1d278a30fdf",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "time_id": 645089,
+    "temporada": 2026,
+    "descricao": "Teste ajuste via API",
+    "valor": -25,
+    "criado_por": "",
+    "atualizado_por": "",
+    "ativo": false,
+    "criado_em": "2026-01-10T20:10:18.748Z",
+    "atualizado_em": "2026-01-10T20:10:18.748Z",
+    "__v": 0
+  },
+  {
+    "_id": "6962b23cb96bd1d278a30fec",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "time_id": 645089,
+    "temporada": 2026,
+    "descricao": "Teste ajuste via API",
+    "valor": -25,
+    "criado_por": "",
+    "atualizado_por": "",
+    "ativo": false,
+    "criado_em": "2026-01-10T20:10:36.836Z",
+    "atualizado_em": "2026-01-10T20:10:36.836Z",
+    "__v": 0
+  },
+  {
+    "_id": "69683ff2db92d4521842c0fa",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "time_id": 1323370,
+    "temporada": 2026,
+    "descricao": "Restante da Inscrição 2026",
+    "valor": -40,
+    "criado_por": "paulinete.miranda@laboratoriosobral.com.br",
+    "atualizado_por": "",
+    "ativo": true,
+    "criado_em": "2026-01-15T01:16:34.108Z",
+    "atualizado_em": "2026-01-15T01:16:34.108Z",
+    "__v": 0
+  }
+]

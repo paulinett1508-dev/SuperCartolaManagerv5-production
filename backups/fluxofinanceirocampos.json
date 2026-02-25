@@ -1,0 +1,2260 @@
+[
+  {
+    "_id": "68f67eb82099769363deac16",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "39786",
+    "campos": [
+      {
+        "nome": "Saldo 2024",
+        "valor": 344.38,
+        "_id": "68f67eb82099769363deac17"
+      },
+      {
+        "nome": "Teste",
+        "valor": 0,
+        "_id": "68f67eb82099769363deac18"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f67eb82099769363deac19"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f67eb82099769363deac1a"
+      }
+    ],
+    "updatedAt": "2025-10-21T10:56:15.454Z",
+    "createdAt": "2025-10-20T18:26:00.553Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f76f95a5e0f3cdac593735",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "621609",
+    "campos": [
+      {
+        "nome": "Saldo 2024",
+        "valor": 0.54,
+        "_id": "68f76f95a5e0f3cdac593736"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f76f95a5e0f3cdac593737"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f76f95a5e0f3cdac593738"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f76f95a5e0f3cdac593739"
+      }
+    ],
+    "updatedAt": "2025-10-21T11:34:03.486Z",
+    "createdAt": "2025-10-21T11:33:41.980Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f7707ea5e0f3cdac593855",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "3300583",
+    "campos": [
+      {
+        "nome": "Saldo 2024",
+        "valor": 0.54,
+        "_id": "68f7707ea5e0f3cdac593856"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f7707ea5e0f3cdac593857"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f7707ea5e0f3cdac593858"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f7707ea5e0f3cdac593859"
+      }
+    ],
+    "updatedAt": "2025-10-21T11:37:49.801Z",
+    "createdAt": "2025-10-21T11:37:34.738Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f77188a5e0f3cdac593a68",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "1233737",
+    "campos": [
+      {
+        "nome": "Inscrição 2025",
+        "valor": -142,
+        "_id": "68f77188a5e0f3cdac593a69"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f77188a5e0f3cdac593a6a"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f77188a5e0f3cdac593a6b"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f77188a5e0f3cdac593a6c"
+      }
+    ],
+    "updatedAt": "2025-10-24T19:33:12.288Z",
+    "createdAt": "2025-10-21T11:42:00.625Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f7c915b808e20050df5173",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "8098497",
+    "campos": [
+      {
+        "nome": "SALDO CARTOLA 2025",
+        "valor": 0,
+        "_id": "68f7c915b808e20050df5174"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f7c915b808e20050df5175"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f7c915b808e20050df5176"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f7c915b808e20050df5177"
+      }
+    ],
+    "updatedAt": "2026-01-05T10:42:01.146Z",
+    "createdAt": "2025-10-21T17:55:33.991Z",
+    "__v": 0,
+    "temporada": 2026
+  },
+  {
+    "_id": "68f7c917b808e20050df5191",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "2718174",
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "68f7c917b808e20050df5192"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f7c917b808e20050df5193"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f7c917b808e20050df5194"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f7c917b808e20050df5195"
+      }
+    ],
+    "updatedAt": "2025-10-21T17:55:35.560Z",
+    "createdAt": "2025-10-21T17:55:35.560Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f8292d1ad5c69a5aacfaa6",
+    "ligaId": "684d821cf1a7ae16d1f89572",
+    "timeId": "49149388",
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "68f8292d1ad5c69a5aacfaa7"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f8292d1ad5c69a5aacfaa8"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f8292d1ad5c69a5aacfaa9"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f8292d1ad5c69a5aacfaaa"
+      }
+    ],
+    "updatedAt": "2025-10-22T00:45:33.044Z",
+    "createdAt": "2025-10-22T00:45:33.044Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f8292d1ad5c69a5aacfab2",
+    "ligaId": "684d821cf1a7ae16d1f89572",
+    "timeId": "49149009",
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "68f8292d1ad5c69a5aacfab3"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f8292d1ad5c69a5aacfab4"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f8292d1ad5c69a5aacfab5"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f8292d1ad5c69a5aacfab6"
+      }
+    ],
+    "updatedAt": "2025-10-22T00:45:33.556Z",
+    "createdAt": "2025-10-22T00:45:33.556Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f76acea5e0f3cdac59362b",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "7698677",
+    "campos": [
+      {
+        "nome": "Saldo 2024",
+        "valor": 336.54,
+        "_id": "68f76acea5e0f3cdac59362c"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 100,
+        "_id": "68f76acea5e0f3cdac59362d"
+      },
+      {
+        "nome": "3º colocado geral",
+        "valor": 400,
+        "_id": "68f76acea5e0f3cdac59362e"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f76acea5e0f3cdac59362f"
+      }
+    ],
+    "updatedAt": "2025-12-14T01:11:50.403Z",
+    "createdAt": "2025-10-21T11:13:18.357Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f76b2ea5e0f3cdac593666",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "1097804",
+    "campos": [
+      {
+        "nome": "Saldo 2024",
+        "valor": 5.54,
+        "_id": "68f76b2ea5e0f3cdac593667"
+      },
+      {
+        "nome": "Melhor do Mês - Edição 03",
+        "valor": 100,
+        "_id": "68f76b2ea5e0f3cdac593668"
+      },
+      {
+        "nome": "2º COLOCADO PONTOS CORRIDOS",
+        "valor": 150,
+        "_id": "68f76b2ea5e0f3cdac593669"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f76b2ea5e0f3cdac59366a"
+      }
+    ],
+    "updatedAt": "2025-12-13T23:01:42.340Z",
+    "createdAt": "2025-10-21T11:14:54.563Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f76b9ca5e0f3cdac5936bb",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "5254799",
+    "campos": [
+      {
+        "nome": "Saldo 2024",
+        "valor": 336.38,
+        "_id": "68f76b9ca5e0f3cdac5936bc"
+      },
+      {
+        "nome": "2º colocado geral",
+        "valor": 700,
+        "_id": "68f76b9ca5e0f3cdac5936bd"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f76b9ca5e0f3cdac5936be"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f76b9ca5e0f3cdac5936bf"
+      }
+    ],
+    "updatedAt": "2025-12-14T01:13:02.360Z",
+    "createdAt": "2025-10-21T11:16:44.658Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f76fe1a5e0f3cdac593785",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "575856",
+    "campos": [
+      {
+        "nome": "Inscrição 2025",
+        "valor": -140,
+        "_id": "68f76fe1a5e0f3cdac593786"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f76fe1a5e0f3cdac593787"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f76fe1a5e0f3cdac593788"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f76fe1a5e0f3cdac593789"
+      }
+    ],
+    "updatedAt": "2025-10-21T11:35:33.348Z",
+    "createdAt": "2025-10-21T11:34:57.890Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f7702ea5e0f3cdac5937df",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "1568358",
+    "campos": [
+      {
+        "nome": "Saldo 2024",
+        "valor": 405.07,
+        "_id": "68f7702ea5e0f3cdac5937e0"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f7702ea5e0f3cdac5937e1"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f7702ea5e0f3cdac5937e2"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f7702ea5e0f3cdac5937e3"
+      }
+    ],
+    "updatedAt": "2025-10-21T11:36:32.948Z",
+    "createdAt": "2025-10-21T11:36:14.658Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f770a7a5e0f3cdac593890",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "25324292",
+    "campos": [
+      {
+        "nome": "Saldo 2024",
+        "valor": 55.59,
+        "_id": "68f770a7a5e0f3cdac593891"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f770a7a5e0f3cdac593892"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f770a7a5e0f3cdac593893"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f770a7a5e0f3cdac593894"
+      }
+    ],
+    "updatedAt": "2025-10-21T11:38:29.575Z",
+    "createdAt": "2025-10-21T11:38:15.108Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f770bca5e0f3cdac5938cb",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "14569704",
+    "campos": [
+      {
+        "nome": "Inscrição 2025",
+        "valor": -140,
+        "_id": "68f770bca5e0f3cdac5938cc"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f770bca5e0f3cdac5938cd"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f770bca5e0f3cdac5938ce"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f770bca5e0f3cdac5938cf"
+      }
+    ],
+    "updatedAt": "2025-10-21T11:38:48.961Z",
+    "createdAt": "2025-10-21T11:38:36.587Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f77134a5e0f3cdac5939b7",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "4966295",
+    "campos": [
+      {
+        "nome": "Saldo 2024",
+        "valor": 51.54,
+        "_id": "68f77134a5e0f3cdac5939b8"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f77134a5e0f3cdac5939b9"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f77134a5e0f3cdac5939ba"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f77134a5e0f3cdac5939bb"
+      }
+    ],
+    "updatedAt": "2025-10-21T11:40:54.799Z",
+    "createdAt": "2025-10-21T11:40:36.687Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f7c912b808e20050df5127",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "645089",
+    "campos": [
+      {
+        "nome": "Ajuste/Limbo",
+        "valor": 20,
+        "_id": "68f7c912b808e20050df5128"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f7c912b808e20050df5129"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f7c912b808e20050df512a"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f7c912b808e20050df512b"
+      }
+    ],
+    "updatedAt": "2026-01-14T19:11:12.091Z",
+    "createdAt": "2025-10-21T17:55:30.528Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f7c913b808e20050df5147",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "1323370",
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "68f7c913b808e20050df5148"
+      },
+      {
+        "nome": "CAMPO 2",
+        "valor": 0,
+        "_id": "68f7c913b808e20050df5149"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f7c913b808e20050df514a"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f7c913b808e20050df514b"
+      }
+    ],
+    "updatedAt": "2025-10-28T01:04:01.655Z",
+    "createdAt": "2025-10-21T17:55:31.950Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f7c916b808e20050df5189",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "8188312",
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "68f7c916b808e20050df518a"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f7c916b808e20050df518b"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f7c916b808e20050df518c"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f7c916b808e20050df518d"
+      }
+    ],
+    "updatedAt": "2025-10-21T17:55:34.977Z",
+    "createdAt": "2025-10-21T17:55:34.977Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f7c91bb808e20050df51eb",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "8183683",
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "68f7c91bb808e20050df51ec"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f7c91bb808e20050df51ed"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f7c91bb808e20050df51ee"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f7c91bb808e20050df51ef"
+      }
+    ],
+    "updatedAt": "2025-10-21T17:55:39.313Z",
+    "createdAt": "2025-10-21T17:55:39.313Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f7c91db808e20050df5221",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "1039496",
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "68f7c91db808e20050df5222"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f7c91db808e20050df5223"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f7c91db808e20050df5224"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f7c91db808e20050df5225"
+      }
+    ],
+    "updatedAt": "2025-10-21T17:55:41.710Z",
+    "createdAt": "2025-10-21T17:55:41.710Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f7e1b1590bb819af87a1e2",
+    "ligaId": "684d821cf1a7ae16d1f89572",
+    "timeId": "1926323",
+    "campos": [
+      {
+        "nome": "CAMPEÃO RANKING GERAL",
+        "valor": 100,
+        "_id": "68f7e1b1590bb819af87a1e3"
+      },
+      {
+        "nome": "CAMPEÃO ARTILHEIRO CAMPEÃO",
+        "valor": 40,
+        "_id": "68f7e1b1590bb819af87a1e4"
+      },
+      {
+        "nome": "CAMPEÃO LUVA DE OURO",
+        "valor": 40,
+        "_id": "68f7e1b1590bb819af87a1e5"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f7e1b1590bb819af87a1e6"
+      }
+    ],
+    "updatedAt": "2025-12-09T01:10:31.553Z",
+    "createdAt": "2025-10-21T19:40:33.849Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f8292c1ad5c69a5aacfa9e",
+    "ligaId": "684d821cf1a7ae16d1f89572",
+    "timeId": "50180257",
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "68f8292c1ad5c69a5aacfa9f"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f8292c1ad5c69a5aacfaa0"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f8292c1ad5c69a5aacfaa1"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f8292c1ad5c69a5aacfaa2"
+      }
+    ],
+    "updatedAt": "2025-10-22T00:45:32.521Z",
+    "createdAt": "2025-10-22T00:45:32.521Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f8292e1ad5c69a5aacfabe",
+    "ligaId": "684d821cf1a7ae16d1f89572",
+    "timeId": "13935277",
+    "campos": [
+      {
+        "nome": "2º COLOCADO RANKING GERAL",
+        "valor": 80,
+        "_id": "68f8292e1ad5c69a5aacfabf"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f8292e1ad5c69a5aacfac0"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f8292e1ad5c69a5aacfac1"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f8292e1ad5c69a5aacfac2"
+      }
+    ],
+    "updatedAt": "2025-12-09T01:11:38.591Z",
+    "createdAt": "2025-10-22T00:45:34.066Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "691227a644bd1953a0badf1b",
+    "ligaId": "null",
+    "timeId": "13935277",
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "691227a644bd1953a0badf1c"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "691227a644bd1953a0badf1d"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "691227a644bd1953a0badf1e"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "691227a644bd1953a0badf1f"
+      }
+    ],
+    "updatedAt": "2025-11-10T17:57:58.655Z",
+    "createdAt": "2025-11-10T17:57:58.655Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f67eb92099769363deac1d",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "1173066",
+    "campos": [
+      {
+        "nome": "Saldo 2024 + Inscrição 2025",
+        "valor": -167.82,
+        "_id": "68f67eb92099769363deac1e"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f67eb92099769363deac1f"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f67eb92099769363deac20"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f67eb92099769363deac21"
+      }
+    ],
+    "updatedAt": "2025-10-21T10:54:14.566Z",
+    "createdAt": "2025-10-20T18:26:01.262Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f770cfa5e0f3cdac593906",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "14916330",
+    "campos": [
+      {
+        "nome": "Saldo 2024 + Inscrição 2025",
+        "valor": -465.46,
+        "_id": "68f770cfa5e0f3cdac593907"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f770cfa5e0f3cdac593908"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f770cfa5e0f3cdac593909"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f770cfa5e0f3cdac59390a"
+      }
+    ],
+    "updatedAt": "2025-10-21T11:39:12.282Z",
+    "createdAt": "2025-10-21T11:38:55.683Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f77110a5e0f3cdac59397c",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "1932235",
+    "campos": [
+      {
+        "nome": "Inscrição 2025",
+        "valor": -140,
+        "_id": "68f77110a5e0f3cdac59397d"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f77110a5e0f3cdac59397e"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f77110a5e0f3cdac59397f"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f77110a5e0f3cdac593980"
+      }
+    ],
+    "updatedAt": "2025-10-21T11:40:13.842Z",
+    "createdAt": "2025-10-21T11:40:00.146Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f77154a5e0f3cdac5939f2",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "1459952",
+    "campos": [
+      {
+        "nome": "Inscrição 2025",
+        "valor": -70,
+        "_id": "68f77154a5e0f3cdac5939f3"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f77154a5e0f3cdac5939f4"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f77154a5e0f3cdac5939f5"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f77154a5e0f3cdac5939f6"
+      }
+    ],
+    "updatedAt": "2025-10-21T11:41:30.448Z",
+    "createdAt": "2025-10-21T11:41:08.887Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f77172a5e0f3cdac593a2d",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "3027272",
+    "campos": [
+      {
+        "nome": "Saldo 2024",
+        "valor": 223.67,
+        "_id": "68f77172a5e0f3cdac593a2e"
+      },
+      {
+        "nome": "Melhor do Mês - Edição 01 e 05",
+        "valor": 200,
+        "_id": "68f77172a5e0f3cdac593a2f"
+      },
+      {
+        "nome": "campeão super cartola",
+        "valor": 1000,
+        "_id": "68f77172a5e0f3cdac593a30"
+      },
+      {
+        "nome": "CAMPEÃO 1º TURNO",
+        "valor": 100,
+        "_id": "68f77172a5e0f3cdac593a31"
+      }
+    ],
+    "updatedAt": "2025-12-14T01:09:41.256Z",
+    "createdAt": "2025-10-21T11:41:38.407Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f7720fa5e0f3cdac593b1d",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "22623329",
+    "campos": [
+      {
+        "nome": "3º colocado liga pontos corridos",
+        "valor": 50,
+        "_id": "68f7720fa5e0f3cdac593b1e"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f7720fa5e0f3cdac593b1f"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f7720fa5e0f3cdac593b20"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f7720fa5e0f3cdac593b21"
+      }
+    ],
+    "updatedAt": "2025-12-13T23:10:40.633Z",
+    "createdAt": "2025-10-21T11:44:15.146Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f7c914b808e20050df5153",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "25371297",
+    "campos": [
+      {
+        "nome": "Melhor do Mês - Edição 04",
+        "valor": 100,
+        "_id": "68f7c914b808e20050df5154"
+      },
+      {
+        "nome": "MELHOR DO MÊS - EDIÇÃO 06",
+        "valor": 100,
+        "_id": "68f7c914b808e20050df5155"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f7c914b808e20050df5156"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f7c914b808e20050df5157"
+      }
+    ],
+    "updatedAt": "2025-10-28T01:05:54.953Z",
+    "createdAt": "2025-10-21T17:55:32.576Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f7c918b808e20050df51a1",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "45004009",
+    "campos": [
+      {
+        "nome": "Melhor do Mês - Edição 02",
+        "valor": 100,
+        "_id": "68f7c918b808e20050df51a2"
+      },
+      {
+        "nome": "LIGA PONTOS CORRIDOS",
+        "valor": 250,
+        "_id": "68f7c918b808e20050df51a3"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f7c918b808e20050df51a4"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f7c918b808e20050df51a5"
+      }
+    ],
+    "updatedAt": "2025-12-13T22:59:33.025Z",
+    "createdAt": "2025-10-21T17:55:36.159Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f8292b1ad5c69a5aacfa88",
+    "ligaId": "684d821cf1a7ae16d1f89572",
+    "timeId": "14747183",
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "68f8292b1ad5c69a5aacfa89"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f8292b1ad5c69a5aacfa8a"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f8292b1ad5c69a5aacfa8b"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f8292b1ad5c69a5aacfa8c"
+      }
+    ],
+    "updatedAt": "2025-10-22T00:45:31.637Z",
+    "createdAt": "2025-10-22T00:45:31.637Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f76c1aa5e0f3cdac59370b",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "5902324",
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "68f76c1aa5e0f3cdac59370c"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f76c1aa5e0f3cdac59370d"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f76c1aa5e0f3cdac59370e"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f76c1aa5e0f3cdac59370f"
+      }
+    ],
+    "updatedAt": "2025-10-21T11:18:50.565Z",
+    "createdAt": "2025-10-21T11:18:50.565Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f7705ea5e0f3cdac59381a",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "715731",
+    "campos": [
+      {
+        "nome": "Saldo 2024 + Inscrição 2025",
+        "valor": -142.46,
+        "_id": "68f7705ea5e0f3cdac59381b"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f7705ea5e0f3cdac59381c"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f7705ea5e0f3cdac59381d"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f7705ea5e0f3cdac59381e"
+      }
+    ],
+    "updatedAt": "2025-10-21T11:37:23.676Z",
+    "createdAt": "2025-10-21T11:37:02.963Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f770eba5e0f3cdac593941",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "20165417",
+    "campos": [
+      {
+        "nome": "Inscrição 2025",
+        "valor": -70,
+        "_id": "68f770eba5e0f3cdac593942"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f770eba5e0f3cdac593943"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f770eba5e0f3cdac593944"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f770eba5e0f3cdac593945"
+      }
+    ],
+    "updatedAt": "2025-10-21T11:39:44.550Z",
+    "createdAt": "2025-10-21T11:39:23.699Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f7c918b808e20050df51a9",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "164131",
+    "campos": [
+      {
+        "nome": "Limbo (Ajuste Quitacao)",
+        "valor": 77,
+        "_id": "68f7c918b808e20050df51aa"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f7c918b808e20050df51ab"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f7c918b808e20050df51ac"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f7c918b808e20050df51ad"
+      }
+    ],
+    "updatedAt": "2026-01-17T23:44:44.374Z",
+    "createdAt": "2025-10-21T17:55:36.739Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "68f7c91bb808e20050df51f3",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "13935277",
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "68f7c91bb808e20050df51f4"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "68f7c91bb808e20050df51f5"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "68f7c91bb808e20050df51f6"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "68f7c91bb808e20050df51f7"
+      }
+    ],
+    "updatedAt": "2025-10-21T17:55:39.900Z",
+    "createdAt": "2025-10-21T17:55:39.900Z",
+    "__v": 0,
+    "temporada": 2025
+  },
+  {
+    "_id": "695afb98daaf573a099589c4",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "-1767569480236",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "695afb98daaf573a099589c5"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "695afb98daaf573a099589c6"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "695afb98daaf573a099589c7"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "695afb98daaf573a099589c8"
+      }
+    ],
+    "updatedAt": "2026-01-04T23:45:28.375Z",
+    "createdAt": "2026-01-04T23:45:28.375Z",
+    "__v": 0
+  },
+  {
+    "_id": "696a84772a89e2fa6b61cd53",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "13935277",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "696a84772a89e2fa6b61cd54"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "696a84772a89e2fa6b61cd55"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "696a84772a89e2fa6b61cd56"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "696a84772a89e2fa6b61cd57"
+      }
+    ],
+    "updatedAt": "2026-01-16T18:33:27.276Z",
+    "createdAt": "2026-01-16T18:33:27.276Z",
+    "__v": 0
+  },
+  {
+    "_id": "696abb41b0b93cd4d2a0b1ff",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "8183683",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "696abb41b0b93cd4d2a0b200"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "696abb41b0b93cd4d2a0b201"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "696abb41b0b93cd4d2a0b202"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "696abb41b0b93cd4d2a0b203"
+      }
+    ],
+    "updatedAt": "2026-01-16T22:27:13.581Z",
+    "createdAt": "2026-01-16T22:27:13.581Z",
+    "__v": 0
+  },
+  {
+    "_id": "696aece17224432114cd4f55",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "1097804",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "696aece17224432114cd4f56"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "696aece17224432114cd4f57"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "696aece17224432114cd4f58"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "696aece17224432114cd4f59"
+      }
+    ],
+    "updatedAt": "2026-01-17T01:58:57.520Z",
+    "createdAt": "2026-01-17T01:58:57.520Z",
+    "__v": 0
+  },
+  {
+    "_id": "696be8e595762d12840bd262",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "25324292",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "696be8e595762d12840bd263"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "696be8e595762d12840bd264"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "696be8e595762d12840bd265"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "696be8e595762d12840bd266"
+      }
+    ],
+    "updatedAt": "2026-01-17T19:54:13.065Z",
+    "createdAt": "2026-01-17T19:54:13.065Z",
+    "__v": 0
+  },
+  {
+    "_id": "696bf31895762d12840bd712",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "1173066",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "696bf31895762d12840bd713"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "696bf31895762d12840bd714"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "696bf31895762d12840bd715"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "696bf31895762d12840bd716"
+      }
+    ],
+    "updatedAt": "2026-01-17T20:37:44.759Z",
+    "createdAt": "2026-01-17T20:37:44.759Z",
+    "__v": 0
+  },
+  {
+    "_id": "696ec6fd8570fb05032c7010",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "3300583",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Saldo 2025",
+        "valor": 0
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0
+      }
+    ],
+    "createdAt": "2026-01-20T00:06:21.794Z",
+    "updatedAt": "2026-01-20T14:04:07.627Z"
+  },
+  {
+    "_id": "6973bc59b4eadcdac7501c81",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "5254799",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "6973bc59b4eadcdac7501c82"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "6973bc59b4eadcdac7501c83"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "6973bc59b4eadcdac7501c84"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "6973bc59b4eadcdac7501c85"
+      }
+    ],
+    "updatedAt": "2026-01-23T18:22:17.427Z",
+    "createdAt": "2026-01-23T18:22:17.427Z",
+    "__v": 0
+  },
+  {
+    "_id": "697418da50d44891cb0774f5",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "7698677",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "697418da50d44891cb0774f6"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "697418da50d44891cb0774f7"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "697418da50d44891cb0774f8"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "697418da50d44891cb0774f9"
+      }
+    ],
+    "updatedAt": "2026-01-24T00:56:58.705Z",
+    "createdAt": "2026-01-24T00:56:58.705Z",
+    "__v": 0
+  },
+  {
+    "_id": "6974191550d44891cb077512",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "14916330",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "6974191550d44891cb077513"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "6974191550d44891cb077514"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "6974191550d44891cb077515"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "6974191550d44891cb077516"
+      }
+    ],
+    "updatedAt": "2026-01-24T00:57:57.757Z",
+    "createdAt": "2026-01-24T00:57:57.757Z",
+    "__v": 0
+  },
+  {
+    "_id": "6974bac250d44891cb0775f1",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "621609",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "6974bac250d44891cb0775f2"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "6974bac250d44891cb0775f3"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "6974bac250d44891cb0775f4"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "6974bac250d44891cb0775f5"
+      }
+    ],
+    "updatedAt": "2026-01-24T12:27:46.676Z",
+    "createdAt": "2026-01-24T12:27:46.676Z",
+    "__v": 0
+  },
+  {
+    "_id": "6974c35250d44891cb077799",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "1568358",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "6974c35250d44891cb07779a"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "6974c35250d44891cb07779b"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "6974c35250d44891cb07779c"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "6974c35250d44891cb07779d"
+      }
+    ],
+    "updatedAt": "2026-01-24T13:04:18.029Z",
+    "createdAt": "2026-01-24T13:04:18.029Z",
+    "__v": 0
+  },
+  {
+    "_id": "6974edd750d44891cb077a70",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "14569704",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "6974edd750d44891cb077a71"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "6974edd750d44891cb077a72"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "6974edd750d44891cb077a73"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "6974edd750d44891cb077a74"
+      }
+    ],
+    "updatedAt": "2026-01-24T16:05:43.419Z",
+    "createdAt": "2026-01-24T16:05:43.419Z",
+    "__v": 0
+  },
+  {
+    "_id": "6977502b63a02ee144eb3d42",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "1039496",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "6977502b63a02ee144eb3d43"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "6977502b63a02ee144eb3d44"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "6977502b63a02ee144eb3d45"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "6977502b63a02ee144eb3d46"
+      }
+    ],
+    "updatedAt": "2026-01-26T11:29:47.326Z",
+    "createdAt": "2026-01-26T11:29:47.326Z",
+    "__v": 0
+  },
+  {
+    "_id": "697809ad0212af1170f50ad1",
+    "ligaId": "6977a62071dee12036bb163e",
+    "timeId": "4223845",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "697809ad0212af1170f50ad2"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "697809ad0212af1170f50ad3"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "697809ad0212af1170f50ad4"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "697809ad0212af1170f50ad5"
+      }
+    ],
+    "updatedAt": "2026-01-27T00:41:17.973Z",
+    "createdAt": "2026-01-27T00:41:17.973Z",
+    "__v": 0
+  },
+  {
+    "_id": "697818080801132b4a6b7807",
+    "ligaId": "6977a62071dee12036bb163e",
+    "timeId": "50988035",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "697818080801132b4a6b7808"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "697818080801132b4a6b7809"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "697818080801132b4a6b780a"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "697818080801132b4a6b780b"
+      }
+    ],
+    "updatedAt": "2026-01-27T01:42:32.450Z",
+    "createdAt": "2026-01-27T01:42:32.450Z",
+    "__v": 0
+  },
+  {
+    "_id": "69781f74b0fb4d4acdb16f6e",
+    "ligaId": "6977a62071dee12036bb163e",
+    "timeId": "47664680",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "69781f74b0fb4d4acdb16f6f"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "69781f74b0fb4d4acdb16f70"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "69781f74b0fb4d4acdb16f71"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "69781f74b0fb4d4acdb16f72"
+      }
+    ],
+    "updatedAt": "2026-01-27T02:14:12.047Z",
+    "createdAt": "2026-01-27T02:14:12.047Z",
+    "__v": 0
+  },
+  {
+    "_id": "697913009260c75de4f5e611",
+    "ligaId": "6977a62071dee12036bb163e",
+    "timeId": "4223845",
+    "temporada": 2025,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "697913009260c75de4f5e612"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "697913009260c75de4f5e613"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "697913009260c75de4f5e614"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "697913009260c75de4f5e615"
+      }
+    ],
+    "updatedAt": "2026-01-27T19:33:20.102Z",
+    "createdAt": "2026-01-27T19:33:20.102Z",
+    "__v": 0
+  },
+  {
+    "_id": "69791a97db119cb3a1d7e214",
+    "ligaId": "6977a62071dee12036bb163e",
+    "timeId": "47664680",
+    "temporada": 2025,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "69791a97db119cb3a1d7e215"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "69791a97db119cb3a1d7e216"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "69791a97db119cb3a1d7e217"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "69791a97db119cb3a1d7e218"
+      }
+    ],
+    "updatedAt": "2026-01-27T20:05:43.496Z",
+    "createdAt": "2026-01-27T20:05:43.496Z",
+    "__v": 0
+  },
+  {
+    "_id": "69794dbf0b722bf81a621070",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "19615809",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "69794dbf0b722bf81a621071"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "69794dbf0b722bf81a621072"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "69794dbf0b722bf81a621073"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "69794dbf0b722bf81a621074"
+      }
+    ],
+    "updatedAt": "2026-01-27T23:43:59.078Z",
+    "createdAt": "2026-01-27T23:43:59.078Z",
+    "__v": 0
+  },
+  {
+    "_id": "6979562b0b722bf81a621147",
+    "ligaId": "6977a62071dee12036bb163e",
+    "timeId": "4021507",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "6979562b0b722bf81a621148"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "6979562b0b722bf81a621149"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "6979562b0b722bf81a62114a"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "6979562b0b722bf81a62114b"
+      }
+    ],
+    "updatedAt": "2026-01-28T00:19:55.451Z",
+    "createdAt": "2026-01-28T00:19:55.451Z",
+    "__v": 0
+  },
+  {
+    "_id": "69796333925a308b3c332a97",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "14003233",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "69796333925a308b3c332a98"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "69796333925a308b3c332a99"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "69796333925a308b3c332a9a"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "69796333925a308b3c332a9b"
+      }
+    ],
+    "updatedAt": "2026-01-28T01:15:31.177Z",
+    "createdAt": "2026-01-28T01:15:31.177Z",
+    "__v": 0
+  },
+  {
+    "_id": "6979c4f01249c753e15b2f27",
+    "ligaId": "6977a62071dee12036bb163e",
+    "timeId": "9232824",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "6979c4f01249c753e15b2f28"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "6979c4f01249c753e15b2f29"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "6979c4f01249c753e15b2f2a"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "6979c4f01249c753e15b2f2b"
+      }
+    ],
+    "updatedAt": "2026-01-28T08:12:32.677Z",
+    "createdAt": "2026-01-28T08:12:32.677Z",
+    "__v": 0
+  },
+  {
+    "_id": "6979ec071249c753e15b3070",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "752847",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "6979ec071249c753e15b3071"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "6979ec071249c753e15b3072"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "6979ec071249c753e15b3073"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "6979ec071249c753e15b3074"
+      }
+    ],
+    "updatedAt": "2026-01-28T10:59:19.754Z",
+    "createdAt": "2026-01-28T10:59:19.754Z",
+    "__v": 0
+  },
+  {
+    "_id": "697a021e00325092fda0706d",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "1113367",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "697a021e00325092fda0706e"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "697a021e00325092fda0706f"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "697a021e00325092fda07070"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "697a021e00325092fda07071"
+      }
+    ],
+    "updatedAt": "2026-01-28T12:33:34.213Z",
+    "createdAt": "2026-01-28T12:33:34.213Z",
+    "__v": 0
+  },
+  {
+    "_id": "697a698d1249c753e15b35fb",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "20165417",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "697a698d1249c753e15b35fc"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "697a698d1249c753e15b35fd"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "697a698d1249c753e15b35fe"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "697a698d1249c753e15b35ff"
+      }
+    ],
+    "updatedAt": "2026-01-28T19:54:53.977Z",
+    "createdAt": "2026-01-28T19:54:53.977Z",
+    "__v": 0
+  },
+  {
+    "_id": "697a979c26df67e0a2d41861",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "2718174",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "697a979c26df67e0a2d41862"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "697a979c26df67e0a2d41863"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "697a979c26df67e0a2d41864"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "697a979c26df67e0a2d41865"
+      }
+    ],
+    "updatedAt": "2026-01-28T23:11:24.820Z",
+    "createdAt": "2026-01-28T23:11:24.820Z",
+    "__v": 0
+  },
+  {
+    "_id": "697abddf4f83686896dd88f0",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "476869",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "697abddf4f83686896dd88f1"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "697abddf4f83686896dd88f2"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "697abddf4f83686896dd88f3"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "697abddf4f83686896dd88f4"
+      }
+    ],
+    "updatedAt": "2026-01-29T01:54:39.986Z",
+    "createdAt": "2026-01-29T01:54:39.986Z",
+    "__v": 0
+  },
+  {
+    "_id": "697c1ec91850e2d86f7d8143",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "645089",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "697c1ec91850e2d86f7d8144"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "697c1ec91850e2d86f7d8145"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "697c1ec91850e2d86f7d8146"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "697c1ec91850e2d86f7d8147"
+      }
+    ],
+    "updatedAt": "2026-01-30T03:00:25.574Z",
+    "createdAt": "2026-01-30T03:00:25.574Z",
+    "__v": 0
+  },
+  {
+    "_id": "697c73f31850e2d86f7d82c1",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "1649056",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "697c73f31850e2d86f7d82c2"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "697c73f31850e2d86f7d82c3"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "697c73f31850e2d86f7d82c4"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "697c73f31850e2d86f7d82c5"
+      }
+    ],
+    "updatedAt": "2026-01-30T09:03:47.075Z",
+    "createdAt": "2026-01-30T09:03:47.075Z",
+    "__v": 0
+  },
+  {
+    "_id": "697cf86e756accf1b225e8ce",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "1323370",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "697cf86f756accf1b225e8cf"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "697cf86f756accf1b225e8d0"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "697cf86f756accf1b225e8d1"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "697cf86f756accf1b225e8d2"
+      }
+    ],
+    "updatedAt": "2026-01-30T18:29:03.010Z",
+    "createdAt": "2026-01-30T18:29:03.010Z",
+    "__v": 0
+  },
+  {
+    "_id": "697d140dc18d288d66e5d781",
+    "ligaId": "6977a62071dee12036bb163e",
+    "timeId": "13935277",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "697d140dc18d288d66e5d782"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "697d140dc18d288d66e5d783"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "697d140dc18d288d66e5d784"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "697d140dc18d288d66e5d785"
+      }
+    ],
+    "updatedAt": "2026-01-30T20:26:53.646Z",
+    "createdAt": "2026-01-30T20:26:53.646Z",
+    "__v": 0
+  },
+  {
+    "_id": "698678b67713c310a3a8861a",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "timeId": "8188312",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "698678b67713c310a3a8861b"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "698678b67713c310a3a8861c"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "698678b67713c310a3a8861d"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "698678b67713c310a3a8861e"
+      }
+    ],
+    "criado_em": "2026-02-06T23:26:46.290Z",
+    "atualizado_em": "2026-02-06T23:26:46.290Z",
+    "__v": 0
+  },
+  {
+    "_id": "69964f6b7ed13beb69c0ce58",
+    "ligaId": "null",
+    "timeId": "645089",
+    "temporada": 2026,
+    "campos": [
+      {
+        "nome": "Campo 1",
+        "valor": 0,
+        "_id": "69964f6b7ed13beb69c0ce59"
+      },
+      {
+        "nome": "Campo 2",
+        "valor": 0,
+        "_id": "69964f6b7ed13beb69c0ce5a"
+      },
+      {
+        "nome": "Campo 3",
+        "valor": 0,
+        "_id": "69964f6b7ed13beb69c0ce5b"
+      },
+      {
+        "nome": "Campo 4",
+        "valor": 0,
+        "_id": "69964f6b7ed13beb69c0ce5c"
+      }
+    ],
+    "criado_em": "2026-02-18T23:46:51.400Z",
+    "atualizado_em": "2026-02-18T23:46:51.400Z",
+    "__v": 0
+  }
+]

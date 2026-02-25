@@ -1,0 +1,2453 @@
+[
+  {
+    "_id": "6984d357729927bdd1526793",
+    "temporada": 2026,
+    "timeId": 39786,
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 262,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/EupMJQ0P0BOSR8FwlvgdSrtm5Ms=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/69/44/17/001c3cc0b4-f4ce-449a-b54d-9e864790ab6920250315134417",
+    "media_capitao": 11,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Cássio Marques",
+    "nome_time": "Cassius United FC",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 92854,
+      "atleta_nome": "Borré",
+      "pontuacao": 3.5999999999999996
+    },
+    "pontuacao_total": 33,
+    "posicao_final": 14,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Borré",
+        "pontuacao": 3.5999999999999996,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563e3"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563e4"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563e5"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd1526794",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 1097804,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 266,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/fya9g-gd1TwwOeBbDeqKRBFYW1E=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/21/34/07/00e46cbf7a-1b79-4523-a2ce-19715897902120250311123407",
+    "media_capitao": 12.199999999999998,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "China Guardiola",
+    "nome_time": "Quase Nada Palace",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 98384,
+      "atleta_nome": "Negueba",
+      "pontuacao": 7.199999999999999
+    },
+    "pontuacao_total": 36.599999999999994,
+    "posicao_final": 8,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Negueba",
+        "pontuacao": 7.199999999999999,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563d1"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563d2"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563d3"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd1526795",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 1323370,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 276,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/LUGRd8uPVTQmdevtvj_4mKuqxOY=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_237/escudo/5e/59/53/002c87b260-e8bf-415c-a051-18570dec165e20250325095953",
+    "media_capitao": 11,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Diego Barbosa",
+    "nome_time": "DB.advogado FC",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 92854,
+      "atleta_nome": "Borré",
+      "pontuacao": 3.5999999999999996
+    },
+    "pontuacao_total": 33,
+    "posicao_final": 15,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Borré",
+        "pontuacao": 3.5999999999999996,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563e6"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563e7"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563e8"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd15267a9",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 1932235,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 267,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/UhLsNosWoiOG6XxBAXOrQyci2FM=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_212/escudo/1e/46/00/00deaa8f15-208e-4879-99d1-521d6ab6cc1e20230404144600",
+    "media_capitao": 11.299999999999999,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "RODRIGO PAES LANDIM ",
+    "nome_time": "VILA LEÃO F.C",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 68685,
+      "atleta_nome": "Alan Patrick",
+      "pontuacao": 4.5
+    },
+    "pontuacao_total": 33.9,
+    "posicao_final": 11,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Alan Patrick",
+        "pontuacao": 4.5,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563da"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563db"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563dc"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd15267a1",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 1173066,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 262,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/CIrRR4Ic4u-c57vINaMghKdyxTo=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_203/escudo/e2/53/22/00fbdce42d-d54d-40fa-b3cb-c94777a560e220220407125322",
+    "media_capitao": 11.299999999999999,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Mr. Carmilton",
+    "nome_time": " two left feet tlf",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 68685,
+      "atleta_nome": "Alan Patrick",
+      "pontuacao": 4.5
+    },
+    "pontuacao_total": 33.9,
+    "posicao_final": 10,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Alan Patrick",
+        "pontuacao": 4.5,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563d7"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563d8"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563d9"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd152679b",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 2718174,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 262,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/tfD7X-alWaVX43veG4lc20R8zbQ=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_237/escudo/e6/01/07/00a193a589-9941-49e1-acf5-f1224e78bde620250317190107",
+    "media_capitao": 11,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Flavio André",
+    "nome_time": "Red Bull Corissabá",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 92854,
+      "atleta_nome": "Borré",
+      "pontuacao": 3.5999999999999996
+    },
+    "pontuacao_total": 33,
+    "posicao_final": 17,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Borré",
+        "pontuacao": 3.5999999999999996,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563ec"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563ed"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563ee"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd15267a3",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 13935277,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 262,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/XqTNWtU0S8uzpU6ZUjcMZVWJQYc=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_211/escudo/f8/27/53/00681760d8-c096-4ce7-8896-13b4cc8b71f820230318082753",
+    "media_capitao": 7.8,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 114802,
+      "atleta_nome": "Vitor Roque",
+      "pontuacao": 21
+    },
+    "nome_cartola": "Paulinett Miranda",
+    "nome_time": "Urubu Play F.C.",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 78850,
+      "atleta_nome": "Reinaldo",
+      "pontuacao": 1.2000000000000002
+    },
+    "pontuacao_total": 23.4,
+    "posicao_final": 33,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Reinaldo",
+        "pontuacao": 1.2000000000000002,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da65641c"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Willian José",
+        "pontuacao": 1.2000000000000002,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da65641d"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Vitor Roque",
+        "pontuacao": 21,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da65641e"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd1526799",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 575856,
+    "__v": 0,
+    "capitaes_distintos": 2,
+    "clube_id": 275,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/gLEDdOuQ_n7yCD7n7FmjDDnGdsQ=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/2e/28/03/006801f521-3921-4b83-ad29-34f525542e2e20250315122803",
+    "media_capitao": 8.25,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 103445,
+      "atleta_nome": "Kaio Jorge",
+      "pontuacao": 13.799999999999999
+    },
+    "nome_cartola": "Felipe Jokstay",
+    "nome_time": "Feirão do Insta Floriano PI",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 92854,
+      "atleta_nome": "Borré",
+      "pontuacao": 3.5999999999999996
+    },
+    "pontuacao_total": 24.75,
+    "posicao_final": 32,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Borré",
+        "pontuacao": 3.5999999999999996,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656419"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da65641a"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 13.799999999999999,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da65641b"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd15267a7",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 1039496,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 262,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/BY2XS47U9RXBrTg_agj-cLLgPAk=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_3/escudo/7c/18/54/008e7b57d4-812d-49d5-a904-8403f884e67c20260126081854",
+    "media_capitao": 11,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Randerson Rodrigues",
+    "nome_time": "Randim",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 92854,
+      "atleta_nome": "Borré",
+      "pontuacao": 3.5999999999999996
+    },
+    "pontuacao_total": 33,
+    "posicao_final": 23,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Borré",
+        "pontuacao": 3.5999999999999996,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563fe"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563ff"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656400"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd15267aa",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 4966295,
+    "__v": 0,
+    "capitaes_distintos": 2,
+    "clube_id": 276,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/49qFi-ErG5vjvWynjFmoibKHpjQ=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_166/escudo/65/22/51/00572af97a-a778-4f4a-b9d8-d981efb6456520200727232251",
+    "media_capitao": 10.899999999999999,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Rony Morais",
+    "nome_time": "Pedras_City AC",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 103445,
+      "atleta_nome": "Kaio Jorge",
+      "pontuacao": 3.3000000000000003
+    },
+    "pontuacao_total": 32.699999999999996,
+    "posicao_final": 28,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 3.3000000000000003,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da65640d"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da65640e"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da65640f"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd152679f",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 3300583,
+    "__v": 0,
+    "capitaes_distintos": 2,
+    "clube_id": 262,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/WOdsMPEJH_PW0PqdH0drZq_0PZY=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/e8/53/30/0035e0f640-0c85-4f82-88b3-74a1ddaff0e820250315175330",
+    "media_capitao": 12.799999999999997,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Leilson Bezerra",
+    "nome_time": "LEJORA FC",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 7.949999999999999
+    },
+    "pontuacao_total": 38.39999999999999,
+    "posicao_final": 5,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Hulk",
+        "pontuacao": 7.949999999999999,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563c8"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Lucas Paquetá",
+        "pontuacao": 8.399999999999999,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563c9"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563ca"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd15267a4",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 25324292,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 262,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/gbjd-QdTHi8-f2AEGyh0IFYq8uE=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/32/15/02/00b17a99c1-1ae7-4ca9-98d3-8f7833ea0f3220250311131502",
+    "media_capitao": 11,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Pedro Antônio",
+    "nome_time": "Invictus Patamar S.A.F.",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 92854,
+      "atleta_nome": "Borré",
+      "pontuacao": 3.5999999999999996
+    },
+    "pontuacao_total": 33,
+    "posicao_final": 21,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Borré",
+        "pontuacao": 3.5999999999999996,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563f8"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563f9"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563fa"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd15267ab",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 1459952,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 262,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/9P-eeFvkTIqbbmfemTuX16zJX3w=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_213/escudo/9b/24/47/00f17face5-70e6-4f2c-bc3a-eded1ce80c9b20230409122447",
+    "media_capitao": 10.549999999999999,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Sávio C Cavalcante ",
+    "nome_time": "FC Arthur Sávio.C.C",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 68685,
+      "atleta_nome": "Alan Patrick",
+      "pontuacao": 4.5
+    },
+    "pontuacao_total": 31.65,
+    "posicao_final": 29,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Alan Patrick",
+        "pontuacao": 4.5,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656410"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Everton",
+        "pontuacao": 5.1,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656411"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656412"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd15267af",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 645089,
+    "__v": 0,
+    "capitaes_distintos": 2,
+    "clube_id": 262,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "",
+    "media_capitao": 9.749999999999998,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Antonio Luis ",
+    "nome_time": "FloriMengo FC",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 92854,
+      "atleta_nome": "Borré",
+      "pontuacao": 3.5999999999999996
+    },
+    "pontuacao_total": 29.249999999999996,
+    "posicao_final": 30,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Borré",
+        "pontuacao": 3.5999999999999996,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656413"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Hulk",
+        "pontuacao": 3.5999999999999996,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656414"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656415"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd15267a6",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 14916330,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 262,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/mRo85ZdnFerFQyp4W2lOkVYyd98=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/bd/23/37/00cb582f75-e5cc-49d8-8def-bbe68e7764bd20250311222337",
+    "media_capitao": 11,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Raimundo Pinheiro ",
+    "nome_time": "Lioness  Clubs LL",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 92854,
+      "atleta_nome": "Borré",
+      "pontuacao": 3.5999999999999996
+    },
+    "pontuacao_total": 33,
+    "posicao_final": 22,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Borré",
+        "pontuacao": 3.5999999999999996,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563fb"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563fc"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563fd"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd15267a8",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 20165417,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 276,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/J39tNqJcxSL9Zk1YfqIUUDBiB28=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_205/escudo/1f/53/55/00ee0f7db4-ac40-4e3b-a713-bd18ddfb051f20220409145355",
+    "media_capitao": 11,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Raylson Fernandes",
+    "nome_time": "RB Ousadia&Alegria 94",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 92854,
+      "atleta_nome": "Borré",
+      "pontuacao": 3.5999999999999996
+    },
+    "pontuacao_total": 33,
+    "posicao_final": 24,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Borré",
+        "pontuacao": 3.5999999999999996,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656401"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656402"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656403"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd15267b0",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 19615809,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 292,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/bzb3YnZFQ4ySa3VDcp2xkvrWIiA=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_2/escudo/d7/01/05/00a90f6647-24df-4ea1-b3fb-49b2895536d720260114160105",
+    "media_capitao": 11,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Lúcio de Souza",
+    "nome_time": "Bela Bosta FCPE",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 92854,
+      "atleta_nome": "Borré",
+      "pontuacao": 3.5999999999999996
+    },
+    "pontuacao_total": 33,
+    "posicao_final": 27,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Borré",
+        "pontuacao": 3.5999999999999996,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da65640a"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da65640b"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da65640c"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd152679d",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 715731,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 262,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/U3VavTcs6WmBuSMkySM5Dqh9FPE=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_237/escudo/29/48/04/00482fcaf8-292a-4ade-bd93-192c3107792920250320224804",
+    "media_capitao": 12.299999999999999,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Jonney Vojvoda",
+    "nome_time": "La Família 026 Cbjr",
+    "pior_capitao": {
+      "rodada": 2,
+      "atleta_id": 103445,
+      "atleta_nome": "Kaio Jorge",
+      "pontuacao": 7.3500000000000005
+    },
+    "pontuacao_total": 36.9,
+    "posicao_final": 7,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Lucas Ronier",
+        "pontuacao": 7.5,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563ce"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563cf"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563d0"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd15267b1",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 476869,
+    "__v": 0,
+    "capitaes_distintos": 1,
+    "clube_id": 262,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/_eqX4D-QFHuwyRQykxqJGpyb_fY=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_3/escudo/10/42/57/00ddaf0e2b-c6e7-4d2e-a2a3-d2d226fd871020260126204257",
+    "media_capitao": 6.849999999999999,
+    "melhor_capitao": {
+      "rodada": 2,
+      "atleta_id": 92854,
+      "atleta_nome": "Borré",
+      "pontuacao": 13.049999999999999
+    },
+    "nome_cartola": "Lucas Sousa",
+    "nome_time": "Engenhando",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 92854,
+      "atleta_nome": "Borré",
+      "pontuacao": 3.5999999999999996
+    },
+    "pontuacao_total": 20.549999999999997,
+    "posicao_final": 35,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Borré",
+        "pontuacao": 3.5999999999999996,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656422"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Borré",
+        "pontuacao": 13.049999999999999,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656423"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Borré",
+        "pontuacao": 3.9000000000000004,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656424"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd1526798",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 8098497,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 292,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/I_RW8-j0FhezntS3oYwJb6Bpnqo=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/26/04/08/007b16c5d8-6210-40dd-ac62-0a528be5b62620250315120408",
+    "media_capitao": 11,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Felipe Barbosa",
+    "nome_time": "Banege F.C",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 92854,
+      "atleta_nome": "Borré",
+      "pontuacao": 3.5999999999999996
+    },
+    "pontuacao_total": 33,
+    "posicao_final": 16,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Borré",
+        "pontuacao": 3.5999999999999996,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563e9"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563ea"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563eb"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd15267b2",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 14003233,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 275,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/tbziml9OQUsMBiEMcB_dUwS8zvw=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_3/escudo/0f/59/39/0017e9f996-cb07-4479-8be6-7d301673690f20260124145939",
+    "media_capitao": 15,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Marconi Araújo",
+    "nome_time": "Palestra Itália JN",
+    "pior_capitao": {
+      "rodada": 2,
+      "atleta_id": 103445,
+      "atleta_nome": "Kaio Jorge",
+      "pontuacao": 7.3500000000000005
+    },
+    "pontuacao_total": 45,
+    "posicao_final": 1,
+    "premiacao_recebida": 25,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Renato Kayzer",
+        "pontuacao": 15.600000000000001,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563bc"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563bd"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563be"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd152679a",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 8188312,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 277,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/YZwWWZwLJSHbYX7Rqqa8a6Cz-Ns=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_106/escudo/9a/40/43/0092958566-cdb9-4da6-bb44-2bfca753b49a20180407194043",
+    "media_capitao": 13,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Felipe Santos",
+    "nome_time": "Chamex F.C.",
+    "pior_capitao": {
+      "rodada": 2,
+      "atleta_id": 112886,
+      "atleta_nome": "Lucas Barbosa",
+      "pontuacao": 4.949999999999999
+    },
+    "pontuacao_total": 39,
+    "posicao_final": 4,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Artur",
+        "pontuacao": 12,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563c5"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Lucas Barbosa",
+        "pontuacao": 4.949999999999999,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563c6"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563c7"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd15267a0",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 5254799,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 263,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/mWAPeW_4lvsVcZdseSxH_ZBK-6M=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_237/escudo/a1/50/53/00f1dd3e98-9ad5-401c-9f13-8c5421a5a1a120250324165053",
+    "media_capitao": 11,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Mauricio Wendel",
+    "nome_time": "AltosShow",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 92854,
+      "atleta_nome": "Borré",
+      "pontuacao": 3.5999999999999996
+    },
+    "pontuacao_total": 33,
+    "posicao_final": 19,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Borré",
+        "pontuacao": 3.5999999999999996,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563f2"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563f3"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563f4"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd1526797",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 621609,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 262,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/r0mEcixSu8DZGb5-CK3NjuUjMWI=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_183/escudo/af/37/06/008d7e2db3-aaa7-472d-af03-f29b329c35af20210427123706",
+    "media_capitao": 12.4,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Eudes Pereira",
+    "nome_time": "Itaueira Mengão ",
+    "pior_capitao": {
+      "rodada": 2,
+      "atleta_id": 114802,
+      "atleta_nome": "Vitor Roque",
+      "pontuacao": 6.6000000000000005
+    },
+    "pontuacao_total": 37.2,
+    "posicao_final": 6,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Canobbio",
+        "pontuacao": 8.55,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563cb"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Vitor Roque",
+        "pontuacao": 6.6000000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563cc"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563cd"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd152679e",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 5902324,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 262,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/OKcyVs-FCUwC8Vd7afLD-aQpUok=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_222/escudo/72/02/33/00e52b667e-a772-4dda-8b8a-c6685016737220240314140233",
+    "media_capitao": 11.299999999999999,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "juniel henrique",
+    "nome_time": "ALA PEDRINHAS FC",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 68685,
+      "atleta_nome": "Alan Patrick",
+      "pontuacao": 4.5
+    },
+    "pontuacao_total": 33.9,
+    "posicao_final": 9,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Alan Patrick",
+        "pontuacao": 4.5,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563d4"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563d5"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563d6"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd15267ae",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 7698677,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 262,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/Wys2YIpHrJUAlYDY9XwVB6EMjnE=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_238/escudo/39/55/15/00488bddce-2a6b-4edc-b39a-ccf3b5f2333920250328095515",
+    "media_capitao": 11,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Wesley Oliveira",
+    "nome_time": "FC WESLEY OLIVEIRA",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 92854,
+      "atleta_nome": "Borré",
+      "pontuacao": 3.5999999999999996
+    },
+    "pontuacao_total": 33,
+    "posicao_final": 26,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Borré",
+        "pontuacao": 3.5999999999999996,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656407"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656408"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656409"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd15267b3",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 752847,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 267,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/Q22J8WjMevR2ctMj5dTZclGAWmU=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_3/escudo/70/40/40/00938d2df4-2404-4a8b-aa46-aa82065da77020260124164040",
+    "media_capitao": 15,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Yuri Jivago",
+    "nome_time": "Trem Bala Juá",
+    "pior_capitao": {
+      "rodada": 2,
+      "atleta_id": 103445,
+      "atleta_nome": "Kaio Jorge",
+      "pontuacao": 7.3500000000000005
+    },
+    "pontuacao_total": 45,
+    "posicao_final": 2,
+    "premiacao_recebida": 15,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Renato Kayzer",
+        "pontuacao": 15.600000000000001,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563bf"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563c0"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563c1"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd15267b4",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 1113367,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 275,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/vyEi986OL4l05LKnwkZft8RR9nc=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_4/escudo/2b/23/35/0085634f0f-0d1f-4abb-95bb-08f84c63cd2b20260128092335",
+    "media_capitao": 15,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Bruno Barros",
+    "nome_time": "BarrosB",
+    "pior_capitao": {
+      "rodada": 2,
+      "atleta_id": 103445,
+      "atleta_nome": "Kaio Jorge",
+      "pontuacao": 7.3500000000000005
+    },
+    "pontuacao_total": 45,
+    "posicao_final": 3,
+    "premiacao_recebida": 10,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Renato Kayzer",
+        "pontuacao": 15.600000000000001,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563c2"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563c3"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563c4"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd1526796",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 25371297,
+    "__v": 0,
+    "capitaes_distintos": 2,
+    "clube_id": 344,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/_jON9YLuQ_WAradOue9WJWlMaB8=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/d3/48/40/007f2cd575-4692-41b4-82e9-4a8711086cd320250312084840",
+    "media_capitao": 8.25,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 103445,
+      "atleta_nome": "Kaio Jorge",
+      "pontuacao": 13.799999999999999
+    },
+    "nome_cartola": "Diogo Monte",
+    "nome_time": "Tabaca Neon",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 92854,
+      "atleta_nome": "Borré",
+      "pontuacao": 3.5999999999999996
+    },
+    "pontuacao_total": 24.75,
+    "posicao_final": 31,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Borré",
+        "pontuacao": 3.5999999999999996,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656416"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656417"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 13.799999999999999,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656418"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd152679c",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 45004009,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 264,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/xmP3eccyTVmcw9SOwRP2R8mqqcY=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_215/escudo/43/53/40/009730c5f8-bf31-43e2-98ba-f1d1eb83144320230414165340",
+    "media_capitao": 11,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "fucim ",
+    "nome_time": "fc.catumbi",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 92854,
+      "atleta_nome": "Borré",
+      "pontuacao": 3.5999999999999996
+    },
+    "pontuacao_total": 33,
+    "posicao_final": 18,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Borré",
+        "pontuacao": 3.5999999999999996,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563ef"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563f0"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563f1"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd15267ac",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 1568358,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 283,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/TpMxaid-TQgtMB7B41zxEvn3MoA=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/78/44/35/005e1577f1-d3bb-4e23-bd54-d8131889777820250311124435",
+    "media_capitao": 11,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Sir Gegé   ",
+    "nome_time": "Dollynho United FC",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 92854,
+      "atleta_nome": "Borré",
+      "pontuacao": 3.5999999999999996
+    },
+    "pontuacao_total": 33,
+    "posicao_final": 25,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Borré",
+        "pontuacao": 3.5999999999999996,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656404"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656405"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656406"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd15267b5",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 1649056,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 276,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/P-brxi6ymWNr5zQBJwRUQpF6_uA=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_2/escudo/2d/57/08/0088a59cc8-b52d-4bdd-a6b0-be7d7c0c162d20260115125708",
+    "media_capitao": 11.299999999999999,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Geones Vaz",
+    "nome_time": "GAAVAZ.FC",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 68685,
+      "atleta_nome": "Alan Patrick",
+      "pontuacao": 4.5
+    },
+    "pontuacao_total": 33.9,
+    "posicao_final": 13,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Alan Patrick",
+        "pontuacao": 4.5,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563e0"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563e1"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563e2"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd15267a2",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 8183683,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 262,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/YR1c2t3ttAn0NfsmTuYMqKsTgp4=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/dd/32/03/00a9b9e295-4ed8-4ab3-bb4e-dba77e035fdd20250311223203",
+    "media_capitao": 11,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Neto Waquim",
+    "nome_time": "Fla-Seleção NW",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 92854,
+      "atleta_nome": "Borré",
+      "pontuacao": 3.5999999999999996
+    },
+    "pontuacao_total": 33,
+    "posicao_final": 20,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Borré",
+        "pontuacao": 3.5999999999999996,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563f5"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563f6"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563f7"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd15267ad",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 3027272,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 262,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/DANx0cpRHzW-C_XwWkGJJRI1bAM=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_222/escudo/07/48/48/007351dafe-0b47-4f48-a78d-f4aa9ad6c70720240320164848",
+    "media_capitao": 11.299999999999999,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Vitim",
+    "nome_time": "Vitim 10 FC",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 68685,
+      "atleta_nome": "Alan Patrick",
+      "pontuacao": 4.5
+    },
+    "pontuacao_total": 33.9,
+    "posicao_final": 12,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Alan Patrick",
+        "pontuacao": 4.5,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563dd"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563de"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da6563df"
+      }
+    ]
+  },
+  {
+    "_id": "6984d357729927bdd15267a5",
+    "ligaId": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "timeId": 14569704,
+    "__v": 0,
+    "capitaes_distintos": 2,
+    "clube_id": 262,
+    "createdAt": "2026-02-05T17:28:54.795Z",
+    "escudo": "https://s2-cartola.glbimg.com/nfMz_oystbWZIhJej_7qlCZdBvE=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_237/escudo/e8/10/53/006d7ab9da-e0be-497d-89f3-dcd394e757e820250325061053",
+    "media_capitao": 7.45,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 103445,
+      "atleta_nome": "Kaio Jorge",
+      "pontuacao": 13.799999999999999
+    },
+    "nome_cartola": "Rafael Janderson",
+    "nome_time": "Fla Stronger FC",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 87863,
+      "atleta_nome": "Arrascaeta",
+      "pontuacao": 1.2000000000000002
+    },
+    "pontuacao_total": 22.35,
+    "posicao_final": 34,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-14T16:02:21.187Z",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Arrascaeta",
+        "pontuacao": 1.2000000000000002,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da65641f"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656420"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 13.799999999999999,
+        "parcial": false,
+        "jogou": null,
+        "_id": "69909c8d6410cc02da656421"
+      }
+    ]
+  },
+  {
+    "_id": "6984d885729927bdd1527664",
+    "ligaId": "6977a62071dee12036bb163e",
+    "temporada": 2026,
+    "timeId": 25330294,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 262,
+    "createdAt": "2026-02-05T17:51:00.894Z",
+    "escudo": "https://s2-cartola.glbimg.com/8bvpJhaAqvM7zzEpP_dK7wkXqLY=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_186/escudo/ac/15/59/005b898a19-755f-4888-9cc3-2ab70cd8cfac20210508131559",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Renato Kayzer",
+        "pontuacao": 15.600000000000001,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf922"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Flaco López",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf923"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf924"
+      }
+    ],
+    "media_capitao": 15,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "jhones Prado ",
+    "nome_time": "j.Prado fc",
+    "pior_capitao": {
+      "rodada": 2,
+      "atleta_id": 113103,
+      "atleta_nome": "Flaco López",
+      "pontuacao": 7.3500000000000005
+    },
+    "pontuacao_total": 45,
+    "posicao_final": 1,
+    "premiacao_recebida": 25,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-13T19:35:37.964Z"
+  },
+  {
+    "_id": "6984d885729927bdd1527665",
+    "ligaId": "6977a62071dee12036bb163e",
+    "temporada": 2026,
+    "timeId": 4223845,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 276,
+    "createdAt": "2026-02-05T17:51:00.894Z",
+    "escudo": "https://s2-cartola.glbimg.com/nWIkiO8ihiMQmAQl8Nft6OlF0tI=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_222/escudo/0b/35/49/00248061c7-9d11-405d-a9a9-84d9a3b8540b20240321093549",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Alan Patrick",
+        "pontuacao": 4.5,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf928"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Flaco López",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf929"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf92a"
+      }
+    ],
+    "media_capitao": 11.299999999999999,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "bruno",
+    "nome_time": "TriiMundial sp",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 68685,
+      "atleta_nome": "Alan Patrick",
+      "pontuacao": 4.5
+    },
+    "pontuacao_total": 33.9,
+    "posicao_final": 3,
+    "premiacao_recebida": 10,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-13T19:35:37.964Z"
+  },
+  {
+    "_id": "6984d885729927bdd1527666",
+    "ligaId": "6977a62071dee12036bb163e",
+    "temporada": 2026,
+    "timeId": 4021507,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 277,
+    "createdAt": "2026-02-05T17:51:00.894Z",
+    "escudo": "https://s2-cartola.glbimg.com/1yVKMBWKBWCDFDJQfDS23cX96EI=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_3/escudo/04/40/30/00b91d8cd7-afed-4453-ba2b-6e70b679250420260126204030",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Alan Patrick",
+        "pontuacao": 4.5,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf92b"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Flaco López",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf92c"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf92d"
+      }
+    ],
+    "media_capitao": 11.299999999999999,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Thyago Martins",
+    "nome_time": "TCMV Futebol club",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 68685,
+      "atleta_nome": "Alan Patrick",
+      "pontuacao": 4.5
+    },
+    "pontuacao_total": 33.9,
+    "posicao_final": 4,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-13T19:35:37.964Z"
+  },
+  {
+    "_id": "6984d885729927bdd1527667",
+    "ligaId": "6977a62071dee12036bb163e",
+    "temporada": 2026,
+    "timeId": 50988035,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 262,
+    "createdAt": "2026-02-05T17:51:00.894Z",
+    "escudo": "https://s2-cartola.glbimg.com/SujcmLlRuhSzehIJRroxD6wJxsw=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_2/escudo/da/35/17/00d5cec5ae-f4bf-4b53-b2e7-63ceb8b77fda20260113143517",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Borré",
+        "pontuacao": 3.5999999999999996,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf925"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Negueba",
+        "pontuacao": 8.25,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf926"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf927"
+      }
+    ],
+    "media_capitao": 11.299999999999999,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Enderson",
+    "nome_time": "Obraga04",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 92854,
+      "atleta_nome": "Borré",
+      "pontuacao": 3.5999999999999996
+    },
+    "pontuacao_total": 33.9,
+    "posicao_final": 2,
+    "premiacao_recebida": 15,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-13T19:35:37.964Z"
+  },
+  {
+    "_id": "6984d885729927bdd1527668",
+    "ligaId": "6977a62071dee12036bb163e",
+    "temporada": 2026,
+    "timeId": 9232824,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 284,
+    "createdAt": "2026-02-05T17:51:00.894Z",
+    "escudo": "https://s2-cartola.glbimg.com/MT-TkCJqZ8-UkJMjF1IUfUQbhYA=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_2/escudo/76/20/29/001f747d9c-9076-4461-a9cf-95113b075b7620260113122029",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Borré",
+        "pontuacao": 3.5999999999999996,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf937"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Eduardo Sasha",
+        "pontuacao": 1.5,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf938"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Arthur Melo",
+        "pontuacao": 5.85,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf939"
+      }
+    ],
+    "media_capitao": 3.65,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 90532,
+      "atleta_nome": "Arthur Melo",
+      "pontuacao": 5.85
+    },
+    "nome_cartola": "Padé Papito",
+    "nome_time": "Papito's Football Club",
+    "pior_capitao": {
+      "rodada": 2,
+      "atleta_id": 70360,
+      "atleta_nome": "Eduardo Sasha",
+      "pontuacao": 1.5
+    },
+    "pontuacao_total": 10.95,
+    "posicao_final": 8,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-13T19:35:37.964Z"
+  },
+  {
+    "_id": "6984d885729927bdd1527669",
+    "ligaId": "6977a62071dee12036bb163e",
+    "temporada": 2026,
+    "timeId": 47664680,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 262,
+    "createdAt": "2026-02-05T17:51:00.894Z",
+    "escudo": "https://s2-cartola.glbimg.com/-LQVXWj1bU7rJvJauo0GkeQRxe8=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_2/escudo/99/40/12/00c8ae6c0c-a4a3-4aad-a38f-d05a5560969920260113174012",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Borré",
+        "pontuacao": 3.5999999999999996,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf92e"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf92f"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf930"
+      }
+    ],
+    "media_capitao": 11,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Erivaldo",
+    "nome_time": "CR ErySoldado ",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 92854,
+      "atleta_nome": "Borré",
+      "pontuacao": 3.5999999999999996
+    },
+    "pontuacao_total": 33,
+    "posicao_final": 5,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-13T19:35:37.964Z"
+  },
+  {
+    "_id": "6984d885729927bdd152766a",
+    "ligaId": "6977a62071dee12036bb163e",
+    "temporada": 2026,
+    "timeId": 51078986,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 262,
+    "createdAt": "2026-02-05T17:51:00.894Z",
+    "escudo": "https://s2-cartola.glbimg.com/ubwUGGVPPLjl6q9j3C4vGbMSK9I=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_4/escudo/22/49/34/0061599b41-6d60-41f4-8290-1dfdbc5bfe2220260128134934",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Borré",
+        "pontuacao": 3.5999999999999996,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf931"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Kaio Jorge",
+        "pontuacao": 7.3500000000000005,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf932"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Hulk",
+        "pontuacao": 22.049999999999997,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf933"
+      }
+    ],
+    "media_capitao": 11,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 39148,
+      "atleta_nome": "Hulk",
+      "pontuacao": 22.049999999999997
+    },
+    "nome_cartola": "Anthony",
+    "nome_time": "KroonosFLA",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 92854,
+      "atleta_nome": "Borré",
+      "pontuacao": 3.5999999999999996
+    },
+    "pontuacao_total": 33,
+    "posicao_final": 6,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-13T19:35:37.964Z"
+  },
+  {
+    "_id": "6984d885729927bdd152766b",
+    "ligaId": "6977a62071dee12036bb163e",
+    "temporada": 2026,
+    "timeId": 13935277,
+    "__v": 0,
+    "capitaes_distintos": 3,
+    "clube_id": 262,
+    "createdAt": "2026-02-05T17:51:00.894Z",
+    "escudo": "https://s2-cartola.glbimg.com/UNl1ReGPyphtwv69CqhMbYDZrTc=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_2/escudo/f8/24/14/00681760d8-c096-4ce7-8896-13b4cc8b71f820260113162414",
+    "historico_rodadas": [
+      {
+        "rodada": 1,
+        "atleta_nome": "Reinaldo",
+        "pontuacao": 1.2000000000000002,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf934"
+      },
+      {
+        "rodada": 2,
+        "atleta_nome": "Willian José",
+        "pontuacao": 1.2000000000000002,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf935"
+      },
+      {
+        "rodada": 3,
+        "atleta_nome": "Vitor Roque",
+        "pontuacao": 21,
+        "parcial": false,
+        "jogou": null,
+        "_id": "698f7d09084961b94ffbf936"
+      }
+    ],
+    "media_capitao": 7.8,
+    "melhor_capitao": {
+      "rodada": 3,
+      "atleta_id": 114802,
+      "atleta_nome": "Vitor Roque",
+      "pontuacao": 21
+    },
+    "nome_cartola": "Paulinett Miranda",
+    "nome_time": "Urubu Play F.C.",
+    "pior_capitao": {
+      "rodada": 1,
+      "atleta_id": 78850,
+      "atleta_nome": "Reinaldo",
+      "pontuacao": 1.2000000000000002
+    },
+    "pontuacao_total": 23.4,
+    "posicao_final": 7,
+    "premiacao_recebida": 0,
+    "rodadas_jogadas": 3,
+    "updatedAt": "2026-02-13T19:35:37.964Z"
+  }
+]

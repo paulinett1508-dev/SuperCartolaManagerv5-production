@@ -1,0 +1,1754 @@
+[
+  {
+    "_id": "695c55b8d35f7c2b6ff39d07",
+    "temporada": 2026,
+    "time_id": 8098497,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "__v": 2,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-24T20:24:55.110Z",
+    "criado_em": "2026-01-06T00:22:16.031Z",
+    "dados_participante": {
+      "nome_time": "Banege F.C",
+      "nome_cartoleiro": "Felipe Barbosa",
+      "escudo": "https://s2-cartola.glbimg.com/q9Gz_EgbWJexLLAHUcJhAeEc4x0=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_2/escudo/26/34/04/007b16c5d8-6210-40dd-ac62-0a528be5b62620260114153404",
+      "id_cartola_oficial": 8098497
+    },
+    "data_decisao": "2026-01-06T00:43:15.864Z",
+    "divida_anterior": 0,
+    "observacoes": "",
+    "origem": "renovacao",
+    "pagou_inscricao": false,
+    "processado": true,
+    "saldo_inicial_temporada": -180,
+    "saldo_transferido": 0,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": 0,
+      "status_quitacao": "quitado"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -180,
+        "ref_id": "inscricao_684cb1c8af923da7c7df51de_8098497_2026",
+        "_id": "695c5aa4ff76fb05952a9f22"
+      }
+    ],
+    "data_processamento": "2026-01-06T00:43:16.416Z"
+  },
+  {
+    "_id": "6962948dd35f7c2b6ff7c3b1",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "time_id": 645089,
+    "__v": 1,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-24T23:48:03.815Z",
+    "criado_em": "2026-01-10T18:03:57.160Z",
+    "dados_participante": {
+      "nome_time": "FloriMengo FC",
+      "nome_cartoleiro": "Antonio Luis ",
+      "escudo": "https://s2-cartola.glbimg.com/Az5M4TTIJ5zYniGShw8PA3oZnTk=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_3/escudo/7a/17/02/00215a5668-4a0a-45ce-b9d8-51110de74a7a20260124141702",
+      "id_cartola_oficial": 645089
+    },
+    "divida_anterior": 0,
+    "legado_manual": {
+      "origem": "quitacao_admin",
+      "valor_original": 33,
+      "valor_definido": 0,
+      "tipo_quitacao": "zerado",
+      "observacao": "Saldo processado de 2025. Admin quitou as pendências",
+      "admin_responsavel": "paulinete.miranda@laboratoriosobral.com.br",
+      "data_quitacao": "2026-01-10T18:03:57.159Z"
+    },
+    "observacoes": "",
+    "origem": "renovacao",
+    "pagou_inscricao": false,
+    "processado": true,
+    "saldo_inicial_temporada": -180,
+    "saldo_transferido": 0,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": 33,
+      "status_quitacao": "quitado"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -180,
+        "ref_id": "inscricao_684cb1c8af923da7c7df51de_645089_2026",
+        "_id": "69629af1d250093524533ba7"
+      }
+    ],
+    "data_decisao": "2026-01-10T18:31:12.478Z",
+    "data_processamento": "2026-01-10T18:31:13.247Z"
+  },
+  {
+    "_id": "69639468d35f7c2b6ff84a4f",
+    "temporada": 2026,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "time_id": 13935277,
+    "__v": 0,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-11T12:15:37.012Z",
+    "criado_em": "2026-01-11T12:15:36.640Z",
+    "dados_participante": {
+      "nome_time": "Urubu Play F.C.",
+      "nome_cartoleiro": "Paulinett Miranda",
+      "escudo": "https://s2-cartola.glbimg.com/XqTNWtU0S8uzpU6ZUjcMZVWJQYc=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_211/escudo/f8/27/53/00681760d8-c096-4ce7-8896-13b4cc8b71f820230318082753",
+      "id_cartola_oficial": 13935277
+    },
+    "data_decisao": "2026-01-11T12:15:36.639Z",
+    "divida_anterior": 0,
+    "observacoes": "",
+    "origem": "renovacao",
+    "pagou_inscricao": true,
+    "processado": true,
+    "saldo_inicial_temporada": 0,
+    "saldo_transferido": 0,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": 14,
+      "status_quitacao": "credor"
+    },
+    "transacoes_criadas": [],
+    "data_processamento": "2026-01-11T12:15:37.011Z"
+  },
+  {
+    "_id": "696405aed35f7c2b6ff8920d",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "time_id": 25371297,
+    "__v": 1,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-28T01:32:59.592Z",
+    "criado_em": "2026-01-11T20:18:54.867Z",
+    "dados_participante": {
+      "nome_time": "Tabaca Neon",
+      "nome_cartoleiro": "Diogo Monte",
+      "escudo": "https://s2-cartola.glbimg.com/_jON9YLuQ_WAradOue9WJWlMaB8=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/d3/48/40/007f2cd575-4692-41b4-82e9-4a8711086cd320250312084840",
+      "id_cartola_oficial": 25371297
+    },
+    "data_decisao": "2026-01-11T20:18:54.864Z",
+    "divida_anterior": 0,
+    "observacoes": "Renovacao usando credito completo de 2025",
+    "origem": "renovacao",
+    "pagou_inscricao": false,
+    "processado": true,
+    "saldo_inicial_temporada": 174,
+    "saldo_transferido": 354,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": 20,
+      "status_quitacao": "quitado"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -180,
+        "ref_id": "inscricao_684cb1c8af923da7c7df51de_25371297_2026",
+        "_id": "696405b0a86cbb323f420297"
+      },
+      {
+        "tipo": "SALDO_TEMPORADA_ANTERIOR",
+        "valor": 354,
+        "ref_id": "saldo_anterior_684cb1c8af923da7c7df51de_25371297_2026",
+        "_id": "696405b0a86cbb323f420298"
+      }
+    ],
+    "data_processamento": "2026-01-11T20:18:56.207Z",
+    "legado_manual": {
+      "origem": "quitacao_admin",
+      "valor_original": 20,
+      "valor_definido": 174,
+      "tipo_quitacao": "customizado",
+      "observacao": "Saldo remanescente pra 2026. Inscrição quitada!",
+      "admin_responsavel": "paulinete.miranda@laboratoriosobral.com.br",
+      "data_quitacao": "2026-01-11T20:47:37.726Z"
+    }
+  },
+  {
+    "_id": "69679531d35f7c2b6ffb7482",
+    "temporada": 2026,
+    "time_id": 22623329,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "__v": 0,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-14T13:08:01.430Z",
+    "criado_em": "2026-01-14T13:08:01.430Z",
+    "dados_participante": {
+      "nome_time": "WorldTreta FC",
+      "nome_cartoleiro": "Emerson",
+      "escudo": "https://s2-cartola.glbimg.com/78IQ7owWDrI59MlvBdgiwGSqmm4=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_160/escudo/67/18/14/00fede7949-68d0-48c6-a51f-528e7002df6720191002181814",
+      "id_cartola_oficial": 22623329
+    },
+    "data_decisao": "2026-01-14T13:08:01.426Z",
+    "data_processamento": "2026-01-14T13:08:01.426Z",
+    "divida_anterior": 0,
+    "observacoes": "Optou por não participar",
+    "origem": "renovacao",
+    "pagou_inscricao": true,
+    "processado": true,
+    "saldo_inicial_temporada": 0,
+    "saldo_transferido": 0,
+    "status": "nao_participa",
+    "taxa_inscricao": 0,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": 21,
+      "status_quitacao": "credor"
+    },
+    "transacoes_criadas": []
+  },
+  {
+    "_id": "69683e2056ec8ee74c25efd3",
+    "temporada": 2026,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "time_id": 1323370,
+    "__v": 0,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-15T01:08:48.614Z",
+    "criado_em": "2026-01-15T01:08:48.058Z",
+    "dados_participante": {
+      "nome_time": "adv.DBarbosa.FC",
+      "nome_cartoleiro": "Diego Barbosa",
+      "escudo": "https://s2-cartola.glbimg.com/LUGRd8uPVTQmdevtvj_4mKuqxOY=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_237/escudo/5e/59/53/002c87b260-e8bf-415c-a051-18570dec165e20250325095953",
+      "id_cartola_oficial": 1323370
+    },
+    "data_decisao": "2026-01-15T01:08:48.057Z",
+    "divida_anterior": 0,
+    "observacoes": "",
+    "origem": "renovacao",
+    "pagou_inscricao": true,
+    "processado": true,
+    "saldo_inicial_temporada": 0,
+    "saldo_transferido": 0,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": 0,
+      "status_quitacao": "quitado"
+    },
+    "transacoes_criadas": [],
+    "data_processamento": "2026-01-15T01:08:48.611Z"
+  },
+  {
+    "_id": "696949f30f0a96d693180a15",
+    "time_id": 19615809,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "__v": 1,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-15T20:11:31.896Z",
+    "criado_em": "2026-01-15T20:11:30.966Z",
+    "dados_participante": {
+      "nome_time": "Bela Bosta FCPE",
+      "nome_cartoleiro": "Lúcio de Souza",
+      "escudo": "https://s2-cartola.glbimg.com/bzb3YnZFQ4ySa3VDcp2xkvrWIiA=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_2/escudo/d7/01/05/00a90f6647-24df-4ea1-b3fb-49b2895536d720260114160105",
+      "id_cartola_oficial": 19615809,
+      "clube_id": 292
+    },
+    "data_decisao": "2026-01-15T20:11:30.966Z",
+    "divida_anterior": 0,
+    "observacoes": "Adicionado via Ferramentas > Pesquisar Time",
+    "origem": "novo_cadastro",
+    "pagou_inscricao": false,
+    "processado": true,
+    "saldo_inicial_temporada": -180,
+    "saldo_transferido": 0,
+    "status": "novo",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": null,
+      "saldo_final": 0,
+      "status_quitacao": "quitado"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -180,
+        "ref_id": "inscricao_684cb1c8af923da7c7df51de_19615809_2026",
+        "_id": "696949f3b67b3099af217e90"
+      }
+    ],
+    "data_processamento": "2026-01-15T20:11:31.892Z"
+  },
+  {
+    "_id": "696aa4440f0a96d693198e6d",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "time_id": 621609,
+    "__v": 1,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-16T20:49:10.124Z",
+    "criado_em": "2026-01-16T20:49:08.826Z",
+    "dados_participante": {
+      "nome_time": "Itaueira Mengão ",
+      "nome_cartoleiro": "Eudes Pereira",
+      "escudo": "https://s2-cartola.glbimg.com/r0mEcixSu8DZGb5-CK3NjuUjMWI=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_183/escudo/af/37/06/008d7e2db3-aaa7-472d-af03-f29b329c35af20210427123706",
+      "id_cartola_oficial": 621609
+    },
+    "data_decisao": "2026-01-16T20:49:08.825Z",
+    "divida_anterior": 0,
+    "observacoes": "",
+    "origem": "renovacao",
+    "pagou_inscricao": false,
+    "processado": true,
+    "saldo_inicial_temporada": -68.46,
+    "saldo_transferido": 111.54,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": 111.54,
+      "status_quitacao": "credor"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -180,
+        "ref_id": "inscricao_684cb1c8af923da7c7df51de_621609_2026",
+        "_id": "696aa4468463b9c8a49ba875"
+      },
+      {
+        "tipo": "SALDO_TEMPORADA_ANTERIOR",
+        "valor": 111.54,
+        "ref_id": "saldo_anterior_684cb1c8af923da7c7df51de_621609_2026",
+        "_id": "696aa4468463b9c8a49ba876"
+      }
+    ],
+    "data_processamento": "2026-01-16T20:49:10.119Z"
+  },
+  {
+    "_id": "696ae5c40f0a96d6931a10d6",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "time_id": 1097804,
+    "__v": 0,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-17T01:40:21.827Z",
+    "criado_em": "2026-01-17T01:28:36.015Z",
+    "dados_participante": {
+      "nome_time": "Quase Nada Palace",
+      "nome_cartoleiro": "China Guardiola",
+      "escudo": "https://s2-cartola.glbimg.com/fya9g-gd1TwwOeBbDeqKRBFYW1E=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/21/34/07/00e46cbf7a-1b79-4523-a2ce-19715897902120250311123407",
+      "id_cartola_oficial": 1097804
+    },
+    "data_decisao": "2026-01-17T01:28:36.014Z",
+    "divida_anterior": 0,
+    "observacoes": "",
+    "origem": "renovacao",
+    "pagou_inscricao": true,
+    "processado": true,
+    "saldo_inicial_temporada": 241.54000000000002,
+    "saldo_transferido": 241.54000000000002,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": 421.54,
+      "status_quitacao": "credor"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "SALDO_TEMPORADA_ANTERIOR",
+        "valor": 241.54000000000002,
+        "ref_id": "saldo_anterior_684cb1c8af923da7c7df51de_1097804_2026",
+        "data": "2026-01-17T01:40:21.827Z"
+      }
+    ],
+    "data_processamento": "2026-01-17T01:28:36.566Z",
+    "fix_aplicado": {
+      "versao": "fix-china-guardiola-2026",
+      "data": "2026-01-17T01:40:21.827Z",
+      "valores_anteriores": {
+        "saldo_transferido": 0,
+        "saldo_inicial_temporada": 0
+      }
+    }
+  },
+  {
+    "_id": "696b93810f0a96d6931a54cd",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "time_id": 39786,
+    "__v": 1,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-17T13:49:54.600Z",
+    "criado_em": "2026-01-17T13:49:53.680Z",
+    "dados_participante": {
+      "nome_time": "Cassius United FC",
+      "nome_cartoleiro": "Cássio Marques",
+      "escudo": "https://s2-cartola.glbimg.com/EupMJQ0P0BOSR8FwlvgdSrtm5Ms=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/69/44/17/001c3cc0b4-f4ce-449a-b54d-9e864790ab6920250315134417",
+      "id_cartola_oficial": 39786
+    },
+    "data_decisao": "2026-01-17T13:49:53.679Z",
+    "divida_anterior": 0,
+    "observacoes": "",
+    "origem": "renovacao",
+    "pagou_inscricao": true,
+    "processado": true,
+    "saldo_inicial_temporada": 163.38,
+    "saldo_transferido": 343.38,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": 343.38,
+      "status_quitacao": "credor"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "SALDO_TEMPORADA_ANTERIOR",
+        "valor": 163.38,
+        "ref_id": "saldo_anterior_684cb1c8af923da7c7df51de_39786_2026",
+        "_id": "696b9382c4cfc6f1886c5231"
+      }
+    ],
+    "data_processamento": "2026-01-17T13:49:54.595Z"
+  },
+  {
+    "_id": "696c19ba1ed097a98b8b099d",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "time_id": 575856,
+    "temporada": 2026,
+    "status": "renovado",
+    "dados_participante": {
+      "nome_time": "Feirão do Insta Floriano PI",
+      "nome_cartoleiro": "Felipe Jokstay",
+      "escudo": "https://s2-cartola.glbimg.com/gLEDdOuQ_n7yCD7n7FmjDDnGdsQ=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/2e/28/03/006801f521-3921-4b83-ad29-34f525542e2e20250315122803",
+      "id_cartola_oficial": 575856
+    },
+    "temporada_anterior": {
+      "saldo_final": 0,
+      "status_quitacao": "quitado"
+    },
+    "saldo_transferido": 0,
+    "taxa_inscricao": 180,
+    "divida_anterior": 0,
+    "saldo_inicial_temporada": -180,
+    "pagou_inscricao": false,
+    "origem": "renovacao",
+    "aprovado_por": "admin",
+    "observacoes": "",
+    "processado": true,
+    "legado_manual": {
+      "origem": "decisao_unificada",
+      "valor_original": -372,
+      "valor_definido": 0,
+      "tipo_quitacao": "zerado"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -180,
+        "ref_id": "inscricao_684cb1c8af923da7c7df51de_575856_2026",
+        "_id": "696c19bd1ed097a98b8b09a5"
+      }
+    ],
+    "criado_em": "2026-01-17T23:22:34.867Z",
+    "atualizado_em": "2026-01-17T23:22:37.185Z",
+    "__v": 1,
+    "data_decisao": "2026-01-17T23:22:36.214Z",
+    "data_processamento": "2026-01-17T23:22:37.183Z"
+  },
+  {
+    "_id": "696c1a2f1ed097a98b8b09df",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "time_id": 8188312,
+    "temporada": 2026,
+    "status": "renovado",
+    "dados_participante": {
+      "nome_time": "Chamex F.C.",
+      "nome_cartoleiro": "Felipe Santos",
+      "escudo": "https://s2-cartola.glbimg.com/YZwWWZwLJSHbYX7Rqqa8a6Cz-Ns=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_106/escudo/9a/40/43/0092958566-cdb9-4da6-bb44-2bfca753b49a20180407194043",
+      "id_cartola_oficial": 8188312
+    },
+    "temporada_anterior": {
+      "saldo_final": 0,
+      "status_quitacao": "quitado"
+    },
+    "saldo_transferido": 0,
+    "taxa_inscricao": 180,
+    "divida_anterior": 0,
+    "saldo_inicial_temporada": 0,
+    "pagou_inscricao": true,
+    "origem": "renovacao",
+    "aprovado_por": "admin",
+    "observacoes": "",
+    "processado": true,
+    "legado_manual": {
+      "origem": "decisao_unificada",
+      "valor_original": -5,
+      "valor_definido": 0,
+      "tipo_quitacao": "zerado"
+    },
+    "transacoes_criadas": [],
+    "criado_em": "2026-01-17T23:24:31.259Z",
+    "atualizado_em": "2026-01-17T23:24:33.175Z",
+    "__v": 0,
+    "data_decisao": "2026-01-17T23:24:32.597Z",
+    "data_processamento": "2026-01-17T23:24:33.174Z"
+  },
+  {
+    "_id": "696c1a950f0a96d6931ad944",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "time_id": 2718174,
+    "__v": 1,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-17T23:26:14.482Z",
+    "criado_em": "2026-01-17T23:26:13.136Z",
+    "dados_participante": {
+      "nome_time": "Red Bull Corissabá",
+      "nome_cartoleiro": "Flavio André",
+      "escudo": "https://s2-cartola.glbimg.com/tfD7X-alWaVX43veG4lc20R8zbQ=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_237/escudo/e6/01/07/00a193a589-9941-49e1-acf5-f1224e78bde620250317190107",
+      "id_cartola_oficial": 2718174
+    },
+    "data_decisao": "2026-01-17T23:26:13.135Z",
+    "divida_anterior": 0,
+    "observacoes": "",
+    "origem": "renovacao",
+    "pagou_inscricao": false,
+    "processado": true,
+    "saldo_inicial_temporada": -101,
+    "saldo_transferido": 79,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": 79,
+      "status_quitacao": "credor"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -180,
+        "ref_id": "inscricao_684cb1c8af923da7c7df51de_2718174_2026",
+        "_id": "696c1a961ed097a98b8b0a04"
+      },
+      {
+        "tipo": "SALDO_TEMPORADA_ANTERIOR",
+        "valor": 79,
+        "ref_id": "saldo_anterior_684cb1c8af923da7c7df51de_2718174_2026",
+        "_id": "696c1a961ed097a98b8b0a05"
+      }
+    ],
+    "data_processamento": "2026-01-17T23:26:14.480Z"
+  },
+  {
+    "_id": "696ec4f10f0a96d6931d5fa7",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "time_id": 5902324,
+    "__v": 1,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-19T23:57:38.636Z",
+    "criado_em": "2026-01-19T23:57:37.352Z",
+    "dados_participante": {
+      "nome_time": "ALA PEDRINHAS FC",
+      "nome_cartoleiro": "juniel henrique",
+      "escudo": "https://s2-cartola.glbimg.com/OKcyVs-FCUwC8Vd7afLD-aQpUok=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_222/escudo/72/02/33/00e52b667e-a772-4dda-8b8a-c6685016737220240314140233",
+      "id_cartola_oficial": 5902324
+    },
+    "data_decisao": "2026-01-19T23:57:37.352Z",
+    "divida_anterior": 0,
+    "observacoes": "",
+    "origem": "renovacao",
+    "pagou_inscricao": false,
+    "processado": true,
+    "saldo_inicial_temporada": -2,
+    "saldo_transferido": 178,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": 178,
+      "status_quitacao": "credor"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -180,
+        "ref_id": "inscricao_684cb1c8af923da7c7df51de_5902324_2026",
+        "_id": "696ec4f2d730ee80d37cb457"
+      },
+      {
+        "tipo": "SALDO_TEMPORADA_ANTERIOR",
+        "valor": 178,
+        "ref_id": "saldo_anterior_684cb1c8af923da7c7df51de_5902324_2026",
+        "_id": "696ec4f2d730ee80d37cb458"
+      }
+    ],
+    "data_processamento": "2026-01-19T23:57:38.631Z"
+  },
+  {
+    "_id": "696ec5730f0a96d6931d5fb9",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "time_id": 715731,
+    "__v": 1,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-19T23:59:48.506Z",
+    "criado_em": "2026-01-19T23:59:47.235Z",
+    "dados_participante": {
+      "nome_time": "La Família 025 Cbjr",
+      "nome_cartoleiro": "Jonney Vojvoda",
+      "escudo": "https://s2-cartola.glbimg.com/U3VavTcs6WmBuSMkySM5Dqh9FPE=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_237/escudo/29/48/04/00482fcaf8-292a-4ade-bd93-192c3107792920250320224804",
+      "id_cartola_oficial": 715731
+    },
+    "data_decisao": "2026-01-19T23:59:47.235Z",
+    "divida_anterior": 240.46,
+    "observacoes": "",
+    "origem": "renovacao",
+    "pagou_inscricao": false,
+    "processado": true,
+    "saldo_inicial_temporada": -660.9200000000001,
+    "saldo_transferido": 0,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": -240.46,
+      "status_quitacao": "devedor"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -180,
+        "ref_id": "inscricao_684cb1c8af923da7c7df51de_715731_2026",
+        "_id": "696ec574d730ee80d37cb47c"
+      },
+      {
+        "tipo": "SALDO_TEMPORADA_ANTERIOR",
+        "valor": -240.46,
+        "ref_id": "saldo_anterior_684cb1c8af923da7c7df51de_715731_2026",
+        "_id": "696ec574d730ee80d37cb47d"
+      }
+    ],
+    "data_processamento": "2026-01-19T23:59:48.504Z"
+  },
+  {
+    "_id": "696ec5d6d730ee80d37cb485",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "time_id": 3300583,
+    "temporada": 2026,
+    "status": "renovado",
+    "dados_participante": {
+      "nome_time": "LEJORA FC",
+      "nome_cartoleiro": "Leilson Bezerra",
+      "escudo": "https://s2-cartola.glbimg.com/W7mlOe1jl5dpFAEPExUwCXjTBSM=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_2/escudo/e8/28/55/0035e0f640-0c85-4f82-88b3-74a1ddaff0e820260118092855",
+      "id_cartola_oficial": 3300583
+    },
+    "temporada_anterior": {
+      "saldo_final": 0,
+      "status_quitacao": "quitado"
+    },
+    "saldo_transferido": 0,
+    "taxa_inscricao": 180,
+    "divida_anterior": 0,
+    "saldo_inicial_temporada": 0,
+    "pagou_inscricao": true,
+    "origem": "renovacao",
+    "aprovado_por": "admin",
+    "observacoes": "",
+    "processado": true,
+    "legado_manual": {
+      "origem": "decisao_unificada",
+      "valor_original": 0.54,
+      "valor_definido": 0,
+      "tipo_quitacao": "zerado"
+    },
+    "transacoes_criadas": [],
+    "criado_em": "2026-01-20T00:01:26.445Z",
+    "atualizado_em": "2026-01-24T23:47:13.101Z",
+    "__v": 0,
+    "data_decisao": "2026-01-20T00:01:27.707Z",
+    "data_processamento": "2026-01-20T00:01:28.252Z"
+  },
+  {
+    "_id": "6973bbca694758bfc0c7c86c",
+    "time_id": 5254799,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "__v": 1,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-23T18:19:55.997Z",
+    "criado_em": "2026-01-23T18:19:54.711Z",
+    "dados_participante": {
+      "nome_time": "AltosShow",
+      "nome_cartoleiro": "Mauricio Wendel",
+      "escudo": "https://s2-cartola.glbimg.com/mWAPeW_4lvsVcZdseSxH_ZBK-6M=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_237/escudo/a1/50/53/00f1dd3e98-9ad5-401c-9f13-8c5421a5a1a120250324165053",
+      "id_cartola_oficial": 5254799
+    },
+    "data_decisao": "2026-01-23T18:19:54.710Z",
+    "divida_anterior": 0,
+    "observacoes": "[CORRIGIDO 2026-01-23T18:32:54.573Z] Inscricao paga com credito. Antes: taxa como debito separado.",
+    "origem": "renovacao",
+    "pagou_inscricao": true,
+    "processado": true,
+    "saldo_inicial_temporada": 1118.38,
+    "saldo_transferido": 1118.38,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": 1298.38,
+      "status_quitacao": "credor"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -180,
+        "ref_id": "inscricao_684cb1c8af923da7c7df51de_5254799_2026",
+        "_id": "6973bbcbb4eadcdac7501c45"
+      },
+      {
+        "tipo": "SALDO_TEMPORADA_ANTERIOR",
+        "valor": 1298.38,
+        "ref_id": "saldo_anterior_684cb1c8af923da7c7df51de_5254799_2026",
+        "_id": "6973bbcbb4eadcdac7501c46"
+      }
+    ],
+    "data_processamento": "2026-01-23T18:19:55.990Z"
+  },
+  {
+    "_id": "6973e212ce977e11ba3a2435",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "time_id": 1173066,
+    "__v": 0,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-23T21:03:15.090Z",
+    "criado_em": "2026-01-23T21:03:14.528Z",
+    "dados_participante": {
+      "nome_time": " two left feet tlf",
+      "nome_cartoleiro": "Mr. Carmilton",
+      "escudo": "https://s2-cartola.glbimg.com/CIrRR4Ic4u-c57vINaMghKdyxTo=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_203/escudo/e2/53/22/00fbdce42d-d54d-40fa-b3cb-c94777a560e220220407125322",
+      "id_cartola_oficial": 1173066
+    },
+    "data_decisao": "2026-01-23T21:03:14.527Z",
+    "divida_anterior": 0,
+    "observacoes": "",
+    "origem": "renovacao",
+    "pagou_inscricao": true,
+    "processado": true,
+    "saldo_inicial_temporada": 0,
+    "saldo_transferido": 59,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": 59,
+      "status_quitacao": "credor"
+    },
+    "transacoes_criadas": [],
+    "data_processamento": "2026-01-23T21:03:15.087Z"
+  },
+  {
+    "_id": "6973e28dce977e11ba3a24f3",
+    "time_id": 8183683,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "__v": 0,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-23T21:05:17.811Z",
+    "criado_em": "2026-01-23T21:05:17.267Z",
+    "dados_participante": {
+      "nome_time": "FlaMadridFlo",
+      "nome_cartoleiro": "Neto Waquim",
+      "escudo": "https://s2-cartola.glbimg.com/YR1c2t3ttAn0NfsmTuYMqKsTgp4=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/dd/32/03/00a9b9e295-4ed8-4ab3-bb4e-dba77e035fdd20250311223203",
+      "id_cartola_oficial": 8183683
+    },
+    "data_decisao": "2026-01-23T21:05:17.267Z",
+    "divida_anterior": 0,
+    "observacoes": "",
+    "origem": "renovacao",
+    "pagou_inscricao": true,
+    "processado": true,
+    "saldo_inicial_temporada": 0,
+    "saldo_transferido": 110,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": 110,
+      "status_quitacao": "credor"
+    },
+    "transacoes_criadas": [],
+    "data_processamento": "2026-01-23T21:05:17.811Z"
+  },
+  {
+    "_id": "69741341ce977e11ba3a708c",
+    "temporada": 2026,
+    "time_id": 25324292,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "__v": 1,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-24T00:33:06.624Z",
+    "criado_em": "2026-01-24T00:33:05.459Z",
+    "dados_participante": {
+      "nome_time": "Invictus Patamar S.A.F.",
+      "nome_cartoleiro": "Pedro Antônio",
+      "escudo": "https://s2-cartola.glbimg.com/gbjd-QdTHi8-f2AEGyh0IFYq8uE=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/32/15/02/00b17a99c1-1ae7-4ca9-98d3-8f7833ea0f3220250311131502",
+      "id_cartola_oficial": 25324292
+    },
+    "data_decisao": "2026-01-24T00:33:05.458Z",
+    "divida_anterior": 47,
+    "observacoes": "",
+    "origem": "renovacao",
+    "pagou_inscricao": false,
+    "processado": true,
+    "saldo_inicial_temporada": -274,
+    "saldo_transferido": 0,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": -47,
+      "status_quitacao": "devedor"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -180,
+        "ref_id": "inscricao_684cb1c8af923da7c7df51de_25324292_2026",
+        "_id": "6974134250d44891cb0773b1"
+      },
+      {
+        "tipo": "SALDO_TEMPORADA_ANTERIOR",
+        "valor": -47,
+        "ref_id": "saldo_anterior_684cb1c8af923da7c7df51de_25324292_2026",
+        "_id": "6974134250d44891cb0773b2"
+      }
+    ],
+    "data_processamento": "2026-01-24T00:33:06.612Z"
+  },
+  {
+    "_id": "6974135ace977e11ba3a70af",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "time_id": 14569704,
+    "__v": 1,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-24T00:33:31.886Z",
+    "criado_em": "2026-01-24T00:33:30.750Z",
+    "dados_participante": {
+      "nome_time": "Fla Stronger FC",
+      "nome_cartoleiro": "Rafael Janderson",
+      "escudo": "https://s2-cartola.glbimg.com/nfMz_oystbWZIhJej_7qlCZdBvE=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_237/escudo/e8/10/53/006d7ab9da-e0be-497d-89f3-dcd394e757e820250325061053",
+      "id_cartola_oficial": 14569704
+    },
+    "data_decisao": "2026-01-24T00:33:30.750Z",
+    "divida_anterior": 254,
+    "observacoes": "",
+    "origem": "renovacao",
+    "pagou_inscricao": false,
+    "processado": true,
+    "saldo_inicial_temporada": -688,
+    "saldo_transferido": 0,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": -254,
+      "status_quitacao": "devedor"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -180,
+        "ref_id": "inscricao_684cb1c8af923da7c7df51de_14569704_2026",
+        "_id": "6974135b50d44891cb0773bf"
+      },
+      {
+        "tipo": "SALDO_TEMPORADA_ANTERIOR",
+        "valor": -254,
+        "ref_id": "saldo_anterior_684cb1c8af923da7c7df51de_14569704_2026",
+        "_id": "6974135b50d44891cb0773c0"
+      }
+    ],
+    "data_processamento": "2026-01-24T00:33:31.884Z"
+  },
+  {
+    "_id": "6974136dce977e11ba3a70c6",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "time_id": 14916330,
+    "__v": 1,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-24T00:33:50.749Z",
+    "criado_em": "2026-01-24T00:33:49.609Z",
+    "dados_participante": {
+      "nome_time": "Lioness  Clubs",
+      "nome_cartoleiro": "Raimundo Pinheiro ",
+      "escudo": "https://s2-cartola.glbimg.com/mRo85ZdnFerFQyp4W2lOkVYyd98=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/bd/23/37/00cb582f75-e5cc-49d8-8def-bbe68e7764bd20250311222337",
+      "id_cartola_oficial": 14916330
+    },
+    "data_decisao": "2026-01-24T00:33:49.608Z",
+    "divida_anterior": 425.46,
+    "observacoes": "",
+    "origem": "renovacao",
+    "pagou_inscricao": false,
+    "processado": true,
+    "saldo_inicial_temporada": -1030.92,
+    "saldo_transferido": 0,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": -425.46,
+      "status_quitacao": "devedor"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -180,
+        "ref_id": "inscricao_684cb1c8af923da7c7df51de_14916330_2026",
+        "_id": "6974136e50d44891cb0773cd"
+      },
+      {
+        "tipo": "SALDO_TEMPORADA_ANTERIOR",
+        "valor": -425.46,
+        "ref_id": "saldo_anterior_684cb1c8af923da7c7df51de_14916330_2026",
+        "_id": "6974136e50d44891cb0773ce"
+      }
+    ],
+    "data_processamento": "2026-01-24T00:33:50.744Z"
+  },
+  {
+    "_id": "697413ee50d44891cb0773d6",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "time_id": 1039496,
+    "temporada": 2026,
+    "status": "renovado",
+    "dados_participante": {
+      "nome_time": "Randim",
+      "nome_cartoleiro": "Randerson Rodrigues",
+      "escudo": "https://s2-cartola.glbimg.com/BY2XS47U9RXBrTg_agj-cLLgPAk=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_3/escudo/7c/18/54/008e7b57d4-812d-49d5-a904-8403f884e67c20260126081854",
+      "id_cartola_oficial": 1039496
+    },
+    "temporada_anterior": {
+      "saldo_final": 0,
+      "status_quitacao": "quitado"
+    },
+    "saldo_transferido": 0,
+    "taxa_inscricao": 180,
+    "divida_anterior": 0,
+    "saldo_inicial_temporada": 0,
+    "pagou_inscricao": true,
+    "origem": "renovacao",
+    "aprovado_por": "admin",
+    "observacoes": "",
+    "processado": true,
+    "legado_manual": {
+      "origem": "decisao_unificada",
+      "valor_original": -135,
+      "valor_definido": 0,
+      "tipo_quitacao": "zerado"
+    },
+    "transacoes_criadas": [],
+    "criado_em": "2026-01-24T00:35:58.598Z",
+    "atualizado_em": "2026-01-28T01:39:37.804Z",
+    "__v": 0,
+    "data_decisao": "2026-01-24T00:35:59.728Z",
+    "data_processamento": "2026-01-24T00:36:00.215Z"
+  },
+  {
+    "_id": "69741425ce977e11ba3a71a6",
+    "time_id": 1932235,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "__v": 1,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-24T00:36:54.438Z",
+    "criado_em": "2026-01-24T00:36:53.305Z",
+    "dados_participante": {
+      "nome_time": "VILA LEÃO F.C",
+      "nome_cartoleiro": "RODRIGO PAES LANDIM ",
+      "escudo": "https://s2-cartola.glbimg.com/UhLsNosWoiOG6XxBAXOrQyci2FM=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_212/escudo/1e/46/00/00deaa8f15-208e-4879-99d1-521d6ab6cc1e20230404144600",
+      "id_cartola_oficial": 1932235
+    },
+    "data_decisao": "2026-01-24T00:36:53.305Z",
+    "divida_anterior": 99,
+    "observacoes": "",
+    "origem": "renovacao",
+    "pagou_inscricao": false,
+    "processado": true,
+    "saldo_inicial_temporada": -378,
+    "saldo_transferido": 0,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": -99,
+      "status_quitacao": "devedor"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -180,
+        "ref_id": "inscricao_684cb1c8af923da7c7df51de_1932235_2026",
+        "_id": "6974142650d44891cb0773ea"
+      },
+      {
+        "tipo": "SALDO_TEMPORADA_ANTERIOR",
+        "valor": -99,
+        "ref_id": "saldo_anterior_684cb1c8af923da7c7df51de_1932235_2026",
+        "_id": "6974142650d44891cb0773eb"
+      }
+    ],
+    "data_processamento": "2026-01-24T00:36:54.435Z"
+  },
+  {
+    "_id": "697414fece977e11ba3a72cf",
+    "temporada": 2026,
+    "time_id": 4966295,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "__v": 0,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-24T00:40:30.917Z",
+    "criado_em": "2026-01-24T00:40:30.365Z",
+    "dados_participante": {
+      "nome_time": "Pedras_City AC",
+      "nome_cartoleiro": "Rony Morais",
+      "escudo": "https://s2-cartola.glbimg.com/49qFi-ErG5vjvWynjFmoibKHpjQ=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_166/escudo/65/22/51/00572af97a-a778-4f4a-b9d8-d981efb6456520200727232251",
+      "id_cartola_oficial": 4966295
+    },
+    "data_decisao": "2026-01-24T00:40:30.365Z",
+    "divida_anterior": 0,
+    "observacoes": "",
+    "origem": "renovacao",
+    "pagou_inscricao": true,
+    "processado": true,
+    "saldo_inicial_temporada": 0,
+    "saldo_transferido": 171.54,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": 171.54,
+      "status_quitacao": "credor"
+    },
+    "transacoes_criadas": [],
+    "data_processamento": "2026-01-24T00:40:30.915Z"
+  },
+  {
+    "_id": "6974154bce977e11ba3a7335",
+    "time_id": 1459952,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "__v": 1,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-24T00:41:48.480Z",
+    "criado_em": "2026-01-24T00:41:47.338Z",
+    "dados_participante": {
+      "nome_time": "FC Arthur Sávio.C.C",
+      "nome_cartoleiro": "Sávio C Cavalcante ",
+      "escudo": "https://s2-cartola.glbimg.com/9P-eeFvkTIqbbmfemTuX16zJX3w=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_213/escudo/9b/24/47/00f17face5-70e6-4f2c-bc3a-eded1ce80c9b20230409122447",
+      "id_cartola_oficial": 1459952
+    },
+    "data_decisao": "2026-01-24T00:41:47.337Z",
+    "divida_anterior": 71,
+    "observacoes": "",
+    "origem": "renovacao",
+    "pagou_inscricao": false,
+    "processado": true,
+    "saldo_inicial_temporada": -322,
+    "saldo_transferido": 0,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": -71,
+      "status_quitacao": "devedor"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -180,
+        "ref_id": "inscricao_684cb1c8af923da7c7df51de_1459952_2026",
+        "_id": "6974154c50d44891cb07742d"
+      },
+      {
+        "tipo": "SALDO_TEMPORADA_ANTERIOR",
+        "valor": -71,
+        "ref_id": "saldo_anterior_684cb1c8af923da7c7df51de_1459952_2026",
+        "_id": "6974154c50d44891cb07742e"
+      }
+    ],
+    "data_processamento": "2026-01-24T00:41:48.477Z"
+  },
+  {
+    "_id": "697415a0ce977e11ba3a73aa",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "time_id": 1568358,
+    "__v": 1,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-24T00:43:13.319Z",
+    "criado_em": "2026-01-24T00:43:12.206Z",
+    "dados_participante": {
+      "nome_time": "Dollynho United FC",
+      "nome_cartoleiro": "Sir Gegé   ",
+      "escudo": "https://s2-cartola.glbimg.com/TpMxaid-TQgtMB7B41zxEvn3MoA=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/78/44/35/005e1577f1-d3bb-4e23-bd54-d8131889777820250311124435",
+      "id_cartola_oficial": 1568358
+    },
+    "data_decisao": "2026-01-24T00:43:12.206Z",
+    "divida_anterior": 0,
+    "observacoes": "",
+    "origem": "renovacao",
+    "pagou_inscricao": true,
+    "processado": true,
+    "saldo_inicial_temporada": 368.06999999999994,
+    "saldo_transferido": 548.0699999999999,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": 548.0699999999999,
+      "status_quitacao": "credor"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "SALDO_TEMPORADA_ANTERIOR",
+        "valor": 368.06999999999994,
+        "ref_id": "saldo_anterior_684cb1c8af923da7c7df51de_1568358_2026",
+        "_id": "697415a150d44891cb07744e"
+      }
+    ],
+    "data_processamento": "2026-01-24T00:43:13.316Z"
+  },
+  {
+    "_id": "697415bace977e11ba3a73ce",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "time_id": 3027272,
+    "__v": 1,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-24T00:43:40.104Z",
+    "criado_em": "2026-01-24T00:43:38.878Z",
+    "dados_participante": {
+      "nome_time": "Vitim 10 FC",
+      "nome_cartoleiro": "Vitim",
+      "escudo": "https://s2-cartola.glbimg.com/DANx0cpRHzW-C_XwWkGJJRI1bAM=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_222/escudo/07/48/48/007351dafe-0b47-4f48-a78d-f4aa9ad6c70720240320164848",
+      "id_cartola_oficial": 3027272
+    },
+    "data_decisao": "2026-01-24T00:43:38.878Z",
+    "divida_anterior": 0,
+    "observacoes": "",
+    "origem": "renovacao",
+    "pagou_inscricao": true,
+    "processado": true,
+    "saldo_inicial_temporada": 1668.67,
+    "saldo_transferido": 1848.67,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": 1848.67,
+      "status_quitacao": "credor"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "SALDO_TEMPORADA_ANTERIOR",
+        "valor": 1668.67,
+        "ref_id": "saldo_anterior_684cb1c8af923da7c7df51de_3027272_2026",
+        "_id": "697415bc50d44891cb07745b"
+      }
+    ],
+    "data_processamento": "2026-01-24T00:43:40.102Z"
+  },
+  {
+    "_id": "697415cdce977e11ba3a73ec",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "time_id": 7698677,
+    "__v": 1,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-24T00:43:58.764Z",
+    "criado_em": "2026-01-24T00:43:57.802Z",
+    "dados_participante": {
+      "nome_time": "FC WESLEY OLIVEIRA",
+      "nome_cartoleiro": "Wesley Oliveira",
+      "escudo": "https://s2-cartola.glbimg.com/Wys2YIpHrJUAlYDY9XwVB6EMjnE=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_238/escudo/39/55/15/00488bddce-2a6b-4edc-b39a-ccf3b5f2333920250328095515",
+      "id_cartola_oficial": 7698677
+    },
+    "data_decisao": "2026-01-24T00:43:57.802Z",
+    "divida_anterior": 0,
+    "observacoes": "",
+    "origem": "renovacao",
+    "pagou_inscricao": true,
+    "processado": true,
+    "saldo_inicial_temporada": 904.54,
+    "saldo_transferido": 1084.54,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": 1084.54,
+      "status_quitacao": "credor"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "SALDO_TEMPORADA_ANTERIOR",
+        "valor": 904.54,
+        "ref_id": "saldo_anterior_684cb1c8af923da7c7df51de_7698677_2026",
+        "_id": "697415ce50d44891cb077468"
+      }
+    ],
+    "data_processamento": "2026-01-24T00:43:58.763Z"
+  },
+  {
+    "_id": "697416afce977e11ba3a752d",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "time_id": 164131,
+    "__v": 0,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-24T00:47:43.781Z",
+    "criado_em": "2026-01-24T00:47:43.781Z",
+    "dados_participante": {
+      "nome_time": " 51 Sportclub",
+      "nome_cartoleiro": "JB Oliveira",
+      "escudo": "https://s2-cartola.glbimg.com/613JIbTrU_m1MAm9P7tsCnNc8HQ=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_212/escudo/a3/32/49/00579d8956-dace-4efa-b2b5-7b78a7bb20a320230327223249",
+      "id_cartola_oficial": 164131
+    },
+    "data_decisao": "2026-01-24T00:47:43.781Z",
+    "data_processamento": "2026-01-24T00:47:43.781Z",
+    "divida_anterior": 0,
+    "observacoes": "Optou por não participar",
+    "origem": "renovacao",
+    "pagou_inscricao": true,
+    "processado": true,
+    "saldo_inicial_temporada": 0,
+    "saldo_transferido": 0,
+    "status": "nao_participa",
+    "taxa_inscricao": 0,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": 0,
+      "status_quitacao": "quitado"
+    },
+    "transacoes_criadas": []
+  },
+  {
+    "_id": "697417e0ce977e11ba3a76d2",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "time_id": 20165417,
+    "__v": 1,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-24T00:52:49.994Z",
+    "criado_em": "2026-01-24T00:52:48.860Z",
+    "dados_participante": {
+      "nome_time": "RB Ousadia&Alegria 94",
+      "nome_cartoleiro": "Raylson Fernandes",
+      "escudo": "https://s2-cartola.glbimg.com/J39tNqJcxSL9Zk1YfqIUUDBiB28=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_205/escudo/1f/53/55/00ee0f7db4-ac40-4e3b-a713-bd18ddfb051f20220409145355",
+      "id_cartola_oficial": 20165417
+    },
+    "data_decisao": "2026-01-24T00:52:48.859Z",
+    "divida_anterior": 165,
+    "observacoes": "",
+    "origem": "renovacao",
+    "pagou_inscricao": false,
+    "processado": true,
+    "saldo_inicial_temporada": -510,
+    "saldo_transferido": 0,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": -165,
+      "status_quitacao": "devedor"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -180,
+        "ref_id": "inscricao_684cb1c8af923da7c7df51de_20165417_2026",
+        "_id": "697417e150d44891cb0774a7"
+      },
+      {
+        "tipo": "SALDO_TEMPORADA_ANTERIOR",
+        "valor": -165,
+        "ref_id": "saldo_anterior_684cb1c8af923da7c7df51de_20165417_2026",
+        "_id": "697417e150d44891cb0774a8"
+      }
+    ],
+    "data_processamento": "2026-01-24T00:52:49.990Z"
+  },
+  {
+    "_id": "69741800ce977e11ba3a76fc",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "time_id": 45004009,
+    "__v": 1,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-28T01:29:40.642Z",
+    "criado_em": "2026-01-24T00:53:20.280Z",
+    "dados_participante": {
+      "nome_time": "fc.catumbi",
+      "nome_cartoleiro": "fucim ",
+      "escudo": "https://s2-cartola.glbimg.com/xmP3eccyTVmcw9SOwRP2R8mqqcY=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_215/escudo/43/53/40/009730c5f8-bf31-43e2-98ba-f1d1eb83144320230414165340",
+      "id_cartola_oficial": 45004009
+    },
+    "data_decisao": "2026-01-24T20:21:58.803Z",
+    "data_processamento": "2026-01-24T20:21:59.722Z",
+    "divida_anterior": 0,
+    "observacoes": "",
+    "origem": "renovacao",
+    "pagou_inscricao": false,
+    "processado": true,
+    "saldo_inicial_temporada": -180,
+    "saldo_transferido": 0,
+    "status": "renovado",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": -14,
+      "status_quitacao": "devedor"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -180,
+        "ref_id": "inscricao_684cb1c8af923da7c7df51de_45004009_2026",
+        "_id": "697529e738895ae8d0ed6742"
+      }
+    ],
+    "legado_manual": {
+      "origem": "decisao_unificada",
+      "tipo_quitacao": "zerado",
+      "valor_original": -14,
+      "valor_definido": 0
+    }
+  },
+  {
+    "_id": "69741818ce977e11ba3a7726",
+    "time_id": 1233737,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "__v": 0,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-24T00:53:44.331Z",
+    "criado_em": "2026-01-24T00:53:44.331Z",
+    "dados_participante": {
+      "nome_time": "Wil08",
+      "nome_cartoleiro": "Wildemar Silva",
+      "escudo": "https://s2-cartola.glbimg.com/3u2Gk_8w9JK42F3YFkzZqjgciaE=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_237/escudo/41/54/06/00cdd69d61-e8ad-4156-a490-97724e433f4120250324185406",
+      "id_cartola_oficial": 1233737
+    },
+    "data_decisao": "2026-01-24T00:53:44.330Z",
+    "data_processamento": "2026-01-24T00:53:44.330Z",
+    "divida_anterior": 0,
+    "observacoes": "Optou por não participar",
+    "origem": "renovacao",
+    "pagou_inscricao": true,
+    "processado": true,
+    "saldo_inicial_temporada": 0,
+    "saldo_transferido": 0,
+    "status": "nao_participa",
+    "taxa_inscricao": 0,
+    "temporada_anterior": {
+      "temporada": 2025,
+      "saldo_final": 0,
+      "status_quitacao": "quitado"
+    },
+    "transacoes_criadas": []
+  },
+  {
+    "_id": "697816d9ad61691182d84ef5",
+    "liga_id": "6977a62071dee12036bb163e",
+    "time_id": 13935277,
+    "temporada": 2026,
+    "status": "novo",
+    "taxa_inscricao": 100,
+    "pagou_inscricao": false,
+    "saldo_anterior": 0,
+    "saldo_inicial_temporada": -100,
+    "dados_participante": {
+      "nome_cartoleiro": "Paulinett Miranda",
+      "nomeTime": "Urubu Play F.C.",
+      "clube_id": 262
+    },
+    "processado_em": "2026-01-27T01:37:28.660Z",
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -100,
+        "ref_id": "inscricao_13935277_2026"
+      }
+    ],
+    "atualizado_em": "2026-01-27T17:44:44.820Z",
+    "observacoes": "Inscrição criada via script fix-osfuleros-inscricoes.js"
+  },
+  {
+    "_id": "697816daad61691182d84ef7",
+    "liga_id": "6977a62071dee12036bb163e",
+    "time_id": 50988035,
+    "temporada": 2026,
+    "status": "novo",
+    "taxa_inscricao": 100,
+    "pagou_inscricao": true,
+    "saldo_anterior": 0,
+    "saldo_inicial_temporada": 0,
+    "dados_participante": {
+      "nome_cartoleiro": "Enderson",
+      "nomeTime": "Obraga04",
+      "clube_id": 262
+    },
+    "processado_em": "2026-01-27T01:37:28.660Z",
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -100,
+        "ref_id": "inscricao_50988035_2026"
+      }
+    ],
+    "atualizado_em": "2026-01-27T17:44:45.010Z",
+    "observacoes": "Inscrição criada via script fix-osfuleros-inscricoes.js | Sincronizado em 2026-01-27T17:34:42.252Z - Acerto 697817f30801132b4a6b77e4 | Saldo corrigido em 2026-01-27T17:36:57.418Z (era -100)"
+  },
+  {
+    "_id": "697816daad61691182d84ef9",
+    "liga_id": "6977a62071dee12036bb163e",
+    "time_id": 9232824,
+    "temporada": 2026,
+    "status": "novo",
+    "taxa_inscricao": 100,
+    "pagou_inscricao": false,
+    "saldo_anterior": 0,
+    "saldo_inicial_temporada": -100,
+    "dados_participante": {
+      "nome_cartoleiro": "Padé Papito",
+      "nomeTime": "Papito's Football Club",
+      "clube_id": 284,
+      "escudo": "https://s2-cartola.glbimg.com/MT-TkCJqZ8-UkJMjF1IUfUQbhYA=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_2/escudo/76/20/29/001f747d9c-9076-4461-a9cf-95113b075b7620260113122029",
+      "nome_time": "Papito's Football Club"
+    },
+    "processado_em": "2026-01-27T01:37:28.660Z",
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -100,
+        "ref_id": "inscricao_9232824_2026"
+      }
+    ],
+    "atualizado_em": "2026-02-18T13:40:35.048Z",
+    "observacoes": "Inscrição criada via script fix-osfuleros-inscricoes.js"
+  },
+  {
+    "_id": "697816dbad61691182d84efb",
+    "liga_id": "6977a62071dee12036bb163e",
+    "time_id": 25330294,
+    "temporada": 2026,
+    "status": "novo",
+    "taxa_inscricao": 100,
+    "pagou_inscricao": false,
+    "saldo_anterior": 0,
+    "saldo_inicial_temporada": -100,
+    "dados_participante": {
+      "nome_cartoleiro": "jhones Prado ",
+      "nomeTime": "j.Prado fc",
+      "clube_id": 262
+    },
+    "processado_em": "2026-01-27T01:37:28.660Z",
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -100,
+        "ref_id": "inscricao_25330294_2026"
+      }
+    ],
+    "atualizado_em": "2026-01-27T17:44:45.379Z",
+    "observacoes": "Inscrição criada via script fix-osfuleros-inscricoes.js"
+  },
+  {
+    "_id": "697816dcad61691182d84efd",
+    "liga_id": "6977a62071dee12036bb163e",
+    "time_id": 47664680,
+    "temporada": 2026,
+    "status": "novo",
+    "taxa_inscricao": 100,
+    "pagou_inscricao": true,
+    "saldo_anterior": 0,
+    "saldo_inicial_temporada": 0,
+    "dados_participante": {
+      "nome_cartoleiro": "Erivaldo",
+      "nomeTime": "CR ErySoldado ",
+      "clube_id": 262
+    },
+    "processado_em": "2026-01-27T01:37:28.660Z",
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -100,
+        "ref_id": "inscricao_47664680_2026"
+      }
+    ],
+    "atualizado_em": "2026-01-27T17:44:45.560Z",
+    "observacoes": "Inscrição criada via script fix-osfuleros-inscricoes.js | Sincronizado em 2026-01-27T17:34:42.977Z - Acerto 697817de0801132b4a6b77d2 | Saldo corrigido em 2026-01-27T17:36:57.755Z (era -100)"
+  },
+  {
+    "_id": "697816ddad61691182d84eff",
+    "liga_id": "6977a62071dee12036bb163e",
+    "time_id": 4223845,
+    "temporada": 2026,
+    "status": "novo",
+    "taxa_inscricao": 100,
+    "pagou_inscricao": false,
+    "saldo_anterior": 0,
+    "saldo_inicial_temporada": -100,
+    "dados_participante": {
+      "nome_cartoleiro": "bruno",
+      "nomeTime": "TriiMundial sp",
+      "clube_id": 276,
+      "escudo": "https://s2-cartola.glbimg.com/nWIkiO8ihiMQmAQl8Nft6OlF0tI=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_222/escudo/0b/35/49/00248061c7-9d11-405d-a9a9-84d9a3b8540b20240321093549",
+      "nome_time": "TriiMundial sp"
+    },
+    "processado_em": "2026-01-27T01:37:28.660Z",
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -100,
+        "ref_id": "inscricao_4223845_2026"
+      }
+    ],
+    "atualizado_em": "2026-02-07T20:26:11.546Z",
+    "observacoes": "Inscrição criada via script fix-osfuleros-inscricoes.js"
+  },
+  {
+    "_id": "697816ddad61691182d84f01",
+    "liga_id": "6977a62071dee12036bb163e",
+    "time_id": 4021507,
+    "temporada": 2026,
+    "status": "novo",
+    "taxa_inscricao": 100,
+    "pagou_inscricao": false,
+    "saldo_anterior": 0,
+    "saldo_inicial_temporada": -100,
+    "dados_participante": {
+      "nome_cartoleiro": "Thyago Martins",
+      "nomeTime": "TCMV Futebol club",
+      "clube_id": 277
+    },
+    "processado_em": "2026-01-27T01:37:28.660Z",
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -100,
+        "ref_id": "inscricao_4021507_2026"
+      }
+    ],
+    "atualizado_em": "2026-01-27T17:44:45.935Z",
+    "observacoes": "Inscrição criada via script fix-osfuleros-inscricoes.js"
+  },
+  {
+    "_id": "69795aec6495ba0bb86894ac",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "time_id": 476869,
+    "temporada": 2026,
+    "status": "novo",
+    "dados_participante": {
+      "nome_cartoleiro": "Lucas Sousa",
+      "nome_time": "Engenhando",
+      "escudo": "https://s2-cartola.glbimg.com/_eqX4D-QFHuwyRQykxqJGpyb_fY=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_3/escudo/10/42/57/00ddaf0e2b-c6e7-4d2e-a2a3-d2d226fd871020260126204257"
+    },
+    "pagou_inscricao": false,
+    "saldo_transferido": 0,
+    "saldo_inicial_temporada": 0,
+    "criado_em": "2026-01-28T00:40:12.995Z",
+    "criado_por": "admin-fix",
+    "observacoes": "Criado manualmente - participante existia em liga.participantes sem inscricao 2026",
+    "atualizado_em": "2026-01-28T00:43:55.960Z"
+  },
+  {
+    "_id": "6979623d4645f26dd567faca",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "time_id": 14003233,
+    "temporada": 2026,
+    "status": "novo",
+    "dados_participante": {
+      "nome_cartoleiro": "Marconi Araújo",
+      "nome_time": "Palestra Itália JN",
+      "escudo": "https://s2-cartola.glbimg.com/tbziml9OQUsMBiEMcB_dUwS8zvw=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_3/escudo/0f/59/39/0017e9f996-cb07-4479-8be6-7d301673690f20260124145939",
+      "clube_id": null,
+      "foto_perfil": ""
+    },
+    "created_at": "2026-01-28T01:11:25.998Z",
+    "updated_at": "2026-01-28T01:11:25.998Z",
+    "aprovado_por": "admin-fix",
+    "observacoes": "Inscrição criada manualmente para corrigir participante órfão",
+    "atualizado_em": "2026-01-28T01:14:06.764Z"
+  },
+  {
+    "_id": "6979663e794308faf34db732",
+    "temporada": 2026,
+    "time_id": 752847,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "__v": 1,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-28T01:28:49.440Z",
+    "criado_em": "2026-01-28T01:28:30.795Z",
+    "dados_participante": {
+      "nome_time": "Trem Bala Juá",
+      "nome_cartoleiro": "Yuri Jivago",
+      "escudo": "https://s2-cartola.glbimg.com/Q22J8WjMevR2ctMj5dTZclGAWmU=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_3/escudo/70/40/40/00938d2df4-2404-4a8b-aa46-aa82065da77020260124164040",
+      "id_cartola_oficial": 752847
+    },
+    "data_decisao": "2026-01-28T01:28:30.794Z",
+    "divida_anterior": 0,
+    "observacoes": "Novo participante adicionado via modal",
+    "origem": "novo_cadastro",
+    "pagou_inscricao": false,
+    "processado": true,
+    "saldo_inicial_temporada": -180,
+    "saldo_transferido": 0,
+    "status": "novo",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": null,
+      "saldo_final": 0,
+      "status_quitacao": "quitado"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -180,
+        "ref_id": "inscricao_684cb1c8af923da7c7df51de_752847_2026",
+        "_id": "6979663f925a308b3c332af7"
+      }
+    ],
+    "data_processamento": "2026-01-28T01:28:31.712Z"
+  },
+  {
+    "_id": "697a0082794308faf34e07e8",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "time_id": 1113367,
+    "__v": 1,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-28T12:27:37.059Z",
+    "criado_em": "2026-01-28T12:26:42.298Z",
+    "dados_participante": {
+      "nome_time": "BarrosB",
+      "nome_cartoleiro": "Bruno Barros",
+      "escudo": "https://s2-cartola.glbimg.com/vyEi986OL4l05LKnwkZft8RR9nc=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_4/escudo/2b/23/35/0085634f0f-0d1f-4abb-95bb-08f84c63cd2b20260128092335",
+      "id_cartola_oficial": 1113367
+    },
+    "data_decisao": "2026-01-28T12:26:42.298Z",
+    "divida_anterior": 0,
+    "observacoes": "Novo participante adicionado via modal",
+    "origem": "novo_cadastro",
+    "pagou_inscricao": false,
+    "processado": true,
+    "saldo_inicial_temporada": -180,
+    "saldo_transferido": 0,
+    "status": "novo",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": null,
+      "saldo_final": 0,
+      "status_quitacao": "quitado"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -180,
+        "ref_id": "inscricao_684cb1c8af923da7c7df51de_1113367_2026",
+        "_id": "697a008300325092fda0700b"
+      }
+    ],
+    "data_processamento": "2026-01-28T12:26:43.221Z"
+  },
+  {
+    "_id": "697ac45a1406198d59bd92dc",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "time_id": 1649056,
+    "__v": 1,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-29T02:23:00.572Z",
+    "criado_em": "2026-01-29T02:22:18.523Z",
+    "dados_participante": {
+      "nome_time": "GAAVAZ.FC",
+      "nome_cartoleiro": "Geones Vaz",
+      "escudo": "https://s2-cartola.glbimg.com/P-brxi6ymWNr5zQBJwRUQpF6_uA=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_2/escudo/2d/57/08/0088a59cc8-b52d-4bdd-a6b0-be7d7c0c162d20260115125708",
+      "id_cartola_oficial": 1649056
+    },
+    "data_decisao": "2026-01-29T02:22:18.522Z",
+    "divida_anterior": 0,
+    "observacoes": "Adicionado via Ferramentas > Adicionar Participante",
+    "origem": "novo_cadastro",
+    "pagou_inscricao": false,
+    "processado": true,
+    "saldo_inicial_temporada": -180,
+    "saldo_transferido": 0,
+    "status": "novo",
+    "taxa_inscricao": 180,
+    "temporada_anterior": {
+      "temporada": null,
+      "saldo_final": 0,
+      "status_quitacao": "quitado"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -180,
+        "ref_id": "inscricao_684cb1c8af923da7c7df51de_1649056_2026",
+        "_id": "697ac45bf812fd04373bdf86"
+      }
+    ],
+    "data_processamento": "2026-01-29T02:22:19.264Z"
+  },
+  {
+    "_id": "697bc8630b500f83e025e707",
+    "temporada": 2026,
+    "liga_id": "6977a62071dee12036bb163e",
+    "time_id": 51078986,
+    "__v": 1,
+    "aprovado_por": "admin",
+    "atualizado_em": "2026-01-29T20:54:03.784Z",
+    "criado_em": "2026-01-29T20:51:47.213Z",
+    "dados_participante": {
+      "nome_time": "ABC_Flamengo_BR",
+      "nome_cartoleiro": "Anthony",
+      "escudo": "https://s2-cartola.glbimg.com/ubwUGGVPPLjl6q9j3C4vGbMSK9I=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_4/escudo/22/49/34/0061599b41-6d60-41f4-8290-1dfdbc5bfe2220260128134934",
+      "id_cartola_oficial": 51078986
+    },
+    "data_decisao": "2026-01-29T20:51:47.212Z",
+    "divida_anterior": 0,
+    "observacoes": "Adicionado via Ferramentas > Adicionar Participante",
+    "origem": "novo_cadastro",
+    "pagou_inscricao": false,
+    "processado": true,
+    "saldo_inicial_temporada": -100,
+    "saldo_transferido": 0,
+    "status": "novo",
+    "taxa_inscricao": 100,
+    "temporada_anterior": {
+      "temporada": null,
+      "saldo_final": 0,
+      "status_quitacao": "quitado"
+    },
+    "transacoes_criadas": [
+      {
+        "tipo": "INSCRICAO_TEMPORADA",
+        "valor": -100,
+        "ref_id": "inscricao_6977a62071dee12036bb163e_51078986_2026",
+        "_id": "697bc864eab8e70094d0818f"
+      }
+    ],
+    "data_processamento": "2026-01-29T20:51:48.141Z"
+  }
+]

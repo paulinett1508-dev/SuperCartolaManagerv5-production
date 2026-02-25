@@ -1,0 +1,40 @@
+[
+  {
+    "_id": "694dcd261df76840c0942d2d",
+    "email": "paulinett@live.com",
+    "nome": "Simone Miranda",
+    "senhaHash": "$2b$10$FlNaYLF0kqt2wuDK8m6Vz.VhvaUNTWHRuhcZ3DaaE2CThFC1NMuPy",
+    "senhaProvisoria": false,
+    "superAdmin": false,
+    "ativo": true,
+    "criadoEm": "2025-12-25T23:47:50.616Z",
+    "criadoPor": "paulinete.miranda@laboratoriosobral.com.br",
+    "tipo": "cliente",
+    "ultimoAcesso": "2025-12-25T23:55:13.757Z",
+    "updatedAt": "2025-12-25T23:49:24.234Z"
+  },
+  {
+    "_id": "694f11e2df76d7f81b948523",
+    "email": "paulinete.miranda@laboratoriosobral.com.br",
+    "nome": "Owner Replit",
+    "superAdmin": true,
+    "ativo": true,
+    "criadoEm": "2025-12-26T00:00:00.000Z",
+    "criadoPor": "sistema",
+    "tipo": "owner"
+  },
+  {
+    "_id": "69815ae6507b1bb44c1ef7b8",
+    "email": "paulinett1508@gmail.com",
+    "nome": "O Presida",
+    "senhaHash": "$2b$10$jG6E10Gx3OIaxlsZkm/HYe0J9D1tLmz9KrbBiReUUpaJJeDRQWjCu",
+    "senhaProvisoria": false,
+    "superAdmin": false,
+    "ativo": true,
+    "criadoEm": "2026-02-03T02:18:14.350Z",
+    "criadoPor": "sistema",
+    "tipo": "cliente",
+    "ultimoAcesso": "2026-02-24T14:43:06.719Z",
+    "updatedAt": "2026-02-03T02:31:38.111Z"
+  }
+]

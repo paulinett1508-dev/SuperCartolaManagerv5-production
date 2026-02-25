@@ -1,0 +1,22 @@
+[
+  {
+    "_id": "697659ffefa6ef8bdafdef00",
+    "timeId": "13935277",
+    "endpoint": "https://wns2-bl2p.notify.windows.com/w/?token=BQYAAADJ29Rt724HLACfTlBpBzC9k5Dj6Ys%2blKyRhk9QVN13V7H0Vhnmiuv1q95uqMTO1uCWivFAXMV93oGBDfQBHKH4EEFR0VDspPffS%2fex2COENjEiFf2G9qU7zj4Dg30vjIoHnTWH3yirk%2bRSp92E2UnGNrPUsEEUs8GPVbd9rDq8KGwpD5UIymUp03bfAIb67MAY40tv0X1JH4%2f4i9qPwcLDA9FRthoZ058J04AWW43RdiWcdc0nou3MBdtfIE3nDRwFPmN2bTikzsN7307HY4sxJJRJFBliBU%2fP62q0yh7X0ZuiyM9feKuZI8GHeIWXfgfNbM0VRHEZ5wtqoLEGjvyU",
+    "keys": {
+      "p256dh": "BEZe2zxRM96M-jZPbnRl139OK2_q06QCHj-f-VHKsFy7PRWt0G3uK_Mb_8vPol6LjC4vh8m6M3PvufX5kSx36zM",
+      "auth": "aZfp7QiIhT1_wOnwx82V6g"
+    },
+    "preferences": {
+      "rodadaConsolidada": true,
+      "mitoMico": true,
+      "escalacaoPendente": true,
+      "acertosFinanceiros": true
+    },
+    "active": true,
+    "createdAt": "2026-01-25T17:59:27.143Z",
+    "expiresAt": null,
+    "lastUsed": "2026-01-25T17:59:33.871Z",
+    "__v": 0
+  }
+]

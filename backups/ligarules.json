@@ -1,0 +1,42 @@
+[
+  {
+    "_id": "695a971ed35f7c2b6ff23d6d",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "__v": 0,
+    "atualizado_em": "2026-01-25T02:32:09.354Z",
+    "atualizado_por": "admin",
+    "criado_em": "2026-01-04T16:36:45.941Z",
+    "criado_por": "sistema",
+    "inscricao": {
+      "taxa": 180,
+      "prazo_renovacao": "2026-01-25T00:00:00.000Z",
+      "permitir_devedor_renovar": true,
+      "aproveitar_saldo_positivo": true,
+      "permitir_parcelamento": true,
+      "max_parcelas": 3
+    },
+    "mensagens": {
+      "boas_vindas": "Bem-vindo 2026",
+      "aviso_devedor": "Pendencias",
+      "confirmacao": "OK"
+    },
+    "status": "fechado"
+  },
+  {
+    "_id": "697816d9ad61691182d84ef4",
+    "liga_id": "6977a62071dee12036bb163e",
+    "temporada": 2026,
+    "inscricao": {
+      "taxa": 100,
+      "prazo_renovacao": "2026-03-01T00:00:00.000Z",
+      "permitir_devedor_renovar": true,
+      "aproveitar_saldo_positivo": true,
+      "permitir_parcelamento": false,
+      "max_parcelas": 1
+    },
+    "status": "aberto",
+    "criado_em": "2026-01-27T01:37:28.660Z",
+    "criado_por": "script"
+  }
+]

@@ -1,0 +1,1054 @@
+[
+  {
+    "_id": "695acbe6d35f7c2b6ff263b7",
+    "modulo": "mata_mata",
+    "temporada": 2026,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "__v": 0,
+    "ativado_em": "2026-02-06T00:26:39.822Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-06T00:26:39.823Z",
+    "atualizado_por": "sistema_sync",
+    "calendario_override": [],
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-01-04T20:21:58.330Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": null,
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {
+      "total_times": "32",
+      "qtd_edicoes": 7,
+      "valor_vitoria": 10,
+      "valor_derrota": -10,
+      "valores_progressivos": false,
+      "integrar_extrato": true,
+      "extrato_tipo_impacto": "misto",
+      "extrato_regra": "Extrato deve receber valores pertinentes em cada rodada de acordo com a configuração do módulo específico"
+    },
+    "configurado": false
+  },
+  {
+    "_id": "69682e7656ec8ee74c25de2b",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "modulo": "pontos_corridos",
+    "temporada": 2025,
+    "ativado_em": "2026-01-15T00:01:58.437Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-04T23:21:45.816Z",
+    "atualizado_por": "migracao-2025",
+    "configurado_por": "migracao-2025",
+    "criado_em": "2026-01-15T00:01:58.437Z",
+    "criado_por": "migracao-2025",
+    "regras_override": {
+      "rodada_inicial": 2
+    }
+  },
+  {
+    "_id": "69682e7656ec8ee74c25de2c",
+    "temporada": 2025,
+    "modulo": "mata_mata",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "ativado_em": "2026-01-15T00:01:58.437Z",
+    "ativo": true,
+    "atualizado_em": "2026-01-15T00:01:58.437Z",
+    "atualizado_por": "migracao-2025",
+    "configurado_por": "migracao-2025",
+    "criado_em": "2026-01-15T00:01:58.437Z",
+    "criado_por": "migracao-2025"
+  },
+  {
+    "_id": "69682e7656ec8ee74c25de2d",
+    "temporada": 2025,
+    "modulo": "melhor_mes",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "ativado_em": "2026-01-15T00:01:58.437Z",
+    "ativo": true,
+    "atualizado_em": "2026-01-15T00:01:58.437Z",
+    "atualizado_por": "migracao-2025",
+    "configurado_por": "migracao-2025",
+    "criado_em": "2026-01-15T00:01:58.437Z",
+    "criado_por": "migracao-2025"
+  },
+  {
+    "_id": "69682e7756ec8ee74c25de2e",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "modulo": "top10",
+    "temporada": 2025,
+    "ativado_em": "2026-01-15T00:01:58.437Z",
+    "ativo": true,
+    "atualizado_em": "2026-01-15T00:01:58.437Z",
+    "atualizado_por": "migracao-2025",
+    "configurado_por": "migracao-2025",
+    "criado_em": "2026-01-15T00:01:58.437Z",
+    "criado_por": "migracao-2025"
+  },
+  {
+    "_id": "69682e7756ec8ee74c25de2f",
+    "temporada": 2025,
+    "modulo": "banco",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "ativado_em": "2026-01-15T00:01:58.437Z",
+    "ativo": true,
+    "atualizado_em": "2026-01-15T00:01:58.437Z",
+    "atualizado_por": "migracao-2025",
+    "configurado_por": "migracao-2025",
+    "criado_em": "2026-01-15T00:01:58.437Z",
+    "criado_por": "migracao-2025"
+  },
+  {
+    "_id": "697583a8236b0ac260895eac",
+    "temporada": 2026,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "modulo": "top10",
+    "ativo": false,
+    "atualizado_em": "2026-01-25T02:44:56.591Z",
+    "atualizado_por": "reset-temporada-2026",
+    "configurado": false,
+    "configurado_por": "sistema",
+    "criado_em": "2026-01-25T02:44:56.591Z"
+  },
+  {
+    "_id": "697583a9236b0ac260895eae",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "modulo": "melhor_mes",
+    "temporada": 2026,
+    "ativo": true,
+    "atualizado_em": "2026-02-04T00:08:56.490Z",
+    "atualizado_por": "sistema_sync",
+    "configurado": false,
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-01-25T02:44:56.959Z",
+    "wizard_respostas": {
+      "edicoes_intervalos": {
+        "1": {
+          "inicio": 1,
+          "fim": 4
+        },
+        "2": {
+          "inicio": 5,
+          "fim": 8
+        },
+        "3": {
+          "inicio": 9,
+          "fim": 13
+        },
+        "4": {
+          "inicio": 14,
+          "fim": 18
+        },
+        "5": {
+          "inicio": 19,
+          "fim": 25
+        },
+        "6": {
+          "inicio": 26,
+          "fim": 33
+        },
+        "7": {
+          "inicio": 34,
+          "fim": 38
+        }
+      },
+      "total_edicoes": 7,
+      "valor_campeao_edicao": 80,
+      "valor_campeao_geral": 20,
+      "integrar_extrato": true,
+      "extrato_tipo_impacto": "credito",
+      "extrato_regra": "Inputado para o participante que ganhar ao final de cada edição"
+    },
+    "ativado_em": "2026-02-04T00:08:56.489Z"
+  },
+  {
+    "_id": "697583a9236b0ac260895eaf",
+    "modulo": "pontos_corridos",
+    "temporada": 2026,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "ativo": true,
+    "atualizado_em": "2026-02-08T17:48:12.165Z",
+    "atualizado_por": "sistema_sync",
+    "configurado": true,
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-01-25T02:44:57.322Z",
+    "ativado_em": "2026-02-06T00:26:39.454Z",
+    "wizard_respostas": {
+      "rodada_inicial": 2,
+      "turnos": "1",
+      "valor_vitoria": 5,
+      "valor_empate": 3,
+      "valor_derrota": -5,
+      "tolerancia_empate": 0.3,
+      "limite_goleada": 50,
+      "bonus_goleada": 2,
+      "bonus_pontos_goleada": 1,
+      "formato": "round_robin",
+      "quantidade_grupos": "2",
+      "criterio_divisao": "sorteio",
+      "classificados_por_grupo": 2,
+      "tipo_playoff": "ida_volta",
+      "criterio_desempate_playoff": "saldo_gols",
+      "integrar_extrato": true,
+      "extrato_tipo_impacto": "misto",
+      "extrato_regra": "Extrato deve receber valores pertinentes em cada rodada de acordo com a configuração do módulo específico"
+    },
+    "regras_override": {
+      "rodada_inicial": 2
+    }
+  },
+  {
+    "_id": "697583aa236b0ac260895eb1",
+    "modulo": "ranking_rodada",
+    "temporada": 2026,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "ativo": true,
+    "atualizado_em": "2026-02-07T13:50:19.875Z",
+    "atualizado_por": "sistema",
+    "configurado": true,
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-01-25T02:44:58.058Z",
+    "wizard_respostas": {
+      "posicoes_ganho": 0,
+      "posicoes_perda": 0,
+      "valor_mito": 2015,
+      "valor_mico": 0,
+      "decremento_valor": 0,
+      "total_participantes": 35,
+      "tipo_config": "fixo",
+      "valores_manual": {
+        "1": 15,
+        "2": 14,
+        "3": 13,
+        "4": 12,
+        "5": 11,
+        "6": 10,
+        "7": 9,
+        "8": 8,
+        "9": 7,
+        "10": 6,
+        "11": 5,
+        "12": 4,
+        "13": 0,
+        "14": 0,
+        "15": 0,
+        "16": 0,
+        "17": 0,
+        "18": 0,
+        "19": 0,
+        "20": 0,
+        "21": 0,
+        "22": 0,
+        "23": 0,
+        "24": -4,
+        "25": -5,
+        "26": -6,
+        "27": -7,
+        "28": -8,
+        "29": -9,
+        "30": -10,
+        "31": -11,
+        "32": -12,
+        "33": -13,
+        "34": -14,
+        "35": -15
+      },
+      "integrar_extrato": true,
+      "extrato_tipo_impacto": "misto",
+      "extrato_regra": "Serão lançados em todas as rodadas, baseado na posição do participante, ao final da rodada consolidada",
+      "rodada_transicao": 30
+    },
+    "ativado_em": "2026-02-07T13:50:19.874Z"
+  },
+  {
+    "_id": "697583aa236b0ac260895eb2",
+    "temporada": 2026,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "modulo": "artilheiro",
+    "ativo": true,
+    "atualizado_em": "2026-02-22T23:52:36.352Z",
+    "atualizado_por": "sistema",
+    "configurado": false,
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-01-25T02:44:58.420Z",
+    "wizard_respostas": {
+      "valor_campeao": 50,
+      "vice_habilitado": false,
+      "valor_vice": 0,
+      "terceiro_habilitado": false,
+      "valor_terceiro": 0,
+      "criterio_ranking": "saldo_gols"
+    },
+    "ativado_em": "2026-02-22T23:52:36.169Z",
+    "financeiro_override": {
+      "valores_por_posicao": {
+        "1": 50
+      }
+    }
+  },
+  {
+    "_id": "697583aa236b0ac260895eb3",
+    "temporada": 2026,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "modulo": "luva_ouro",
+    "ativo": true,
+    "atualizado_em": "2026-02-22T23:46:49.653Z",
+    "atualizado_por": "sistema",
+    "configurado": false,
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-01-25T02:44:58.782Z",
+    "wizard_respostas": {
+      "valor_campeao": 50,
+      "vice_habilitado": true,
+      "valor_vice": 0,
+      "terceiro_habilitado": true,
+      "valor_terceiro": 0
+    },
+    "ativado_em": "2026-02-22T23:46:49.460Z",
+    "financeiro_override": {
+      "valores_por_posicao": {
+        "1": 50
+      }
+    }
+  },
+  {
+    "_id": "69828e17729927bdd14ff2bc",
+    "temporada": 2026,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "modulo": "ranking_geral",
+    "__v": 0,
+    "ativado_em": "2026-02-04T00:08:55.360Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-04T00:08:55.360Z",
+    "atualizado_por": "sistema_sync",
+    "calendario_override": [],
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-02-04T00:08:55.360Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": null,
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {}
+  },
+  {
+    "_id": "69828e18729927bdd14ff2bd",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "modulo": "top_10",
+    "temporada": 2026,
+    "__v": 0,
+    "ativado_em": "2026-02-04T00:08:56.105Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-04T00:08:56.105Z",
+    "atualizado_por": "sistema_sync",
+    "calendario_override": [],
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-02-04T00:08:56.105Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": null,
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {}
+  },
+  {
+    "_id": "6983a482729927bdd151293d",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "modulo": "capitao_luxo",
+    "temporada": 2026,
+    "__v": 0,
+    "ativado_em": "2026-02-22T23:47:55.557Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-22T23:47:55.744Z",
+    "atualizado_por": "sistema",
+    "calendario_override": [],
+    "configurado_por": "sistema",
+    "criado_em": "2026-02-04T19:56:50.640Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": {
+        "1": 50
+      },
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {
+      "valor_campeao": 50,
+      "vice_habilitado": false,
+      "valor_vice": 0,
+      "terceiro_habilitado": false,
+      "valor_terceiro": 0,
+      "bonus_rodada": false
+    }
+  },
+  {
+    "_id": "6983b9b0729927bdd15132f7",
+    "temporada": 2026,
+    "liga_id": "6977a62071dee12036bb163e",
+    "modulo": "mata_mata",
+    "__v": 0,
+    "ativado_em": "2026-02-08T13:20:07.243Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-08T13:20:07.244Z",
+    "atualizado_por": "sistema",
+    "calendario_override": [],
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-02-04T21:27:12.575Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": null,
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {
+      "total_times": "8",
+      "qtd_edicoes": 10,
+      "valor_vitoria": 10,
+      "valor_derrota": -10,
+      "valores_progressivos": false,
+      "integrar_extrato": true,
+      "extrato_tipo_impacto": "misto",
+      "extrato_regra": "Extrato deve receber valores pertinentes em cada rodada de acordo com a configuração do módulo específico"
+    }
+  },
+  {
+    "_id": "6983b9c4729927bdd1513309",
+    "temporada": 2026,
+    "liga_id": "6977a62071dee12036bb163e",
+    "modulo": "capitao_luxo",
+    "__v": 0,
+    "ativado_em": "2026-02-04T21:27:32.571Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-22T21:51:00.797Z",
+    "atualizado_por": "script:seed-premiacoes-lps",
+    "calendario_override": [],
+    "configurado_por": "sistema",
+    "criado_em": "2026-02-04T21:27:32.572Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": {
+        "1": 150,
+        "2": 80,
+        "3": 40
+      },
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {
+      "valor_campeao": 25,
+      "valor_vice": 15,
+      "valor_terceiro": 10,
+      "bonus_rodada": false,
+      "integrar_extrato": true,
+      "extrato_tipo_impacto": "misto",
+      "extrato_regra": "Extrato deve receber valores pertinentes em cada rodada de acordo com a configuração do módulo específico"
+    }
+  },
+  {
+    "_id": "6983bdc6729927bdd15133d0",
+    "modulo": "extrato",
+    "temporada": 2026,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "__v": 0,
+    "ativado_em": "2026-02-11T01:30:28.486Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-11T01:30:28.486Z",
+    "atualizado_por": "sistema_sync",
+    "calendario_override": [],
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-02-04T21:44:38.403Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": null,
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {
+      "exibir_historico_completo": true,
+      "permitir_exportacao_pdf": true,
+      "cor_saldo_positivo": "verde",
+      "cor_saldo_negativo": "vermelho",
+      "integrar_extrato": true,
+      "extrato_tipo_impacto": "misto",
+      "extrato_regra": "Lançamentos rodada a rodada"
+    }
+  },
+  {
+    "_id": "6983dc78729927bdd151663e",
+    "liga_id": "6977a62071dee12036bb163e",
+    "modulo": "extrato",
+    "temporada": 2026,
+    "__v": 0,
+    "ativado_em": "2026-02-06T19:00:13.187Z",
+    "ativo": false,
+    "atualizado_em": "2026-02-08T23:21:46.359Z",
+    "atualizado_por": "sistema_sync",
+    "calendario_override": [],
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-02-04T23:55:35.977Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": null,
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {
+      "exibir_historico_completo": true,
+      "permitir_exportacao_pdf": true,
+      "cor_saldo_positivo": "verde",
+      "cor_saldo_negativo": "vermelho",
+      "integrar_extrato": true,
+      "extrato_tipo_impacto": "misto",
+      "extrato_regra": "Extrato deve receber valores pertinentes em cada rodada de acordo com a configuração do módulo específico"
+    }
+  },
+  {
+    "_id": "6983dc78729927bdd151663f",
+    "modulo": "ranking_geral",
+    "temporada": 2026,
+    "liga_id": "6977a62071dee12036bb163e",
+    "__v": 0,
+    "ativado_em": "2026-02-04T23:55:36.344Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-04T23:55:36.344Z",
+    "atualizado_por": "sistema_sync",
+    "calendario_override": [],
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-02-04T23:55:36.344Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": null,
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {}
+  },
+  {
+    "_id": "6983dc78729927bdd1516641",
+    "liga_id": "6977a62071dee12036bb163e",
+    "modulo": "ranking_rodada",
+    "temporada": 2026,
+    "__v": 0,
+    "ativado_em": "2026-02-07T13:51:34.456Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-07T13:51:34.457Z",
+    "atualizado_por": "sistema",
+    "calendario_override": [],
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-02-04T23:55:36.708Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": null,
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {
+      "tipo_config": "fixo",
+      "total_participantes": 8,
+      "valores_manual": {
+        "1": 8,
+        "2": 6,
+        "3": 4,
+        "4": 0,
+        "5": 0,
+        "6": -4,
+        "7": -6,
+        "8": -8
+      },
+      "rodada_transicao": 30,
+      "integrar_extrato": true,
+      "extrato_tipo_impacto": "misto",
+      "extrato_regra": "Extrato deve receber valores pertinentes em cada rodada de acordo com a configuração do módulo específico"
+    }
+  },
+  {
+    "_id": "6983dc79729927bdd1516644",
+    "liga_id": "6977a62071dee12036bb163e",
+    "modulo": "top_10",
+    "temporada": 2026,
+    "__v": 0,
+    "ativado_em": "2026-02-04T23:55:37.073Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-04T23:55:37.075Z",
+    "atualizado_por": "sistema_sync",
+    "calendario_override": [],
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-02-04T23:55:37.075Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": null,
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {}
+  },
+  {
+    "_id": "6983dc79729927bdd1516645",
+    "liga_id": "6977a62071dee12036bb163e",
+    "modulo": "melhor_mes",
+    "temporada": 2026,
+    "__v": 0,
+    "ativado_em": "2026-02-04T23:55:37.442Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-04T23:55:37.442Z",
+    "atualizado_por": "sistema_sync",
+    "calendario_override": [],
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-02-04T23:55:37.442Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": null,
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {}
+  },
+  {
+    "_id": "6983dc7a729927bdd1516646",
+    "liga_id": "6977a62071dee12036bb163e",
+    "modulo": "artilheiro",
+    "temporada": 2026,
+    "__v": 0,
+    "ativado_em": "2026-02-04T23:55:38.167Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-22T21:51:00.430Z",
+    "atualizado_por": "script:seed-premiacoes-lps",
+    "calendario_override": [],
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-02-04T23:55:38.168Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": {
+        "1": 150,
+        "2": 80,
+        "3": 40
+      },
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {}
+  },
+  {
+    "_id": "6983dc7a729927bdd1516649",
+    "modulo": "luva_ouro",
+    "temporada": 2026,
+    "liga_id": "6977a62071dee12036bb163e",
+    "__v": 0,
+    "ativado_em": "2026-02-06T19:00:33.380Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-22T21:51:01.162Z",
+    "atualizado_por": "script:seed-premiacoes-lps",
+    "calendario_override": [],
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-02-04T23:55:38.533Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": {
+        "1": 150,
+        "2": 80,
+        "3": 40
+      },
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {}
+  },
+  {
+    "_id": "6983dc7b729927bdd151664a",
+    "liga_id": "6977a62071dee12036bb163e",
+    "modulo": "campinho",
+    "temporada": 2026,
+    "__v": 0,
+    "ativado_em": "2026-02-07T13:51:44.356Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-07T13:51:44.356Z",
+    "atualizado_por": "sistema_sync",
+    "calendario_override": [],
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-02-04T23:55:39.076Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": null,
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {}
+  },
+  {
+    "_id": "6983dc7b729927bdd151664f",
+    "modulo": "historico",
+    "temporada": 2026,
+    "liga_id": "6977a62071dee12036bb163e",
+    "__v": 0,
+    "ativado_em": "2026-02-04T23:55:39.619Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-04T23:55:39.619Z",
+    "atualizado_por": "sistema_sync",
+    "calendario_override": [],
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-02-04T23:55:39.619Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": null,
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {}
+  },
+  {
+    "_id": "69853540729927bdd1535710",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "modulo": "campinho",
+    "temporada": 2026,
+    "__v": 0,
+    "ativado_em": "2026-02-07T13:50:30.326Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-07T13:50:30.327Z",
+    "atualizado_por": "sistema_sync",
+    "calendario_override": [],
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-02-06T00:26:40.729Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": null,
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {}
+  },
+  {
+    "_id": "69869a16f0961537a6a5e37e",
+    "modulo": "historico",
+    "temporada": 2026,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "__v": 0,
+    "ativado_em": "2026-02-07T01:49:10.588Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-07T01:49:10.588Z",
+    "atualizado_por": "sistema_sync",
+    "calendario_override": [],
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-02-07T01:49:10.588Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": null,
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {}
+  },
+  {
+    "_id": "698913adf0961537a6a80747",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "modulo": "participantes",
+    "temporada": 2026,
+    "__v": 0,
+    "ativado_em": "2026-02-08T22:52:29.075Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-08T22:52:29.075Z",
+    "atualizado_por": "sistema_sync",
+    "calendario_override": [],
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-02-08T22:52:29.075Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": null,
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {}
+  },
+  {
+    "_id": "698913adf0961537a6a80748",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "modulo": "regras",
+    "__v": 0,
+    "ativado_em": "2026-02-08T22:52:29.626Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-08T22:52:29.626Z",
+    "atualizado_por": "sistema_sync",
+    "calendario_override": [],
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-02-08T22:52:29.626Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": null,
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {}
+  },
+  {
+    "_id": "69891a8cf0961537a6a81088",
+    "modulo": "participantes",
+    "temporada": 2026,
+    "liga_id": "6977a62071dee12036bb163e",
+    "__v": 0,
+    "ativado_em": "2026-02-08T23:21:48.710Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-08T23:21:48.710Z",
+    "atualizado_por": "sistema_sync",
+    "calendario_override": [],
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-02-08T23:21:48.710Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": null,
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {}
+  },
+  {
+    "_id": "69891a8df0961537a6a8108a",
+    "liga_id": "6977a62071dee12036bb163e",
+    "modulo": "regras",
+    "temporada": 2026,
+    "__v": 0,
+    "ativado_em": "2026-02-08T23:21:49.262Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-08T23:21:49.262Z",
+    "atualizado_por": "sistema_sync",
+    "calendario_override": [],
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-02-08T23:21:49.262Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": null,
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {}
+  },
+  {
+    "_id": "6998de97cf12e440605ebfff",
+    "modulo": "raio_x",
+    "temporada": 2026,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "__v": 0,
+    "ativado_em": "2026-02-20T22:22:15.408Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-20T22:22:15.409Z",
+    "atualizado_por": "sistema_sync",
+    "calendario_override": [],
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-02-20T22:22:15.409Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": null,
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {}
+  },
+  {
+    "_id": "6998de98cf12e440605ec002",
+    "modulo": "tiro_certo",
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "temporada": 2026,
+    "__v": 0,
+    "ativado_em": "2026-02-22T15:34:16.578Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-22T15:34:16.582Z",
+    "atualizado_por": "sistema",
+    "calendario_override": [],
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-02-20T22:22:16.692Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": null,
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {
+      "qtd_edicoes": 5,
+      "valor_campeao": 50,
+      "valor_bonus_invicto": 15,
+      "repeticao_times": true,
+      "integrar_extrato": true,
+      "extrato_tipo_impacto": "misto",
+      "extrato_regra": "Valor do campeão vai pra o extrato "
+    }
+  },
+  {
+    "_id": "699b1534cf12e44060607129",
+    "modulo": "restaUm",
+    "temporada": 2026,
+    "liga_id": "684cb1c8af923da7c7df51de",
+    "__v": 0,
+    "ativado_em": "2026-02-22T14:39:48.398Z",
+    "ativo": true,
+    "atualizado_em": "2026-02-22T14:39:48.399Z",
+    "atualizado_por": "sistema_sync",
+    "calendario_override": [],
+    "configurado_por": "sistema_sync",
+    "criado_em": "2026-02-22T14:39:48.399Z",
+    "financeiro_override": {
+      "valores_por_fase": null,
+      "valores_por_posicao": null,
+      "valores_simples": {
+        "derrota": null,
+        "empate": null,
+        "vitoria": null
+      }
+    },
+    "regras_override": null,
+    "wizard_respostas": {}
+  },
+  {
+    "_id": "699b7a43cf12e44060612639",
+    "liga_id": "684d821cf1a7ae16d1f89572",
+    "modulo": "artilheiro",
+    "ativo": true,
+    "atualizado_em": "2026-02-22T21:50:59.309Z",
+    "atualizado_por": "script:seed-premiacoes-lps",
+    "configurado_por": "script:seed-premiacoes-lps",
+    "criado_em": "2026-02-22T21:50:59.309Z",
+    "financeiro_override": {
+      "valores_por_posicao": {
+        "1": 150,
+        "2": 80,
+        "3": 40
+      }
+    },
+    "temporada": 2026,
+    "wizard_respostas": {}
+  },
+  {
+    "_id": "699b7a43cf12e4406061263c",
+    "liga_id": "684d821cf1a7ae16d1f89572",
+    "modulo": "capitao_luxo",
+    "ativo": true,
+    "atualizado_em": "2026-02-22T21:50:59.690Z",
+    "atualizado_por": "script:seed-premiacoes-lps",
+    "configurado_por": "script:seed-premiacoes-lps",
+    "criado_em": "2026-02-22T21:50:59.690Z",
+    "financeiro_override": {
+      "valores_por_posicao": {
+        "1": 150,
+        "2": 80,
+        "3": 40
+      }
+    },
+    "temporada": 2026,
+    "wizard_respostas": {}
+  },
+  {
+    "_id": "699b7a44cf12e4406061263f",
+    "liga_id": "684d821cf1a7ae16d1f89572",
+    "modulo": "luva_ouro",
+    "ativo": true,
+    "atualizado_em": "2026-02-22T21:51:00.057Z",
+    "atualizado_por": "script:seed-premiacoes-lps",
+    "configurado_por": "script:seed-premiacoes-lps",
+    "criado_em": "2026-02-22T21:51:00.057Z",
+    "financeiro_override": {
+      "valores_por_posicao": {
+        "1": 150,
+        "2": 80,
+        "3": 40
+      }
+    },
+    "temporada": 2026,
+    "wizard_respostas": {}
+  }
+]

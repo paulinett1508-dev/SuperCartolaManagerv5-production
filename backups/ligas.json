@@ -1,0 +1,1238 @@
+[
+  {
+    "_id": "684cb1c8af923da7c7df51de",
+    "nome": "Super Cartola 2026",
+    "times": [
+      39786,
+      1097804,
+      1323370,
+      25371297,
+      621609,
+      8098497,
+      575856,
+      8188312,
+      2718174,
+      45004009,
+      715731,
+      5902324,
+      3300583,
+      5254799,
+      1173066,
+      8183683,
+      13935277,
+      25324292,
+      14569704,
+      14916330,
+      1039496,
+      20165417,
+      1932235,
+      4966295,
+      1459952,
+      1568358,
+      3027272,
+      7698677,
+      645089,
+      19615809,
+      476869,
+      14003233,
+      752847,
+      1113367,
+      1649056
+    ],
+    "criadaEm": "2025-06-13T23:18:32.478Z",
+    "__v": 85,
+    "atualizadaEm": "2026-02-22T14:39:44.915Z",
+    "configuracoes": {
+      "ranking_rodada": {
+        "descricao": "Bônus/ônus por posição na rodada",
+        "configurado": true,
+        "total_participantes": 35,
+        "valores": {
+          "1": 15,
+          "2": 14,
+          "3": 13,
+          "4": 12,
+          "5": 11,
+          "6": 10,
+          "7": 9,
+          "8": 8,
+          "9": 7,
+          "10": 6,
+          "11": 5,
+          "12": 4,
+          "13": 0,
+          "14": 0,
+          "15": 0,
+          "16": 0,
+          "17": 0,
+          "18": 0,
+          "19": 0,
+          "20": 0,
+          "21": 0,
+          "22": 0,
+          "23": 0,
+          "24": -4,
+          "25": -5,
+          "26": -6,
+          "27": -7,
+          "28": -8,
+          "29": -9,
+          "30": -10,
+          "31": -11,
+          "32": -12,
+          "33": -13,
+          "34": -14,
+          "35": -15
+        },
+        "faixas": {
+          "credito": {
+            "inicio": 1,
+            "fim": 12
+          },
+          "neutro": {
+            "inicio": 13,
+            "fim": 23
+          },
+          "debito": {
+            "inicio": 24,
+            "fim": 35
+          }
+        }
+      },
+      "top10": {
+        "habilitado": false,
+        "configurado": false
+      },
+      "pontos_corridos": {
+        "habilitado": true,
+        "configurado": true,
+        "rodadaInicial": 2
+      },
+      "mata_mata": {
+        "habilitado": false,
+        "configurado": false
+      },
+      "melhor_mes": {
+        "habilitado": false,
+        "configurado": false
+      },
+      "artilheiro": {
+        "habilitado": true,
+        "configurado": false
+      },
+      "luva_ouro": {
+        "habilitado": false,
+        "configurado": false
+      },
+      "temporada_2026": {
+        "status": "ativa",
+        "rodada_inicial": 2,
+        "rodada_final": null
+      },
+      "cards_desabilitados": [],
+      "temporada_2025": {}
+    },
+    "descricao": "",
+    "participantes": [
+      {
+        "time_id": 39786,
+        "nome_cartola": "Cássio Marques",
+        "nome_time": "Cassius United FC",
+        "clube_id": 262,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/EupMJQ0P0BOSR8FwlvgdSrtm5Ms=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/69/44/17/001c3cc0b4-f4ce-449a-b54d-9e864790ab6920250315134417",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$t7JcdgtVwiSUASm5h8ASku2kOowxZSWqbWaT/oICSsMH7VgPsY2Ni"
+      },
+      {
+        "time_id": 1097804,
+        "nome_cartola": "China Guardiola",
+        "nome_time": "Quase Nada Palace",
+        "clube_id": 266,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/fya9g-gd1TwwOeBbDeqKRBFYW1E=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/21/34/07/00e46cbf7a-1b79-4523-a2ce-19715897902120250311123407",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$UDsW1zpSqTT5QawUIuW7eOCX73IMwnViZvPfy9KqsXBhFtgb4FBUW"
+      },
+      {
+        "time_id": 1323370,
+        "nome_cartola": "Diego Barbosa",
+        "nome_time": "DB.advogado FC",
+        "clube_id": 276,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/LUGRd8uPVTQmdevtvj_4mKuqxOY=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_237/escudo/5e/59/53/002c87b260-e8bf-415c-a051-18570dec165e20250325095953",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$1FUeOiPfbt4rLrA3FQ3lfOR24YazQ3NL.bLVQ3qSXeCd0VHzylvUW"
+      },
+      {
+        "time_id": 25371297,
+        "nome_cartola": "Diogo Monte",
+        "nome_time": "Tabaca Neon",
+        "clube_id": 344,
+        "foto_perfil": "https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/placeholder/perfil-v2.png",
+        "foto_time": "https://s2-cartola.glbimg.com/_jON9YLuQ_WAradOue9WJWlMaB8=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/d3/48/40/007f2cd575-4692-41b4-82e9-4a8711086cd320250312084840",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$x0aLYBCEAlI6OjXTlm6M6OLK6pmFn7J5eLqv0wlhx3XdXjSarZPvK"
+      },
+      {
+        "time_id": 621609,
+        "nome_cartola": "Eudes Pereira",
+        "nome_time": "Itaueira Mengão ",
+        "clube_id": 262,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/r0mEcixSu8DZGb5-CK3NjuUjMWI=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_183/escudo/af/37/06/008d7e2db3-aaa7-472d-af03-f29b329c35af20210427123706",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$AssYgj7QDgyOOfSfhjkGkO6hTaUd0SLD6A30ukU60R73au5/txa.K"
+      },
+      {
+        "time_id": 8098497,
+        "nome_cartola": "Felipe Barbosa",
+        "nome_time": "Banege F.C",
+        "clube_id": 292,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/I_RW8-j0FhezntS3oYwJb6Bpnqo=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/26/04/08/007b16c5d8-6210-40dd-ac62-0a528be5b62620250315120408",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$kFVmK9rsLzut2ASzSrkQ6uWYCPM3Eug9wn3KOjXgZtU4kVu9OM6Ea"
+      },
+      {
+        "time_id": 575856,
+        "nome_cartola": "Felipe Jokstay",
+        "nome_time": "Feirão do Insta Floriano PI",
+        "clube_id": 275,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/gLEDdOuQ_n7yCD7n7FmjDDnGdsQ=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/2e/28/03/006801f521-3921-4b83-ad29-34f525542e2e20250315122803",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$JapuF4wDRZjBdWY.ACu9VORJeRApUI89xXgu.H3UmhF2mQIS.cD.O"
+      },
+      {
+        "time_id": 8188312,
+        "nome_cartola": "Felipe Santos",
+        "nome_time": "Chamex F.C.",
+        "clube_id": 277,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/YZwWWZwLJSHbYX7Rqqa8a6Cz-Ns=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_106/escudo/9a/40/43/0092958566-cdb9-4da6-bb44-2bfca753b49a20180407194043",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$0HO70ulzMhXNsGTN1GnkdOtrERe2vGwR7eQpE6eq8NkkHp9nz9ulK"
+      },
+      {
+        "time_id": 2718174,
+        "nome_cartola": "Flavio André",
+        "nome_time": "Red Bull Corissabá",
+        "clube_id": 262,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/tfD7X-alWaVX43veG4lc20R8zbQ=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_237/escudo/e6/01/07/00a193a589-9941-49e1-acf5-f1224e78bde620250317190107",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$k3OOAEGUzh0iIZw66j8dK.A4SpB0x/0eN//tGtwoy/eGG8xbB93GC"
+      },
+      {
+        "time_id": 45004009,
+        "nome_cartola": "fucim ",
+        "nome_time": "fc.catumbi",
+        "clube_id": 264,
+        "foto_perfil": "https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/placeholder/perfil-v2.png",
+        "foto_time": "https://s2-cartola.glbimg.com/xmP3eccyTVmcw9SOwRP2R8mqqcY=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_215/escudo/43/53/40/009730c5f8-bf31-43e2-98ba-f1d1eb83144320230414165340",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$RLEbdIsIWWZktnVkfwBqh.Tbrig3lhs.0KKGyeaSgO0fObRIq/isO"
+      },
+      {
+        "time_id": 715731,
+        "nome_cartola": "Jonney Vojvoda",
+        "nome_time": "La Família 026 Cbjr",
+        "clube_id": 262,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/U3VavTcs6WmBuSMkySM5Dqh9FPE=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_237/escudo/29/48/04/00482fcaf8-292a-4ade-bd93-192c3107792920250320224804",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$/gS777hmLQAjukVkmVWhke1jBGwPJIPp1g/owDyiQz1hWXRXuAqbu"
+      },
+      {
+        "time_id": 5902324,
+        "nome_cartola": "juniel henrique",
+        "nome_time": "ALA PEDRINHAS FC",
+        "clube_id": 262,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/OKcyVs-FCUwC8Vd7afLD-aQpUok=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_222/escudo/72/02/33/00e52b667e-a772-4dda-8b8a-c6685016737220240314140233",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$LxDfeOo3XWvegj53L1YmTOqbIskyPYA2nhxGLl7PhLxwa0AVGTYC."
+      },
+      {
+        "time_id": 3300583,
+        "nome_cartola": "Leilson Bezerra",
+        "nome_time": "LEJORA FC",
+        "clube_id": 262,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/WOdsMPEJH_PW0PqdH0drZq_0PZY=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/e8/53/30/0035e0f640-0c85-4f82-88b3-74a1ddaff0e820250315175330",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$bi8n7SbIXP2aHzE6OKNZJ..OpEZpc8a6xmOe9ddlDw6c1ReK0IPY."
+      },
+      {
+        "time_id": 5254799,
+        "nome_cartola": "Mauricio Wendel",
+        "nome_time": "AltosShow",
+        "clube_id": 263,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/mWAPeW_4lvsVcZdseSxH_ZBK-6M=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_237/escudo/a1/50/53/00f1dd3e98-9ad5-401c-9f13-8c5421a5a1a120250324165053",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$rSBH3W1VbapNUqhHst1ID.qvn9RnMQ60wsJfXnFdiXN5hAfdS45pK"
+      },
+      {
+        "time_id": 1173066,
+        "nome_cartola": "Mr. Carmilton",
+        "nome_time": " two left feet tlf",
+        "clube_id": 262,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/CIrRR4Ic4u-c57vINaMghKdyxTo=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_203/escudo/e2/53/22/00fbdce42d-d54d-40fa-b3cb-c94777a560e220220407125322",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$sY4tvjibhGz.sZ65U7dxMO2EK9pmriS0Nt6EfJzQRVkXqjUMOlVP."
+      },
+      {
+        "time_id": 8183683,
+        "nome_cartola": "Neto Waquim",
+        "nome_time": "Fla-Seleção NW",
+        "clube_id": 262,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/YR1c2t3ttAn0NfsmTuYMqKsTgp4=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/dd/32/03/00a9b9e295-4ed8-4ab3-bb4e-dba77e035fdd20250311223203",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$Dm2BQ2XSJSUiBhwGHHaafun.oZALRxTxW8MOodn2WjobGVOTSLKs6"
+      },
+      {
+        "time_id": 13935277,
+        "nome_cartola": "Paulinett Miranda",
+        "nome_time": "Urubu Play F.C.",
+        "clube_id": 262,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/XqTNWtU0S8uzpU6ZUjcMZVWJQYc=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_211/escudo/f8/27/53/00681760d8-c096-4ce7-8896-13b4cc8b71f820230318082753",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$43GYPIfrKh4Qbyty9Us03uTvzHVdbDTPuRbDlMyD91sDlBZVNyqFa",
+        "premium": true
+      },
+      {
+        "time_id": 25324292,
+        "nome_cartola": "Pedro Antônio",
+        "nome_time": "Invictus Patamar S.A.F.",
+        "clube_id": 262,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/gbjd-QdTHi8-f2AEGyh0IFYq8uE=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/32/15/02/00b17a99c1-1ae7-4ca9-98d3-8f7833ea0f3220250311131502",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$NJ4l1oypiyPSL166Q9gS1OgA4nqcTrWy1vmeiYpb2/SbCvzR5wH3W",
+        "premium": false
+      },
+      {
+        "time_id": 14569704,
+        "nome_cartola": "Rafael Janderson",
+        "nome_time": "Fla Stronger FC",
+        "clube_id": 262,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/nfMz_oystbWZIhJej_7qlCZdBvE=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_237/escudo/e8/10/53/006d7ab9da-e0be-497d-89f3-dcd394e757e820250325061053",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$bcmIrasRGtgy7ummMJ7Z1O/rBmk42Hs1IK/e4T8L.r3WF18htnG7W"
+      },
+      {
+        "time_id": 14916330,
+        "nome_cartola": "Raimundo Pinheiro ",
+        "nome_time": "Lioness  Clubs LL",
+        "clube_id": 262,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/mRo85ZdnFerFQyp4W2lOkVYyd98=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/bd/23/37/00cb582f75-e5cc-49d8-8def-bbe68e7764bd20250311222337",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$7eXJX/yjdpzla1xrwUDEr.Jbl7F.8Xe5tc8WdFsIX37YAM1S0Gwnm"
+      },
+      {
+        "time_id": 1039496,
+        "nome_cartola": "Randerson Rodrigues",
+        "nome_time": "Randim",
+        "clube_id": 262,
+        "foto_perfil": "https://graph.facebook.com/v10.0/1432616250377324/picture?width=100&height=100&access_token=289255557788943|p1h0FLxpyM0z4_NnY8WK5RM8k-A",
+        "foto_time": "https://s2-cartola.glbimg.com/BY2XS47U9RXBrTg_agj-cLLgPAk=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_3/escudo/7c/18/54/008e7b57d4-812d-49d5-a904-8403f884e67c20260126081854",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$YO8T4rgmG6JZGJwtBOcijuCpzqIAFgKvyCvd5wcTwsyb0GaPhkIUi"
+      },
+      {
+        "time_id": 20165417,
+        "nome_cartola": "Raylson Fernandes",
+        "nome_time": "RB Ousadia&Alegria 94",
+        "clube_id": 276,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/J39tNqJcxSL9Zk1YfqIUUDBiB28=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_205/escudo/1f/53/55/00ee0f7db4-ac40-4e3b-a713-bd18ddfb051f20220409145355",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$tYY6z5o6ohW31/0mjs4AQ.XcA8mqWasmkOXP59hjGbKDSMwH0Wh2y"
+      },
+      {
+        "time_id": 1932235,
+        "nome_cartola": "RODRIGO PAES LANDIM ",
+        "nome_time": "VILA LEÃO F.C",
+        "clube_id": 267,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/UhLsNosWoiOG6XxBAXOrQyci2FM=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_212/escudo/1e/46/00/00deaa8f15-208e-4879-99d1-521d6ab6cc1e20230404144600",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$YtqdlXwR9f2ojSydlmQP5uQdQfjGCe8xQCLla.FvbitZY5h4rnesm"
+      },
+      {
+        "time_id": 4966295,
+        "nome_cartola": "Rony Morais",
+        "nome_time": "Pedras_City AC",
+        "clube_id": 276,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/49qFi-ErG5vjvWynjFmoibKHpjQ=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_166/escudo/65/22/51/00572af97a-a778-4f4a-b9d8-d981efb6456520200727232251",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$yfZh5KVJ16DHuofornOrteagz2Ihimvv3KEOGw41hSE6bR8kbCw5."
+      },
+      {
+        "time_id": 1459952,
+        "nome_cartola": "Sávio C Cavalcante ",
+        "nome_time": "FC Arthur Sávio.C.C",
+        "clube_id": 262,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/9P-eeFvkTIqbbmfemTuX16zJX3w=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_213/escudo/9b/24/47/00f17face5-70e6-4f2c-bc3a-eded1ce80c9b20230409122447",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$lqKBTvd/YhVkNe5NNGP9v.7DW454LYqSBHK37Wf/EyVLqLOFOACAm"
+      },
+      {
+        "time_id": 1568358,
+        "nome_cartola": "Sir Gegé   ",
+        "nome_time": "Dollynho United FC",
+        "clube_id": 283,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/TpMxaid-TQgtMB7B41zxEvn3MoA=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/78/44/35/005e1577f1-d3bb-4e23-bd54-d8131889777820250311124435",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$g3n5pcH.yAKfjEvSrd93LOXPFWf.gzWfpJzDHgt6n.shxlqLXZ0wi"
+      },
+      {
+        "time_id": 3027272,
+        "nome_cartola": "Vitim",
+        "nome_time": "Vitim 10 FC",
+        "clube_id": 262,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/DANx0cpRHzW-C_XwWkGJJRI1bAM=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_222/escudo/07/48/48/007351dafe-0b47-4f48-a78d-f4aa9ad6c70720240320164848",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$dJnPHv6IK0XkioxOhhnhB.LU1mkCeU8DIhZNZjfPDvwPOJoghsxR2"
+      },
+      {
+        "time_id": 7698677,
+        "nome_cartola": "Wesley Oliveira",
+        "nome_time": "FC WESLEY OLIVEIRA",
+        "clube_id": 262,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/Wys2YIpHrJUAlYDY9XwVB6EMjnE=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_238/escudo/39/55/15/00488bddce-2a6b-4edc-b39a-ccf3b5f2333920250328095515",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$b5HbtLfMnry3V3lZ7rwx9.xrjbhn9CSV36Xigd174lU1n.sqm7ICa"
+      },
+      {
+        "time_id": 645089,
+        "nome_cartola": "Antonio Luis ",
+        "nome_time": "FloriMengo FC",
+        "clube_id": 262,
+        "foto_perfil": "",
+        "foto_time": "",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$Qu..jXeox142xgMESF/xA.cQ3S9MK39QpM7SpQS0Kz2mCEpjhCTQ2",
+        "pagouInscricao": false
+      },
+      {
+        "time_id": 19615809,
+        "nome_cartola": "Lúcio de Souza",
+        "nome_time": "Bela Bosta FCPE",
+        "clube_id": 292,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/bzb3YnZFQ4ySa3VDcp2xkvrWIiA=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_2/escudo/d7/01/05/00a90f6647-24df-4ea1-b3fb-49b2895536d720260114160105",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$Sk8bmzSz./eaNTkKvxBAj.4.XNd20IgLFf3bhCSzZCiq8I5LYW8MS",
+        "ativo": true,
+        "contato": ""
+      },
+      {
+        "time_id": 476869,
+        "nome_cartola": "Lucas Sousa",
+        "nome_time": "Engenhando",
+        "clube_id": 262,
+        "foto_perfil": "https://graph.facebook.com/v10.0/551329558315715/picture?width=100&height=100&access_token=289255557788943|p1h0FLxpyM0z4_NnY8WK5RM8k-A",
+        "foto_time": "https://s2-cartola.glbimg.com/_eqX4D-QFHuwyRQykxqJGpyb_fY=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_3/escudo/10/42/57/00ddaf0e2b-c6e7-4d2e-a2a3-d2d226fd871020260126204257",
+        "assinante": true,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$F3Wkg013kjHyIESvBImGA.22jX8McBBBNX9QDT7zUlIMft4OrAZQe",
+        "ativo": true,
+        "contato": "",
+        "premium": false,
+        "cartolaAuth": null
+      },
+      {
+        "time_id": 14003233,
+        "nome_cartola": "Marconi Araújo",
+        "nome_time": "Palestra Itália JN",
+        "clube_id": 275,
+        "foto_perfil": "https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/placeholder/perfil-v2.png",
+        "foto_time": "https://s2-cartola.glbimg.com/tbziml9OQUsMBiEMcB_dUwS8zvw=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_3/escudo/0f/59/39/0017e9f996-cb07-4479-8be6-7d301673690f20260124145939",
+        "assinante": true,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$lCD8Bar1n5FDb8Gm0F62meOwJt5TWms1FQa/ydG83u/Z4OD4iYAbO",
+        "ativo": true,
+        "contato": "",
+        "premium": false,
+        "cartolaAuth": null
+      },
+      {
+        "time_id": 752847,
+        "nome_cartola": "Yuri Jivago",
+        "nome_time": "Trem Bala Juá",
+        "clube_id": 267,
+        "foto_perfil": "https://graph.facebook.com/v10.0/571219236319093/picture?width=100&height=100&access_token=289255557788943|p1h0FLxpyM0z4_NnY8WK5RM8k-A",
+        "foto_time": "https://s2-cartola.glbimg.com/Q22J8WjMevR2ctMj5dTZclGAWmU=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_3/escudo/70/40/40/00938d2df4-2404-4a8b-aa46-aa82065da77020260124164040",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$dBh.6YitA62BHw6h1HQ.w.E.huiWI1HoomwRNETCSmZGr5XyAAQJC",
+        "ativo": true,
+        "contato": "",
+        "premium": false,
+        "cartolaAuth": null
+      },
+      {
+        "time_id": 1113367,
+        "nome_cartola": "Bruno Barros",
+        "nome_time": "BarrosB",
+        "clube_id": 275,
+        "foto_perfil": "https://graph.facebook.com/v10.0/619654981452851/picture?width=100&height=100&access_token=289255557788943|p1h0FLxpyM0z4_NnY8WK5RM8k-A",
+        "foto_time": "https://s2-cartola.glbimg.com/vyEi986OL4l05LKnwkZft8RR9nc=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_4/escudo/2b/23/35/0085634f0f-0d1f-4abb-95bb-08f84c63cd2b20260128092335",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$.lbstE8DC79glyILD2izSOqEM7.kfLt/faWJ.Oo7C9GVkeutd1GHu",
+        "ativo": true,
+        "contato": "",
+        "premium": false,
+        "cartolaAuth": null
+      },
+      {
+        "time_id": 1649056,
+        "nome_cartola": "Geones Vaz",
+        "nome_time": "GAAVAZ.FC",
+        "clube_id": 276,
+        "foto_perfil": "https://graph.facebook.com/v10.0/620420741374566/picture?width=100&height=100&access_token=289255557788943|p1h0FLxpyM0z4_NnY8WK5RM8k-A",
+        "foto_time": "https://s2-cartola.glbimg.com/P-brxi6ymWNr5zQBJwRUQpF6_uA=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_2/escudo/2d/57/08/0088a59cc8-b52d-4bdd-a6b0-be7d7c0c162d20260115125708",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$.70iVeMfjPNoiBSJ2Qh19O4S3uNkNsIWtklMwQM38NNDAfbBO317i",
+        "ativo": true,
+        "contato": "",
+        "premium": false,
+        "cartolaAuth": null
+      }
+    ],
+    "tipo": "publica",
+    "modulos_ativos": {
+      "extrato": true,
+      "ranking": true,
+      "rodadas": true,
+      "top10": true,
+      "melhorMes": true,
+      "pontosCorridos": true,
+      "mataMata": true,
+      "artilheiro": true,
+      "luvaOuro": true,
+      "capitaoLuxo": true,
+      "raioX": true,
+      "campinho": true,
+      "dicas": false,
+      "participantes": true,
+      "premiacoes": false,
+      "regras": true,
+      "cartolaPro": false,
+      "tiroCerto": true,
+      "restaUm": true,
+      "historico": true,
+      "tiro_certo": true
+    },
+    "admin_id": "69815ae6507b1bb44c1ef7b8",
+    "blindado": true,
+    "blindado_em": "2026-01-03T12:40:09.727Z",
+    "owner_email": "paulinett1508@gmail.com",
+    "temporada": 2026,
+    "ativa": true,
+    "status": "ativa",
+    "configuracoes_historico": {
+      "2025": {
+        "ranking_rodada": {
+          "descricao": "Bônus/ônus por posição na rodada",
+          "total_participantes": 32,
+          "valores": {
+            "1": 20,
+            "2": 19,
+            "3": 18,
+            "4": 17,
+            "5": 16,
+            "6": 15,
+            "7": 14,
+            "8": 13,
+            "9": 12,
+            "10": 11,
+            "11": 10,
+            "12": 0,
+            "13": 0,
+            "14": 0,
+            "15": 0,
+            "16": 0,
+            "17": 0,
+            "18": 0,
+            "19": 0,
+            "20": 0,
+            "21": 0,
+            "22": -10,
+            "23": -11,
+            "24": -12,
+            "25": -13,
+            "26": -14,
+            "27": -15,
+            "28": -16,
+            "29": -17,
+            "30": -18,
+            "31": -19,
+            "32": -20
+          },
+          "faixas": {
+            "credito": {
+              "inicio": 1,
+              "fim": 11
+            },
+            "neutro": {
+              "inicio": 12,
+              "fim": 21
+            },
+            "debito": {
+              "inicio": 22,
+              "fim": 32
+            }
+          }
+        },
+        "top10": {
+          "descricao": "Prêmio histórico por posição no ranking semanal",
+          "habilitado": true,
+          "valores_mito": {
+            "1": 30,
+            "2": 28,
+            "3": 26,
+            "4": 24,
+            "5": 22,
+            "6": 20,
+            "7": 18,
+            "8": 16,
+            "9": 14,
+            "10": 12
+          },
+          "valores_mico": {
+            "1": -30,
+            "2": -28,
+            "3": -26,
+            "4": -24,
+            "5": -22,
+            "6": -20,
+            "7": -18,
+            "8": -16,
+            "9": -14,
+            "10": -12
+          }
+        },
+        "pontos_corridos": {
+          "descricao": "Confrontos todos contra todos",
+          "habilitado": true,
+          "valores": {
+            "vitoria": 3,
+            "empate": 1,
+            "derrota": 0
+          },
+          "premiacao": {
+            "primeiro": 0,
+            "segundo": 0,
+            "terceiro": 0
+          }
+        },
+        "mata_mata": {
+          "descricao": "Eliminatórias em chaves",
+          "habilitado": true,
+          "valores": {
+            "vitoria": 10,
+            "derrota": -10
+          },
+          "edicoes": 3
+        },
+        "melhor_mes": {
+          "descricao": "Ranking por período mensal",
+          "habilitado": true,
+          "edicoes": [
+            {
+              "id": 1,
+              "nome": "Edição 01",
+              "inicio": 1,
+              "fim": 6
+            },
+            {
+              "id": 2,
+              "nome": "Edição 02",
+              "inicio": 7,
+              "fim": 10
+            },
+            {
+              "id": 3,
+              "nome": "Edição 03",
+              "inicio": 11,
+              "fim": 17
+            },
+            {
+              "id": 4,
+              "nome": "Edição 04",
+              "inicio": 18,
+              "fim": 22
+            },
+            {
+              "id": 5,
+              "nome": "Edição 05",
+              "inicio": 23,
+              "fim": 26
+            },
+            {
+              "id": 6,
+              "nome": "Edição 06",
+              "inicio": 27,
+              "fim": 30
+            },
+            {
+              "id": 7,
+              "nome": "Edição 07",
+              "inicio": 31,
+              "fim": 38
+            }
+          ],
+          "premiacao": {
+            "primeiro": 0,
+            "ultimo": 0
+          }
+        },
+        "artilheiro": {
+          "descricao": "Ranking de gols",
+          "habilitado": false
+        },
+        "luva_ouro": {
+          "descricao": "Ranking de goleiros",
+          "habilitado": false
+        },
+        "temporada_2025": {
+          "status": "ativa",
+          "rodada_inicial": 1,
+          "rodada_final": 38
+        },
+        "arquivado_em": "2026-01-25T02:44:56.228Z"
+      }
+    },
+    "logo": "img/logo-supercartola.png",
+    "historico": {},
+    "parametros_financeiros": {
+      "inscricao": 180
+    }
+  },
+  {
+    "_id": "684d821cf1a7ae16d1f89572",
+    "nome": "Cartoleiros do Sobral",
+    "times": [
+      14747183,
+      1926323,
+      50180257,
+      49149388,
+      49149009,
+      13935277
+    ],
+    "criadaEm": "2025-06-14T14:07:24.821Z",
+    "__v": 19,
+    "atualizadaEm": "2026-01-26T18:46:31.113Z",
+    "configuracoes": {
+      "ranking_rodada": {
+        "descricao": "Bônus/ônus por posição na rodada (sistema temporal)",
+        "temporal": true,
+        "rodada_transicao": 30,
+        "fase1": {
+          "descricao": "Rodadas 1-29: 6 participantes",
+          "total_participantes": 6,
+          "valores": {
+            "1": 7,
+            "2": 4,
+            "3": 0,
+            "4": -2,
+            "5": -5,
+            "6": -10
+          },
+          "faixas": {
+            "credito": {
+              "inicio": 1,
+              "fim": 2
+            },
+            "neutro": {
+              "inicio": 3,
+              "fim": 3
+            },
+            "debito": {
+              "inicio": 4,
+              "fim": 6
+            }
+          }
+        },
+        "fase2": {
+          "descricao": "Rodadas 30-38: 4 participantes ativos",
+          "total_participantes": 4,
+          "valores": {
+            "1": 5,
+            "2": 0,
+            "3": 0,
+            "4": -5
+          },
+          "faixas": {
+            "credito": {
+              "inicio": 1,
+              "fim": 1
+            },
+            "neutro": {
+              "inicio": 2,
+              "fim": 3
+            },
+            "debito": {
+              "inicio": 4,
+              "fim": 4
+            }
+          }
+        }
+      },
+      "top10": {
+        "descricao": "Prêmio histórico por posição no ranking semanal",
+        "habilitado": true,
+        "valores_mito": {
+          "1": 10,
+          "2": 9,
+          "3": 8,
+          "4": 7,
+          "5": 6,
+          "6": 5,
+          "7": 4,
+          "8": 3,
+          "9": 2,
+          "10": 1
+        },
+        "valores_mico": {
+          "1": -10,
+          "2": -9,
+          "3": -8,
+          "4": -7,
+          "5": -6,
+          "6": -5,
+          "7": -4,
+          "8": -3,
+          "9": -2,
+          "10": -1
+        }
+      },
+      "pontos_corridos": {
+        "descricao": "Confrontos todos contra todos",
+        "habilitado": false
+      },
+      "mata_mata": {
+        "descricao": "Eliminatórias em chaves",
+        "habilitado": false
+      },
+      "melhor_mes": {
+        "descricao": "Ranking por período mensal",
+        "habilitado": false,
+        "premiacao": {
+          "primeiro": 15,
+          "ultimo": -15
+        }
+      },
+      "artilheiro": {
+        "descricao": "Ranking de gols",
+        "habilitado": true,
+        "premiacao": {
+          "primeiro": 0,
+          "segundo": 0,
+          "terceiro": 0
+        }
+      },
+      "luva_ouro": {
+        "descricao": "Ranking de goleiros",
+        "habilitado": true,
+        "premiacao": {
+          "primeiro": 0,
+          "segundo": 0,
+          "terceiro": 0
+        }
+      },
+      "cards_desabilitados": [
+        "mata-mata",
+        "pontos-corridos",
+        "melhor-mes"
+      ],
+      "temporada_2025": {
+        "status": "finalizada",
+        "rodada_final": 38,
+        "data_encerramento": "2025-12-11T02:31:05.184Z",
+        "cache_permanente": true
+      }
+    },
+    "descricao": "",
+    "participantes": [
+      {
+        "time_id": 14747183,
+        "nome_cartola": "Carlos Henrique",
+        "nome_time": "CHS EC",
+        "clube_id": 276,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/a20EDxltWY_BMWsCandvsi2MJZc=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_238/escudo/16/23/51/00c62828a6-42d4-4f96-917a-612a02b6f31620250326112351",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$5YbWXbbhHv7rOTfUBrNjVuISUAgF0.tQXtBR1bD6GacRARIGof3uu"
+      },
+      {
+        "time_id": 1926323,
+        "nome_cartola": "Daniel Barbosa",
+        "nome_time": "specter United",
+        "clube_id": 262,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/fJB2769UdYR17XXbWZt_D9dwtJY=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_241/escudo/c3/48/59/00fe9e57e9-431b-41e1-a50e-61b71c71a8c320250419134859",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$N7MmND7EoId4DU3vI9CKeOwBWRv6onIvidJL8vubBWetmQRpAIWi6"
+      },
+      {
+        "time_id": 50180257,
+        "nome_cartola": "Hivisson ",
+        "nome_time": "Senhores Da Escuridão ",
+        "clube_id": 267,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/UXMQF_Pc3paiGZanZEVwLSibfEI=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_236/escudo/9c/24/21/002350563c-6c6f-4562-8f4a-193d7c8fa89c20250317132421",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$OKxE6x3ULKhkn0BqURFf7eiC9WdpJpSnDkHcda9WCBQJf2Q771nNC",
+        "ativo": false,
+        "rodada_desistencia": 29
+      },
+      {
+        "time_id": 49149388,
+        "nome_cartola": "Junior Brasilino",
+        "nome_time": "JBMENGO94 FC ",
+        "clube_id": 262,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/jwvB7UV--ZydTK3VhTEvJAFUzMA=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_222/escudo/1e/02/44/002b074128-fb38-45f9-af44-c3fa73d3eb1e20240321150244",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$3Ts6IbDGUD8yaeH6Eb5kF.VQIc7WIwvt4l037VWsezoiX6ugq/ZBK",
+        "ativo": false,
+        "rodada_desistencia": 29
+      },
+      {
+        "time_id": 49149009,
+        "nome_cartola": "Matheus Coutinho",
+        "nome_time": "RB Teteux SC",
+        "clube_id": 262,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/4wDWnvlTv9q1jrLBrVrgF38TfmM=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_237/escudo/a2/23/50/00d5d7efd5-ba38-45cb-ac81-a4ae266e16a220250324172350",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$H/HG2Crx6pjWpRsdyqaIfe1J/m/hEe.vZb0bpW4ua/M5Qt7n0JC7q"
+      },
+      {
+        "time_id": 13935277,
+        "nome_cartola": "Paulinett Miranda",
+        "nome_time": "Urubu Play F.C.",
+        "clube_id": 262,
+        "foto_perfil": "",
+        "foto_time": "https://s2-cartola.glbimg.com/XqTNWtU0S8uzpU6ZUjcMZVWJQYc=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_211/escudo/f8/27/53/00681760d8-c096-4ce7-8896-13b4cc8b71f820230318082753",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$u89FoO3F0YMscD6P//GEHOrJ3ek3v1yNUBvuCgukPS5HVtCSweMrC",
+        "premium": true
+      }
+    ],
+    "tipo": "publica",
+    "modulos_ativos": {
+      "extrato": false,
+      "ranking": true,
+      "rodadas": true,
+      "top10": true,
+      "melhorMes": false,
+      "pontosCorridos": false,
+      "mataMata": false,
+      "artilheiro": true,
+      "luvaOuro": true,
+      "raioX": true
+    },
+    "admin_id": "69815ae6507b1bb44c1ef7b8",
+    "blindado": true,
+    "blindado_em": "2026-01-03T12:40:09.935Z",
+    "owner_email": "paulinett1508@gmail.com",
+    "temporada": 2025,
+    "aposentada_em": "2026-01-24T21:41:59.715Z",
+    "aposentada_motivo": "Liga encerrada oficialmente. Dados preservados para consulta histórica.",
+    "ativa": false,
+    "historico": {
+      "temporada_2025": {
+        "campeao": {
+          "timeId": 1926323,
+          "nome_cartola": "Daniel Barbosa",
+          "nome_time": "specter United",
+          "pontos": 3309.05,
+          "rodadas_jogadas": 38
+        },
+        "vice": {
+          "timeId": 13935277,
+          "nome_cartola": "Paulinett Miranda",
+          "nome_time": "Urubu Play F.C.",
+          "pontos": 2990.43
+        },
+        "terceiro": {
+          "timeId": 49149009,
+          "nome_cartola": "Matheus Coutinho",
+          "nome_time": "RB Teteux SC",
+          "pontos": 2415.39
+        },
+        "total_participantes": 6,
+        "total_rodadas": 38,
+        "data_inicio": "2025-06-14",
+        "data_fim": "2025-12-08"
+      }
+    },
+    "status": "aposentada",
+    "logo": "img/logo-cartoleirossobral.png"
+  },
+  {
+    "_id": "6977a62071dee12036bb163e",
+    "nome": "Os Fuleros",
+    "descricao": "",
+    "tipo": "publica",
+    "owner_email": "paulinett1508@gmail.com",
+    "blindado": false,
+    "blindado_em": null,
+    "temporada": 2026,
+    "ativa": true,
+    "status": null,
+    "aposentada_em": null,
+    "aposentada_motivo": null,
+    "times": [
+      13935277,
+      50988035,
+      9232824,
+      25330294,
+      47664680,
+      4223845,
+      4021507,
+      51078986
+    ],
+    "configuracoes": {
+      "cards_desabilitados": [],
+      "artilheiro": {},
+      "luva_ouro": {},
+      "mata_mata": {},
+      "melhor_mes": {},
+      "pontos_corridos": {},
+      "ranking_rodada": {
+        "descricao": "Bônus/ônus por posição na rodada",
+        "configurado": true,
+        "total_participantes": 8,
+        "valores": {
+          "1": 8,
+          "2": 6,
+          "3": 4,
+          "4": 0,
+          "5": 0,
+          "6": -4,
+          "7": -6,
+          "8": -8
+        },
+        "faixas": {
+          "credito": {
+            "inicio": 1,
+            "fim": 3
+          },
+          "neutro": {
+            "inicio": 4,
+            "fim": 5
+          },
+          "debito": {
+            "inicio": 6,
+            "fim": 8
+          }
+        }
+      },
+      "temporada_2025": {},
+      "top10": {}
+    },
+    "modulos_ativos": {
+      "extrato": false,
+      "ranking": true,
+      "rodadas": true,
+      "top10": true,
+      "melhorMes": true,
+      "pontosCorridos": false,
+      "mataMata": true,
+      "artilheiro": true,
+      "luvaOuro": true,
+      "capitaoLuxo": true,
+      "campinho": true,
+      "dicas": false,
+      "participantes": true,
+      "premiacoes": false,
+      "regras": true,
+      "cartolaPro": false,
+      "historico": true,
+      "raioX": true
+    },
+    "participantes": [
+      {
+        "time_id": 13935277,
+        "nome_cartola": "Paulinett Miranda",
+        "nome_time": "Urubu Play F.C.",
+        "clube_id": 262,
+        "foto_perfil": "https://graph.facebook.com/v10.0/561875670595524/picture?width=100&height=100&access_token=289255557788943|p1h0FLxpyM0z4_NnY8WK5RM8k-A",
+        "foto_time": "https://s2-cartola.glbimg.com/UNl1ReGPyphtwv69CqhMbYDZrTc=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_2/escudo/f8/24/14/00681760d8-c096-4ce7-8896-13b4cc8b71f820260113162414",
+        "assinante": true,
+        "rodada_time_id": null,
+        "senha_acesso": null,
+        "ativo": true,
+        "contato": "",
+        "premium": true,
+        "cartolaAuth": null
+      },
+      {
+        "time_id": 50988035,
+        "nome_cartola": "Enderson",
+        "nome_time": "Obraga04",
+        "clube_id": 262,
+        "foto_perfil": "https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/placeholder/perfil-v2.png",
+        "foto_time": "https://s2-cartola.glbimg.com/SujcmLlRuhSzehIJRroxD6wJxsw=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_2/escudo/da/35/17/00d5cec5ae-f4bf-4b53-b2e7-63ceb8b77fda20260113143517",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$8AvKP6gYvFs/BG10gAdJvuRn4zgVaQACmwhFKobHoBkIGCwnXV88a",
+        "ativo": true,
+        "contato": "",
+        "premium": false,
+        "cartolaAuth": null
+      },
+      {
+        "time_id": 9232824,
+        "nome_cartola": "Padé Papito",
+        "nome_time": "Papito's Football Club",
+        "clube_id": 284,
+        "foto_perfil": "https://graph.facebook.com/v10.0/608744545879786/picture?width=100&height=100&access_token=289255557788943|p1h0FLxpyM0z4_NnY8WK5RM8k-A",
+        "foto_time": "https://s2-cartola.glbimg.com/MT-TkCJqZ8-UkJMjF1IUfUQbhYA=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_2/escudo/76/20/29/001f747d9c-9076-4461-a9cf-95113b075b7620260113122029",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$Gu.J22iKNeoRn7aSqZnHBeKAI5wZQ1Lh7MLkUmw3BaecmGXbImHtm",
+        "ativo": true,
+        "contato": "",
+        "premium": false,
+        "cartolaAuth": null
+      },
+      {
+        "time_id": 25330294,
+        "nome_cartola": "jhones Prado ",
+        "nome_time": "j.Prado fc",
+        "clube_id": 262,
+        "foto_perfil": "https://graph.facebook.com/v10.0/458953697571528/picture?width=100&height=100&access_token=289255557788943|p1h0FLxpyM0z4_NnY8WK5RM8k-A",
+        "foto_time": "https://s2-cartola.glbimg.com/8bvpJhaAqvM7zzEpP_dK7wkXqLY=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_186/escudo/ac/15/59/005b898a19-755f-4888-9cc3-2ab70cd8cfac20210508131559",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$Km2GfUrQmHiel.wr8tlLWOOIQymaGM.g1frPOTgnhqChw7izVuGI6",
+        "ativo": true,
+        "contato": "",
+        "premium": false,
+        "cartolaAuth": null
+      },
+      {
+        "time_id": 47664680,
+        "nome_cartola": "Erivaldo",
+        "nome_time": "CR ErySoldado ",
+        "clube_id": 262,
+        "foto_perfil": "https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/placeholder/perfil-v2.png",
+        "foto_time": "https://s2-cartola.glbimg.com/-LQVXWj1bU7rJvJauo0GkeQRxe8=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_2/escudo/99/40/12/00c8ae6c0c-a4a3-4aad-a38f-d05a5560969920260113174012",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$F1fcFhDUauCCqeRPbu/zbuGYHE3d5SFy9WE4ThIyjqyBVJoSM4KSe",
+        "ativo": true,
+        "contato": "",
+        "premium": false,
+        "cartolaAuth": null
+      },
+      {
+        "time_id": 4223845,
+        "nome_cartola": "bruno",
+        "nome_time": "TriiMundial sp",
+        "clube_id": 276,
+        "foto_perfil": "https://graph.facebook.com/v10.0/620369938055361/picture?width=100&height=100&access_token=289255557788943|p1h0FLxpyM0z4_NnY8WK5RM8k-A",
+        "foto_time": "https://s2-cartola.glbimg.com/nWIkiO8ihiMQmAQl8Nft6OlF0tI=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_svg_222/escudo/0b/35/49/00248061c7-9d11-405d-a9a9-84d9a3b8540b20240321093549",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$Hs5l3LWOSE7PWHGp1F/jJOR7Gzb1IDisg0wQePNkWGN40SO7RnPsK",
+        "ativo": true,
+        "contato": "",
+        "premium": false,
+        "cartolaAuth": null
+      },
+      {
+        "time_id": 4021507,
+        "nome_cartola": "Thyago Martins",
+        "nome_time": "TCMV Futebol club",
+        "clube_id": 277,
+        "foto_perfil": "https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/placeholder/perfil-v2.png",
+        "foto_time": "https://s2-cartola.glbimg.com/1yVKMBWKBWCDFDJQfDS23cX96EI=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_3/escudo/04/40/30/00b91d8cd7-afed-4453-ba2b-6e70b679250420260126204030",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$jy3RqyLgbr7lCSrqUa4F0.bsGo7lD0cBMED9CVmi5pfx5lVyshDxq",
+        "ativo": true,
+        "contato": "",
+        "premium": false,
+        "cartolaAuth": null
+      },
+      {
+        "time_id": 51078986,
+        "nome_cartola": "Anthony",
+        "nome_time": "KroonosFLA",
+        "clube_id": 262,
+        "foto_perfil": "https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/placeholder/perfil-v2.png",
+        "foto_time": "https://s2-cartola.glbimg.com/ubwUGGVPPLjl6q9j3C4vGbMSK9I=/https://s3.glbimg.com/v1/AUTH_58d78b787ec34892b5aaa0c7a146155f/cartola_assets_4/escudo/22/49/34/0061599b41-6d60-41f4-8290-1dfdbc5bfe2220260128134934",
+        "assinante": false,
+        "rodada_time_id": null,
+        "senha_acesso": "$2b$10$b6ILfQMdRkTQ088UGvIgQOtbb2/fB8ClKiioqyi/ArAhk1kwh0AaO",
+        "ativo": true,
+        "contato": "",
+        "premium": false,
+        "cartolaAuth": null
+      }
+    ],
+    "criadaEm": "2026-01-26T17:36:32.210Z",
+    "atualizadaEm": "2026-02-08T23:21:46.173Z",
+    "__v": 7,
+    "logo": "img/logo-osfuleros.png",
+    "historico": {},
+    "admin_id": "69815ae6507b1bb44c1ef7b8"
+  }
+]

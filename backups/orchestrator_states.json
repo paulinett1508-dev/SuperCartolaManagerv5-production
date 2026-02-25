@@ -1,0 +1,27 @@
+[
+  {
+    "_id": "698f3f4fcf12e440605406db",
+    "chave": "round_market_orchestrator",
+    "__v": 0,
+    "atualizado_em": "2026-02-25T15:07:25.371Z",
+    "consolidacao_em_andamento": false,
+    "createdAt": "2026-02-13T15:12:15.217Z",
+    "eventos": [],
+    "fase_rodada": "aguardando",
+    "managers": [],
+    "polling_ativo": true,
+    "polling_intervalo_ms": 120000,
+    "rodada_atual": 4,
+    "rodadas_consolidadas": [],
+    "status_mercado": 1,
+    "status_mercado_anterior": 1,
+    "temporada": 2026,
+    "total_consolidacoes": 0,
+    "total_erros": 0,
+    "total_transicoes": 0,
+    "ultima_consolidacao": null,
+    "ultimo_poll": "2026-02-25T15:07:25.371Z",
+    "updatedAt": "2026-02-25T15:07:25.372Z",
+    "uptime_inicio": "2026-02-25T02:12:24.142Z"
+  }
+]
