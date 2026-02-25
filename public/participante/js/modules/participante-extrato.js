@@ -404,13 +404,18 @@ async function carregarExtrato(ligaId, timeId) {
             <div style="text-align: center; padding: 40px;">
                 <span class="material-icons" style="font-size:48px;color:var(--app-amber);display:block;margin-bottom:16px">timer_off</span>
                 <h3 style="color: var(--app-amber); margin-bottom: 12px;">Carregamento lento</h3>
-                <p style="color: #9ca3af; margin-bottom: 20px;">O servidor está demorando para responder.</p>
-                <button onclick="window.location.reload()"
+                <p style="color: #9ca3af; margin-bottom: 20px;">O servidor está demorando para responder. Tentando novamente automaticamente...</p>
+                <button onclick="window.forcarRefreshExtratoParticipante ? window.forcarRefreshExtratoParticipante() : window.location.reload()"
                     style="background: var(--app-primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">
                     Tentar Novamente
                 </button>
             </div>
         `;
+        // ✅ v5.4: Auto-retry após timeout (backend pode estar calculando em background)
+        setTimeout(() => {
+            timeoutFired = false; // Resetar flag para permitir render no retry
+            window.forcarRefreshExtratoParticipante?.();
+        }, 10000);
     };
 
     const cache = window.ParticipanteCache;
@@ -1183,14 +1188,34 @@ function mostrarVazio() {
             setTimeout(() => window.forcarRefreshExtratoParticipante?.(), 5000);
             return;
         }
-        // Mensagem padrao (temporada ativa sem dados ainda)
-        container.innerHTML = `
-            <div style="text-align: center; padding: 40px 20px; color: #999;">
-                <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;">&#128202;</div>
-                <h3 style="color: #ccc; margin-bottom: 8px;">Sem dados ainda</h3>
-                <p style="font-size: 13px;">O extrato sera gerado apos a primeira rodada.</p>
-            </div>
-        `;
+        // ✅ v5.4: Temporada ativa com rodadas — provável problema temporário, oferecer retry
+        const temporadaAtiva = config && config.isAtiva && config.isAtiva();
+        if (temporadaAtiva) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px 20px;">
+                    <span class="material-icons" style="font-size:48px;color:var(--app-primary);display:block;margin-bottom:16px">sync</span>
+                    <h3 style="color: var(--app-primary); margin-bottom: 8px;">Calculando extrato...</h3>
+                    <p style="color: #9ca3af; font-size: 13px; margin-bottom: 20px;">
+                        Seu extrato financeiro esta sendo processado. Aguarde um momento.
+                    </p>
+                    <button onclick="window.forcarRefreshExtratoParticipante ? window.forcarRefreshExtratoParticipante() : window.location.reload()"
+                        style="background: var(--app-primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                        Atualizar
+                    </button>
+                </div>
+            `;
+            // Auto-retry após 8s
+            setTimeout(() => window.forcarRefreshExtratoParticipante?.(), 8000);
+        } else {
+            // Temporada realmente sem dados (encerrada ou preparando sem rodadas)
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px 20px; color: #999;">
+                    <span class="material-icons" style="font-size:48px;color:#666;display:block;margin-bottom:16px;opacity:0.5">assessment</span>
+                    <h3 style="color: #ccc; margin-bottom: 8px;">Sem dados ainda</h3>
+                    <p style="font-size: 13px;">O extrato sera gerado apos a primeira rodada.</p>
+                </div>
+            `;
+        }
     }
 
     atualizarHeaderZerado();
