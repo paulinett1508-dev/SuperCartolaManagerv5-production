@@ -18,7 +18,7 @@
                 </div>
                 <span class="home-action-label">Cartola PRO</span>
             </button>
-            <button class="home-action-item" id="btn-joguinhos" style="display:none" onclick="window.abrirJoguinhos && window.abrirJoguinhos()">
+            <button class="home-action-item" id="btn-joguinhos" style="display:none" onclick="window.abrirJoguinhos ? window.abrirJoguinhos() : (function(b){b.disabled=true;var s=document.createElement('script');s.src='/participante/js/participante-joguinhos.js';s.onload=function(){b.disabled=false;window.abrirJoguinhos&&window.abrirJoguinhos()};s.onerror=function(){b.disabled=false};document.head.appendChild(s)})(this)">
                 <div class="home-action-icon">
                     <span class="material-icons">sports_esports</span>
                 </div>
