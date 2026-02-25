@@ -1624,7 +1624,9 @@ export const limparCachesCorrompidos = async (req, res) => {
             $or: [
                 { historico_transacoes: { $type: "number" } },
                 { historico_transacoes: { $exists: false } },
-                { historico_transacoes: { $size: 0 } },
+                // ✅ B1 FIX: excluir temporada atual — na pré-temporada, caches com
+                // pagouInscricao=true podem ter array vazio validamente
+                { historico_transacoes: { $size: 0 }, temporada: { $lt: CURRENT_SEASON } },
             ],
         };
         if (ligaId) filtro.liga_id = ligaId;
