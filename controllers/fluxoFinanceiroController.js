@@ -210,9 +210,10 @@ async function getStatusMercadoInterno() {
         // API Cartola falhava, deixando participantes sem dados financeiros.
         // Solução: Consultar última rodada consolidada no DB como fallback confiável.
         try {
+            // ✅ v8.16.0: Timeout de 3s para evitar hang se MongoDB estiver lento
             const ultimaRodadaDB = await Rodada.findOne({
                 temporada: CURRENT_SEASON,
-            }).sort({ rodada: -1 }).select('rodada').lean();
+            }).sort({ rodada: -1 }).select('rodada').lean().maxTimeMS(3000);
 
             if (ultimaRodadaDB && ultimaRodadaDB.rodada > 0) {
                 logger.warn(
@@ -1082,11 +1083,22 @@ export const getExtratoFinanceiro = async (req, res) => {
                 rodada_atual_cartola: rodadaAtualCartola,
                 inativo: isInativo,
                 rodada_desistencia: rodadaDesistencia,
+                // ✅ v8.16.0: Indicadores de fallback para o frontend
+                _fallback: usouFallback,
+                _fallbackSource: statusMercado._fallbackSource || null,
             },
         });
     } catch (error) {
         logger.error("[FLUXO-CONTROLLER] Erro crítico:", error);
-        res.status(500).json({ error: "Erro interno ao processar financeiro" });
+        // ✅ v8.16.0: Erro estruturado — frontend pode distinguir tipos de falha
+        const isDev = process.env.NODE_ENV === 'development';
+        res.status(500).json({
+            error: "Erro interno ao processar financeiro",
+            tipo: error.name || 'Error',
+            detalhe: isDev ? error.message : undefined,
+            _erro: true,
+            _retryable: error.name !== 'ValidationError',
+        });
     }
 };
 

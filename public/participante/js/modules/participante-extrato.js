@@ -71,6 +71,9 @@ const RODADA_FINAL_CAMPEONATO = 38;
 const CONFIG = window.ParticipanteConfig || {};
 const CAMPEONATO_ENCERRADO = CONFIG.isPreparando?.() || false; // Durante pré-temporada, 2025 está encerrada
 
+// ✅ v5.5: Cache-bust estavel por sessao (evita acumular instancias de modulo por retry)
+const UI_MODULE_VERSION = Date.now();
+
 // ✅ v4.0: Cache de status de renovação
 let statusRenovacaoCache = null;
 
@@ -411,11 +414,9 @@ async function carregarExtrato(ligaId, timeId) {
                 </button>
             </div>
         `;
-        // ✅ v5.4: Auto-retry após timeout (backend pode estar calculando em background)
-        setTimeout(() => {
-            timeoutFired = false; // Resetar flag para permitir render no retry
-            window.forcarRefreshExtratoParticipante?.();
-        }, 10000);
+        // ✅ v5.4: Auto-retry apos timeout (backend pode estar calculando em background)
+        // forcarRefreshExtratoParticipante() cria nova invocacao de carregarExtrato() com seu proprio timeoutFired
+        setTimeout(() => window.forcarRefreshExtratoParticipante?.(), 10000);
     };
 
     const cache = window.ParticipanteCache;
@@ -443,12 +444,13 @@ async function carregarExtrato(ligaId, timeId) {
             // Requisição 2: Buscar status do mercado (com timeout de 5s)
             fetch("/api/cartola/mercado/status", {
                 signal: AbortSignal.timeout(5000)
-            }).then(r => r.ok ? r.json() : { rodada_atual: 1, serverError: r.status >= 500 })
-              .catch(() => ({ rodada_atual: 1, serverError: true }))
+            // ✅ v5.5 FIX: Usar rodada_atual: 0 (desconhecido) ao inves de 1 (falso positivo)
+            }).then(r => r.ok ? r.json() : { rodada_atual: 0, serverError: r.status >= 500 })
+              .catch(() => ({ rodada_atual: 0, serverError: true }))
         ]);
 
         statusRenovacao = statusRenovacaoResult || { renovado: false };
-        rodadaAtual = mercadoResult?.rodada_atual || 1;
+        rodadaAtual = mercadoResult?.rodada_atual ?? 0;
         ultimoStatusMercado = mercadoResult?.status_mercado || null;
 
         // Detectar se AMBAS as requisições falharam (servidor fora do ar)
@@ -490,7 +492,7 @@ async function carregarExtrato(ligaId, timeId) {
             // Renderizar IMEDIATAMENTE com dados do cache
             // ✅ v4.7: Cache-busting para forçar recarga após atualizações
             const uiModule = await import(
-                `./participante-extrato-ui.js?v=${Date.now()}`
+                `./participante-extrato-ui.js?v=${UI_MODULE_VERSION}`
             );
             uiModule.renderizarExtratoParticipante(extratoDataCache, timeId);
         }
@@ -817,7 +819,7 @@ async function carregarExtrato(ligaId, timeId) {
 
             // ✅ v4.7: Cache-busting
             const uiMod = await import(
-                `./participante-extrato-ui.js?v=${Date.now()}`
+                `./participante-extrato-ui.js?v=${UI_MODULE_VERSION}`
             );
             uiMod.renderizarExtratoParticipante(extratoData, timeId);
         } else if (deveReRenderizar && timeoutFired) {
@@ -845,9 +847,16 @@ async function carregarExtrato(ligaId, timeId) {
         // ✅ v4.6: Limpar timeout de segurança
         if (timeoutId) clearTimeout(timeoutId);
 
-        if (window.Log) Log.error("EXTRATO-PARTICIPANTE", "❌ Erro:", error);
-        // ✅ v5.2: Não sobrescrever tela de timeout com mensagem de erro genérica
-        if (!usouCache && !timeoutFired) mostrarErro(error.message);
+        if (window.Log) Log.error("EXTRATO-PARTICIPANTE", "Erro:", error);
+        // ✅ v5.5: Sanitizar mensagem de erro antes de exibir ao usuario
+        if (!usouCache && !timeoutFired) {
+            const mensagemUsuario = error.name === 'AbortError'
+                ? 'Servidor demorou para responder. Tente novamente.'
+                : error.message?.includes('fetch') || error.message?.includes('network') || error.message?.includes('Network')
+                    ? 'Sem conexao com o servidor. Verifique sua internet.'
+                    : 'Erro ao carregar extrato. Tente novamente.';
+            mostrarErro(mensagemUsuario);
+        }
     }
 }
 
@@ -1087,7 +1096,7 @@ function mostrarVazio() {
                 <!-- Card Bem-vindo 2026 -->
                 <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
                             border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 16px; padding: 24px;">
-                    <div style="font-size: 40px; margin-bottom: 12px;">✅</div>
+                    <span class="material-icons" style="font-size: 40px; color: var(--app-success); display: block; margin-bottom: 12px;">check_circle</span>
                     <h3 style="color: var(--app-success); margin: 0 0 8px 0; font-size: 18px; font-weight: 700;">
                         Renovacao Confirmada!
                     </h3>
@@ -1116,7 +1125,7 @@ function mostrarVazio() {
                 <!-- Card Temporada Nova -->
                 <div style="background: linear-gradient(135deg, rgba(255,85,0,0.1) 0%, rgba(255,136,0,0.05) 100%);
                             border: 1px solid rgba(255,85,0,0.3); border-radius: 16px; padding: 24px; margin-bottom: 20px;">
-                    <div style="font-size: 40px; margin-bottom: 12px;">📋</div>
+                    <span class="material-icons" style="font-size: 40px; color: var(--app-primary); display: block; margin-bottom: 12px;">assignment</span>
                     <h3 style="color: var(--app-primary); margin: 0 0 8px 0; font-size: 18px; font-weight: 700;">
                         Temporada ${temporadaAtual}
                     </h3>
@@ -1152,9 +1161,7 @@ function mostrarVazio() {
             <div style="text-align: center; padding: 32px 20px;">
                 <div style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%);
                             border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 16px; padding: 24px;">
-                    <div style="font-size: 40px; margin-bottom: 12px;">
-                        <span style="animation: pulse 2s infinite;">&#9917;</span>
-                    </div>
+                    <span class="material-icons" style="font-size: 40px; color: var(--app-success); display: block; margin-bottom: 12px; animation: pulse 2s infinite;">sports_soccer</span>
                     <h3 style="color: #22c55e; margin: 0 0 8px 0; font-size: 18px; font-weight: 700;">
                         Rodada em Andamento
                     </h3>
@@ -1230,14 +1237,14 @@ function mostrarErro(mensagem) {
         container.innerHTML = `
             <div style="text-align: center; padding: 40px; background: rgba(239, 68, 68, 0.1);
                         border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.3);">
-                <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+                <span class="material-icons" style="font-size: 48px; color: var(--app-danger); display: block; margin-bottom: 16px;">warning</span>
                 <h3 style="color: var(--app-danger); margin-bottom: 12px;">Erro ao Carregar</h3>
                 <p style="color: #e0e0e0; margin-bottom: 20px;">${mensagem}</p>
                 <button onclick="window.forcarRefreshExtratoParticipante()"
                         style="padding: 12px 24px; background: linear-gradient(135deg, #ff4500 0%, var(--app-primary-dark) 100%);
                                color: white; border: none; border-radius: 8px; cursor: pointer;
                                font-weight: 600; font-size: 14px;">
-                    🔄 Tentar Novamente
+                    <span class="material-icons" style="font-size: 16px; vertical-align: middle; margin-right: 4px;">refresh</span> Tentar Novamente
                 </button>
             </div>
         `;
@@ -1256,7 +1263,7 @@ function atualizarHeaderZerado() {
     if (badgeEl) {
         const statusIcon = badgeEl.querySelector(".status-icon");
         const statusText = badgeEl.querySelector(".status-text");
-        if (statusIcon) statusIcon.textContent = "⏳";
+        if (statusIcon) statusIcon.textContent = "hourglass_empty";
         if (statusText) statusText.textContent = "AGUARDANDO";
     }
 }
@@ -1303,32 +1310,15 @@ window.forcarRefreshExtratoParticipante = async function () {
     }
 
     try {
-        // ✅ PASSO 1: Limpar cache no MongoDB
-        const urlLimpeza = `/api/extrato-cache/${PARTICIPANTE_IDS.ligaId}/times/${PARTICIPANTE_IDS.timeId}/limpar`;
+        // ✅ v5.5 FIX CRITICO: Rota DELETE /limpar foi removida na v2.0 de extratoFinanceiroCacheRoutes
+        // Usar ?refresh=true no endpoint de calculo — o backend ja suporta (L593)
+        // e faz o mesmo: deleta cache + recria preservando entradas R0
+        const temporadaRetry = temporadaSelecionadaPeloUsuario
+            || (statusRenovacaoCache?.renovado ? (CONFIG.CURRENT_SEASON || 2026)
+            : (CONFIG.getFinancialSeason ? CONFIG.getFinancialSeason() : (CONFIG.PREVIOUS_SEASON || 2025)));
+        const urlCalculo = `/api/fluxo-financeiro/${PARTICIPANTE_IDS.ligaId}/extrato/${PARTICIPANTE_IDS.timeId}?temporada=${temporadaRetry}&refresh=true`;
         if (window.Log)
-            Log.debug("EXTRATO-PARTICIPANTE", "🗑️ Limpando cache:", urlLimpeza);
-
-        const resLimpeza = await fetch(urlLimpeza, { method: "DELETE" });
-
-        if (resLimpeza.ok) {
-            const resultado = await resLimpeza.json();
-            if (window.Log)
-                Log.debug("EXTRATO-PARTICIPANTE", "✅ Cache limpo:", resultado);
-        } else {
-            if (window.Log)
-                Log.warn(
-                    "EXTRATO-PARTICIPANTE",
-                    "⚠️ Falha ao limpar cache:",
-                    resLimpeza.status,
-                );
-        }
-
-        // ✅ PASSO 2: Chamar endpoint DIRETO que calcula do zero
-        // ✅ v4.4: Incluir temporada para garantir dados corretos
-        const temporadaAtual = CONFIG.CURRENT_SEASON || 2026;
-        const urlCalculo = `/api/fluxo-financeiro/${PARTICIPANTE_IDS.ligaId}/extrato/${PARTICIPANTE_IDS.timeId}?temporada=${temporadaAtual}`;
-        if (window.Log)
-            Log.debug("EXTRATO-PARTICIPANTE", "🔄 Recalculando:", urlCalculo);
+            Log.debug("EXTRATO-PARTICIPANTE", "Recalculando:", urlCalculo);
 
         const resCalculo = await fetch(urlCalculo);
 
@@ -1411,7 +1401,7 @@ window.forcarRefreshExtratoParticipante = async function () {
 
         // ✅ v4.7: Cache-busting
         const uiModule = await import(
-            `./participante-extrato-ui.js?v=${Date.now()}`
+            `./participante-extrato-ui.js?v=${UI_MODULE_VERSION}`
         );
         uiModule.renderizarExtratoParticipante(extratoData, PARTICIPANTE_IDS.timeId);
 
@@ -1535,7 +1525,7 @@ async function buscarEExibirProjecao(ligaId, timeId) {
         });
 
         // Renderizar card de projeção via UI module
-        const uiMod = await import(`./participante-extrato-ui.js?v=${Date.now()}`);
+        const uiMod = await import(`./participante-extrato-ui.js?v=${UI_MODULE_VERSION}`);
         if (uiMod.renderizarProjecaoFinanceira) {
             uiMod.renderizarProjecaoFinanceira(projecaoData);
         }
