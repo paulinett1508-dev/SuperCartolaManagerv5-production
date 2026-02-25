@@ -455,34 +455,42 @@ export async function calcularConfrontoPontosCorridos(
     }
     const pontuacaoOponente = pontuacaoOponenteObj.pontos;
 
+    // ✅ A7 FIX: Valores configuráveis por liga — fallback para padrões se não configurados
+    const pcConfig = liga.configuracoes?.pontos_corridos || {};
+    const THRESHOLD_EMPATE  = pcConfig.thresholdEmpate  ?? 0.3;
+    const THRESHOLD_GOLEADA = pcConfig.thresholdGoleada ?? 50;
+    const VALOR_EMPATE      = pcConfig.valorEmpate      ?? 3.0;
+    const VALOR_VITORIA     = pcConfig.valorVitoria     ?? 5.0;
+    const BONUS_GOLEADA     = pcConfig.bonusGoleada     ?? 2.0;
+
     const diferenca = Math.abs(pontuacaoTime - pontuacaoOponente);
     let valor = 0;
     let descricao = "";
 
-    // Empate: diferença ≤ 0.3
-    if (diferenca <= 0.3) {
-        valor = 3.0;
+    // Empate: diferença ≤ THRESHOLD_EMPATE
+    if (diferenca <= THRESHOLD_EMPATE) {
+        valor = VALOR_EMPATE;
         descricao = `Empate PC vs ${oponente.nome_time}`;
     }
     // Vitória
     else if (pontuacaoTime > pontuacaoOponente) {
-        // Goleada: diferença ≥ 50
-        if (diferenca >= 50) {
-            valor = 7.0; // 5 + 2 (bônus goleada)
+        // Goleada: diferença ≥ THRESHOLD_GOLEADA
+        if (diferenca >= THRESHOLD_GOLEADA) {
+            valor = VALOR_VITORIA + BONUS_GOLEADA;
             descricao = `Vitória Goleada PC vs ${oponente.nome_time}`;
         } else {
-            valor = 5.0;
+            valor = VALOR_VITORIA;
             descricao = `Vitória PC vs ${oponente.nome_time}`;
         }
     }
     // Derrota
     else {
         // Goleada sofrida
-        if (diferenca >= 50) {
-            valor = -7.0; // -5 - 2 (penalidade goleada)
+        if (diferenca >= THRESHOLD_GOLEADA) {
+            valor = -(VALOR_VITORIA + BONUS_GOLEADA);
             descricao = `Derrota Goleada PC vs ${oponente.nome_time}`;
         } else {
-            valor = -5.0;
+            valor = -VALOR_VITORIA;
             descricao = `Derrota PC vs ${oponente.nome_time}`;
         }
     }

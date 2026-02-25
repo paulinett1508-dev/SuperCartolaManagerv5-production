@@ -45,23 +45,15 @@ export async function buscarDadosParaQuitacao(req, res) {
             });
         }
 
-        // Buscar acertos financeiros para calcular saldo completo
+        // ✅ A5 FIX: Usar AcertoFinanceiro.calcularSaldoAcertos() — fonte única de verdade
+        // Elimina divergência com extratoFinanceiroCacheController (else catch-all vs else if)
         const AcertoFinanceiro = mongoose.model('AcertoFinanceiro');
-        const acertos = await AcertoFinanceiro.find({
-            ligaId: String(ligaId),
-            timeId: String(timeId),
-            temporada: temporada,
-            ativo: true
-        }).lean();
-
-        // Calcular saldo de acertos
-        let totalPago = 0;
-        let totalRecebido = 0;
-        acertos.forEach(a => {
-            if (a.tipo === 'pagamento') totalPago += a.valor;
-            else if (a.tipo === 'recebimento') totalRecebido += a.valor;
-        });
-        const saldoAcertos = totalPago - totalRecebido;
+        const acertosInfo = await AcertoFinanceiro.calcularSaldoAcertos(
+            String(ligaId), String(timeId), temporada
+        );
+        const saldoAcertos = acertosInfo.saldoAcertos;
+        const totalPago = acertosInfo.totalPago;
+        const totalRecebido = acertosInfo.totalRecebido;
 
         // Buscar campos manuais
         const FluxoFinanceiroCampos = mongoose.model('FluxoFinanceiroCampos');
@@ -98,6 +90,20 @@ export async function buscarDadosParaQuitacao(req, res) {
             rodadas.forEach(r => {
                 saldoRodadas += (r.bonus || 0) - (r.onus || 0);
             });
+
+            // ✅ A4 FIX: Sem cache, incluir legado e taxa de inscrição (R0 transactions)
+            // cache.saldo_consolidado já inclui R0 — sem cache buscamos manualmente
+            const inscricaoAtual = await InscricaoTemporada.findOne({
+                liga_id: String(ligaId),
+                time_id: Number(timeId),
+                temporada: temporada
+            }).lean();
+            if (inscricaoAtual) {
+                saldoRodadas += inscricaoAtual.saldo_anterior || 0;
+                if (!inscricaoAtual.pagou_inscricao) {
+                    saldoRodadas -= inscricaoAtual.taxa_inscricao || 0;
+                }
+            }
 
             logger.log(`[QUITACAO] Cache não encontrado para time ${timeId}/temporada ${temporada}. Calculado diretamente: saldoRodadas=${saldoRodadas}`);
         }
