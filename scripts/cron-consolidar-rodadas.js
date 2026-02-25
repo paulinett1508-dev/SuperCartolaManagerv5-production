@@ -19,6 +19,10 @@ dotenv.config();
 const LIGA_ID = process.env.LIGA_ID_PRINCIPAL || '684cb1c8af923da7c7df51de';
 const BASE_URL = process.env.API_URL || 'http://localhost:5000';
 
+// ✅ J2 FIX: Suporte a --dry-run (detecta rodada mas não chama a API de consolidação)
+const args = process.argv.slice(2);
+const isDryRun = args.includes('--dry-run');
+
 async function detectarRodadaAnterior() {
     try {
         const response = await fetch('https://api.cartola.globo.com/mercado/status', {
@@ -84,9 +88,13 @@ async function executarConsolidacaoAutomatica() {
         
         // Detectar rodada a consolidar
         const rodada = await detectarRodadaAnterior();
-        
-        // Executar consolidação
-        await consolidarRodada(rodada);
+
+        if (isDryRun) {
+            console.log(`[DRY-RUN] Consolidaria rodada ${rodada} — nenhuma ação executada.`);
+        } else {
+            // Executar consolidação
+            await consolidarRodada(rodada);
+        }
         
         console.log('\n🎉 Processo concluído com sucesso!');
         

@@ -13,7 +13,7 @@ import CartolaOficialDump from '../models/CartolaOficialDump.js';
 
 dotenv.config();
 
-const MONGO_URI = process.env.MONGO_URI || process.env.MONGO_URI_DEV;
+const MONGO_URI = process.env.MONGO_URI;
 const LIGA_ID = '684cb1c8af923da7c7df51de'; // Super Cartola 2025
 
 // Delay entre requests para não sobrecarregar a API

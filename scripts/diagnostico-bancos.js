@@ -6,7 +6,10 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const MONGO_URI_DEV = process.env.MONGO_URI_DEV;
+// ✅ J1 FIX: MONGO_URI_DEV foi descontinuada (banco único cartola-manager).
+// Este script mantém a variável por compatibilidade histórica mas MONGO_URI_DEV
+// estará undefined — apenas o banco PROD (MONGO_URI) será analisado.
+const MONGO_URI_DEV = process.env.MONGO_URI_DEV; // deprecated — sempre undefined
 const MONGO_URI_PROD = process.env.MONGO_URI;
 
 async function analisarBanco(uri, nome) {

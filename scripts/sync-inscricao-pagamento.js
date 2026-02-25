@@ -13,7 +13,7 @@
  *
  * Uso:
  *   node scripts/sync-inscricao-pagamento.js --dry-run           # Simula
- *   node scripts/sync-inscricao-pagamento.js                     # Executa
+ *   node scripts/sync-inscricao-pagamento.js --force             # Executa (requer flag explícita)
  *   node scripts/sync-inscricao-pagamento.js --liga 6977a62...   # Liga específica
  *   node scripts/sync-inscricao-pagamento.js --temporada 2026    # Temporada específica
  */
@@ -26,8 +26,15 @@ dotenv.config();
 // Parsear argumentos
 const args = process.argv.slice(2);
 const isDryRun = args.includes('--dry-run');
+const isForce = args.includes('--force');
 const ligaIndex = args.indexOf('--liga');
 const temporadaIndex = args.indexOf('--temporada');
+
+// ✅ J2 FIX: Safety guard — exige --dry-run ou --force
+if (!isDryRun && !isForce) {
+    console.error('❌ Use --dry-run para simular ou --force para executar');
+    process.exit(1);
+}
 
 const LIGA_ID = ligaIndex !== -1 ? args[ligaIndex + 1] : null;
 const TEMPORADA = temporadaIndex !== -1 ? parseInt(args[temporadaIndex + 1]) : 2026;

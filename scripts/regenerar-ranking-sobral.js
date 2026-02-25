@@ -11,7 +11,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const MONGO_URI = process.env.MONGO_URI || process.env.MONGO_URI_DEV;
+const MONGO_URI = process.env.MONGO_URI;
 const LIGA_SOBRAL_ID = '684d821cf1a7ae16d1f89572';
 
 async function main() {

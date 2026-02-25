@@ -195,20 +195,15 @@ async function analisarParticipantes(opcoes = {}) {
         console.log("🔐 CONFIGURAÇÃO DE AMBIENTE:");
         console.log("─".repeat(80));
         const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
-        const mongoUriDev = process.env.MONGO_URI_DEV;
         const nodeEnv = process.env.NODE_ENV || "development";
-        
+
         console.log(`   NODE_ENV: ${nodeEnv}`);
         if (mongoUri) {
             console.log(`   MONGO_URI: Configurada (${mongoUri.substring(0, 20)}...)`);
         } else {
             console.log(`   MONGO_URI: Não encontrada no .env (provavelmente nos Replit Secrets)`);
         }
-        if (mongoUriDev) {
-            console.log(`   MONGO_URI_DEV: Configurada`);
-        } else {
-            console.log(`   MONGO_URI_DEV: Não encontrada`);
-        }
+        // ✅ J1 FIX: MONGO_URI_DEV foi descontinuada — banco único cartola-manager
         console.log();
         
         // Resumo final

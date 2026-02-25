@@ -10,7 +10,7 @@ import Rodada from '../models/Rodada.js';
 
 dotenv.config();
 
-const MONGO_URI = process.env.MONGO_URI || process.env.MONGO_URI_DEV;
+const MONGO_URI = process.env.MONGO_URI;
 
 async function regenerarRankingGeral() {
     console.log('═══════════════════════════════════════════════════════════════');

@@ -11,7 +11,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const MONGO_URI = process.env.MONGO_URI || process.env.MONGO_URI_DEV;
+const MONGO_URI = process.env.MONGO_URI;
 const LIGA_ID = '684cb1c8af923da7c7df51de';
 const TEMPORADA = 2026;
 const EDICAO = 1;

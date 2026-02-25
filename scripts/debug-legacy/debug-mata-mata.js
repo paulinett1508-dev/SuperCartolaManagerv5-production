@@ -12,7 +12,7 @@ import {
 
 dotenv.config();
 
-const MONGO_URI = process.env.MONGO_URI || process.env.MONGO_URI_DEV;
+const MONGO_URI = process.env.MONGO_URI;
 
 async function debugMataMata() {
     console.log('═══════════════════════════════════════════════════════════════');

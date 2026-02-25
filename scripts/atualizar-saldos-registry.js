@@ -14,6 +14,15 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// ✅ J2 FIX: Safety guard — exige --dry-run ou --force
+const args = process.argv.slice(2);
+const isDryRun = args.includes('--dry-run');
+const isForce = args.includes('--force');
+if (!isDryRun && !isForce) {
+    console.error('❌ Use --dry-run para simular ou --force para executar');
+    process.exit(1);
+}
+
 // Cores para output
 const log = {
     info: (msg) => console.log(`\x1b[36m[INFO]\x1b[0m ${msg}`),
