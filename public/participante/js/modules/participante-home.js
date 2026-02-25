@@ -331,6 +331,19 @@ async function atualizarCardsHome(ligaId, timeId, participante) {
 
     homeAutoRefreshEmAndamento = true;
     try {
+        // IC-02: Re-buscar status do mercado a cada ciclo para detectar transicoes
+        const statusAnterior = mercadoStatus?.status_mercado;
+        await buscarStatusMercado();
+        const statusAtual = mercadoStatus?.status_mercado;
+
+        // Detectar transicao de status (ex: 2→1 = jogos terminaram, 1→2 = mercado fechou)
+        if (statusAnterior && statusAtual && statusAnterior !== statusAtual) {
+            if (window.Log) Log.info("PARTICIPANTE-HOME", `Transicao de mercado detectada: ${statusAnterior} → ${statusAtual}`);
+            // Re-renderizar completo para refletir novo estado
+            await carregarDadosERenderizar(ligaId, timeId, participante);
+            return;
+        }
+
         const dadosFresh = await buscarDadosHomeFresh(ligaId, timeId);
         if (!dadosFresh) return;
 
@@ -490,8 +503,13 @@ function atualizarCardsHomeUI(data) {
     }
 
     if (rankingSaldoEl) {
-        // Saldo financeiro reflete até a última rodada FINALIZADA, não a atual/aberta
-        const rodadaSaldo = ultimaRodadaDisputada || (rodadaAtual > 0 ? rodadaAtual - 1 : 0);
+        // IC-07: Saldo financeiro reflete ate a ultima rodada FINALIZADA
+        // Quando status=2 (jogos em andamento), a rodada atual AINDA NAO foi consolidada
+        const statusMercadoSaldo = Number(mercadoStatus?.status_mercado ?? 1) || 1;
+        const rodadaMercadoSaldo = Number(mercadoStatus?.rodada_atual ?? rodadaAtual) || rodadaAtual;
+        const rodadaSaldo = (statusMercadoSaldo === 2)
+            ? Math.max(1, rodadaMercadoSaldo - 1)
+            : (ultimaRodadaDisputada || (rodadaAtual > 0 ? rodadaAtual - 1 : 0));
         rankingSaldoEl.textContent = rodadaSaldo ? `R${rodadaSaldo}` : '--';
     }
 
@@ -639,7 +657,12 @@ function calcularRankingManual(rodadas) {
 }
 
 function formatarPontos(valor) {
-    return valor.toLocaleString("pt-BR", {
+    // IC-09: Truncar em vez de arredondar (regra absoluta do projeto)
+    // toLocaleString com maximumFractionDigits arredonda (ex: 93.785 → "93,79")
+    // Math.trunc garante truncamento correto (ex: 93.785 → "93,78")
+    const num = parseFloat(valor) || 0;
+    const truncado = Math.trunc(num * 100) / 100;
+    return truncado.toLocaleString("pt-BR", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     });
@@ -1052,8 +1075,13 @@ function renderizarHome(container, data, ligaId) {
     }
 
     if (rankingSaldoEl) {
-        // Saldo financeiro reflete até a última rodada FINALIZADA, não a atual/aberta
-        const rodadaSaldo = ultimaRodadaDisputada || (rodadaAtual > 0 ? rodadaAtual - 1 : 0);
+        // IC-07: Saldo financeiro reflete ate a ultima rodada FINALIZADA
+        // Quando status=2 (jogos em andamento), a rodada atual AINDA NAO foi consolidada
+        const statusMercadoSaldo = Number(mercadoStatus?.status_mercado ?? 1) || 1;
+        const rodadaMercadoSaldo = Number(mercadoStatus?.rodada_atual ?? rodadaAtual) || rodadaAtual;
+        const rodadaSaldo = (statusMercadoSaldo === 2)
+            ? Math.max(1, rodadaMercadoSaldo - 1)
+            : (ultimaRodadaDisputada || (rodadaAtual > 0 ? rodadaAtual - 1 : 0));
         rankingSaldoEl.textContent = rodadaSaldo ? `R${rodadaSaldo}` : '--';
     }
 
@@ -1189,22 +1217,15 @@ let _destaquesRefreshTimer = null;
 
 async function carregarDestaquesRodada(ligaId, rodada, timeId, isAoVivo = false) {
     try {
-        // Atualizar badge com número da rodada
+        // IC-03: NAO atualizar badge/live imediatamente - aguardar resultado do fetch
+        // para evitar flash "Rodada X" → "Rodada X-1" a cada auto-refresh
         const rodadaBadgeEl = document.getElementById('home-destaques-rodada');
-        if (rodadaBadgeEl) {
-            rodadaBadgeEl.textContent = `Rodada ${rodada}`;
-        }
-
-        // ✅ Badge AO VIVO
         const liveBadgeEl = document.getElementById('home-destaques-live-badge');
-        if (liveBadgeEl) {
-            liveBadgeEl.style.display = isAoVivo ? 'inline-flex' : 'none';
-        }
 
-        // Buscar escalação do time na rodada
+        // Buscar escalacao do time na rodada
         const response = await fetch(`/api/cartola/time/id/${timeId}/${rodada}`);
         if (!response.ok) {
-            // ✅ FIX: Fallback para rodada anterior em caso de 404
+            // Fallback para rodada anterior em caso de 404
             if (response.status === 404 && rodada > 1) {
                 if (window.Log) Log.debug("PARTICIPANTE-HOME", `Rodada ${rodada} sem dados, tentando rodada ${rodada - 1}`);
                 const fallbackResp = await fetch(`/api/cartola/time/id/${timeId}/${rodada - 1}`);
@@ -1212,11 +1233,13 @@ async function carregarDestaquesRodada(ligaId, rodada, timeId, isAoVivo = false)
                     const fallbackData = await fallbackResp.json();
                     if (fallbackData?.atletas?.length) {
                         _renderizarDestaques(fallbackData, rodada - 1);
+                        if (rodadaBadgeEl) rodadaBadgeEl.textContent = `Rodada ${rodada - 1}`;
+                        if (liveBadgeEl) liveBadgeEl.style.display = 'none';
                         return;
                     }
                 }
             }
-            if (window.Log) Log.debug("PARTICIPANTE-HOME", "Escalação não encontrada");
+            if (window.Log) Log.debug("PARTICIPANTE-HOME", "Escalacao nao encontrada");
             const destaquesSection = document.getElementById('home-destaques-section');
             if (destaquesSection) destaquesSection.classList.add('hidden');
             return;
@@ -1229,12 +1252,12 @@ async function carregarDestaquesRodada(ligaId, rodada, timeId, isAoVivo = false)
             return;
         }
 
-        // ✅ FIX: Detectar se todos os atletas têm pontos_num 0 (jogos não começaram)
+        // Detectar se todos os atletas tem pontos_num 0 (jogos nao comecaram)
         const todosAtletas = [...(escalacao.atletas || []), ...(escalacao.reservas || [])];
         const todosZerados = todosAtletas.every(a => !a.pontos_num || a.pontos_num === 0);
 
         if (todosZerados && isAoVivo && rodada > 1) {
-            // Jogos não começaram ainda - buscar rodada anterior como fallback
+            // IC-01: Jogos nao comecaram - mostrar estado intermediario claro
             if (window.Log) Log.debug("PARTICIPANTE-HOME", `Rodada ${rodada} sem pontos ainda, usando rodada ${rodada - 1}`);
             const fallbackResp = await fetch(`/api/cartola/time/id/${timeId}/${rodada - 1}`);
             if (fallbackResp.ok) {
@@ -1243,27 +1266,66 @@ async function carregarDestaquesRodada(ligaId, rodada, timeId, isAoVivo = false)
                 const fallbackTemPontos = fallbackAtletas.some(a => a.pontos_num && a.pontos_num !== 0);
                 if (fallbackTemPontos) {
                     _renderizarDestaques(fallbackData, rodada - 1);
-                    // Atualizar badge para indicar rodada anterior
+                    // IC-01: Badge indica rodada anterior com contexto de aguardo
                     if (rodadaBadgeEl) rodadaBadgeEl.textContent = `Rodada ${rodada - 1}`;
-                    // Esconder badge AO VIVO (dados são da rodada anterior)
-                    if (liveBadgeEl) liveBadgeEl.style.display = 'none';
+                    // IC-01: Mostrar badge AGUARDANDO em vez de AO VIVO
+                    if (liveBadgeEl) {
+                        liveBadgeEl.textContent = 'AGUARDANDO';
+                        liveBadgeEl.style.display = 'inline-flex';
+                        liveBadgeEl.classList.add('aguardando');
+                        liveBadgeEl.classList.remove('ao-vivo');
+                    }
                 } else {
                     _renderizarDestaques(escalacao, rodada);
+                    if (rodadaBadgeEl) rodadaBadgeEl.textContent = `Rodada ${rodada}`;
+                    if (liveBadgeEl) {
+                        liveBadgeEl.textContent = 'AGUARDANDO';
+                        liveBadgeEl.style.display = 'inline-flex';
+                        liveBadgeEl.classList.add('aguardando');
+                        liveBadgeEl.classList.remove('ao-vivo');
+                    }
                 }
             } else {
                 _renderizarDestaques(escalacao, rodada);
+                if (rodadaBadgeEl) rodadaBadgeEl.textContent = `Rodada ${rodada}`;
+                if (liveBadgeEl) {
+                    liveBadgeEl.textContent = 'AGUARDANDO';
+                    liveBadgeEl.style.display = 'inline-flex';
+                    liveBadgeEl.classList.add('aguardando');
+                    liveBadgeEl.classList.remove('ao-vivo');
+                }
             }
         } else {
+            // IC-03: Atualizar badge SOMENTE apos confirmar que ha dados validos
             _renderizarDestaques(escalacao, rodada);
+            if (rodadaBadgeEl) rodadaBadgeEl.textContent = `Rodada ${rodada}`;
+            if (liveBadgeEl) {
+                if (isAoVivo) {
+                    liveBadgeEl.textContent = 'AO VIVO';
+                    liveBadgeEl.style.display = 'inline-flex';
+                    liveBadgeEl.classList.add('ao-vivo');
+                    liveBadgeEl.classList.remove('aguardando');
+                } else {
+                    liveBadgeEl.style.display = 'none';
+                }
+            }
         }
 
-        // ✅ Auto-refresh durante jogos ao vivo (a cada 60s)
+        // Auto-refresh durante jogos ao vivo (a cada 60s)
         if (_destaquesRefreshTimer) clearInterval(_destaquesRefreshTimer);
         if (isAoVivo) {
             _destaquesRefreshTimer = setInterval(() => {
-                // Verificar se ainda está na home e se jogos continuam
+                // Verificar se ainda esta na home e se jogos continuam
                 const homeContainer = document.getElementById('home-destaques-section');
                 if (!homeContainer || !document.contains(homeContainer)) {
+                    clearInterval(_destaquesRefreshTimer);
+                    _destaquesRefreshTimer = null;
+                    return;
+                }
+                // IC-02: Verificar se mercado ainda esta fechado antes de refresh
+                const statusAtual = mercadoStatus?.status_mercado;
+                if (statusAtual !== 2) {
+                    if (window.Log) Log.debug("PARTICIPANTE-HOME", "Mercado nao esta mais fechado, parando auto-refresh destaques");
                     clearInterval(_destaquesRefreshTimer);
                     _destaquesRefreshTimer = null;
                     return;
@@ -1738,9 +1800,25 @@ function atualizarCardsHomeComParciais() {
         posicaoIndicatorEl.style.left = `${percentualClamped}%`;
     }
 
+    // IC-08: Sincronizar stat cards de posicao com posicao parcial
+    const rankingPontosEl = document.getElementById('home-ranking-pontos');
+    const rankingGeralEl = document.getElementById('home-ranking-geral');
+    if (rankingPontosEl && minhaPosicao.posicao) {
+        rankingPontosEl.textContent = `${minhaPosicao.posicao}º`;
+    }
+    if (rankingGeralEl && minhaPosicao.posicao) {
+        rankingGeralEl.textContent = `${minhaPosicao.posicao}º`;
+    }
+
     // Atualizar card de pontos (pontos da rodada parcial)
     const ultimaPontuacaoEl = document.getElementById('home-ultima-pontuacao');
     const variacaoPontosEl = document.getElementById('home-variacao-pontos');
+
+    // IC-04: Atualizar label para indicar que sao pontos parciais
+    const pontuacaoLabelEl = document.getElementById('home-pontuacao-label');
+    if (pontuacaoLabelEl) {
+        pontuacaoLabelEl.textContent = 'PONTUACAO PARCIAL';
+    }
 
     if (ultimaPontuacaoEl) {
         const pontosParciais = minhaPosicao.pontos || 0;
@@ -1751,14 +1829,16 @@ function atualizarCardsHomeComParciais() {
         variacaoPontosEl.innerHTML = '<span class="live-badge-mini">AO VIVO</span>';
     }
 
-    // Atualizar painel de avisos para modo AO VIVO
+    // IC-06: Atualizar painel de avisos para modo AO VIVO mantendo numero da rodada
     const avisoTitulo = document.getElementById('home-aviso-titulo');
     const avisoSubtitulo = document.getElementById('home-aviso-subtitulo');
+    const rodadaMercadoLive = mercadoStatus?.rodada_atual || '';
     if (avisoTitulo) {
         avisoTitulo.innerHTML = 'JOGOS AO VIVO <span class="live-badge-mini">LIVE</span>';
     }
     if (avisoSubtitulo) {
-        avisoSubtitulo.textContent = `Posição ${minhaPosicao.posicao}º • ${minhaPosicao.pontos ? (Math.trunc(minhaPosicao.pontos * 10) / 10).toFixed(1) : 0 || 0} pts parciais`;
+        const pontsParciais = minhaPosicao.pontos ? (Math.trunc(minhaPosicao.pontos * 10) / 10).toFixed(1) : '0';
+        avisoSubtitulo.textContent = `Rodada ${rodadaMercadoLive} • ${minhaPosicao.posicao}º • ${pontsParciais} pts`;
     }
 
     // Atualizar saldo projetado
@@ -1773,8 +1853,9 @@ function getValorRankingPosicao(config, posicao) {
 function atualizarSaldoProjetado(posicaoParcial) {
     if (!configRankingRodada) return;
 
-    const patrimonioEl = document.getElementById('home-patrimonio');
-    const variacaoEl = document.getElementById('home-variacao-patrimonio');
+    // IC-05: Corrigido IDs para corresponder ao HTML real (home-saldo-financeiro, home-variacao-saldo)
+    const patrimonioEl = document.getElementById('home-saldo-financeiro');
+    const variacaoEl = document.getElementById('home-variacao-saldo');
     if (!patrimonioEl) return;
 
     // Calcular impacto da posição parcial
