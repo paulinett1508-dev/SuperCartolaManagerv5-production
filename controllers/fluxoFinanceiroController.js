@@ -61,6 +61,7 @@ import FluxoFinanceiroCampos from "../models/FluxoFinanceiroCampos.js";
 import Top10Cache from "../models/Top10Cache.js";
 import AcertoFinanceiro from "../models/AcertoFinanceiro.js";
 import AjusteFinanceiro from "../models/AjusteFinanceiro.js";
+import LigaRules from "../models/LigaRules.js";
 import { getResultadosMataMataCompleto } from "./mata-mata-backend.js";
 // ✅ v8.1.0: Invalidação de cache em cascata
 import { onCamposSaved } from "../utils/cache-invalidator.js";
@@ -1000,7 +1001,12 @@ export const getExtratoFinanceiro = async (req, res) => {
         let transacoesInscricao = [];
         let saldoInscricao = 0;
 
-        const valorInscricao = liga.parametros_financeiros?.inscricao || 0;
+        // ✅ A2 FIX: Usar LigaRules como fonte única de verdade para taxa de inscrição
+        // liga.parametros_financeiros?.inscricao é campo legado que pode divergir
+        const ligaRulesData = await LigaRules.buscarPorLiga(ligaId, temporadaAtual);
+        const valorInscricao = ligaRulesData?.inscricao?.taxa
+            ?? liga.parametros_financeiros?.inscricao   // fallback: ligas sem LigaRules configurado
+            ?? 0;
         const pagouInscricao = participante?.pagouInscricao === true;
 
         // ✅ v8.12.0: Owner/premium isento de inscrição (liga com owner_email)
