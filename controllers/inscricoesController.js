@@ -66,14 +66,17 @@ export async function criarTransacoesIniciais(ligaId, timeId, temporada, valores
     const transacoes = [];
     const agora = new Date();
 
+    // ✅ G1 FIX: liga_id sempre como String — convenção da collection extratofinanceirocaches
+    // Usar ObjectId em um bloco e String no outro causava criação de documentos duplicados
+    // para o mesmo participante (cada bloco "não encontrava" o documento do outro)
+    const ligaIdStr = String(ligaId);
+
     // 1. Transação de Taxa de Inscrição
     // REGRA ESTRUTURADA: só gera débito se regra da liga permitir
     // Se pagouInscricao = false e gerar_debito_inscricao_renovacao = true, cria débito no extrato
     const ligaRules = await LigaRules.buscarPorLiga(ligaId, temporada);
     const gerarDebitoInscricao = ligaRules?.inscricao?.gerar_debito_inscricao_renovacao !== false;
     if (valores.taxa > 0 && valores.pagouInscricao !== true && gerarDebitoInscricao) {
-        // liga_id armazenado como String nos caches existentes — usar String diretamente
-        const ligaIdStr = String(ligaId);
 
         // Verificar se já existe transação de inscrição (evitar duplicação)
         const extratoExistente = await db.collection('extratofinanceirocaches').findOne({
@@ -133,12 +136,12 @@ export async function criarTransacoesIniciais(ligaId, timeId, temporada, valores
 
     // 2. Transação de Saldo Transferido (pode ser positivo ou negativo)
     if (valores.saldoTransferido !== 0) {
-        // ✅ v1.2: Usar ObjectId para liga_id (compatível com schema Mongoose)
-        const ligaObjIdSaldo = new mongoose.Types.ObjectId(ligaId);
+        // ✅ G1 FIX: Usar ligaIdStr (String) — mesmo tipo do bloco 1
+        // Antes usava ObjectId aqui, causando criação de documento duplicado
 
         // ✅ v1.1: Verificar se já existe transação de saldo anterior (evitar duplicação)
         const extratoComSaldo = await db.collection('extratofinanceirocaches').findOne({
-            liga_id: ligaObjIdSaldo,
+            liga_id: ligaIdStr,
             time_id: Number(timeId),
             temporada: Number(temporada),
             'historico_transacoes.tipo': 'SALDO_TEMPORADA_ANTERIOR'
@@ -155,7 +158,7 @@ export async function criarTransacoesIniciais(ligaId, timeId, temporada, valores
             // Caso: pagouInscricao=true com saldoTransferido > 0 (credor que pagou com crédito)
             await db.collection('extratofinanceirocaches').updateOne(
                 {
-                    liga_id: ligaObjIdSaldo,
+                    liga_id: ligaIdStr,
                     time_id: Number(timeId),
                     temporada: Number(temporada)
                 },
@@ -173,7 +176,7 @@ export async function criarTransacoesIniciais(ligaId, timeId, temporada, valores
                         saldo_consolidado: valores.saldoTransferido
                     },
                     $setOnInsert: {
-                        liga_id: ligaObjIdSaldo,
+                        liga_id: ligaIdStr,
                         time_id: Number(timeId),
                         temporada: Number(temporada),
                         criado_em: agora,
