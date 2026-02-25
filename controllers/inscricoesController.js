@@ -25,6 +25,8 @@ import { CURRENT_SEASON } from "../config/seasons.js";
 import { calcularSaldoParticipante, classificarSituacao } from "../utils/saldo-calculator.js";
 import crypto from "crypto";
 import logger from '../utils/logger.js';
+// E2 FIX: Usar serviço dedicado com cache, retry e timeout (sem fetch inline)
+import cartolaApiService from '../services/cartolaApiService.js';
 
 // =============================================================================
 // FUNÇÕES AUXILIARES
@@ -1140,18 +1142,17 @@ export async function processarBatchInscricoes(ligaId, temporada, timeIds, acao,
                     const participante = ligaDoc?.participantes?.find(p => Number(p.time_id) === Number(timeId));
 
                     if (participante) {
-                        // Buscar dados na API Cartola
-                        const cartolaRes = await fetch(`https://api.cartola.globo.com/time/id/${timeId}`);
-                        if (cartolaRes.ok) {
-                            const cartolaData = await cartolaRes.json();
+                        // E2 FIX: Usar cartolaApiService (cache + retry + timeout)
+                        const dadosTime = await cartolaApiService.buscarTimePorId(timeId);
+                        if (dadosTime) {
                             // Atualizar dados na liga
                             await Liga.updateOne(
                                 { _id: ligaId, "participantes.time_id": Number(timeId) },
                                 {
                                     $set: {
-                                        "participantes.$.nome_time": cartolaData.time?.nome,
-                                        "participantes.$.nome_cartola": cartolaData.time?.nome_cartola,
-                                        "participantes.$.escudo_url": cartolaData.time?.url_escudo_png
+                                        "participantes.$.nome_time": dadosTime.nome_time,
+                                        "participantes.$.nome_cartola": dadosTime.nome_cartoleiro,
+                                        "participantes.$.escudo_url": dadosTime.escudo
                                     }
                                 }
                             );
