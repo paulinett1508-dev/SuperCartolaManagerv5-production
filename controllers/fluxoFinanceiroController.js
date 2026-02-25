@@ -967,7 +967,7 @@ export const getExtratoFinanceiro = async (req, res) => {
                             tipo: "AJUSTE_MANUAL",
                             descricao: campo.nome,
                             valor: campo.valor,
-                            data: camposManuais.updatedAt,
+                            data: camposManuais.atualizado_em, // ✅ H5 FIX: FluxoFinanceiroCampos remapeia updatedAt → atualizado_em
                         });
                     }
                 });
@@ -1168,7 +1168,7 @@ export const salvarCampo = async (req, res) => {
         if (valor !== undefined)
             documento.campos[index].valor = parseFloat(valor) || 0;
 
-        documento.updatedAt = new Date();
+        // ✅ H5 FIX: FluxoFinanceiroCampos usa timestamps transform atualizado_em — não definir updatedAt manualmente
         await documento.save();
 
         // ✅ v8.1.0: Invalidar cache para recalcular saldos

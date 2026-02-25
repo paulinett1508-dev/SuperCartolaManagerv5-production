@@ -10,7 +10,7 @@
  */
 
 import mongoose from "mongoose";
-import { CURRENT_SEASON } from "../config/seasons.js";
+import { CURRENT_SEASON, SEASON_CONFIG } from "../config/seasons.js";
 
 const LigaRulesSchema = new mongoose.Schema({
     // Identificação
@@ -43,7 +43,14 @@ const LigaRulesSchema = new mongoose.Schema({
         prazo_renovacao: {
             type: Date,
             required: true,
-            default: () => new Date('2026-01-27T23:59:59') // 1 dia antes da 1ª rodada
+            // ✅ H4 FIX: dinâmico — 1 dia antes da 1ª rodada da temporada corrente
+            default: () => {
+                const primeiraRodada = SEASON_CONFIG.dataPrimeiraRodada || new Date('2026-01-28');
+                const prazo = new Date(primeiraRodada);
+                prazo.setDate(prazo.getDate() - 1);
+                prazo.setHours(23, 59, 59, 0);
+                return prazo;
+            }
         },
 
         // Permitir que devedores renovem (carregando a dívida)

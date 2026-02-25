@@ -25,6 +25,7 @@ const ExtratoFinanceiroCacheSchema = new mongoose.Schema(
 
         // Controle de Cache Permanente
         cache_permanente: { type: Boolean, default: false },
+        // ⚠️ H3 DEPRECATED: versao_calculo root duplica metadados.versaoCalculo — usar metadados.versaoCalculo
         versao_calculo: { type: String, default: "4.0.0" },
         rodadas_imutaveis: [Number],
 
@@ -77,6 +78,8 @@ const ExtratoFinanceiroCacheSchema = new mongoose.Schema(
             },
             valor_legado: { type: Number, default: 0 },  // Valor a carregar para próxima temporada
             observacao: { type: String },
+            // ✅ H2 FIX: campo de auditoria escrito por quitacaoController.js
+            criado_sem_cache: { type: Boolean, default: false },
         },
     },
     {

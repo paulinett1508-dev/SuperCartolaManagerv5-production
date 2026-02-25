@@ -27,6 +27,7 @@ import {
 } from "./fluxoFinanceiroController.js";
 import { getFinancialSeason } from "../config/seasons.js";
 import NodeCache from "node-cache";
+import logger from "../utils/logger.js"; // ✅ E4 FIX
 
 const LOG_PREFIX = "[PROJECAO-FINANCEIRA]";
 
@@ -74,7 +75,7 @@ export const getProjecaoTime = async (req, res) => {
     try {
         const { ligaId, timeId } = req.params;
 
-        console.log(`${LOG_PREFIX} Projeção time ${timeId} liga ${ligaId}`);
+        logger.log(`${LOG_PREFIX} Projeção time ${timeId} liga ${ligaId}`);
 
         // 1. Buscar ranking parcial (já valida status_mercado === 2)
         const rankingParcial = await buscarRankingParcialComCache(ligaId);
@@ -180,7 +181,7 @@ export const getProjecaoTime = async (req, res) => {
         });
 
     } catch (error) {
-        console.error(`${LOG_PREFIX} ❌ Erro:`, error);
+        logger.error(`${LOG_PREFIX} ❌ Erro:`, error);
         res.status(500).json({ error: "Erro ao calcular projeção financeira" });
     }
 };
@@ -194,7 +195,7 @@ export const getProjecaoLiga = async (req, res) => {
     try {
         const { ligaId } = req.params;
 
-        console.log(`${LOG_PREFIX} Projeção liga ${ligaId} (todos participantes)`);
+        logger.log(`${LOG_PREFIX} Projeção liga ${ligaId} (todos participantes)`);
 
         // 1. Buscar ranking parcial
         const rankingParcial = await buscarRankingParcialComCache(ligaId);
@@ -298,9 +299,9 @@ export const getProjecaoLiga = async (req, res) => {
         });
 
     } catch (error) {
-        console.error(`${LOG_PREFIX} ❌ Erro:`, error);
+        logger.error(`${LOG_PREFIX} ❌ Erro:`, error);
         res.status(500).json({ error: "Erro ao calcular projeção da liga" });
     }
 };
 
-console.log(`${LOG_PREFIX} ✅ v1.0.0 carregado`);
+logger.log(`${LOG_PREFIX} ✅ v1.0.0 carregado`);
