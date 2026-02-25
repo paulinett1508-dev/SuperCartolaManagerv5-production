@@ -10,7 +10,7 @@ import "./fluxo-financeiro/fluxo-financeiro-quitacao.js";
 import "./fluxo-financeiro/fluxo-financeiro-ajustes-api.js";
 
 // Cache-buster para forçar reload de módulos (incrementar a cada mudança)
-const CACHE_BUSTER = "v8.5"; // v8.5: Double RAF para garantir container no DOM após refresh
+const CACHE_BUSTER = "v8.6"; // v8.6: Colunas RestaUm e CapitaoLuxo na tabela financeira
 
 // VARIÁVEIS GLOBAIS
 let rodadaAtual = 0;
