@@ -336,13 +336,6 @@ export function aplicarAjusteInscricaoBulk(saldoConsolidado, inscricaoData, hist
 }
 
 /**
- * Alias para compatibilidade com código existente
- * @deprecated Use calcularSaldoParticipante() diretamente
- */
-export const calcularSaldoCompleto = calcularSaldoParticipante;
-export const calcularSaldoTotalParticipante = calcularSaldoParticipante;
-
-/**
  * Calcula saldo rápido (sem recálculo, usa cache direto)
  * Útil para listagens onde performance é crítica
  *
@@ -369,8 +362,6 @@ export function classificarSituacao(saldoFinal) {
 
 export default {
     calcularSaldoParticipante,
-    calcularSaldoCompleto,
-    calcularSaldoTotalParticipante,
     calcularSaldoRapido,
     aplicarAjusteInscricaoBulk,
     classificarSituacao,
