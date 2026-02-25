@@ -26,6 +26,64 @@ import {
 import { salvarAcertoTransacional, desativarAcerto } from "../services/acertoService.js";
 
 // =============================================================================
+// ✅ C3 FIX: Helper interno — elimina cálculo de saldo triplicado nos 3 GET endpoints
+// =============================================================================
+
+const TIPOS_ESPECIAIS_SALDO = ['INSCRICAO_TEMPORADA', 'SALDO_TEMPORADA_ANTERIOR', 'LEGADO_ANTERIOR'];
+
+/**
+ * Calcula saldo de um participante a partir de dados pré-carregados (bulk-safe).
+ * Usado por getParticipantes, getLiga e getResumo para evitar duplicação.
+ *
+ * @param {object} p
+ * @param {string}   p.ligaId
+ * @param {number}   p.temporadaNum
+ * @param {Array}    p.historico      - historico_transacoes do ExtratoFinanceiroCache
+ * @param {object}   p.extrato        - documento ExtratoFinanceiroCache (lean)
+ * @param {Array}    p.camposAtivos   - campos com valor !== 0 (FluxoFinanceiroCampos)
+ * @param {object}   p.inscricaoData  - documento InscricaoTemporada (lean) ou null
+ * @param {Array}    p.ajustesList    - array de AjusteFinanceiro para este time
+ * @returns {{ saldoConsolidado, resumoCalculado, saldoAjustes, inscricaoInfo }}
+ */
+function _calcularSaldoCore({ ligaId, temporadaNum, historico, extrato, camposAtivos, inscricaoData, ajustesList }) {
+    const apenasTransacoesEspeciais = historico.length > 0 &&
+        historico.every(t => TIPOS_ESPECIAIS_SALDO.includes(t.tipo));
+
+    let saldoConsolidado = 0;
+    let resumoCalculado = { bonus: 0, onus: 0, pontosCorridos: 0, mataMata: 0, top10: 0, camposManuais: 0 };
+
+    if (apenasTransacoesEspeciais) {
+        if (temporadaNum >= CURRENT_SEASON) {
+            historico.forEach(t => {
+                if (t.tipo && t.tipo !== 'INSCRICAO_TEMPORADA' && t.tipo !== 'SALDO_TEMPORADA_ANTERIOR') {
+                    saldoConsolidado += t.valor || 0;
+                }
+            });
+        } else {
+            saldoConsolidado = extrato?.saldo_consolidado || 0;
+        }
+    } else {
+        const rodadasProcessadas = transformarTransacoesEmRodadas(historico, ligaId);
+        resumoCalculado = calcularResumoDeRodadas(rodadasProcessadas, camposAtivos);
+        saldoConsolidado = resumoCalculado.saldo;
+    }
+
+    let inscricaoInfo = { saldoAjustado: saldoConsolidado, taxaInscricao: 0, pagouInscricao: true, saldoAnteriorTransferido: 0, dividaAnterior: 0 };
+    if (temporadaNum >= CURRENT_SEASON) {
+        inscricaoInfo = aplicarAjusteInscricaoBulk(saldoConsolidado, inscricaoData, historico);
+        saldoConsolidado = inscricaoInfo.saldoAjustado;
+    }
+
+    let saldoAjustes = 0;
+    if (temporadaNum >= CURRENT_SEASON) {
+        saldoAjustes = (ajustesList || []).reduce((acc, a) => acc + (a.valor || 0), 0);
+        saldoConsolidado += saldoAjustes;
+    }
+
+    return { saldoConsolidado, resumoCalculado, saldoAjustes, inscricaoInfo };
+}
+
+// =============================================================================
 // GET /api/tesouraria/participantes
 // Retorna TODOS os participantes de TODAS as ligas com saldos
 // =============================================================================
@@ -148,58 +206,17 @@ export async function getParticipantes(req, res) {
                 // Buscar dados do cache
                 const extrato = extratoMap.get(key);
                 const historico = extrato?.historico_transacoes || [];
-
-                const TIPOS_ESPECIAIS = ['INSCRICAO_TEMPORADA', 'SALDO_TEMPORADA_ANTERIOR', 'LEGADO_ANTERIOR'];
-                const apenasTransacoesEspeciais = historico.length > 0 &&
-                    historico.every(t => TIPOS_ESPECIAIS.includes(t.tipo));
-
-                // Campos manuais
                 const camposDoc = camposMap.get(key);
                 const camposAtivos = camposDoc?.campos?.filter(c => c.valor !== 0) || [];
 
-                let saldoConsolidado = 0;
-                let saldoCampos = 0;
-                let resumoCalculado = { bonus: 0, onus: 0, pontosCorridos: 0, mataMata: 0, top10: 0 };
-
-                if (apenasTransacoesEspeciais) {
-                    if (temporadaNum >= CURRENT_SEASON) {
-                        saldoConsolidado = 0;
-                        historico.forEach(t => {
-                            if (t.tipo && t.tipo !== 'INSCRICAO_TEMPORADA' && t.tipo !== 'SALDO_TEMPORADA_ANTERIOR') {
-                                saldoConsolidado += t.valor || 0;
-                            }
-                        });
-                    } else {
-                        saldoConsolidado = extrato?.saldo_consolidado || 0;
-                    }
-                } else {
-                    const rodadasProcessadas = transformarTransacoesEmRodadas(historico, ligaId);
-                    resumoCalculado = calcularResumoDeRodadas(rodadasProcessadas, camposAtivos);
-                    saldoConsolidado = resumoCalculado.saldo;
-                    saldoCampos = resumoCalculado.camposManuais || 0;
-                }
-
-                let taxaInscricao = 0;
-                let pagouInscricao = true;
-                let saldoAnteriorTransferido = 0;
-                let dividaAnterior = 0;
-
-                if (temporadaNum >= CURRENT_SEASON) {
-                    const inscricaoData = inscricoesMapAll.get(key);
-                    const ajusteInsc = aplicarAjusteInscricaoBulk(saldoConsolidado, inscricaoData, historico);
-                    saldoConsolidado = ajusteInsc.saldoAjustado;
-                    taxaInscricao = ajusteInsc.taxaInscricao;
-                    pagouInscricao = ajusteInsc.pagouInscricao;
-                    saldoAnteriorTransferido = ajusteInsc.saldoAnteriorTransferido;
-                    dividaAnterior = ajusteInsc.dividaAnterior;
-                }
-
-                let saldoAjustes = 0;
-                if (temporadaNum >= CURRENT_SEASON) {
-                    const ajustesList = ajustesFinMap.get(key) || [];
-                    saldoAjustes = ajustesList.reduce((acc, a) => acc + (a.valor || 0), 0);
-                    saldoConsolidado += saldoAjustes;
-                }
+                // ✅ C3 FIX: _calcularSaldoCore elimina bloco de 40 linhas triplicado
+                const { saldoConsolidado, resumoCalculado, saldoAjustes, inscricaoInfo } = _calcularSaldoCore({
+                    ligaId, temporadaNum, historico, extrato, camposAtivos,
+                    inscricaoData: inscricoesMapAll.get(key),
+                    ajustesList: ajustesFinMap.get(key) || [],
+                });
+                const saldoCampos = resumoCalculado.camposManuais || 0;
+                const { taxaInscricao, pagouInscricao, saldoAnteriorTransferido, dividaAnterior } = inscricaoInfo;
 
                 const breakdown = {
                     banco: resumoCalculado.bonus + resumoCalculado.onus,
@@ -483,44 +500,20 @@ export async function getLiga(req, res) {
 
             const extrato = extratoMap.get(timeId);
             const historico = extrato?.historico_transacoes || [];
-
-            const TIPOS_ESPECIAIS = ['INSCRICAO_TEMPORADA', 'SALDO_TEMPORADA_ANTERIOR', 'LEGADO_ANTERIOR'];
-            const apenasTransacoesEspeciais = historico.length > 0 &&
-                historico.every(t => TIPOS_ESPECIAIS.includes(t.tipo));
-
             const camposDoc = camposMap.get(timeId);
             const camposAtivos = camposDoc?.campos?.filter(c => c.valor !== 0) || [];
 
-            let saldoConsolidado = 0;
-            let saldoCampos = 0;
-            let resumoCalculado = { bonus: 0, onus: 0, pontosCorridos: 0, mataMata: 0, top10: 0 };
+            // ✅ C3 FIX: _calcularSaldoCore elimina bloco triplicado
+            let { saldoConsolidado, resumoCalculado, saldoAjustes, inscricaoInfo } = _calcularSaldoCore({
+                ligaId, temporadaNum, historico, extrato, camposAtivos,
+                inscricaoData: inscricoesMap.get(timeId),
+                ajustesList: ajustesFinMap.get(timeId) || [],
+            });
+            const saldoCampos = resumoCalculado.camposManuais || 0;
 
-            if (apenasTransacoesEspeciais) {
-                if (temporadaNum >= CURRENT_SEASON) {
-                    saldoConsolidado = 0;
-                    historico.forEach(t => {
-                        if (t.tipo && t.tipo !== 'INSCRICAO_TEMPORADA' && t.tipo !== 'SALDO_TEMPORADA_ANTERIOR') {
-                            saldoConsolidado += t.valor || 0;
-                        }
-                    });
-                } else {
-                    saldoConsolidado = extrato?.saldo_consolidado || 0;
-                }
-            } else {
-                const rodadasProcessadas = transformarTransacoesEmRodadas(historico, ligaId);
-                resumoCalculado = calcularResumoDeRodadas(rodadasProcessadas, camposAtivos);
-                saldoConsolidado = resumoCalculado.saldo;
-                saldoCampos = resumoCalculado.camposManuais || 0;
-            }
-
-            let inscricaoInfo = { taxaInscricao: 0, pagouInscricao: true, saldoAnteriorTransferido: 0, dividaAnterior: 0 };
-            if (temporadaNum >= CURRENT_SEASON) {
-                const inscricaoData = inscricoesMap.get(timeId);
-                const ajusteInsc = aplicarAjusteInscricaoBulk(saldoConsolidado, inscricaoData, historico);
-                saldoConsolidado = ajusteInsc.saldoAjustado;
-                inscricaoInfo = ajusteInsc;
-
-                if ((inscricaoInfo.saldoAnteriorTransferido === 0 || inscricaoInfo.saldoAnteriorTransferido == null)) {
+            // B3-FALLBACK: Se inscrição sem saldo anterior, recalcular da temporada anterior
+            if (temporadaNum >= CURRENT_SEASON &&
+                (inscricaoInfo.saldoAnteriorTransferido === 0 || inscricaoInfo.saldoAnteriorTransferido == null)) {
                     const extratoAnt = extratoAnteriorMap.get(timeId);
                     if (extratoAnt) {
                         const histAnt = extratoAnt.historico_transacoes || [];
@@ -541,14 +534,6 @@ export async function getLiga(req, res) {
                             console.log(`[TESOURARIA] B3-FALLBACK time=${timeId}: saldoAnterior2025=${saldoFinal2025.toFixed(2)} (InscricaoTemporada ausente/zerada)`);
                         }
                     }
-                }
-            }
-
-            let saldoAjustes = 0;
-            if (temporadaNum >= CURRENT_SEASON) {
-                const ajustesList = ajustesFinMap.get(timeId) || [];
-                saldoAjustes = ajustesList.reduce((acc, a) => acc + (a.valor || 0), 0);
-                saldoConsolidado += saldoAjustes;
             }
 
             const breakdown = {
@@ -1227,39 +1212,12 @@ export async function getResumo(req, res) {
                 const camposDoc = camposMap.get(key);
                 const camposAtivos = camposDoc?.campos?.filter(c => c.valor !== 0) || [];
 
-                let saldoConsolidado = 0;
-                const TIPOS_ESPECIAIS = ['INSCRICAO_TEMPORADA', 'SALDO_TEMPORADA_ANTERIOR', 'LEGADO_ANTERIOR'];
-                const apenasTransacoesEspeciais = historico.length > 0 &&
-                    historico.every(t => TIPOS_ESPECIAIS.includes(t.tipo));
-
-                if (apenasTransacoesEspeciais) {
-                    if (temporadaNum >= CURRENT_SEASON) {
-                        saldoConsolidado = 0;
-                        historico.forEach(t => {
-                            if (t.tipo && t.tipo !== 'INSCRICAO_TEMPORADA' && t.tipo !== 'SALDO_TEMPORADA_ANTERIOR') {
-                                saldoConsolidado += t.valor || 0;
-                            }
-                        });
-                    } else {
-                        saldoConsolidado = extrato?.saldo_consolidado || 0;
-                    }
-                } else {
-                    const rodadasProcessadas = transformarTransacoesEmRodadas(historico, ligaId);
-                    const resumoCalculado = calcularResumoDeRodadas(rodadasProcessadas, camposAtivos);
-                    saldoConsolidado = resumoCalculado.saldo;
-                }
-
-                if (temporadaNum >= CURRENT_SEASON) {
-                    const inscricaoData = inscricoesMap.get(key);
-                    const ajusteInsc = aplicarAjusteInscricaoBulk(saldoConsolidado, inscricaoData, historico);
-                    saldoConsolidado = ajusteInsc.saldoAjustado;
-                }
-
-                if (temporadaNum >= CURRENT_SEASON) {
-                    const ajustesList = ajustesFinMap.get(key) || [];
-                    const saldoAjustes = ajustesList.reduce((acc, a) => acc + (a.valor || 0), 0);
-                    saldoConsolidado += saldoAjustes;
-                }
+                // ✅ C3 FIX: _calcularSaldoCore elimina bloco triplicado
+                const { saldoConsolidado } = _calcularSaldoCore({
+                    ligaId, temporadaNum, historico, extrato, camposAtivos,
+                    inscricaoData: inscricoesMap.get(key),
+                    ajustesList: ajustesFinMap.get(key) || [],
+                });
 
                 const acertosList = acertosMap.get(key) || [];
                 const acertosTemporada = acertosList.filter(a => Number(a.temporada) === temporadaNum);

@@ -240,75 +240,9 @@ async function buscarExtratoDeSnapshots(ligaId, timeId, temporada = null) {
 
         logger.log(`[CACHE-CONTROLLER] ✅ Encontrado nos snapshots: saldo=${timeStats.saldo_total}, ganhos=${timeStats.ganhos}`);
 
-        // Construir array de rodadas baseado nas transações do extrato
-        const rodadasArray = [];
+        // ✅ C4 FIX: Usar transformarTransacoesEmRodadas canônico (evita switch duplicado)
         const transacoes = timeExtrato?.transacoes || [];
-
-        // Agrupar transações por rodada
-        const rodadasMap = {};
-        transacoes.forEach(t => {
-            const numRodada = t.rodada;
-            if (!numRodada) return;
-
-            if (!rodadasMap[numRodada]) {
-                rodadasMap[numRodada] = {
-                    rodada: numRodada,
-                    posicao: null,
-                    bonusOnus: 0,
-                    pontosCorridos: 0,
-                    mataMata: 0,
-                    top10: 0,
-                    saldo: 0,
-                    isMito: false,
-                    isMico: false,
-                    top10Status: null,
-                    top10Posicao: null,
-                };
-            }
-
-            const r = rodadasMap[numRodada];
-            const valor = parseFloat(t.valor) || 0;
-            const tipo = t.tipo || '';
-
-            switch (tipo) {
-                case 'PONTOS_CORRIDOS':
-                    r.pontosCorridos += valor;
-                    break;
-                case 'MATA_MATA':
-                    r.mataMata += valor;
-                    break;
-                case 'MITO':
-                    r.top10 += valor;
-                    r.isMito = true;
-                    r.top10Status = 'MITO';
-                    break;
-                case 'MICO':
-                    r.top10 += valor;
-                    r.isMico = true;
-                    r.top10Status = 'MICO';
-                    break;
-                case 'BONUS':
-                case 'BANCO_RODADA':
-                    r.bonusOnus += valor;
-                    break;
-                case 'ONUS':
-                    r.bonusOnus += valor;
-                    break;
-                default:
-                    if (valor !== 0) {
-                        r.bonusOnus += valor;
-                    }
-            }
-            r.saldo = r.bonusOnus + r.pontosCorridos + r.mataMata + r.top10;
-        });
-
-        // Converter mapa para array e calcular acumulado
-        const rodadasSorted = Object.values(rodadasMap).sort((a, b) => a.rodada - b.rodada);
-        let saldoAcumulado = 0;
-        rodadasSorted.forEach(r => {
-            saldoAcumulado += r.saldo;
-            r.saldoAcumulado = saldoAcumulado;
-        });
+        const rodadasSorted = transformarTransacoesEmRodadas(transacoes, ligaId);
 
         // Se não tem transações detalhadas, criar resumo básico
         if (rodadasSorted.length === 0 && timeStats.saldo_total) {

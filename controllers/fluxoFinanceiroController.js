@@ -252,7 +252,7 @@ function detectarModulosFaltantesNoCache(cache, liga, rodadaLimite) {
     const transacoes = cache.historico_transacoes || [];
 
     // 1. Verificar PONTOS CORRIDOS
-    const pcHabilitado = isModuloHabilitado(liga, 'pontos_corridos') || liga.modulos_ativos?.pontosCorridos;
+    const pcHabilitado = isModuloHabilitado(liga, 'pontos_corridos'); // ✅ C6 FIX: modulos_ativos já verificado dentro de isModuloHabilitado
     if (pcHabilitado) {
         const rodadaInicialPC = liga.configuracoes?.pontos_corridos?.rodadaInicial ?? 7;
         // Verificar se deveria ter transações de PC (rodada >= rodadaInicial)
@@ -265,7 +265,7 @@ function detectarModulosFaltantesNoCache(cache, liga, rodadaLimite) {
     }
 
     // 2. Verificar MATA-MATA
-    const mmHabilitado = isModuloHabilitado(liga, 'mata_mata') || liga.modulos_ativos?.mataMata;
+    const mmHabilitado = isModuloHabilitado(liga, 'mata_mata'); // ✅ C6 FIX
     if (mmHabilitado) {
         // MM pode ter múltiplas edições, verificar se tem pelo menos uma transação
         const temMM = transacoes.some(t => t.tipo === 'MATA_MATA');
@@ -279,7 +279,7 @@ function detectarModulosFaltantesNoCache(cache, liga, rodadaLimite) {
     }
 
     // 3. Verificar TOP10
-    const top10Habilitado = isModuloHabilitado(liga, 'top10') || liga.modulos_ativos?.top10 === true;
+    const top10Habilitado = isModuloHabilitado(liga, 'top10'); // ✅ C6 FIX
     if (top10Habilitado) {
         const temTop10 = transacoes.some(t => t.tipo === 'MITO' || t.tipo === 'MICO');
         // Top10 é ranking histórico, só deveria aparecer após várias rodadas
@@ -558,7 +558,7 @@ async function calcularFinanceiroDaRodada(
 
     // 3. PONTOS CORRIDOS
     // ✅ v8.0: Usa isModuloHabilitado ao invés de hardcoded ID
-    if (isModuloHabilitado(liga, 'pontos_corridos') || liga.modulos_ativos?.pontosCorridos) {
+    if (isModuloHabilitado(liga, 'pontos_corridos')) { // ✅ C6 FIX
         const resultadoPC = await calcularConfrontoPontosCorridos(
             liga,
             timeId,
@@ -806,8 +806,7 @@ export const getExtratoFinanceiro = async (req, res) => {
 
         // ✅ v8.0: Calcular TOP10 histórico (separado do loop de rodadas)
         // ✅ v8.4.0: Só calcular se NÃO for temporada futura
-        // ✅ v8.5.0: top10 é OPCIONAL, só habilita se === true
-        const top10Habilitado = isModuloHabilitado(liga, 'top10') || liga.modulos_ativos?.top10 === true;
+        const top10Habilitado = isModuloHabilitado(liga, 'top10'); // ✅ C6 FIX: === true já verificado internamente
         if (top10Habilitado && !isTemporadaFutura && !usouFallback) {
             // Verificar se já tem transações de TOP10 no cache
             const temTop10NoCache = cache.historico_transacoes.some(
@@ -843,7 +842,7 @@ export const getExtratoFinanceiro = async (req, res) => {
         // ✅ v8.13.0 FIX: NÃO calcular quando API Cartola está indisponível (fallback)
         // Bug anterior: fallback rodada_atual:38 fazia calcular MM com rankings de outra
         // temporada, gerando cobranças indevidas no cache.
-        const mataHabilitado = isModuloHabilitado(liga, 'mata_mata') || liga.modulos_ativos?.mataMata;
+        const mataHabilitado = isModuloHabilitado(liga, 'mata_mata'); // ✅ C6 FIX
         if (mataHabilitado && !isTemporadaFutura && !usouFallback) {
             // Sempre remover transações de MATA_MATA antigas para recalcular com dados frescos
             const mmAntigas = cache.historico_transacoes.filter(t => t.tipo === "MATA_MATA");
@@ -1302,8 +1301,7 @@ export const getFluxoFinanceiroLiga = async (ligaId, rodadaNumero) => {
                 }
 
                 // ✅ v8.0: Calcular TOP10 histórico na consolidação
-                // ✅ v8.5.0: top10 é OPCIONAL, só habilita se === true
-                const top10Habilitado = isModuloHabilitado(liga, 'top10') || liga.modulos_ativos?.top10 === true;
+                const top10Habilitado = isModuloHabilitado(liga, 'top10'); // ✅ C6 FIX
                 if (top10Habilitado) {
                     // ✅ FIX: Subtrair TOP10 antigos do saldo ANTES de remover do array
                     const top10Antigos = cache.historico_transacoes.filter(
@@ -1327,7 +1325,7 @@ export const getFluxoFinanceiroLiga = async (ligaId, rodadaNumero) => {
                 // ✅ v8.0: Calcular MATA-MATA histórico na consolidação
                 // Usa isModuloHabilitado ao invés de hardcoded ID
                 // ✅ v8.12.0 FIX: SEMPRE recalcular MATA_MATA (mesma lógica do getExtratoFinanceiro)
-                const mataHabilitado = isModuloHabilitado(liga, 'mata_mata') || liga.modulos_ativos?.mataMata;
+                const mataHabilitado = isModuloHabilitado(liga, 'mata_mata'); // ✅ C6 FIX
                 if (mataHabilitado) {
                     // Sempre remover transações de MATA_MATA antigas para recalcular
                     const mmAntigas = cache.historico_transacoes.filter(t => t.tipo === "MATA_MATA");
