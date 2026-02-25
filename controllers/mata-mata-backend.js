@@ -83,6 +83,7 @@ async function getRankingRodada(ligaId, rodada) {
         const registros = await Rodada.find({
             ligaId: ligaIdQuery,
             rodada: rodada,
+            temporada: CURRENT_SEASON,
         })
             .select("timeId pontos nome_time nome_cartola")
             .lean();
