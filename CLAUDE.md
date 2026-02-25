@@ -450,8 +450,19 @@ const preTemporada = temporada > statusMercado.temporada;
 | `extratofinanceirocaches` | `time_id` | Number | Performance |
 | `fluxofinanceirocampos` | `timeId` | String | Flexibilidade |
 | `acertofinanceiros` | `timeId` | String | Consistência |
+| `ajustefinanceiros` | `time_id` | Number | Histórico |
+| `inscricoestemporada` | `time_id` | Number | Histórico |
 
 **Mongoose faz coerção:** `String("13935277") == 13935277`
+
+**⚠️ G2/G3 — Dívida técnica conhecida (auditoria 2026-02-25):**
+- `AcertoFinanceiro`/`FluxoFinanceiroCampos` usam camelCase (`timeId: String`)
+- `AjusteFinanceiro`/`ExtratoFinanceiroCache`/`InscricaoTemporada` usam snake_case (`time_id: Number`)
+- **Regra de ouro para novas queries:**
+  - `extratofinanceirocaches` → `time_id: Number(id)` (raw) / `timeIds.map(Number)` (bulk)
+  - `fluxofinanceirocampos` → `timeId: { $in: ids.map(String) }` (Mongoose)
+  - `acertofinanceiros` → `timeId: String(id)` (Mongoose)
+- Migração completa requer script de dados — Sprint 3 futura
 
 ### Escudos
 Localização: `/public/escudos/{clube_id}.png` (262=Flamengo, 263=Botafogo, etc.)

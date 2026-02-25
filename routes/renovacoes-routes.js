@@ -261,6 +261,21 @@ router.post('/:id/pagamento', verificarAdmin, (req, res) => {
 
         const user = registry.users[userIndex];
 
+        // ✅ F7 FIX: idempotência — rejeita pagamento duplicado (mesmo valor nos últimos 60s)
+        const JANELA_DEDUP_MS = 60_000;
+        const agora = Date.now();
+        const pagamentosRecentes = user.situacao_financeira?.historico_pagamentos || [];
+        const isDuplicado = pagamentosRecentes.some(p => {
+            const diffMs = agora - new Date(p.data).getTime();
+            return p.valor === valorNumerico && diffMs >= 0 && diffMs < JANELA_DEDUP_MS;
+        });
+        if (isDuplicado) {
+            return res.status(409).json({
+                success: false,
+                error: `Pagamento duplicado detectado: R$ ${valorNumerico.toFixed(2)} já registrado nos últimos 60 segundos`
+            });
+        }
+
         // Atualizar saldo
         if (!user.situacao_financeira) {
             user.situacao_financeira = { saldo_atual: 0, tipo: 'zerado', historico_pagamentos: [] };

@@ -409,7 +409,8 @@ export async function getLiga(req, res) {
                     { liga_id: ligaIdStr },
                     { liga_id: new mongoose.Types.ObjectId(ligaId) }
                 ],
-                time_id: { $in: timeIds },
+                // ✅ G2 FIX: coerção defensiva — extratofinanceirocaches armazena time_id como Number
+                time_id: { $in: timeIds.map(Number) },
                 temporada: { $in: [temporadaNum, temporadaNum - 1] }
             }).toArray(),
 
