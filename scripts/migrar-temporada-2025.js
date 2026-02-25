@@ -7,7 +7,7 @@
  *
  * Uso:
  *   node scripts/migrar-temporada-2025.js          # Executar migração
- *   node scripts/migrar-temporada-2025.js --dry    # Apenas simular (não altera dados)
+ *   node scripts/migrar-temporada-2025.js --dry-run    # Apenas simular (não altera dados)
  *
  * @version 1.0.0
  * @date 2025-12-16
@@ -22,7 +22,7 @@ dotenv.config();
 // CONFIGURAÇÃO
 // =========================================================================
 const TEMPORADA_PADRAO = 2025;
-const DRY_RUN = process.argv.includes('--dry');
+const DRY_RUN = process.argv.includes('--dry-run');
 
 // Collections para migrar (todas que receberam o campo temporada)
 const COLLECTIONS_PARA_MIGRAR = [
@@ -149,7 +149,7 @@ async function executarMigracao() {
 
         if (DRY_RUN) {
             console.log(`  📊 Documentos que seriam migrados: ${totalPendentes}`);
-            console.log('  ⚠️  Execute sem --dry para aplicar a migração');
+            console.log('  ⚠️  Execute sem --dry-run para aplicar a migração');
         } else {
             console.log(`  ✅ Total de documentos migrados: ${totalMigrados}`);
         }
