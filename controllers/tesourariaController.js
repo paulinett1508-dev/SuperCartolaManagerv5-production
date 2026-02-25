@@ -191,6 +191,8 @@ export async function getParticipantes(req, res) {
                 melhorMes: liga.modulos_ativos?.melhorMes === true || liga.configuracoes?.melhor_mes?.habilitado === true,
                 artilheiro: liga.modulos_ativos?.artilheiro === true || liga.configuracoes?.artilheiro?.habilitado === true,
                 luvaOuro: liga.modulos_ativos?.luvaOuro === true || liga.configuracoes?.luva_ouro?.habilitado === true,
+                restaUm: liga.modulos_ativos?.restaUm === true,
+                capitaoLuxo: liga.modulos_ativos?.capitaoLuxo === true,
             };
 
             // Processar cada participante da liga
@@ -226,6 +228,8 @@ export async function getParticipantes(req, res) {
                     melhorMes: 0,
                     artilheiro: 0,
                     luvaOuro: 0,
+                    restaUm: 0,
+                    capitaoLuxo: 0,
                     campos: saldoCampos,
                     ajustes: saldoAjustes,
                     acertos: 0,
@@ -239,6 +243,7 @@ export async function getParticipantes(req, res) {
                     if (t.tipo === 'MELHOR_MES') breakdown.melhorMes += t.valor || 0;
                     else if (t.tipo === 'ARTILHEIRO') breakdown.artilheiro += t.valor || 0;
                     else if (t.tipo === 'LUVA_OURO') breakdown.luvaOuro += t.valor || 0;
+                    else if (t.tipo === 'RESTA_UM') breakdown.restaUm += t.valor || 0;
                 });
 
                 const acertosList = acertosMap.get(key) || [];
@@ -487,6 +492,8 @@ export async function getLiga(req, res) {
             melhorMes: liga.modulos_ativos?.melhorMes === true || liga.configuracoes?.melhor_mes?.habilitado === true,
             artilheiro: liga.modulos_ativos?.artilheiro === true || liga.configuracoes?.artilheiro?.habilitado === true,
             luvaOuro: liga.modulos_ativos?.luvaOuro === true || liga.configuracoes?.luva_ouro?.habilitado === true,
+            restaUm: liga.modulos_ativos?.restaUm === true,
+            capitaoLuxo: liga.modulos_ativos?.capitaoLuxo === true,
         };
 
         const participantes = [];
@@ -545,6 +552,8 @@ export async function getLiga(req, res) {
                 melhorMes: 0,
                 artilheiro: 0,
                 luvaOuro: 0,
+                restaUm: 0,
+                capitaoLuxo: 0,
                 ajustes: saldoAjustes,
                 acertos: 0,
                 taxaInscricao: inscricaoInfo.taxaInscricao || 0,
@@ -557,6 +566,7 @@ export async function getLiga(req, res) {
                 if (t.tipo === 'MELHOR_MES') breakdown.melhorMes += t.valor || 0;
                 else if (t.tipo === 'ARTILHEIRO') breakdown.artilheiro += t.valor || 0;
                 else if (t.tipo === 'LUVA_OURO') breakdown.luvaOuro += t.valor || 0;
+                else if (t.tipo === 'RESTA_UM') breakdown.restaUm += t.valor || 0;
             });
 
             const acertosList = acertosMap.get(timeId) || [];

@@ -461,13 +461,27 @@ function transformarTransacoesEmRodadas(transacoes, ligaId) {
             case "ONUS":
                 r.bonusOnus += valor; // valor já é negativo
                 break;
+            case "MELHOR_MES":
+                r.melhorMes = (r.melhorMes || 0) + valor;
+                break;
+            case "ARTILHEIRO":
+                r.artilheiro = (r.artilheiro || 0) + valor;
+                break;
+            case "LUVA_OURO":
+                r.luvaOuro = (r.luvaOuro || 0) + valor;
+                break;
+            case "RESTA_UM":
+                r.restaUm = (r.restaUm || 0) + valor;
+                break;
             default:
                 // Tipo desconhecido ou genérico vai para bonusOnus
                 if (valor !== 0) {
                     r.bonusOnus += valor;
                 }
         }
-        r.saldo = r.bonusOnus + r.pontosCorridos + r.mataMata + r.top10;
+        r.saldo = r.bonusOnus + r.pontosCorridos + r.mataMata + r.top10
+                + (r.melhorMes || 0) + (r.artilheiro || 0)
+                + (r.luvaOuro || 0) + (r.restaUm || 0);
     });
 
     const rodadasArray = Object.values(rodadasMap).sort(

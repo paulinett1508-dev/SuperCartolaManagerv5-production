@@ -606,6 +606,8 @@ export class FluxoFinanceiroUI {
             melhorMes: false,       // Precisa habilitar
             artilheiro: false,      // Precisa habilitar
             luvaOuro: false,        // Precisa habilitar
+            restaUm: false,         // Precisa habilitar
+            capitaoLuxo: false,     // Precisa habilitar
         };
         await this._carregarIntegracoesExtrato(ligaId);
 
@@ -813,6 +815,8 @@ export class FluxoFinanceiroUI {
                             ${this._modulosAtivos?.melhorMes ? '<th class="col-modulo" data-modulo="melhorMes">Melhor Mês</th>' : ''}
                             ${this._modulosAtivos?.artilheiro ? '<th class="col-modulo" data-modulo="artilheiro">Artilheiro</th>' : ''}
                             ${this._modulosAtivos?.luvaOuro ? '<th class="col-modulo" data-modulo="luvaOuro">Luva Ouro</th>' : ''}
+                            ${this._modulosAtivos?.restaUm ? '<th class="col-modulo" data-modulo="restaUm">Resta Um</th>' : ''}
+                            ${this._modulosAtivos?.capitaoLuxo ? '<th class="col-modulo" data-modulo="capitaoLuxo">Cap. Luxo</th>' : ''}
                             <th class="col-modulo">Aj. Manuais</th>
                             <th class="col-modulo">Acertos</th>
                             <th class="col-saldo sortable" onclick="window.ordenarTabelaFinanceiro('saldo')" data-sort="saldo">
@@ -1091,6 +1095,8 @@ export class FluxoFinanceiroUI {
         if (this._modulosAtivos?.melhorMes) modulosCols += `<td class="col-modulo">${fmtModulo(breakdown.melhorMes)}</td>`;
         if (this._modulosAtivos?.artilheiro) modulosCols += `<td class="col-modulo">${fmtModulo(breakdown.artilheiro)}</td>`;
         if (this._modulosAtivos?.luvaOuro) modulosCols += `<td class="col-modulo">${fmtModulo(breakdown.luvaOuro)}</td>`;
+        if (this._modulosAtivos?.restaUm) modulosCols += `<td class="col-modulo">${fmtModulo(breakdown.restaUm)}</td>`;
+        if (this._modulosAtivos?.capitaoLuxo) modulosCols += `<td class="col-modulo">${fmtModulo(breakdown.capitaoLuxo)}</td>`;
         modulosCols += `<td class="col-modulo">${fmtModulo(breakdown.campos)}</td>`;
         modulosCols += `<td class="col-modulo">${fmtModulo(breakdown.acertos)}</td>`;
 
