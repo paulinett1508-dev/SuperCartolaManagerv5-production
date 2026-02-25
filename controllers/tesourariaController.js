@@ -124,7 +124,7 @@ export async function getParticipantes(req, res) {
         const temporadaNum = Number(temporada);
         const [todosExtratos, todosCampos, todosAcertos, todasInscricoes, todosAjustes] = await Promise.all([
             ExtratoFinanceiroCache.find({ time_id: { $in: allTimeIds }, temporada: temporadaNum }).lean(),
-            FluxoFinanceiroCampos.find({ timeId: { $in: allTimeIds.map(String) }, temporada: temporadaNum }).lean(),
+            FluxoFinanceiroCampos.find({ time_id: { $in: allTimeIds.map(Number) }, temporada: temporadaNum }).lean(),
             AcertoFinanceiro.find({ temporada: temporadaNum, ativo: true }).lean(),
             temporadaNum >= CURRENT_SEASON
                 ? InscricaoTemporada.find({ temporada: temporadaNum }).lean()
@@ -158,14 +158,14 @@ export async function getParticipantes(req, res) {
 
         const camposMap = new Map();
         todosCampos.forEach(c => {
-            const key = `${c.ligaId}_${c.timeId}`;
+            const key = `${c.liga_id}_${c.time_id}`;
             camposMap.set(key, c);
         });
 
         // Agrupar acertos por liga_time
         const acertosMap = new Map();
         todosAcertos.forEach(a => {
-            const key = `${a.ligaId}_${a.timeId}`;
+            const key = `${a.liga_id}_${a.time_id}`;
             if (!acertosMap.has(key)) acertosMap.set(key, []);
             acertosMap.get(key).push(a);
         });
@@ -415,13 +415,13 @@ export async function getLiga(req, res) {
             }).toArray(),
 
             FluxoFinanceiroCampos.find({
-                ligaId: ligaIdStr,
-                timeId: { $in: timeIds.map(String) },
+                liga_id: ligaIdStr,
+                time_id: { $in: timeIds.map(Number) },
                 temporada: { $in: [temporadaNum, temporadaNum - 1] }
             }).lean(),
 
             AcertoFinanceiro.find({
-                ligaId: String(ligaId),
+                liga_id: String(ligaId),
                 temporada: { $in: [temporadaNum, temporadaNum - 1] },
                 ativo: true
             }).lean(),
@@ -1150,7 +1150,7 @@ export async function getResumo(req, res) {
 
         const [todosExtratos, todosCampos, todosAcertos, todasInscricoes, todosAjustes] = await Promise.all([
             ExtratoFinanceiroCache.find({ time_id: { $in: allTimeIds }, temporada: temporadaNum }).lean(),
-            FluxoFinanceiroCampos.find({ timeId: { $in: allTimeIds.map(String) }, temporada: temporadaNum }).lean(),
+            FluxoFinanceiroCampos.find({ time_id: { $in: allTimeIds.map(Number) }, temporada: temporadaNum }).lean(),
             AcertoFinanceiro.find({ temporada: temporadaNum, ativo: true }).lean(),
             temporadaNum >= CURRENT_SEASON
                 ? InscricaoTemporada.find({ temporada: temporadaNum }).lean()

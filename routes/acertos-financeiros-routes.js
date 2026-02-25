@@ -148,20 +148,21 @@ router.get("/admin/:ligaId", verificarAdmin, async (req, res) => {
         // Agrupar por time para facilitar visualização
         const porTime = {};
         acertos.forEach(a => {
-            if (!porTime[a.timeId]) {
-                porTime[a.timeId] = {
-                    timeId: a.timeId,
+            const key = a.time_id;
+            if (!porTime[key]) {
+                porTime[key] = {
+                    time_id: a.time_id,
                     nomeTime: a.nomeTime,
                     acertos: [],
                     totalPago: 0,
                     totalRecebido: 0,
                 };
             }
-            porTime[a.timeId].acertos.push(a);
+            porTime[key].acertos.push(a);
             if (a.tipo === "pagamento") {
-                porTime[a.timeId].totalPago += a.valor;
+                porTime[key].totalPago += a.valor;
             } else {
-                porTime[a.timeId].totalRecebido += a.valor;
+                porTime[key].totalRecebido += a.valor;
             }
         });
 
@@ -237,8 +238,8 @@ router.post("/:ligaId/:timeId", verificarAdmin, async (req, res) => {
         // =========================================================================
         const janelaIdempotencia = new Date(Date.now() - 60 * 1000); // 60 segundos
         const acertoDuplicado = await AcertoFinanceiro.findOne({
-            ligaId,
-            timeId,
+            liga_id: String(ligaId),
+            time_id: Number(timeId),
             temporada: Number(temporada),
             tipo,
             valor: valorPagamento,
@@ -304,8 +305,8 @@ router.post("/:ligaId/:timeId", verificarAdmin, async (req, res) => {
         // C1 FIX: Delegado para acertoService.salvarAcertoTransacional()
         // =========================================================================
         const novoAcerto = new AcertoFinanceiro({
-            ligaId,
-            timeId,
+            liga_id: String(ligaId),
+            time_id: Number(timeId),
             nomeTime: nomeTimeFinal,
             temporada,
             tipo,
@@ -320,8 +321,8 @@ router.post("/:ligaId/:timeId", verificarAdmin, async (req, res) => {
 
         if (valorTroco > 0) {
             acertoTroco = new AcertoFinanceiro({
-                ligaId,
-                timeId,
+                liga_id: String(ligaId),
+                time_id: Number(timeId),
                 nomeTime: nomeTimeFinal,
                 temporada,
                 tipo: "recebimento",

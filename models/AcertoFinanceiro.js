@@ -7,7 +7,7 @@
  * Diferente do ExtratoFinanceiroCache que consolida pontuações,
  * este model registra transações financeiras REAIS (PIX, transferência, etc).
  *
- * @version 1.0.0
+ * @version 2.0.0 — G2/G3: ligaId→liga_id (String), timeId (String)→time_id (Number)
  */
 
 import mongoose from "mongoose";
@@ -17,13 +17,13 @@ const { Schema } = mongoose;
 
 const AcertoFinanceiroSchema = new Schema(
     {
-        ligaId: {
+        liga_id: {
             type: String,
             required: true,
             index: true,
         },
-        timeId: {
-            type: String,
+        time_id: {
+            type: Number,
             required: true,
             index: true,
         },
@@ -95,18 +95,18 @@ const AcertoFinanceiroSchema = new Schema(
 );
 
 // Índices compostos para buscas frequentes
-AcertoFinanceiroSchema.index({ ligaId: 1, timeId: 1, temporada: 1 });
-AcertoFinanceiroSchema.index({ ligaId: 1, temporada: 1, dataAcerto: -1 });
+AcertoFinanceiroSchema.index({ liga_id: 1, time_id: 1, temporada: 1 });
+AcertoFinanceiroSchema.index({ liga_id: 1, temporada: 1, dataAcerto: -1 });
 
 // ✅ v2.0.0: Virtual impactoSaldo REMOVIDO por contradizer calcularSaldoAcertos.
 // A lógica real é: PAGAMENTO aumenta saldo (quita dívida), RECEBIMENTO diminui saldo.
 // O virtual dizia o contrário e não era usado em nenhum lugar do código.
 
 // Método estático para buscar acertos de um time
-AcertoFinanceiroSchema.statics.buscarPorTime = async function (ligaId, timeId, temporada = CURRENT_SEASON) {
+AcertoFinanceiroSchema.statics.buscarPorTime = async function (liga_id, time_id, temporada = CURRENT_SEASON) {
     return this.find({
-        ligaId,
-        timeId,
+        liga_id,
+        time_id: Number(time_id),
         temporada,
         ativo: true,
     }).sort({ dataAcerto: -1 });
@@ -114,10 +114,10 @@ AcertoFinanceiroSchema.statics.buscarPorTime = async function (ligaId, timeId, t
 
 // Método estático para calcular saldo de acertos de um time
 // ✅ v1.1.0: Correção da lógica de saldo
-AcertoFinanceiroSchema.statics.calcularSaldoAcertos = async function (ligaId, timeId, temporada = CURRENT_SEASON) {
+AcertoFinanceiroSchema.statics.calcularSaldoAcertos = async function (liga_id, time_id, temporada = CURRENT_SEASON) {
     const acertos = await this.find({
-        ligaId,
-        timeId,
+        liga_id,
+        time_id: Number(time_id),
         temporada,
         ativo: true,
     });
@@ -157,9 +157,9 @@ AcertoFinanceiroSchema.statics.calcularSaldoAcertos = async function (ligaId, ti
 };
 
 // Método estático para buscar todos os acertos de uma liga
-AcertoFinanceiroSchema.statics.buscarPorLiga = async function (ligaId, temporada = CURRENT_SEASON) {
+AcertoFinanceiroSchema.statics.buscarPorLiga = async function (liga_id, temporada = CURRENT_SEASON) {
     return this.find({
-        ligaId,
+        liga_id,
         temporada,
         ativo: true,
     }).sort({ dataAcerto: -1 });

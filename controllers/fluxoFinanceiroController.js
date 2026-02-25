@@ -1120,15 +1120,15 @@ export const getCampos = async (req, res) => {
         const { ligaId, timeId } = req.params;
         // ✅ v8.3.0 FIX: Aceitar temporada via query param, default getFinancialSeason()
         const temporadaAtual = req.query.temporada ? parseInt(req.query.temporada) : getFinancialSeason();
-        let campos = await FluxoFinanceiroCampos.findOne({ ligaId, timeId, temporada: temporadaAtual }).lean();
+        let campos = await FluxoFinanceiroCampos.findOne({ liga_id: String(ligaId), time_id: Number(timeId), temporada: temporadaAtual }).lean();
 
         if (!campos) {
             logger.log(
                 `[FLUXO-CONTROLLER] Criando campos padrão para time ${timeId} (temporada ${temporadaAtual})`,
             );
             campos = await FluxoFinanceiroCampos.create({
-                ligaId,
-                timeId,
+                liga_id: String(ligaId),
+                time_id: Number(timeId),
                 temporada: temporadaAtual,
                 campos: [
                     { nome: "Campo 1", valor: 0 },
@@ -1161,11 +1161,11 @@ export const salvarCampo = async (req, res) => {
             return res.status(400).json({ error: "Índice inválido" });
         }
 
-        let documento = await FluxoFinanceiroCampos.findOne({ ligaId, timeId, temporada: temporadaAtual });
+        let documento = await FluxoFinanceiroCampos.findOne({ liga_id: String(ligaId), time_id: Number(timeId), temporada: temporadaAtual });
         if (!documento) {
             documento = new FluxoFinanceiroCampos({
-                ligaId,
-                timeId,
+                liga_id: String(ligaId),
+                time_id: Number(timeId),
                 temporada: temporadaAtual,
                 campos: [{}, {}, {}, {}],
             });
@@ -1193,7 +1193,7 @@ export const getCamposLiga = async (req, res) => {
         const { ligaId } = req.params;
         // ✅ v8.3.0 FIX: Aceitar temporada via query, default getFinancialSeason()
         const temporadaAtual = req.query.temporada ? parseInt(req.query.temporada) : getFinancialSeason();
-        const todosCampos = await FluxoFinanceiroCampos.find({ ligaId, temporada: temporadaAtual }).lean();
+        const todosCampos = await FluxoFinanceiroCampos.find({ liga_id: String(ligaId), temporada: temporadaAtual }).lean();
         res.json(todosCampos);
     } catch (error) {
         res.status(500).json({ error: "Erro ao buscar campos da liga" });
@@ -1223,7 +1223,7 @@ export const resetarCampos = async (req, res) => {
             });
         }
 
-        await FluxoFinanceiroCampos.deleteOne({ ligaId, timeId, temporada });
+        await FluxoFinanceiroCampos.deleteOne({ liga_id: String(ligaId), time_id: Number(timeId), temporada });
         logger.log(`[FLUXO] Campos resetados: liga=${ligaId}, time=${timeId}, temporada=${temporada}`);
         res.json({ message: "Campos resetados com sucesso", temporada });
     } catch (error) {

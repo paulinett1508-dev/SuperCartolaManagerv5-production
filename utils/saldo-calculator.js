@@ -59,8 +59,8 @@ export async function calcularSaldoParticipante(ligaId, timeId, temporada = CURR
         let camposAtivos = [];
         if (Number(temporada) < 2026) {
             const camposDoc = await FluxoFinanceiroCampos.findOne({
-                ligaId: String(ligaId),
-                timeId: String(timeId),
+                liga_id: String(ligaId),
+                time_id: Number(timeId),
                 temporada: Number(temporada),
             }).lean();
             camposAtivos = camposDoc?.campos?.filter(c => c.valor !== 0) || [];
@@ -98,8 +98,8 @@ export async function calcularSaldoParticipante(ligaId, timeId, temporada = CURR
         // Para 2026+, AjusteFinanceiro é o sistema vigente — incluir ambos causava double-count
         if (Number(temporada) < 2026) {
             const camposDoc = await FluxoFinanceiroCampos.findOne({
-                ligaId: String(ligaId),
-                timeId: String(timeId),
+                liga_id: String(ligaId),
+                time_id: Number(timeId),
                 temporada: Number(temporada),
             }).lean();
 

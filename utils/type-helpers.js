@@ -3,9 +3,9 @@
  *
  * Resolve inconsistência de tipos entre models:
  * - ExtratoFinanceiroCache: liga_id=Mixed, time_id=Number
- * - AcertoFinanceiro: ligaId=String, timeId=String
+ * - AcertoFinanceiro: liga_id=String, time_id=Number  (G2/G3)
  * - AjusteFinanceiro: liga_id=ObjectId, time_id=Number
- * - FluxoFinanceiroCampos: ligaId=String, timeId=String
+ * - FluxoFinanceiroCampos: liga_id=String, time_id=Number  (G2/G3)
  * - InscricaoTemporada: liga_id=ObjectId, time_id=Number
  *
  * @version 1.0.0

@@ -3,8 +3,8 @@
  *
  * PROBLEMA: O sistema tem tipos inconsistentes para IDs:
  * - ExtratoFinanceiroCache.time_id = Number
- * - FluxoFinanceiroCampos.timeId = String
- * - AcertoFinanceiro.timeId = String
+ * - FluxoFinanceiroCampos.time_id = Number  (G2/G3: migrado de timeId String)
+ * - AcertoFinanceiro.time_id = Number       (G2/G3: migrado de timeId String)
  *
  * Este módulo centraliza o cast correto para cada collection.
  *
@@ -78,21 +78,21 @@ export function toExtratoTimeId(timeId) {
 }
 
 /**
- * Cast específico para timeId em FluxoFinanceiroCampos (String)
+ * Cast específico para time_id em FluxoFinanceiroCampos (Number — G2/G3)
  * @param {string|number} timeId
- * @returns {string}
+ * @returns {number}
  */
 export function toCamposTimeId(timeId) {
-    return String(timeId);
+    return Number(timeId);
 }
 
 /**
- * Cast específico para timeId em AcertoFinanceiro (String)
+ * Cast específico para time_id em AcertoFinanceiro (Number — G2/G3)
  * @param {string|number} timeId
- * @returns {string}
+ * @returns {number}
  */
 export function toAcertoTimeId(timeId) {
-    return String(timeId);
+    return Number(timeId);
 }
 
 /**

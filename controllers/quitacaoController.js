@@ -58,8 +58,8 @@ export async function buscarDadosParaQuitacao(req, res) {
         // Buscar campos manuais
         const FluxoFinanceiroCampos = mongoose.model('FluxoFinanceiroCampos');
         const camposManuais = await FluxoFinanceiroCampos.findOne({
-            ligaId: String(ligaId),
-            timeId: String(timeId),
+            liga_id: String(ligaId),
+            time_id: Number(timeId),
             temporada: temporada
         }).lean();
 

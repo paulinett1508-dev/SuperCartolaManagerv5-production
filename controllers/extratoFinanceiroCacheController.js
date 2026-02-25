@@ -67,8 +67,8 @@ import logger from '../utils/logger.js';
 async function buscarAcertosFinanceiros(ligaId, timeId, temporada = CURRENT_SEASON) {
     try {
         const acertos = await AcertoFinanceiro.find({
-            ligaId: String(ligaId),
-            timeId: String(timeId),
+            liga_id: String(ligaId),
+            time_id: Number(timeId),
             temporada,
             ativo: true,
         }).sort({ dataAcerto: -1 }).lean();
@@ -488,8 +488,8 @@ function transformarTransacoesEmRodadas(transacoes, ligaId) {
 async function buscarCamposManuais(ligaId, timeId, temporada = CURRENT_SEASON) {
     try {
         const doc = await FluxoFinanceiroCampos.findOne({
-            ligaId: String(ligaId),
-            timeId: String(timeId),
+            liga_id: String(ligaId),
+            time_id: Number(timeId),
             temporada: temporada,  // ✅ v5.9: Filtrar por temporada
         }).lean();
         if (!doc || !doc.campos) {
@@ -545,8 +545,8 @@ function transformarCamposParaObjeto(camposArray) {
 async function buscarCamposComoObjeto(ligaId, timeId, temporada = CURRENT_SEASON) {
     try {
         const doc = await FluxoFinanceiroCampos.findOne({
-            ligaId: String(ligaId),
-            timeId: String(timeId),
+            liga_id: String(ligaId),
+            time_id: Number(timeId),
             temporada: temporada,  // ✅ v5.9: Filtrar por temporada
         }).lean();
 

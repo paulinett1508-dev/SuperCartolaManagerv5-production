@@ -32,7 +32,7 @@ export async function raioXFinanceiro(ligaId, temporada = CURRENT_SEASON) {
 
   // Saldo consolidado por participante
   const participantes = extratos.map(e => {
-    const acertosTime = acertos.filter(a => String(a.timeId) === String(e.time_id));
+    const acertosTime = acertos.filter(a => a.time_id === e.time_id);
     const ajustesTime = ajustes.filter(a => String(a.time_id) === String(e.time_id));
 
     const totalPago = acertosTime

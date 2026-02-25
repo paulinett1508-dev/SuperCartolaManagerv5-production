@@ -1,3 +1,11 @@
+/**
+ * MODEL: FluxoFinanceiroCampos
+ *
+ * Armazena os campos manuais (campo1-4) do extrato financeiro por time/temporada.
+ *
+ * @version 2.0.0 — G2/G3: ligaId→liga_id (String), timeId (String)→time_id (Number)
+ */
+
 import mongoose from "mongoose";
 import { CURRENT_SEASON } from "../config/seasons.js";
 
@@ -5,13 +13,13 @@ const { Schema } = mongoose;
 
 const FluxoFinanceiroCamposSchema = new Schema(
     {
-        ligaId: {
+        liga_id: {
             type: String,
             required: true,
             index: true,
         },
-        timeId: {
-            type: String,
+        time_id: {
+            type: Number,
             required: true,
             index: true,
         },
@@ -51,7 +59,8 @@ const FluxoFinanceiroCamposSchema = new Schema(
 );
 
 // Índice composto para busca rápida (incluindo temporada)
-FluxoFinanceiroCamposSchema.index({ ligaId: 1, timeId: 1, temporada: 1 }, { unique: true });
+// Corresponde ao índice criado pela migração G2/G3
+FluxoFinanceiroCamposSchema.index({ liga_id: 1, time_id: 1, temporada: 1 }, { unique: true });
 
 // Garantir que sempre tenha 4 campos
 FluxoFinanceiroCamposSchema.pre("save", function (next) {
