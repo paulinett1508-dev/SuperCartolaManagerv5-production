@@ -72,10 +72,7 @@ class AdminTesouraria {
         this.ligaId = ligaId;
         this.season = season;
 
-        if (!this.container) {
-            console.error('[TESOURARIA] Container nao encontrado:', containerId);
-            return;
-        }
+        if (!this.container) return;
 
         this.container.innerHTML = this._renderLayout();
         await this._carregarDados();
@@ -94,8 +91,8 @@ class AdminTesouraria {
                         <p>Gestao financeira e fechamento de caixa da liga</p>
                     </div>
                     <div class="header-actions">
-                        <button class="btn-icon" onclick="adminTesouraria.recarregar()" title="Atualizar">
-                            <span class="material-icons">refresh</span>
+                        <button class="btn-icon" onclick="adminTesouraria.recarregar()" title="Atualizar" aria-label="Atualizar dados">
+                            <span class="material-icons" aria-hidden="true">refresh</span>
                         </button>
                         <button class="btn-secondary-dark" onclick="adminTesouraria.exportarCSV()" title="Exportar CSV">
                             <span class="material-icons">download</span>
@@ -251,8 +248,6 @@ class AdminTesouraria {
                 breakdown: p.breakdown || {},
             }));
 
-            console.log(`[TESOURARIA] ${this.participantes.length} participantes carregados`);
-
             this._renderKPIs();
             this._renderTabela();
             this._atualizarContador();
@@ -262,7 +257,6 @@ class AdminTesouraria {
             this._buscarStatusConsolidacao();
 
         } catch (error) {
-            console.error('[TESOURARIA] Erro ao carregar dados:', error);
             this._renderErro('Erro ao carregar dados financeiros');
         } finally {
             this.isLoading = false;
@@ -292,9 +286,8 @@ class AdminTesouraria {
             this._renderBannerProjecao(data);
             this._iniciarAutoRefreshProjecao();
 
-            console.log(`[TESOURARIA] Projecao R${data.rodada}: ${data.projecoes?.length} participantes`);
         } catch (error) {
-            console.warn('[TESOURARIA] Projecao indisponivel:', error.message);
+            // Projeção indisponível — falha silenciosa, não bloqueia a tela
         }
     }
 
@@ -396,7 +389,7 @@ class AdminTesouraria {
             const data = await response.json();
             this._renderStatusConsolidacao(data);
         } catch (error) {
-            console.warn('[TESOURARIA] Status consolidacao indisponivel:', error.message);
+            // Status consolidação indisponível — falha silenciosa
         }
     }
 
@@ -622,11 +615,11 @@ class AdminTesouraria {
                         <span class="saldo-valor">${saldoFormatado}</span>
                     </div>
                     <div class="linha-acoes">
-                        <button class="btn-acao" onclick="event.stopPropagation(); adminTesouraria.abrirAcerto('${timeId}', '${this._escapeHtml(nome).replace(/'/g, "\\'")}')" title="Registrar Acerto">
-                            <span class="material-icons">payments</span>
+                        <button class="btn-acao" onclick="event.stopPropagation(); adminTesouraria.abrirAcerto('${timeId}', '${this._escapeHtml(nome).replace(/'/g, "\\'")}')" title="Registrar Acerto" aria-label="Registrar acerto financeiro">
+                            <span class="material-icons" aria-hidden="true">payments</span>
                         </button>
-                        <button class="btn-acao" onclick="event.stopPropagation(); adminTesouraria.verDetalhes('${timeId}')" title="Ver Detalhes">
-                            <span class="material-icons">visibility</span>
+                        <button class="btn-acao" onclick="event.stopPropagation(); adminTesouraria.verDetalhes('${timeId}')" title="Ver Detalhes" aria-label="Ver detalhes financeiros">
+                            <span class="material-icons" aria-hidden="true">visibility</span>
                         </button>
                     </div>
                     <span class="material-icons expand-indicator">expand_more</span>
@@ -813,8 +806,8 @@ class AdminTesouraria {
                 <h3>${this._escapeHtml(participante.nome)}</h3>
                 <p>${this._escapeHtml(participante.nomeTime || '')}</p>
             </div>
-            <button class="panel-close" onclick="adminTesouraria.fecharDetalhes()">
-                <span class="material-icons">close</span>
+            <button class="panel-close" onclick="adminTesouraria.fecharDetalhes()" aria-label="Fechar detalhes">
+                <span class="material-icons" aria-hidden="true">close</span>
             </button>
         `;
 
@@ -1115,4 +1108,4 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = AdminTesouraria;
 }
 
-console.log('[TESOURARIA] Modulo AdminTesouraria carregado v3.0.0 (Search, Sort, Detail Panel, Expand, CSV)');
+// AdminTesouraria v3.0.0

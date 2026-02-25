@@ -526,7 +526,7 @@
 }
 
 .tesouraria-module .badge-icon {
-    font-size: 14px !important;
+    font-size: 14px;
 }
 
 .tesouraria-module .badge-valor {
@@ -591,7 +591,7 @@
 }
 
 .tesouraria-module .status-icon {
-    font-size: 18px !important;
+    font-size: 18px;
 }
 
 .tesouraria-module .status-devedor .status-icon { color: var(--color-danger); }
@@ -726,7 +726,7 @@
 /* Expand chevron indicator */
 .tesouraria-module .expand-indicator {
     transition: transform 0.2s ease;
-    font-size: 20px !important;
+    font-size: 20px;
     color: var(--text-dim);
 }
 

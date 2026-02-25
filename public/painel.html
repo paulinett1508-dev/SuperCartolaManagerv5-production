@@ -41,8 +41,8 @@
                                     </div>
                                 </div>
                                 <div class="dashboard-header-actions">
-                                    <button class="btn-secondary-new btn-sm" onclick="carregarDadosLigas()" title="Atualizar dados">
-                                        <span class="material-icons">refresh</span>
+                                    <button class="btn-secondary-new btn-sm" onclick="carregarDadosLigas()" title="Atualizar dados" aria-label="Atualizar dados">
+                                        <span class="material-icons" aria-hidden="true">refresh</span>
                                     </button>
                                     <a href="preencher-liga.html" class="btn-primary-new btn-sm">
                                         <span class="material-icons">add</span>
@@ -176,7 +176,7 @@
                                     font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600;
                                     background: rgba(255,255,255,0.05); color: var(--text-secondary, #aaa);
                                 ">
-                                    <span id="orchDot" style="width: 8px; height: 8px; border-radius: 50%; background: #555;"></span>
+                                    <span id="orchDot" style="width: 8px; height: 8px; border-radius: 50%; background: var(--text-disabled);"></span>
                                     <span id="orchBadgeText">Carregando...</span>
                                 </div>
                                 <span class="material-icons health-toggle-icon">expand_more</span>
@@ -1623,10 +1623,10 @@
                             text-align: center; padding: 12px; border-radius: 10px;
                             background: var(--surface-card-elevated, #2a2a2a);
                         ">
-                            <div style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: var(--color-primary, #FF5500);">
+                            <div style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: var(--color-primary);">
                                 ${db.total_consolidacoes || 0}
                             </div>
-                            <div style="font-size: 11px; color: var(--text-secondary, #aaa);">Consolidacoes</div>
+                            <div style="font-size: 11px; color: var(--text-secondary);">Consolidacoes</div>
                         </div>
                         <div style="
                             text-align: center; padding: 12px; border-radius: 10px;
@@ -1645,7 +1645,7 @@
 
                     <div style="text-align: center;">
                         <a href="admin-orchestrator.html" style="
-                            color: var(--color-primary, #FF5500);
+                            color: var(--color-primary);
                             font-weight: 600; font-size: 13px;
                             text-decoration: none;
                             display: inline-flex; align-items: center; gap: 4px;
@@ -1738,7 +1738,7 @@
                         <div class="health-error">
                             <span class="material-icons">error</span>
                             <div>Erro ao carregar status do sistema</div>
-                            <button onclick="loadHealthData()" style="margin-top: 12px; padding: 8px 16px; background: #FF5500; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                            <button onclick="loadHealthData()" class="btn btn-primary btn-sm" style="margin-top: 12px;">
                                 Tentar Novamente
                             </button>
                         </div>
