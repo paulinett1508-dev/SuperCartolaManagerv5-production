@@ -106,6 +106,25 @@ const InscricaoTemporadaSchema = new mongoose.Schema({
     },
 
     // =========================================================================
+    // PAGAMENTO DA INSCRIÇÃO
+    // =========================================================================
+    // Data em que o pagamento da inscrição foi registrado
+    data_pagamento_inscricao: {
+        type: Date
+    },
+
+    // Data efetiva do pagamento (pode diferir da data de registro)
+    data_pagamento: {
+        type: Date
+    },
+
+    // Método utilizado no pagamento da inscrição
+    metodo_pagamento: {
+        type: String,
+        enum: ['pix', 'transferencia', 'dinheiro', 'outro']
+    },
+
+    // =========================================================================
     // ORIGEM E DECISÃO
     // =========================================================================
     origem: {

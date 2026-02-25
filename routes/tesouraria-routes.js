@@ -1098,8 +1098,12 @@ router.post("/acerto", verificarAdmin, async (req, res) => {
             observacoes,
             dataAcerto,
             temporada = String(CURRENT_SEASON),
-            registradoPor = "admin_tesouraria",
         } = req.body;
+
+        // ✅ Derivar de sessão — nunca aceitar de req.body (audit trail inviolável)
+        const registradoPor = req.session?.admin?.email
+            || req.session?.admin?.nome
+            || "admin_tesouraria";
 
         // Validações
         if (!ligaId || !timeId) {
@@ -1126,15 +1130,17 @@ router.post("/acerto", verificarAdmin, async (req, res) => {
         const valorNumerico = parseFloat(valor);
         const dataAcertoFinal = dataAcerto ? new Date(dataAcerto) : new Date();
 
-        // ✅ v3.0: Idempotência - verificar duplicata nos últimos 60s
+        // ✅ v3.1: Idempotência - verificar duplicata nos últimos 60s
+        // FIX F1: temporada deve ser Number (schema do AcertoFinanceiro é Number)
+        // FIX F1: campo de timestamp é createdAt (timestamps:true padrão), não criado_em
         const sessentaSegundosAtras = new Date(Date.now() - 60000);
         const duplicata = await AcertoFinanceiro.findOne({
             ligaId: String(ligaId),
             timeId: String(timeId),
             tipo,
             valor: valorNumerico,
-            temporada: String(temporada),
-            criado_em: { $gte: sessentaSegundosAtras },
+            temporada: Number(temporada),
+            createdAt: { $gte: sessentaSegundosAtras },
         }).lean();
 
         if (duplicata) {
@@ -1142,7 +1148,7 @@ router.post("/acerto", verificarAdmin, async (req, res) => {
             return res.status(409).json({
                 success: false,
                 error: "Acerto duplicado detectado. Aguarde 60s antes de registrar outro idêntico.",
-                duplicata: { id: duplicata._id, criadoEm: duplicata.criado_em },
+                duplicata: { id: duplicata._id, criadoEm: duplicata.createdAt },
             });
         }
 
