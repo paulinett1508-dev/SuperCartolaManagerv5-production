@@ -80,6 +80,8 @@ import {
     calcularSaldoParticipante,
     aplicarAjusteInscricaoBulk,
 } from "../utils/saldo-calculator.js";
+// C1/C2 FIX: Lógica transacional centralizada (sem duplicar em acertos-financeiros-routes)
+import { salvarAcertoTransacional, desativarAcerto } from "../services/acertoService.js";
 
 const router = express.Router();
 
@@ -1215,22 +1217,12 @@ router.post("/acerto", verificarAdmin, async (req, res) => {
             registradoPor,
         });
 
-        // ✅ F2 FIX: TRANSAÇÃO MongoDB - Salvar acerto + troco atomicamente
-        // Previne perda de troco em caso de crash entre os dois saves
-        // Ref: acertos-financeiros-routes.js v2.0.0 (mesmo padrão)
-        const dbSession = await mongoose.startSession();
-        try {
-            await dbSession.withTransaction(async () => {
-                await novoAcerto.save({ session: dbSession });
-
-                if (acertoTroco) {
-                    await acertoTroco.save({ session: dbSession });
-                    console.log(`[TESOURARIA] ✅ Troco de R$ ${valorTroco.toFixed(2)} salvo`);
-                }
-            });
-        } finally {
-            await dbSession.endSession();
+        // ✅ F2 FIX + C1 FIX: TRANSAÇÃO MongoDB - Salvar acerto + troco atomicamente
+        // Delegado para acertoService.salvarAcertoTransacional()
+        if (acertoTroco) {
+            console.log(`[TESOURARIA] ✅ Troco de R$ ${valorTroco.toFixed(2)} calculado`);
         }
+        await salvarAcertoTransacional(novoAcerto, acertoTroco);
 
         // =========================================================================
         // ✅ v2.26 FIX CRIT-001: Atualizar inscrição 2026 se for pagamento de inscrição
@@ -1378,7 +1370,8 @@ router.delete("/acerto/:id", verificarAdmin, async (req, res) => {
     try {
         const { id } = req.params;
 
-        const acerto = await AcertoFinanceiro.findById(id);
+        // C2 FIX: Delegado para acertoService.desativarAcerto()
+        const acerto = await desativarAcerto(id);
 
         if (!acerto) {
             return res.status(404).json({
@@ -1386,10 +1379,6 @@ router.delete("/acerto/:id", verificarAdmin, async (req, res) => {
                 error: "Acerto não encontrado",
             });
         }
-
-        // ✅ v3.0: Sempre soft delete (preservar histórico para auditoria)
-        acerto.ativo = false;
-        await acerto.save();
 
         console.log(`[TESOURARIA] ✅ Acerto desativado para time ${acerto.timeId} (cache preservado)`)
 

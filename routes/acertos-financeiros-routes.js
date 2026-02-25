@@ -20,7 +20,6 @@
  */
 
 import express from "express";
-import mongoose from "mongoose";
 import { verificarAdmin, verificarAdminOuDono } from "../middleware/auth.js";
 import AcertoFinanceiro from "../models/AcertoFinanceiro.js";
 import ExtratoFinanceiroCache from "../models/ExtratoFinanceiroCache.js";
@@ -31,6 +30,8 @@ import { CURRENT_SEASON } from "../config/seasons.js";
 import { calcularSaldoParticipante } from "../utils/saldo-calculator.js";
 // 🔔 PUSH NOTIFICATIONS - Gatilho de acerto financeiro (FASE 5)
 import { triggerAcertoFinanceiro } from "../services/notificationTriggers.js";
+// C1/C2 FIX: Lógica transacional centralizada (sem duplicar em tesouraria-routes)
+import { salvarAcertoTransacional, desativarAcerto } from "../services/acertoService.js";
 
 const router = express.Router();
 
@@ -300,55 +301,42 @@ router.post("/:ligaId/:timeId", verificarAdmin, async (req, res) => {
 
         // =========================================================================
         // ✅ v2.0.0: TRANSAÇÃO MongoDB - Salvar acerto + troco atomicamente
-        // Previne race condition onde acerto salva mas troco falha (ou vice-versa)
+        // C1 FIX: Delegado para acertoService.salvarAcertoTransacional()
         // =========================================================================
-        const session = await mongoose.startSession();
-        let novoAcerto;
+        const novoAcerto = new AcertoFinanceiro({
+            ligaId,
+            timeId,
+            nomeTime: nomeTimeFinal,
+            temporada,
+            tipo,
+            valor: valorPagamento,
+            descricao: descricao || `Acerto financeiro - ${tipo}`,
+            metodoPagamento: metodoPagamento || "pix",
+            comprovante: comprovante || null,
+            observacoes: observacoes || null,
+            dataAcerto: dataAcertoFinal,
+            registradoPor,
+        });
 
-        try {
-            await session.withTransaction(async () => {
-                // Salvar acerto principal
-                novoAcerto = new AcertoFinanceiro({
-                    ligaId,
-                    timeId,
-                    nomeTime: nomeTimeFinal,
-                    temporada,
-                    tipo,
-                    valor: valorPagamento,
-                    descricao: descricao || `Acerto financeiro - ${tipo}`,
-                    metodoPagamento: metodoPagamento || "pix",
-                    comprovante: comprovante || null,
-                    observacoes: observacoes || null,
-                    dataAcerto: dataAcertoFinal,
-                    registradoPor,
-                });
-
-                await novoAcerto.save({ session });
-
-                // Salvar troco se existir
-                if (valorTroco > 0) {
-                    acertoTroco = new AcertoFinanceiro({
-                        ligaId,
-                        timeId,
-                        nomeTime: nomeTimeFinal,
-                        temporada,
-                        tipo: "recebimento",
-                        valor: valorTroco,
-                        descricao: `TROCO - Pagamento a maior (Dívida: R$ ${(valorPagamento - valorTroco).toFixed(2)})`,
-                        metodoPagamento: metodoPagamento || "pix",
-                        comprovante: null,
-                        observacoes: `Gerado automaticamente. Pagamento original: R$ ${valorPagamento.toFixed(2)} - ${descricao || "Acerto financeiro"}`,
-                        dataAcerto: dataAcertoFinal,
-                        registradoPor: "sistema_troco",
-                    });
-
-                    await acertoTroco.save({ session });
-                    console.log(`[ACERTOS] ✅ Troco de R$ ${valorTroco.toFixed(2)} salvo para ${nomeTimeFinal}`);
-                }
+        if (valorTroco > 0) {
+            acertoTroco = new AcertoFinanceiro({
+                ligaId,
+                timeId,
+                nomeTime: nomeTimeFinal,
+                temporada,
+                tipo: "recebimento",
+                valor: valorTroco,
+                descricao: `TROCO - Pagamento a maior (Dívida: R$ ${(valorPagamento - valorTroco).toFixed(2)})`,
+                metodoPagamento: metodoPagamento || "pix",
+                comprovante: null,
+                observacoes: `Gerado automaticamente. Pagamento original: R$ ${valorPagamento.toFixed(2)} - ${descricao || "Acerto financeiro"}`,
+                dataAcerto: dataAcertoFinal,
+                registradoPor: "sistema_troco",
             });
-        } finally {
-            await session.endSession();
+            console.log(`[ACERTOS] ✅ Troco de R$ ${valorTroco.toFixed(2)} calculado para ${nomeTimeFinal}`);
         }
+
+        await salvarAcertoTransacional(novoAcerto, acertoTroco);
 
         // =========================================================================
         // 🔔 PUSH NOTIFICATION - Gatilho de acerto financeiro (FASE 5)
@@ -496,7 +484,8 @@ router.delete("/:id", verificarAdmin, async (req, res) => {
     try {
         const { id } = req.params;
 
-        const acerto = await AcertoFinanceiro.findById(id);
+        // C2 FIX: Delegado para acertoService.desativarAcerto()
+        const acerto = await desativarAcerto(id);
 
         if (!acerto) {
             return res.status(404).json({
@@ -504,10 +493,6 @@ router.delete("/:id", verificarAdmin, async (req, res) => {
                 error: "Acerto não encontrado",
             });
         }
-
-        // Soft delete (marca como inativo - mantém histórico para auditoria)
-        acerto.ativo = false;
-        await acerto.save();
 
         console.log(`[ACERTOS] ✅ Acerto ${id} desativado (soft delete, cache preservado)`);
 
