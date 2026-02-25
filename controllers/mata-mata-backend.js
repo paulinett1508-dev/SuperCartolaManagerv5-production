@@ -380,7 +380,7 @@ async function calcularResultadosEdicao(ligaId, edicao, rodadaAtual, config) {
         const fases = getFasesParaTamanho(tamanhoTorneio);
 
         logger.log(
-            `[MATA-BACKEND] ${edicao.nome}: Torneio com ${tamanhoTorneio} times (config: ${totalTimesConfig || 'dinâmico'}). ${fases.length} fases: [${fases.join(', ')}].`,
+            `[MATA-BACKEND] ${edicao.nome}: Torneio com ${tamanhoTorneio} times. ${fases.length} fases: [${fases.join(', ')}].`,
         );
 
         // Mapear rodadas de cada fase (dinâmico)
