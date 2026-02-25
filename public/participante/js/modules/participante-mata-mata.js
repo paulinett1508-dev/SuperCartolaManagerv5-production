@@ -1046,7 +1046,7 @@ function renderConfrontosCards(confrontos, fase, aoVivo = false, rodadaParciais 
   }
 
   if (meuConfronto) {
-    html += renderMeuConfrontoCard(meuConfronto, meuTimeId);
+    html += renderMeuConfrontoCard(meuConfronto, meuTimeId, aoVivo);
   } else {
     const historico = estado.historicoParticipacao[estado.edicaoSelecionada];
 
@@ -1106,7 +1106,7 @@ function renderConfrontosCards(confrontos, fase, aoVivo = false, rodadaParciais 
 // =====================================================================
 // RENDER MEU CONFRONTO EM CARD
 // =====================================================================
-function renderMeuConfrontoCard(confronto, meuTimeId) {
+function renderMeuConfrontoCard(confronto, meuTimeId, aoVivo = false) {
   const souTimeA = extrairTimeId(confronto.timeA) === meuTimeId;
   const eu = souTimeA ? confronto.timeA : confronto.timeB;
   const adv = souTimeA ? confronto.timeB : confronto.timeA;
@@ -1125,7 +1125,7 @@ function renderMeuConfrontoCard(confronto, meuTimeId) {
   const statusText = ganhando
     ? "Você está passando!"
     : perdendo
-      ? "Você está sendo eliminado"
+      ? (aoVivo ? "Você está sendo eliminado" : "Você foi eliminado")
       : "Empate técnico";
   const statusIcon = ganhando
     ? "check_circle"
