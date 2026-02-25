@@ -16,6 +16,7 @@
 import mongoose from "mongoose";
 import ExtratoFinanceiroCache from "../models/ExtratoFinanceiroCache.js";
 import InscricaoTemporada from "../models/InscricaoTemporada.js";
+import AjusteFinanceiro from "../models/AjusteFinanceiro.js";
 import { CURRENT_SEASON, getFinancialSeason } from "../config/seasons.js";
 import logger from '../utils/logger.js';
 
@@ -101,8 +102,16 @@ export async function buscarDadosParaQuitacao(req, res) {
             logger.log(`[QUITACAO] Cache não encontrado para time ${timeId}/temporada ${temporada}. Calculado diretamente: saldoRodadas=${saldoRodadas}`);
         }
 
+        // ✅ A1 FIX: Incluir AjusteFinanceiro (sistema dinâmico 2026+) no saldo de quitação
+        const ajustesInfo = await AjusteFinanceiro.calcularTotal(
+            String(ligaId),
+            Number(timeId),
+            temporada
+        );
+        const saldoAjustes = ajustesInfo?.total || 0;
+
         // Calcular saldo final
-        const saldoFinal = saldoRodadas + totalCamposManuais + saldoAcertos;
+        const saldoFinal = saldoRodadas + totalCamposManuais + saldoAcertos + saldoAjustes;
 
         // Buscar nome do participante
         const Time = mongoose.model('Time');
@@ -110,26 +119,26 @@ export async function buscarDadosParaQuitacao(req, res) {
 
         // ✅ v1.1: Buscar status da inscrição na próxima temporada (integração com modal de Renovação)
         const proximaTemporada = temporada + 1;
-        const inscricao2026 = await InscricaoTemporada.findOne({
+        const inscricaoProximaTemporada = await InscricaoTemporada.findOne({
             liga_id: String(ligaId),
             time_id: Number(timeId),
             temporada: proximaTemporada
         }).lean();
 
         // Verificar se já tem renovação processada
-        const jaRenovou = inscricao2026?.status === 'renovado' || inscricao2026?.status === 'novo';
-        const jaProcessado = inscricao2026?.processado === true;
+        const jaRenovou = inscricaoProximaTemporada?.status === 'renovado' || inscricaoProximaTemporada?.status === 'novo';
+        const jaProcessado = inscricaoProximaTemporada?.processado === true;
 
         // ✅ v1.3: Calcular saldo comprometido com a próxima temporada
         // FIX: creditoComprometido = taxa abatida (não o saldo total transferido)
         let creditoComprometido = 0;
         let saldoRemanescente = saldoFinal;
 
-        if (inscricao2026 && jaProcessado && !inscricao2026.legado_manual?.origem) {
+        if (inscricaoProximaTemporada && jaProcessado && !inscricaoProximaTemporada.legado_manual?.origem) {
             // Se renovou E processou E não tem quitação manual ainda
-            const saldoTransferido = inscricao2026.saldo_transferido || 0;
-            const taxaInscricao = inscricao2026.taxa_inscricao || 0;
-            const pagouInscricao = inscricao2026.pagou_inscricao === true;
+            const saldoTransferido = inscricaoProximaTemporada.saldo_transferido || 0;
+            const taxaInscricao = inscricaoProximaTemporada.taxa_inscricao || 0;
+            const pagouInscricao = inscricaoProximaTemporada.pagou_inscricao === true;
 
             // Se tinha crédito e NÃO pagou inscrição, a taxa foi abatida do crédito
             if (saldoTransferido > 0 && !pagouInscricao && taxaInscricao > 0) {
@@ -172,18 +181,18 @@ export async function buscarDadosParaQuitacao(req, res) {
                 saldo_remanescente: saldoRemanescente,
                 status: saldoFinal < -0.01 ? 'devedor' : (saldoFinal > 0.01 ? 'credor' : 'quitado'),
                 // ✅ v1.1: Dados da inscrição na próxima temporada
-                inscricao_proxima_temporada: inscricao2026 ? {
+                inscricao_proxima_temporada: inscricaoProximaTemporada ? {
                     temporada: proximaTemporada,
-                    status: inscricao2026.status,
+                    status: inscricaoProximaTemporada.status,
                     processado: jaProcessado,
                     ja_renovou: jaRenovou,
-                    pagou_inscricao: inscricao2026.pagou_inscricao,
-                    taxa_inscricao: inscricao2026.taxa_inscricao,
-                    saldo_transferido: inscricao2026.saldo_transferido || 0, // v1.2: Crédito usado
-                    divida_anterior: inscricao2026.divida_anterior || 0, // v1.2: Dívida carregada
+                    pagou_inscricao: inscricaoProximaTemporada.pagou_inscricao,
+                    taxa_inscricao: inscricaoProximaTemporada.taxa_inscricao,
+                    saldo_transferido: inscricaoProximaTemporada.saldo_transferido || 0, // v1.2: Crédito usado
+                    divida_anterior: inscricaoProximaTemporada.divida_anterior || 0, // v1.2: Dívida carregada
                     // Se já tem legado_manual definido, avisar
-                    legado_manual_existente: inscricao2026.legado_manual?.origem ? true : false,
-                    legado_manual: inscricao2026.legado_manual
+                    legado_manual_existente: inscricaoProximaTemporada.legado_manual?.origem ? true : false,
+                    legado_manual: inscricaoProximaTemporada.legado_manual
                 } : null
             }
         });

@@ -96,7 +96,7 @@ export async function criarAjuste(req, res) {
         }
 
         // Obter email do admin (se disponível na sessão)
-        const criadoPor = req.session?.admin?.email || req.session?.admin?.email || req.session?.usuario?.email || req.user?.email || '';
+        const criadoPor = req.session?.admin?.email || req.session?.admin?.nome || req.session?.usuario?.email || req.user?.email || '';
 
         const ajuste = await AjusteFinanceiro.criar({
             liga_id: ligaId,

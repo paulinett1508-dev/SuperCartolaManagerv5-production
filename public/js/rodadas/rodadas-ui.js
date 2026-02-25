@@ -359,7 +359,7 @@ function renderizarCardApp(rank, index, posLabel, banco, isParcial = false) {
 
   // Pontuação
   const scoreParcial = (Math.trunc((parseFloat(rank.pontos || 0)) * 100) / 100).toFixed(2);
-  const scoreTotal = rank.totalPontos ? parseFloat(rank.totalPontos).toFixed(2) : null;
+  const scoreTotal = rank.totalPontos ? (Math.trunc(parseFloat(rank.totalPontos) * 100) / 100).toFixed(2) : null;
   
   // Patrimônio (se disponível)
   const patrimonio = rank.patrimonio ? parseFloat(rank.patrimonio).toFixed(2) : null;
@@ -574,7 +574,7 @@ export async function exibirRankingParciais(
                </div>
             </div>
             <div class="rc-stats">
-               <div class="rc-score-main">${parseFloat(rank.totalPontos || 0).toFixed(2)}</div>
+               <div class="rc-score-main">${(Math.trunc(parseFloat(rank.totalPontos || 0) * 100) / 100).toFixed(2)}</div>
             </div>
           </div>
         `;
@@ -800,11 +800,11 @@ function renderizarEstatisticasResumo(dados) {
     </div>
     <div class="stat-card">
       <div class="stat-card-title">Média Pontos MITO</div>
-      <div class="stat-card-value">${estatisticas.mediaMito.toFixed(1)}</div>
+      <div class="stat-card-value">${(Math.trunc(estatisticas.mediaMito * 10) / 10).toFixed(1)}</div>
     </div>
     <div class="stat-card">
       <div class="stat-card-title">Média Pontos MICO</div>
-      <div class="stat-card-value">${estatisticas.mediaMico.toFixed(1)}</div>
+      <div class="stat-card-value">${(Math.trunc(estatisticas.mediaMico * 10) / 10).toFixed(1)}</div>
     </div>
   `;
 

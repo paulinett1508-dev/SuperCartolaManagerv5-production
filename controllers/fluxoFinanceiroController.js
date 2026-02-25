@@ -253,7 +253,7 @@ function detectarModulosFaltantesNoCache(cache, liga, rodadaLimite) {
     // 1. Verificar PONTOS CORRIDOS
     const pcHabilitado = isModuloHabilitado(liga, 'pontos_corridos') || liga.modulos_ativos?.pontosCorridos;
     if (pcHabilitado) {
-        const rodadaInicialPC = liga.configuracoes?.pontos_corridos?.rodadaInicial || 7;
+        const rodadaInicialPC = liga.configuracoes?.pontos_corridos?.rodadaInicial ?? 7;
         // Verificar se deveria ter transações de PC (rodada >= rodadaInicial)
         if (rodadaLimite >= rodadaInicialPC) {
             const temPC = transacoes.some(t => t.tipo === 'PONTOS_CORRIDOS' && t.rodada >= rodadaInicialPC);
@@ -419,7 +419,7 @@ export async function calcularConfrontoPontosCorridos(
     todasPontuacoes,
 ) {
     const RODADA_INICIAL_LIGA =
-        liga.configuracoes?.pontos_corridos?.rodadaInicial ||
+        liga.configuracoes?.pontos_corridos?.rodadaInicial ??
         RODADA_INICIAL_PONTOS_CORRIDOS;
     const rodadaLiga = rodadaCartola - (RODADA_INICIAL_LIGA - 1);
 
@@ -776,8 +776,8 @@ export const getExtratoFinanceiro = async (req, res) => {
 
         // ✅ v8.15.0: Permitir cálculo de rodadas com fallback DB (confiável)
         // Bloqueia apenas quando fallback é hardcoded (rodada=0, sem dados confiáveis)
-        const podeCaclularRodadas = !isTemporadaFutura && (!usouFallback || fallbackConfiavel);
-        if (podeCaclularRodadas && cache.ultima_rodada_consolidada < rodadaLimite) {
+        const podeCalcularRodadas = !isTemporadaFutura && (!usouFallback || fallbackConfiavel);
+        if (podeCalcularRodadas && cache.ultima_rodada_consolidada < rodadaLimite) {
             logger.log(
                 `[FLUXO-CONTROLLER] Calculando R${cache.ultima_rodada_consolidada + 1} → R${rodadaLimite}`,
             );

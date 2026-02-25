@@ -1215,12 +1215,21 @@ router.post("/acerto", verificarAdmin, async (req, res) => {
             registradoPor,
         });
 
-        await novoAcerto.save();
+        // ✅ F2 FIX: TRANSAÇÃO MongoDB - Salvar acerto + troco atomicamente
+        // Previne perda de troco em caso de crash entre os dois saves
+        // Ref: acertos-financeiros-routes.js v2.0.0 (mesmo padrão)
+        const dbSession = await mongoose.startSession();
+        try {
+            await dbSession.withTransaction(async () => {
+                await novoAcerto.save({ session: dbSession });
 
-        // Salvar troco se existir
-        if (acertoTroco) {
-            await acertoTroco.save();
-            console.log(`[TESOURARIA] ✅ Troco de R$ ${valorTroco.toFixed(2)} salvo`);
+                if (acertoTroco) {
+                    await acertoTroco.save({ session: dbSession });
+                    console.log(`[TESOURARIA] ✅ Troco de R$ ${valorTroco.toFixed(2)} salvo`);
+                }
+            });
+        } finally {
+            await dbSession.endSession();
         }
 
         // =========================================================================

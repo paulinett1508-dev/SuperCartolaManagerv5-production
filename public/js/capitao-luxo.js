@@ -382,10 +382,10 @@ const CapitaoLuxo = {
 
             const escudoSrc = participante.escudo || `/escudos/${participante.clube_id || "default"}.png`;
             const pontos = (Math.trunc((participante.pontuacao_total || 0) * 100) / 100).toFixed(2);
-            const media = (participante.media_capitao || 0).toFixed(2);
+            const media = (Math.trunc((participante.media_capitao || 0) * 100) / 100).toFixed(2);
             const rodadas = participante.rodadas_jogadas || 0;
-            const melhor = participante.melhor_capitao?.pontuacao?.toFixed(2) || "-";
-            const pior = participante.pior_capitao?.pontuacao?.toFixed(2) || "-";
+            const melhor = participante.melhor_capitao?.pontuacao != null ? (Math.trunc(participante.melhor_capitao.pontuacao * 100) / 100).toFixed(2) : "-";
+            const pior = participante.pior_capitao?.pontuacao != null ? (Math.trunc(participante.pior_capitao.pontuacao * 100) / 100).toFixed(2) : "-";
             const distintos = participante.capitaes_distintos || 0;
 
             const rowClass = isPrimeiro
@@ -491,7 +491,7 @@ const CapitaoLuxo = {
 
         const lider = ranking[0];
         const liderNome = lider?.nome_cartola || "---";
-        const liderPts = (lider?.pontuacao_total || 0).toFixed(2);
+        const liderPts = (Math.trunc((lider?.pontuacao_total || 0) * 100) / 100).toFixed(2);
 
         const liderLabel = temporadaEncerrada
             ? "🏆 CAPITÃO DE LUXO"

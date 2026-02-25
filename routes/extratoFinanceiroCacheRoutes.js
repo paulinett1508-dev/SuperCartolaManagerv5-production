@@ -40,10 +40,12 @@ router.get("/:ligaId/times/:timeId", lerCacheExtratoFinanceiro);
 // =====================================================================
 
 // Estatísticas gerais de cache
-router.get("/stats", estatisticasCache);
+// 🔒 ADMIN ONLY - expõe dados financeiros agregados de todos os participantes
+router.get("/stats", verificarAdmin, estatisticasCache);
 
 // Estatísticas de uma liga específica
-router.get("/:ligaId/stats", estatisticasCache);
+// 🔒 ADMIN ONLY - expõe dados financeiros agregados de uma liga
+router.get("/:ligaId/stats", verificarAdmin, estatisticasCache);
 
 // =====================================================================
 // ROTAS DE MANUTENÇÃO (apenas para caches corrompidos)

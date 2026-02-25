@@ -28,8 +28,8 @@ const CapitaoHistoricoModal = {
         const historico = participante.historico_rodadas || [];
         const nomeCartola = participante.nome_cartola || 'Participante';
         const nomeTime = participante.nome_time || '';
-        const pontuacaoTotal = (participante.pontuacao_total || 0).toFixed(2);
-        const mediaCapitao = (participante.media_capitao || 0).toFixed(2);
+        const pontuacaoTotal = (Math.trunc((participante.pontuacao_total || 0) * 100) / 100).toFixed(2);
+        const mediaCapitao = (Math.trunc((participante.media_capitao || 0) * 100) / 100).toFixed(2);
         const rodadasJogadas = historico.length;
 
         // Ordenar histórico por rodada
@@ -37,7 +37,7 @@ const CapitaoHistoricoModal = {
 
         // Gerar linhas da tabela
         const linhasTabela = historicoOrdenado.map((r, index) => {
-            const pts = (r.pontuacao || 0).toFixed(2);
+            const pts = (Math.trunc((r.pontuacao || 0) * 100) / 100).toFixed(2);
             const isParcial = r.parcial === true;
             const jogou = r.jogou;
 
@@ -107,13 +107,13 @@ const CapitaoHistoricoModal = {
                         ${participante.melhor_capitao ? `
                         <div class="resumo-item">
                             <span class="resumo-label">Melhor</span>
-                            <span class="resumo-valor" style="color: #22c55e;">${participante.melhor_capitao.pontuacao.toFixed(2)}</span>
+                            <span class="resumo-valor" style="color: #22c55e;">${(Math.trunc(participante.melhor_capitao.pontuacao * 100) / 100).toFixed(2)}</span>
                         </div>
                         ` : ''}
                         ${participante.pior_capitao ? `
                         <div class="resumo-item">
                             <span class="resumo-label">Pior</span>
-                            <span class="resumo-valor" style="color: #ef4444;">${participante.pior_capitao.pontuacao.toFixed(2)}</span>
+                            <span class="resumo-valor" style="color: #ef4444;">${(Math.trunc(participante.pior_capitao.pontuacao * 100) / 100).toFixed(2)}</span>
                         </div>
                         ` : ''}
                     </div>
