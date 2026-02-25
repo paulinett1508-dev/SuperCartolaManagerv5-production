@@ -581,6 +581,15 @@ router.post("/:ligaId/:temporada/batch", verificarAdmin, async (req, res) => {
             });
         }
 
+        // ✅ F6 FIX: Limitar tamanho do batch para prevenir DoS
+        const MAX_BATCH_SIZE = 100;
+        if (timeIds.length > MAX_BATCH_SIZE) {
+            return res.status(400).json({
+                success: false,
+                error: `Batch excede o limite máximo de ${MAX_BATCH_SIZE} times por requisição`
+            });
+        }
+
         if (!acao) {
             return res.status(400).json({
                 success: false,

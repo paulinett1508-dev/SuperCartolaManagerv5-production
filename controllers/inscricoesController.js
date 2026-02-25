@@ -1039,6 +1039,12 @@ export async function processarDecisaoUnificada(ligaId, timeId, temporada, decis
  * @returns {Promise<Object>} { success, total, processados, erros }
  */
 export async function processarBatchInscricoes(ligaId, temporada, timeIds, acao, opcoes = {}) {
+    // ✅ F6 FIX: Guard de defesa em profundidade (route já valida, mas controller é chamável internamente)
+    const MAX_BATCH_SIZE = 100;
+    if (!Array.isArray(timeIds) || timeIds.length > MAX_BATCH_SIZE) {
+        throw new Error(`Batch inválido: array obrigatório com no máximo ${MAX_BATCH_SIZE} times`);
+    }
+
     const resultados = [];
     const db = mongoose.connection.db;
 

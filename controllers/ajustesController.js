@@ -66,10 +66,11 @@ export async function criarAjuste(req, res) {
             });
         }
 
-        if (valor === undefined || valor === null || valor === 0) {
+        // ✅ F5 FIX: isNaN() previne Number("abc")=NaN passar silenciosamente
+        if (valor === undefined || valor === null || valor === 0 || isNaN(Number(valor))) {
             return res.status(400).json({
                 success: false,
-                error: "Valor é obrigatório e não pode ser zero"
+                error: "Valor é obrigatório, não pode ser zero e deve ser numérico"
             });
         }
 
