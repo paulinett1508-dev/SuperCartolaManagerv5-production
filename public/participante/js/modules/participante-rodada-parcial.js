@@ -423,7 +423,7 @@ async function buscarECalcularPontuacao(time, rodada, atletasPontuados) {
         }
 
         // ✅ CALCULAR PONTUAÇÃO (Regras oficiais Cartola FC 2025/2026)
-        // Capitão: 1.5x | Reserva comum: entra se titular ausente na posição
+        // Capitão: 2x | Reserva comum: entra se titular ausente na posição
         // Reserva de Luxo: substitui pior titular da posição se TODOS jogaram E luxo pontuou mais
         let pontos = 0;
         let atletasEmCampo = 0;
@@ -443,7 +443,7 @@ async function buscarECalcularPontuacao(time, rodada, atletasPontuados) {
                 if (jogou) atletasEmCampo++;
 
                 const isCapitao = atleta.atleta_id === dadosEscalacao.capitao_id;
-                const pontosEfetivos = isCapitao ? pontuacao * 1.5 : pontuacao;
+                const pontosEfetivos = isCapitao ? pontuacao * 2 : pontuacao;
                 pontos += pontosEfetivos;
 
                 const info = {
@@ -568,7 +568,7 @@ async function buscarECalcularPontuacao(time, rodada, atletasPontuados) {
 
                             // Luxo herda multiplicador de capitão se substituir o capitão
                             if (piorTitular.is_capitao) {
-                                pontosEfetivos = pontuacao * 1.5;
+                                pontosEfetivos = pontuacao * 2;
                                 luxoHerdouCapitao = true;
                             } else {
                                 pontosEfetivos = pontuacao;
