@@ -436,7 +436,9 @@ async function buscarECalcularPontuacao(time, rodada, atletasPontuados) {
                 const atletaPontuado = atletasPontuados[atleta.atleta_id];
                 const pontuacao = atletaPontuado?.pontuacao || 0;
                 const entrouEmCampo = atletaPontuado?.entrou_em_campo;
-                const jogou = !!(entrouEmCampo || pontuacao !== 0);
+                // Conservador: só ausente quando a API confirma explicitamente entrou_em_campo=false
+                // null/undefined = jogo não iniciado/desconhecido → não substituir prematuramente
+                const jogou = entrouEmCampo !== false || pontuacao !== 0;
 
                 if (jogou) atletasEmCampo++;
 
@@ -483,7 +485,9 @@ async function buscarECalcularPontuacao(time, rodada, atletasPontuados) {
                 const atletaPontuado = atletasPontuados[atleta.atleta_id];
                 const pontuacao = atletaPontuado?.pontuacao || 0;
                 const entrouEmCampo = atletaPontuado?.entrou_em_campo;
-                const jogou = !!(entrouEmCampo || pontuacao !== 0);
+                // Conservador: só ausente quando a API confirma explicitamente entrou_em_campo=false
+                // null/undefined = jogo não iniciado/desconhecido → não substituir prematuramente
+                const jogou = entrouEmCampo !== false || pontuacao !== 0;
                 let pontosEfetivos = 0;
                 let contribuiu = false;
                 let substituiuApelido = null;
@@ -522,7 +526,9 @@ async function buscarECalcularPontuacao(time, rodada, atletasPontuados) {
                 const atletaPontuado = atletasPontuados[luxoAtleta.atleta_id];
                 const pontuacao = atletaPontuado?.pontuacao || 0;
                 const entrouEmCampo = atletaPontuado?.entrou_em_campo;
-                const jogou = !!(entrouEmCampo || pontuacao !== 0);
+                // Conservador: só ausente quando a API confirma explicitamente entrou_em_campo=false
+                // null/undefined = jogo não iniciado/desconhecido → não substituir prematuramente
+                const jogou = entrouEmCampo !== false || pontuacao !== 0;
                 let pontosEfetivos = 0;
                 let contribuiu = false;
                 let substituiuApelido = null;
