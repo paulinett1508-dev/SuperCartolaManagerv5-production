@@ -1271,7 +1271,7 @@ async function carregarDestaquesRodada(ligaId, rodada, timeId, isAoVivo = false)
         const liveBadgeEl = document.getElementById('home-destaques-live-badge');
 
         // ── FONTE PRIMÁRIA (ao vivo): ParciaisModule já tem tudo calculado ──
-        // Capitão 2x, reservas, luxo — evita fetch extra e discrepâncias
+        // Capitão 1.5x, reservas, luxo — evita fetch extra e discrepâncias
         if (isAoVivo && parciaisAtivos && ParciaisModule?.obterDados) {
             const dadosParciais = ParciaisModule.obterDados();
             const meuTime = dadosParciais?.participantes?.find(

@@ -1638,7 +1638,7 @@ function abrirCampinhoModal(targetTimeId, rodada, rodadaData = null) {
     const isMeuTime = String(targetTimeId) === String(meuTimeId);
 
     if (timeDados?.atletas?.length > 0) {
-        // Fonte 1: ParciaisModule — dados já processados (capitão 2x, reservas, luxo)
+        // Fonte 1: ParciaisModule — dados já processados (capitão 1.5x, reservas, luxo)
         fonte = 'parciais';
         nomeTime = timeDados.nome_time || "Time";
         nomeCartola = timeDados.nome_cartola || "";
