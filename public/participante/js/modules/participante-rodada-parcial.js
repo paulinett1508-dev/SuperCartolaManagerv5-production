@@ -485,9 +485,10 @@ async function buscarECalcularPontuacao(time, rodada, atletasPontuados) {
                 const atletaPontuado = atletasPontuados[atleta.atleta_id];
                 const pontuacao = atletaPontuado?.pontuacao || 0;
                 const entrouEmCampo = atletaPontuado?.entrou_em_campo;
-                // Conservador: só ausente quando a API confirma explicitamente entrou_em_campo=false
-                // null/undefined = jogo não iniciado/desconhecido → não substituir prematuramente
-                const jogou = entrouEmCampo !== false || pontuacao !== 0;
+                // ESTRITO para reservas: só entra quando confirmadamente jogou.
+                // null/undefined = jogo não iniciado → reserva NÃO ocupa slot de substituição
+                // (evita que reserva sem jogo iniciado "roube" o slot de outra que já pontuou)
+                const jogou = entrouEmCampo === true || pontuacao !== 0;
                 let pontosEfetivos = 0;
                 let contribuiu = false;
                 let substituiuApelido = null;
@@ -526,9 +527,9 @@ async function buscarECalcularPontuacao(time, rodada, atletasPontuados) {
                 const atletaPontuado = atletasPontuados[luxoAtleta.atleta_id];
                 const pontuacao = atletaPontuado?.pontuacao || 0;
                 const entrouEmCampo = atletaPontuado?.entrou_em_campo;
-                // Conservador: só ausente quando a API confirma explicitamente entrou_em_campo=false
-                // null/undefined = jogo não iniciado/desconhecido → não substituir prematuramente
-                const jogou = entrouEmCampo !== false || pontuacao !== 0;
+                // ESTRITO para reservas: luxo só ativa quando confirmadamente jogou
+                // null/undefined = jogo não iniciado → luxo não ativa (Cenário A nem B)
+                const jogou = entrouEmCampo === true || pontuacao !== 0;
                 let pontosEfetivos = 0;
                 let contribuiu = false;
                 let substituiuApelido = null;
@@ -546,10 +547,12 @@ async function buscarECalcularPontuacao(time, rodada, atletasPontuados) {
                     titSub.substituido_por = luxoAtleta.apelido || 'Reserva de Luxo';
                 }
                 // Cenário B: Habilidade especial do Luxo
-                // Todos titulares da posição jogaram → substitui o pior se luxo pontuou mais
+                // Todos titulares da posição jogaram E luxo pontuou mais que o pior
+                // Só compara com titulares que CONFIRMADAMENTE jogaram (pontos > 0 ou entrou=true)
+                // para não trocar prematuramente com titular cujo jogo não iniciou (pontos=0)
                 else if (jogou) {
                     const titularesDaPosicao = titularesProcessados.filter(
-                        t => t.posicao_id === luxoAtleta.posicao_id && t.entrou_em_campo
+                        t => t.posicao_id === luxoAtleta.posicao_id && (t.pontos > 0 || atletasPontuados[t.atleta_id]?.entrou_em_campo === true)
                     );
 
                     if (titularesDaPosicao.length > 0) {
