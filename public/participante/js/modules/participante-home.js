@@ -1063,9 +1063,10 @@ function renderizarHome(container, data, ligaId) {
 
     if (rodadaEmAndamento) {
         // Rodada em andamento: placeholder ate parciais carregarem
+        // Sem pulsing — ainda não sabemos se há jogo rolando
         if (ultimaPontuacaoEl) ultimaPontuacaoEl.textContent = '--';
         if (variacaoPontosEl) {
-            variacaoPontosEl.innerHTML = '<span class="live-badge-mini">AO VIVO</span>';
+            variacaoPontosEl.innerHTML = '<span class="andamento-badge-mini">RODADA EM ANDAMENTO</span>';
         }
         if (pontuacaoLabelEl) pontuacaoLabelEl.textContent = 'PONTUACAO PARCIAL';
         if (rankingPontosEl) rankingPontosEl.textContent = '--';
