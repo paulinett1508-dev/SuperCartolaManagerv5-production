@@ -358,19 +358,38 @@ async function buscarEscalacaoCompleta(ligaId, timeId, rodada = 1) {
 }
 
 function calcularPontosTotais(data) {
-    const atletas = data?.titulares || data?.atletas || [];
-    const capitaoId = data?.capitao_id;
-    const reservaLuxoId = data?.reserva_luxo_id;
+    const titulares = data?.titulares || data?.atletas || [];
+    const reservas = data?.reservas || [];
+    const capitaoId = Number(data?.capitao_id);
+    const reservaLuxoId = Number(data?.reserva_luxo_id);
 
-    if (!Array.isArray(atletas)) return 0;
+    if (!Array.isArray(titulares)) return 0;
 
-    return atletas.reduce((total, a) => {
+    let total = 0;
+    let vagasDisponiveis = 0;
+
+    for (const a of titulares) {
         const atletaId = Number(a.atleta_id ?? a.atletaId ?? a.id);
-        let pontos = parseFloat(a.pontos_atual ?? a.pontos_num ?? (a.pontos || 0)) || 0;
-        if (atletaId && Number(capitaoId) && atletaId === Number(capitaoId)) pontos *= 1.5;
-        else if (atletaId && Number(reservaLuxoId) && atletaId === Number(reservaLuxoId) && pontos !== 0) pontos *= 1.5;
-        return total + pontos;
-    }, 0);
+        let pontos = parseFloat(a.pontos_atual ?? a.pontos_num ?? a.pontos ?? 0) || 0;
+        if (pontos === 0) vagasDisponiveis++;
+        if (atletaId && capitaoId && atletaId === capitaoId) pontos *= 2;
+        total += pontos;
+    }
+
+    // Somar reservas que entraram (substituições automáticas do Cartola)
+    let reservasAdicionadas = 0;
+    for (const a of reservas) {
+        if (reservasAdicionadas >= vagasDisponiveis) break;
+        const atletaId = Number(a.atleta_id ?? a.atletaId ?? a.id);
+        const pontos = parseFloat(a.pontos_atual ?? a.pontos_num ?? a.pontos ?? 0) || 0;
+        if (pontos === 0) continue;
+        let pontosComMult = pontos;
+        if (atletaId && reservaLuxoId && atletaId === reservaLuxoId) pontosComMult *= 1.5;
+        total += pontosComMult;
+        reservasAdicionadas++;
+    }
+
+    return total;
 }
 
 async function buscarConfrontos(ligaId, timeId) {
@@ -382,7 +401,10 @@ async function buscarConfrontos(ligaId, timeId) {
 
 async function tentarBuscarAtletasPontuados() {
     try {
-        const response = await fetch('/api/cartola/atletas/pontuados');
+        const response = await fetch(`/api/cartola/atletas/pontuados?_t=${Date.now()}`, {
+            cache: 'no-store',
+            headers: { 'Cache-Control': 'no-cache, no-store', Pragma: 'no-cache' }
+        });
         if (!response.ok) return { atletas: {} };
         return await response.json();
     } catch (error) {
