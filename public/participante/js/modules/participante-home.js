@@ -193,15 +193,8 @@ async function carregarDadosERenderizar(ligaId, timeId, participante) {
         }
     }
 
-    // Se nao tem cache, mostrar loading
-    if (!liga || !ranking?.length) {
-        container.innerHTML = `
-            <div class="flex flex-col items-center justify-center min-h-[300px] py-16">
-                <div class="w-10 h-10 border-4 border-zinc-700 border-t-orange-500 rounded-full animate-spin mb-4"></div>
-                <p class="text-sm text-gray-400">Carregando...</p>
-            </div>
-        `;
-    }
+    // ✅ FIX: Não substituir container.innerHTML com spinner — isso destruía os tiles HTML.
+    // Os tiles já mostram "--" por padrão como placeholder enquanto carregam.
 
     // Buscar dados frescos da API
     // ✅ v9.0: Passar temporada para segregar dados por ano
@@ -2187,6 +2180,13 @@ async function _renderizarTiles(data, ligaId) {
 
     // Guardar snapshot para uso nos modais
     _homeSnapshot = { data, ligaId };
+
+    // === HEADER TÍTULO (personalizado com primeiro nome) ===
+    const headerTituloEl = document.getElementById('tile-header-titulo');
+    if (headerTituloEl && data.nomeCartola) {
+        const primeiroNome = data.nomeCartola.split(' ')[0];
+        headerTituloEl.textContent = `Olá, ${primeiroNome}`;
+    }
 
     // === TIMESTAMP ===
     const tsEl = document.getElementById('tile-atualizado');
