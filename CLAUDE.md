@@ -33,6 +33,8 @@ Solicitação do Usuário
     • Executar tarefas listadas
     • Marcar progresso em tempo real
     • Auto-accept edits (se configurado)
+    • Se algo sair dos trilhos → PARE e re-planeje (nunca force)
+    • Ao concluir cada tarefa → resumo curto do que mudou
 ```
 
 ### Formato de Apresentação
@@ -65,6 +67,30 @@ Sempre use este template ao planejar:
 
 **⚠️ Este planejamento faz sentido? Posso prosseguir?**
 ```
+
+### FASE 3.5: Verificação Antes de Concluir
+
+**NUNCA marque uma tarefa como concluída sem PROVAR que funciona.**
+
+| Tipo de Mudança | Verificação Mínima |
+|-----------------|-------------------|
+| **Backend** (controller/route/model) | Testar endpoint (curl/Postman), verificar logs do servidor |
+| **Frontend** (JS/HTML) | Verificar console do browser, testar interação |
+| **Script** (migration/cron) | Rodar com `--dry-run` primeiro |
+| **CSS/Visual** | Confirmar render visual, checar responsivo |
+| **Config/DB** | Validar schema, testar query |
+
+**Checklist obrigatório:**
+- [ ] Funciona? (testei/demonstrei)
+- [ ] Diff correto? (reli `git diff` — só contém o pedido)
+- [ ] Sem regressão? (nada existente quebrou)
+- [ ] Staff engineer aprovaria este PR?
+
+**Se algo sair dos trilhos durante execução:**
+1. **PARE** imediatamente — não force uma solução
+2. **Comunique** ao usuário o que mudou
+3. **Re-planeje** com as novas informações
+4. **Nunca** continue empurrando uma abordagem que não está funcionando
 
 ### Exceções (RARAS)
 
@@ -166,6 +192,10 @@ Cada módulo possui sua paleta de cores padronizada. **Sempre use variáveis CSS
 - **Error Handling:** Use `try/catch` in async controllers
 - **No React/Vue:** Pure JavaScript for frontend
 - **Nomenclatura em Português:** Use `autorizado` (not `authorized`), `usuario` (not `user`), `senha` (not `password`)
+- **Performance MongoDB:**
+  - Usar `.lean()` em queries de leitura (retorna POJO, ~3x mais rápido)
+  - Cache TTL padrão: Rodadas 5min, Rankings 10min, Configs 30min
+  - Toda query DEVE incluir `liga_id` (multi-tenant — sem isso, dados de ligas se misturam)
 - **SPA Init Pattern:** Páginas em `supportedPages` (layout.html) NUNCA devem usar `DOMContentLoaded` sozinho. O evento só dispara uma vez — na navegação SPA o DOM já está pronto e o listener nunca executa. Sempre usar:
 ```javascript
 if (document.readyState === 'loading') {
@@ -174,6 +204,51 @@ if (document.readyState === 'loading') {
     init(); // SPA: DOM já pronto, executar imediatamente
 }
 ```
+
+## 🔧 Correção Autônoma de Bugs
+
+Quando receber um bug report: **resolva**. Não peça "me mostre o arquivo" ou "qual a rota?".
+
+### Protocolo
+1. **Investigar** — Grep logs, ler código, rastrear o fluxo, encontrar a causa raiz
+2. **Corrigir** — Fix cirúrgico, mínimo impacto, seguindo S.A.I.S
+3. **Verificar** — Testar que o fix funciona E não quebra nada (FASE 3.5)
+4. **Reportar** — Resumo curto: o que era, onde estava, como foi corrigido
+
+### Zero Context Switch
+- O usuário **NÃO** deve precisar guiar você passo a passo
+- Use as ferramentas (Grep, Glob, Read) para encontrar tudo sozinho
+- Se testes/lint falham após seu fix, corrija sem esperar instrução
+- **Exceção:** Decisões de negócio ou trade-offs arquiteturais exigem confirmação do usuário
+
+## 🧱 Princípios de Engenharia
+
+### Simplicidade Primeiro
+- Cada mudança deve ser a **mais simples possível**. Impactar o mínimo de código.
+- Não adicionar features, refatorar, ou "melhorar" além do pedido.
+- 3 linhas similares são melhores que uma abstração prematura.
+- Não adicionar docstrings, comments ou type annotations em código que não foi alterado.
+
+### Causa Raiz, Não Paliativo
+- Investigar até o **problema real**. Zero fixes temporários. Padrão senior developer.
+- Não contornar problemas com hacks — resolver de verdade.
+- Se o fix parece gambiarra, pausar e perguntar: _"existe uma solução mais elegante?"_
+- Para mudanças não-triviais: desafiar o próprio trabalho antes de apresentar.
+
+### Mudanças Cirúrgicas (Protocolo S.A.I.S)
+Antes de QUALQUER alteração em arquivo existente:
+1. **S**olicitar — Ler o arquivo original completo
+2. **A**nalisar — Entender linha por linha
+3. **I**dentificar — Mapear dependências (`grep -r "require.*arquivo"`, IDs CSS, rotas)
+4. **A**lterar — Mudança mínima e focada no objetivo
+
+**NUNCA:** Reescrever código funcional sem requisição explícita. Assumir melhorias sem pedido. Fazer múltiplas soluções para o mesmo problema.
+
+### Autonomia Total na Investigação
+- **NUNCA** pergunte "onde fica o arquivo?" ou "qual a rota?" — busque sozinho (Grep, Glob, Read).
+- **NUNCA** ofereça opções quando pode investigar e resolver.
+- Use as ferramentas disponíveis para encontrar tudo antes de perguntar ao usuário.
+- **Exceção:** Decisões de negócio ou ambiguidade de requisito — aí sim, pergunte.
 
 ## 🎨 REGRA Nº 1 — Skill `frontend-design` (AUTORIDADE ESTÉTICA MÁXIMA)
 
@@ -659,3 +734,34 @@ Aplica-se a **qualquer valor de pontuação de participante**, incluindo:
 2. NEVER break "Follow the Money" audit trail in financial controllers
 3. Always check variable existence before accessing properties (avoid `undefined`)
 4. NEVER round participant points — always TRUNCATE using `truncarPontosNum()` (backend) or `truncarPontos()` (frontend)
+5. EVERY MongoDB query MUST include `liga_id` filter (sistema multi-tenant — sem isso, dados de ligas se misturam)
+6. EVERY read query SHOULD use `.lean()` unless document methods are needed (performance)
+7. After ANY user correction → update `.claude/LESSONS.md` with the lesson learned
+
+## 🔄 Loop de Auto-Aprendizado
+
+### Regra
+Após **QUALQUER** correção do usuário (erro, abordagem errada, padrão violado):
+
+1. **Registrar** a lição em [`.claude/LESSONS.md`](.claude/LESSONS.md)
+2. **Categorizar** — `DADOS`, `FRONTEND`, `LOGICA` ou `PROCESSO`
+3. **Escrever regra** que previna o mesmo erro no futuro
+4. **Revisar** lições no início de cada sessão nova
+
+### Formato de Registro
+
+```markdown
+| Data | Categoria | Erro Cometido | Lição Aprendida | Regra Adicionada ao CLAUDE.md? |
+```
+
+### Escalação
+- Se **3+ lições da mesma categoria** acumularem → propor nova regra no CLAUDE.md
+- Se a lição é **crítica** (perda de dados, bug em produção) → adicionar imediatamente às Critical Rules
+
+### Exemplos de Lições
+| Categoria | Erro | Lição |
+|-----------|------|-------|
+| DADOS | Query sem `liga_id` retornou dados de outra liga | Sempre incluir `liga_id` em toda query MongoDB |
+| FRONTEND | Usou emoji `⭐` em vez de Material Icon | Consultar tabela de ícones no CLAUDE.md antes de usar |
+| LOGICA | Usou `.toFixed(2)` que arredonda pontos | Usar `truncarPontosNum()` — NUNCA arredondar pontos |
+| PROCESSO | Começou a programar sem planejamento | FASE 1 é obrigatória, sem exceções |
