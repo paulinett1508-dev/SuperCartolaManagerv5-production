@@ -649,6 +649,14 @@ function processarDadosParaRender(liga, ranking, rodadas, extratoData, meuTimeId
     const clubeId = participante?.clube_id || participante?.clubeId ||
                     authParticipante?.clube_id || meuTime?.clube_id || null;
 
+    // Dados do líder do ranking para o tile de ranking
+    const liderRanking = Array.isArray(ranking) && ranking.length > 0 ? ranking[0] : null;
+    const lider = liderRanking ? {
+        nomeTime: liderRanking.nome_time || liderRanking.nomeTime || '',
+        pontos: parseFloat(liderRanking.pontos ?? liderRanking.pontos_total ?? liderRanking.pontuacao ?? 0) || 0,
+        clubeId: liderRanking.clube_id || liderRanking.clubeId || null
+    } : null;
+
     return {
         posicao,
         totalParticipantes,
@@ -663,7 +671,8 @@ function processarDadosParaRender(liga, ranking, rodadas, extratoData, meuTimeId
         posicaoAnterior,
         minhasRodadas: rodadasOrdenadas,
         timeId: meuTimeIdNum,
-        clubeId
+        clubeId,
+        lider
     };
 }
 
@@ -1232,6 +1241,9 @@ function renderizarHome(container, data, ligaId) {
             if (btn) btn.style.display = 'none';
         }
     }
+
+    // === TILES HOME ===
+    _renderizarTiles(data, ligaId);
 }
 
 // =====================================================================
@@ -1891,6 +1903,24 @@ function atualizarCardsHomeComParciais() {
 
     // Atualizar saldo projetado
     atualizarSaldoProjetado(minhaPosicao.posicao);
+
+    // === ATUALIZAR TILES (parciais ativos) ===
+    const confrontoPtsEl = document.getElementById('tile-confronto-pts');
+    if (confrontoPtsEl && minhaPosicao.pontos !== undefined) {
+        confrontoPtsEl.textContent = (Math.trunc((minhaPosicao.pontos || 0) * 100) / 100).toFixed(2);
+    }
+
+    const confrontoLiveBadgeEl = document.getElementById('tile-confronto-live-badge');
+    if (confrontoLiveBadgeEl) {
+        const jogoRolando = dadosParciais?.participantes?.some(p => (p.pontos || 0) > 0)
+            || mercadoStatus?.bola_rolando === true;
+        confrontoLiveBadgeEl.style.display = jogoRolando ? 'flex' : 'none';
+    }
+
+    const rankingPosTileEl = document.getElementById('tile-ranking-pos');
+    if (rankingPosTileEl && minhaPosicao.posicao) {
+        rankingPosTileEl.textContent = `${minhaPosicao.posicao}º`;
+    }
 }
 
 function getValorRankingPosicao(config, posicao) {
@@ -2139,6 +2169,109 @@ async function buscarCartoletasTime(timeId) {
     } catch (error) {
         if (window.Log) Log.warn("PARTICIPANTE-HOME", "Erro ao buscar cartoletas:", error);
     }
+}
+
+// =====================================================================
+// RENDERIZAR TILES HOME (Windows Phone Style)
+// =====================================================================
+async function _renderizarTiles(data, ligaId) {
+    const { posicao, ultimaRodada, lider } = data;
+    const modulosAtivos = window.participanteNav?.modulosAtivos || {};
+    const statusMercadoNum = Number(mercadoStatus?.status_mercado ?? 1) || 1;
+    const rodadaEmAndamento = statusMercadoNum === 2;
+
+    // === TIMESTAMP ===
+    const tsEl = document.getElementById('tile-atualizado');
+    if (tsEl) {
+        const agora = new Date();
+        tsEl.textContent = `${String(agora.getHours()).padStart(2, '0')}:${String(agora.getMinutes()).padStart(2, '0')}`;
+    }
+
+    // === TILE: RANKING ===
+    const rankingPosEl = document.getElementById('tile-ranking-pos');
+    if (rankingPosEl) rankingPosEl.textContent = posicao ? `${posicao}º` : '--';
+
+    if (lider) {
+        const liderNomeEl = document.getElementById('tile-ranking-lider-nome');
+        const liderPtsEl = document.getElementById('tile-ranking-lider-pts');
+        const liderImgEl = document.getElementById('tile-ranking-img');
+        if (liderNomeEl) liderNomeEl.textContent = lider.nomeTime || '--';
+        if (liderPtsEl) liderPtsEl.textContent = lider.pontos ? `${formatarPontos(lider.pontos)} pts` : '-- pts';
+        if (liderImgEl && lider.clubeId) {
+            liderImgEl.src = `/escudos/${lider.clubeId}.png`;
+            liderImgEl.style.display = '';
+        }
+    }
+
+    // === TILE: CONFRONTO ===
+    const confrontoPtsEl = document.getElementById('tile-confronto-pts');
+    if (confrontoPtsEl) {
+        if (rodadaEmAndamento && parciaisAtivos && dadosParciais) {
+            const posicaoParcial = ParciaisModule.obterMinhaPosicaoParcial?.();
+            const pontosParciais = posicaoParcial?.pontos || 0;
+            confrontoPtsEl.textContent = (Math.trunc(pontosParciais * 100) / 100).toFixed(2);
+        } else {
+            const pontosRodada = ultimaRodada ? parseFloat(ultimaRodada.pontos || 0) : 0;
+            confrontoPtsEl.textContent = formatarPontos(pontosRodada);
+        }
+    }
+
+    const confrontoLiveBadgeEl = document.getElementById('tile-confronto-live-badge');
+    if (confrontoLiveBadgeEl) {
+        confrontoLiveBadgeEl.style.display = (rodadaEmAndamento && parciaisAtivos) ? 'flex' : 'none';
+    }
+
+    // === TILES OPCIONAIS ===
+    const anyOptionalActive = modulosAtivos.capitaoLuxo || modulosAtivos.artilheiro || modulosAtivos.mataMata;
+    const optionalRow = document.getElementById('home-tiles-optional-row');
+    if (optionalRow) optionalRow.style.display = anyOptionalActive ? 'flex' : 'none';
+
+    // Capitão de Luxo
+    const tileCapitao = document.getElementById('tile-capitao');
+    if (tileCapitao) {
+        tileCapitao.style.display = modulosAtivos.capitaoLuxo ? '' : 'none';
+        if (modulosAtivos.capitaoLuxo) _popularTileCapitao(ligaId);
+    }
+
+    // Artilheiro Campeão
+    const tileArtilheiro = document.getElementById('tile-artilheiro');
+    if (tileArtilheiro) {
+        tileArtilheiro.style.display = modulosAtivos.artilheiro ? '' : 'none';
+        if (modulosAtivos.artilheiro) _popularTileArtilheiro(ligaId);
+    }
+
+    // Mata-Mata
+    const tileMataMata = document.getElementById('tile-mata-mata');
+    if (tileMataMata) tileMataMata.style.display = modulosAtivos.mataMata ? '' : 'none';
+}
+
+async function _popularTileCapitao(ligaId) {
+    try {
+        const r = await fetch(`/api/capitao/${ligaId}/ranking`);
+        if (!r.ok) return;
+        const d = await r.json();
+        const top = Array.isArray(d) ? d[0] : (d?.ranking?.[0] || d?.data?.[0] || null);
+        if (!top) return;
+        const nomeEl = document.getElementById('tile-capitao-nome');
+        const ptsEl = document.getElementById('tile-capitao-pts');
+        if (nomeEl) nomeEl.textContent = top.nomeCartola || top.nome_cartola || top.nomeTime || top.nome_time || '--';
+        if (ptsEl) ptsEl.textContent = top.pontos !== undefined ? `${formatarPontos(top.pontos)} pts` : '-- pts';
+    } catch (e) { /* silencioso */ }
+}
+
+async function _popularTileArtilheiro(ligaId) {
+    try {
+        const r = await fetch(`/api/artilheiro-campeao/${ligaId}/ranking`);
+        if (!r.ok) return;
+        const d = await r.json();
+        const top = Array.isArray(d) ? d[0] : (d?.ranking?.[0] || d?.data?.[0] || null);
+        if (!top) return;
+        const golsEl = document.getElementById('tile-artilheiro-gols');
+        if (golsEl) {
+            const gols = top.gols ?? top.gols_marcados ?? top.total ?? top.totalGols ?? '--';
+            golsEl.textContent = gols !== '--' ? `${gols}` : '--';
+        }
+    } catch (e) { /* silencioso */ }
 }
 
 if (window.Log)

@@ -1,0 +1,303 @@
+/* ================================================
+   HOME TILES - Windows Phone Style
+   public/participante/css/home-tiles.css
+   Criado: 2026-02-26
+   ================================================ */
+
+/* Container principal */
+.home-tiles-container {
+    background: var(--app-bg);
+    min-height: 100vh;
+    padding: var(--app-space-5);
+    padding-bottom: calc(var(--app-bottom-nav-height) + var(--app-space-10));
+}
+
+/* ================================
+   HEADER
+   ================================ */
+.home-tiles-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--app-space-4);
+    padding-bottom: var(--app-space-3);
+    border-bottom: var(--app-border-subtle);
+}
+
+.home-tiles-header-title {
+    font-family: var(--app-font-brand);
+    font-size: var(--app-font-xl);
+    color: var(--app-text-primary);
+    letter-spacing: 0.5px;
+}
+
+.home-tiles-header-time {
+    font-family: var(--app-font-mono);
+    font-size: var(--app-font-xs);
+    color: var(--app-text-muted);
+}
+
+/* ================================
+   GRID
+   ================================ */
+.home-tiles-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 100px;
+    gap: var(--app-space-2);
+}
+
+/* ================================
+   BASE TILE
+   ================================ */
+.home-tile {
+    position: relative;
+    border-radius: var(--app-radius-md);
+    padding: var(--app-space-3);
+    border: none;
+    cursor: pointer;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    text-align: left;
+    color: var(--app-text-primary);
+    transition: transform var(--app-transition-bounce), opacity var(--app-transition-fast);
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    min-height: 100px;
+}
+
+.home-tile:active {
+    transform: scale(0.96);
+    opacity: 0.88;
+}
+
+/* ================================
+   TILE SIZES (grid spans)
+   ================================ */
+.home-tile--confronto,
+.home-tile--ranking {
+    grid-column: span 2;
+    grid-row: span 2;
+}
+
+.home-tile--confrontos {
+    grid-column: span 1;
+}
+
+.home-tile--ver-tudo {
+    grid-column: span 3;
+}
+
+/* ================================
+   OPTIONAL ROW (módulos opcionais)
+   Wrapper flex que ocupa a linha inteira
+   ================================ */
+.home-tiles-optional-row {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: var(--app-space-2);
+    height: 100px;
+}
+
+/* Capitão: largura dupla dentro do flex */
+.home-tile--capitao {
+    flex: 2;
+}
+
+/* Mata-Mata e Artilheiro: largura simples */
+.home-tile--mata-mata,
+.home-tile--artilheiro {
+    flex: 1;
+}
+
+/* ================================
+   DECORAÇÃO: ícone de fundo
+   ================================ */
+.home-tile-icon-bg {
+    position: absolute;
+    right: -6px;
+    bottom: -6px;
+    font-size: 64px !important;
+    opacity: 0.07;
+    color: white;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* ================================
+   TILE COLORS (via CSS vars)
+   ================================ */
+.home-tile--confronto {
+    background: var(--app-info);
+}
+
+.home-tile--ranking {
+    background: var(--app-surface);
+    border: var(--app-border-default);
+}
+
+.home-tile--capitao {
+    background: var(--app-purple);
+}
+
+.home-tile--mata-mata {
+    background: var(--app-danger);
+}
+
+.home-tile--artilheiro {
+    background: var(--app-success-light);
+}
+
+.home-tile--confrontos {
+    background: var(--app-surface-elevated);
+    border: var(--app-border-subtle);
+}
+
+.home-tile--ver-tudo {
+    background: var(--app-surface);
+    border: var(--app-border-subtle);
+}
+
+/* ================================
+   TILE TAG (label topo-esquerda)
+   ================================ */
+.home-tile-tag {
+    position: absolute;
+    top: var(--app-space-3);
+    left: var(--app-space-3);
+    font-family: var(--app-font-brand);
+    font-size: var(--app-font-xs);
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.5px;
+    line-height: 1;
+    pointer-events: none;
+}
+
+/* ================================
+   BADGE AO VIVO
+   ================================ */
+.home-tile-live-badge {
+    position: absolute;
+    top: var(--app-space-3);
+    right: var(--app-space-3);
+    background: var(--app-danger);
+    color: var(--app-text-primary);
+    font-family: var(--app-font-brand);
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: var(--app-radius-full);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    letter-spacing: 0.5px;
+    line-height: 1.4;
+    animation: home-tile-live-pulse 2s ease-in-out infinite;
+}
+
+@keyframes home-tile-live-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* ================================
+   TILE BODY (conteúdo principal)
+   ================================ */
+.home-tile-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    position: relative;
+    z-index: 1;
+}
+
+.home-tile-body--row {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--app-space-2);
+    width: 100%;
+}
+
+/* ================================
+   NÚMEROS
+   ================================ */
+.home-tile-number {
+    font-family: var(--app-font-mono);
+    font-size: 28px;
+    font-weight: var(--app-font-bold);
+    color: var(--app-text-primary);
+    line-height: var(--app-leading-tight);
+}
+
+.home-tile-number-sm {
+    font-family: var(--app-font-mono);
+    font-size: var(--app-font-md);
+    font-weight: var(--app-font-bold);
+    color: var(--app-text-primary);
+    line-height: var(--app-leading-tight);
+}
+
+/* ================================
+   LABELS
+   ================================ */
+.home-tile-label {
+    font-family: var(--app-font-brand);
+    font-size: var(--app-font-xs);
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.home-tile-label-sm {
+    font-family: var(--app-font-brand);
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.home-tile-label-val {
+    font-family: var(--app-font-base);
+    font-size: var(--app-font-sm);
+    color: rgba(255, 255, 255, 0.85);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* ================================
+   LÍDER DO RANKING
+   ================================ */
+.home-tile-ranking-lider {
+    display: flex;
+    flex-direction: column;
+    margin-top: var(--app-space-2);
+    gap: 2px;
+}
+
+.home-tile-ranking-lider img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    border-radius: var(--app-radius-sm);
+    background: rgba(255, 255, 255, 0.05);
+    margin-bottom: 2px;
+}
+
+.home-tile-lider-nome {
+    font-family: var(--app-font-base);
+    font-size: var(--app-font-xs);
+    color: rgba(255, 255, 255, 0.75);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 130px;
+}
+
+.home-tile-lider-pts {
+    font-family: var(--app-font-mono);
+    font-size: var(--app-font-xs);
+    color: rgba(255, 255, 255, 0.45);
+}
