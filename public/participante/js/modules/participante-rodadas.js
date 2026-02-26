@@ -1014,6 +1014,26 @@ window.toggleMinhaEscalacao = function() {
     }
 };
 
+// ✅ v8.1: Toggle para expandir/colapsar Meu Resumo
+window.toggleMeuResumo = function() {
+    const header = document.querySelector('.meu-resumo-toggle');
+    const content = document.getElementById('meuResumoContent');
+
+    if (!header || !content) return;
+
+    const isExpanded = header.classList.contains('expanded');
+
+    if (isExpanded) {
+        header.classList.remove('expanded');
+        content.classList.remove('expanded');
+        localStorage.setItem('superCartola_meuResumoExpandido', 'false');
+    } else {
+        header.classList.add('expanded');
+        content.classList.add('expanded');
+        localStorage.setItem('superCartola_meuResumoExpandido', 'true');
+    }
+};
+
 // Helper para extrair clube_id da foto do atleta (fallback)
 function extrairClubeIdDaFoto(foto) {
     if (!foto) return null;
@@ -1408,21 +1428,42 @@ function renderizarDetalhamentoRodada(rodadaData, isParcial = false, inativos = 
             ? `<span style="margin-left:8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--app-text-muted)">${escalados}/12 <span style="color:var(--app-success-light);font-weight:600;font-size:10px;margin-left:2px">${jogandoAoVivo}</span></span>`
             : '';
 
+        // ✅ v8.1: Meu Resumo colapsivel (default: fechado)
+        const isResumoExpanded = localStorage.getItem('superCartola_meuResumoExpandido') === 'true';
+        const resumoExpandedClass = isResumoExpanded ? 'expanded' : '';
+        const pontosResumoFormatados = typeof window.truncarPontos === 'function'
+            ? window.truncarPontos(meusPontosCalc)
+            : (Math.trunc(meusPontosCalc * 100) / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
         meuResumoHTML = `
-            <div class="meu-resumo-card ${meuResumoExtraClass}">
-                <div class="meu-resumo-posicao">${meuPosicaoIcon}</div>
-                <div class="meu-resumo-info">
-                    <div class="meu-resumo-nome">${meuNome}</div>
-                    <div class="meu-resumo-detalhes">
-                        ${detalhesExtra}
-                        ${!isParcial && meusValorTexto ? `<span style="color:${meusValorCor};font-family:'JetBrains Mono',monospace;font-size:12px;">${meusValorTexto}</span>` : ''}
-                        ${emCampoInfo}
+            <div class="meu-resumo-wrapper">
+                <div class="meu-resumo-toggle ${resumoExpandedClass}" onclick="window.toggleMeuResumo()">
+                    <div class="meu-resumo-toggle-left">
+                        <span class="material-icons">person</span>
+                        <div>
+                            <div class="meu-resumo-toggle-title">Meu Resumo</div>
+                            <div class="meu-resumo-toggle-subtitle">${escapeHtml(meuNome)} • ${pontosResumoFormatados} pts • ${minhaPosicaoCalc}&#186;/${totalParticipantes}</div>
+                        </div>
                     </div>
-                    ${meuStatusLabel}
+                    <span class="material-icons me-toggle-chevron">expand_more</span>
                 </div>
-                <div class="meu-resumo-pontos">
-                    <div class="meu-resumo-pontos-valor">${meusPontosCalc.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                    <div class="meu-resumo-pontos-label">pontos</div>
+                <div class="meu-resumo-collapsible ${resumoExpandedClass}" id="meuResumoContent">
+                    <div class="meu-resumo-card ${meuResumoExtraClass}">
+                        <div class="meu-resumo-posicao">${meuPosicaoIcon}</div>
+                        <div class="meu-resumo-info">
+                            <div class="meu-resumo-nome">${meuNome}</div>
+                            <div class="meu-resumo-detalhes">
+                                ${detalhesExtra}
+                                ${!isParcial && meusValorTexto ? `<span style="color:${meusValorCor};font-family:'JetBrains Mono',monospace;font-size:12px;">${meusValorTexto}</span>` : ''}
+                                ${emCampoInfo}
+                            </div>
+                            ${meuStatusLabel}
+                        </div>
+                        <div class="meu-resumo-pontos">
+                            <div class="meu-resumo-pontos-valor">${pontosResumoFormatados}</div>
+                            <div class="meu-resumo-pontos-label">pontos</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
@@ -1456,7 +1497,13 @@ function renderizarDetalhamentoRodada(rodadaData, isParcial = false, inativos = 
             ? window.truncarPontos(pontosRaw)
             : (Math.trunc(pontosRaw * 100) / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-        const nomeTime = participante.nome || participante.nome_time || "N/D";
+        // ✅ v8.1: Fallback robusto para nome — nunca exibir "N/D"
+        let nomeTime = participante.nome || participante.nome_time || "";
+        if (!nomeTime || nomeTime === "N/D") {
+            nomeTime = participante.nome_cartola && participante.nome_cartola !== "N/D"
+                ? participante.nome_cartola
+                : `Time #${timeId}`;
+        }
         const naoJogouBadge = participante.rodadaNaoJogada ? '<span class="badge-nao-jogou">N/E</span>' : "";
 
         // ✅ v8.0: Escudo do time do coração
@@ -2070,8 +2117,12 @@ function renderizarSecaoInativos(inativos, rodadaNum) {
     const inativosOrdenados = [...inativos].sort((a, b) => (b.pontos || 0) - (a.pontos || 0));
 
     const items = inativosOrdenados.map((p) => {
-        const nomeTime = p.nome || p.nome_time || "N/D";
-        const nomeCartola = p.nome_cartola || "N/D";
+        // ✅ v8.1: Fallback robusto — nunca exibir "N/D"
+        let nomeTime = p.nome || p.nome_time || "";
+        const nomeCartola = p.nome_cartola || "";
+        if (!nomeTime || nomeTime === "N/D") {
+            nomeTime = (nomeCartola && nomeCartola !== "N/D") ? nomeCartola : `Time #${p.timeId || p.time_id || '?'}`;
+        }
         const rodadaDesist = p.rodada_desistencia;
         const rodadaInfo = rodadaDesist ? `Saiu na R${rodadaDesist}` : "Inativo";
 
