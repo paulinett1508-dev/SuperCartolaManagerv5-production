@@ -35,16 +35,21 @@ function getTimeModel() {
  */
 export async function buscarStatusParticipantes(timeIds) {
     try {
+        // Guard: rejeitar chamadas inválidas (não-array ou IDs que viram NaN)
+        if (!Array.isArray(timeIds) || timeIds.length === 0) return {};
+        const idsValidos = timeIds.map(Number).filter(id => !isNaN(id) && id > 0);
+        if (idsValidos.length === 0) return {};
+
         const Time = getTimeModel();
 
         const times = await Time.find({
-            id: { $in: timeIds.map((id) => Number(id)) },
+            id: { $in: idsValidos },
         }).lean();
 
         const statusMap = {};
 
         // Inicializar todos como ativos (default)
-        timeIds.forEach((id) => {
+        idsValidos.forEach((id) => {
             statusMap[String(id)] = {
                 ativo: true,
                 rodada_desistencia: null,

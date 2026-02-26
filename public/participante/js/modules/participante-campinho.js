@@ -281,27 +281,43 @@ async function buscarEscalacaoCompleta(ligaId, timeId, rodada = 1) {
             return rawEscalacao;
         }
 
-        // Fallback furrom Cartola (porque o dump ainda não existe)
-        const cartolaRes = await fetch(`/api/cartola/time/${timeId}/${rodadaAtual}/escalacao`);
-        if (cartolaRes.ok) {
-            const data = await cartolaRes.json();
-            // Controller já separa titulares/reservas corretamente
-            const tit = data.titulares || [];
-            const res = data.reservas || [];
-            const todosAtletas = data.atletas || [...tit, ...res];
+        // [Fix B] Fallback: cache do módulo de parciais (evita requisição extra)
+        const escalacaoCacheada = window.ParciaisModule?.obterEscalacaoCacheada?.(timeId);
+        if (escalacaoCacheada?.atletas?.length || escalacaoCacheada?.reservas?.length) {
+            const tit = escalacaoCacheada.atletas || [];
+            const res = escalacaoCacheada.reservas || [];
             return {
                 timeId,
                 rodada: rodadaAtual,
-                atletas: todosAtletas,
+                atletas: [...tit, ...res],
+                titulares: tit,
+                reservas: res,
+                capitao_id: escalacaoCacheada.capitao_id,
+                reserva_luxo_id: escalacaoCacheada.reserva_luxo_id,
+                pontos: escalacaoCacheada.pontos_time || 0,
+                nome: escalacaoCacheada.time?.nome,
+                nome_cartoleiro: escalacaoCacheada.time?.nome_cartola,
+            };
+        }
+
+        // [Fix A] Fallback: cartola-proxy (axios com timeout, mais resiliente que fetch nativo)
+        const proxyRes = await fetch(`/api/cartola-proxy/time/id/${timeId}/${rodadaAtual}`);
+        if (proxyRes.ok) {
+            const data = await proxyRes.json();
+            // Proxy retorna formato raw da API Cartola: atletas=titulares, reservas=reservas
+            const tit = data.atletas || [];
+            const res = data.reservas || [];
+            return {
+                timeId,
+                rodada: rodadaAtual,
+                atletas: [...tit, ...res],
                 titulares: tit,
                 reservas: res,
                 capitao_id: data.capitao_id,
                 reserva_luxo_id: data.reserva_luxo_id,
-                pontos: data.pontos || calcularPontosTotais(data),
-                patrimonio: data.patrimonio,
-                variacao_patrimonio: data.variacao_patrimonio,
-                nome: data.nome,
-                nome_cartoleiro: data.nome_cartoleiro
+                pontos: data.pontos_time || calcularPontosTotais({ titulares: tit, capitao_id: data.capitao_id, reserva_luxo_id: data.reserva_luxo_id }),
+                nome: data.time?.nome,
+                nome_cartoleiro: data.time?.nome_cartola,
             };
         }
 
