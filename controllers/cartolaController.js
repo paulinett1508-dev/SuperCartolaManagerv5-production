@@ -87,7 +87,6 @@ export async function obterEscalacao(req, res) {
         headers: {
           "Cache-Control": "no-cache",
           Pragma: "no-cache",
-          "If-Modified-Since": "0",
         },
       },
     );
