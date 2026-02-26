@@ -101,3 +101,77 @@
         <div id="restaUmDados" style="display: none;"></div>
     </div>
 </div>
+<script type="module">
+// ✅ RESTA UM ORQUESTRADOR - Participante
+// Carrega dados via API e renderiza ranking
+
+import('./../js/orquestradores/resta-um-orquestrador.js').then(() => {
+    // Aguardar dados do navegação participante
+    const waitForNav = setInterval(() => {
+        if (window.participanteNav && window.participanteNav.participanteData) {
+            clearInterval(waitForNav);
+            inicializarRestaUm();
+        }
+    }, 100);
+
+    // Timeout de 10s
+    setTimeout(() => clearInterval(waitForNav), 10000);
+
+    async function inicializarRestaUm() {
+        if (!window.participanteNav) return;
+
+        const ligaId = window.participanteNav.participanteData.ligaId;
+        const container = document.getElementById('restaUmDados');
+
+        if (!container) {
+            console.warn('[RESTA-UM] Container não encontrado');
+            return;
+        }
+
+        try {
+            // Criar instância do módulo
+            const restaUm = new window.RestaUmModule();
+            
+            // Inicializar
+            const sucesso = await restaUm.init(ligaId, container);
+            
+            if (sucesso) {
+                // Mostrar container de dados e esconder loading
+                const loadingEl = document.getElementById('restaUmLoading');
+                const emptyEl = document.getElementById('restaUmEmpty');
+                const errorEl = document.getElementById('restaUmError');
+                const naoIniciadoEl = document.getElementById('restaUmNaoIniciado');
+
+                if (loadingEl) loadingEl.style.display = 'none';
+                if (emptyEl) emptyEl.style.display = 'none';
+                if (errorEl) errorEl.style.display = 'none';
+                if (naoIniciadoEl) naoIniciadoEl.style.display = 'none';
+                container.style.display = 'block';
+            } else {
+                // Mostrar erro
+                const errorEl = document.getElementById('restaUmError');
+                if (errorEl) errorEl.style.display = 'block';
+                const loadingEl = document.getElementById('restaUmLoading');
+                if (loadingEl) loadingEl.style.display = 'none';
+            }
+
+            // Limpar ao sair da página
+            window.addEventListener('unload', () => {
+                restaUm.destroy();
+            });
+        } catch (error) {
+            console.error('[RESTA-UM] Erro ao inicializar:', error);
+            const errorEl = document.getElementById('restaUmError');
+            if (errorEl) errorEl.style.display = 'block';
+            const loadingEl = document.getElementById('restaUmLoading');
+            if (loadingEl) loadingEl.style.display = 'none';
+        }
+    }
+}).catch(err => {
+    console.error('[RESTA-UM] Erro ao carregar módulo:', err);
+    const errorEl = document.getElementById('restaUmError');
+    if (errorEl) errorEl.style.display = 'block';
+    const loadingEl = document.getElementById('restaUmLoading');
+    if (loadingEl) loadingEl.style.display = 'none';
+});
+</script>

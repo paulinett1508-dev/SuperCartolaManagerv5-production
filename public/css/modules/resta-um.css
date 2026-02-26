@@ -1,0 +1,334 @@
+/**
+ * REST UM - Estilos Dark Mode
+ * Design System: Russo One (títulos) + Inter (corpo) + JetBrains Mono (números)
+ */
+
+.ru-container {
+    padding: 20px;
+    background: var(--bg-secondary, #1a1a2e);
+    border-radius: 12px;
+    color: var(--text-primary, #fff);
+    font-family: 'Inter', -apple-system, sans-serif;
+}
+
+.ru-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--module-restaum-primary, #10b981);
+}
+
+.ru-header h2 {
+    font-family: 'Russo One', sans-serif;
+    font-size: 1.8rem;
+    margin: 0;
+    color: var(--module-restaum-primary, #10b981);
+}
+
+.ru-status {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ru-status.pendente {
+    background: var(--status-warning-bg, rgba(234, 179, 8, 0.2));
+    color: var(--status-warning, #eab308);
+}
+
+.ru-status.em_andamento {
+    background: var(--status-info-bg, rgba(59, 130, 246, 0.2));
+    color: var(--status-info, #3b82f6);
+    animation: pulse 2s infinite;
+}
+
+.ru-status.finalizada {
+    background: var(--status-success-bg, rgba(16, 185, 129, 0.2));
+    color: var(--status-success, #10b981);
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.ru-live-badge {
+    position: sticky;
+    top: 10px;
+    display: inline-block;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(220, 38, 38, 0.9));
+    color: white;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-bottom: 14px;
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+    animation: float 3s ease-in-out infinite;
+    z-index: 10;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.ru-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* CAMPEÃO */
+.ru-campeao {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
+    border: 2px solid var(--module-restaum-primary, #10b981);
+    border-radius: 12px;
+}
+
+.ru-trophy {
+    font-size: 3rem;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0%, 100% { transform: rotate(-10deg); }
+    50% { transform: rotate(10deg); }
+}
+
+.ru-campeao-info p {
+    margin: 0;
+    line-height: 1.4;
+}
+
+.ru-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--module-restaum-primary, #10b981);
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.ru-campeao-nome {
+    font-family: 'Russo One', sans-serif;
+    font-size: 1.4rem;
+    color: var(--module-restaum-primary, #10b981);
+    font-weight: 700;
+}
+
+.ru-campeao-cartoleiro {
+    font-size: 0.9rem;
+    color: var(--text-secondary, #d1d5db);
+}
+
+/* RANKING VIVOS */
+.ru-ranking {
+    margin-top: 16px;
+}
+
+.ru-ranking h3 {
+    font-family: 'Russo One', sans-serif;
+    font-size: 1.2rem;
+    color: var(--module-restaum-primary, #10b981);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+}
+
+.ru-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.ru-table thead {
+    background: rgba(16, 185, 129, 0.1);
+    border-bottom: 2px solid var(--module-restaum-primary, #10b981);
+}
+
+.ru-table th {
+    padding: 12px;
+    text-align: left;
+    color: var(--module-restaum-primary, #10b981);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
+.ru-table tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background-color 0.2s;
+}
+
+.ru-table tbody tr:hover {
+    background-color: rgba(16, 185, 129, 0.05);
+}
+
+.ru-table td {
+    padding: 12px;
+}
+
+.ru-pos {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    width: 40px;
+}
+
+.ru-time {
+    color: var(--text-primary, #fff);
+    font-weight: 500;
+}
+
+.ru-rodada-atual {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-secondary, #d1d5db);
+}
+
+.ru-rodada-atual.hasPoints {
+    color: var(--module-restaum-primary, #10b981);
+    font-weight: 600;
+}
+
+.ru-acumulado {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    color: var(--text-primary, #fff);
+}
+
+.ru-rodadas {
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-secondary, #d1d5db);
+}
+
+/* ELIMINADOS */
+.ru-eliminados {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ru-eliminados h3 {
+    font-family: 'Russo One', sans-serif;
+    font-size: 1rem;
+    color: var(--text-secondary, #9ca3af);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+}
+
+.ru-table-eliminados {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.ru-table-eliminados thead {
+    background: rgba(107, 114, 128, 0.1);
+    border-bottom: 1px solid rgba(107, 114, 128, 0.3);
+}
+
+.ru-table-eliminados th {
+    padding: 10px;
+    text-align: left;
+    color: var(--text-secondary, #9ca3af);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+}
+
+.ru-table-eliminados tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+    opacity: 0.7;
+}
+
+.ru-table-eliminados td {
+    padding: 10px;
+    color: var(--text-secondary, #6b7280);
+}
+
+.ru-rodada-elim {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+}
+
+.ru-time-elim {
+    color: var(--text-secondary, #9ca3af);
+}
+
+.ru-pontos-elim {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* EMPTY STATE */
+.ru-empty,
+.ru-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    color: var(--text-secondary, #9ca3af);
+    font-size: 1rem;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .ru-container {
+        padding: 12px;
+    }
+
+    .ru-header h2 {
+        font-size: 1.3rem;
+    }
+
+    .ru-table,
+    .ru-table-eliminados {
+        font-size: 0.8rem;
+    }
+
+    .ru-table th,
+    .ru-table-eliminados th {
+        padding: 8px;
+    }
+
+    .ru-table td,
+    .ru-table-eliminados td {
+        padding: 8px;
+    }
+
+    .ru-pos {
+        width: 30px;
+    }
+
+    .ru-trophy {
+        font-size: 2rem;
+    }
+
+    .ru-campeao-nome {
+        font-size: 1.1rem;
+    }
+}
+
+/* Utilitários */
+.ru-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(16, 185, 129, 0.3);
+    border-top-color: var(--module-restaum-primary, #10b981);
+    border-radius: 50%;
+    animation: spin-loader 0.8s linear infinite;
+}
+
+@keyframes spin-loader {
+    to { transform: rotate(360deg); }
+}
