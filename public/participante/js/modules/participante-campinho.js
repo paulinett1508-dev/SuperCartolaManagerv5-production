@@ -302,13 +302,14 @@ async function buscarEscalacaoCompleta(ligaId, timeId, rodada = 1) {
             };
         }
 
-        // [Fix A] Fallback: cartola-proxy (axios com timeout, mais resiliente que fetch nativo)
-        const proxyRes = await fetch(`/api/cartola-proxy/time/id/${timeId}/${rodadaAtual}`);
+        // [Fix A] Fallback: cartola/time/id (mesmo endpoint que o módulo de parciais usa)
+        const atletasPontuadosObj = atletasPontuados.atletas || {};
+        const proxyRes = await fetch(`/api/cartola/time/id/${timeId}/${rodadaAtual}`);
         if (proxyRes.ok) {
             const data = await proxyRes.json();
-            // Proxy retorna formato raw da API Cartola: atletas=titulares, reservas=reservas
-            const tit = data.atletas || [];
-            const res = data.reservas || [];
+            // Normalizar com overlay de pontos ao vivo (mesmo tratamento do path data-lake)
+            const tit = normalizarListaAtletas(data.atletas || [], atletasPontuadosObj, false);
+            const res = normalizarListaAtletas(data.reservas || [], atletasPontuadosObj, true);
             return {
                 timeId,
                 rodada: rodadaAtual,
@@ -317,7 +318,7 @@ async function buscarEscalacaoCompleta(ligaId, timeId, rodada = 1) {
                 reservas: res,
                 capitao_id: data.capitao_id,
                 reserva_luxo_id: data.reserva_luxo_id,
-                pontos: data.pontos_time || calcularPontosTotais({ titulares: tit, capitao_id: data.capitao_id, reserva_luxo_id: data.reserva_luxo_id }),
+                pontos: 0, // calcularPontosTotais() recalcula no render
                 nome: data.time?.nome,
                 nome_cartoleiro: data.time?.nome_cartola,
             };
