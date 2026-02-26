@@ -67,7 +67,7 @@
         0 0 40px var(--wh-glow-subtle),
         inset 0 -2px 10px rgba(0, 0, 0, 0.2);
     cursor: grab;
-    z-index: 1000;
+    z-index: var(--app-z-fab);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -486,12 +486,12 @@
     bottom: 0;
     left: 0;
     right: 0;
-    /* v1.1: Estender para altura completa - fix seções cortadas */
-    max-height: 100vh;
-    max-height: 100dvh; /* Dynamic viewport height (mobile Safari) */
+    /* v6.0: Quase full-screen para caber mais cards */
+    max-height: 92vh;
+    max-height: 92dvh;
     background: var(--app-surface);
     border-radius: 20px 20px 0 0;
-    z-index: 1001;
+    z-index: var(--app-z-fab-panel);
     transform: translateY(100%);
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
@@ -512,7 +512,7 @@
     inset: 0;
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(4px);
-    z-index: 1000;
+    z-index: var(--app-z-fab);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
@@ -580,15 +580,15 @@
     color: var(--app-danger);
 }
 
-/* Content - v3.0: Scroll fluido com indicadores */
+/* Content - v5.0: Mais respiração e separação visual */
 .wh-content {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 12px;
+    padding: 12px 14px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     /* Scrollbar customizada */
@@ -629,30 +629,60 @@
     background: rgba(255, 255, 255, 0.3);
 }
 
-/* Timestamp */
+/* Timestamp — v5.0: Live indicator com dot pulsante */
 .wh-timestamp {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
     font-size: var(--app-font-xs);
-    color: var(--app-text-muted);
-    padding-bottom: 8px;
+    color: var(--app-text-dim);
+    padding: 2px 0 4px;
 }
 
 .wh-timestamp .material-icons {
-    font-size: 14px;
+    font-size: 12px;
+}
+
+.wh-timestamp-time {
+    font-size: var(--app-font-xs);
+    color: var(--app-text-dim);
+}
+
+.wh-live-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--app-danger);
+    font-weight: 700;
+    font-size: var(--app-font-sm);
+    letter-spacing: 0.5px;
+}
+
+.wh-live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--app-danger);
+    animation: wh-live-dot-pulse 1.5s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+@keyframes wh-live-dot-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
 }
 
 /* ========================================
    3. MODULE SECTIONS
    ======================================== */
-/* Seções com animação de entrada stagger */
+/* Seções com animação de entrada stagger — v5.0: box-shadow para separação */
 .wh-section {
     background: var(--app-bg);
-    border-radius: 12px;
+    border-radius: var(--app-radius-lg);
     overflow: hidden;
     border: 1px solid var(--app-border);
+    box-shadow: var(--app-shadow-sm);
     animation: wh-section-enter 0.4s ease-out both;
 }
 
@@ -668,18 +698,18 @@
 @keyframes wh-section-enter {
     0% {
         opacity: 0;
-        transform: translateY(12px);
+        transform: translateY(16px) scale(0.98);
     }
     100% {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
     }
 }
 
 .wh-section-header {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     padding: 10px 12px;
     border-bottom: 1px solid var(--app-border);
 }
@@ -687,7 +717,7 @@
 .wh-section-icon {
     width: 28px;
     height: 28px;
-    border-radius: 7px;
+    border-radius: var(--app-radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -697,7 +727,7 @@
 .wh-section-title {
     flex: 1;
     font-family: var(--app-font-brand);
-    font-size: var(--app-font-sm); /* v1.2: Reduzido de md */
+    font-size: var(--app-font-base); /* v5.0: Aumentado para legibilidade */
     color: var(--app-text-primary);
 }
 
@@ -745,12 +775,28 @@
     color: var(--app-danger);
 }
 
+/* v5.0: Barra de progresso de sobrevivência */
+.wh-ru-progress {
+    height: 4px;
+    background: var(--app-danger-muted);
+    border-radius: 2px;
+    margin: 0 12px 4px;
+    overflow: hidden;
+}
+
+.wh-ru-bar {
+    height: 100%;
+    background: var(--app-success);
+    border-radius: 2px;
+    transition: width 0.5s ease;
+}
+
 /* Resta Um — Lanterna alert */
 .wh-ru-lanterna {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 10px;
+    padding: 8px 10px;
     margin-top: 6px;
     border-radius: 8px;
     background: rgba(239, 68, 68, 0.12);
@@ -760,13 +806,22 @@
     font-weight: 600;
 }
 
+.wh-ru-lanterna.is-me {
+    animation: wh-lanterna-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes wh-lanterna-pulse {
+    0%, 100% { background: rgba(239, 68, 68, 0.12); }
+    50% { background: rgba(239, 68, 68, 0.25); }
+}
+
 .wh-ru-lanterna .material-icons {
     font-size: 16px;
 }
 
-/* Section Body - v3.0: scrollável internamente */
+/* Section Body - v5.0: Mais respiração */
 .wh-section-body {
-    padding: 8px;
+    padding: 10px;
 }
 
 /* Confrontos em carrossel horizontal dentro da section */
@@ -786,13 +841,20 @@
     display: none;
 }
 
-/* Confrontos grandes: 85% width no carrossel */
+/* Confrontos: 88% width no carrossel (v5.0: mais conteúdo visível) */
 .wh-section-body--carousel > .wh-confronto {
-    min-width: 85%;
-    max-width: 85%;
+    min-width: 88%;
+    max-width: 88%;
     flex-shrink: 0;
     scroll-snap-align: start;
     margin-bottom: 0;
+}
+
+/* Padding final no carousel para último card não colar na borda */
+.wh-section-body--carousel::after {
+    content: '';
+    min-width: 12px;
+    flex-shrink: 0;
 }
 
 /* Chips: flow horizontal com wrap */
@@ -812,8 +874,8 @@
 }
 
 .wh-carousel-dot {
-    width: 6px;
-    height: 6px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
     background: var(--app-border);
     transition: all 0.2s ease;
@@ -821,8 +883,8 @@
 
 .wh-carousel-dot.active {
     background: var(--app-primary);
-    width: 16px;
-    border-radius: 3px;
+    width: 18px;
+    border-radius: 4px;
 }
 
 /* Swipe hint (arraste para ver mais) */
@@ -860,7 +922,7 @@
 .wh-confronto {
     background: var(--app-surface);
     border-radius: 10px;
-    padding: 12px;
+    padding: 10px;
     margin-bottom: 8px;
     border: 1px solid transparent;
     transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
@@ -885,7 +947,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
 }
 
 .wh-confronto-rodada {
@@ -917,110 +979,69 @@
 
 @keyframes wh-live-pulse {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
+    50% { opacity: 0.4; }
 }
 
-/* Times no confronto */
-.wh-confronto-times {
-    display: flex;
+/* v5.0: SCOREBOARD GRID — Layout horizontal compacto */
+.wh-confronto-scoreboard {
+    display: grid;
+    grid-template-columns: 28px 1fr auto 20px auto 1fr 28px;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+    padding: 10px;
 }
 
-.wh-time {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px;
-    background: var(--app-bg);
-    border-radius: 8px;
-}
-
-.wh-time--home {
-    flex-direction: row;
-}
-
-.wh-time--away {
-    flex-direction: row-reverse;
-    text-align: right;
-}
-
-.wh-time-escudo {
-    width: 32px;
-    height: 32px;
+.wh-confronto-escudo {
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     object-fit: contain;
-    background: var(--app-surface);
+    background: var(--app-bg);
+    border: 1px solid var(--app-border);
 }
 
-.wh-time-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.wh-time-nome {
+.wh-confronto-nome {
     font-size: var(--app-font-sm);
     font-weight: 600;
     color: var(--app-text-primary);
-    /* v2.0: Permitir 2 linhas para nomes longos */
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    line-height: 1.2;
-}
-
-.wh-time-cartola {
-    font-size: 10px;
-    color: var(--app-text-muted);
-    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
     line-height: 1.2;
 }
 
-.wh-time--away .wh-time-cartola {
+.wh-confronto-nome--away {
     text-align: right;
 }
 
-.wh-time-pontos {
+.wh-confronto-pts {
     font-family: var(--app-font-mono);
     font-size: var(--app-font-lg);
     font-weight: 700;
     color: var(--app-text-primary);
+    text-align: center;
 }
 
-.wh-time.winning .wh-time-pontos {
+.wh-confronto-pts.winning {
     color: var(--app-success);
 }
 
-.wh-time.losing .wh-time-pontos {
-    color: var(--app-danger);
-}
-
-/* VS separator */
-.wh-vs {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0 4px;
-}
-
-.wh-vs-text {
+.wh-confronto-x {
     font-size: var(--app-font-xs);
-    font-weight: 700;
     color: var(--app-text-dim);
+    text-align: center;
+    font-weight: 400;
 }
 
-.wh-vs-diff {
-    font-family: var(--app-font-mono);
-    font-size: var(--app-font-xs);
-    color: var(--app-text-muted);
-    margin-top: 2px;
+/* Badges row abaixo do scoreboard */
+.wh-confronto-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 0 10px 8px;
 }
 
-/* Confronto insight */
+/* Legacy classes kept for compatibility */
 .wh-confronto-insight {
     display: flex;
     align-items: center;
@@ -1324,133 +1345,117 @@
     animation: wh-live-pulse 1.5s ease-in-out infinite;
 }
 
-/* Meu Confronto Container - v1.3: Compactado */
+/* Meu Confronto Container — v5.0: Scoreboard layout */
 .wh-meu-confronto {
     display: flex;
     flex-direction: column;
-    gap: 6px; /* v1.3: Reduzido de 12px */
+    gap: 8px;
 }
 
-/* Times Container */
-.wh-mc-times {
-    display: flex;
-    align-items: stretch;
-    gap: 4px; /* v1.3: Reduzido de 8px */
-}
-
-/* Cada Time - v1.3: Layout horizontal compacto */
-.wh-mc-time {
-    flex: 1;
-    display: flex;
-    flex-direction: row; /* v1.3: Horizontal em vez de coluna */
+/* v5.0: Scoreboard — Grid 3 colunas (Eu | Score | Adversário) */
+.wh-mc-scoreboard {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 8px;
     align-items: center;
-    padding: 8px 6px; /* v1.3: Reduzido de 12px 8px */
-    background: var(--app-surface);
-    border-radius: 8px; /* v1.3: Reduzido de 12px */
-    gap: 6px; /* v1.3: Reduzido de 8px */
-    transition: all 0.3s ease;
+    padding: 4px 0;
 }
 
-.wh-mc-time--eu {
-    border-left: 2px solid var(--app-primary); /* v1.3: Reduzido de 3px */
+/* Cada lado (Eu / Adversário) — coluna vertical centralizada */
+.wh-mc-side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 10px 6px;
+    border-radius: var(--app-radius-md);
+    transition: background 0.3s ease;
 }
 
-.wh-mc-time--adv {
-    border-right: 2px solid var(--app-text-dim); /* v1.3: Reduzido de 3px */
-    flex-direction: row-reverse; /* v1.3: Pontuação à direita */
-}
-
-.wh-mc-time.winning {
+.wh-mc-side.winning {
     background: var(--app-success-muted);
 }
 
-.wh-mc-time.winning .wh-mc-pontos {
-    color: var(--app-success);
+.wh-mc-side.losing {
+    background: var(--app-danger-muted);
 }
 
-/* Escudo - v1.3: Compactado */
+/* Escudo — v5.0: Maior, mais destaque */
 .wh-mc-escudo {
-    width: 28px; /* v1.3: Reduzido de 48px */
-    height: 28px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     object-fit: contain;
     background: var(--app-bg);
-    border: 1px solid var(--app-border); /* v1.3: Reduzido de 2px */
+    border: 2px solid var(--app-border);
     flex-shrink: 0;
+    margin-bottom: 6px;
 }
 
-/* Info do Time - v1.3: Compactado */
-.wh-mc-info {
-    flex: 1;
-    min-width: 0;
-    text-align: left; /* v1.3: Alinhado à esquerda */
-}
-
-.wh-mc-time--adv .wh-mc-info {
-    text-align: right; /* v1.3: Adversário à direita */
+.wh-mc-side.winning .wh-mc-escudo {
+    border-color: var(--app-success);
 }
 
 .wh-mc-label {
-    font-size: 9px; /* v1.3: Reduzido */
+    font-size: 9px;
     font-weight: 600;
-    color: var(--app-text-muted);
+    color: var(--app-text-dim);
     text-transform: uppercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
     line-height: 1;
+    margin-bottom: 2px;
 }
 
 .wh-mc-nome {
-    font-size: var(--app-font-sm); /* v2.0: Aumentado para legibilidade */
+    font-size: var(--app-font-sm);
     font-weight: 600;
     color: var(--app-text-primary);
-    /* v2.0: Permitir 2 linhas */
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     line-height: 1.2;
+    max-width: 100px;
 }
 
-/* Pontuação - v1.3: Destaque mas compacto */
+/* Score Center — v5.0: Scores grandes e centralizados */
+.wh-mc-score-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.wh-mc-score-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
 .wh-mc-pontos {
     font-family: var(--app-font-mono);
-    font-size: var(--app-font-lg); /* v1.3: Reduzido de 2xl */
+    font-size: var(--app-font-hero);
     font-weight: 700;
     color: var(--app-text-primary);
-    flex-shrink: 0;
+    line-height: 1;
 }
 
 .wh-mc-pontos.winning {
     color: var(--app-success);
 }
 
-/* VS Central - v1.3: Compactado */
-.wh-mc-vs {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 4px 2px; /* v1.3: Reduzido */
-    min-width: 36px; /* v1.3: Reduzido de 50px */
-}
-
-.wh-mc-vs-emoji {
-    font-size: 16px; /* v1.3: Reduzido de 24px */
-    animation: wh-vs-pulse 2s ease-in-out infinite;
-}
-
-@keyframes wh-vs-pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
+.wh-mc-score-x {
+    font-size: var(--app-font-sm);
+    color: var(--app-text-dim);
+    font-weight: 400;
 }
 
 .wh-mc-vs-diff {
     font-family: var(--app-font-mono);
-    font-size: var(--app-font-xs); /* v1.3: Reduzido de sm */
+    font-size: var(--app-font-xs);
     font-weight: 700;
-    padding: 1px 4px; /* v1.3: Reduzido */
-    border-radius: 4px;
-    margin-top: 2px; /* v1.3: Reduzido */
+    padding: 2px 8px;
+    border-radius: var(--app-radius-sm);
 }
 
 .wh-mc-vs-diff.winning {
@@ -1468,15 +1473,15 @@
     color: var(--app-warning);
 }
 
-/* Status do Confronto - v1.3: Compactado */
+/* Status do Confronto — v5.0: Bar at bottom */
 .wh-mc-status {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px; /* v1.3: Reduzido de 6px */
-    padding: 6px 10px; /* v1.3: Reduzido de 10px 12px */
-    border-radius: 6px;
-    font-size: var(--app-font-xs); /* v1.3: Reduzido de sm */
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: var(--app-radius-md);
+    font-size: var(--app-font-sm);
     font-weight: 600;
 }
 
@@ -1496,7 +1501,27 @@
 }
 
 .wh-mc-status .material-icons {
-    font-size: 14px; /* v1.3: Reduzido de 18px */
+    font-size: 16px;
+}
+
+/* Hero section glow effects */
+.wh-section--meu-confronto.winning {
+    box-shadow: 0 0 16px rgba(34, 197, 94, 0.12);
+}
+
+.wh-section--meu-confronto.losing {
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.12);
+}
+
+/* Hero entrance animation */
+@keyframes wh-hero-enter {
+    0% { opacity: 0; transform: scale(0.95); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+.wh-section--meu-confronto {
+    animation: wh-hero-enter 0.5s ease-out both;
+    margin-bottom: 2px;
 }
 
 /* ========================================
@@ -1827,16 +1852,31 @@
     background: var(--app-surface-hover);
 }
 
-/* Primeiro lugar com destaque sutil */
+/* v5.0: Posições com left-border colorido (gold/silver/bronze) */
+.wh-rank-row.gold {
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.08) 0%, var(--app-surface) 100%);
+    border-left: 3px solid var(--app-gold);
+}
+
+.wh-rank-row.silver {
+    background: linear-gradient(90deg, rgba(192, 192, 192, 0.06) 0%, var(--app-surface) 100%);
+    border-left: 3px solid var(--app-silver);
+}
+
+.wh-rank-row.bronze {
+    background: linear-gradient(90deg, rgba(205, 127, 50, 0.06) 0%, var(--app-surface) 100%);
+    border-left: 3px solid var(--app-bronze);
+}
+
 .wh-rank-row.first {
     background: linear-gradient(90deg, rgba(255, 215, 0, 0.08) 0%, var(--app-surface) 100%);
-    border-left: 2px solid var(--app-gold);
+    border-left: 3px solid var(--app-gold);
 }
 
 /* Minha posição destacada */
 .wh-rank-row.me {
     background: linear-gradient(90deg, rgba(255, 85, 0, 0.1) 0%, var(--app-surface) 100%);
-    border-left: 2px solid var(--app-primary);
+    border-left: 3px solid var(--app-primary);
 }
 
 /* Posição numérica */
@@ -1849,6 +1889,9 @@
     color: var(--app-text-muted);
 }
 
+.wh-rank-row.gold .wh-rank-pos { color: var(--app-gold); }
+.wh-rank-row.silver .wh-rank-pos { color: var(--app-silver); }
+.wh-rank-row.bronze .wh-rank-pos { color: var(--app-bronze); }
 .wh-rank-row.first .wh-rank-pos { color: var(--app-gold); }
 .wh-rank-row.me .wh-rank-pos { color: var(--app-primary); }
 
@@ -1883,6 +1926,20 @@
 
 .wh-rank-row.me .wh-rank-nome {
     color: var(--app-primary-light);
+}
+
+/* Pontos no rank-row (v5.0: usado no novo ranking vertical) */
+.wh-rank-row .wh-rank-pontos {
+    font-family: var(--app-font-mono);
+    font-size: var(--app-font-sm);
+    font-weight: 700;
+    color: var(--app-text-secondary);
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.wh-rank-row.me .wh-rank-pontos {
+    color: var(--app-primary);
 }
 
 /* Sublabel */
@@ -2039,4 +2096,787 @@
     font-weight: 700;
     font-size: 14px;
     color: var(--app-primary);
+}
+
+/* ========================================
+   19. COMPACT MODULE ROWS (v4.0 Redesign)
+   ======================================== */
+.wh-section--compact {
+    /* Tighter section for single-line modules */
+}
+
+.wh-section-body--compact {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.wh-compact-leader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--app-border);
+}
+
+.wh-compact-leader:last-child {
+    border-bottom: none;
+}
+
+.wh-compact-leader.me {
+    background: linear-gradient(90deg, var(--app-primary-muted) 0%, transparent 100%);
+}
+
+.wh-compact-leader--me {
+    background: linear-gradient(90deg, var(--app-primary-muted) 0%, transparent 100%);
+}
+
+.wh-compact-pos {
+    font-family: var(--app-font-mono);
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--app-text-muted);
+    min-width: 16px;
+    text-align: center;
+}
+
+.wh-compact-leader:first-child .wh-compact-pos {
+    color: var(--app-gold, #ffd700);
+}
+
+.wh-compact-leader--me .wh-compact-pos {
+    color: var(--app-primary);
+}
+
+.wh-compact-escudo {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.wh-compact-nome {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--app-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wh-compact-leader--me .wh-compact-nome {
+    color: var(--app-primary-light);
+}
+
+.wh-compact-valor {
+    font-family: var(--app-font-brand);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--app-text-primary);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.wh-compact-leader:first-child .wh-compact-valor {
+    color: var(--app-gold, #ffd700);
+}
+
+.wh-compact-leader--me .wh-compact-valor {
+    color: var(--app-primary);
+}
+
+/* v5.0: Accent left-border por módulo nos líderes */
+.wh-section--artilheiro .wh-compact-leader:first-child {
+    border-left: 3px solid var(--app-success);
+}
+
+.wh-section--luva-ouro .wh-compact-leader:first-child {
+    border-left: 3px solid var(--app-gold);
+}
+
+.wh-section--capitao .wh-compact-leader:first-child {
+    border-left: 3px solid var(--app-purple);
+}
+
+/* ========================================
+   20. MODULE BADGE (v4.0 Bug Fix)
+   ======================================== */
+.wh-module-badge {
+    font-size: var(--app-font-xs);
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.wh-module-badge--pc {
+    background: var(--app-info-muted);
+    color: var(--app-info);
+}
+
+.wh-module-badge--mm {
+    background: var(--app-danger-muted);
+    color: var(--app-danger);
+}
+
+/* ========================================
+   21. CARD GRID — v6.0 Redesign
+   Grid de cards-resumo no bottom-sheet
+   ======================================== */
+.wh-card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+/* Card hero (Meu Confronto) — mesmo tamanho dos demais */
+
+/* Card base */
+.wh-card {
+    background: var(--app-surface);
+    border-radius: var(--app-radius-lg);
+    border: 1px solid var(--app-border);
+    padding: 12px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+    animation: wh-card-enter 0.4s ease-out both;
+}
+
+.wh-card:nth-child(1) { animation-delay: 0s; }
+.wh-card:nth-child(2) { animation-delay: 0.05s; }
+.wh-card:nth-child(3) { animation-delay: 0.10s; }
+.wh-card:nth-child(4) { animation-delay: 0.15s; }
+.wh-card:nth-child(5) { animation-delay: 0.20s; }
+.wh-card:nth-child(6) { animation-delay: 0.25s; }
+.wh-card:nth-child(7) { animation-delay: 0.30s; }
+.wh-card:nth-child(8) { animation-delay: 0.35s; }
+.wh-card:nth-child(9) { animation-delay: 0.40s; }
+
+@keyframes wh-card-enter {
+    0% {
+        opacity: 0;
+        transform: translateY(12px) scale(0.96);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.wh-card:active {
+    transform: scale(0.96);
+}
+
+.wh-card:hover {
+    border-color: var(--app-primary-border);
+}
+
+/* Card header: icon + title */
+.wh-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.wh-card-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--app-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.wh-card-icon .material-icons {
+    font-size: 14px;
+}
+
+.wh-card-title {
+    font-family: var(--app-font-brand);
+    font-size: var(--app-font-sm);
+    color: var(--app-text-secondary);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Card metric: número grande destaque */
+.wh-card-metric {
+    font-family: var(--app-font-mono);
+    font-size: var(--app-font-xl);
+    font-weight: 700;
+    color: var(--app-text-primary);
+    line-height: 1.1;
+}
+
+/* Card subtitle: descrição ou contexto */
+.wh-card-subtitle {
+    font-size: var(--app-font-xs);
+    color: var(--app-text-muted);
+    line-height: 1.3;
+}
+
+/* Card badge inline */
+.wh-card-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: var(--app-radius-sm);
+    text-transform: uppercase;
+}
+
+.wh-card-badge--live {
+    background: var(--app-danger-muted);
+    color: var(--app-danger);
+    animation: wh-live-pulse 1.5s ease-in-out infinite;
+}
+
+.wh-card-badge--hot {
+    background: var(--app-warning-muted);
+    color: var(--app-warning);
+}
+
+/* "Toque para ver" hint */
+.wh-card-tap-hint {
+    font-size: 9px;
+    color: var(--app-text-dim);
+    text-align: right;
+    margin-top: auto;
+}
+
+.wh-card-tap-hint .material-icons {
+    font-size: 10px;
+    vertical-align: middle;
+}
+
+/* ---- Card Hero: Meu Confronto (mesmo tamanho dos demais) ---- */
+.wh-card--hero {
+    background: linear-gradient(135deg, var(--app-surface) 0%, rgba(255, 85, 0, 0.06) 100%);
+    border: 2px solid var(--app-primary-border);
+}
+
+.wh-card--hero.winning {
+    border-color: var(--app-success);
+    background: linear-gradient(135deg, var(--app-surface) 0%, rgba(34, 197, 94, 0.08) 100%);
+    box-shadow: 0 0 16px rgba(34, 197, 94, 0.1);
+}
+
+.wh-card--hero.losing {
+    border-color: var(--app-danger);
+    background: linear-gradient(135deg, var(--app-surface) 0%, rgba(239, 68, 68, 0.08) 100%);
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.1);
+}
+
+.wh-card--hero.tied {
+    border-color: var(--app-warning);
+    background: linear-gradient(135deg, var(--app-surface) 0%, rgba(245, 158, 11, 0.08) 100%);
+}
+
+/* Hero scoreboard inline */
+.wh-card-hero-score {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+}
+
+.wh-card-hero-side {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.wh-card-hero-side--away {
+    flex-direction: row-reverse;
+}
+
+.wh-card-hero-escudo {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: contain;
+    background: var(--app-bg);
+    border: 2px solid var(--app-border);
+    flex-shrink: 0;
+}
+
+.wh-card--hero.winning .wh-card-hero-side:first-child .wh-card-hero-escudo {
+    border-color: var(--app-success);
+}
+
+.wh-card--hero.losing .wh-card-hero-side--away .wh-card-hero-escudo {
+    border-color: var(--app-success);
+}
+
+.wh-card-hero-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.wh-card-hero-side--away .wh-card-hero-info {
+    align-items: flex-end;
+}
+
+.wh-card-hero-label {
+    font-size: 8px;
+    font-weight: 700;
+    color: var(--app-text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.wh-card-hero-nome {
+    font-size: var(--app-font-sm);
+    font-weight: 600;
+    color: var(--app-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 90px;
+}
+
+.wh-card-hero-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.wh-card-hero-pts {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.wh-card-hero-pts-val {
+    font-family: var(--app-font-mono);
+    font-size: var(--app-font-2xl);
+    font-weight: 700;
+    color: var(--app-text-primary);
+    line-height: 1;
+}
+
+.wh-card-hero-pts-val.winning {
+    color: var(--app-success);
+}
+
+.wh-card-hero-pts-x {
+    font-size: var(--app-font-xs);
+    color: var(--app-text-dim);
+}
+
+.wh-card-hero-diff {
+    font-family: var(--app-font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: var(--app-radius-sm);
+}
+
+.wh-card-hero-diff.winning {
+    background: var(--app-success-muted);
+    color: var(--app-success);
+}
+
+.wh-card-hero-diff.losing {
+    background: var(--app-danger-muted);
+    color: var(--app-danger);
+}
+
+.wh-card-hero-diff.tied {
+    background: var(--app-warning-muted);
+    color: var(--app-warning);
+}
+
+/* ---- Cards módulo-específicos ---- */
+.wh-card--pontos-corridos .wh-card-icon { background: var(--app-info-muted); color: var(--app-info); }
+.wh-card--mata-mata .wh-card-icon { background: var(--app-danger-muted); color: var(--app-danger); }
+.wh-card--ranking .wh-card-icon { background: var(--app-primary-muted); color: var(--app-primary); }
+.wh-card--artilheiro .wh-card-icon { background: var(--app-success-muted); color: var(--app-success); }
+.wh-card--luva-ouro .wh-card-icon { background: var(--app-gold-muted); color: var(--app-gold); }
+.wh-card--capitao .wh-card-icon { background: var(--app-purple-muted); color: var(--app-purple); }
+.wh-card--resta-um .wh-card-icon { background: var(--app-danger-muted); color: var(--app-danger); }
+
+/* Mini progress bar dentro do card (Resta Um) */
+.wh-card-progress {
+    height: 3px;
+    background: var(--app-danger-muted);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.wh-card-progress-bar {
+    height: 100%;
+    background: var(--app-success);
+    border-radius: 2px;
+    transition: width 0.5s ease;
+}
+
+/* ========================================
+   22. MODAL — v6.0 Modal Flutuante
+   ======================================== */
+.wh-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: calc(var(--app-z-fab, 9999) + 10);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+}
+
+.wh-modal-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.wh-modal {
+    background: var(--app-bg);
+    border-radius: var(--app-radius-xl) var(--app-radius-xl) 0 0;
+    width: 100%;
+    max-width: 420px;
+    max-height: 75vh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--app-border);
+    border-bottom: none;
+}
+
+.wh-modal-overlay.open .wh-modal {
+    transform: translateY(0);
+}
+
+/* Modal handle (drag indicator) */
+.wh-modal-handle {
+    display: flex;
+    justify-content: center;
+    padding: 10px 0 4px;
+}
+
+.wh-modal-handle::after {
+    content: '';
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--app-text-dim);
+}
+
+/* Modal header */
+.wh-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px 12px;
+    border-bottom: 1px solid var(--app-border);
+}
+
+.wh-modal-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--app-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.wh-modal-icon .material-icons {
+    font-size: 18px;
+}
+
+.wh-modal-title {
+    flex: 1;
+    font-family: var(--app-font-brand);
+    font-size: var(--app-font-md);
+    color: var(--app-text-primary);
+}
+
+.wh-modal-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--app-surface);
+    border: 1px solid var(--app-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    flex-shrink: 0;
+}
+
+.wh-modal-close:active {
+    background: var(--app-surface-hover);
+}
+
+.wh-modal-close .material-icons {
+    font-size: 16px;
+    color: var(--app-text-muted);
+}
+
+/* Modal body */
+.wh-modal-body {
+    padding: 12px 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Modal confronto row */
+.wh-modal-confronto {
+    display: grid;
+    grid-template-columns: 24px 1fr auto 16px auto 1fr 24px;
+    align-items: center;
+    gap: 6px;
+    padding: 10px;
+    background: var(--app-surface);
+    border-radius: var(--app-radius-md);
+    border: 1px solid transparent;
+}
+
+.wh-modal-confronto.hot {
+    border-color: var(--app-primary-border);
+    background: linear-gradient(135deg, var(--app-surface) 0%, rgba(255, 85, 0, 0.04) 100%);
+}
+
+.wh-modal-confronto-escudo {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: contain;
+    background: var(--app-bg);
+}
+
+.wh-modal-confronto-nome {
+    font-size: var(--app-font-sm);
+    font-weight: 600;
+    color: var(--app-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wh-modal-confronto-nome--away {
+    text-align: right;
+}
+
+.wh-modal-confronto-pts {
+    font-family: var(--app-font-mono);
+    font-size: var(--app-font-md);
+    font-weight: 700;
+    color: var(--app-text-primary);
+    text-align: center;
+}
+
+.wh-modal-confronto-pts.winning {
+    color: var(--app-success);
+}
+
+.wh-modal-confronto-x {
+    font-size: 9px;
+    color: var(--app-text-dim);
+    text-align: center;
+}
+
+/* Modal confronto badge */
+.wh-modal-badge-row {
+    display: flex;
+    gap: 4px;
+    padding: 0 10px 4px;
+}
+
+/* Modal ranking row */
+.wh-modal-rank-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: var(--app-surface);
+    border-radius: var(--app-radius-md);
+}
+
+.wh-modal-rank-row.gold { border-left: 3px solid var(--app-gold); }
+.wh-modal-rank-row.silver { border-left: 3px solid var(--app-silver); }
+.wh-modal-rank-row.bronze { border-left: 3px solid var(--app-bronze); }
+.wh-modal-rank-row.me {
+    border-left: 3px solid var(--app-primary);
+    background: linear-gradient(90deg, rgba(255, 85, 0, 0.08) 0%, var(--app-surface) 100%);
+}
+
+.wh-modal-rank-pos {
+    font-family: var(--app-font-mono);
+    font-weight: 700;
+    font-size: 13px;
+    min-width: 20px;
+    text-align: center;
+    color: var(--app-text-muted);
+}
+
+.wh-modal-rank-row.gold .wh-modal-rank-pos { color: var(--app-gold); }
+.wh-modal-rank-row.silver .wh-modal-rank-pos { color: var(--app-silver); }
+.wh-modal-rank-row.bronze .wh-modal-rank-pos { color: var(--app-bronze); }
+.wh-modal-rank-row.me .wh-modal-rank-pos { color: var(--app-primary); }
+
+.wh-modal-rank-escudo {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    object-fit: contain;
+    background: var(--app-bg);
+    flex-shrink: 0;
+}
+
+.wh-modal-rank-nome {
+    flex: 1;
+    font-size: var(--app-font-sm);
+    font-weight: 600;
+    color: var(--app-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wh-modal-rank-row.me .wh-modal-rank-nome {
+    color: var(--app-primary-light);
+}
+
+.wh-modal-rank-pontos {
+    font-family: var(--app-font-mono);
+    font-size: var(--app-font-sm);
+    font-weight: 700;
+    color: var(--app-text-secondary);
+    flex-shrink: 0;
+}
+
+.wh-modal-rank-row.me .wh-modal-rank-pontos {
+    color: var(--app-primary);
+}
+
+/* Modal leader row (artilheiro/luva/capitao) */
+.wh-modal-leader-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--app-surface);
+    border-radius: var(--app-radius-md);
+    border-bottom: 1px solid var(--app-border);
+}
+
+.wh-modal-leader-row:last-child {
+    border-bottom: none;
+}
+
+.wh-modal-leader-row.me {
+    background: linear-gradient(90deg, var(--app-primary-muted) 0%, var(--app-surface) 100%);
+}
+
+/* Modal footer: "Ver módulo completo" */
+.wh-modal-footer {
+    padding: 8px 16px 16px;
+}
+
+.wh-modal-navigate-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    padding: 10px;
+    background: var(--app-primary-muted);
+    border: 1px solid var(--app-primary-border);
+    border-radius: var(--app-radius-md);
+    color: var(--app-primary-light);
+    font-size: var(--app-font-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.wh-modal-navigate-btn:active {
+    background: rgba(255, 85, 0, 0.2);
+    transform: scale(0.98);
+}
+
+.wh-modal-navigate-btn .material-icons {
+    font-size: 16px;
+}
+
+/* Modal separator */
+.wh-modal-separator {
+    text-align: center;
+    font-size: var(--app-font-xs);
+    color: var(--app-text-dim);
+    padding: 4px 0;
+}
+
+/* Module-specific icon colors in modal */
+.wh-modal--pontos-corridos .wh-modal-icon { background: var(--app-info-muted); color: var(--app-info); }
+.wh-modal--mata-mata .wh-modal-icon { background: var(--app-danger-muted); color: var(--app-danger); }
+.wh-modal--ranking .wh-modal-icon { background: var(--app-primary-muted); color: var(--app-primary); }
+.wh-modal--artilheiro .wh-modal-icon { background: var(--app-success-muted); color: var(--app-success); }
+.wh-modal--luva-ouro .wh-modal-icon { background: var(--app-gold-muted); color: var(--app-gold); }
+.wh-modal--capitao .wh-modal-icon { background: var(--app-purple-muted); color: var(--app-purple); }
+.wh-modal--resta-um .wh-modal-icon { background: var(--app-danger-muted); color: var(--app-danger); }
+.wh-modal--meu-confronto .wh-modal-icon { background: var(--app-primary-muted); color: var(--app-primary); }
+
+/* Resta Um specific modal rows */
+.wh-modal-ru-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: var(--app-radius-md);
+    font-size: var(--app-font-sm);
+    font-weight: 600;
+}
+
+.wh-modal-ru-status--vivo {
+    background: var(--app-success-muted);
+    color: var(--app-success);
+}
+
+.wh-modal-ru-status--eliminado {
+    background: var(--app-danger-muted);
+    color: var(--app-danger);
+}
+
+.wh-modal-ru-status--perigo {
+    background: var(--app-warning-muted);
+    color: var(--app-warning);
+    animation: wh-lanterna-pulse 1.5s ease-in-out infinite;
+}
+
+/* Responsive: modal on desktop */
+@media (min-width: 768px) {
+    .wh-modal {
+        border-radius: var(--app-radius-xl);
+        border-bottom: 1px solid var(--app-border);
+        max-height: 70vh;
+    }
+
+    .wh-modal-overlay {
+        align-items: center;
+    }
 }

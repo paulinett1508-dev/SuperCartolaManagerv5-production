@@ -638,6 +638,7 @@ function openPanel() {
 
 function closePanel() {
     WHState.isOpen = false;
+    closeCardModal(); // v6.0: fechar modal se aberto
     document.getElementById("wh-fab").classList.remove("open");
     document.getElementById("wh-panel").classList.remove("open");
     document.getElementById("wh-backdrop").classList.remove("visible");
@@ -1129,128 +1130,75 @@ function renderContent() {
         return;
     }
 
-    const sections = [];
+    const cards = [];
 
-    // Timestamp
-    sections.push(renderTimestamp());
-
-    // ========== MEUS CONFRONTOS (DESTAQUE PRINCIPAL) ==========
-    // Meu Confronto no Pontos Corridos
+    // ========== HERO: MEUS CONFRONTOS ==========
     if (WHState.modulosAtivos.pontosCorridos && WHState.data.meuConfrontoPc) {
-        const meuPcSection = renderMeuConfrontoPontosCorridos();
-        if (meuPcSection) sections.push(meuPcSection);
+        const card = renderCardMeuConfronto('pc');
+        if (card) cards.push(card);
     }
-
-    // Meu Confronto no Mata-Mata
     if (WHState.modulosAtivos.mataMata && WHState.data.meuConfrontoMm) {
-        const meuMmSection = renderMeuConfrontoMataMata();
-        if (meuMmSection) sections.push(meuMmSection);
+        const card = renderCardMeuConfronto('mm');
+        if (card) cards.push(card);
     }
 
-    // ========== OUTROS MÓDULOS ==========
-    // Ranking da Rodada
-    const rankingSection = renderRankingSection();
-    if (rankingSection) sections.push(rankingSection);
+    // ========== GRID CARDS ==========
+    const rankCard = renderCardRanking();
+    if (rankCard) cards.push(rankCard);
 
-    // Pontos Corridos (outros confrontos quentes)
     if (WHState.modulosAtivos.pontosCorridos) {
-        const pcSection = renderPontosCorridosSection();
-        if (pcSection) sections.push(pcSection);
+        const pcCard = renderCardConfrontos();
+        if (pcCard) cards.push(pcCard);
     }
 
-    // Mata-Mata (outros confrontos)
     if (WHState.modulosAtivos.mataMata) {
-        const mmSection = renderMataMataSection();
-        if (mmSection) sections.push(mmSection);
+        const mmCard = renderCardMataMata();
+        if (mmCard) cards.push(mmCard);
     }
 
-    // Artilheiro
     if (WHState.modulosAtivos.artilheiro) {
-        const artSection = renderArtilheiroSection();
-        if (artSection) sections.push(artSection);
+        const artCard = renderCardModulo('artilheiro');
+        if (artCard) cards.push(artCard);
     }
 
-    // Luva de Ouro
     if (WHState.modulosAtivos.luvaOuro) {
-        const luvaSection = renderLuvaOuroSection();
-        if (luvaSection) sections.push(luvaSection);
+        const luvaCard = renderCardModulo('luva-ouro');
+        if (luvaCard) cards.push(luvaCard);
     }
 
-    // Capitão de Luxo
     if (WHState.modulosAtivos.capitaoLuxo) {
-        const capSection = renderCapitaoSection();
-        if (capSection) sections.push(capSection);
+        const capCard = renderCardModulo('capitao');
+        if (capCard) cards.push(capCard);
     }
 
-    // Resta Um
     if (WHState.modulosAtivos.restaUm) {
-        const ruSection = renderRestaUmSection();
-        if (ruSection) sections.push(ruSection);
+        const ruCard = renderCardRestaUm();
+        if (ruCard) cards.push(ruCard);
     }
 
-    // Se não há nada
-    if (sections.length <= 1) {
+    if (cards.length === 0) {
         content.innerHTML = `
             <div class="wh-empty">
                 <span class="material-icons wh-empty-icon">sports_soccer</span>
                 <div class="wh-empty-title">Nenhuma disputa ativa</div>
-                <div class="wh-empty-desc">Aguardando início da rodada</div>
+                <div class="wh-empty-desc">Aguardando inicio da rodada</div>
             </div>
         `;
         return;
     }
 
-    content.innerHTML = sections.join("");
+    content.innerHTML = `
+        ${renderTimestamp()}
+        <div class="wh-card-grid">
+            ${cards.join("")}
+        </div>
+    `;
 
-    // Event delegation: carrossel scroll → atualizar dots
-    content.querySelectorAll('.wh-section-body--carousel').forEach(carousel => {
-        carousel.addEventListener('scroll', () => {
-            const scrollLeft = carousel.scrollLeft;
-            const cardWidth = carousel.firstElementChild?.offsetWidth || 1;
-            const gap = 10;
-            const activeIndex = Math.round(scrollLeft / (cardWidth + gap));
-
-            // Atualizar dots correspondentes
-            const dotsContainer = carousel.closest('.wh-section')?.querySelector('.wh-carousel-dots');
-            if (dotsContainer) {
-                dotsContainer.querySelectorAll('.wh-carousel-dot').forEach((dot, i) => {
-                    dot.classList.toggle('active', i === activeIndex);
-                });
-            }
-
-            // Esconder hint de swipe após primeira rolagem
-            const hint = carousel.closest('.wh-section')?.querySelector('.wh-swipe-hint');
-            if (hint) hint.classList.add('hidden');
-        }, { passive: true });
-    });
-
-    // Event delegation: tap-to-navigate para módulo
-    content.querySelectorAll('[data-navigate]').forEach(el => {
-        el.style.cursor = 'pointer';
-        el.addEventListener('click', (e) => {
-            // Ignorar se estava arrastando carrossel
-            if (e.target.closest('.wh-section-body--carousel')) return;
-
-            const modulo = el.dataset.navigate;
-            if (modulo && window.participanteNav) {
-                closePanel();
-                setTimeout(() => {
-                    window.participanteNav.navegarPara(modulo);
-                }, 300);
-            }
-        });
-    });
-
-    // Navegação: clicar no header da seção
-    content.querySelectorAll('.wh-section-header[data-navigate]').forEach(header => {
-        header.addEventListener('click', (e) => {
-            const modulo = header.dataset.navigate;
-            if (modulo && window.participanteNav) {
-                closePanel();
-                setTimeout(() => {
-                    window.participanteNav.navegarPara(modulo);
-                }, 300);
-            }
+    // Event delegation: tap em card → abrir modal
+    content.querySelectorAll('.wh-card[data-modal]').forEach(card => {
+        card.addEventListener('click', () => {
+            const modalType = card.dataset.modal;
+            if (modalType) openCardModal(modalType);
         });
     });
 }
@@ -1258,17 +1206,876 @@ function renderContent() {
 function renderTimestamp() {
     const now = WHState.lastUpdate || new Date();
     const time = now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-
-    const isLive = isJogosAoVivo(); // v2.1: usa game-status real
+    const isLive = isJogosAoVivo();
+    const rodada = WHState.mercadoStatus?.rodada_atual || '?';
 
     return `
         <div class="wh-timestamp">
-            <span class="material-icons">${isLive ? "sensors" : "schedule"}</span>
-            ${isLive ? "Ao vivo" : "Atualizado"} às ${time}
-            ${isLive ? '<span style="color: var(--app-danger);">●</span>' : ""}
+            ${isLive
+                ? `<span class="wh-live-indicator"><span class="wh-live-dot"></span> AO VIVO</span> <span class="wh-timestamp-time">Rodada ${rodada} · ${time}</span>`
+                : `<span class="material-icons">schedule</span> Rodada ${rodada} · ${time}`
+            }
         </div>
     `;
 }
+
+// ============================================
+// v6.0 CARD RENDERERS — Summary cards no grid
+// ============================================
+
+/** Truncar pontos helper (1 casa decimal) */
+function _tp(val) {
+    return (Math.trunc((val || 0) * 10) / 10).toFixed(1);
+}
+
+/** Card: Meu Confronto (mesmo tamanho dos demais) */
+function renderCardMeuConfronto(tipo) {
+    const isPc = tipo === 'pc';
+    const confronto = isPc ? WHState.data.meuConfrontoPc : WHState.data.meuConfrontoMm;
+    if (!confronto) return null;
+
+    const { eu, adversario } = confronto;
+    const parciais = WHState.data.parciais?.ranking || [];
+    const minhaParcial = parciais.find(p => String(p.timeId) === String(WHState.timeId));
+    const advId = isPc ? adversario?.id : (adversario?.timeId || adversario?.time_id);
+    const advParcial = parciais.find(p => String(p.timeId) === String(advId));
+
+    const meusPontos = minhaParcial?.pontos_rodada_atual || eu?.pontos || 0;
+    const pontosAdv = advParcial?.pontos_rodada_atual || adversario?.pontos || 0;
+    const diff = meusPontos - pontosAdv;
+    const vencendo = diff > 0;
+    const perdendo = diff < 0;
+    const statusClass = vencendo ? 'winning' : perdendo ? 'losing' : 'tied';
+    const isLive = isJogosAoVivo();
+
+    const moduleLabel = isPc ? 'PC' : 'MM';
+    const moduleIcon = isPc ? 'swap_horiz' : 'emoji_events';
+    const modalType = isPc ? 'meu-confronto-pc' : 'meu-confronto-mm';
+
+    const statusText = vencendo ? 'Vencendo' : perdendo ? 'Perdendo' : 'Empatado';
+    const statusIcon = vencendo ? 'trending_up' : perdendo ? 'trending_down' : 'trending_flat';
+
+    return `
+        <div class="wh-card wh-card--hero ${statusClass}" data-modal="${modalType}">
+            <div class="wh-card-header">
+                <div class="wh-card-icon">
+                    <span class="material-icons">${moduleIcon}</span>
+                </div>
+                <span class="wh-card-title">Seu Jogo · ${moduleLabel}</span>
+                ${isLive ? '<span class="wh-card-badge wh-card-badge--live"><span class="material-icons" style="font-size:8px">sensors</span> LIVE</span>' : ''}
+            </div>
+            <div class="wh-card-metric">${_tp(meusPontos)} <span style="font-size:var(--app-font-xs);color:var(--app-text-dim)">x</span> ${_tp(pontosAdv)}</div>
+            <div class="wh-card-subtitle">
+                <span class="material-icons" style="font-size:12px;vertical-align:middle;color:${vencendo ? 'var(--app-success)' : perdendo ? 'var(--app-danger)' : 'var(--app-warning)'}">${statusIcon}</span>
+                ${statusText} por ${_tp(Math.abs(diff))}
+            </div>
+        </div>
+    `;
+}
+
+/** Card: Ranking da Rodada */
+function renderCardRanking() {
+    const parciais = WHState.data.parciais?.ranking || [];
+    const isLive = isJogosAoVivo() && parciais.length > 0;
+
+    let ranking;
+    if (isLive) {
+        ranking = [...parciais]
+            .map(p => ({
+                timeId: String(p.timeId || p.time_id),
+                nome_time: p.nome_time || p.nomeTime || p.slug || 'Time',
+                pontos: p.pontos_rodada_atual ?? p.pontos ?? 0,
+            }))
+            .sort((a, b) => b.pontos - a.pontos);
+    } else {
+        const data = WHState.data.ranking;
+        if (!data?.ranking || !Array.isArray(data.ranking) || data.ranking.length === 0) return null;
+        ranking = data.ranking.map(r => ({
+            timeId: String(r.timeId),
+            nome_time: r.nome_time || r.nomeTime,
+            pontos: r.pontos_totais || r.pontos || 0,
+        }));
+    }
+
+    if (ranking.length === 0) return null;
+
+    const meuId = String(WHState.timeId);
+    const minhaPosicao = ranking.findIndex(r => r.timeId === meuId) + 1;
+    const leader = ranking[0];
+
+    return `
+        <div class="wh-card wh-card--ranking" data-modal="ranking">
+            <div class="wh-card-header">
+                <div class="wh-card-icon">
+                    <span class="material-icons">leaderboard</span>
+                </div>
+                <span class="wh-card-title">Ranking</span>
+                ${isLive ? '<span class="wh-card-badge wh-card-badge--live"><span class="material-icons" style="font-size:8px">sensors</span> LIVE</span>' : ''}
+            </div>
+            <div class="wh-card-metric">#${minhaPosicao || '?'} <span style="font-size:var(--app-font-xs);color:var(--app-text-muted)">de ${ranking.length}</span></div>
+            <div class="wh-card-subtitle">Lider: ${escapeHtml(leader.nome_time)} · ${_tp(leader.pontos)}</div>
+        </div>
+    `;
+}
+
+/** Card: Confrontos PC */
+function renderCardConfrontos() {
+    const data = WHState.data.pontosCorridos;
+    if (!data?.confrontos || data.confrontos.length === 0) return null;
+
+    const meuId = String(WHState.timeId);
+    const confrontos = WHState.data.meuConfrontoPc
+        ? data.confrontos.filter(c => String(c.time1?.id) !== meuId && String(c.time2?.id) !== meuId)
+        : [...data.confrontos];
+
+    if (confrontos.length === 0) return null;
+
+    const hotCount = confrontos.filter(c =>
+        Math.abs((getPontosAoVivo(c.time1?.id, c.time1?.pontos || 0)) - (getPontosAoVivo(c.time2?.id, c.time2?.pontos || 0))) < WH_CONFIG.MIN_DIFF_HOT
+    ).length;
+
+    const isLive = isJogosAoVivo();
+
+    return `
+        <div class="wh-card wh-card--pontos-corridos" data-modal="pontos-corridos">
+            <div class="wh-card-header">
+                <div class="wh-card-icon">
+                    <span class="material-icons">swap_horiz</span>
+                </div>
+                <span class="wh-card-title">Confrontos</span>
+                ${isLive ? '<span class="wh-card-badge wh-card-badge--live"><span class="material-icons" style="font-size:8px">sensors</span> LIVE</span>' : ''}
+            </div>
+            <div class="wh-card-metric">${confrontos.length} <span style="font-size:var(--app-font-xs);color:var(--app-text-muted)">jogos</span></div>
+            ${hotCount > 0 ? `<div class="wh-card-subtitle"><span class="wh-card-badge wh-card-badge--hot"><span class="material-icons" style="font-size:8px">local_fire_department</span> ${hotCount} quente${hotCount > 1 ? 's' : ''}</span></div>` : '<div class="wh-card-subtitle">Pontos Corridos</div>'}
+        </div>
+    `;
+}
+
+/** Card: Mata-Mata */
+function renderCardMataMata() {
+    const data = WHState.data.mataMata;
+    if (!data?.dados) return null;
+
+    const fases = ["final", "semis", "quartas", "oitavas", "primeira"];
+    let faseAtual = data.faseAtual || null;
+    let confrontosFase = [];
+
+    if (!faseAtual) {
+        for (const fase of fases) {
+            const cf = data.dados[fase];
+            if (Array.isArray(cf) && cf.length > 0 && cf.some(c => !c.vencedor)) {
+                faseAtual = fase;
+                confrontosFase = cf;
+                break;
+            }
+        }
+    } else {
+        confrontosFase = data.dados[faseAtual] || [];
+    }
+
+    if (!faseAtual || confrontosFase.length === 0) {
+        for (const fase of fases) {
+            const cf = data.dados[fase];
+            if (Array.isArray(cf) && cf.length > 0) {
+                faseAtual = fase;
+                confrontosFase = cf;
+                break;
+            }
+        }
+    }
+
+    if (confrontosFase.length === 0) return null;
+
+    const meuId = String(WHState.timeId);
+    const filtered = WHState.data.meuConfrontoMm
+        ? confrontosFase.filter(c => String(c.timeA?.timeId || c.timeA?.time_id) !== meuId && String(c.timeB?.timeId || c.timeB?.time_id) !== meuId)
+        : confrontosFase;
+
+    if (filtered.length === 0) return null;
+
+    const faseLabel = { primeira: "1a Fase", oitavas: "Oitavas", quartas: "Quartas", semis: "Semi", final: "FINAL" }[faseAtual] || faseAtual;
+    const isLive = isJogosAoVivo();
+
+    return `
+        <div class="wh-card wh-card--mata-mata" data-modal="mata-mata">
+            <div class="wh-card-header">
+                <div class="wh-card-icon">
+                    <span class="material-icons">emoji_events</span>
+                </div>
+                <span class="wh-card-title">Mata-Mata</span>
+                ${isLive ? '<span class="wh-card-badge wh-card-badge--live"><span class="material-icons" style="font-size:8px">sensors</span> LIVE</span>' : ''}
+            </div>
+            <div class="wh-card-metric">${faseLabel}</div>
+            <div class="wh-card-subtitle">${filtered.length} confronto${filtered.length > 1 ? 's' : ''}</div>
+        </div>
+    `;
+}
+
+/** Card: Módulo genérico (Artilheiro, Luva, Capitão) */
+function renderCardModulo(tipo) {
+    const config = {
+        artilheiro: {
+            data: WHState.data.artilheiro,
+            title: 'Artilheiro',
+            icon: 'sports_soccer',
+            getValue: (r) => `${r.golsPro || r.gols || 0} gols`,
+            getLabel: (r) => r.nome || r.nome_cartola || r.nomeCartola || 'Jogador',
+        },
+        'luva-ouro': {
+            data: WHState.data.luvaOuro,
+            title: 'Luva de Ouro',
+            icon: 'sports_handball',
+            getValue: (r) => `${_tp(r.pontosTotais || r.pontos || 0)} pts`,
+            getLabel: (r) => r.participanteNome || r.nome_cartola || r.nomeCartola || 'Jogador',
+        },
+        capitao: {
+            data: WHState.data.capitao,
+            title: 'Capitao',
+            icon: 'military_tech',
+            getValue: (r) => `${(r.pontuacao_total || r.total || 0).toFixed(0)} pts`,
+            getLabel: (r) => r.nome_cartola || r.nomeCartola || 'Jogador',
+        },
+    }[tipo];
+
+    if (!config) return null;
+    const data = config.data;
+    if (!data?.ranking || !Array.isArray(data.ranking) || data.ranking.length === 0) return null;
+
+    const leader = data.ranking[0];
+    const meuId = String(WHState.timeId);
+    const matchId = (r) => String(r.timeId || r.time_id || r.participanteId || '') === meuId;
+    const meuIndex = data.ranking.findIndex(matchId);
+
+    return `
+        <div class="wh-card wh-card--${tipo}" data-modal="${tipo}">
+            <div class="wh-card-header">
+                <div class="wh-card-icon">
+                    <span class="material-icons">${config.icon}</span>
+                </div>
+                <span class="wh-card-title">${config.title}</span>
+            </div>
+            <div class="wh-card-metric">${config.getValue(leader)}</div>
+            <div class="wh-card-subtitle">${escapeHtml(config.getLabel(leader))} ${meuIndex > 0 ? `· Voce #${meuIndex + 1}` : meuIndex === 0 ? '· Voce lidera!' : ''}</div>
+        </div>
+    `;
+}
+
+/** Card: Resta Um */
+function renderCardRestaUm() {
+    const data = WHState.data.restaUm;
+    if (!data || !data.vivos || data.vivos.length === 0) return null;
+
+    const meuId = String(WHState.timeId);
+    const totalVivos = data.vivos.length;
+    const totalEliminados = data.eliminados?.length || 0;
+    const total = data.totalParticipantes || (totalVivos + totalEliminados);
+    const pctVivos = total > 0 ? Math.round((totalVivos / total) * 100) : 0;
+
+    const meu = data.vivos.find(p => String(p.timeId) === meuId);
+    const isElim = !meu && data.eliminados?.find(p => String(p.timeId) === meuId);
+    const statusText = meu ? 'Voce esta vivo!' : isElim ? 'Eliminado' : '';
+
+    return `
+        <div class="wh-card wh-card--resta-um" data-modal="resta-um">
+            <div class="wh-card-header">
+                <div class="wh-card-icon">
+                    <span class="material-icons">person_off</span>
+                </div>
+                <span class="wh-card-title">Resta Um</span>
+            </div>
+            <div class="wh-card-metric">${totalVivos}/${total} <span style="font-size:var(--app-font-xs);color:var(--app-text-muted)">vivos</span></div>
+            <div class="wh-card-progress">
+                <div class="wh-card-progress-bar" style="width:${pctVivos}%"></div>
+            </div>
+            <div class="wh-card-subtitle">${statusText}</div>
+        </div>
+    `;
+}
+
+// ============================================
+// v6.0 MODAL SYSTEM — Detalhes ao clicar no card
+// ============================================
+
+/** Abre modal flutuante com detalhes do módulo */
+function openCardModal(tipo) {
+    // Remove modal existente
+    closeCardModal();
+
+    const modalContent = renderModalContent(tipo);
+    if (!modalContent) return;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'wh-modal-overlay';
+    overlay.className = 'wh-modal-overlay';
+    overlay.innerHTML = `
+        <div class="wh-modal">
+            <div class="wh-modal-handle"></div>
+            ${modalContent}
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    // Abrir com animação
+    requestAnimationFrame(() => {
+        overlay.classList.add('open');
+    });
+
+    // Fechar ao clicar no backdrop
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeCardModal();
+    });
+
+    // Fechar ao clicar no X
+    overlay.querySelector('.wh-modal-close')?.addEventListener('click', () => {
+        closeCardModal();
+    });
+
+    // Navegação: botão "Ver módulo completo"
+    overlay.querySelector('.wh-modal-navigate-btn')?.addEventListener('click', () => {
+        const modulo = overlay.querySelector('.wh-modal-navigate-btn').dataset.navigate;
+        if (modulo && window.participanteNav) {
+            closeCardModal();
+            closePanel();
+            setTimeout(() => {
+                window.participanteNav.navegarPara(modulo);
+            }, 300);
+        }
+    });
+}
+
+/** Fecha modal */
+function closeCardModal() {
+    const overlay = document.getElementById('wh-modal-overlay');
+    if (!overlay) return;
+    overlay.classList.remove('open');
+    setTimeout(() => overlay.remove(), 300);
+}
+
+/** Roteador de conteúdo do modal */
+function renderModalContent(tipo) {
+    switch (tipo) {
+        case 'meu-confronto-pc': return renderModalMeuConfronto('pc');
+        case 'meu-confronto-mm': return renderModalMeuConfronto('mm');
+        case 'ranking': return renderModalRanking();
+        case 'pontos-corridos': return renderModalConfrontos();
+        case 'mata-mata': return renderModalMataMata();
+        case 'artilheiro': return renderModalModulo('artilheiro');
+        case 'luva-ouro': return renderModalModulo('luva-ouro');
+        case 'capitao': return renderModalModulo('capitao');
+        case 'resta-um': return renderModalRestaUm();
+        default: return null;
+    }
+}
+
+/** Modal: Meu Confronto detalhado */
+function renderModalMeuConfronto(tipo) {
+    const isPc = tipo === 'pc';
+    const confronto = isPc ? WHState.data.meuConfrontoPc : WHState.data.meuConfrontoMm;
+    if (!confronto) return null;
+
+    const { eu, adversario } = confronto;
+    const parciais = WHState.data.parciais?.ranking || [];
+    const minhaParcial = parciais.find(p => String(p.timeId) === String(WHState.timeId));
+    const advId = isPc ? adversario?.id : (adversario?.timeId || adversario?.time_id);
+    const advParcial = parciais.find(p => String(p.timeId) === String(advId));
+
+    const meusPontos = minhaParcial?.pontos_rodada_atual || eu?.pontos || 0;
+    const pontosAdv = advParcial?.pontos_rodada_atual || adversario?.pontos || 0;
+    const diff = meusPontos - pontosAdv;
+    const vencendo = diff > 0;
+    const perdendo = diff < 0;
+    const statusClass = vencendo ? 'winning' : perdendo ? 'losing' : 'tied';
+    const statusText = vencendo ? 'Vencendo' : perdendo ? 'Perdendo' : 'Empatado';
+    const isLive = isJogosAoVivo();
+
+    const euEscudo = eu?.escudo || eu?.url_escudo_png || '/escudos/default.png';
+    const advEscudo = adversario?.escudo || adversario?.url_escudo_png || '/escudos/default.png';
+    const moduleLabel = isPc ? 'Pontos Corridos' : 'Mata-Mata';
+    const moduleIcon = isPc ? 'swap_horiz' : 'emoji_events';
+    const navigateTo = isPc ? 'pontos-corridos' : 'mata-mata';
+    const rodadaInfo = isPc ? `Rodada ${confronto.rodada || '?'}` : (confronto.fase || '');
+    const faseLabel = isPc ? '' : ({ primeira: "1a Fase", oitavas: "Oitavas", quartas: "Quartas", semis: "Semifinal", final: "FINAL" }[confronto.fase] || confronto.fase);
+
+    return `
+        <div class="wh-modal-header wh-modal--meu-confronto">
+            <div class="wh-modal-icon">
+                <span class="material-icons">${moduleIcon}</span>
+            </div>
+            <span class="wh-modal-title">Seu Confronto · ${moduleLabel}</span>
+            <button class="wh-modal-close"><span class="material-icons">close</span></button>
+        </div>
+        <div class="wh-modal-body">
+            <div style="text-align:center;font-size:var(--app-font-xs);color:var(--app-text-muted);margin-bottom:4px;">
+                ${isPc ? `Rodada ${confronto.rodada || '?'}` : faseLabel}
+                ${isLive ? ' · <span style="color:var(--app-danger);font-weight:700">AO VIVO</span>' : ''}
+            </div>
+
+            <div class="wh-mc-scoreboard" style="padding:8px 0;">
+                <div class="wh-mc-side ${vencendo ? 'winning' : perdendo ? 'losing' : ''}">
+                    <img class="wh-mc-escudo" src="${euEscudo}" onerror="this.src='/escudos/default.png'" alt="">
+                    <div class="wh-mc-label">VOCE</div>
+                    <div class="wh-mc-nome">${escapeHtml(eu?.nome || eu?.nome_time || 'Meu Time')}</div>
+                </div>
+                <div class="wh-mc-score-center">
+                    <div class="wh-mc-score-row">
+                        <span class="wh-mc-pontos ${vencendo ? 'winning' : ''}">${_tp(meusPontos)}</span>
+                        <span class="wh-mc-score-x">x</span>
+                        <span class="wh-mc-pontos ${perdendo ? 'winning' : ''}">${_tp(pontosAdv)}</span>
+                    </div>
+                    <div class="wh-mc-vs-diff ${statusClass}">${diff > 0 ? '+' : ''}${_tp(diff)}</div>
+                </div>
+                <div class="wh-mc-side ${perdendo ? 'winning' : vencendo ? 'losing' : ''}">
+                    <img class="wh-mc-escudo" src="${advEscudo}" onerror="this.src='/escudos/default.png'" alt="">
+                    <div class="wh-mc-label">ADVERSARIO</div>
+                    <div class="wh-mc-nome">${escapeHtml(adversario?.nome || adversario?.nome_time || adversario?.nome_cartola || 'Rival')}</div>
+                </div>
+            </div>
+
+            <div class="wh-mc-status ${statusClass}">
+                <span class="material-icons">${vencendo ? 'trending_up' : perdendo ? 'trending_down' : 'trending_flat'}</span>
+                ${statusText} por ${_tp(Math.abs(diff))} pts
+            </div>
+        </div>
+        <div class="wh-modal-footer">
+            <button class="wh-modal-navigate-btn" data-navigate="${navigateTo}">
+                <span class="material-icons">open_in_new</span> Ver ${moduleLabel} completo
+            </button>
+        </div>
+    `;
+}
+
+/** Modal: Ranking completo */
+function renderModalRanking() {
+    const parciais = WHState.data.parciais?.ranking || [];
+    const isLive = isJogosAoVivo() && parciais.length > 0;
+
+    let ranking;
+    if (isLive) {
+        ranking = [...parciais]
+            .map(p => ({
+                timeId: String(p.timeId || p.time_id),
+                nome_time: p.nome_time || p.nomeTime || p.slug || 'Time',
+                pontos: p.pontos_rodada_atual ?? p.pontos ?? 0,
+                escudo: p.url_escudo_png || p.escudo || '/escudos/default.png',
+            }))
+            .sort((a, b) => b.pontos - a.pontos);
+    } else {
+        const data = WHState.data.ranking;
+        if (!data?.ranking) return null;
+        ranking = data.ranking.map(r => ({
+            timeId: String(r.timeId),
+            nome_time: r.nome_time || r.nomeTime,
+            pontos: r.pontos_totais || r.pontos || 0,
+            escudo: r.url_escudo_png || r.escudo || '/escudos/default.png',
+        }));
+    }
+
+    if (ranking.length === 0) return null;
+
+    const meuId = String(WHState.timeId);
+    const posColors = ['gold', 'silver', 'bronze'];
+
+    // Show top 5 + user
+    const top = ranking.slice(0, 5);
+    const minhaPosicao = ranking.findIndex(r => r.timeId === meuId);
+
+    let rows = top.map((r, i) => {
+        const isMe = r.timeId === meuId;
+        return `
+            <div class="wh-modal-rank-row ${posColors[i] || ''} ${isMe ? 'me' : ''}">
+                <span class="wh-modal-rank-pos">${i + 1}</span>
+                <img class="wh-modal-rank-escudo" src="${r.escudo}" onerror="this.src='/escudos/default.png'" alt="">
+                <span class="wh-modal-rank-nome">${escapeHtml(r.nome_time)}</span>
+                <span class="wh-modal-rank-pontos">${_tp(r.pontos)}</span>
+            </div>
+        `;
+    }).join('');
+
+    if (minhaPosicao >= 5) {
+        const meuTime = ranking[minhaPosicao];
+        rows += `
+            <div class="wh-modal-separator">···</div>
+            <div class="wh-modal-rank-row me">
+                <span class="wh-modal-rank-pos">${minhaPosicao + 1}</span>
+                <img class="wh-modal-rank-escudo" src="${meuTime.escudo}" onerror="this.src='/escudos/default.png'" alt="">
+                <span class="wh-modal-rank-nome">${escapeHtml(meuTime.nome_time)}</span>
+                <span class="wh-modal-rank-pontos">${_tp(meuTime.pontos)}</span>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="wh-modal-header wh-modal--ranking">
+            <div class="wh-modal-icon">
+                <span class="material-icons">leaderboard</span>
+            </div>
+            <span class="wh-modal-title">Ranking da Rodada</span>
+            <button class="wh-modal-close"><span class="material-icons">close</span></button>
+        </div>
+        <div class="wh-modal-body">
+            ${rows}
+        </div>
+        <div class="wh-modal-footer">
+            <button class="wh-modal-navigate-btn" data-navigate="home">
+                <span class="material-icons">open_in_new</span> Ver ranking completo
+            </button>
+        </div>
+    `;
+}
+
+/** Modal: Confrontos PC */
+function renderModalConfrontos() {
+    const data = WHState.data.pontosCorridos;
+    if (!data?.confrontos) return null;
+
+    const meuId = String(WHState.timeId);
+    const confrontos = WHState.data.meuConfrontoPc
+        ? data.confrontos.filter(c => String(c.time1?.id) !== meuId && String(c.time2?.id) !== meuId)
+        : [...data.confrontos];
+
+    if (confrontos.length === 0) return null;
+
+    // Ordenar por diferença (quentes primeiro)
+    confrontos.sort((a, b) => {
+        const diffA = Math.abs((getPontosAoVivo(a.time1?.id, a.time1?.pontos || 0)) - (getPontosAoVivo(a.time2?.id, a.time2?.pontos || 0)));
+        const diffB = Math.abs((getPontosAoVivo(b.time1?.id, b.time1?.pontos || 0)) - (getPontosAoVivo(b.time2?.id, b.time2?.pontos || 0)));
+        return diffA - diffB;
+    });
+
+    const isLive = isJogosAoVivo();
+
+    const rows = confrontos.map(c => {
+        const t1 = c.time1 || {};
+        const t2 = c.time2 || {};
+        const pA = getPontosAoVivo(t1.id, t1.pontos || 0);
+        const pB = getPontosAoVivo(t2.id, t2.pontos || 0);
+        const diff = Math.abs(pA - pB);
+        const isHot = diff < WH_CONFIG.MIN_DIFF_HOT;
+        const aWin = pA > pB;
+        const bWin = pB > pA;
+
+        const insight = getConfrontoInsight(diff);
+        const showBadge = isHot || (insight && (insight.level === 'inferno' || insight.level === 'tied'));
+
+        return `
+            <div class="wh-modal-confronto ${isHot ? 'hot' : ''}">
+                <img class="wh-modal-confronto-escudo" src="${t1.escudo || '/escudos/default.png'}" onerror="this.src='/escudos/default.png'" alt="">
+                <span class="wh-modal-confronto-nome">${escapeHtml(t1.nome || t1.nome_cartola || 'Time 1')}</span>
+                <span class="wh-modal-confronto-pts ${aWin ? 'winning' : ''}">${_tp(pA)}</span>
+                <span class="wh-modal-confronto-x">x</span>
+                <span class="wh-modal-confronto-pts ${bWin ? 'winning' : ''}">${_tp(pB)}</span>
+                <span class="wh-modal-confronto-nome wh-modal-confronto-nome--away">${escapeHtml(t2.nome || t2.nome_cartola || 'Time 2')}</span>
+                <img class="wh-modal-confronto-escudo" src="${t2.escudo || '/escudos/default.png'}" onerror="this.src='/escudos/default.png'" alt="">
+            </div>
+            ${showBadge ? `<div class="wh-modal-badge-row">
+                ${isHot ? '<span class="wh-confronto-status tight"><span class="material-icons" style="font-size:10px">local_fire_department</span> Quente!</span>' : ''}
+                ${insight && insight.level === 'inferno' ? `<span class="wh-confronto-status wh-insight--inferno"><span class="material-icons" style="font-size:10px">${insight.icon}</span> ${insight.text}</span>` : ''}
+                ${insight && insight.level === 'tied' ? `<span class="wh-confronto-status wh-insight--tied"><span class="material-icons" style="font-size:10px">${insight.icon}</span> ${insight.text}</span>` : ''}
+            </div>` : ''}
+        `;
+    }).join('');
+
+    return `
+        <div class="wh-modal-header wh-modal--pontos-corridos">
+            <div class="wh-modal-icon">
+                <span class="material-icons">swap_horiz</span>
+            </div>
+            <span class="wh-modal-title">Confrontos da Rodada</span>
+            <button class="wh-modal-close"><span class="material-icons">close</span></button>
+        </div>
+        <div class="wh-modal-body">
+            ${rows}
+        </div>
+        <div class="wh-modal-footer">
+            <button class="wh-modal-navigate-btn" data-navigate="pontos-corridos">
+                <span class="material-icons">open_in_new</span> Ver Pontos Corridos
+            </button>
+        </div>
+    `;
+}
+
+/** Modal: Mata-Mata */
+function renderModalMataMata() {
+    const data = WHState.data.mataMata;
+    if (!data?.dados) return null;
+
+    const fases = ["final", "semis", "quartas", "oitavas", "primeira"];
+    let faseAtual = data.faseAtual || null;
+    let confrontosFase = [];
+
+    if (!faseAtual) {
+        for (const fase of fases) {
+            const cf = data.dados[fase];
+            if (Array.isArray(cf) && cf.length > 0 && cf.some(c => !c.vencedor)) {
+                faseAtual = fase;
+                confrontosFase = cf;
+                break;
+            }
+        }
+    } else {
+        confrontosFase = data.dados[faseAtual] || [];
+    }
+
+    if (!faseAtual || confrontosFase.length === 0) {
+        for (const fase of fases) {
+            const cf = data.dados[fase];
+            if (Array.isArray(cf) && cf.length > 0) {
+                faseAtual = fase;
+                confrontosFase = cf;
+                break;
+            }
+        }
+    }
+
+    if (confrontosFase.length === 0) return null;
+
+    const meuId = String(WHState.timeId);
+    const filtered = WHState.data.meuConfrontoMm
+        ? confrontosFase.filter(c => String(c.timeA?.timeId || c.timeA?.time_id) !== meuId && String(c.timeB?.timeId || c.timeB?.time_id) !== meuId)
+        : confrontosFase;
+
+    if (filtered.length === 0) return null;
+
+    const faseLabel = { primeira: "1a Fase", oitavas: "Oitavas", quartas: "Quartas", semis: "Semifinal", final: "FINAL" }[faseAtual] || faseAtual;
+    const isLive = isJogosAoVivo();
+
+    const sorted = [...filtered].sort((a, b) => {
+        const diffA = Math.abs((a.timeA?.pontos || 0) - (a.timeB?.pontos || 0));
+        const diffB = Math.abs((b.timeA?.pontos || 0) - (b.timeB?.pontos || 0));
+        return diffA - diffB;
+    });
+
+    const rows = sorted.map(c => {
+        const idA = String(c.timeA?.timeId || c.timeA?.time_id);
+        const idB = String(c.timeB?.timeId || c.timeB?.time_id);
+        const pA = getPontosAoVivo(idA, parseFloat(c.timeA?.pontos) || 0);
+        const pB = getPontosAoVivo(idB, parseFloat(c.timeB?.pontos) || 0);
+        const diff = Math.abs(pA - pB);
+        const aWin = pA > pB;
+        const bWin = pB > pA;
+        const isDecided = !!c.vencedor;
+        const isHot = diff < 15 && !isDecided;
+
+        return `
+            <div class="wh-modal-confronto ${isHot ? 'hot' : ''}" style="${isDecided ? 'opacity:0.6' : ''}">
+                <img class="wh-modal-confronto-escudo" src="${resolverEscudo({timeId: idA, escudo: c.timeA?.escudo || c.timeA?.url_escudo_png})}" onerror="this.src='/escudos/default.png'" alt="">
+                <span class="wh-modal-confronto-nome">${escapeHtml(c.timeA?.nome_time || c.timeA?.nome || 'Time A')}</span>
+                <span class="wh-modal-confronto-pts ${aWin ? 'winning' : ''}">${_tp(pA)}</span>
+                <span class="wh-modal-confronto-x">x</span>
+                <span class="wh-modal-confronto-pts ${bWin ? 'winning' : ''}">${_tp(pB)}</span>
+                <span class="wh-modal-confronto-nome wh-modal-confronto-nome--away">${escapeHtml(c.timeB?.nome_time || c.timeB?.nome || 'Time B')}</span>
+                <img class="wh-modal-confronto-escudo" src="${resolverEscudo({timeId: idB, escudo: c.timeB?.escudo || c.timeB?.url_escudo_png})}" onerror="this.src='/escudos/default.png'" alt="">
+            </div>
+        `;
+    }).join('');
+
+    return `
+        <div class="wh-modal-header wh-modal--mata-mata">
+            <div class="wh-modal-icon">
+                <span class="material-icons">emoji_events</span>
+            </div>
+            <span class="wh-modal-title">Mata-Mata · ${faseLabel}</span>
+            <button class="wh-modal-close"><span class="material-icons">close</span></button>
+        </div>
+        <div class="wh-modal-body">
+            ${rows}
+        </div>
+        <div class="wh-modal-footer">
+            <button class="wh-modal-navigate-btn" data-navigate="mata-mata">
+                <span class="material-icons">open_in_new</span> Ver Mata-Mata completo
+            </button>
+        </div>
+    `;
+}
+
+/** Modal: Módulo genérico (Artilheiro, Luva, Capitão) */
+function renderModalModulo(tipo) {
+    const config = {
+        artilheiro: {
+            data: WHState.data.artilheiro,
+            title: 'Artilheiro Campeao',
+            icon: 'sports_soccer',
+            navigateTo: 'artilheiro',
+            getValue: (r) => `${r.golsPro || r.gols || 0} gols`,
+            getLabel: (r) => r.nome || r.nome_cartola || r.nomeCartola || 'Jogador',
+        },
+        'luva-ouro': {
+            data: WHState.data.luvaOuro,
+            title: 'Luva de Ouro',
+            icon: 'sports_handball',
+            navigateTo: 'luva-de-ouro',
+            getValue: (r) => `${_tp(r.pontosTotais || r.pontos || 0)} pts`,
+            getLabel: (r) => r.participanteNome || r.nome_cartola || r.nomeCartola || 'Jogador',
+        },
+        capitao: {
+            data: WHState.data.capitao,
+            title: 'Capitao de Luxo',
+            icon: 'military_tech',
+            navigateTo: 'capitao',
+            getValue: (r) => `${(r.pontuacao_total || r.total || 0).toFixed(0)} pts`,
+            getLabel: (r) => r.nome_cartola || r.nomeCartola || 'Jogador',
+        },
+    }[tipo];
+
+    if (!config) return null;
+    const data = config.data;
+    if (!data?.ranking || !Array.isArray(data.ranking) || data.ranking.length === 0) return null;
+
+    const meuId = String(WHState.timeId);
+    const matchId = (r) => String(r.timeId || r.time_id || r.participanteId || '') === meuId;
+
+    // Top 5 + user
+    const top = data.ranking.slice(0, 5);
+    const meuIndex = data.ranking.findIndex(matchId);
+
+    let rows = top.map((r, i) => {
+        const isMe = matchId(r);
+        return `
+            <div class="wh-modal-leader-row ${isMe ? 'me' : ''}">
+                <span style="font-family:var(--app-font-mono);font-weight:700;font-size:13px;min-width:20px;text-align:center;color:${i === 0 ? 'var(--app-gold)' : 'var(--app-text-muted)'};">${i + 1}</span>
+                <img style="width:26px;height:26px;border-radius:50%;object-fit:contain;flex-shrink:0;" src="${resolverEscudo(r)}" onerror="this.src='/escudos/default.png'" alt="">
+                <span style="flex:1;font-size:var(--app-font-sm);font-weight:600;color:var(--app-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(config.getLabel(r))}</span>
+                <span style="font-family:var(--app-font-mono);font-size:var(--app-font-sm);font-weight:700;color:var(--app-text-secondary);flex-shrink:0;">${config.getValue(r)}</span>
+            </div>
+        `;
+    }).join('');
+
+    if (meuIndex >= 5) {
+        const meuItem = data.ranking[meuIndex];
+        rows += `
+            <div class="wh-modal-separator">···</div>
+            <div class="wh-modal-leader-row me">
+                <span style="font-family:var(--app-font-mono);font-weight:700;font-size:13px;min-width:20px;text-align:center;color:var(--app-primary);">${meuIndex + 1}</span>
+                <img style="width:26px;height:26px;border-radius:50%;object-fit:contain;flex-shrink:0;" src="${resolverEscudo(meuItem)}" onerror="this.src='/escudos/default.png'" alt="">
+                <span style="flex:1;font-size:var(--app-font-sm);font-weight:600;color:var(--app-primary-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(config.getLabel(meuItem))}</span>
+                <span style="font-family:var(--app-font-mono);font-size:var(--app-font-sm);font-weight:700;color:var(--app-primary);flex-shrink:0;">${config.getValue(meuItem)}</span>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="wh-modal-header wh-modal--${tipo}">
+            <div class="wh-modal-icon">
+                <span class="material-icons">${config.icon}</span>
+            </div>
+            <span class="wh-modal-title">${config.title}</span>
+            <button class="wh-modal-close"><span class="material-icons">close</span></button>
+        </div>
+        <div class="wh-modal-body">
+            ${rows}
+        </div>
+        <div class="wh-modal-footer">
+            <button class="wh-modal-navigate-btn" data-navigate="${config.navigateTo}">
+                <span class="material-icons">open_in_new</span> Ver ${config.title} completo
+            </button>
+        </div>
+    `;
+}
+
+/** Modal: Resta Um */
+function renderModalRestaUm() {
+    const data = WHState.data.restaUm;
+    if (!data || !data.vivos || data.vivos.length === 0) return null;
+
+    const meuId = String(WHState.timeId);
+    const vivos = data.vivos;
+    const totalVivos = vivos.length;
+    const totalEliminados = data.eliminados?.length || 0;
+    const total = data.totalParticipantes || (totalVivos + totalEliminados);
+    const pctVivos = total > 0 ? Math.round((totalVivos / total) * 100) : 0;
+
+    // Meu status
+    const meuVivo = vivos.find(p => String(p.timeId) === meuId);
+    const meuElim = data.eliminados?.find(p => String(p.timeId) === meuId);
+    const meuPosVivo = vivos.findIndex(p => String(p.timeId) === meuId);
+    const isLanterna = meuPosVivo === vivos.length - 1 && vivos.length > 1;
+
+    let meuStatusHtml = '';
+    if (meuVivo) {
+        meuStatusHtml = `
+            <div class="wh-modal-ru-status ${isLanterna ? 'wh-modal-ru-status--perigo' : 'wh-modal-ru-status--vivo'}">
+                <span class="material-icons">${isLanterna ? 'warning' : 'check_circle'}</span>
+                ${isLanterna ? 'Voce esta na zona de eliminacao!' : `Voce esta vivo! Posicao #${meuPosVivo + 1}`}
+            </div>
+        `;
+    } else if (meuElim) {
+        meuStatusHtml = `
+            <div class="wh-modal-ru-status wh-modal-ru-status--eliminado">
+                <span class="material-icons">cancel</span>
+                Eliminado na Rodada ${meuElim.rodadaEliminacao || '?'}
+            </div>
+        `;
+    }
+
+    // Top 3 + lanterna
+    const leader = vivos[0];
+    const lanterna = vivos.length > 1 ? vivos[vivos.length - 1] : null;
+
+    let listHtml = `
+        <div class="wh-modal-rank-row gold">
+            <span class="wh-modal-rank-pos">1</span>
+            <img class="wh-modal-rank-escudo" src="${resolverEscudo(leader)}" onerror="this.src='/escudos/default.png'" alt="">
+            <span class="wh-modal-rank-nome">${escapeHtml(leader.nomeTime || leader.nomeCartoleiro || 'Time')}</span>
+            <span class="wh-modal-rank-pontos" style="color:var(--app-success)">Vivo</span>
+        </div>
+    `;
+
+    if (vivos.length > 2) {
+        listHtml += `
+            <div class="wh-modal-rank-row silver">
+                <span class="wh-modal-rank-pos">2</span>
+                <img class="wh-modal-rank-escudo" src="${resolverEscudo(vivos[1])}" onerror="this.src='/escudos/default.png'" alt="">
+                <span class="wh-modal-rank-nome">${escapeHtml(vivos[1].nomeTime || vivos[1].nomeCartoleiro || 'Time')}</span>
+                <span class="wh-modal-rank-pontos" style="color:var(--app-success)">Vivo</span>
+            </div>
+        `;
+    }
+
+    if (lanterna && String(lanterna.timeId) !== String(leader.timeId)) {
+        const isMe = String(lanterna.timeId) === meuId;
+        listHtml += `
+            <div class="wh-modal-separator">···</div>
+            <div class="wh-modal-rank-row ${isMe ? 'me' : ''}" style="border-left:3px solid var(--app-danger)">
+                <span class="wh-modal-rank-pos">${vivos.length}</span>
+                <img class="wh-modal-rank-escudo" src="${resolverEscudo(lanterna)}" onerror="this.src='/escudos/default.png'" alt="">
+                <span class="wh-modal-rank-nome">${escapeHtml(lanterna.nomeTime || lanterna.nomeCartoleiro || 'Time')}</span>
+                <span class="wh-modal-rank-pontos" style="color:var(--app-danger)">Zona!</span>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="wh-modal-header wh-modal--resta-um">
+            <div class="wh-modal-icon">
+                <span class="material-icons">person_off</span>
+            </div>
+            <span class="wh-modal-title">Resta Um</span>
+            <button class="wh-modal-close"><span class="material-icons">close</span></button>
+        </div>
+        <div class="wh-modal-body">
+            <div style="display:flex;align-items:center;justify-content:space-between;font-size:var(--app-font-sm);margin-bottom:8px;">
+                <span style="color:var(--app-text-muted)">Sobreviventes</span>
+                <span><span style="color:var(--app-success);font-weight:700">${totalVivos}</span>/<span style="color:var(--app-text-muted)">${total}</span></span>
+            </div>
+            <div class="wh-ru-progress" style="margin:0 0 12px">
+                <div class="wh-ru-bar" style="width:${pctVivos}%"></div>
+            </div>
+            ${meuStatusHtml}
+            ${listHtml}
+        </div>
+        <div class="wh-modal-footer">
+            <button class="wh-modal-navigate-btn" data-navigate="resta-um">
+                <span class="material-icons">open_in_new</span> Ver Resta Um completo
+            </button>
+        </div>
+    `;
+}
+
+// ============================================
+// LEGACY RENDER FUNCTIONS — Kept for compatibility
+// (Old section-based renderers, still used by some data paths)
+// ============================================
 
 function renderRankingSection() {
     // v3.1: Priorizar parciais ao vivo como ranking da rodada
@@ -1310,32 +2117,33 @@ function renderRankingSection() {
     const meuId = String(WHState.timeId);
     const minhaPosicao = ranking.findIndex(r => r.timeId === meuId) + 1;
 
-    // Top 5 como chips + minha posição
-    const top5 = ranking.slice(0, 5);
+    // v5.0: Top 3 como lista vertical compacta + minha posição
+    const top3 = ranking.slice(0, 3);
     const posColors = ['gold', 'silver', 'bronze'];
 
-    let items = top5.map((r, i) => {
+    let items = top3.map((r, i) => {
         const isMe = r.timeId === meuId;
         return `
-            <div class="wh-rank-card ${i < 3 ? posColors[i] : ''} ${isMe ? 'me' : ''}">
-                <div class="wh-rank-pos">${i + 1}</div>
+            <div class="wh-rank-row ${posColors[i]} ${isMe ? 'me' : ''}">
+                <span class="wh-rank-pos">${i + 1}</span>
                 <img class="wh-rank-escudo" src="${r.escudo}" onerror="this.src='/escudos/default.png'" alt="">
-                <div class="wh-rank-nome">${escapeHtml(r.nome_time)}</div>
-                <div class="wh-rank-pontos">${(Math.trunc((r.pontos||0) * 10) / 10).toFixed(1)}</div>
+                <span class="wh-rank-nome">${escapeHtml(r.nome_time)}</span>
+                <span class="wh-rank-pontos">${(Math.trunc((r.pontos||0) * 10) / 10).toFixed(1)}</span>
             </div>
         `;
     }).join('');
 
-    // Minha posição se fora do top 5
+    // Minha posição se fora do top 3
     let meuItemHtml = '';
-    if (minhaPosicao > 5) {
+    if (minhaPosicao > 3) {
         const meuTime = ranking[minhaPosicao - 1];
         meuItemHtml = `
-            <div class="wh-rank-card me">
-                <div class="wh-rank-pos">${minhaPosicao}o</div>
+            <div class="wh-ranking-separator">···</div>
+            <div class="wh-rank-row me">
+                <span class="wh-rank-pos">${minhaPosicao}º</span>
                 <img class="wh-rank-escudo" src="${meuTime.escudo}" onerror="this.src='/escudos/default.png'" alt="">
-                <div class="wh-rank-nome">${escapeHtml(meuTime.nome_time)}</div>
-                <div class="wh-rank-pontos">${(Math.trunc((meuTime.pontos||0) * 10) / 10).toFixed(1)}</div>
+                <span class="wh-rank-nome">${escapeHtml(meuTime.nome_time)}</span>
+                <span class="wh-rank-pontos">${(Math.trunc((meuTime.pontos||0) * 10) / 10).toFixed(1)}</span>
             </div>
         `;
     }
@@ -1348,8 +2156,9 @@ function renderRankingSection() {
                 </div>
                 <div class="wh-section-title">${rankingTitle}</div>
                 ${isLive ? '<span class="wh-live-badge">AO VIVO</span>' : ''}
+                <span class="material-icons wh-navigate-hint">open_in_new</span>
             </div>
-            <div class="wh-section-body wh-section-body--chips">
+            <div class="wh-section-body wh-section-body--list">
                 ${items}
                 ${meuItemHtml}
             </div>
@@ -1475,42 +2284,32 @@ function renderPontosCorridosSection() {
         const aWinning = pontosA > pontosB;
         const bWinning = pontosB > pontosA;
 
+        // v5.0: Apenas insights "inferno" e "tied" como badges
         const insight = getConfrontoInsight(diff);
-        const insightHtml = insight ? `
-            <div class="wh-confronto-insight wh-insight--${insight.level}">
-                <span class="material-icons">${insight.icon}</span>
-                ${insight.text}
+        const showInsight = insight && (insight.level === 'inferno' || insight.level === 'tied');
+
+        // v5.0: Badges compactos
+        const isLive = isJogosAoVivo();
+        const badgesHtml = (isLive || isHot || showInsight) ? `
+            <div class="wh-confronto-badges">
+                ${isLive ? '<span class="wh-confronto-status live"><span class="material-icons" style="font-size:10px">sensors</span> AO VIVO</span>' : ''}
+                ${isHot ? '<span class="wh-confronto-status tight"><span class="material-icons" style="font-size:10px">local_fire_department</span> Quente!</span>' : ''}
+                ${showInsight ? `<span class="wh-confronto-status wh-insight--${insight.level}"><span class="material-icons" style="font-size:10px">${insight.icon}</span> ${insight.text}</span>` : ''}
             </div>
         ` : '';
 
         return `
             <div class="wh-confronto ${isHot ? "hot" : ""} ${isMyGame ? "mine" : ""}" data-navigate="pontos-corridos">
-                <div class="wh-confronto-header">
-                    <span class="wh-confronto-rodada">${isMyGame ? "Seu jogo" : `Jogo ${index + 1}`}</span>
-                    ${isJogosAoVivo() ? '<span class="wh-confronto-status live"><span class="material-icons" style="font-size:12px">sensors</span> AO VIVO</span>' : ''}
-                    ${isHot ? '<span class="wh-confronto-status tight"><span class="material-icons" style="font-size:12px">local_fire_department</span> Quente!</span>' : ""}
+                <div class="wh-confronto-scoreboard">
+                    <img class="wh-confronto-escudo" src="${t1.escudo || "/escudos/default.png"}" onerror="this.src='/escudos/default.png'" alt="">
+                    <span class="wh-confronto-nome">${escapeHtml(t1.nome || t1.nome_cartola || "Time 1")}</span>
+                    <span class="wh-confronto-pts ${aWinning ? "winning" : ""}">${(Math.trunc((pontosA||0) * 10) / 10).toFixed(1)}</span>
+                    <span class="wh-confronto-x">x</span>
+                    <span class="wh-confronto-pts ${bWinning ? "winning" : ""}">${(Math.trunc((pontosB||0) * 10) / 10).toFixed(1)}</span>
+                    <span class="wh-confronto-nome wh-confronto-nome--away">${escapeHtml(t2.nome || t2.nome_cartola || "Time 2")}</span>
+                    <img class="wh-confronto-escudo" src="${t2.escudo || "/escudos/default.png"}" onerror="this.src='/escudos/default.png'" alt="">
                 </div>
-                <div class="wh-confronto-times">
-                    <div class="wh-time wh-time--home ${aWinning ? "winning" : bWinning ? "losing" : ""}">
-                        <img class="wh-time-escudo" src="${t1.escudo || "/escudos/default.png"}" onerror="this.src='/escudos/default.png'" alt="">
-                        <div class="wh-time-info">
-                            <div class="wh-time-nome">${escapeHtml(t1.nome || t1.nome_cartola || "Time 1")}</div>
-                        </div>
-                        <div class="wh-time-pontos">${(Math.trunc((pontosA||0) * 10) / 10).toFixed(1)}</div>
-                    </div>
-                    <div class="wh-vs">
-                        <span class="wh-vs-text">VS</span>
-                    </div>
-                    <div class="wh-time wh-time--away ${bWinning ? "winning" : aWinning ? "losing" : ""}">
-                        <div class="wh-time-pontos">${(Math.trunc((pontosB||0) * 10) / 10).toFixed(1)}</div>
-                        <div class="wh-time-info">
-                            <div class="wh-time-nome">${escapeHtml(t2.nome || t2.nome_cartola || "Time 2")}</div>
-                        </div>
-                        <img class="wh-time-escudo" src="${t2.escudo || "/escudos/default.png"}" onerror="this.src='/escudos/default.png'" alt="">
-                    </div>
-                </div>
-                ${renderBarraProporção(pontosA, pontosB)}
-                ${insightHtml}
+                ${badgesHtml}
             </div>
         `;
     }
@@ -1639,55 +2438,40 @@ function renderMataMataSection() {
         const isDecided = !!c.vencedor;
         const isHot = diff < 15 && !isDecided;
 
-        const insight = !isDecided ? getConfrontoInsight(diff) : null;
-        const insightHtml = insight ? `
-            <div class="wh-confronto-insight wh-insight--${insight.level}">
-                <span class="material-icons">${insight.icon}</span>
-                ${insight.text}
-            </div>
-        ` : '';
-
-        // Status de decisão
-        let decisionHtml = '';
+        // v5.0: Status de decisão e badges
+        let decisionBadge = '';
         if (isDecided) {
             const vencedorNome = String(c.vencedor) === idA
                 ? (c.timeA?.nome_time || c.timeA?.nome || 'Time A')
                 : (c.timeB?.nome_time || c.timeB?.nome || 'Time B');
-            decisionHtml = `<div class="wh-mm-decided"><span class="material-icons">check_circle</span> ${escapeHtml(vencedorNome)} classificado</div>`;
+            decisionBadge = `<span class="wh-confronto-status decided"><span class="material-icons" style="font-size:10px">check_circle</span> ${escapeHtml(vencedorNome)}</span>`;
         }
+
+        // v5.0: Apenas insights "inferno" e "tied" como badges
+        const insight = !isDecided ? getConfrontoInsight(diff) : null;
+        const showInsight = insight && (insight.level === 'inferno' || insight.level === 'tied');
+
+        const badgesHtml = (isLive || isHot || isDecided || showInsight) ? `
+            <div class="wh-confronto-badges">
+                ${isLive && !isDecided ? '<span class="wh-confronto-status live"><span class="material-icons" style="font-size:10px">sensors</span> AO VIVO</span>' : ''}
+                ${isHot ? '<span class="wh-confronto-status tight"><span class="material-icons" style="font-size:10px">local_fire_department</span> Quente!</span>' : ''}
+                ${decisionBadge}
+                ${showInsight ? `<span class="wh-confronto-status wh-insight--${insight.level}"><span class="material-icons" style="font-size:10px">${insight.icon}</span> ${insight.text}</span>` : ''}
+            </div>
+        ` : '';
 
         return `
             <div class="wh-confronto wh-mm-confronto ${isHot ? "hot" : ""} ${isMyGame ? "mine" : ""} ${isDecided ? "decided" : ""}" data-navigate="mata-mata">
-                <div class="wh-confronto-header">
-                    <span class="wh-confronto-rodada">${isMyGame ? "Seu jogo" : `Jogo ${c.jogo || ''}`}</span>
-                    ${isLive && !isDecided ? '<span class="wh-confronto-status live"><span class="material-icons" style="font-size:12px">sensors</span> AO VIVO</span>' : ""}
-                    ${isDecided ? '<span class="wh-confronto-status decided"><span class="material-icons" style="font-size:12px">check</span> Definido</span>' : ""}
+                <div class="wh-confronto-scoreboard">
+                    <img class="wh-confronto-escudo" src="${resolverEscudo({timeId: idA, escudo: c.timeA?.escudo || c.timeA?.url_escudo_png})}" onerror="this.src='/escudos/default.png'" alt="">
+                    <span class="wh-confronto-nome">${escapeHtml(c.timeA?.nome_time || c.timeA?.nome || "Time A")}</span>
+                    <span class="wh-confronto-pts ${aWinning ? "winning" : ""}">${(Math.trunc((pontosA||0) * 10) / 10).toFixed(1)}</span>
+                    <span class="wh-confronto-x">x</span>
+                    <span class="wh-confronto-pts ${bWinning ? "winning" : ""}">${(Math.trunc((pontosB||0) * 10) / 10).toFixed(1)}</span>
+                    <span class="wh-confronto-nome wh-confronto-nome--away">${escapeHtml(c.timeB?.nome_time || c.timeB?.nome || "Time B")}</span>
+                    <img class="wh-confronto-escudo" src="${resolverEscudo({timeId: idB, escudo: c.timeB?.escudo || c.timeB?.url_escudo_png})}" onerror="this.src='/escudos/default.png'" alt="">
                 </div>
-                <div class="wh-confronto-times">
-                    <div class="wh-time wh-time--home ${aWinning ? "winning" : bWinning ? "losing" : ""}">
-                        <img class="wh-time-escudo" src="${resolverEscudo({timeId: idA, escudo: c.timeA?.escudo || c.timeA?.url_escudo_png})}" onerror="this.src='/escudos/default.png'" alt="">
-                        <div class="wh-time-info">
-                            <div class="wh-time-nome">${escapeHtml(c.timeA?.nome_time || c.timeA?.nome || "Time A")}</div>
-                            ${c.timeA?.nome_cartola ? `<div class="wh-time-cartola">${escapeHtml(c.timeA.nome_cartola)}</div>` : ''}
-                        </div>
-                        <div class="wh-time-pontos">${(Math.trunc((pontosA||0) * 10) / 10).toFixed(1)}</div>
-                    </div>
-                    <div class="wh-vs">
-                        <span class="wh-vs-text">VS</span>
-                        <span class="wh-vs-diff">${(Math.trunc(diff * 10) / 10).toFixed(1)}</span>
-                    </div>
-                    <div class="wh-time wh-time--away ${bWinning ? "winning" : aWinning ? "losing" : ""}">
-                        <div class="wh-time-pontos">${(Math.trunc((pontosB||0) * 10) / 10).toFixed(1)}</div>
-                        <div class="wh-time-info">
-                            <div class="wh-time-nome">${escapeHtml(c.timeB?.nome_time || c.timeB?.nome || "Time B")}</div>
-                            ${c.timeB?.nome_cartola ? `<div class="wh-time-cartola">${escapeHtml(c.timeB.nome_cartola)}</div>` : ''}
-                        </div>
-                        <img class="wh-time-escudo" src="${resolverEscudo({timeId: idB, escudo: c.timeB?.escudo || c.timeB?.url_escudo_png})}" onerror="this.src='/escudos/default.png'" alt="">
-                    </div>
-                </div>
-                ${!isDecided ? renderBarraProporção(pontosA, pontosB) : ''}
-                ${insightHtml}
-                ${decisionHtml}
+                ${badgesHtml}
             </div>
         `;
     }
@@ -1738,50 +2522,40 @@ function renderMataMataSection() {
  * v3.0 - Redesign: tabela inline sem boxes aninhados + badge separado
  */
 function renderModuleRankingSection(opts) {
-    const { data, title, icon, sectionClass, navigateTo, getValue, getLabel, getSubLabel, unitLabel } = opts;
+    const { data, title, icon, sectionClass, navigateTo, getValue, getLabel } = opts;
     if (!data?.ranking || !Array.isArray(data.ranking) || data.ranking.length === 0) return null;
 
-    const top3 = data.ranking.slice(0, 3);
+    const leader = data.ranking[0];
     const meuId = String(WHState.timeId);
-
     const matchId = (r) => String(r.timeId || r.time_id || r.participanteId || '') === meuId;
     const meuIndex = data.ranking.findIndex(matchId);
-    const meInTop3 = meuIndex >= 0 && meuIndex < 3;
 
-    // Tabela TOP 3
-    const tableRows = top3.map((r, i) => {
-        const isMe = matchId(r);
-        const valor = getValue(r);
-        const nome = getLabel(r);
-        const sub = getSubLabel ? getSubLabel(r) : '';
-        const isFirst = i === 0;
+    // Líder #1 — sempre visível (single-line compacto)
+    const leaderHtml = `
+        <div class="wh-compact-leader ${meuIndex === 0 ? 'me' : ''}">
+            <span class="wh-compact-pos">1</span>
+            <img class="wh-compact-escudo" src="${resolverEscudo(leader)}" onerror="this.src='/escudos/default.png'" alt="">
+            <span class="wh-compact-nome">${getLabel(leader)}</span>
+            <span class="wh-compact-valor">${getValue(leader)}</span>
+        </div>
+    `;
 
-        return `
-            <tr class="${isMe ? 'me' : ''}">
-                <td class="wh-podium-pos">${i + 1}</td>
-                <td class="wh-podium-escudo"><img src="${resolverEscudo(r)}" onerror="this.src='/escudos/default.png'" alt=""></td>
-                <td class="wh-podium-nome">${nome}</td>
-                <td class="wh-podium-valor">${valor}</td>
-            </tr>
-        `;
-    }).join('');
-
-    // Badge de "Minha Posição" separado (fora da tabela) se não estou no top 3
-    let myBadgeHtml = '';
-    if (meuIndex >= 3) {
+    // Minha posição (se não sou o #1)
+    let myHtml = '';
+    if (meuIndex > 0) {
         const meuItem = data.ranking[meuIndex];
-        myBadgeHtml = `
-            <div class="wh-my-position-badge">
-                <span class="wh-mpb-pos">#${meuIndex + 1}</span>
-                <img class="wh-mpb-escudo" src="${resolverEscudo(meuItem)}" onerror="this.src='/escudos/default.png'" alt="">
-                <span class="wh-mpb-nome">${getLabel(meuItem)}</span>
-                <span class="wh-mpb-valor">${getValue(meuItem)}</span>
+        myHtml = `
+            <div class="wh-compact-leader wh-compact-leader--me">
+                <span class="wh-compact-pos">${meuIndex + 1}</span>
+                <img class="wh-compact-escudo" src="${resolverEscudo(meuItem)}" onerror="this.src='/escudos/default.png'" alt="">
+                <span class="wh-compact-nome">${getLabel(meuItem)}</span>
+                <span class="wh-compact-valor">${getValue(meuItem)}</span>
             </div>
         `;
     }
 
     return `
-        <div class="wh-section wh-section--${sectionClass}">
+        <div class="wh-section wh-section--${sectionClass} wh-section--compact">
             <div class="wh-section-header" ${navigateTo ? `data-navigate="${navigateTo}"` : ''}>
                 <div class="wh-section-icon">
                     <span class="material-icons">${icon}</span>
@@ -1789,12 +2563,10 @@ function renderModuleRankingSection(opts) {
                 <div class="wh-section-title">${title}</div>
                 ${navigateTo ? '<span class="material-icons wh-navigate-hint">open_in_new</span>' : ''}
             </div>
-            <div class="wh-section-body wh-section-body--podium">
-                <table class="wh-podium-table">
-                    ${tableRows}
-                </table>
+            <div class="wh-section-body wh-section-body--compact">
+                ${leaderHtml}
+                ${myHtml}
             </div>
-            ${myBadgeHtml}
         </div>
     `;
 }
@@ -1845,32 +2617,22 @@ function renderRestaUmSection() {
     const totalEliminados = data.eliminados?.length || 0;
     const total = data.totalParticipantes || (totalVivos + totalEliminados);
 
-    // Encontrar meu status
     const meu = vivos.find(p => String(p.timeId) === meuId)
         || data.eliminados?.find(p => String(p.timeId) === meuId);
-    const meuStatusLabel = !meu ? '' : meu.status === 'vivo' ? 'VIVO' : meu.status === 'campeao' ? 'CAMPEAO' : 'ELIMINADO';
-    const meuStatusClass = meu?.status || '';
 
-    // Lanterna = último vivo na lista (backend ordena por pontos DESC)
+    const leader = vivos[0];
     const lanterna = vivos.length > 1 ? vivos[vivos.length - 1] : null;
-    const lanternaIsMe = lanterna && String(lanterna.timeId) === meuId;
 
-    // Top 3 sobreviventes + lanterna
-    const top3 = vivos.slice(0, 3);
-
-    const rows = top3.map((p, i) => {
-        const isMe = String(p.timeId) === meuId;
-        return `
-            <tr class="${isMe ? 'me' : ''}">
-                <td class="wh-podium-pos">${i + 1}</td>
-                <td class="wh-podium-escudo"><img src="${resolverEscudo(p)}" onerror="this.src='/escudos/default.png'" alt=""></td>
-                <td class="wh-podium-nome">${escapeHtml(p.nomeTime || p.nomeCartoleiro || 'Time')}</td>
-                <td class="wh-podium-valor" style="color:var(--app-success)">
-                    <span class="material-icons" style="font-size:12px;vertical-align:middle;">favorite</span> Vivo
-                </td>
-            </tr>
-        `;
-    }).join('');
+    // Líder #1 sobrevivente (compact)
+    const leaderIsMe = String(leader.timeId) === meuId;
+    const leaderHtml = `
+        <div class="wh-compact-leader ${leaderIsMe ? 'me' : ''}">
+            <span class="wh-compact-pos">1</span>
+            <img class="wh-compact-escudo" src="${resolverEscudo(leader)}" onerror="this.src='/escudos/default.png'" alt="">
+            <span class="wh-compact-nome">${escapeHtml(leader.nomeTime || leader.nomeCartoleiro || 'Time')}</span>
+            <span class="wh-compact-valor" style="color:var(--app-success)">Vivo</span>
+        </div>
+    `;
 
     // Lanterna alert (zona de eliminação)
     let lanternaHtml = '';
@@ -1878,45 +2640,40 @@ function renderRestaUmSection() {
         const isMe = String(lanterna.timeId) === meuId;
         lanternaHtml = `
             <div class="wh-ru-lanterna ${isMe ? 'is-me' : ''}">
-                <span class="material-icons" style="font-size:14px;color:var(--app-danger);">warning</span>
-                <img src="${resolverEscudo(lanterna)}" onerror="this.src='/escudos/default.png'" style="width:18px;height:18px;object-fit:contain;">
-                <span style="flex:1;font-size:var(--app-font-xs);color:${isMe ? 'var(--app-danger)' : 'var(--app-text-muted)'};">
-                    ${isMe ? 'VOCE esta na zona!' : escapeHtml(lanterna.nomeTime || 'Time')}
-                </span>
-                <span style="font-size:var(--app-font-xs);color:var(--app-danger);font-weight:600;">Zona de eliminacao</span>
+                <span class="material-icons">warning</span>
+                <span style="flex:1">${isMe ? 'VOCE esta na zona!' : escapeHtml(lanterna.nomeTime || 'Time')}</span>
+                <span>Zona de eliminacao</span>
             </div>
         `;
     }
 
-    // Meu badge se não estou no top3
-    let myBadgeHtml = '';
-    if (meu && meu.status === 'vivo') {
+    // Minha posição (se não sou o #1)
+    let myHtml = '';
+    if (meu && !leaderIsMe) {
         const meuIndex = vivos.findIndex(p => String(p.timeId) === meuId);
-        if (meuIndex >= 3) {
-            myBadgeHtml = `
-                <div class="wh-my-position-badge">
-                    <span class="wh-mpb-pos">#${meuIndex + 1}</span>
-                    <img class="wh-mpb-escudo" src="${resolverEscudo(meu)}" onerror="this.src='/escudos/default.png'" alt="">
-                    <span class="wh-mpb-nome">${escapeHtml(meu.nomeTime || 'Meu Time')}</span>
-                    <span class="wh-mpb-valor" style="color:var(--app-success)">Vivo</span>
-                </div>
-            `;
-        }
-    } else if (meu && meu.status === 'eliminado') {
-        myBadgeHtml = `
-            <div class="wh-my-position-badge" style="border-color:var(--app-danger);">
-                <span class="wh-mpb-pos" style="color:var(--app-danger);">
-                    <span class="material-icons" style="font-size:14px;">close</span>
+        const isElim = meu.status === 'eliminado';
+        myHtml = `
+            <div class="wh-compact-leader wh-compact-leader--me">
+                <span class="wh-compact-pos">${isElim ? '-' : (meuIndex + 1)}</span>
+                <img class="wh-compact-escudo" src="${resolverEscudo(meu)}" onerror="this.src='/escudos/default.png'" alt="">
+                <span class="wh-compact-nome">${escapeHtml(meu.nomeTime || 'Meu Time')}</span>
+                <span class="wh-compact-valor" style="color:${isElim ? 'var(--app-danger)' : 'var(--app-success)'}">
+                    ${isElim ? `Elim. R${meu.rodadaEliminacao || '?'}` : 'Vivo'}
                 </span>
-                <img class="wh-mpb-escudo" src="${resolverEscudo(meu)}" onerror="this.src='/escudos/default.png'" alt="">
-                <span class="wh-mpb-nome">${escapeHtml(meu.nomeTime || 'Meu Time')}</span>
-                <span class="wh-mpb-valor" style="color:var(--app-danger)">Eliminado R${meu.rodadaEliminacao || '?'}</span>
             </div>
         `;
     }
+
+    // v5.0: Barra de progresso de sobrevivência
+    const pctVivos = total > 0 ? Math.round((totalVivos / total) * 100) : 0;
+    const progressHtml = `
+        <div class="wh-ru-progress">
+            <div class="wh-ru-bar" style="width:${pctVivos}%"></div>
+        </div>
+    `;
 
     return `
-        <div class="wh-section wh-section--resta-um">
+        <div class="wh-section wh-section--resta-um wh-section--compact">
             <div class="wh-section-header" data-navigate="resta-um">
                 <div class="wh-section-icon">
                     <span class="material-icons">person_off</span>
@@ -1927,13 +2684,12 @@ function renderRestaUmSection() {
                 </div>
                 <span class="material-icons wh-navigate-hint">open_in_new</span>
             </div>
-            <div class="wh-section-body wh-section-body--podium">
-                <table class="wh-podium-table">
-                    ${rows}
-                </table>
+            ${progressHtml}
+            <div class="wh-section-body wh-section-body--compact">
+                ${leaderHtml}
+                ${lanternaHtml}
+                ${myHtml}
             </div>
-            ${lanternaHtml}
-            ${myBadgeHtml}
         </div>
     `;
 }
@@ -1960,8 +2716,7 @@ function renderMeuConfrontoPontosCorridos() {
     const perdendo = diff < 0;
 
     const statusClass = vencendo ? "winning" : perdendo ? "losing" : "tied";
-    const statusEmoji = vencendo ? '<span class="material-icons" style="color: var(--app-danger)">local_fire_department</span>' : perdendo ? '<span class="material-icons" style="color: var(--app-warning)">sentiment_stressed</span>' : '<span class="material-icons" style="color: var(--app-info)">compare_arrows</span>';
-    const statusText = vencendo ? "Vencendo!" : perdendo ? "Perdendo..." : "Empatado";
+    const statusText = vencendo ? "Vencendo" : perdendo ? "Perdendo" : "Empatado";
 
     const isLive = isJogosAoVivo();
 
@@ -1977,28 +2732,26 @@ function renderMeuConfrontoPontosCorridos() {
             </div>
             <div class="wh-section-body">
                 <div class="wh-meu-confronto">
-                    <div class="wh-mc-times">
-                        <div class="wh-mc-time wh-mc-time--eu ${vencendo ? 'winning' : ''}">
+                    <div class="wh-mc-scoreboard">
+                        <div class="wh-mc-side ${vencendo ? 'winning' : perdendo ? 'losing' : ''}">
                             <img class="wh-mc-escudo" src="${eu?.escudo || '/escudos/default.png'}" onerror="this.src='/escudos/default.png'" alt="">
-                            <div class="wh-mc-info">
-                                <div class="wh-mc-label">VOCÊ</div>
-                                <div class="wh-mc-nome">${escapeHtml(eu?.nome || 'Meu Time')}</div>
+                            <div class="wh-mc-label">VOCÊ</div>
+                            <div class="wh-mc-nome">${escapeHtml(eu?.nome || 'Meu Time')}</div>
+                        </div>
+
+                        <div class="wh-mc-score-center">
+                            <div class="wh-mc-score-row">
+                                <span class="wh-mc-pontos ${vencendo ? 'winning' : ''}">${(Math.trunc((meusPontos||0) * 10) / 10).toFixed(1)}</span>
+                                <span class="wh-mc-score-x">x</span>
+                                <span class="wh-mc-pontos ${perdendo ? 'winning' : ''}">${(Math.trunc((pontosAdv||0) * 10) / 10).toFixed(1)}</span>
                             </div>
-                            <div class="wh-mc-pontos ${vencendo ? 'winning' : ''}">${(Math.trunc((meusPontos||0) * 10) / 10).toFixed(1)}</div>
+                            <div class="wh-mc-vs-diff ${statusClass}">${diff > 0 ? '+' : ''}${(Math.trunc(diff * 10) / 10).toFixed(1)}</div>
                         </div>
 
-                        <div class="wh-mc-vs">
-                            <span class="wh-mc-vs-emoji">${statusEmoji}</span>
-                            <span class="wh-mc-vs-diff ${statusClass}">${diff > 0 ? '+' : ''}${(Math.trunc(diff * 10) / 10).toFixed(1)}</span>
-                        </div>
-
-                        <div class="wh-mc-time wh-mc-time--adv ${perdendo ? 'winning' : ''}">
+                        <div class="wh-mc-side ${perdendo ? 'winning' : vencendo ? 'losing' : ''}">
                             <img class="wh-mc-escudo" src="${adversario?.escudo || '/escudos/default.png'}" onerror="this.src='/escudos/default.png'" alt="">
-                            <div class="wh-mc-info">
-                                <div class="wh-mc-label">ADVERSÁRIO</div>
-                                <div class="wh-mc-nome">${escapeHtml(adversario?.nome || adversario?.nome_cartola || 'Rival')}</div>
-                            </div>
-                            <div class="wh-mc-pontos ${perdendo ? 'winning' : ''}">${(Math.trunc((pontosAdv||0) * 10) / 10).toFixed(1)}</div>
+                            <div class="wh-mc-label">ADVERSÁRIO</div>
+                            <div class="wh-mc-nome">${escapeHtml(adversario?.nome || adversario?.nome_cartola || 'Rival')}</div>
                         </div>
                     </div>
 
@@ -2034,7 +2787,6 @@ function renderMeuConfrontoMataMata() {
     const perdendo = diff < 0;
 
     const statusClass = vencendo ? "winning" : perdendo ? "losing" : "tied";
-    const statusEmoji = vencendo ? '<span class="material-icons" style="color: var(--app-warning)">emoji_events</span>' : perdendo ? '<span class="material-icons" style="color: var(--app-danger)">warning</span>' : '<span class="material-icons" style="color: var(--app-info)">compare_arrows</span>';
 
     const faseLabel = {
         primeira: "1ª Fase",
@@ -2045,6 +2797,7 @@ function renderMeuConfrontoMataMata() {
     }[fase] || fase;
 
     const isLive = isJogosAoVivo();
+    const statusText = vencendo ? 'Avançando' : perdendo ? 'Em risco' : 'Equilibrado';
 
     return `
         <div class="wh-section wh-section--meu-confronto wh-section--mata-mata ${statusClass}" data-navigate="mata-mata">
@@ -2058,34 +2811,32 @@ function renderMeuConfrontoMataMata() {
             </div>
             <div class="wh-section-body">
                 <div class="wh-meu-confronto">
-                    <div class="wh-mc-times">
-                        <div class="wh-mc-time wh-mc-time--eu ${vencendo ? 'winning' : ''}">
+                    <div class="wh-mc-scoreboard">
+                        <div class="wh-mc-side ${vencendo ? 'winning' : perdendo ? 'losing' : ''}">
                             <img class="wh-mc-escudo" src="${eu?.url_escudo_png || '/escudos/default.png'}" onerror="this.src='/escudos/default.png'" alt="">
-                            <div class="wh-mc-info">
-                                <div class="wh-mc-label">VOCÊ</div>
-                                <div class="wh-mc-nome">${escapeHtml(eu?.nome_time || eu?.nome_cartola || 'Meu Time')}</div>
+                            <div class="wh-mc-label">VOCÊ</div>
+                            <div class="wh-mc-nome">${escapeHtml(eu?.nome_time || eu?.nome_cartola || 'Meu Time')}</div>
+                        </div>
+
+                        <div class="wh-mc-score-center">
+                            <div class="wh-mc-score-row">
+                                <span class="wh-mc-pontos ${vencendo ? 'winning' : ''}">${(Math.trunc((meusPontos||0) * 10) / 10).toFixed(1)}</span>
+                                <span class="wh-mc-score-x">x</span>
+                                <span class="wh-mc-pontos ${perdendo ? 'winning' : ''}">${(Math.trunc((pontosAdv||0) * 10) / 10).toFixed(1)}</span>
                             </div>
-                            <div class="wh-mc-pontos ${vencendo ? 'winning' : ''}">${(Math.trunc((meusPontos||0) * 10) / 10).toFixed(1)}</div>
+                            <div class="wh-mc-vs-diff ${statusClass}">${diff > 0 ? '+' : ''}${(Math.trunc(diff * 10) / 10).toFixed(1)}</div>
                         </div>
 
-                        <div class="wh-mc-vs">
-                            <span class="wh-mc-vs-emoji">${statusEmoji}</span>
-                            <span class="wh-mc-vs-diff ${statusClass}">${diff > 0 ? '+' : ''}${(Math.trunc(diff * 10) / 10).toFixed(1)}</span>
-                        </div>
-
-                        <div class="wh-mc-time wh-mc-time--adv ${perdendo ? 'winning' : ''}">
+                        <div class="wh-mc-side ${perdendo ? 'winning' : vencendo ? 'losing' : ''}">
                             <img class="wh-mc-escudo" src="${adversario?.url_escudo_png || '/escudos/default.png'}" onerror="this.src='/escudos/default.png'" alt="">
-                            <div class="wh-mc-info">
-                                <div class="wh-mc-label">ADVERSÁRIO</div>
-                                <div class="wh-mc-nome">${escapeHtml(adversario?.nome_time || adversario?.nome_cartola || 'Rival')}</div>
-                            </div>
-                            <div class="wh-mc-pontos ${perdendo ? 'winning' : ''}">${(Math.trunc((pontosAdv||0) * 10) / 10).toFixed(1)}</div>
+                            <div class="wh-mc-label">ADVERSÁRIO</div>
+                            <div class="wh-mc-nome">${escapeHtml(adversario?.nome_time || adversario?.nome_cartola || 'Rival')}</div>
                         </div>
                     </div>
 
                     <div class="wh-mc-status ${statusClass}">
-                        <span class="material-icons">${vencendo ? 'thumb_up' : perdendo ? 'thumb_down' : 'compare_arrows'}</span>
-                        ${vencendo ? 'Avançando!' : perdendo ? 'Em risco de eliminação' : 'Confronto equilibrado'}
+                        <span class="material-icons">${vencendo ? 'trending_up' : perdendo ? 'trending_down' : 'trending_flat'}</span>
+                        ${statusText} por ${(Math.trunc(Math.abs(diff) * 10) / 10).toFixed(1)} pts
                     </div>
                 </div>
             </div>
@@ -2132,6 +2883,8 @@ if (typeof window !== "undefined") {
         close: closePanel,
         refresh: fetchAllData,
         syncState: syncFabGameState,
+        openModal: openCardModal,
+        closeModal: closeCardModal,
         state: WHState,
         FAB_GAME_STATE,
     };
