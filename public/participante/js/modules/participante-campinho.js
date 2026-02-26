@@ -76,13 +76,13 @@ export async function inicializarCampinhoParticipante(params) {
     try {
         const statusMercado = await buscarStatusMercado();
         const rodadaMercado = statusMercado?.rodada_atual || 1;
-        const mercadoAberto = statusMercado?.status_mercado === 1;
+        const statusMercadoNum = statusMercado?.status_mercado;
 
-        // Sempre mostrar última rodada CONSOLIDADA (com pontuação final)
-        // Em AMBOS os casos (mercado aberto ou fechado), a consolidada é sempre rodada_atual - 1:
-        // - Mercado ABERTO: rodada_atual = próxima rodada (não jogada) → consolidada = -1
-        // - Mercado FECHADO: rodada_atual = rodada em andamento → consolidada = -1
-        const rodadaConsolidada = Math.max(1, rodadaMercado - 1);
+        // Mercado FECHADO (status=2): jogos em andamento → rodada_atual É a rodada disputada
+        // Mercado ABERTO (status=1) ou manutenção (status=3): rodada_atual é a PRÓXIMA → consolidada = -1
+        const rodadaConsolidada = statusMercadoNum === 2
+            ? rodadaMercado
+            : Math.max(1, rodadaMercado - 1);
 
         const [escalacao, confrontos] = await Promise.all([
             buscarEscalacaoCompleta(ligaId, timeId, rodadaConsolidada),
