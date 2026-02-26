@@ -153,7 +153,6 @@ export async function getMercadoStatus(req, res) {
         headers: {
           "Cache-Control": "no-cache",
           Pragma: "no-cache",
-          "If-Modified-Since": "0",
           "User-Agent": "SuperCartola/1.0",
         },
       },
@@ -209,7 +208,6 @@ export async function getParciais(req, res) {
         headers: {
           "Cache-Control": "no-cache",
           Pragma: "no-cache",
-          "If-Modified-Since": "0",
         },
       },
     );

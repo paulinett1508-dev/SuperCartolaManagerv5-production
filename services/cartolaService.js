@@ -58,7 +58,6 @@ export async function buscarClubes() {
         headers: {
           "Cache-Control": "no-cache",
           Pragma: "no-cache",
-          "If-Modified-Since": "0",
         },
       },
     );
@@ -127,7 +126,6 @@ export async function buscarTimePorId(id) {
         headers: {
           "Cache-Control": "no-cache",
           Pragma: "no-cache",
-          "If-Modified-Since": "0",
         },
       },
     );
@@ -177,7 +175,6 @@ export async function buscarPontuacaoPorRodada(id, rodada) {
         headers: {
           "Cache-Control": "no-cache",
           Pragma: "no-cache",
-          "If-Modified-Since": "0",
         },
       },
     );

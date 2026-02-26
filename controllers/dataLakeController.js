@@ -15,7 +15,6 @@ const FETCH_TIMEOUT = 15000; // 15 segundos
 const FETCH_HEADERS = {
   "Cache-Control": "no-cache",
   "Pragma": "no-cache",
-  "If-Modified-Since": "0",
   "User-Agent": "SuperCartola/1.0 DataLake",
 };
 
