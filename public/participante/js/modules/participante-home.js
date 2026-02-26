@@ -2173,19 +2173,44 @@ async function buscarCartoletasTime(timeId) {
 }
 
 // =====================================================================
-// RENDERIZAR TILES HOME (Windows Phone Style)
+// RENDERIZAR TILES HOME v5.0 (Inteligente + Modais)
 // =====================================================================
+
+// Snapshot para modais (ligaId, data, ranking) — atualizado a cada render
+let _homeSnapshot = { data: null, ligaId: null };
+
 async function _renderizarTiles(data, ligaId) {
-    const { posicao, ultimaRodada, lider } = data;
+    const { posicao, ultimaRodada, lider, saldoFinanceiro, minhasRodadas } = data;
     const modulosAtivos = window.participanteNav?.modulosAtivos || {};
     const statusMercadoNum = Number(mercadoStatus?.status_mercado ?? 1) || 1;
     const rodadaEmAndamento = statusMercadoNum === 2;
+
+    // Guardar snapshot para uso nos modais
+    _homeSnapshot = { data, ligaId };
 
     // === TIMESTAMP ===
     const tsEl = document.getElementById('tile-atualizado');
     if (tsEl) {
         const agora = new Date();
         tsEl.textContent = `${String(agora.getHours()).padStart(2, '0')}:${String(agora.getMinutes()).padStart(2, '0')}`;
+    }
+
+    // === TILE: MINHA RODADA ===
+    const confrontoPtsEl = document.getElementById('tile-confronto-pts');
+    if (confrontoPtsEl) {
+        if (rodadaEmAndamento && parciaisAtivos && dadosParciais) {
+            const posicaoParcial = ParciaisModule.obterMinhaPosicaoParcial?.();
+            const pontosParciais = posicaoParcial?.pontos || 0;
+            confrontoPtsEl.textContent = (Math.trunc(pontosParciais * 100) / 100).toFixed(2);
+        } else {
+            const pontosRodada = ultimaRodada ? parseFloat(ultimaRodada.pontos || 0) : 0;
+            confrontoPtsEl.textContent = formatarPontos(pontosRodada);
+        }
+    }
+
+    const confrontoLiveBadgeEl = document.getElementById('tile-confronto-live-badge');
+    if (confrontoLiveBadgeEl) {
+        confrontoLiveBadgeEl.style.display = (rodadaEmAndamento && parciaisAtivos) ? 'flex' : 'none';
     }
 
     // === TILE: RANKING ===
@@ -2204,46 +2229,80 @@ async function _renderizarTiles(data, ligaId) {
         }
     }
 
-    // === TILE: CONFRONTO ===
-    const confrontoPtsEl = document.getElementById('tile-confronto-pts');
-    if (confrontoPtsEl) {
-        if (rodadaEmAndamento && parciaisAtivos && dadosParciais) {
-            const posicaoParcial = ParciaisModule.obterMinhaPosicaoParcial?.();
-            const pontosParciais = posicaoParcial?.pontos || 0;
-            confrontoPtsEl.textContent = (Math.trunc(pontosParciais * 100) / 100).toFixed(2);
-        } else {
-            const pontosRodada = ultimaRodada ? parseFloat(ultimaRodada.pontos || 0) : 0;
-            confrontoPtsEl.textContent = formatarPontos(pontosRodada);
-        }
+    // === TILE: EXTRATO/SALDO (sempre ativo) ===
+    const extratoSaldoEl = document.getElementById('tile-extrato-saldo');
+    const extratoVariacaoEl = document.getElementById('tile-extrato-variacao');
+    if (extratoSaldoEl) {
+        const abs = Math.abs(saldoFinanceiro);
+        const formatted = saldoFinanceiro >= 0
+            ? `R$ ${abs.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+            : `-R$ ${abs.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+        extratoSaldoEl.textContent = formatted;
+        extratoSaldoEl.style.color = saldoFinanceiro < 0 ? 'rgba(255,200,200,0.9)' : '';
+    }
+    if (extratoVariacaoEl && ultimaRodada) {
+        const ganho = parseFloat(ultimaRodada.valorFinanceiro || ultimaRodada.ganho_rodada || 0);
+        const sinal = ganho >= 0 ? '+' : '';
+        extratoVariacaoEl.textContent = `${sinal}R$ ${(Math.trunc(ganho * 100) / 100).toFixed(2)} última rodada`;
+        extratoVariacaoEl.className = `home-tile-variacao ${ganho >= 0 ? 'positivo' : 'negativo'}`;
     }
 
-    const confrontoLiveBadgeEl = document.getElementById('tile-confronto-live-badge');
-    if (confrontoLiveBadgeEl) {
-        confrontoLiveBadgeEl.style.display = (rodadaEmAndamento && parciaisAtivos) ? 'flex' : 'none';
-    }
+    // === ROW 3: Capitão, Artilheiro ===
+    // Row 3 é sempre visível (extrato sempre ativo)
 
-    // === TILES OPCIONAIS ===
-    const anyOptionalActive = modulosAtivos.capitaoLuxo || modulosAtivos.artilheiro || modulosAtivos.mataMata;
-    const optionalRow = document.getElementById('home-tiles-optional-row');
-    if (optionalRow) optionalRow.style.display = anyOptionalActive ? 'flex' : 'none';
-
-    // Capitão de Luxo
     const tileCapitao = document.getElementById('tile-capitao');
     if (tileCapitao) {
         tileCapitao.style.display = modulosAtivos.capitaoLuxo ? '' : 'none';
-        if (modulosAtivos.capitaoLuxo) _popularTileCapitao(ligaId);
     }
 
-    // Artilheiro Campeão
     const tileArtilheiro = document.getElementById('tile-artilheiro');
     if (tileArtilheiro) {
         tileArtilheiro.style.display = modulosAtivos.artilheiro ? '' : 'none';
-        if (modulosAtivos.artilheiro) _popularTileArtilheiro(ligaId);
     }
 
-    // Mata-Mata
+    // === ROW 4: Mata-Mata, Luva de Ouro, Pontos Corridos ===
+    const row4Active = modulosAtivos.mataMata || modulosAtivos.luvaOuro || modulosAtivos.pontosCorridos;
+    const row4El = document.getElementById('home-row-4');
+    if (row4El) row4El.style.display = row4Active ? 'flex' : 'none';
+
     const tileMataMata = document.getElementById('tile-mata-mata');
     if (tileMataMata) tileMataMata.style.display = modulosAtivos.mataMata ? '' : 'none';
+
+    const tileLuvaOuro = document.getElementById('tile-luva-ouro');
+    if (tileLuvaOuro) tileLuvaOuro.style.display = modulosAtivos.luvaOuro ? '' : 'none';
+
+    const tilePontosCorridos = document.getElementById('tile-pontos-corridos');
+    if (tilePontosCorridos) tilePontosCorridos.style.display = modulosAtivos.pontosCorridos ? '' : 'none';
+
+    // === ROW 5: Top10, Melhor Mês, Resta Um, Campinho ===
+    const row5Active = modulosAtivos.top10 || modulosAtivos.melhorMes || modulosAtivos.restaUm || modulosAtivos.campinho;
+    const row5El = document.getElementById('home-row-5');
+    if (row5El) row5El.style.display = row5Active ? 'flex' : 'none';
+
+    const tileTop10 = document.getElementById('tile-top10');
+    if (tileTop10) tileTop10.style.display = modulosAtivos.top10 ? '' : 'none';
+
+    const tileMelhorMes = document.getElementById('tile-melhor-mes');
+    if (tileMelhorMes) tileMelhorMes.style.display = modulosAtivos.melhorMes ? '' : 'none';
+
+    const tileRestaUm = document.getElementById('tile-resta-um');
+    if (tileRestaUm) tileRestaUm.style.display = modulosAtivos.restaUm ? '' : 'none';
+
+    const tileCampinho = document.getElementById('tile-campinho');
+    if (tileCampinho) tileCampinho.style.display = modulosAtivos.campinho ? '' : 'none';
+
+    // === LAZY FETCHES em paralelo para tiles opcionais ativos ===
+    const lazyTasks = [];
+    if (modulosAtivos.capitaoLuxo) lazyTasks.push(_popularTileCapitao(ligaId));
+    if (modulosAtivos.artilheiro)  lazyTasks.push(_popularTileArtilheiro(ligaId));
+    if (modulosAtivos.luvaOuro)    lazyTasks.push(_popularTileLuvaOuro(ligaId));
+    if (modulosAtivos.pontosCorridos) lazyTasks.push(_popularTilePontosCorridos(ligaId, data.timeId));
+    if (modulosAtivos.top10)       _popularTileTop10(data);
+    if (modulosAtivos.restaUm)     lazyTasks.push(_popularTileRestaUm(ligaId, data.timeId));
+
+    if (lazyTasks.length > 0) {
+        Promise.allSettled(lazyTasks).catch(() => {});
+    }
 }
 
 async function _popularTileCapitao(ligaId) {
@@ -2275,5 +2334,425 @@ async function _popularTileArtilheiro(ligaId) {
     } catch (e) { /* silencioso */ }
 }
 
+async function _popularTileLuvaOuro(ligaId) {
+    try {
+        const r = await fetch(`/api/luva-de-ouro/${ligaId}/ranking`);
+        if (!r.ok) return;
+        const d = await r.json();
+        const top = Array.isArray(d) ? d[0] : (d?.ranking?.[0] || d?.data?.[0] || null);
+        if (!top) return;
+        const nomeEl = document.getElementById('tile-luva-nome');
+        const defEl = document.getElementById('tile-luva-defesas');
+        if (nomeEl) nomeEl.textContent = top.nomeCartola || top.nome_cartola || top.nomeTime || top.nome_time || '--';
+        if (defEl) {
+            const def = top.defesas ?? top.total_defesas ?? top.totalDefesas ?? '--';
+            defEl.textContent = def !== '--' ? `${def} def` : '-- def';
+        }
+    } catch (e) { /* silencioso */ }
+}
+
+async function _popularTilePontosCorridos(ligaId, timeId) {
+    try {
+        const temporada = window.ParticipanteConfig?.CURRENT_SEASON || new Date().getFullYear();
+        const r = await fetch(`/api/pontos-corridos/${ligaId}?temporada=${temporada}`);
+        if (!r.ok) return;
+        const d = await r.json();
+        const meu = Array.isArray(d) ? d.find(t => Number(t.timeId || t.time_id) === Number(timeId))
+                                     : (d?.ranking || d?.data || []).find(t => Number(t.timeId || t.time_id) === Number(timeId));
+        if (!meu) return;
+        const v = meu.vitorias ?? meu.ganhos ?? 0;
+        const e = meu.empates ?? 0;
+        const derrota = meu.derrotas ?? meu.perdas ?? 0;
+        const total = v + e + derrota;
+        const aprovEl = document.getElementById('tile-pontos-corridos-aproveitamento');
+        const recEl = document.getElementById('tile-pontos-corridos-record');
+        if (aprovEl) {
+            const aprv = total > 0 ? Math.round(((v * 3 + e) / (total * 3)) * 100) : 0;
+            aprovEl.textContent = `${aprv}%`;
+        }
+        if (recEl) recEl.textContent = `${v}V ${e}E ${derrota}D`;
+    } catch (e) { /* silencioso */ }
+}
+
+function _popularTileTop10(data) {
+    const { ranking, posicao } = data;
+    const statusEl = document.getElementById('tile-top10-status');
+    if (!statusEl || !posicao) return;
+    if (posicao <= 10) {
+        statusEl.textContent = `${posicao}º MITO`;
+        statusEl.style.color = 'var(--app-gold)';
+    } else if (Array.isArray(ranking) && posicao === ranking.length) {
+        statusEl.textContent = 'MICO';
+        statusEl.style.color = 'var(--app-danger)';
+    } else {
+        statusEl.textContent = `${posicao}º lugar`;
+        statusEl.style.color = '';
+    }
+}
+
+async function _popularTileRestaUm(ligaId, timeId) {
+    try {
+        const r = await fetch(`/api/resta-um/${ligaId}/status`);
+        if (!r.ok) return;
+        const d = await r.json();
+        const meu = (d?.participantes || d?.times || []).find(t => Number(t.timeId || t.time_id) === Number(timeId));
+        const statusEl = document.getElementById('tile-resta-um-status');
+        if (!statusEl) return;
+        const vivo = meu?.ativo !== false && meu?.eliminado !== true;
+        statusEl.textContent = vivo ? 'VIVO' : 'ELIMINADO';
+        statusEl.className = `home-tile-badge-status ${vivo ? 'vivo' : 'eliminado'}`;
+    } catch (e) { /* silencioso */ }
+}
+
+// =====================================================================
+// SISTEMA DE MODAL BOTTOM-SHEET v5.0
+// =====================================================================
+
+window._abrirModalHome = function(titulo, htmlContent) {
+    const overlay = document.getElementById('home-modal-overlay');
+    const titleEl = document.getElementById('home-modal-title');
+    const bodyEl = document.getElementById('home-modal-body');
+    if (!overlay || !titleEl || !bodyEl) return;
+
+    titleEl.textContent = titulo;
+    bodyEl.innerHTML = htmlContent;
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+};
+
+window._fecharModalHome = function() {
+    const overlay = document.getElementById('home-modal-overlay');
+    if (!overlay) return;
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+};
+
+window._homeTileClick = async function(tileId) {
+    const { data, ligaId } = _homeSnapshot;
+    if (!data || !ligaId) return;
+
+    switch (tileId) {
+        case 'rodada':    await _modalMinhaRodada(data, ligaId); break;
+        case 'ranking':   _modalRanking(data); break;
+        case 'extrato':   _modalExtrato(data, ligaId); break;
+        case 'capitao':   await _modalCapitao(ligaId); break;
+        case 'artilheiro': await _modalArtilheiro(ligaId); break;
+        case 'luva-ouro': await _modalLuvaOuro(ligaId); break;
+        case 'mata-mata': await _modalMataMata(ligaId, data.timeId); break;
+        case 'pontos-corridos': await _modalPontosCorridos(ligaId, data.timeId); break;
+        case 'top10':     _modalTop10(data); break;
+        case 'campinho':  window.participanteNav?.navegarPara('campinho'); break;
+        case 'melhor-mes': window.participanteNav?.navegarPara('melhor-mes'); break;
+        case 'resta-um':  window.participanteNav?.navegarPara('resta-um'); break;
+        default:
+            window.participanteNav?.navegarPara(tileId);
+    }
+};
+
+// Helper: botão de navegação padronizado
+function _btnNavModal(label, modulo) {
+    return `<button class="home-modal-btn" onclick="window._fecharModalHome?.(); window.participanteNav?.navegarPara('${modulo}')">
+        <span class="material-icons" style="font-size:18px">arrow_forward</span>
+        ${label}
+    </button>`;
+}
+
+// Helper: skeleton loading
+function _skeletonModal(linhas = 3) {
+    return `<div class="home-modal-loading">${Array(linhas).fill('<div class="home-modal-skeleton"></div>').join('')}</div>`;
+}
+
+async function _modalMinhaRodada(data, ligaId) {
+    const { ultimaRodada, ultimaRodadaDisputada, rodadaAtual, timeId } = data;
+    window._abrirModalHome('MINHA RODADA', _skeletonModal(4));
+
+    try {
+        const rodadaFetch = ultimaRodadaDisputada || rodadaAtual;
+        const r = await fetch(`/api/cartola/time/id/${timeId}/${rodadaFetch}`);
+        if (!r.ok) throw new Error('not found');
+        const d = await r.json();
+        const atletas = (d?.atletas || []).sort((a, b) => (parseFloat(b.pontos_num || b.pontos || 0)) - (parseFloat(a.pontos_num || a.pontos || 0))).slice(0, 5);
+        const pontosRodada = ultimaRodada ? parseFloat(ultimaRodada.pontos || 0) : 0;
+
+        const rows = atletas.map(a => {
+            const pts = parseFloat(a.pontos_num || a.pontos || 0);
+            const nome = a.apelido || a.nome || '—';
+            return `<div class="home-modal-ranking-row">
+                <span class="home-modal-ranking-nome">${nome}</span>
+                <span class="home-modal-ranking-pts">${(Math.trunc(pts * 100) / 100).toFixed(2)} pts</span>
+            </div>`;
+        }).join('');
+
+        const pontosFmt = (Math.trunc(pontosRodada * 100) / 100).toFixed(2);
+        window._abrirModalHome('MINHA RODADA', `
+            <div class="home-modal-stat-row">
+                <span class="home-modal-stat-label">PONTUAÇÃO RODADA ${rodadaFetch}</span>
+                <span class="home-modal-stat-value">${pontosFmt} pts</span>
+            </div>
+            <div style="margin-top:12px">${rows || '<p class="home-modal-info">Sem atletas encontrados.</p>'}</div>
+            ${_btnNavModal('Ver Rodada Completa', 'rodadas')}
+        `);
+    } catch (e) {
+        const pontosRodada = ultimaRodada ? (Math.trunc(parseFloat(ultimaRodada.pontos || 0) * 100) / 100).toFixed(2) : '--';
+        window._abrirModalHome('MINHA RODADA', `
+            <div class="home-modal-stat-row">
+                <span class="home-modal-stat-label">ÚLTIMA PONTUAÇÃO</span>
+                <span class="home-modal-stat-value">${pontosRodada} pts</span>
+            </div>
+            ${_btnNavModal('Ver Rodada Completa', 'rodadas')}
+        `);
+    }
+}
+
+function _modalRanking(data) {
+    const { posicao, ranking, lider } = data;
+    const top5 = Array.isArray(ranking) ? ranking.slice(0, 5) : [];
+    const rows = top5.map((t, i) => {
+        const isMe = Number(t.timeId || t.time_id) === Number(data.timeId);
+        const pts = parseFloat(t.pontos ?? t.pontos_total ?? 0);
+        const nome = t.nome_time || t.nomeTime || '—';
+        const posClass = isMe ? ' me' : '';
+        return `<div class="home-modal-ranking-row">
+            <span class="home-modal-ranking-pos${posClass}">${i + 1}º</span>
+            <span class="home-modal-ranking-nome${posClass}">${nome}</span>
+            <span class="home-modal-ranking-pts">${(Math.trunc(pts * 100) / 100).toFixed(2)}</span>
+        </div>`;
+    }).join('');
+
+    window._abrirModalHome('RANKING GERAL', `
+        <div class="home-modal-stat-row">
+            <span class="home-modal-stat-label">SUA POSIÇÃO</span>
+            <span class="home-modal-stat-value">${posicao ? `${posicao}º` : '--'}</span>
+        </div>
+        <div style="margin-top:12px">${rows || '<p class="home-modal-info">Carregando ranking...</p>'}</div>
+        ${_btnNavModal('Ver Ranking Completo', 'ranking')}
+    `);
+}
+
+async function _modalExtrato(data, ligaId) {
+    const { saldoFinanceiro, timeId, minhasRodadas } = data;
+    const abs = Math.abs(saldoFinanceiro);
+    const saldoFmt = saldoFinanceiro >= 0
+        ? `R$ ${abs.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+        : `-R$ ${abs.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+    const saldoClass = saldoFinanceiro >= 0 ? 'positivo' : 'negativo';
+
+    // Últimas 3 rodadas financeiramente
+    const ultimas = (minhasRodadas || []).slice(0, 3).map(r => {
+        const ganho = parseFloat(r.valorFinanceiro || r.ganho_rodada || 0);
+        const sinal = ganho >= 0 ? '+' : '';
+        return `<div class="home-modal-ranking-row">
+            <span class="home-modal-ranking-pos">R${r.rodada}</span>
+            <span class="home-modal-ranking-nome">${(Math.trunc(parseFloat(r.pontos||0)*100)/100).toFixed(2)} pts</span>
+            <span class="home-modal-ranking-pts" style="color:${ganho>=0?'var(--app-success-light)':'var(--app-danger)'}">${sinal}R$${Math.abs((Math.trunc(ganho*100)/100)).toFixed(2)}</span>
+        </div>`;
+    }).join('');
+
+    window._abrirModalHome('EXTRATO / SALDO', `
+        <div class="home-modal-saldo-card">
+            <span class="home-modal-saldo-label">SALDO ATUAL</span>
+            <span class="home-modal-saldo-valor ${saldoClass}">${saldoFmt}</span>
+        </div>
+        ${ultimas ? `<div>${ultimas}</div>` : ''}
+        ${_btnNavModal('Ver Extrato Completo', 'extrato')}
+    `);
+}
+
+async function _modalCapitao(ligaId) {
+    window._abrirModalHome('CAPITÃO DE LUXO', _skeletonModal(5));
+    try {
+        const r = await fetch(`/api/capitao/${ligaId}/ranking`);
+        if (!r.ok) throw new Error();
+        const d = await r.json();
+        const lista = Array.isArray(d) ? d : (d?.ranking || d?.data || []);
+        const rows = lista.slice(0, 5).map((t, i) => {
+            const pts = parseFloat(t.pontos ?? 0);
+            const nome = t.nomeCartola || t.nome_cartola || t.nomeTime || t.nome_time || '—';
+            return `<div class="home-modal-ranking-row">
+                <span class="home-modal-ranking-pos">${i + 1}º</span>
+                <span class="home-modal-ranking-nome">${nome}</span>
+                <span class="home-modal-ranking-pts">${(Math.trunc(pts*100)/100).toFixed(2)} pts</span>
+            </div>`;
+        }).join('');
+        window._abrirModalHome('CAPITÃO DE LUXO', `
+            ${rows || '<p class="home-modal-info">Sem dados.</p>'}
+            ${_btnNavModal('Ver Capitão de Luxo', 'capitao')}
+        `);
+    } catch (e) {
+        window._abrirModalHome('CAPITÃO DE LUXO', `<p class="home-modal-info">Dados indisponíveis.</p>${_btnNavModal('Ver Capitão de Luxo', 'capitao')}`);
+    }
+}
+
+async function _modalArtilheiro(ligaId) {
+    window._abrirModalHome('ARTILHEIRO CAMPEÃO', _skeletonModal(5));
+    try {
+        const r = await fetch(`/api/artilheiro-campeao/${ligaId}/ranking`);
+        if (!r.ok) throw new Error();
+        const d = await r.json();
+        const lista = Array.isArray(d) ? d : (d?.ranking || d?.data || []);
+        const rows = lista.slice(0, 5).map((t, i) => {
+            const gols = t.gols ?? t.gols_marcados ?? t.total ?? t.totalGols ?? 0;
+            const nome = t.nomeCartola || t.nome_cartola || t.nomeTime || t.nome_time || '—';
+            return `<div class="home-modal-ranking-row">
+                <span class="home-modal-ranking-pos">${i + 1}º</span>
+                <span class="home-modal-ranking-nome">${nome}</span>
+                <span class="home-modal-ranking-pts">${gols} gols</span>
+            </div>`;
+        }).join('');
+        window._abrirModalHome('ARTILHEIRO CAMPEÃO', `
+            ${rows || '<p class="home-modal-info">Sem dados.</p>'}
+            ${_btnNavModal('Ver Artilheiro', 'artilheiro')}
+        `);
+    } catch (e) {
+        window._abrirModalHome('ARTILHEIRO CAMPEÃO', `<p class="home-modal-info">Dados indisponíveis.</p>${_btnNavModal('Ver Artilheiro', 'artilheiro')}`);
+    }
+}
+
+async function _modalLuvaOuro(ligaId) {
+    window._abrirModalHome('LUVA DE OURO', _skeletonModal(5));
+    try {
+        const r = await fetch(`/api/luva-de-ouro/${ligaId}/ranking`);
+        if (!r.ok) throw new Error();
+        const d = await r.json();
+        const lista = Array.isArray(d) ? d : (d?.ranking || d?.data || []);
+        const rows = lista.slice(0, 5).map((t, i) => {
+            const def = t.defesas ?? t.total_defesas ?? t.totalDefesas ?? 0;
+            const nome = t.nomeCartola || t.nome_cartola || t.nomeTime || t.nome_time || '—';
+            return `<div class="home-modal-ranking-row">
+                <span class="home-modal-ranking-pos">${i + 1}º</span>
+                <span class="home-modal-ranking-nome">${nome}</span>
+                <span class="home-modal-ranking-pts">${def} def</span>
+            </div>`;
+        }).join('');
+        window._abrirModalHome('LUVA DE OURO', `
+            ${rows || '<p class="home-modal-info">Sem dados.</p>'}
+            ${_btnNavModal('Ver Luva de Ouro', 'luva-ouro')}
+        `);
+    } catch (e) {
+        window._abrirModalHome('LUVA DE OURO', `<p class="home-modal-info">Dados indisponíveis.</p>${_btnNavModal('Ver Luva de Ouro', 'luva-ouro')}`);
+    }
+}
+
+async function _modalMataMata(ligaId, timeId) {
+    window._abrirModalHome('MATA-MATA', _skeletonModal(2));
+    try {
+        const r = await fetch(`/api/ligas/${ligaId}/mata-mata`);
+        if (!r.ok) throw new Error();
+        const d = await r.json();
+        const fases = d?.fases || d?.rounds || d?.confrontos || [];
+        // Encontrar confronto do time atual
+        let confronto = null;
+        let faseAtual = '';
+        for (const fase of [...fases].reverse()) {
+            const cf = (fase.confrontos || fase.matches || []).find(c =>
+                Number(c.time1?.id || c.timeA?.id) === Number(timeId) ||
+                Number(c.time2?.id || c.timeB?.id) === Number(timeId)
+            );
+            if (cf) { confronto = cf; faseAtual = fase.nome || fase.name || ''; break; }
+        }
+
+        if (!confronto) {
+            window._abrirModalHome('MATA-MATA', `
+                <p class="home-modal-info">Aguardando confronto.</p>
+                ${_btnNavModal('Ver Mata-Mata', 'mata-mata')}
+            `);
+            return;
+        }
+
+        const t1 = confronto.time1 || confronto.timeA || {};
+        const t2 = confronto.time2 || confronto.timeB || {};
+        const pts1 = parseFloat(t1.pontos ?? 0);
+        const pts2 = parseFloat(t2.pontos ?? 0);
+
+        window._abrirModalHome('MATA-MATA', `
+            <div class="home-modal-stat-row">
+                <span class="home-modal-stat-label">FASE ATUAL</span>
+                <span class="home-modal-stat-value">${faseAtual}</span>
+            </div>
+            <div class="home-modal-confronto">
+                <div class="home-modal-confronto-team">
+                    <span class="home-modal-confronto-team-name">${t1.nomeTime || t1.nome_time || '—'}</span>
+                    <span class="home-modal-confronto-pts">${(Math.trunc(pts1*100)/100).toFixed(2)}</span>
+                </div>
+                <span class="home-modal-confronto-vs">VS</span>
+                <div class="home-modal-confronto-team">
+                    <span class="home-modal-confronto-team-name">${t2.nomeTime || t2.nome_time || '—'}</span>
+                    <span class="home-modal-confronto-pts">${(Math.trunc(pts2*100)/100).toFixed(2)}</span>
+                </div>
+            </div>
+            ${_btnNavModal('Ver Mata-Mata', 'mata-mata')}
+        `);
+    } catch (e) {
+        window._abrirModalHome('MATA-MATA', `<p class="home-modal-info">Dados indisponíveis.</p>${_btnNavModal('Ver Mata-Mata', 'mata-mata')}`);
+    }
+}
+
+async function _modalPontosCorridos(ligaId, timeId) {
+    window._abrirModalHome('PONTOS CORRIDOS', _skeletonModal(3));
+    try {
+        const temporada = window.ParticipanteConfig?.CURRENT_SEASON || new Date().getFullYear();
+        const r = await fetch(`/api/pontos-corridos/${ligaId}?temporada=${temporada}`);
+        if (!r.ok) throw new Error();
+        const d = await r.json();
+        const lista = Array.isArray(d) ? d : (d?.ranking || d?.data || []);
+        const meu = lista.find(t => Number(t.timeId || t.time_id) === Number(timeId));
+
+        const v = meu?.vitorias ?? meu?.ganhos ?? 0;
+        const e = meu?.empates ?? 0;
+        const def = meu?.derrotas ?? meu?.perdas ?? 0;
+        const total = v + e + def;
+        const aprv = total > 0 ? Math.round(((v * 3 + e) / (total * 3)) * 100) : 0;
+
+        window._abrirModalHome('PONTOS CORRIDOS', `
+            <div class="home-modal-stat-row">
+                <span class="home-modal-stat-label">APROVEITAMENTO</span>
+                <span class="home-modal-stat-value">${aprv}%</span>
+            </div>
+            <div class="home-modal-record">
+                <div class="home-modal-record-item vitoria">
+                    <span class="home-modal-record-num">${v}</span>
+                    <span class="home-modal-record-label">VITÓRIAS</span>
+                </div>
+                <div class="home-modal-record-item empate">
+                    <span class="home-modal-record-num">${e}</span>
+                    <span class="home-modal-record-label">EMPATES</span>
+                </div>
+                <div class="home-modal-record-item derrota">
+                    <span class="home-modal-record-num">${def}</span>
+                    <span class="home-modal-record-label">DERROTAS</span>
+                </div>
+            </div>
+            ${_btnNavModal('Ver Pontos Corridos', 'pontos-corridos')}
+        `);
+    } catch (e) {
+        window._abrirModalHome('PONTOS CORRIDOS', `<p class="home-modal-info">Dados indisponíveis.</p>${_btnNavModal('Ver Pontos Corridos', 'pontos-corridos')}`);
+    }
+}
+
+function _modalTop10(data) {
+    const { ranking, posicao } = data;
+    const top10 = Array.isArray(ranking) ? ranking.slice(0, 10) : [];
+    const rows = top10.map((t, i) => {
+        const isMe = Number(t.timeId || t.time_id) === Number(data.timeId);
+        const pts = parseFloat(t.pontos ?? t.pontos_total ?? 0);
+        const nome = t.nome_time || t.nomeTime || '—';
+        const posClass = isMe ? ' me' : '';
+        return `<div class="home-modal-ranking-row">
+            <span class="home-modal-ranking-pos${posClass}">${i + 1}º</span>
+            <span class="home-modal-ranking-nome${posClass}">${nome}</span>
+            <span class="home-modal-ranking-pts">${(Math.trunc(pts*100)/100).toFixed(2)}</span>
+        </div>`;
+    }).join('');
+
+    window._abrirModalHome('TOP 10', `
+        <div class="home-modal-stat-row">
+            <span class="home-modal-stat-label">SUA POSIÇÃO</span>
+            <span class="home-modal-stat-value">${posicao ? `${posicao}º` : '--'}</span>
+        </div>
+        <div style="margin-top:12px">${rows || '<p class="home-modal-info">Sem dados.</p>'}</div>
+        ${_btnNavModal('Ver Ranking Completo', 'ranking')}
+    `);
+}
+
 if (window.Log)
-    Log.info("PARTICIPANTE-HOME", "Modulo v1.4 carregado");
+    Log.info("PARTICIPANTE-HOME", "Modulo v5.0 carregado (Tiles Inteligentes + Modais)");
