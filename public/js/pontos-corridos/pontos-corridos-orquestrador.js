@@ -64,6 +64,7 @@ let estadoOrquestrador = {
   times: [],
   confrontos: [],
   rodadaAtualBrasileirao: 1,
+  statusMercado: 1,
   classificacaoAtual: null,
   ultimaRodadaComDados: 0,
   houveErro: false,
@@ -222,6 +223,7 @@ export async function carregarPontosCorridos() {
     const status = await getStatusMercadoCache();
     let rodadaAtual = status.rodada_atual || 1;
     const mercadoAberto = status.status_mercado === 1;
+    estadoOrquestrador.statusMercado = status.status_mercado || 1;
     const temporadaAPI = status.temporada || new Date().getFullYear();
     const anoAtual = new Date().getFullYear();
     const rodadaFinalDinamica = status.rodada_final || RODADA_FINAL_CAMPEONATO;
@@ -621,6 +623,9 @@ async function renderRodada(rodadaNum) {
 
     const isRodadaPassada =
       rodadaCartola < estadoOrquestrador.rodadaAtualBrasileirao;
+    const isRodadaAoVivo =
+      estadoOrquestrador.statusMercado === 2 &&
+      rodadaCartola === estadoOrquestrador.rodadaAtualBrasileirao;
 
     let pontuacoesMap = {};
     if (isRodadaPassada) {
@@ -630,6 +635,15 @@ async function renderRodada(rodadaNum) {
         jogos,
       );
       pontuacoesMap = resultado.pontuacoesMap;
+    } else if (isRodadaAoVivo && window.ParciaisModule?.obterDados) {
+      // Usar parciais ao vivo quando disponíveis
+      const dadosParciais = window.ParciaisModule.obterDados();
+      if (dadosParciais?.participantes?.length > 0) {
+        dadosParciais.participantes.forEach(p => {
+          pontuacoesMap[String(p.timeId)] = p.pontos || 0;
+        });
+        console.log(`[PONTOS-CORRIDOS-ORQUESTRADOR] 🔴 PARCIAL R${rodadaNum}: usando ${Object.keys(pontuacoesMap).length} times do ParciaisModule`);
+      }
     }
 
     // Renderizar tabela (CORREÇÃO: passar rodadaNum diretamente, não -1)
@@ -639,7 +653,13 @@ async function renderRodada(rodadaNum) {
       pontuacoesMap,
       estadoOrquestrador.rodadaAtualBrasileirao,
     );
-    atualizarContainer(containerId, tabelaHtml);
+    const parcialBanner = isRodadaAoVivo
+      ? `<div style="display:flex;align-items:center;gap:8px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:10px 14px;margin-bottom:12px;">
+           <span class="material-icons" style="color:#ef4444;font-size:18px;">radio_button_checked</span>
+           <span style="color:#ef4444;font-size:0.82rem;font-weight:600;">PARCIAL — Rodada em andamento</span>
+         </div>`
+      : '';
+    atualizarContainer(containerId, parcialBanner + tabelaHtml);
 
     console.log(`[PONTOS-CORRIDOS-ORQUESTRADOR] Rodada ${rodadaNum} carregada`);
   } catch (error) {

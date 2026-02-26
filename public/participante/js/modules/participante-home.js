@@ -207,10 +207,14 @@ async function carregarDadosERenderizar(ligaId, timeId, participante) {
     // ✅ v9.0: Passar temporada para segregar dados por ano
     const temporada = window.ParticipanteConfig?.CURRENT_SEASON || new Date().getFullYear();
     try {
+        // ✅ FIX BUG-PARCIAL: buscarStatusMercado junto com os outros fetches para que
+        // mercadoStatus esteja preenchido ANTES de renderizarHome(). Sem isso,
+        // mercadoStatus=null → rodadaEmAndamento=false → card mostra dados R3 em vez de "--"
         const [ligaFresh, rankingFresh, rodadasFresh] = await Promise.all([
             fetch(`/api/ligas/${ligaId}`).then(r => r.ok ? r.json() : liga),
             fetch(`/api/ligas/${ligaId}/ranking?temporada=${temporada}`).then(r => r.ok ? r.json() : ranking),
-            fetch(`/api/rodadas/${ligaId}/rodadas?inicio=1&fim=38&temporada=${temporada}`).then(r => r.ok ? r.json() : rodadas)
+            fetch(`/api/rodadas/${ligaId}/rodadas?inicio=1&fim=38&temporada=${temporada}`).then(r => r.ok ? r.json() : rodadas),
+            buscarStatusMercado()   // preenche mercadoStatus antes do render
         ]);
 
         if (cache) {
@@ -344,11 +348,14 @@ async function atualizarCardsHome(ligaId, timeId, participante) {
             return;
         }
 
-        // FIX BUG-3/4: Quando parciais estao ativos, atualizar via parciais
-        // em vez de sobrescrever com dados consolidados Round N-1
-        if (parciaisAtivos && statusAtual === 2) {
-            // Parciais ativos: atualizar cards via modulo de parciais
-            if (ParciaisModule?.carregarParciais) {
+        // FIX BUG-3/4: Quando status=2, manter modo parciais
+        // Se parciais não foram ativados ainda (ex: falha na inicialização), tentar novamente
+        if (statusAtual === 2) {
+            if (!parciaisAtivos && ParciaisModule?.inicializarParciais) {
+                if (window.Log) Log.info("PARTICIPANTE-HOME", "Status=2 mas parciais inativos — re-tentando inicialização...");
+                await inicializarParciaisHome(ligaId, timeId, null);
+            }
+            if (parciaisAtivos && ParciaisModule?.carregarParciais) {
                 const novosParciais = await ParciaisModule.carregarParciais();
                 if (novosParciais) {
                     dadosParciais = novosParciais;
@@ -531,7 +538,7 @@ function atualizarCardsHomeUI(data) {
         const rodadaSaldo = (statusMercadoSaldo === 2)
             ? Math.max(1, rodadaMercadoSaldo - 1)
             : (ultimaRodadaDisputada || (rodadaAtual > 0 ? rodadaAtual - 1 : 0));
-        rankingSaldoEl.textContent = rodadaSaldo ? `R${rodadaSaldo}` : '--';
+        rankingSaldoEl.textContent = rodadaSaldo ? (statusMercadoSaldo === 2 ? `até R${rodadaSaldo}` : `R${rodadaSaldo}`) : '--';
     }
 
     // === PONTOS RANKING GERAL ===
@@ -731,6 +738,13 @@ async function buscarStatusMercado() {
         const response = await fetch('/api/cartola/mercado/status');
         if (response.ok) {
             mercadoStatus = await response.json();
+            // Expor globalmente para outros módulos (Resta Um, Capitão, etc.)
+            window.cartolaState = {
+                statusMercado: mercadoStatus.status_mercado,
+                mercadoFechado: mercadoStatus.status_mercado === 2,
+                rodadaAtual: mercadoStatus.rodada_atual,
+                temporada: mercadoStatus.temporada
+            };
         }
     } catch (error) {
         mercadoStatus = null;
@@ -1117,7 +1131,7 @@ function renderizarHome(container, data, ligaId) {
         const rodadaSaldo = (statusMercadoSaldo === 2)
             ? Math.max(1, rodadaMercadoSaldo - 1)
             : (ultimaRodadaDisputada || (rodadaAtual > 0 ? rodadaAtual - 1 : 0));
-        rankingSaldoEl.textContent = rodadaSaldo ? `R${rodadaSaldo}` : '--';
+        rankingSaldoEl.textContent = rodadaSaldo ? (statusMercadoSaldo === 2 ? `até R${rodadaSaldo}` : `R${rodadaSaldo}`) : '--';
     }
 
     // Pontos Ranking Geral
@@ -1290,6 +1304,25 @@ async function carregarDestaquesRodada(ligaId, rodada, timeId, isAoVivo = false)
         // Detectar se todos os atletas tem pontos_num 0 (jogos nao comecaram)
         const todosAtletas = [...(escalacao.atletas || []), ...(escalacao.reservas || [])];
         const todosZerados = todosAtletas.every(a => !a.pontos_num || a.pontos_num === 0);
+
+        // Sobrepor pontos ao vivo nos atletas se disponível
+        if (isAoVivo && parciaisAtivos && ParciaisModule?.obterAtletasPontuados) {
+            const atletasPontuados = ParciaisModule.obterAtletasPontuados();
+            if (atletasPontuados && Object.keys(atletasPontuados).length > 0) {
+                const sobreporPontos = (lista) => (lista || []).map(a => {
+                    const live = atletasPontuados[String(a.atleta_id)];
+                    if (live !== undefined) {
+                        return { ...a, pontos_num: typeof live === 'object' ? (live.pontuacao ?? live.pontos_num ?? a.pontos_num) : live };
+                    }
+                    return a;
+                });
+                escalacao = {
+                    ...escalacao,
+                    atletas: sobreporPontos(escalacao.atletas),
+                    reservas: sobreporPontos(escalacao.reservas)
+                };
+            }
+        }
 
         if (todosZerados && isAoVivo) {
             // FIX BUG-2: Jogos nao comecaram mas mercado fechado - mostrar escalacao
@@ -1592,7 +1625,7 @@ function atualizarPainelAvisos(rodadaAtual, totalParticipantes, extras = {}) {
     } else if (status === 2) {
         avisoCard.classList.add('mercado-fechado');
         if (avisoIcon) avisoIcon.textContent = 'sports_soccer';
-        if (avisoTitulo) avisoTitulo.textContent = 'JOGOS EM ANDAMENTO';
+        if (avisoTitulo) avisoTitulo.textContent = 'RODADA EM ANDAMENTO';
         if (avisoSubtitulo) {
             avisoSubtitulo.textContent = `Rodada ${rodadaMercado} • Acompanhe os parciais`;
         }
@@ -1844,7 +1877,7 @@ function atualizarCardsHomeComParciais() {
     const avisoSubtitulo = document.getElementById('home-aviso-subtitulo');
     const rodadaMercadoLive = mercadoStatus?.rodada_atual || '';
     if (avisoTitulo) {
-        avisoTitulo.innerHTML = 'JOGOS AO VIVO <span class="live-badge-mini">LIVE</span>';
+        avisoTitulo.innerHTML = 'RODADA EM ANDAMENTO <span class="live-badge-mini">LIVE</span>';
     }
     if (avisoSubtitulo) {
         const pontsParciais = minhaPosicao.pontos ? (Math.trunc(minhaPosicao.pontos * 10) / 10).toFixed(1) : '0';

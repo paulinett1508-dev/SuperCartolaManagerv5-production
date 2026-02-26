@@ -809,6 +809,13 @@ export function obterTimesInativos() {
 }
 
 // =====================================================================
+// OBTER ATLETAS PONTUADOS (scores ao vivo por atleta_id)
+// =====================================================================
+export function obterAtletasPontuados() {
+    return estadoParciais.atletasPontuados || {};
+}
+
+// =====================================================================
 // OBTER MINHA POSIÇÃO PARCIAL
 // =====================================================================
 export function obterMinhaPosicaoParcial() {
@@ -877,6 +884,7 @@ window.ParciaisModule = {
     pararAutoRefresh,
     limparCache: limparCacheEscalacoes,
     obterEscalacaoCacheada,
+    obterAtletasPontuados,
 };
 
 if (window.Log) Log.info(

@@ -46,6 +46,7 @@ function esc(str) {
 let dadosEscalacao = null;
 let dadosAdversario = null;
 let confrontoAtual = null;
+let _campinhoRefreshTimer = null;
 
 // =====================================================================
 // FUNCAO PRINCIPAL DE INICIALIZACAO
@@ -73,15 +74,22 @@ export async function inicializarCampinhoParticipante(params) {
     // Mostrar loading
     container.innerHTML = renderizarLoading();
 
+    // Limpar auto-refresh anterior
+    if (_campinhoRefreshTimer) {
+        clearInterval(_campinhoRefreshTimer);
+        _campinhoRefreshTimer = null;
+    }
+
     try {
         const statusMercado = await buscarStatusMercado();
         const rodadaMercado = statusMercado?.rodada_atual || 1;
         const statusMercadoNum = statusMercado?.status_mercado;
+        const isAoVivo = statusMercadoNum === 2;
 
         // Usar função canônica compartilhada (participante-utils.js)
         const rodadaConsolidada = window.obterUltimaRodadaDisputada
             ? window.obterUltimaRodadaDisputada(rodadaMercado, statusMercadoNum)
-            : (statusMercadoNum === 2 ? rodadaMercado : Math.max(1, rodadaMercado - 1));
+            : (isAoVivo ? rodadaMercado : Math.max(1, rodadaMercado - 1));
 
         const [escalacao, confrontos] = await Promise.all([
             buscarEscalacaoCompleta(ligaId, timeId, rodadaConsolidada),
@@ -89,8 +97,9 @@ export async function inicializarCampinhoParticipante(params) {
         ]);
 
         // Fallback: se rodada sem dados, tentar rodada anterior consolidada
+        // Durante jogos ao vivo (status=2), NÃO fazer fallback para evitar mostrar R-1
         let escalacaoFinal = escalacao;
-        if ((!escalacao || (!escalacao.atletas?.length && !escalacao.titulares?.length)) && rodadaConsolidada > 1) {
+        if ((!escalacao || (!escalacao.atletas?.length && !escalacao.titulares?.length)) && rodadaConsolidada > 1 && !isAoVivo) {
             if (window.Log) Log.debug("PARTICIPANTE-CAMPINHO", `Rodada ${rodadaConsolidada} sem dados, tentando rodada ${rodadaConsolidada - 1}`);
             escalacaoFinal = await buscarEscalacaoCompleta(ligaId, timeId, rodadaConsolidada - 1);
         }
@@ -113,6 +122,28 @@ export async function inicializarCampinhoParticipante(params) {
 
         // Buscar extrato financeiro da rodada (assíncrono)
         buscarExtratoRodada(ligaId, timeId, rodadaConsolidada);
+
+        // Auto-refresh durante rodada ao vivo (a cada 60s)
+        if (isAoVivo) {
+            _campinhoRefreshTimer = setInterval(async () => {
+                if (!document.getElementById('campinho-container') || !document.contains(document.getElementById('campinho-container'))) {
+                    clearInterval(_campinhoRefreshTimer);
+                    _campinhoRefreshTimer = null;
+                    return;
+                }
+                if (window.Log) Log.debug("PARTICIPANTE-CAMPINHO", "Auto-refresh ao vivo...");
+                try {
+                    const escalacaoAtualizada = await buscarEscalacaoCompleta(ligaId, timeId, rodadaConsolidada);
+                    if (escalacaoAtualizada?.atletas?.length || escalacaoAtualizada?.titulares?.length) {
+                        dadosEscalacao = escalacaoAtualizada;
+                        document.getElementById('campinho-container').innerHTML =
+                            renderizarCampinhoCompleto(escalacaoAtualizada, dadosAdversario, confrontos, ligaId, timeId, statusMercado);
+                    }
+                } catch (e) {
+                    if (window.Log) Log.warn("PARTICIPANTE-CAMPINHO", "Erro no auto-refresh:", e);
+                }
+            }, 60000);
+        }
 
     } catch (error) {
         if (window.Log) Log.error("PARTICIPANTE-CAMPINHO", "❌ Erro:", error);

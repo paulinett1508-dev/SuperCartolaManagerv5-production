@@ -60,8 +60,16 @@ export async function inicializarTiroCertoParticipante({ participante, ligaId, t
     _participante = participante;
     _timeSelecionado = null;
 
-    // Detectar premium via participante-navigation
-    const isPremium = window.participanteNav?._isPremium === true;
+    // Detectar premium via participante-navigation (com fallbacks)
+    const isPremiumNav = window.participanteNav?._isPremium === true;
+    const isPremiumParticipante = participante?.premium === true;
+    const isPremiumAuth = (() => {
+        const ligaData = window.participanteAuth?.ligaDataCache;
+        const participantes = ligaData?.participantes || [];
+        const p = participantes.find(pt => String(pt.time_id) === String(timeId));
+        return p?.premium === true;
+    })();
+    const isPremium = isPremiumNav || isPremiumParticipante || isPremiumAuth;
 
     if (window.Log) Log.info('TIRO-CERTO', `Inicializando: liga=${ligaId} time=${timeId} premium=${isPremium}`);
 

@@ -24,6 +24,7 @@ let meuTimeId = null;
 let ligaId = null;
 let rodadaSelecionada = null;
 let rodadaAtualCartola = 38;
+let statusMercadoAtual = 1;
 let parciaisInfo = null;
 const TEMPORADA_ATUAL = window.ParticipanteConfig?.CURRENT_SEASON || new Date().getFullYear();
 
@@ -145,9 +146,10 @@ async function buscarRodadaAtual() {
         if (response.ok) {
             const data = await response.json();
             rodadaAtualCartola = data.rodada_atual || 38;
+            statusMercadoAtual = data.status_mercado || 1;
             if (window.Log)
                 Log.info(
-                    `[PARTICIPANTE-RODADAS] 📅 Rodada atual: ${rodadaAtualCartola}`,
+                    `[PARTICIPANTE-RODADAS] 📅 Rodada atual: ${rodadaAtualCartola} | status: ${statusMercadoAtual}`,
                 );
         }
     } catch (e) {
@@ -516,7 +518,15 @@ function renderizarCardDesempenho(rodadas) {
         if (el) el.style[prop] = value;
     };
 
-    setEl("tempBadgeRodadas", `${rodadasJogadas} RODADAS`);
+    // Durante rodada em andamento (status=2), mostrar +1 rodada com badge ao vivo
+    const badgeEl = document.getElementById("tempBadgeRodadas");
+    if (badgeEl) {
+        if (statusMercadoAtual === 2) {
+            badgeEl.innerHTML = `${rodadasJogadas + 1} RODADAS <span style="font-size:0.65em;background:#ef4444;color:#fff;padding:1px 5px;border-radius:3px;vertical-align:middle;margin-left:3px;">AO VIVO</span>`;
+        } else {
+            badgeEl.textContent = `${rodadasJogadas} RODADAS`;
+        }
+    }
     setEl("tempPontosTotal", totalPontos.toFixed(2).replace('.', ','));
     setEl("tempMediaPontos", mediaPontos.toFixed(2).replace('.', ','));
     setEl("tempPosicaoMedia", posicaoMedia ? `${posicaoMedia.toFixed(1)}º` : "-");
@@ -535,7 +545,8 @@ function renderizarCardDesempenho(rodadas) {
 
     setEl("tempAproveitamento", `${aproveitamento}%`);
     setStyle("tempAproveitamentoBar", "width", `${aproveitamento}%`);
-    setEl("tempAproveitamentoHint", `${vezesAcimaMedia} de ${rodadasJogadas} rodadas acima da média da liga`);
+    const totalRodadasExibidas = statusMercadoAtual === 2 ? rodadasJogadas + 1 : rodadasJogadas;
+    setEl("tempAproveitamentoHint", `${vezesAcimaMedia} de ${totalRodadasExibidas} rodadas acima da média da liga`);
 
     card.style.display = "block";
 }

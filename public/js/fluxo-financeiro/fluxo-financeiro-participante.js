@@ -87,6 +87,7 @@ class FluxoFinanceiroParticipante {
             const mercadoStatus = await fetch("/api/cartola/mercado-status");
             const mercadoData = await mercadoStatus.json();
             const rodadaAtual = mercadoData.rodada_atual || 1;
+            const statusMercadoNum = mercadoData.status_mercado;
             const ultimaRodadaCompleta = Math.max(1, rodadaAtual - 1);
 
             // Buscar dados do participante
@@ -109,6 +110,16 @@ class FluxoFinanceiroParticipante {
 
             // Renderizar
             await this.ui.renderizarExtratoFinanceiro(extrato, participante);
+
+            // Banner informativo quando rodada está em andamento
+            if (statusMercadoNum === 2) {
+                const bannerHtml = `
+                    <div style="display:flex;align-items:center;gap:10px;background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.35);border-radius:10px;padding:12px 16px;margin-bottom:16px;">
+                        <span class="material-icons" style="color:#eab308;flex-shrink:0;">info</span>
+                        <span style="color:#eab308;font-size:0.875rem;">Rodada ${rodadaAtual} em andamento — o resultado financeiro estará disponível após a consolidação da rodada.</span>
+                    </div>`;
+                container.insertAdjacentHTML('afterbegin', bannerHtml);
+            }
 
             console.log(
                 "[FLUXO-PARTICIPANTE] ✅ Extrato renderizado com sucesso",

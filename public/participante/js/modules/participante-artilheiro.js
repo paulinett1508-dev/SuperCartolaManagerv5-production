@@ -942,8 +942,12 @@ let _matchdayStopHandler = null;
 function _subscribeMatchdayEvents() {
     if (!window.MatchdayService) return;
 
-    // Handler: novos dados parciais disponíveis → re-fetch ranking live
-    _matchdayParciaisHandler = async () => {
+    let _parciaisDebounceTimer = null;
+
+    // Handler: novos dados parciais disponíveis → re-fetch ranking live (debounce 300ms)
+    _matchdayParciaisHandler = () => {
+        clearTimeout(_parciaisDebounceTimer);
+        _parciaisDebounceTimer = setTimeout(async () => {
         if (window.Log) Log.info('[PARTICIPANTE-ARTILHEIRO] Atualizando com parciais (MatchdayService)');
         if (!_currentLigaId || !_currentTimeId) return;
 
@@ -966,6 +970,7 @@ function _subscribeMatchdayEvents() {
         } catch (e) {
             if (window.Log) Log.warn('[PARTICIPANTE-ARTILHEIRO] Erro ao atualizar parciais:', e);
         }
+        }, 300); // debounce 300ms para evitar múltiplas atualizações em sequência
     };
 
     // Handler: matchday encerrou → voltar para ranking consolidado

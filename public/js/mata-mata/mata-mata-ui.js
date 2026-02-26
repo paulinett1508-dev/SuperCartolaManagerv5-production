@@ -91,17 +91,20 @@ function setupEdicaoSelector(container, ligaId, onEdicaoChange) {
       const faseNavContainer = document.getElementById("fase-nav-container");
       if (faseNavContainer) faseNavContainer.style.display = "block";
 
-      // Ativar primeira fase disponível
-      const primeiraFase = container.dataset.primeiraFase || "primeira";
-      container
-        .querySelectorAll(".fase-btn")
-        .forEach((btn) => btn.classList.remove("active"));
-      const primeiraFaseBtn = container.querySelector(
-        `.fase-btn[data-fase="${primeiraFase}"]`,
-      );
-      if (primeiraFaseBtn) primeiraFaseBtn.classList.add("active");
+      // Ativar fase mais recente disponível (última não-bloqueada)
+      const todosOsBotoes = Array.from(container.querySelectorAll(".fase-btn"));
+      todosOsBotoes.forEach((btn) => btn.classList.remove("active"));
 
-      onEdicaoChange(edicaoAtual, primeiraFase, ligaId);
+      // Pegar a última fase não-bloqueada (fase atual do torneio)
+      const botoesDisponiveis = todosOsBotoes.filter(btn => !btn.classList.contains("disabled"));
+      const faseAlvo = botoesDisponiveis.length > 0
+        ? botoesDisponiveis[botoesDisponiveis.length - 1].getAttribute("data-fase")
+        : (container.dataset.primeiraFase || "primeira");
+
+      const faseBtnAlvo = container.querySelector(`.fase-btn[data-fase="${faseAlvo}"]`);
+      if (faseBtnAlvo) faseBtnAlvo.classList.add("active");
+
+      onEdicaoChange(edicaoAtual, faseAlvo, ligaId);
     }, 300);
 
     window.addEventListener(

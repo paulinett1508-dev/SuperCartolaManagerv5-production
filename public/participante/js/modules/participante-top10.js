@@ -284,6 +284,19 @@ export async function inicializarTop10Participante({
             Log.info("[PARTICIPANTE-TOP10] ✅ Dados iguais, mantendo renderização do cache");
         }
 
+        // Badge PARCIAL quando rodada está em andamento
+        if (statusMercadoCache?.status_mercado === 2) {
+            const grid = document.getElementById('top10Grid');
+            if (grid && !grid.querySelector('.top10-parcial-banner')) {
+                grid.insertAdjacentHTML('afterbegin',
+                    `<div class="top10-parcial-banner" style="display:flex;align-items:center;gap:8px;background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.3);border-radius:8px;padding:10px 14px;margin-bottom:12px;">
+                        <span class="material-icons" style="color:#eab308;font-size:18px;">bolt</span>
+                        <span style="color:#eab308;font-size:0.82rem;font-weight:600;">PARCIAL — Rodada ${ultimaRodadaCompleta} em andamento</span>
+                    </div>`
+                );
+            }
+        }
+
         if (window.Log)
             Log.info("[PARTICIPANTE-TOP10] ✅ TOP 10 carregado com sucesso");
     } catch (error) {

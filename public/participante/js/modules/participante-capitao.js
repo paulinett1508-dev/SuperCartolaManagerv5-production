@@ -48,9 +48,21 @@ export async function inicializarCapitaoParticipante(params) {
     estadoCapitao.moduloAtivo = true;
 
     // 2. Verificar matchday (parciais)
-    if (window.MatchdayService && window.MatchdayService.isActive) {
+    // Fallback: se MatchdayService não inicializado, verificar via cartolaState ou fetch direto
+    const matchdayAtivo = window.MatchdayService?.isActive;
+    const cartolaStateLive = window.cartolaState?.statusMercado === 2 || window.cartolaState?.mercadoFechado === true;
+    if (matchdayAtivo || cartolaStateLive) {
         estadoCapitao.modeLive = true;
-        subscribeMatchdayEvents();
+        if (window.MatchdayService) subscribeMatchdayEvents();
+    } else {
+        // Último fallback: fetch rápido do status do mercado
+        try {
+            const resp = await fetch('/api/cartola/mercado/status');
+            if (resp.ok) {
+                const st = await resp.json();
+                if (st?.status_mercado === 2) estadoCapitao.modeLive = true;
+            }
+        } catch (e) { /* silencioso */ }
     }
 
     // 3. Verificar temporada encerrada
