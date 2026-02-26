@@ -284,8 +284,10 @@ async function buscarEscalacaoCompleta(ligaId, timeId, rodada = 1) {
         // [Fix B] Fallback: cache do módulo de parciais (evita requisição extra)
         const escalacaoCacheada = window.ParciaisModule?.obterEscalacaoCacheada?.(timeId);
         if (escalacaoCacheada?.atletas?.length || escalacaoCacheada?.reservas?.length) {
-            const tit = escalacaoCacheada.atletas || [];
-            const res = escalacaoCacheada.reservas || [];
+            // Normalizar com overlay de pontos ao vivo (mesmo tratamento do path data-lake)
+            const atletasPontuadosObj = atletasPontuados.atletas || {};
+            const tit = normalizarListaAtletas(escalacaoCacheada.atletas || [], atletasPontuadosObj, false);
+            const res = normalizarListaAtletas(escalacaoCacheada.reservas || [], atletasPontuadosObj, true);
             return {
                 timeId,
                 rodada: rodadaAtual,
@@ -294,7 +296,7 @@ async function buscarEscalacaoCompleta(ligaId, timeId, rodada = 1) {
                 reservas: res,
                 capitao_id: escalacaoCacheada.capitao_id,
                 reserva_luxo_id: escalacaoCacheada.reserva_luxo_id,
-                pontos: escalacaoCacheada.pontos_time || 0,
+                pontos: 0, // calcularPontosTotais() recalcula no render
                 nome: escalacaoCacheada.time?.nome,
                 nome_cartoleiro: escalacaoCacheada.time?.nome_cartola,
             };
