@@ -4,13 +4,6 @@
  * Widget flutuante de engajamento em tempo real
  * Mostra disputas internas ativas nos módulos da liga
  *
- * @version 4.0.0 - Redesign layout vertical scoreboard
- *   - Confrontos convertidos de horizontal (side-by-side) para vertical (stacked)
- *   - Ranking de chips para lista vertical compacta
- *   - Removido VS separator central — diff integrado no status bar
- *   - Module badges (PC/MM) com estilo próprio
- *   - Melhor legibilidade em mobile
- *
  * @version 3.1.0 - Parciais ao vivo + Carrossel total
  *   - getPontosAoVivo() overlay em TODOS os confrontos (PC + MM)
  *   - Ranking da Rodada ao vivo via parciais (substitui ranking geral)
@@ -41,7 +34,7 @@
  * - Capitão de Luxo, Ranking da Rodada, Resta Um
  */
 
-if (window.Log) Log.info("[WHATS-HAPPENING] Widget v4.0 carregando...");
+if (window.Log) Log.info("[WHATS-HAPPENING] 🔥 Widget v3.1 carregando...");
 
 // ============================================
 // MÁQUINA DE ESTADOS DO FOGUINHO
@@ -1317,20 +1310,18 @@ function renderRankingSection() {
     const meuId = String(WHState.timeId);
     const minhaPosicao = ranking.findIndex(r => r.timeId === meuId) + 1;
 
-    // v2.0: Top 5 como lista vertical
+    // Top 5 como chips + minha posição
     const top5 = ranking.slice(0, 5);
+    const posColors = ['gold', 'silver', 'bronze'];
 
     let items = top5.map((r, i) => {
         const isMe = r.timeId === meuId;
-        const isFirst = i === 0;
         return `
-            <div class="wh-rank-row ${isFirst ? 'first' : ''} ${isMe ? 'me' : ''}">
+            <div class="wh-rank-card ${i < 3 ? posColors[i] : ''} ${isMe ? 'me' : ''}">
                 <div class="wh-rank-pos">${i + 1}</div>
                 <img class="wh-rank-escudo" src="${r.escudo}" onerror="this.src='/escudos/default.png'" alt="">
-                <div class="wh-rank-info">
-                    <div class="wh-rank-nome">${escapeHtml(r.nome_time)}</div>
-                </div>
-                <div class="wh-rank-valor">${(Math.trunc((r.pontos||0) * 10) / 10).toFixed(1)}</div>
+                <div class="wh-rank-nome">${escapeHtml(r.nome_time)}</div>
+                <div class="wh-rank-pontos">${(Math.trunc((r.pontos||0) * 10) / 10).toFixed(1)}</div>
             </div>
         `;
     }).join('');
@@ -1340,14 +1331,11 @@ function renderRankingSection() {
     if (minhaPosicao > 5) {
         const meuTime = ranking[minhaPosicao - 1];
         meuItemHtml = `
-            <div class="wh-rank-separator">...</div>
-            <div class="wh-rank-row me">
-                <div class="wh-rank-pos">${minhaPosicao}</div>
+            <div class="wh-rank-card me">
+                <div class="wh-rank-pos">${minhaPosicao}o</div>
                 <img class="wh-rank-escudo" src="${meuTime.escudo}" onerror="this.src='/escudos/default.png'" alt="">
-                <div class="wh-rank-info">
-                    <div class="wh-rank-nome">${escapeHtml(meuTime.nome_time)}</div>
-                </div>
-                <div class="wh-rank-valor">${(Math.trunc((meuTime.pontos||0) * 10) / 10).toFixed(1)}</div>
+                <div class="wh-rank-nome">${escapeHtml(meuTime.nome_time)}</div>
+                <div class="wh-rank-pontos">${(Math.trunc((meuTime.pontos||0) * 10) / 10).toFixed(1)}</div>
             </div>
         `;
     }
@@ -1360,9 +1348,8 @@ function renderRankingSection() {
                 </div>
                 <div class="wh-section-title">${rankingTitle}</div>
                 ${isLive ? '<span class="wh-live-badge">AO VIVO</span>' : ''}
-                <span class="material-icons wh-navigate-hint">open_in_new</span>
             </div>
-            <div class="wh-section-body wh-section-body--list">
+            <div class="wh-section-body wh-section-body--chips">
                 ${items}
                 ${meuItemHtml}
             </div>
@@ -1511,12 +1498,15 @@ function renderPontosCorridosSection() {
                         </div>
                         <div class="wh-time-pontos">${(Math.trunc((pontosA||0) * 10) / 10).toFixed(1)}</div>
                     </div>
+                    <div class="wh-vs">
+                        <span class="wh-vs-text">VS</span>
+                    </div>
                     <div class="wh-time wh-time--away ${bWinning ? "winning" : aWinning ? "losing" : ""}">
-                        <img class="wh-time-escudo" src="${t2.escudo || "/escudos/default.png"}" onerror="this.src='/escudos/default.png'" alt="">
+                        <div class="wh-time-pontos">${(Math.trunc((pontosB||0) * 10) / 10).toFixed(1)}</div>
                         <div class="wh-time-info">
                             <div class="wh-time-nome">${escapeHtml(t2.nome || t2.nome_cartola || "Time 2")}</div>
                         </div>
-                        <div class="wh-time-pontos">${(Math.trunc((pontosB||0) * 10) / 10).toFixed(1)}</div>
+                        <img class="wh-time-escudo" src="${t2.escudo || "/escudos/default.png"}" onerror="this.src='/escudos/default.png'" alt="">
                     </div>
                 </div>
                 ${renderBarraProporção(pontosA, pontosB)}
@@ -1682,13 +1672,17 @@ function renderMataMataSection() {
                         </div>
                         <div class="wh-time-pontos">${(Math.trunc((pontosA||0) * 10) / 10).toFixed(1)}</div>
                     </div>
+                    <div class="wh-vs">
+                        <span class="wh-vs-text">VS</span>
+                        <span class="wh-vs-diff">${(Math.trunc(diff * 10) / 10).toFixed(1)}</span>
+                    </div>
                     <div class="wh-time wh-time--away ${bWinning ? "winning" : aWinning ? "losing" : ""}">
-                        <img class="wh-time-escudo" src="${resolverEscudo({timeId: idB, escudo: c.timeB?.escudo || c.timeB?.url_escudo_png})}" onerror="this.src='/escudos/default.png'" alt="">
+                        <div class="wh-time-pontos">${(Math.trunc((pontosB||0) * 10) / 10).toFixed(1)}</div>
                         <div class="wh-time-info">
                             <div class="wh-time-nome">${escapeHtml(c.timeB?.nome_time || c.timeB?.nome || "Time B")}</div>
                             ${c.timeB?.nome_cartola ? `<div class="wh-time-cartola">${escapeHtml(c.timeB.nome_cartola)}</div>` : ''}
                         </div>
-                        <div class="wh-time-pontos">${(Math.trunc((pontosB||0) * 10) / 10).toFixed(1)}</div>
+                        <img class="wh-time-escudo" src="${resolverEscudo({timeId: idB, escudo: c.timeB?.escudo || c.timeB?.url_escudo_png})}" onerror="this.src='/escudos/default.png'" alt="">
                     </div>
                 </div>
                 ${!isDecided ? renderBarraProporção(pontosA, pontosB) : ''}
@@ -1966,8 +1960,8 @@ function renderMeuConfrontoPontosCorridos() {
     const perdendo = diff < 0;
 
     const statusClass = vencendo ? "winning" : perdendo ? "losing" : "tied";
-    const statusIcon = vencendo ? 'trending_up' : perdendo ? 'trending_down' : 'trending_flat';
-    const statusText = vencendo ? `Vencendo por ${(Math.trunc(Math.abs(diff) * 10) / 10).toFixed(1)} pts` : perdendo ? `Perdendo por ${(Math.trunc(Math.abs(diff) * 10) / 10).toFixed(1)} pts` : "Confronto empatado";
+    const statusEmoji = vencendo ? '<span class="material-icons" style="color: var(--app-danger)">local_fire_department</span>' : perdendo ? '<span class="material-icons" style="color: var(--app-warning)">sentiment_stressed</span>' : '<span class="material-icons" style="color: var(--app-info)">compare_arrows</span>';
+    const statusText = vencendo ? "Vencendo!" : perdendo ? "Perdendo..." : "Empatado";
 
     const isLive = isJogosAoVivo();
 
@@ -1981,7 +1975,7 @@ function renderMeuConfrontoPontosCorridos() {
                 <span class="wh-module-badge wh-module-badge--pc">PC · R${rodada}</span>
                 ${isLive ? '<span class="wh-live-badge"><span class="material-icons" style="font-size:12px; color: var(--app-danger)">sensors</span> AO VIVO</span>' : ''}
             </div>
-            <div class="wh-section-body" style="padding:0">
+            <div class="wh-section-body">
                 <div class="wh-meu-confronto">
                     <div class="wh-mc-times">
                         <div class="wh-mc-time wh-mc-time--eu ${vencendo ? 'winning' : ''}">
@@ -1992,6 +1986,12 @@ function renderMeuConfrontoPontosCorridos() {
                             </div>
                             <div class="wh-mc-pontos ${vencendo ? 'winning' : ''}">${(Math.trunc((meusPontos||0) * 10) / 10).toFixed(1)}</div>
                         </div>
+
+                        <div class="wh-mc-vs">
+                            <span class="wh-mc-vs-emoji">${statusEmoji}</span>
+                            <span class="wh-mc-vs-diff ${statusClass}">${diff > 0 ? '+' : ''}${(Math.trunc(diff * 10) / 10).toFixed(1)}</span>
+                        </div>
+
                         <div class="wh-mc-time wh-mc-time--adv ${perdendo ? 'winning' : ''}">
                             <img class="wh-mc-escudo" src="${adversario?.escudo || '/escudos/default.png'}" onerror="this.src='/escudos/default.png'" alt="">
                             <div class="wh-mc-info">
@@ -2001,9 +2001,10 @@ function renderMeuConfrontoPontosCorridos() {
                             <div class="wh-mc-pontos ${perdendo ? 'winning' : ''}">${(Math.trunc((pontosAdv||0) * 10) / 10).toFixed(1)}</div>
                         </div>
                     </div>
+
                     <div class="wh-mc-status ${statusClass}">
-                        <span class="material-icons">${statusIcon}</span>
-                        ${statusText}
+                        <span class="material-icons">${vencendo ? 'trending_up' : perdendo ? 'trending_down' : 'trending_flat'}</span>
+                        ${statusText} por ${(Math.trunc(Math.abs(diff) * 10) / 10).toFixed(1)} pts
                     </div>
                 </div>
             </div>
@@ -2033,11 +2034,10 @@ function renderMeuConfrontoMataMata() {
     const perdendo = diff < 0;
 
     const statusClass = vencendo ? "winning" : perdendo ? "losing" : "tied";
-    const statusIcon = vencendo ? 'thumb_up' : perdendo ? 'thumb_down' : 'compare_arrows';
-    const statusText = vencendo ? `Avancando! +${(Math.trunc(Math.abs(diff) * 10) / 10).toFixed(1)} pts` : perdendo ? `Em risco! -${(Math.trunc(Math.abs(diff) * 10) / 10).toFixed(1)} pts` : 'Confronto equilibrado';
+    const statusEmoji = vencendo ? '<span class="material-icons" style="color: var(--app-warning)">emoji_events</span>' : perdendo ? '<span class="material-icons" style="color: var(--app-danger)">warning</span>' : '<span class="material-icons" style="color: var(--app-info)">compare_arrows</span>';
 
     const faseLabel = {
-        primeira: "1a Fase",
+        primeira: "1ª Fase",
         oitavas: "Oitavas",
         quartas: "Quartas",
         semis: "Semifinal",
@@ -2056,7 +2056,7 @@ function renderMeuConfrontoMataMata() {
                 <span class="wh-module-badge wh-module-badge--mm">MM · ${faseLabel}</span>
                 ${isLive ? '<span class="wh-live-badge"><span class="material-icons" style="font-size:12px; color: var(--app-danger)">sensors</span> AO VIVO</span>' : ''}
             </div>
-            <div class="wh-section-body" style="padding:0">
+            <div class="wh-section-body">
                 <div class="wh-meu-confronto">
                     <div class="wh-mc-times">
                         <div class="wh-mc-time wh-mc-time--eu ${vencendo ? 'winning' : ''}">
@@ -2067,6 +2067,12 @@ function renderMeuConfrontoMataMata() {
                             </div>
                             <div class="wh-mc-pontos ${vencendo ? 'winning' : ''}">${(Math.trunc((meusPontos||0) * 10) / 10).toFixed(1)}</div>
                         </div>
+
+                        <div class="wh-mc-vs">
+                            <span class="wh-mc-vs-emoji">${statusEmoji}</span>
+                            <span class="wh-mc-vs-diff ${statusClass}">${diff > 0 ? '+' : ''}${(Math.trunc(diff * 10) / 10).toFixed(1)}</span>
+                        </div>
+
                         <div class="wh-mc-time wh-mc-time--adv ${perdendo ? 'winning' : ''}">
                             <img class="wh-mc-escudo" src="${adversario?.url_escudo_png || '/escudos/default.png'}" onerror="this.src='/escudos/default.png'" alt="">
                             <div class="wh-mc-info">
@@ -2076,9 +2082,10 @@ function renderMeuConfrontoMataMata() {
                             <div class="wh-mc-pontos ${perdendo ? 'winning' : ''}">${(Math.trunc((pontosAdv||0) * 10) / 10).toFixed(1)}</div>
                         </div>
                     </div>
+
                     <div class="wh-mc-status ${statusClass}">
-                        <span class="material-icons">${statusIcon}</span>
-                        ${statusText}
+                        <span class="material-icons">${vencendo ? 'thumb_up' : perdendo ? 'thumb_down' : 'compare_arrows'}</span>
+                        ${vencendo ? 'Avançando!' : perdendo ? 'Em risco de eliminação' : 'Confronto equilibrado'}
                     </div>
                 </div>
             </div>
