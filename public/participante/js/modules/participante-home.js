@@ -1870,9 +1870,9 @@ function atualizarCardsHomeComParciais() {
     }
 
     if (variacaoPontosEl) {
-        const jogoRolando = dadosParciais?.participantes?.some(p => (p.pontos || 0) > 0)
-            || mercadoStatus?.bola_rolando === true;
-        variacaoPontosEl.innerHTML = jogoRolando
+        // v2.1: Usar isJogosAoVivo() (game-status real) ao invés de heurística de pontos
+        const aoVivo = typeof isJogosAoVivo === 'function' && isJogosAoVivo();
+        variacaoPontosEl.innerHTML = aoVivo
             ? '<span class="live-badge-mini">AO VIVO</span>'
             : '<span class="andamento-badge-mini">RODADA EM ANDAMENTO</span>';
     }
