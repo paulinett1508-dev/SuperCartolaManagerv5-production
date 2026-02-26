@@ -41,16 +41,62 @@ export async function obterStatus(req, res) {
             const pendente = await RestaUmCache.findOne(queryPendente).sort({ edicao: -1 }).lean();
 
             if (pendente) {
+                // Tentar buscar pontos parciais da rodadaInicial na collection Rodada
+                let pontosLiveMap = new Map();
+                let isLive = false;
+                let rodadaAtualProvisoria = null;
+
+                if (pendente.rodadaInicial) {
+                    const rodadasLive = await Rodada.find({
+                        ligaId,
+                        rodada: pendente.rodadaInicial,
+                        temporada,
+                    }).lean();
+
+                    if (rodadasLive.length > 0) {
+                        isLive = true;
+                        rodadaAtualProvisoria = pendente.rodadaInicial;
+                        rodadasLive.forEach(r => {
+                            pontosLiveMap.set(String(r.timeId), r.pontos || 0);
+                        });
+                    }
+                }
+
+                // Mesclar pontos live com participantes
+                const participantesComPontos = (pendente.participantes || []).map(p => {
+                    const pontosLive = pontosLiveMap.get(String(p.timeId));
+                    return {
+                        ...p,
+                        pontosRodada: pontosLive != null ? truncarPontosNum(pontosLive) : null,
+                        pontosAcumulados: truncarPontosNum(p.pontosAcumulados || 0),
+                    };
+                });
+
+                // Ordenar vivos por pontos DESC (lanterna último) quando live
+                let participantesOrdenados = participantesComPontos;
+                if (isLive) {
+                    const vivos = participantesComPontos
+                        .filter(p => p.status === 'vivo' || p.status === 'campeao')
+                        .sort((a, b) => (b.pontosRodada || 0) - (a.pontosRodada || 0));
+                    const eliminados = participantesComPontos
+                        .filter(p => p.status === 'eliminado')
+                        .sort((a, b) => (b.rodadaEliminacao || 0) - (a.rodadaEliminacao || 0));
+                    participantesOrdenados = [...vivos, ...eliminados];
+                }
+
                 return res.json({
                     edicao: {
                         id: pendente.edicao,
                         nome: pendente.nome,
                         status: pendente.status,
                         rodadaInicial: pendente.rodadaInicial,
+                        eliminadosPorRodada: pendente.eliminadosPorRodada || 1,
                     },
-                    participantes: pendente.participantes || [],
-                    rodadaAtual: null,
+                    participantes: participantesOrdenados,
+                    rodadaAtual: rodadaAtualProvisoria,
                     eliminadosDaRodada: [],
+                    isLive,
+                    isProvisional: isLive, // prévia, edição ainda não ativada oficialmente
                     premiacao: {
                         campeao: pendente.premiacao?.campeao || 0,
                         vice: pendente.premiacao?.viceHabilitado !== false ? (pendente.premiacao?.vice || 0) : null,

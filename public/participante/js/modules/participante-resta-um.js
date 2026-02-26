@@ -102,13 +102,9 @@ function _iniciarAutoRefresh() {
         }
 
         try {
-            // Verificar se mercado está fechado (rodada ao vivo)
-            const isLive = _isRodadaAoVivo();
-
-            if (isLive) {
-                if (window.Log) Log.debug('[PARTICIPANTE-RESTA-UM] Auto-refresh (live)...');
-                await _carregarDados();
-            }
+            // Backend já gerencia estado live/finalizado — sempre buscar
+            if (window.Log) Log.debug('[PARTICIPANTE-RESTA-UM] Auto-refresh...');
+            await _carregarDados();
         } catch (err) {
             if (window.Log) Log.warn('[PARTICIPANTE-RESTA-UM] Erro no auto-refresh:', err);
         }
@@ -205,7 +201,7 @@ function _renderizarDisputa(dados, timeId) {
     // Atualizar estado da lanterna para próximo refresh
     _wasLanterna = isLanterna;
 
-    const isLive = _isRodadaAoVivo();
+    const isLive = dados.isLive || _isRodadaAoVivo();
 
     // Header da edição
     let html = `
