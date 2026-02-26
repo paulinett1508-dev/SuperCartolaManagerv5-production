@@ -78,21 +78,27 @@ export async function inicializarCampinhoParticipante(params) {
         const rodadaMercado = statusMercado?.rodada_atual || 1;
         const statusMercadoNum = statusMercado?.status_mercado;
 
-        // Mercado FECHADO (status=2): jogos em andamento → rodada_atual É a rodada disputada
-        // Mercado ABERTO (status=1) ou manutenção (status=3): rodada_atual é a PRÓXIMA → consolidada = -1
-        const rodadaConsolidada = statusMercadoNum === 2
-            ? rodadaMercado
-            : Math.max(1, rodadaMercado - 1);
+        // Usar função canônica compartilhada (participante-utils.js)
+        const rodadaConsolidada = window.obterUltimaRodadaDisputada
+            ? window.obterUltimaRodadaDisputada(rodadaMercado, statusMercadoNum)
+            : (statusMercadoNum === 2 ? rodadaMercado : Math.max(1, rodadaMercado - 1));
 
         const [escalacao, confrontos] = await Promise.all([
             buscarEscalacaoCompleta(ligaId, timeId, rodadaConsolidada),
             buscarConfrontos(ligaId, timeId)
         ]);
 
-        dadosEscalacao = escalacao;
+        // Fallback: se rodada sem dados, tentar rodada anterior consolidada
+        let escalacaoFinal = escalacao;
+        if ((!escalacao || (!escalacao.atletas?.length && !escalacao.titulares?.length)) && rodadaConsolidada > 1) {
+            if (window.Log) Log.debug("PARTICIPANTE-CAMPINHO", `Rodada ${rodadaConsolidada} sem dados, tentando rodada ${rodadaConsolidada - 1}`);
+            escalacaoFinal = await buscarEscalacaoCompleta(ligaId, timeId, rodadaConsolidada - 1);
+        }
+
+        dadosEscalacao = escalacaoFinal;
         confrontoAtual = confrontos;
 
-        if (!escalacao || (!escalacao.atletas?.length && !escalacao.titulares?.length)) {
+        if (!escalacaoFinal || (!escalacaoFinal.atletas?.length && !escalacaoFinal.titulares?.length)) {
             container.innerHTML = renderizarSemEscalacao();
             return;
         }
@@ -103,7 +109,7 @@ export async function inicializarCampinhoParticipante(params) {
         }
 
         // Renderizar campinho completo
-        container.innerHTML = renderizarCampinhoCompleto(escalacao, dadosAdversario, confrontos, ligaId, timeId, statusMercado);
+        container.innerHTML = renderizarCampinhoCompleto(escalacaoFinal, dadosAdversario, confrontos, ligaId, timeId, statusMercado);
 
         // Buscar extrato financeiro da rodada (assíncrono)
         buscarExtratoRodada(ligaId, timeId, rodadaConsolidada);
