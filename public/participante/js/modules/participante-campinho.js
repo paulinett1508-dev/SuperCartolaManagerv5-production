@@ -277,7 +277,7 @@ async function buscarEscalacaoCompleta(ligaId, timeId, rodada = 1) {
     try {
         const atletasPontuados = await tentarBuscarAtletasPontuados();
         const rawEscalacao = await carregarEscalacaoDoDataLake(timeId, rodadaAtual, temporada, atletasPontuados.atletas || {});
-        if (rawEscalacao) {
+        if (rawEscalacao && (rawEscalacao.titulares?.length || rawEscalacao.atletas?.length)) {
             return rawEscalacao;
         }
 
@@ -310,18 +310,20 @@ async function buscarEscalacaoCompleta(ligaId, timeId, rodada = 1) {
             // data já tem { titulares, reservas, capitao_id, reserva_luxo_id, nome, nome_cartoleiro }
             const tit = normalizarListaAtletas(data.titulares || [], atletasPontuadosObj, false);
             const res = normalizarListaAtletas(data.reservas || [], atletasPontuadosObj, true);
-            return {
-                timeId,
-                rodada: rodadaAtual,
-                atletas: [...tit, ...res],
-                titulares: tit,
-                reservas: res,
-                capitao_id: data.capitao_id,
-                reserva_luxo_id: data.reserva_luxo_id,
-                pontos: 0, // calcularPontosTotais() recalcula no render
-                nome: data.nome,
-                nome_cartoleiro: data.nome_cartoleiro,
-            };
+            if (tit.length || res.length) {
+                return {
+                    timeId,
+                    rodada: rodadaAtual,
+                    atletas: [...tit, ...res],
+                    titulares: tit,
+                    reservas: res,
+                    capitao_id: data.capitao_id,
+                    reserva_luxo_id: data.reserva_luxo_id,
+                    pontos: 0, // calcularPontosTotais() recalcula no render
+                    nome: data.nome,
+                    nome_cartoleiro: data.nome_cartoleiro,
+                };
+            }
         }
 
         // Fallback extra: usar cache de rodadas
