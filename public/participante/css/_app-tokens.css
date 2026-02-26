@@ -278,6 +278,8 @@
     --app-z-modal: 600;
     --app-z-toast: 700;
     --app-z-bottom-nav: 1000;
+    --app-z-fab: 1050;
+    --app-z-fab-panel: 1051;
 
     /* ========================================
        13. COMPONENTES ESPECÍFICOS (Mobile)

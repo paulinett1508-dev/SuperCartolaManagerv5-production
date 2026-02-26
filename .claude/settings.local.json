@@ -191,7 +191,8 @@
       "Bash(git mv \\\\\n  scripts/corrigir-caches-2025.js \\\\\n  scripts/corrigir-hall-fama.js \\\\\n  scripts/fix-auditoria-extratos-2026.js \\\\\n  scripts/fix-cache-permanente-2025.js \\\\\n  scripts/fix-extrato-2026-rodada-fantasma.js \\\\\n  scripts/fix-extrato-2026-saldo-completo.js \\\\\n  scripts/fix-extrato-duplicados-liga-id.js \\\\\n  scripts/fix-extrato-pc-mm-top10-integration-2026.js \\\\\n  scripts/fix-extratos-2025-modulos-perdidos.js \\\\\n  scripts/fix-ranking-temporada-2026.js \\\\\n  scripts/fix-renovacoes-credito-2026.js \\\\\n  scripts/fix-restum-escudos.js \\\\\n  scripts/fix-times-temporada-2026.js \\\\\n  scripts/applied-fixes/)",
       "Bash(which mongodump mongorestore 2>/dev/null && mongodump --version 2>/dev/null || echo \"mongodump não disponível\")",
       "Bash(git cherry-pick 0234c81)",
-      "Bash(git cherry-pick b1b9398)"
+      "Bash(git cherry-pick b1b9398)",
+      "Bash(git add public/participante/css/home-tiles.css public/participante/css/whats-happening.css public/participante/fronts/home.html public/participante/index.html public/participante/js/modules/participante-home.js public/participante/js/widgets/whats-happening-widget.js\n\ngit commit -m \"$\\(cat <<'EOF'\nrevert\\(home+foguinho\\): restaurar versão pré-redesign \\(commit 44f7dc3\\)\n\n- home.html: restaurado layout original \\(scoreboard vertical, stat-cards\\)\n- participante-home.js: restaurado renderizarHome\\(\\) original\n- index.html: removido link para home-tiles.css\n- home-tiles.css: removido \\(criado no redesign tiles v4.0\\)\n- whats-happening.css: revertido scoreboard vertical do PR #163\n- whats-happening-widget.js: revertido para versão pré-PR #163\n\nCo-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   },
   "enableAllProjectMcpServers": true,
