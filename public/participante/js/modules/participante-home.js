@@ -672,7 +672,8 @@ function processarDadosParaRender(liga, ranking, rodadas, extratoData, meuTimeId
         minhasRodadas: rodadasOrdenadas,
         timeId: meuTimeIdNum,
         clubeId,
-        lider
+        lider,
+        ranking: ranking || [] // v5.0: expor ranking completo para modais
     };
 }
 

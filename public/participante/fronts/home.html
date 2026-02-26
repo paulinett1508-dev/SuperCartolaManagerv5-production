@@ -1,4 +1,4 @@
-<!-- PARTICIPANTE HOME - Tiles Edition v4.0 -->
+<!-- PARTICIPANTE HOME - Tiles Edition v5.0 (Inteligente + Modais) -->
 <div id="home-container" class="home-tiles-container">
 
     <!-- Header -->
@@ -10,10 +10,10 @@
     <!-- Grid de Tiles -->
     <div class="home-tiles-grid">
 
-        <!-- TILE: Minha Rodada (2x2) -->
+        <!-- TILE: Minha Rodada (2x2) — sempre ativo -->
         <button class="home-tile home-tile--confronto"
                 aria-label="Ver minha pontuação na rodada"
-                onclick="window.participanteNav?.navegarPara('rodadas')">
+                onclick="window._homeTileClick?.('rodada')">
             <div class="home-tile-tag">MINHA RODADA</div>
             <div class="home-tile-live-badge" id="tile-confronto-live-badge" style="display:none" aria-hidden="true">
                 <span class="material-icons" style="font-size:8px;vertical-align:middle">circle</span>
@@ -26,10 +26,10 @@
             </div>
         </button>
 
-        <!-- TILE: Ranking Geral (2x2) -->
+        <!-- TILE: Ranking Geral (2x2) — sempre ativo -->
         <button class="home-tile home-tile--ranking"
                 aria-label="Ver ranking geral da liga"
-                onclick="window.participanteNav?.navegarPara('ranking')">
+                onclick="window._homeTileClick?.('ranking')">
             <div class="home-tile-tag">RANKING GERAL</div>
             <span class="material-icons home-tile-icon-bg">leaderboard</span>
             <div class="home-tile-body">
@@ -44,15 +44,28 @@
             </div>
         </button>
 
-        <!-- ROW 3: Tiles opcionais (módulos ativos) — JS controla visibilidade -->
-        <div id="home-tiles-optional-row" class="home-tiles-optional-row" style="display:none">
+        <!-- ROW 3: Extrato (sempre ativo), Capitão, Artilheiro -->
+        <div id="home-row-3" class="home-tiles-optional-row">
 
-            <!-- TILE: Capitão de Luxo (largura 2x) -->
+            <!-- TILE: Extrato / Saldo (2x) — sempre ativo -->
+            <button class="home-tile home-tile--extrato"
+                    id="tile-extrato"
+                    aria-label="Ver extrato financeiro"
+                    onclick="window._homeTileClick?.('extrato')">
+                <div class="home-tile-tag">SALDO</div>
+                <span class="material-icons home-tile-icon-bg">account_balance_wallet</span>
+                <div class="home-tile-body">
+                    <span id="tile-extrato-saldo" class="home-tile-number-sm">R$ --</span>
+                    <span id="tile-extrato-variacao" class="home-tile-variacao">--</span>
+                </div>
+            </button>
+
+            <!-- TILE: Capitão de Luxo (1x) — opcional -->
             <button class="home-tile home-tile--capitao home-tile-opcional"
                     id="tile-capitao"
                     aria-label="Ver Capitão de Luxo"
-                    onclick="window.participanteNav?.navegarPara('capitao')">
-                <div class="home-tile-tag">CAPITÃO DE LUXO</div>
+                    onclick="window._homeTileClick?.('capitao')">
+                <div class="home-tile-tag">CAPITÃO</div>
                 <span class="material-icons home-tile-icon-bg" style="font-size:52px">shield</span>
                 <div class="home-tile-body">
                     <span id="tile-capitao-nome" class="home-tile-label-val">--</span>
@@ -60,53 +73,136 @@
                 </div>
             </button>
 
-            <!-- TILE: Mata-Mata (largura 1x) -->
-            <button class="home-tile home-tile--mata-mata home-tile-opcional"
-                    id="tile-mata-mata"
-                    aria-label="Ver Mata-Mata"
-                    onclick="window.participanteNav?.navegarPara('mata-mata')">
-                <span class="material-icons home-tile-icon-bg" style="font-size:52px">emoji_events</span>
-                <div class="home-tile-body">
-                    <span id="tile-mata-mata-fase" class="home-tile-label-sm">MATA-MATA</span>
-                </div>
-            </button>
-
-            <!-- TILE: Artilheiro (largura 1x) -->
+            <!-- TILE: Artilheiro Campeão (1x) — opcional -->
             <button class="home-tile home-tile--artilheiro home-tile-opcional"
                     id="tile-artilheiro"
                     aria-label="Ver Artilheiro Campeão"
-                    onclick="window.participanteNav?.navegarPara('artilheiro')">
+                    onclick="window._homeTileClick?.('artilheiro')">
+                <div class="home-tile-tag">ARTILHEIRO</div>
                 <span class="material-icons home-tile-icon-bg" style="font-size:52px">military_tech</span>
                 <div class="home-tile-body">
                     <span id="tile-artilheiro-gols" class="home-tile-number-sm">--</span>
-                    <span class="home-tile-label-sm">ARTILHEIRO</span>
+                    <span class="home-tile-label-sm">gols líder</span>
                 </div>
             </button>
 
         </div>
 
-        <!-- TILE: Confrontos da Rodada (1x1) -->
-        <button class="home-tile home-tile--confrontos"
-                aria-label="Ver confrontos da rodada"
-                onclick="window.participanteNav?.navegarPara('rodadas')">
-            <span class="material-icons home-tile-icon-bg" style="font-size:52px">groups</span>
-            <div class="home-tile-body">
-                <span class="material-icons" style="font-size:20px;color:rgba(255,255,255,0.5);margin-bottom:2px">groups</span>
-                <span class="home-tile-label-sm">CONFRONTOS</span>
-            </div>
-        </button>
+        <!-- ROW 4: Mata-Mata, Luva de Ouro, Pontos Corridos — opcionais -->
+        <div id="home-row-4" class="home-tiles-optional-row" style="display:none">
 
-        <!-- TILE: Ver Tudo (3x1) -->
-        <button class="home-tile home-tile--ver-tudo"
-                aria-label="Ver todos os módulos"
-                onclick="window.participanteNav?.navegarPara('ranking')">
-            <div class="home-tile-body home-tile-body--row">
-                <span class="material-icons" style="font-size:18px;color:rgba(255,255,255,0.5)">apps</span>
-                <span class="home-tile-label-sm" style="flex:1;text-align:center">VER TODOS OS MÓDULOS</span>
-                <span class="material-icons" style="font-size:18px;color:rgba(255,255,255,0.35)">chevron_right</span>
-            </div>
-        </button>
+            <!-- TILE: Mata-Mata (1x) -->
+            <button class="home-tile home-tile--mata-mata home-tile-opcional"
+                    id="tile-mata-mata"
+                    aria-label="Ver Mata-Mata"
+                    onclick="window._homeTileClick?.('mata-mata')">
+                <div class="home-tile-tag">MATA-MATA</div>
+                <span class="material-icons home-tile-icon-bg" style="font-size:52px">emoji_events</span>
+                <div class="home-tile-body">
+                    <span id="tile-mata-mata-fase" class="home-tile-number-sm">--</span>
+                    <span class="home-tile-label-sm">fase atual</span>
+                </div>
+            </button>
 
+            <!-- TILE: Luva de Ouro (1x) -->
+            <button class="home-tile home-tile--luva-ouro home-tile-opcional"
+                    id="tile-luva-ouro"
+                    aria-label="Ver Luva de Ouro"
+                    onclick="window._homeTileClick?.('luva-ouro')">
+                <div class="home-tile-tag">LUVA DE OURO</div>
+                <span class="material-icons home-tile-icon-bg" style="font-size:52px">sports_handball</span>
+                <div class="home-tile-body">
+                    <span id="tile-luva-nome" class="home-tile-label-val">--</span>
+                    <span id="tile-luva-defesas" class="home-tile-number-sm">-- def</span>
+                </div>
+            </button>
+
+            <!-- TILE: Pontos Corridos (2x) -->
+            <button class="home-tile home-tile--pontos-corridos home-tile-opcional"
+                    id="tile-pontos-corridos"
+                    aria-label="Ver Pontos Corridos"
+                    onclick="window._homeTileClick?.('pontos-corridos')">
+                <div class="home-tile-tag">PTS CORRIDOS</div>
+                <span class="material-icons home-tile-icon-bg">stacked_bar_chart</span>
+                <div class="home-tile-body">
+                    <span id="tile-pontos-corridos-aproveitamento" class="home-tile-number-sm">--%</span>
+                    <span id="tile-pontos-corridos-record" class="home-tile-label-sm">V-E-D</span>
+                </div>
+            </button>
+
+        </div>
+
+        <!-- ROW 5: Top 10, Melhor Mês, Resta Um, Campinho — opcionais -->
+        <div id="home-row-5" class="home-tiles-optional-row" style="display:none">
+
+            <!-- TILE: Top 10 (1x) -->
+            <button class="home-tile home-tile--top10 home-tile-opcional"
+                    id="tile-top10"
+                    aria-label="Ver Top 10 da rodada"
+                    onclick="window._homeTileClick?.('top10')">
+                <div class="home-tile-tag">TOP 10</div>
+                <span class="material-icons home-tile-icon-bg" style="font-size:52px">workspace_premium</span>
+                <div class="home-tile-body">
+                    <span id="tile-top10-status" class="home-tile-label-sm">--</span>
+                </div>
+            </button>
+
+            <!-- TILE: Melhor Mês (1x) -->
+            <button class="home-tile home-tile--melhor-mes home-tile-opcional"
+                    id="tile-melhor-mes"
+                    aria-label="Ver Melhor Mês"
+                    onclick="window._homeTileClick?.('melhor-mes')">
+                <div class="home-tile-tag">MELHOR MÊS</div>
+                <span class="material-icons home-tile-icon-bg" style="font-size:52px">calendar_month</span>
+                <div class="home-tile-body">
+                    <span id="tile-melhor-mes-status" class="home-tile-label-sm">--</span>
+                </div>
+            </button>
+
+            <!-- TILE: Resta Um (1x) -->
+            <button class="home-tile home-tile--resta-um home-tile-opcional"
+                    id="tile-resta-um"
+                    aria-label="Ver Resta Um"
+                    onclick="window._homeTileClick?.('resta-um')">
+                <div class="home-tile-tag">RESTA UM</div>
+                <span class="material-icons home-tile-icon-bg" style="font-size:52px">person_off</span>
+                <div class="home-tile-body">
+                    <span id="tile-resta-um-status" class="home-tile-badge-status">--</span>
+                </div>
+            </button>
+
+            <!-- TILE: Campinho (1x) -->
+            <button class="home-tile home-tile--campinho home-tile-opcional"
+                    id="tile-campinho"
+                    aria-label="Ver escalação no Campinho"
+                    onclick="window._homeTileClick?.('campinho')">
+                <div class="home-tile-tag">CAMPINHO</div>
+                <span class="material-icons home-tile-icon-bg" style="font-size:52px">sports</span>
+                <div class="home-tile-body">
+                    <span class="home-tile-label-sm">ver escalação</span>
+                </div>
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- ==========================================
+         MODAL BOTTOM-SHEET
+         ========================================== -->
+    <div id="home-modal-overlay" class="home-modal-overlay" onclick="window._fecharModalHome?.()">
+        <div class="home-modal-sheet" onclick="event.stopPropagation()">
+            <div class="home-modal-header">
+                <span class="home-modal-drag-bar"></span>
+                <span class="home-modal-title" id="home-modal-title">—</span>
+                <button class="home-modal-close" onclick="window._fecharModalHome?.()">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="home-modal-body" id="home-modal-body">
+                <!-- conteúdo dinâmico por tile -->
+            </div>
+        </div>
     </div>
 
 </div>
