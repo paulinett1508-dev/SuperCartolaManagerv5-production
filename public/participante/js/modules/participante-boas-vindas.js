@@ -664,6 +664,7 @@ function renderizarBoasVindas(container, data, ligaRules) {
         pontosTotal,
         ultimaRodada,
         rodadaAtual,
+        ultimaRodadaDisputada, // FIX: Rodada disputada vs rodada do mercado
         nomeTime,
         nomeCartola,
         nomeLiga,
@@ -976,7 +977,7 @@ function renderizarBoasVindas(container, data, ligaRules) {
                             ${TEMPORADA_ATUAL}
                         </span>
                     </div>
-                    <p class="text-sm font-normal text-white/70 flex items-center gap-1.5">${logoLigaHTML}<span>${escapeHtml(nomeLiga)}</span> • Rodada ${rodadaAtual || "--"}</p>
+                    <p class="text-sm font-normal text-white/70 flex items-center gap-1.5">${logoLigaHTML}<span>${escapeHtml(nomeLiga)}</span> • Rodada ${rodadaAtual || "--"}${mercadoStatus?.status_mercado === 2 ? ' <span class="live-badge-mini" style="font-size:9px;padding:1px 5px;">AO VIVO</span>' : ''}</p>
                 </div>
 
                 <!-- Card Principal do Time -->
@@ -1020,7 +1021,7 @@ function renderizarBoasVindas(container, data, ligaRules) {
                 <div class="mx-4 mb-4 grid grid-cols-3 gap-3">
                     <div class="flex flex-col items-center justify-center gap-1 rounded-xl bg-surface-dark p-3">
                         <p class="text-xs font-medium uppercase text-white/70">Rodadas</p>
-                        <p class="text-2xl font-bold text-white">${rodadaAtual || 0}</p>
+                        <p class="text-2xl font-bold text-white">${ultimaRodadaDisputada || rodadaAtual || 0}</p>
                     </div>
                     <div class="flex flex-col items-center justify-center gap-1 rounded-xl bg-surface-dark p-3">
                         <p class="text-xs font-medium uppercase text-white/70">Participantes</p>
@@ -1039,9 +1040,9 @@ function renderizarBoasVindas(container, data, ligaRules) {
                         <div class="flex justify-between items-center p-3 rounded-lg bg-white/5">
                             <div class="flex items-center gap-2">
                                 <span class="material-icons text-primary text-xl">bolt</span>
-                                <span class="text-xs text-white/70">Rodada ${rodadaAtual}</span>
+                                <span class="text-xs text-white/70">${mercadoStatus?.status_mercado === 2 ? 'Parcial R' + rodadaAtual : 'Rodada ' + (ultimaRodadaDisputada || rodadaAtual)}</span>
                             </div>
-                            <span class="text-sm font-bold text-white">${pontosUltimaRodada} pts</span>
+                            <span class="text-sm font-bold text-white">${mercadoStatus?.status_mercado === 2 ? '--' : pontosUltimaRodada + ' pts'}</span>
                         </div>
                         <div class="flex justify-between items-center p-3 rounded-lg bg-white/5">
                             <div class="flex items-center gap-2">
