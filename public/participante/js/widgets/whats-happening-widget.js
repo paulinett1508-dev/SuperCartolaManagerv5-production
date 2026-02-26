@@ -1316,11 +1316,10 @@ function renderCardRanking() {
     if (ranking.length === 0) return null;
 
     const meuId = String(WHState.timeId);
-    const minhaPosicao = ranking.findIndex(r => r.timeId === meuId) + 1;
-    const leader = ranking[0];
-    const leaderDisplay = leader.nome_cartola
-        ? `${escapeHtml(leader.nome_cartola)} · ${escapeHtml(leader.nome_time)}`
-        : escapeHtml(leader.nome_time);
+    const minhaPosicao = ranking.findIndex(r => r.timeId === meuId);
+    const meuDado = minhaPosicao >= 0 ? ranking[minhaPosicao] : null;
+    const pos = minhaPosicao >= 0 ? minhaPosicao + 1 : '?';
+    const meuPontos = meuDado ? _tp(meuDado.pontos) : '--';
 
     return `
         <div class="wh-card wh-card--ranking" data-modal="ranking">
@@ -1331,8 +1330,8 @@ function renderCardRanking() {
                 <span class="wh-card-title">Ranking</span>
                 ${isLive ? '<span class="wh-card-badge wh-card-badge--live"><span class="material-icons" style="font-size:8px">sensors</span> LIVE</span>' : ''}
             </div>
-            <div class="wh-card-metric">#${minhaPosicao || '?'} <span style="font-size:var(--app-font-xs);color:var(--app-text-muted)">de ${ranking.length}</span></div>
-            <div class="wh-card-subtitle" style="font-size:9px;line-height:1.2">Lider: ${leaderDisplay}</div>
+            <div class="wh-card-metric">#${pos} <span style="font-size:var(--app-font-xs);color:var(--app-text-muted)">de ${ranking.length}</span></div>
+            <div class="wh-card-subtitle" style="font-size:9px;line-height:1.2">Voce · ${meuPontos} pts</div>
         </div>
     `;
 }
@@ -1410,7 +1409,25 @@ function renderCardMataMataUnified() {
         `;
     }
 
-    // Sem meu confronto: mostrar fase + contagem
+    // Sem meu confronto: participante ja foi eliminado ou nao participa
+    const meuId = String(WHState.timeId);
+    // Verificar se o participante foi eliminado em alguma fase anterior
+    let foiEliminado = false;
+    for (const fase of fases) {
+        const cf = data.dados[fase];
+        if (Array.isArray(cf)) {
+            for (const c of cf) {
+                const idA = String(c.timeA?.timeId || c.timeA?.time_id || '');
+                const idB = String(c.timeB?.timeId || c.timeB?.time_id || '');
+                if ((idA === meuId || idB === meuId) && c.vencedor && String(c.vencedor) !== meuId) {
+                    foiEliminado = true;
+                    break;
+                }
+            }
+        }
+        if (foiEliminado) break;
+    }
+
     return `
         <div class="wh-card wh-card--mata-mata" data-modal="mata-mata">
             <div class="wh-card-header">
@@ -1421,7 +1438,7 @@ function renderCardMataMataUnified() {
                 ${isLive ? '<span class="wh-card-badge wh-card-badge--live"><span class="material-icons" style="font-size:8px">sensors</span> LIVE</span>' : ''}
             </div>
             <div class="wh-card-metric">${faseLabel}</div>
-            <div class="wh-card-subtitle">${confrontosFase.length} confronto${confrontosFase.length > 1 ? 's' : ''}</div>
+            <div class="wh-card-subtitle" style="font-size:9px;line-height:1.2">${foiEliminado ? '<span style="color:var(--app-danger)">Voce foi eliminado</span>' : `${confrontosFase.length} confronto${confrontosFase.length > 1 ? 's' : ''}`}</div>
         </div>
     `;
 }
@@ -1453,15 +1470,14 @@ function renderCardModulo(tipo) {
     const data = config.data;
     if (!data?.ranking || !Array.isArray(data.ranking) || data.ranking.length === 0) return null;
 
-    const leader = data.ranking[0];
     const meuId = String(WHState.timeId);
     const matchId = (r) => String(r.timeId || r.time_id || r.participanteId || '') === meuId;
     const meuIndex = data.ranking.findIndex(matchId);
+    const meuDado = meuIndex >= 0 ? data.ranking[meuIndex] : null;
+    const pos = meuIndex >= 0 ? meuIndex + 1 : '?';
 
-    const nomes = _nomes(leader);
-    const leaderDisplay = nomes.participante
-        ? `${escapeHtml(nomes.participante)} · ${escapeHtml(nomes.time)}`
-        : escapeHtml(nomes.time || 'Time');
+    const metricText = meuDado ? config.getValue(meuDado) : config.getValue(data.ranking[0]);
+    const subtitleText = meuIndex === 0 ? 'Voce lidera!' : `Voce · #${pos} de ${data.ranking.length}`;
 
     return `
         <div class="wh-card wh-card--${tipo}" data-modal="${tipo}">
@@ -1471,8 +1487,8 @@ function renderCardModulo(tipo) {
                 </div>
                 <span class="wh-card-title">${config.title}</span>
             </div>
-            <div class="wh-card-metric">${config.getValue(leader)}</div>
-            <div class="wh-card-subtitle" style="font-size:9px;line-height:1.2">${leaderDisplay}${meuIndex > 0 ? ` · Voce #${meuIndex + 1}` : meuIndex === 0 ? ' · Voce lidera!' : ''}</div>
+            <div class="wh-card-metric">${metricText}</div>
+            <div class="wh-card-subtitle" style="font-size:9px;line-height:1.2">${subtitleText}</div>
         </div>
     `;
 }
@@ -1491,13 +1507,11 @@ function renderCardRestaUm() {
     const meu = data.vivos.find(p => String(p.timeId) === meuId);
     const isElim = !meu && data.eliminados?.find(p => String(p.timeId) === meuId);
 
-    const leader = data.vivos[0];
-    const leaderNomes = _nomes(leader);
-    const leaderDisplay = leaderNomes.participante
-        ? `${escapeHtml(leaderNomes.participante)} · ${escapeHtml(leaderNomes.time)}`
-        : escapeHtml(leaderNomes.time || 'Lider');
-
-    const statusText = meu ? 'Voce vivo!' : isElim ? 'Eliminado' : leaderDisplay;
+    const statusText = meu
+        ? '<span style="color:var(--app-success)">Voce vivo!</span>'
+        : isElim
+            ? '<span style="color:var(--app-danger)">Voce foi eliminado</span>'
+            : `${totalVivos} sobreviventes`;
 
     return `
         <div class="wh-card wh-card--resta-um" data-modal="resta-um">
