@@ -443,7 +443,7 @@ async function buscarECalcularPontuacao(time, rodada, atletasPontuados) {
                 if (jogou) atletasEmCampo++;
 
                 const isCapitao = atleta.atleta_id === dadosEscalacao.capitao_id;
-                const pontosEfetivos = isCapitao ? pontuacao * 2 : pontuacao;
+                const pontosEfetivos = isCapitao ? pontuacao * 1.5 : pontuacao;
                 pontos += pontosEfetivos;
 
                 const info = {
@@ -568,7 +568,7 @@ async function buscarECalcularPontuacao(time, rodada, atletasPontuados) {
 
                             // Luxo herda multiplicador de capitão se substituir o capitão
                             if (piorTitular.is_capitao) {
-                                pontosEfetivos = pontuacao * 2;
+                                pontosEfetivos = pontuacao * 1.5;
                                 luxoHerdouCapitao = true;
                             } else {
                                 pontosEfetivos = pontuacao;

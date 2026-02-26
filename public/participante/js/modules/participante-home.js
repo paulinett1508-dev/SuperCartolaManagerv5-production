@@ -1450,11 +1450,11 @@ function popularDestaqueCard(tipo, atleta, isCapitao = false) {
     if (pontosEl) {
         let pontosDisplay;
         if (isCapitao && atleta.pontos_efetivos !== undefined) {
-            // ParciaisModule: pontos_efetivos já inclui capitão 2x
+            // ParciaisModule: pontos_efetivos já inclui capitão 1.5x
             pontosDisplay = parseFloat(atleta.pontos_efetivos || 0);
         } else if (isCapitao) {
-            // API raw: aplicar capitão 2x manualmente
-            pontosDisplay = parseFloat(atleta.pontos_num || 0) * 2;
+            // API raw: aplicar capitão 1.5x manualmente
+            pontosDisplay = parseFloat(atleta.pontos_num || 0) * 1.5;
         } else {
             pontosDisplay = parseFloat(atleta.pontos_num || 0);
         }

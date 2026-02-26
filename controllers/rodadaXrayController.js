@@ -94,8 +94,8 @@ export const obterRaioXRodada = async (req, res) => {
         const atletasEnriquecidos = atletas.map(a => {
             const isCapitao = a.atleta_id === capitaoId;
             const pontosBase = a.pontos_num || 0;
-            // Capitão pontua em dobro no Cartola
-            const pontosEfetivos = isCapitao ? pontosBase * 2 : pontosBase;
+            // Capitão pontua 1.5x no Cartola FC 2026
+            const pontosEfetivos = isCapitao ? pontosBase * 1.5 : pontosBase;
             const posInfo = POSICOES[a.posicao_id] || { nome: "Desconhecido", sigla: "???", cor: "#6b7280" };
 
             return {

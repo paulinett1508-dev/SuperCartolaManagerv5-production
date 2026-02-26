@@ -135,9 +135,9 @@ function calcularPontuacaoTime(escalacao, atletasPontuados) {
         if (atletaPontuado && atletaPontuado.entrou_em_campo) {
             let pontosAtleta = atletaPontuado.pontuacao || 0;
 
-            // Capitão dobra os pontos
+            // Capitão 1.5x (regra Cartola FC 2026)
             if (atletaId === capitaoId) {
-                pontosAtleta *= 2;
+                pontosAtleta *= 1.5;
             }
 
             pontosTotais += pontosAtleta;

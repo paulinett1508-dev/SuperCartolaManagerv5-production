@@ -214,7 +214,7 @@ function renderizarCapitao(dados) {
                 <div class="xray-capitao-pos">${cap.posicao} • Capitão</div>
             </div>
             <div class="xray-capitao-stats">
-                <div class="xray-capitao-pontos">${formatarPontos(cap.pontos_base * 2)}</div>
+                <div class="xray-capitao-pontos">${formatarPontos(cap.pontos_base * 1.5)}</div>
                 <div class="xray-capitao-bonus">+${formatarPontos(cap.bonus)} bônus (${cap.impacto_percentual}%)</div>
             </div>
         </div>

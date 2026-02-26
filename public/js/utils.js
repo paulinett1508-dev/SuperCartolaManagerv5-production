@@ -188,7 +188,7 @@ export async function calcularPontosParciais(liga, rodadaAtual, ligaId) {
           partialsData.atletas[atleta.atleta_id]?.pontuacao || 0;
         pontos +=
           atleta.atleta_id === dadosEscalacao.capitao_id
-            ? pontuacao * 2
+            ? pontuacao * 1.5
             : pontuacao;
       });
       return {
