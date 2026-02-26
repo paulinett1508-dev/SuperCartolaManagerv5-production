@@ -1621,7 +1621,7 @@ function abrirCampinhoModal(targetTimeId, rodada, rodadaData = null) {
         (p) => String(p.timeId) === String(targetTimeId)
     );
 
-    // ── Fonte 2: Escalação cacheada do parciais ──
+    // ── Fonte 2: Escalação cacheada do parciais (dados RAW da API — NÃO processados) ──
     const escalacaoCacheada = ParciaisModule.obterEscalacaoCacheada?.(targetTimeId);
 
     // ── Fonte 3: Dados consolidados da rodada (rodadas finalizadas) ──
@@ -1629,34 +1629,66 @@ function abrirCampinhoModal(targetTimeId, rodada, rodadaData = null) {
         (p) => String(p.timeId || p.time_id) === String(targetTimeId)
     );
 
-    // Prioridade: parciais > cache > consolidado
-    const nomeTime = timeDados?.nome_time || escalacaoCacheada?.nome_time || partConsolidado?.nome || partConsolidado?.nome_time || "Time";
-    const nomeCartola = timeDados?.nome_cartola || escalacaoCacheada?.nome_cartola || partConsolidado?.nome_cartola || "";
-    const pontos = timeDados?.pontos || escalacaoCacheada?.pontos || partConsolidado?.pontos || 0;
-    const emCampo = timeDados?.atletasEmCampo || escalacaoCacheada?.atletasEmCampo || 0;
+    // Determinar fonte prioritária e extrair dados
+    // Prioridade: parciais processados > consolidado > cache raw
+    // NOTA: escalacaoCacheada é RAW da API — .atletas só tem titulares, .pontos não existe
+    let fonte = 'nenhuma';
+    let nomeTime, nomeCartola, pontos, emCampo, atletas, capitaoId;
     const totalAtl = 12;
-    const atletas = (timeDados?.atletas && timeDados.atletas.length > 0)
-        ? timeDados.atletas
-        : (escalacaoCacheada?.atletas?.length > 0)
-            ? escalacaoCacheada.atletas
-            : (partConsolidado?.atletas || []);
-    const capitaoId = timeDados?.capitao_id || escalacaoCacheada?.capitao_id || partConsolidado?.capitao_id;
     const isMeuTime = String(targetTimeId) === String(meuTimeId);
 
-    // Recalcular emCampo para dados consolidados (sem parciais)
-    const emCampoCalc = emCampo || atletas.filter(a =>
-        (!a.is_reserva && a.status_id !== 2) && (a.entrou_em_campo || (a.pontos_num && a.pontos_num !== 0))
-    ).length;
-
-    // DEBUG: verificar fonte e estrutura dos atletas
-    if (window.Log) {
-        const fonte = (timeDados?.atletas?.length > 0) ? 'parciais'
-            : (escalacaoCacheada?.atletas?.length > 0) ? 'cache'
-            : (partConsolidado?.atletas?.length > 0) ? 'consolidado' : 'nenhuma';
-        Log.info("[RODADAS] 📊 Curiosar fonte:", fonte, "atletas:", atletas.length);
+    if (timeDados?.atletas?.length > 0) {
+        // Fonte 1: ParciaisModule — dados já processados (capitão 2x, reservas, luxo)
+        fonte = 'parciais';
+        nomeTime = timeDados.nome_time || "Time";
+        nomeCartola = timeDados.nome_cartola || "";
+        pontos = timeDados.pontos || 0;
+        emCampo = timeDados.atletasEmCampo || 0;
+        atletas = timeDados.atletas;
+        capitaoId = timeDados.capitao_id;
+    } else if (partConsolidado?.atletas?.length > 0) {
+        // Fonte 3: Dados consolidados (rodada finalizada)
+        fonte = 'consolidado';
+        nomeTime = partConsolidado.nome || partConsolidado.nome_time || "Time";
+        nomeCartola = partConsolidado.nome_cartola || "";
+        pontos = partConsolidado.pontos || 0;
+        emCampo = 0; // Calcular abaixo
+        atletas = partConsolidado.atletas;
+        capitaoId = partConsolidado.capitao_id;
+    } else if (escalacaoCacheada?.atletas?.length > 0) {
+        // Fonte 2: Cache raw — mesclar titulares + reservas manualmente
+        fonte = 'cache';
+        nomeTime = escalacaoCacheada.time?.nome || "Time";
+        nomeCartola = escalacaoCacheada.time?.nome_cartola || "";
+        pontos = 0; // Raw não tem pontos calculados — será 0 até parciais processarem
+        emCampo = 0;
+        // Mesclar titulares + reservas marcando is_reserva
+        atletas = [
+            ...(escalacaoCacheada.atletas || []).map(a => ({ ...a, is_reserva: false })),
+            ...(escalacaoCacheada.reservas || []).map(a => ({ ...a, is_reserva: true })),
+        ];
+        capitaoId = escalacaoCacheada.capitao_id;
+    } else {
+        nomeTime = "Time";
+        nomeCartola = "";
+        pontos = 0;
+        emCampo = 0;
+        atletas = [];
+        capitaoId = null;
     }
 
-    const pontosFormatados = Number(pontos).toLocaleString("pt-BR", {
+    // Calcular emCampo quando não veio dos parciais processados
+    const emCampoCalc = emCampo || atletas.filter(a =>
+        (!a.is_reserva && a.status_id !== 2) && (a.entrou_em_campo === true || (a.pontos_num && a.pontos_num !== 0))
+    ).length;
+
+    if (window.Log) {
+        Log.info("[RODADAS] 📊 Curiosar fonte:", fonte, "atletas:", atletas.length, "emCampo:", emCampoCalc);
+    }
+
+    // Truncar pontos (nunca arredondar)
+    const pontosTrunc = Math.trunc(Number(pontos) * 100) / 100;
+    const pontosFormatados = pontosTrunc.toLocaleString("pt-BR", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     });
@@ -1670,6 +1702,13 @@ function abrirCampinhoModal(targetTimeId, rodada, rodadaData = null) {
         5: { nome: 'ATA', cor: 'var(--app-danger)' },
         6: { nome: 'TEC', cor: '#6b7280' },
     };
+
+    // Normalizar campo de pontos: ParciaisModule usa `pontos`, API raw usa `pontos_num`
+    atletas.forEach(a => {
+        if (a.pontos_num === undefined && a.pontos !== undefined) {
+            a.pontos_num = a.pontos;
+        }
+    });
 
     // Separar titulares e reservas (support both is_reserva and status_id fields)
     const titulares = atletas.filter(a => !a.is_reserva && a.status_id !== 2);

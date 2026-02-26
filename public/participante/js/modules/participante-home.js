@@ -1267,15 +1267,59 @@ let _destaquesRefreshTimer = null;
 
 async function carregarDestaquesRodada(ligaId, rodada, timeId, isAoVivo = false) {
     try {
-        // IC-03: NAO atualizar badge/live imediatamente - aguardar resultado do fetch
-        // para evitar flash "Rodada X" → "Rodada X-1" a cada auto-refresh
         const rodadaBadgeEl = document.getElementById('home-destaques-rodada');
         const liveBadgeEl = document.getElementById('home-destaques-live-badge');
 
-        // Buscar escalacao do time na rodada
+        // ── FONTE PRIMÁRIA (ao vivo): ParciaisModule já tem tudo calculado ──
+        // Capitão 2x, reservas, luxo — evita fetch extra e discrepâncias
+        if (isAoVivo && parciaisAtivos && ParciaisModule?.obterDados) {
+            const dadosParciais = ParciaisModule.obterDados();
+            const meuTime = dadosParciais?.participantes?.find(
+                p => String(p.timeId) === String(timeId)
+            );
+
+            if (meuTime?.atletas?.length > 0) {
+                // Converter dados processados para formato esperado por _renderizarDestaques
+                // pontos_num = pontos brutos (para display), capitão já identificado via is_capitao
+                const escalacaoLive = {
+                    atletas: meuTime.atletas.filter(a => !a.is_reserva),
+                    reservas: meuTime.atletas.filter(a => a.is_reserva),
+                    capitao_id: meuTime.capitao_id,
+                };
+
+                const todosZerados = meuTime.atletas.every(a => !a.pontos && !a.pontos_efetivos);
+
+                if (todosZerados) {
+                    if (window.Log) Log.debug("PARTICIPANTE-HOME", `Rodada ${rodada} escalada (parciais), aguardando jogos`);
+                    _renderizarDestaques(escalacaoLive, rodada);
+                    if (rodadaBadgeEl) rodadaBadgeEl.textContent = `Rodada ${rodada}`;
+                    if (liveBadgeEl) {
+                        liveBadgeEl.textContent = 'ESCALADO';
+                        liveBadgeEl.style.display = 'inline-flex';
+                        liveBadgeEl.classList.add('aguardando');
+                        liveBadgeEl.classList.remove('ao-vivo');
+                    }
+                } else {
+                    _renderizarDestaques(escalacaoLive, rodada);
+                    if (rodadaBadgeEl) rodadaBadgeEl.textContent = `Rodada ${rodada}`;
+                    if (liveBadgeEl) {
+                        liveBadgeEl.textContent = 'AO VIVO';
+                        liveBadgeEl.style.display = 'inline-flex';
+                        liveBadgeEl.classList.add('ao-vivo');
+                        liveBadgeEl.classList.remove('aguardando');
+                    }
+                }
+
+                // Auto-refresh via ParciaisModule (a cada 60s)
+                _setupDestaquesAutoRefresh(ligaId, rodada, timeId);
+                return;
+            }
+            // Se ParciaisModule não tem atletas do meu time, cair para fetch raw
+        }
+
+        // ── FONTE SECUNDÁRIA: Fetch direto da API (rodada finalizada ou parciais sem dados) ──
         const response = await fetch(`/api/cartola/time/id/${timeId}/${rodada}`);
         if (!response.ok) {
-            // Fallback para rodada anterior em caso de 404
             if (response.status === 404 && rodada > 1) {
                 if (window.Log) Log.debug("PARTICIPANTE-HOME", `Rodada ${rodada} sem dados, tentando rodada ${rodada - 1}`);
                 const fallbackResp = await fetch(`/api/cartola/time/id/${timeId}/${rodada - 1}`);
@@ -1302,81 +1346,13 @@ async function carregarDestaquesRodada(ligaId, rodada, timeId, isAoVivo = false)
             return;
         }
 
-        // Detectar se todos os atletas tem pontos_num 0 (jogos nao comecaram)
-        const todosAtletas = [...(escalacao.atletas || []), ...(escalacao.reservas || [])];
-        const todosZerados = todosAtletas.every(a => !a.pontos_num || a.pontos_num === 0);
+        _renderizarDestaques(escalacao, rodada);
+        if (rodadaBadgeEl) rodadaBadgeEl.textContent = `Rodada ${rodada}`;
+        if (liveBadgeEl) liveBadgeEl.style.display = 'none';
 
-        // Sobrepor pontos ao vivo nos atletas se disponível
-        if (isAoVivo && parciaisAtivos && ParciaisModule?.obterAtletasPontuados) {
-            const atletasPontuados = ParciaisModule.obterAtletasPontuados();
-            if (atletasPontuados && Object.keys(atletasPontuados).length > 0) {
-                const sobreporPontos = (lista) => (lista || []).map(a => {
-                    const live = atletasPontuados[String(a.atleta_id)];
-                    if (live !== undefined) {
-                        return { ...a, pontos_num: typeof live === 'object' ? (live.pontuacao ?? live.pontos_num ?? a.pontos_num) : live };
-                    }
-                    return a;
-                });
-                escalacao = {
-                    ...escalacao,
-                    atletas: sobreporPontos(escalacao.atletas),
-                    reservas: sobreporPontos(escalacao.reservas)
-                };
-            }
-        }
-
-        if (todosZerados && isAoVivo) {
-            // FIX BUG-2: Jogos nao comecaram mas mercado fechado - mostrar escalacao
-            // da rodada ATUAL (Round N) com badge ESCALADO, NAO cair para Round N-1
-            // A Rodada N-1 e passado petroo quando status=2
-            if (window.Log) Log.debug("PARTICIPANTE-HOME", `Rodada ${rodada} escalada, aguardando inicio dos jogos`);
-            _renderizarDestaques(escalacao, rodada);
-            if (rodadaBadgeEl) rodadaBadgeEl.textContent = `Rodada ${rodada}`;
-            if (liveBadgeEl) {
-                liveBadgeEl.textContent = 'ESCALADO';
-                liveBadgeEl.style.display = 'inline-flex';
-                liveBadgeEl.classList.add('aguardando');
-                liveBadgeEl.classList.remove('ao-vivo');
-            }
-            // (Fallback para Round N-1 removido - passado petroo quando status=2)
-        } else {
-            // IC-03: Atualizar badge SOMENTE apos confirmar que ha dados validos
-            _renderizarDestaques(escalacao, rodada);
-            if (rodadaBadgeEl) rodadaBadgeEl.textContent = `Rodada ${rodada}`;
-            if (liveBadgeEl) {
-                if (isAoVivo) {
-                    liveBadgeEl.textContent = 'AO VIVO';
-                    liveBadgeEl.style.display = 'inline-flex';
-                    liveBadgeEl.classList.add('ao-vivo');
-                    liveBadgeEl.classList.remove('aguardando');
-                } else {
-                    liveBadgeEl.style.display = 'none';
-                }
-            }
-        }
-
-        // Auto-refresh durante jogos ao vivo (a cada 60s)
-        if (_destaquesRefreshTimer) clearInterval(_destaquesRefreshTimer);
+        // Se ao vivo mas ParciaisModule ainda não tinha dados, configurar refresh
         if (isAoVivo) {
-            _destaquesRefreshTimer = setInterval(() => {
-                // Verificar se ainda esta na home e se jogos continuam
-                const homeContainer = document.getElementById('home-destaques-section');
-                if (!homeContainer || !document.contains(homeContainer)) {
-                    clearInterval(_destaquesRefreshTimer);
-                    _destaquesRefreshTimer = null;
-                    return;
-                }
-                // IC-02: Verificar se mercado ainda esta fechado antes de refresh
-                const statusAtual = mercadoStatus?.status_mercado;
-                if (statusAtual !== 2) {
-                    if (window.Log) Log.debug("PARTICIPANTE-HOME", "Mercado nao esta mais fechado, parando auto-refresh destaques");
-                    clearInterval(_destaquesRefreshTimer);
-                    _destaquesRefreshTimer = null;
-                    return;
-                }
-                if (window.Log) Log.debug("PARTICIPANTE-HOME", "Auto-refresh destaques ao vivo...");
-                carregarDestaquesRodada(ligaId, rodada, timeId, true);
-            }, 60000);
+            _setupDestaquesAutoRefresh(ligaId, rodada, timeId);
         }
 
     } catch (error) {
@@ -1389,20 +1365,52 @@ async function carregarDestaquesRodada(ligaId, rodada, timeId, isAoVivo = false)
 }
 
 /**
+ * Configura auto-refresh dos destaques durante jogos ao vivo
+ */
+function _setupDestaquesAutoRefresh(ligaId, rodada, timeId) {
+    if (_destaquesRefreshTimer) clearInterval(_destaquesRefreshTimer);
+    _destaquesRefreshTimer = setInterval(() => {
+        const homeContainer = document.getElementById('home-destaques-section');
+        if (!homeContainer || !document.contains(homeContainer)) {
+            clearInterval(_destaquesRefreshTimer);
+            _destaquesRefreshTimer = null;
+            return;
+        }
+        const statusAtual = mercadoStatus?.status_mercado;
+        if (statusAtual !== 2) {
+            if (window.Log) Log.debug("PARTICIPANTE-HOME", "Mercado nao esta mais fechado, parando auto-refresh destaques");
+            clearInterval(_destaquesRefreshTimer);
+            _destaquesRefreshTimer = null;
+            return;
+        }
+        if (window.Log) Log.debug("PARTICIPANTE-HOME", "Auto-refresh destaques ao vivo...");
+        carregarDestaquesRodada(ligaId, rodada, timeId, true);
+    }, 60000);
+}
+
+/**
  * Renderiza os cards de destaques a partir dos dados da escalação
  */
 function _renderizarDestaques(escalacao, rodada) {
-    // ✅ FIX: Incluir reservas na análise
+    // Incluir reservas na análise
     const atletas = [
         ...(escalacao.atletas || []),
         ...(escalacao.reservas || [])
     ];
     const capitaoId = escalacao.capitao_id;
 
+    // Normalizar campo de pontos: ParciaisModule usa `pontos`, API raw usa `pontos_num`
+    atletas.forEach(a => {
+        if (a.pontos_num === undefined && a.pontos !== undefined) {
+            a.pontos_num = a.pontos;
+        }
+    });
+
     // Encontrar capitão, maior e menor pontuador
     let capitao = atletas.find(a => a.atleta_id === capitaoId) || atletas[0];
-    let maiorPontuador = atletas.reduce((max, a) => (a.pontos_num > (max?.pontos_num || -999) ? a : max), null);
-    let menorPontuador = atletas.reduce((min, a) => (a.pontos_num < (min?.pontos_num || 999) ? a : min), null);
+    const _pts = a => parseFloat(a?.pontos_num ?? 0);
+    let maiorPontuador = atletas.reduce((max, a) => (_pts(a) > _pts(max) ? a : max), atletas[0]);
+    let menorPontuador = atletas.reduce((min, a) => (_pts(a) < _pts(min) ? a : min), atletas[0]);
 
     // Popular card-strips de destaques (Capitão / Maior / Menor)
     popularDestaqueCard('capitao', capitao, true);
@@ -1440,14 +1448,17 @@ function popularDestaqueCard(tipo, atleta, isCapitao = false) {
     }
 
     if (pontosEl) {
-        const pontos = parseFloat(atleta.pontos_num || 0);
-        if (isCapitao) {
-            // Capitão: mostrar pontos x1.5 (truncado, nunca arredondado)
-            const pontosCapitao = pontos * 1.5;
-            pontosEl.textContent = (Math.trunc((pontosCapitao||0) * 100) / 100).toFixed(2);
+        let pontosDisplay;
+        if (isCapitao && atleta.pontos_efetivos !== undefined) {
+            // ParciaisModule: pontos_efetivos já inclui capitão 2x
+            pontosDisplay = parseFloat(atleta.pontos_efetivos || 0);
+        } else if (isCapitao) {
+            // API raw: aplicar capitão 2x manualmente
+            pontosDisplay = parseFloat(atleta.pontos_num || 0) * 2;
         } else {
-            pontosEl.textContent = (Math.trunc((pontos||0) * 100) / 100).toFixed(2);
+            pontosDisplay = parseFloat(atleta.pontos_num || 0);
         }
+        pontosEl.textContent = (Math.trunc((pontosDisplay||0) * 100) / 100).toFixed(2);
     }
 
     // Escudo do clube

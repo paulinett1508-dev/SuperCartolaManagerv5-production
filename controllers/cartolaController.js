@@ -95,6 +95,13 @@ export async function obterEscalacao(req, res) {
     }
     const data = await response.json();
 
+    // Validar que data.time existe (pode ser undefined em rodadas sem escalação)
+    if (!data.time) {
+      return res.status(404).json({
+        error: `Time ${id} sem dados na rodada ${rodada}`,
+      });
+    }
+
     // Cartola API retorna titulares em data.atletas e reservas em data.reservas (arrays separadas)
     // status_id no contexto do Cartola indica status de mercado (7=Provável, 6=Nulo), NÃO titular/reserva
     const titulares = data.atletas || [];
