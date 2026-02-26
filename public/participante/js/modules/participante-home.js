@@ -1870,7 +1870,11 @@ function atualizarCardsHomeComParciais() {
     }
 
     if (variacaoPontosEl) {
-        variacaoPontosEl.innerHTML = '<span class="live-badge-mini">AO VIVO</span>';
+        const jogoRolando = dadosParciais?.participantes?.some(p => (p.pontos || 0) > 0)
+            || mercadoStatus?.bola_rolando === true;
+        variacaoPontosEl.innerHTML = jogoRolando
+            ? '<span class="live-badge-mini">AO VIVO</span>'
+            : '<span class="andamento-badge-mini">RODADA EM ANDAMENTO</span>';
     }
 
     // IC-06: Atualizar painel de avisos para modo AO VIVO mantendo numero da rodada
