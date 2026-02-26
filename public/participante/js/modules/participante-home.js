@@ -344,6 +344,20 @@ async function atualizarCardsHome(ligaId, timeId, participante) {
             return;
         }
 
+        // FIX BUG-3/4: Quando parciais estao ativos, atualizar via parciais
+        // em vez de sobrescrever com dados consolidados Round N-1
+        if (parciaisAtivos && statusAtual === 2) {
+            // Parciais ativos: atualizar cards via modulo de parciais
+            if (ParciaisModule?.carregarParciais) {
+                const novosParciais = await ParciaisModule.carregarParciais();
+                if (novosParciais) {
+                    dadosParciais = novosParciais;
+                    atualizarCardsHomeComParciais();
+                }
+            }
+            return;
+        }
+
         const dadosFresh = await buscarDadosHomeFresh(ligaId, timeId);
         if (!dadosFresh) return;
 
@@ -420,6 +434,13 @@ async function buscarDadosHomeFresh(ligaId, timeId) {
 }
 
 function atualizarCardsHomeUI(data) {
+    // FIX BUG-3: Quando parciais estao ativos, NAO sobrescrever com dados consolidados
+    // O auto-refresh de 60s chamava esta funcao e sobrescrevia dados live com Round N-1
+    if (parciaisAtivos) {
+        if (window.Log) Log.debug("PARTICIPANTE-HOME", "atualizarCardsHomeUI ignorado - parciais ativos");
+        return;
+    }
+
     const {
         posicao,
         totalParticipantes,
@@ -1019,31 +1040,45 @@ function renderizarHome(container, data, ligaId) {
     }
 
     // === CARDS DE STATS ===
-    // Última Pontuação
+    // FIX BUG-1/2: Quando rodada em andamento (status=2), mostrar placeholder
+    // ate parciais carregarem. Evita flash de dados Round N-1 com label Round N.
     const ultimaPontuacaoEl = document.getElementById('home-ultima-pontuacao');
     const variacaoPontosEl = document.getElementById('home-variacao-pontos');
     const rankingPontosEl = document.getElementById('home-ranking-pontos');
+    const pontuacaoLabelEl = document.getElementById('home-pontuacao-label');
 
-    const pontosUltimaRodada = ultimaRodada ? parseFloat(ultimaRodada.pontos || 0) : 0;
-    const pontosRodadaAnterior = minhasRodadas?.[1] ? parseFloat(minhasRodadas[1].pontos || 0) : 0;
-    const variacaoPontos = pontosUltimaRodada - pontosRodadaAnterior;
-
-    if (ultimaPontuacaoEl) {
-        ultimaPontuacaoEl.textContent = formatarPontos(pontosUltimaRodada);
-    }
-
-    if (variacaoPontosEl) {
-        if (variacaoPontos >= 0) {
-            variacaoPontosEl.textContent = `↑${formatarPontos(Math.abs(variacaoPontos))}`;
-            variacaoPontosEl.className = 'home-stat-variacao positivo';
-        } else {
-            variacaoPontosEl.textContent = `↓${formatarPontos(Math.abs(variacaoPontos))}`;
-            variacaoPontosEl.className = 'home-stat-variacao negativo';
+    if (rodadaEmAndamento) {
+        // Rodada em andamento: placeholder ate parciais carregarem
+        if (ultimaPontuacaoEl) ultimaPontuacaoEl.textContent = '--';
+        if (variacaoPontosEl) {
+            variacaoPontosEl.innerHTML = '<span class="live-badge-mini">AO VIVO</span>';
         }
-    }
+        if (pontuacaoLabelEl) pontuacaoLabelEl.textContent = 'PONTUACAO PARCIAL';
+        if (rankingPontosEl) rankingPontosEl.textContent = '--';
+    } else {
+        // Rodada consolidada: mostrar dados normais
+        const pontosUltimaRodada = ultimaRodada ? parseFloat(ultimaRodada.pontos || 0) : 0;
+        const pontosRodadaAnterior = minhasRodadas?.[1] ? parseFloat(minhasRodadas[1].pontos || 0) : 0;
+        const variacaoPontos = pontosUltimaRodada - pontosRodadaAnterior;
 
-    if (rankingPontosEl) {
-        rankingPontosEl.textContent = posicao ? `${posicao}º` : '--';
+        if (pontuacaoLabelEl) pontuacaoLabelEl.textContent = 'ULTIMA PONTUACAO';
+        if (ultimaPontuacaoEl) {
+            ultimaPontuacaoEl.textContent = formatarPontos(pontosUltimaRodada);
+        }
+
+        if (variacaoPontosEl) {
+            if (variacaoPontos >= 0) {
+                variacaoPontosEl.textContent = `↑${formatarPontos(Math.abs(variacaoPontos))}`;
+                variacaoPontosEl.className = 'home-stat-variacao positivo';
+            } else {
+                variacaoPontosEl.textContent = `↓${formatarPontos(Math.abs(variacaoPontos))}`;
+                variacaoPontosEl.className = 'home-stat-variacao negativo';
+            }
+        }
+
+        if (rankingPontosEl) {
+            rankingPontosEl.textContent = posicao ? `${posicao}º` : '--';
+        }
     }
 
     // Saldo Financeiro (Liga)
@@ -1256,45 +1291,20 @@ async function carregarDestaquesRodada(ligaId, rodada, timeId, isAoVivo = false)
         const todosAtletas = [...(escalacao.atletas || []), ...(escalacao.reservas || [])];
         const todosZerados = todosAtletas.every(a => !a.pontos_num || a.pontos_num === 0);
 
-        if (todosZerados && isAoVivo && rodada > 1) {
-            // IC-01: Jogos nao comecaram - mostrar estado intermediario claro
-            if (window.Log) Log.debug("PARTICIPANTE-HOME", `Rodada ${rodada} sem pontos ainda, usando rodada ${rodada - 1}`);
-            const fallbackResp = await fetch(`/api/cartola/time/id/${timeId}/${rodada - 1}`);
-            if (fallbackResp.ok) {
-                const fallbackData = await fallbackResp.json();
-                const fallbackAtletas = [...(fallbackData.atletas || []), ...(fallbackData.reservas || [])];
-                const fallbackTemPontos = fallbackAtletas.some(a => a.pontos_num && a.pontos_num !== 0);
-                if (fallbackTemPontos) {
-                    _renderizarDestaques(fallbackData, rodada - 1);
-                    // IC-01: Badge indica rodada anterior com contexto de aguardo
-                    if (rodadaBadgeEl) rodadaBadgeEl.textContent = `Rodada ${rodada - 1}`;
-                    // IC-01: Mostrar badge AGUARDANDO em vez de AO VIVO
-                    if (liveBadgeEl) {
-                        liveBadgeEl.textContent = 'AGUARDANDO';
-                        liveBadgeEl.style.display = 'inline-flex';
-                        liveBadgeEl.classList.add('aguardando');
-                        liveBadgeEl.classList.remove('ao-vivo');
-                    }
-                } else {
-                    _renderizarDestaques(escalacao, rodada);
-                    if (rodadaBadgeEl) rodadaBadgeEl.textContent = `Rodada ${rodada}`;
-                    if (liveBadgeEl) {
-                        liveBadgeEl.textContent = 'AGUARDANDO';
-                        liveBadgeEl.style.display = 'inline-flex';
-                        liveBadgeEl.classList.add('aguardando');
-                        liveBadgeEl.classList.remove('ao-vivo');
-                    }
-                }
-            } else {
-                _renderizarDestaques(escalacao, rodada);
-                if (rodadaBadgeEl) rodadaBadgeEl.textContent = `Rodada ${rodada}`;
-                if (liveBadgeEl) {
-                    liveBadgeEl.textContent = 'AGUARDANDO';
-                    liveBadgeEl.style.display = 'inline-flex';
-                    liveBadgeEl.classList.add('aguardando');
-                    liveBadgeEl.classList.remove('ao-vivo');
-                }
+        if (todosZerados && isAoVivo) {
+            // FIX BUG-2: Jogos nao comecaram mas mercado fechado - mostrar escalacao
+            // da rodada ATUAL (Round N) com badge ESCALADO, NAO cair para Round N-1
+            // A Rodada N-1 e passado petroo quando status=2
+            if (window.Log) Log.debug("PARTICIPANTE-HOME", `Rodada ${rodada} escalada, aguardando inicio dos jogos`);
+            _renderizarDestaques(escalacao, rodada);
+            if (rodadaBadgeEl) rodadaBadgeEl.textContent = `Rodada ${rodada}`;
+            if (liveBadgeEl) {
+                liveBadgeEl.textContent = 'ESCALADO';
+                liveBadgeEl.style.display = 'inline-flex';
+                liveBadgeEl.classList.add('aguardando');
+                liveBadgeEl.classList.remove('ao-vivo');
             }
+            // (Fallback para Round N-1 removido - passado petroo quando status=2)
         } else {
             // IC-03: Atualizar badge SOMENTE apos confirmar que ha dados validos
             _renderizarDestaques(escalacao, rodada);
