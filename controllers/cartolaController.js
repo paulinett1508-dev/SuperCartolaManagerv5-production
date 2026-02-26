@@ -76,19 +76,43 @@ export async function obterPontuacao(req, res) {
   }
 }
 
+// Helper: fetch com timeout e retry (mesma estratégia do cartolaService)
+async function fetchComRetry(url, options = {}, retries = 3, delay = 1500) {
+  for (let i = 0; i < retries; i++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'Super-Cartola-Manager/1.0.0',
+          'Accept': 'application/json',
+          ...options.headers,
+        },
+      });
+      clearTimeout(timeoutId);
+      if (!response.ok) {
+        throw new Error(`Erro ${response.status}: ${response.statusText}`);
+      }
+      return response;
+    } catch (err) {
+      clearTimeout(timeoutId);
+      if (i === retries - 1) throw err;
+      logger.warn(`fetchComRetry tentativa ${i + 1}/${retries} falhou para ${url}: ${err.message}. Retry em ${delay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+}
+
 // Nova função para buscar escalação de um time para a rodada atual
 // v2.0: Separa titulares e reservas + retorna reserva_luxo_id
+// v2.1: Usa fetchComRetry com User-Agent e timeout (fix ECONNRESET)
 export async function obterEscalacao(req, res) {
   const { id, rodada } = req.params;
   try {
-    const response = await fetch(
+    const response = await fetchComRetry(
       `https://api.cartola.globo.com/time/id/${id}/${rodada}`,
-      {
-        headers: {
-          "Cache-Control": "no-cache",
-          Pragma: "no-cache",
-        },
-      },
     );
     if (!response.ok) {
       throw new Error(`Erro ${response.status}: ${response.statusText}`);

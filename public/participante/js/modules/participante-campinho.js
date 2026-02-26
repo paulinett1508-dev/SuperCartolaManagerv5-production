@@ -770,9 +770,9 @@ function renderizarLinhaLista(atleta, capitaoId, reservaLuxoId, isReserva = fals
     let multiplicador = '';
     let infoExtra = '';
     if (isCapitao) {
-        pontosExibir = pontos * 1.5;
-        multiplicador = '1.5x';
-        infoExtra = ' - Capitão (1.5x)';
+        pontosExibir = pontos * 2;
+        multiplicador = '2x';
+        infoExtra = ' - Capitão (2x)';
     } else if (isReservaLuxo && pontos !== 0) {
         pontosExibir = pontos * 1.5;
         multiplicador = '1.5x';
@@ -794,7 +794,7 @@ function renderizarLinhaLista(atleta, capitaoId, reservaLuxoId, isReserva = fals
 
     // Multiplicador
     const multiplicadorHtml = multiplicador && pontos !== 0
-        ? `<span class="campinho-tabela-multiplicador ${isCapitao ? 'cap' : 'lux'}">(${pontos.toFixed(2)} x${multiplicador.replace('x','')})</span>`
+        ? `<span class="campinho-tabela-multiplicador ${isCapitao ? 'cap' : 'lux'}">(${_truncar(pontos)} x${multiplicador.replace('x','')})</span>`
         : '';
 
     return `
@@ -808,7 +808,7 @@ function renderizarLinhaLista(atleta, capitaoId, reservaLuxoId, isReserva = fals
                 <span class="campinho-tabela-pos">${posInfo.abrev}${infoExtra}</span>
             </div>
             <div class="campinho-tabela-pontos">
-                <span class="campinho-tabela-pontos-valor ${classePontos}">${pontosExibir.toFixed(2)}</span>
+                <span class="campinho-tabela-pontos-valor ${classePontos}">${_truncar(pontosExibir)}</span>
                 ${multiplicadorHtml}
             </div>
         </div>
@@ -880,9 +880,9 @@ function renderizarJogador(atleta, capitaoId, reservaLuxoId) {
     const isCapitao = Number(capitaoId) && atletaId === Number(capitaoId);
     const isReservaLuxo = Number(reservaLuxoId) && atletaId === Number(reservaLuxoId);
 
-    // Multiplicadores (Capitão: 1.5x, Reserva de Luxo: 1.5x)
+    // Multiplicadores (Capitão: 2x, Reserva de Luxo: 1.5x)
     let pontosExibir = pontos;
-    if (isCapitao) pontosExibir = pontos * 1.5;
+    if (isCapitao) pontosExibir = pontos * 2;
     else if (isReservaLuxo && pontos !== 0) pontosExibir = pontos * 1.5;
 
     // Classes especiais
@@ -913,7 +913,7 @@ function renderizarJogador(atleta, capitaoId, reservaLuxoId) {
                      onerror="this.onerror=null;this.src='/escudos/default.png'"
                      alt="${esc(nome)}">
                 ${badgeHtml}
-                <span class="campinho-jogador-pontos ${classePontos}">${pontosExibir.toFixed(1)}</span>
+                <span class="campinho-jogador-pontos ${classePontos}">${_truncar(pontosExibir)}</span>
             </div>
             <span class="campinho-jogador-nome">${esc(nomeAbrev)}</span>
             <span class="campinho-jogador-pos">${posicao.abrev}</span>
