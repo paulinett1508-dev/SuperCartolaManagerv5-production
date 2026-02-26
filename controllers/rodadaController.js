@@ -184,7 +184,7 @@ export const popularRodadas = async (req, res) => {
     }
 
     const timesCompletos = await Time.find({ id: { $in: liga.times } })
-      .select("id ativo rodada_desistencia")
+      .select("id ativo rodada_desistencia nome_time nome_cartoleiro nome_cartola")
       .lean();
 
     const times = timesCompletos.map((t) => {
@@ -197,6 +197,15 @@ export const popularRodadas = async (req, res) => {
     });
 
     logger.log(`[POPULAR-RODADAS] ${times.length} times encontrados (ativo via Liga.participantes: ${participantesMap.size})`);
+
+    // ✅ v8.1: Mapa de nomes locais para fallback quando API Cartola falha
+    const mapaTimesNomes = new Map();
+    timesCompletos.forEach(t => {
+      mapaTimesNomes.set(t.id, {
+        nome_time: t.nome_time || `Time #${t.id}`,
+        nome_cartola: t.nome_cartoleiro || t.nome_cartola || '',
+      });
+    });
 
     // ✅ v2.4: Buscar mapa de clube_id existentes
     const mapaClubeId = await obterMapaClubeId(ligaIdObj);
@@ -222,6 +231,7 @@ export const popularRodadas = async (req, res) => {
           repopular,
           mapaClubeId,
           liga, // ✅ v3.0: Passar objeto liga para acessar configuracoes
+          mapaTimesNomes, // ✅ v8.1: Nomes locais para fallback
         );
 
         resumo.processadas++;
@@ -293,6 +303,7 @@ async function processarRodada(
   repopular,
   mapaClubeId = {},
   liga = null, // ✅ v3.0: Recebe objeto liga para acessar configuracoes
+  mapaTimesNomes = new Map(), // ✅ v8.1: Nomes locais para fallback
 ) {
   // ✅ v3.0: Buscar configuração do banco ao invés de hardcode
   const configRanking = getConfigRankingRodada(liga, rodada);
@@ -383,10 +394,12 @@ async function processarRodada(
           jogo: partidas[a.clube?.id] || partidas[a.clube_id] || null,
         }));
 
+        // ✅ v8.1: Fallback para nomes locais quando API retorna dados incompletos
+        const nomesLocal = mapaTimesNomes.get(time.timeId) || {};
         dadosRodada.push({
           timeId: time.timeId,
-          nome_cartola: dados.time?.nome_cartola || "N/D",
-          nome_time: dados.time?.nome || "N/D",
+          nome_cartola: dados.time?.nome_cartola || nomesLocal.nome_cartola || "N/D",
+          nome_time: dados.time?.nome || nomesLocal.nome_time || "N/D",
           escudo: dados.time?.url_escudo_png || "",
           clube_id: clubeIdFinal,
           pontos: dados.pontos || 0,
@@ -406,10 +419,12 @@ async function processarRodada(
           `[PROCESSAR-RODADA] API falhou para time ${time.timeId} rodada ${rodada} (status: ${response.status})`,
         );
 
+        // ✅ v8.1: Usar nomes locais como fallback em vez de "N/D"
+        const nomesLocalFalha = mapaTimesNomes.get(time.timeId) || {};
         dadosRodada.push({
           timeId: time.timeId,
-          nome_cartola: "N/D",
-          nome_time: "N/D",
+          nome_cartola: nomesLocalFalha.nome_cartola || "N/D",
+          nome_time: nomesLocalFalha.nome_time || "N/D",
           escudo: "",
           clube_id: mapaClubeId[time.timeId] || null, // ✅ v2.4: Herdar clube_id
           pontos: 0,
@@ -424,10 +439,12 @@ async function processarRodada(
       );
 
       // Erro na requisição - criar registro com clube_id herdado
+      // ✅ v8.1: Usar nomes locais como fallback em vez de "N/D"
+      const nomesLocalErro = mapaTimesNomes.get(time.timeId) || {};
       dadosRodada.push({
         timeId: time.timeId,
-        nome_cartola: "N/D",
-        nome_time: "N/D",
+        nome_cartola: nomesLocalErro.nome_cartola || "N/D",
+        nome_time: nomesLocalErro.nome_time || "N/D",
         escudo: "",
         clube_id: mapaClubeId[time.timeId] || null, // ✅ v2.4: Herdar clube_id
         pontos: 0,

@@ -942,6 +942,80 @@
     background: rgba(255, 69, 0, 0.18);
 }
 
+/* === MEU RESUMO WRAPPER (colapsivel) === */
+.meu-resumo-wrapper {
+    background: #111827;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    border: 1px solid rgba(255, 69, 0, 0.15);
+}
+
+.meu-resumo-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s ease;
+}
+
+.meu-resumo-toggle:hover {
+    background: rgba(255, 69, 0, 0.05);
+}
+
+.meu-resumo-toggle-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+}
+
+.meu-resumo-toggle-left .material-icons {
+    font-size: 18px;
+    color: var(--rodadas-primary);
+}
+
+.meu-resumo-toggle-title {
+    font-family: var(--rodadas-font-body);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--rodadas-text-white);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.meu-resumo-toggle-subtitle {
+    font-size: 11px;
+    color: var(--rodadas-text-muted);
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.meu-resumo-toggle .me-toggle-chevron {
+    font-size: 20px;
+    color: var(--rodadas-text-muted);
+    transition: transform 0.3s ease;
+}
+
+.meu-resumo-toggle.expanded .me-toggle-chevron {
+    transform: rotate(180deg);
+}
+
+.meu-resumo-collapsible {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+}
+
+.meu-resumo-collapsible.expanded {
+    max-height: 500px;
+}
+
 /* === MEU RESUMO (summary card acima do ranking) === */
 .meu-resumo-card {
     display: flex;
@@ -949,9 +1023,7 @@
     gap: 12px;
     padding: 14px 16px;
     background: rgba(255, 69, 0, 0.08);
-    border: 1px solid rgba(255, 69, 0, 0.2);
-    border-radius: 12px;
-    margin-bottom: 12px;
+    border-radius: 0;
 }
 
 .meu-resumo-posicao {
