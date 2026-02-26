@@ -403,6 +403,11 @@ const servePublicAssets = express.static("public", {
     else if (/\.(js|mjs|css)$/i.test(filePath)) {
       res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');
     }
+    // HTML fragments: sempre revalidar — não têm cache-busting via ?v=
+    // Sem isso, browser serve home.html antigo por 1h após deploy (causa layout revertido)
+    else if (/\.html$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
   }
 });
 // ✅ FIX EIO: Interceptar erros transitórios de I/O pós-Replit-republish.
