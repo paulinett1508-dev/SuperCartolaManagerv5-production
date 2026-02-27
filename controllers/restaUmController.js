@@ -392,8 +392,8 @@ export async function obterParciais(req, res) {
         }
 
         // ✅ Live Experience: buscar pontos da rodada atual da collection Rodada
-        // Para edicão 'pendente', usar rodadaInicial como fallback (1ª rodada em andamento)
-        const rodadaParaBuscar = edicao.rodadaAtual || edicao.rodadaInicial;
+        // Para edição 'pendente' sem rodadaAtual (jogo ainda não começou), não chamar API externa
+        const rodadaParaBuscar = edicao.rodadaAtual;
         let pontosLiveMap = new Map();
         let isLive = false;
 

@@ -128,6 +128,46 @@ function isJogosEmAndamento(statusMercado) {
     return status === 2; // FECHADO = jogos em andamento
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// isRodadaRealmenteAoVivo — Ground truth para badges AO VIVO
+//
+// Problema: status_mercado=2 persiste horas após fim dos jogos (cálculo de
+// scouts), fazendo badges "AO VIVO" pulsarem incorretamente.
+//
+// Solução: consulta /api/jogos-ao-vivo/game-status que retorna:
+//   - stats.aoVivo  → jogos com statusRaw=LIVE (fonte externa real-time)
+//   - calendarioAberto → alguma rodada tem jogos agora conforme calendário
+//                        cadastrado no admin (MongoDB CalendarioRodada)
+//
+// Resultado: true se qualquer uma das fontes confirmar jogo ao vivo.
+// OR porque APIs externas podem ser lentas; calendário serve de ancora.
+//
+// Gerenciamento do calendário: Admin → Operações → Popular Rodadas → aba Calendário.
+// Cache: 30s — evita requisições em excesso quando vários módulos chamam.
+// ─────────────────────────────────────────────────────────────────────────────
+let _isAoVivoCache = null;
+let _isAoVivoCacheAt = 0;
+const _IS_AO_VIVO_TTL = 30_000; // 30s
+
+async function isRodadaRealmenteAoVivo() {
+    const agora = Date.now();
+    if (_isAoVivoCache !== null && agora - _isAoVivoCacheAt < _IS_AO_VIVO_TTL) {
+        return _isAoVivoCache;
+    }
+    try {
+        const res = await fetch('/api/jogos-ao-vivo/game-status');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        // Tem jogo LIVE na API OU está dentro da janela do calendário
+        _isAoVivoCache = (data?.stats?.aoVivo > 0) || (data?.calendarioAberto === true);
+    } catch {
+        // Em caso de falha, retorna false (conservador — não pisca badge)
+        _isAoVivoCache = false;
+    }
+    _isAoVivoCacheAt = Date.now();
+    return _isAoVivoCache;
+}
+
 // Disponibilizar globalmente
 window.formatarMoedaBR = formatarMoedaBR;
 window.parseMoedaBR = parseMoedaBR;
@@ -136,3 +176,4 @@ window.formatarPontos = formatarPontos;
 window.obterUltimaRodadaDisputada = obterUltimaRodadaDisputada;
 window.isMercadoAberto = isMercadoAberto;
 window.isJogosEmAndamento = isJogosEmAndamento;
+window.isRodadaRealmenteAoVivo = isRodadaRealmenteAoVivo;

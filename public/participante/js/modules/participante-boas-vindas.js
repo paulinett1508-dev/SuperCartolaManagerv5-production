@@ -47,6 +47,8 @@ let participantePremium = false;
 
 // ✅ v12.1: Estado do mercado para cálculo correto de rodada
 let mercadoStatus = null;
+// Ground truth: jogos realmente ao vivo (não apenas status_mercado=2)
+let _aoVivoConfirmado = false;
 
 // =====================================================================
 // FUNÇÃO PRINCIPAL
@@ -515,6 +517,12 @@ async function buscarStatusMercado() {
         if (window.Log) Log.debug("PARTICIPANTE-BOAS-VINDAS", "⚠️ Erro ao buscar status mercado");
         mercadoStatus = null;
     }
+    // Ground truth: confirmar jogos ao vivo via calendário (não apenas status_mercado=2)
+    if (mercadoStatus?.status_mercado === 2 && window.isRodadaRealmenteAoVivo) {
+        _aoVivoConfirmado = await window.isRodadaRealmenteAoVivo();
+    } else {
+        _aoVivoConfirmado = false;
+    }
 }
 
 // =====================================================================
@@ -977,7 +985,7 @@ function renderizarBoasVindas(container, data, ligaRules) {
                             ${TEMPORADA_ATUAL}
                         </span>
                     </div>
-                    <p class="text-sm font-normal text-white/70 flex items-center gap-1.5">${logoLigaHTML}<span>${escapeHtml(nomeLiga)}</span> • Rodada ${rodadaAtual || "--"}${mercadoStatus?.status_mercado === 2 ? ' <span class="live-badge-mini" style="font-size:9px;padding:1px 5px;">AO VIVO</span>' : ''}</p>
+                    <p class="text-sm font-normal text-white/70 flex items-center gap-1.5">${logoLigaHTML}<span>${escapeHtml(nomeLiga)}</span> • Rodada ${rodadaAtual || "--"}${_aoVivoConfirmado ? ' <span class="live-badge-mini" style="font-size:9px;padding:1px 5px;">AO VIVO</span>' : ''}</p>
                 </div>
 
                 <!-- Card Principal do Time -->

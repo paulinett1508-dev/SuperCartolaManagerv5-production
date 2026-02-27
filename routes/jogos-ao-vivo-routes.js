@@ -30,6 +30,7 @@ import path from 'path';
 import obterJogosGloboEsporte, { obterJogosGloboMultiDatas } from '../scripts/scraper-jogos-globo.js';
 import apiOrchestrator from '../services/api-orchestrator.js';
 import copaDoMundo from '../config/copa-do-mundo-2026.js';
+import CalendarioRodada from '../models/CalendarioRodada.js';
 
 const router = express.Router();
 
@@ -589,6 +590,43 @@ function calcularEstatisticas(jogos) {
   };
 }
 
+// =====================================================================
+// CALENDÁRIO DE RODADAS — Ground truth temporal para badges AO VIVO
+// Usa MongoDB (collection CalendarioRodada) para verificar se agora
+// há jogos em andamento conforme o calendário oficial cadastrado.
+// =====================================================================
+let _calendarioAbertoCache = null;
+let _calendarioAbertoCacheAt = 0;
+const CALENDARIO_CACHE_TTL = 2 * 60 * 1000; // 2 min
+
+/**
+ * Verifica via MongoDB se alguma rodada da temporada atual tem jogos
+ * em andamento agora (método temJogosAoVivo do model CalendarioRodada).
+ * Se nenhum calendário cadastrado → retorna false (conservador).
+ * @returns {Promise<boolean>}
+ */
+async function isJanelaCalendarioAberta() {
+  const agora = Date.now();
+  if (_calendarioAbertoCache !== null && agora - _calendarioAbertoCacheAt < CALENDARIO_CACHE_TTL) {
+    return _calendarioAbertoCache;
+  }
+  try {
+    const temporada = new Date().getFullYear();
+    // Busca documentos sem lean() para poder usar os métodos do schema
+    const calendarios = await CalendarioRodada.find({ temporada });
+    if (!calendarios || calendarios.length === 0) {
+      _calendarioAbertoCache = false;
+    } else {
+      _calendarioAbertoCache = calendarios.some(cal => cal.temJogosAoVivo());
+    }
+  } catch (err) {
+    console.error('[JOGOS-DIA] Erro ao verificar calendário MongoDB:', err.message);
+    _calendarioAbertoCache = false;
+  }
+  _calendarioAbertoCacheAt = agora;
+  return _calendarioAbertoCache;
+}
+
 // ✅ v3.6: Rota para limpar cache manualmente
 // DELETE /api/jogos-ao-vivo/cache
 router.delete('/cache', (req, res) => {
@@ -1078,11 +1116,15 @@ router.get('/game-status', async (req, res) => {
     else if (fabStateRecomendado === 'waiting') pollInterval = 300;
     else if (fabStateRecomendado === 'cooling') pollInterval = 180;
 
+    // Calendário de rodadas — ground truth temporal para badges AO VIVO
+    const calendarioAberto = await isJanelaCalendarioAberta();
+
     res.json({
       fabState: fabStateRecomendado,
       pollInterval,
       stats,
       proximoJogo,
+      calendarioAberto,
       atualizadoEm: new Date(cacheTimestamp || agora).toISOString(),
       fonte
     });

@@ -374,7 +374,7 @@ class ParticipanteNavigation {
         }
 
         try {
-            const module = await import('/participante/js/widgets/whats-happening-widget.js');
+            const module = await import('/participante/js/widgets/whats-happening-widget.js?v=' + Date.now());
 
             if (module.initWhatsHappeningWidget) {
                 await module.initWhatsHappeningWidget({

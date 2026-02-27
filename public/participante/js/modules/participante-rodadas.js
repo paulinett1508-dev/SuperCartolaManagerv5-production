@@ -26,6 +26,8 @@ let rodadaSelecionada = null;
 let rodadaAtualCartola = 38;
 let statusMercadoAtual = 1;
 let parciaisInfo = null;
+// Ground truth: jogos realmente ao vivo (não apenas status_mercado=2)
+let _aoVivoConfirmado = false;
 const TEMPORADA_ATUAL = window.ParticipanteConfig?.CURRENT_SEASON || new Date().getFullYear();
 
 // =====================================================================
@@ -88,10 +90,13 @@ export async function inicializarRodadasParticipante({
         // 1. Buscar rodada atual e verificar parciais
         await buscarRodadaAtual();
 
-        // 2. Inicializar módulo de parciais
-        parciaisInfo = await ParciaisModule.inicializarParciais(ligaId, timeId);
+        // 2. Inicializar módulo de parciais + verificar se jogos realmente ao vivo
+        [parciaisInfo, _aoVivoConfirmado] = await Promise.all([
+            ParciaisModule.inicializarParciais(ligaId, timeId),
+            window.isRodadaRealmenteAoVivo ? window.isRodadaRealmenteAoVivo() : Promise.resolve(false)
+        ]);
         if (window.Log)
-            Log.info("[PARTICIPANTE-RODADAS] 📊 Parciais:", parciaisInfo);
+            Log.info("[PARTICIPANTE-RODADAS] 📊 Parciais:", parciaisInfo, "| AO VIVO confirmado:", _aoVivoConfirmado);
 
         // 3. Buscar rodadas consolidadas
         const response = await fetch(
@@ -313,7 +318,7 @@ function renderizarMiniCards(inicio, fim, rodadasMap) {
         else if (temDados && jogou && posicao) chipTexto = `${posicao}º`;
         else if (temDados && !jogou) chipTexto = 'N/J';
 
-        const badgeAoVivo = isParcial ? '<span class="badge-mini-ao-vivo">●</span>' : '';
+        const badgeAoVivo = (isParcial && _aoVivoConfirmado) ? '<span class="badge-mini-ao-vivo">●</span>' : '';
         let badgeDestaque = '';
         if (tipoDestaque === 'mito') {
             badgeDestaque = '<span class="badge-mini-destaque"><span class="material-symbols-outlined">emoji_events</span></span>';

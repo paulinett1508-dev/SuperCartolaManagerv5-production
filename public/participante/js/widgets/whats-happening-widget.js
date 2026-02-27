@@ -936,7 +936,8 @@ async function fetchCapitao() {
 async function fetchRestaUm() {
     try {
         const res = await fetchWithTimeout(
-            `/api/resta-um/${WHState.ligaId}/parciais`
+            `/api/resta-um/${WHState.ligaId}/parciais`,
+            WH_CONFIG.API_TIMEOUT_SLOW // 10s — API pode chamar Cartola quando ao vivo
         );
         if (res.ok) {
             const data = await res.json();
@@ -1167,12 +1168,14 @@ function renderContent() {
         if (capCard) cards.push(capCard);
     }
 
+    // Resta Um: usa section (com campeão, quase, eliminado) — não entra no grid de cards
+    const sections = [];
     if (WHState.modulosAtivos.restaUm) {
-        const ruCard = renderCardRestaUm();
-        if (ruCard) cards.push(ruCard);
+        const ruSection = renderRestaUmSection();
+        if (ruSection) sections.push(ruSection);
     }
 
-    if (cards.length === 0) {
+    if (cards.length === 0 && sections.length === 0) {
         content.innerHTML = `
             <div class="wh-empty">
                 <span class="material-icons wh-empty-icon">sports_soccer</span>
@@ -1185,9 +1188,8 @@ function renderContent() {
 
     content.innerHTML = `
         ${renderTimestamp()}
-        <div class="wh-card-grid">
-            ${cards.join("")}
-        </div>
+        ${sections.join('')}
+        ${cards.length > 0 ? `<div class="wh-card-grid">${cards.join('')}</div>` : ''}
     `;
 
     // Event delegation: tap em card → abrir modal
@@ -1195,6 +1197,17 @@ function renderContent() {
         card.addEventListener('click', () => {
             const modalType = card.dataset.modal;
             if (modalType) openCardModal(modalType);
+        });
+    });
+
+    // Navegação: botão "Ver Resta Um completo" no painel (fora do modal)
+    content.querySelectorAll('.wh-modal-navigate-btn[data-navigate]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const modulo = btn.dataset.navigate;
+            if (modulo && window.participanteNav) {
+                closePanel();
+                setTimeout(() => window.participanteNav.navegarPara(modulo), 300);
+            }
         });
     });
 }
@@ -2061,7 +2074,8 @@ function renderModalRestaUm() {
     if (!data || !data.vivos || data.vivos.length === 0) return null;
 
     const meuId = String(WHState.timeId);
-    const vivos = data.vivos;
+    // Mesclar com parciais ao vivo para ordenação correta
+    const vivos = _vivosMesclados(data.vivos);
     const totalVivos = vivos.length;
     const totalEliminados = data.eliminados?.length || 0;
     const total = data.totalParticipantes || (totalVivos + totalEliminados);
@@ -2078,7 +2092,7 @@ function renderModalRestaUm() {
         meuStatusHtml = `
             <div class="wh-modal-ru-status ${isLanterna ? 'wh-modal-ru-status--perigo' : 'wh-modal-ru-status--vivo'}">
                 <span class="material-icons">${isLanterna ? 'warning' : 'check_circle'}</span>
-                ${isLanterna ? 'Voce esta na zona de eliminacao!' : `Voce esta vivo! Posicao #${meuPosVivo + 1}`}
+                ${isLanterna ? 'Voce sera eliminado!' : `Voce esta vivo! Posicao #${meuPosVivo + 1}`}
             </div>
         `;
     } else if (meuElim) {
@@ -2090,39 +2104,60 @@ function renderModalRestaUm() {
         `;
     }
 
-    // Top 3 + lanterna
-    const leader = vivos[0];
-    const lanterna = vivos.length > 1 ? vivos[vivos.length - 1] : null;
+    const leader = vivos[0];                                               // CAMPEÃO DA RODADA
+    const lanterna = vivos.length > 1 ? vivos[vivos.length - 1] : null;  // ELIMINADO (projetado)
 
+    // Campeão da rodada (#1)
+    const leaderIsMe = String(leader.timeId) === meuId;
     let listHtml = `
-        <div class="wh-modal-rank-row gold">
+        <div class="wh-modal-rank-row gold ${leaderIsMe ? 'me' : ''}">
             <span class="wh-modal-rank-pos">1</span>
             <img class="wh-modal-rank-escudo" src="${resolverEscudo(leader)}" onerror="this.src='/escudos/default.png'" alt="">
             <span class="wh-modal-rank-nome">${escapeHtml(leader.nomeTime || leader.nomeCartoleiro || 'Time')}</span>
-            <span class="wh-modal-rank-pontos" style="color:var(--app-success)">Vivo</span>
+            <span class="wh-modal-rank-pontos" style="color:var(--app-success)">Campeao</span>
         </div>
     `;
 
-    if (vivos.length > 2) {
+    // Minha posição (se não sou o #1 nem o lanterna)
+    if (!leaderIsMe && meuVivo) {
+        const isLanterna = meuPosVivo === vivos.length - 1;
+        if (!isLanterna) {
+            listHtml += `
+                <div class="wh-modal-separator">···</div>
+                <div class="wh-modal-rank-row me">
+                    <span class="wh-modal-rank-pos">${meuPosVivo + 1}</span>
+                    <img class="wh-modal-rank-escudo" src="${resolverEscudo(meuVivo)}" onerror="this.src='/escudos/default.png'" alt="">
+                    <span class="wh-modal-rank-nome">${escapeHtml(meuVivo.nomeTime || meuVivo.nomeCartoleiro || 'Meu Time')}</span>
+                    <span class="wh-modal-rank-pontos" style="color:var(--app-success)">Vivo</span>
+                </div>
+            `;
+        }
+    }
+
+    // Quase! (penúltimo vivo)
+    const quaseModal = vivos.length > 2 ? vivos[vivos.length - 2] : null;
+    if (quaseModal && String(quaseModal.timeId) !== String(leader.timeId)) {
+        const isMe = String(quaseModal.timeId) === meuId;
         listHtml += `
-            <div class="wh-modal-rank-row silver">
-                <span class="wh-modal-rank-pos">2</span>
-                <img class="wh-modal-rank-escudo" src="${resolverEscudo(vivos[1])}" onerror="this.src='/escudos/default.png'" alt="">
-                <span class="wh-modal-rank-nome">${escapeHtml(vivos[1].nomeTime || vivos[1].nomeCartoleiro || 'Time')}</span>
-                <span class="wh-modal-rank-pontos" style="color:var(--app-success)">Vivo</span>
+            <div class="wh-modal-separator">···</div>
+            <div class="wh-modal-rank-row ${isMe ? 'me' : ''}" style="border-left:3px solid var(--app-warning)">
+                <span class="wh-modal-rank-pos">${vivos.length - 1}</span>
+                <img class="wh-modal-rank-escudo" src="${resolverEscudo(quaseModal)}" onerror="this.src='/escudos/default.png'" alt="">
+                <span class="wh-modal-rank-nome">${escapeHtml(quaseModal.nomeTime || quaseModal.nomeCartoleiro || 'Time')}</span>
+                <span class="wh-modal-rank-pontos" style="color:var(--app-warning)">Quase!</span>
             </div>
         `;
     }
 
+    // ELIMINADO (último vivo — projetado para ser eliminado)
     if (lanterna && String(lanterna.timeId) !== String(leader.timeId)) {
         const isMe = String(lanterna.timeId) === meuId;
         listHtml += `
-            <div class="wh-modal-separator">···</div>
             <div class="wh-modal-rank-row ${isMe ? 'me' : ''}" style="border-left:3px solid var(--app-danger)">
                 <span class="wh-modal-rank-pos">${vivos.length}</span>
                 <img class="wh-modal-rank-escudo" src="${resolverEscudo(lanterna)}" onerror="this.src='/escudos/default.png'" alt="">
                 <span class="wh-modal-rank-nome">${escapeHtml(lanterna.nomeTime || lanterna.nomeCartoleiro || 'Time')}</span>
-                <span class="wh-modal-rank-pontos" style="color:var(--app-danger)">Zona!</span>
+                <span class="wh-modal-rank-pontos" style="color:var(--app-danger)">ELIMINADO</span>
             </div>
         `;
     }
@@ -2689,12 +2724,35 @@ function renderCapitaoSection() {
     });
 }
 
+/**
+ * Retorna lista de vivos com pontos ao vivo (parciais) mesclados e ordenados DESC.
+ * Se parciais não disponíveis, retorna vivos na ordem original.
+ */
+function _vivosMesclados(vivosOriginal) {
+    const parciaisRanking = WHState.data.parciais?.ranking || [];
+    if (!parciaisRanking.length) return vivosOriginal;
+
+    const parciaisMap = new Map(
+        parciaisRanking.map(p => [String(p.timeId || p.time_id), p.pontos_rodada_atual ?? p.pontos ?? 0])
+    );
+
+    const enriquecidos = vivosOriginal.map(p => ({
+        ...p,
+        pontosRodada: parciaisMap.has(String(p.timeId))
+            ? parciaisMap.get(String(p.timeId))
+            : (p.pontosRodada ?? 0),
+    }));
+
+    return enriquecidos.sort((a, b) => (b.pontosRodada || 0) - (a.pontosRodada || 0));
+}
+
 function renderRestaUmSection() {
     const data = WHState.data.restaUm;
     if (!data || !data.vivos || data.vivos.length === 0) return null;
 
     const meuId = String(WHState.timeId);
-    const vivos = data.vivos;
+    // Mesclar com parciais ao vivo para ordenação correta
+    const vivos = _vivosMesclados(data.vivos);
     const totalVivos = vivos.length;
     const totalEliminados = data.eliminados?.length || 0;
     const total = data.totalParticipantes || (totalVivos + totalEliminados);
@@ -2702,49 +2760,63 @@ function renderRestaUmSection() {
     const meu = vivos.find(p => String(p.timeId) === meuId)
         || data.eliminados?.find(p => String(p.timeId) === meuId);
 
-    const leader = vivos[0];
-    const lanterna = vivos.length > 1 ? vivos[vivos.length - 1] : null;
+    const leader = vivos[0];                                               // CAMPEÃO DA RODADA
+    const lanterna = vivos.length > 1 ? vivos[vivos.length - 1] : null;  // ELIMINADO (projetado)
+    const quase = vivos.length > 2 ? vivos[vivos.length - 2] : null;     // QUASE (penúltimo)
 
-    // Líder #1 sobrevivente (compact)
+    // Líder #1 (Campeão da rodada)
     const leaderIsMe = String(leader.timeId) === meuId;
     const leaderHtml = `
         <div class="wh-compact-leader ${leaderIsMe ? 'me' : ''}">
             <span class="wh-compact-pos">1</span>
             <img class="wh-compact-escudo" src="${resolverEscudo(leader)}" onerror="this.src='/escudos/default.png'" alt="">
             <span class="wh-compact-nome">${escapeHtml(leader.nomeTime || leader.nomeCartoleiro || 'Time')}</span>
-            <span class="wh-compact-valor" style="color:var(--app-success)">Vivo</span>
+            <span class="wh-compact-valor" style="color:var(--app-success)">Campeao</span>
         </div>
     `;
 
-    // Lanterna alert (zona de eliminação)
-    let lanternaHtml = '';
-    if (lanterna) {
-        const isMe = String(lanterna.timeId) === meuId;
-        lanternaHtml = `
-            <div class="wh-ru-lanterna ${isMe ? 'is-me' : ''}">
-                <span class="material-icons">warning</span>
-                <span style="flex:1">${isMe ? 'VOCE esta na zona!' : escapeHtml(lanterna.nomeTime || 'Time')}</span>
-                <span>Zona de eliminacao</span>
-            </div>
-        `;
-    }
-
-    // Minha posição (se não sou o #1)
+    // Minha posição (se não sou líder, quase, nem lanterna)
     let myHtml = '';
-    if (meu && !leaderIsMe) {
+    if (meu) {
         const meuIndex = vivos.findIndex(p => String(p.timeId) === meuId);
         const isElim = meu.status === 'eliminado';
-        myHtml = `
-            <div class="wh-compact-leader wh-compact-leader--me">
-                <span class="wh-compact-pos">${isElim ? '-' : (meuIndex + 1)}</span>
-                <img class="wh-compact-escudo" src="${resolverEscudo(meu)}" onerror="this.src='/escudos/default.png'" alt="">
-                <span class="wh-compact-nome">${escapeHtml(meu.nomeTime || 'Meu Time')}</span>
-                <span class="wh-compact-valor" style="color:${isElim ? 'var(--app-danger)' : 'var(--app-success)'}">
-                    ${isElim ? `Elim. R${meu.rodadaEliminacao || '?'}` : 'Vivo'}
-                </span>
-            </div>
-        `;
+        const isLider = meuIndex === 0;
+        const isLanterna = !isElim && meuIndex === vivos.length - 1;
+        const isQuase = !isElim && meuIndex === vivos.length - 2;
+        if (!isLider && !isLanterna && !isQuase) {
+            myHtml = `
+                <div class="wh-compact-leader wh-compact-leader--me">
+                    <span class="wh-compact-pos">${isElim ? '-' : (meuIndex + 1)}</span>
+                    <img class="wh-compact-escudo" src="${resolverEscudo(meu)}" onerror="this.src='/escudos/default.png'" alt="">
+                    <span class="wh-compact-nome">${escapeHtml(meu.nomeTime || 'Meu Time')}</span>
+                    <span class="wh-compact-valor" style="color:${isElim ? 'var(--app-danger)' : 'var(--app-success)'}">
+                        ${isElim ? `Elim. R${meu.rodadaEliminacao || '?'}` : 'Vivo'}
+                    </span>
+                </div>
+            `;
+        }
     }
+
+    // QUASE! (penúltimo vivo — em perigo)
+    const quaseIsMe = quase && String(quase.timeId) === meuId;
+    const quaseHtml = quase ? `
+        <div class="wh-compact-leader ${quaseIsMe ? 'wh-compact-leader--me' : ''}" style="border-left:2px solid var(--app-warning)">
+            <span class="wh-compact-pos" style="color:var(--app-warning)">${vivos.length - 1}</span>
+            <img class="wh-compact-escudo" src="${resolverEscudo(quase)}" onerror="this.src='/escudos/default.png'" alt="">
+            <span class="wh-compact-nome">${escapeHtml(quase.nomeTime || quase.nomeCartoleiro || 'Time')}</span>
+            <span class="wh-compact-valor" style="color:var(--app-warning)">Quase!</span>
+        </div>
+    ` : '';
+
+    // ELIMINADO (último vivo — projetado para ser eliminado)
+    const lantIsMe = lanterna && String(lanterna.timeId) === meuId;
+    const elimHtml = lanterna ? `
+        <div class="wh-ru-lanterna ${lantIsMe ? 'is-me' : ''}">
+            <span class="material-icons">warning</span>
+            <span style="flex:1">${lantIsMe ? 'VOCE sera eliminado!' : escapeHtml(lanterna.nomeTime || 'Time')}</span>
+            <span>ELIMINADO</span>
+        </div>
+    ` : '';
 
     // v5.0: Barra de progresso de sobrevivência
     const pctVivos = total > 0 ? Math.round((totalVivos / total) * 100) : 0;
@@ -2756,7 +2828,7 @@ function renderRestaUmSection() {
 
     return `
         <div class="wh-section wh-section--resta-um wh-section--compact">
-            <div class="wh-section-header" data-navigate="resta-um">
+            <div class="wh-section-header">
                 <div class="wh-section-icon">
                     <span class="material-icons">person_off</span>
                 </div>
@@ -2764,13 +2836,18 @@ function renderRestaUmSection() {
                 <div style="display:flex;align-items:center;gap:4px;font-size:var(--app-font-xs);color:var(--app-text-muted);">
                     <span style="color:var(--app-success);font-weight:700;">${totalVivos}</span>/<span>${total}</span> vivos
                 </div>
-                <span class="material-icons wh-navigate-hint">open_in_new</span>
             </div>
             ${progressHtml}
             <div class="wh-section-body wh-section-body--compact">
                 ${leaderHtml}
-                ${lanternaHtml}
                 ${myHtml}
+                ${quaseHtml}
+                ${elimHtml}
+            </div>
+            <div style="padding:8px 12px 4px">
+                <button class="wh-modal-navigate-btn" data-navigate="resta-um" style="width:100%;justify-content:center;">
+                    <span class="material-icons">open_in_new</span> Ver Resta Um completo
+                </button>
             </div>
         </div>
     `;

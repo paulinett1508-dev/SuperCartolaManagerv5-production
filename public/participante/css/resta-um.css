@@ -322,12 +322,11 @@
 }
 
 .resta-um-row.eliminado {
-    opacity: 0.45;
-    filter: grayscale(0.5);
+    opacity: 0.5;
+    filter: grayscale(0.85) brightness(0.65);
 }
 
 .resta-um-row.eliminado .resta-um-nome {
-    text-decoration: line-through;
     color: var(--app-text-dim);
 }
 
@@ -335,10 +334,23 @@
     color: var(--app-restaum-eliminado);
 }
 
+/* Lanterna = zona de perigo (pending elimination) — efeito offline/morto */
 .resta-um-row.lanterna {
-    background: linear-gradient(90deg, rgba(239, 68, 68, 0.3) 0%, rgba(239, 68, 68, 0.1) 100%);
-    border: 2px solid var(--app-restaum-eliminado);
-    border-radius: var(--app-radius-lg);
+    background: linear-gradient(90deg, rgba(239, 68, 68, 0.08) 0%, rgba(239, 68, 68, 0.03) 100%);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--app-radius-md);
+    filter: grayscale(0.75) brightness(0.72);
+    opacity: 0.88;
+    animation: app-fade-in-up var(--app-duration-normal) ease-out,
+               ru-offline-flicker 4s ease-in-out infinite;
+}
+
+@keyframes ru-offline-flicker {
+    0%, 80%, 100% { opacity: 0.88; }
+    84%  { opacity: 0.52; }
+    87%  { opacity: 0.76; }
+    91%  { opacity: 0.42; }
+    94%  { opacity: 0.7; }
 }
 
 .resta-um-row.meu-time {
@@ -378,16 +390,216 @@
     color: var(--app-text-primary);
 }
 
-/* Seção de eliminados */
-.resta-um-eliminados-section {
-    margin: var(--app-space-5) var(--app-space-4) 0;
-    padding-top: var(--app-space-4);
-    border-top: 1px solid var(--app-border);
+/* Pontos verdes para sobreviventes */
+.ru-pts-sobrevivente {
+    font-family: var(--app-font-mono);
+    font-size: var(--app-font-base);
+    font-weight: var(--app-font-semibold);
+    color: #10b981;
 }
 
 .resta-um-eliminado-rodada {
     font-size: var(--app-font-xs);
     color: var(--app-text-dim);
+    white-space: nowrap;
+}
+
+/* Nome do time (subtext) */
+.ru-nome-time {
+    font-size: 11px;
+    opacity: 0.65;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ========================================
+   HERO CARD — LÍDER DA RODADA
+   ======================================== */
+
+.ru-lider-card {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.03));
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: var(--app-radius-lg);
+    padding: var(--app-space-4) var(--app-space-5);
+    margin: 0 var(--app-space-4) var(--app-space-4);
+    animation: app-fade-in-up var(--app-duration-normal) ease-out;
+}
+
+.ru-lider-card.meu-time {
+    border-color: rgba(16, 185, 129, 0.55);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.12);
+}
+
+.ru-lider-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--app-space-3);
+}
+
+.ru-lider-badge {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    font-size: var(--app-font-xs);
+    font-weight: var(--app-font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px var(--app-space-2);
+    border-radius: var(--app-radius-sm);
+}
+
+.ru-lider-pos {
+    font-family: var(--app-font-mono);
+    font-size: var(--app-font-2xl);
+    font-weight: var(--app-font-bold);
+    color: #10b981;
+    line-height: 1;
+}
+
+.ru-lider-body {
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-3);
+}
+
+.ru-lider-escudo {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--app-radius-full);
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.ru-lider-info {
+    flex: 1;
+    overflow: hidden;
+}
+
+.ru-lider-cartoleiro {
+    font-size: var(--app-font-base);
+    font-weight: var(--app-font-semibold);
+    color: var(--app-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ru-lider-time {
+    font-size: var(--app-font-xs);
+    color: var(--app-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ru-lider-pts {
+    font-family: var(--app-font-mono);
+    font-size: var(--app-font-xl);
+    font-weight: var(--app-font-bold);
+    color: #10b981;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* ========================================
+   BARRA DE PROGRESSO DE SOBREVIVENTES
+   ======================================== */
+
+.ru-progress-wrap {
+    margin: 0 var(--app-space-4) var(--app-space-4);
+}
+
+.ru-progress-bar {
+    height: 6px;
+    background: var(--app-surface-elevated);
+    border-radius: var(--app-radius-full);
+    overflow: hidden;
+    margin-bottom: var(--app-space-1);
+}
+
+.ru-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #059669);
+    border-radius: var(--app-radius-full);
+    transition: width 0.6s ease;
+    min-width: 4px;
+}
+
+.ru-progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--app-font-xs);
+}
+
+.ru-progress-vivos {
+    color: #10b981;
+    font-weight: var(--app-font-semibold);
+}
+
+.ru-progress-total {
+    color: var(--app-text-dim);
+}
+
+/* ========================================
+   ZONA DE ELIMINAÇÃO (SEPARADOR)
+   ======================================== */
+
+.ru-zona-perigo {
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: var(--app-font-semibold);
+    color: var(--app-restaum-eliminado);
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    margin: var(--app-space-2) 0;
+    padding-top: var(--app-space-3);
+    border-top: 1px dashed rgba(239, 68, 68, 0.28);
+}
+
+/* ========================================
+   TAG ELIMINADO (para vivo na zona de perigo)
+   ======================================== */
+
+.ru-tag-eliminado {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 10px;
+    font-weight: var(--app-font-semibold);
+    color: var(--app-restaum-eliminado);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+}
+
+/* ========================================
+   DIVIDER ELIMINADOS
+   ======================================== */
+
+.ru-elim-divider {
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-3);
+    margin: var(--app-space-5) 0 var(--app-space-3);
+}
+
+.ru-elim-divider-line {
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.ru-elim-divider-label {
+    font-size: 10px;
+    font-weight: var(--app-font-semibold);
+    color: var(--app-text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
 }
 
 /* ========================================
@@ -485,6 +697,69 @@
 .resta-um-state-title {
     font-family: 'Russo One', sans-serif !important;
     font-weight: 400 !important;
+}
+
+/* ========================================
+   MODO PROJETADO (parciais ao vivo)
+   ======================================== */
+
+/* Pontos âmbar pulsante — dados parciais, não definitivos */
+.ru-pts-projetado {
+    font-family: var(--app-font-mono);
+    font-size: var(--app-font-base);
+    font-weight: var(--app-font-semibold);
+    color: #f59e0b;
+    animation: ru-projetado-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes ru-projetado-pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.6; }
+}
+
+/* Override no hero card quando projetado */
+.ru-lider-pts.ru-pts-projetado {
+    color: #f59e0b;
+}
+
+.ru-lider-card.projetado {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.09), rgba(245, 158, 11, 0.02));
+    border-color: rgba(245, 158, 11, 0.28);
+}
+
+.ru-lider-card.projetado.meu-time {
+    border-color: rgba(245, 158, 11, 0.5);
+    box-shadow: 0 0 18px rgba(245, 158, 11, 0.1);
+}
+
+.ru-lider-badge.projetado {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+}
+
+.ru-lider-pos.projetado {
+    color: #f59e0b;
+}
+
+/* Separador zona de perigo projetado */
+.ru-zona-perigo.projetado {
+    color: #f59e0b;
+    border-top-color: rgba(245, 158, 11, 0.25);
+}
+
+/* Badge PROJETADO no subtitle do header */
+.ru-badge-projetado {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: var(--app-font-semibold);
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: var(--app-radius-sm);
+    padding: 1px 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    vertical-align: middle;
 }
 
 /* ========================================
