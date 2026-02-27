@@ -384,7 +384,7 @@ export async function obterParciais(req, res) {
         const edicao = await RestaUmCache.findOne({
             liga_id: ligaId,
             temporada,
-            status: 'em_andamento',
+            status: { $in: ['em_andamento', 'pendente'] },
         }).sort({ edicao: -1 }).lean();
 
         if (!edicao) {
