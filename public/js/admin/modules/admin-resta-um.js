@@ -99,7 +99,7 @@ class AdminRestaUm {
         // Encontrar rodadas ja ocupadas por edicoes existentes
         const rodadasOcupadas = [];
         for (const ed of this.edicoes) {
-            if (ed.status !== 'finalizada' || true) { // Considerar todas as edicoes
+            if (ed.status !== 'finalizada') { // Ignorar edicoes finalizadas
                 for (let r = (ed.rodadaInicial || 1); r <= (ed.rodadaFinal || 38); r++) {
                     rodadasOcupadas.push(r);
                 }

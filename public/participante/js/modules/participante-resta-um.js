@@ -353,6 +353,16 @@ function _detectarLanterna(vivos, timeId) {
 // HELPERS
 // =====================================================================
 
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 function _getStatusLabel(status) {
     const labels = {
         'vivo': 'Sobrevivente',
