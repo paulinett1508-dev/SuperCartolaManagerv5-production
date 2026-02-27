@@ -392,8 +392,9 @@ export async function obterParciais(req, res) {
         }
 
         // ✅ Live Experience: buscar pontos da rodada atual da collection Rodada
-        // Para edição 'pendente' sem rodadaAtual (jogo ainda não começou), não chamar API externa
-        const rodadaParaBuscar = edicao.rodadaAtual;
+        // Para edição pendente sem rodadaAtual, usa rodadaInicial para buscar dados consolidados
+        // Nunca chama API externa (Cartola) para edição pendente — evita timeout
+        const rodadaParaBuscar = edicao.rodadaAtual || edicao.rodadaInicial;
         let pontosLiveMap = new Map();
         let isLive = false;
 
@@ -409,8 +410,9 @@ export async function obterParciais(req, res) {
                 rodadasLive.forEach(r => {
                     pontosLiveMap.set(String(r.timeId), r.pontos || 0);
                 });
-            } else {
-                // Rodada em andamento mas ainda não consolidada → fallback parciais
+            } else if (edicao.rodadaAtual) {
+                // Só busca parciais ao vivo se rodadaAtual existir (rodada realmente em andamento)
+                // Não chamar para edição pendente (rodadaInicial) — API lenta causaria timeout
                 const fb = await _buscarPontosViaParciais(ligaId);
                 if (fb.isLive) {
                     isLive = true;

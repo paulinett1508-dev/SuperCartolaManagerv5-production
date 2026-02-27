@@ -1168,14 +1168,12 @@ function renderContent() {
         if (capCard) cards.push(capCard);
     }
 
-    // Resta Um: usa section (com campeão, quase, eliminado) — não entra no grid de cards
-    const sections = [];
     if (WHState.modulosAtivos.restaUm) {
-        const ruSection = renderRestaUmSection();
-        if (ruSection) sections.push(ruSection);
+        const ruCard = renderCardRestaUm();
+        if (ruCard) cards.push(ruCard);
     }
 
-    if (cards.length === 0 && sections.length === 0) {
+    if (cards.length === 0) {
         content.innerHTML = `
             <div class="wh-empty">
                 <span class="material-icons wh-empty-icon">sports_soccer</span>
@@ -1188,8 +1186,9 @@ function renderContent() {
 
     content.innerHTML = `
         ${renderTimestamp()}
-        ${sections.join('')}
-        ${cards.length > 0 ? `<div class="wh-card-grid">${cards.join('')}</div>` : ''}
+        <div class="wh-card-grid">
+            ${cards.join("")}
+        </div>
     `;
 
     // Event delegation: tap em card → abrir modal
@@ -1200,9 +1199,10 @@ function renderContent() {
         });
     });
 
-    // Navegação: botão "Ver Resta Um completo" no painel (fora do modal)
+    // Navegação: "Ver Resta Um completo" dentro do card (sem abrir modal)
     content.querySelectorAll('.wh-modal-navigate-btn[data-navigate]').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Não propagar para o card (evita abrir modal)
             const modulo = btn.dataset.navigate;
             if (modulo && window.participanteNav) {
                 closePanel();
@@ -1509,51 +1509,101 @@ function renderCardModulo(tipo) {
     `;
 }
 
-/** Card: Resta Um — com nome participante + time */
+/** Card: Resta Um — span full-width com campeão, minha pos, quase e eliminado */
 function renderCardRestaUm() {
     const data = WHState.data.restaUm;
-    const totalVivosSeguro = (data?.vivos?.length || 0) + (data?.zonaRisco?.length || 0);
-    if (!data || totalVivosSeguro === 0) return null;
+    if (!data || !data.vivos || data.vivos.length === 0) return null;
 
     const meuId = String(WHState.timeId);
-    const vivosSeguro = data.vivos.length;
-    const emRisco = data.zonaRisco?.length || 0;
+    const vivos = _vivosMesclados(data.vivos); // ordena por pontosRodada se parciais disponíveis
+    const totalVivos = vivos.length;
     const totalEliminados = data.eliminados?.length || 0;
-    const total = data.totalParticipantes || (totalVivosSeguro + totalEliminados);
-    const pctVivos = total > 0 ? Math.round((totalVivosSeguro / total) * 100) : 0;
+    const total = data.totalParticipantes || (totalVivos + totalEliminados);
+    const pctVivos = total > 0 ? Math.round((totalVivos / total) * 100) : 0;
 
-    const euVivo = data.vivos.find(p => String(p.timeId) === meuId);
-    const euEmRisco = data.zonaRisco?.find(p => String(p.timeId) === meuId);
-    const euEliminado = !euVivo && !euEmRisco && data.eliminados?.find(p => String(p.timeId) === meuId);
+    const leader = vivos[0];
+    const lanterna = vivos.length > 1 ? vivos[vivos.length - 1] : null;
+    const quase = vivos.length > 2 ? vivos[vivos.length - 2] : null;
 
-    let statusText;
-    if (euEliminado) {
-        statusText = '<span style="color:var(--app-danger)">Voce foi eliminado</span>';
-    } else if (euEmRisco && data.isLive) {
-        statusText = '<span style="color:var(--app-warning)">Voce esta em risco!</span>';
-    } else if (euVivo) {
-        statusText = '<span style="color:var(--app-success)">Voce vivo!</span>';
-    } else {
-        statusText = `${totalVivosSeguro} sobreviventes`;
+    // Líder / Campeão da rodada
+    const leaderIsMe = String(leader.timeId) === meuId;
+    const leaderHtml = `
+        <div class="wh-compact-leader ${leaderIsMe ? 'me' : ''}">
+            <span class="wh-compact-pos">1</span>
+            <img class="wh-compact-escudo" src="${resolverEscudo(leader)}" onerror="this.src='/escudos/default.png'" alt="">
+            <span class="wh-compact-nome">${escapeHtml(leader.nomeTime || leader.nomeCartoleiro || 'Time')}</span>
+            <span class="wh-compact-valor" style="color:var(--app-success)">Campeao</span>
+        </div>
+    `;
+
+    // Minha posição (se não sou líder, quase, nem lanterna)
+    let myHtml = '';
+    const meu = vivos.find(p => String(p.timeId) === meuId)
+        || data.eliminados?.find(p => String(p.timeId) === meuId);
+    if (meu) {
+        const meuIndex = vivos.findIndex(p => String(p.timeId) === meuId);
+        const isElim = meu.status === 'eliminado';
+        const isLider = meuIndex === 0;
+        const isLanterna = !isElim && meuIndex === vivos.length - 1;
+        const isQuase = !isElim && meuIndex === vivos.length - 2;
+        if (!isLider && !isLanterna && !isQuase) {
+            myHtml = `
+                <div class="wh-compact-leader wh-compact-leader--me">
+                    <span class="wh-compact-pos">${isElim ? '-' : (meuIndex + 1)}</span>
+                    <img class="wh-compact-escudo" src="${resolverEscudo(meu)}" onerror="this.src='/escudos/default.png'" alt="">
+                    <span class="wh-compact-nome">${escapeHtml(meu.nomeTime || 'Meu Time')}</span>
+                    <span class="wh-compact-valor" style="color:${isElim ? 'var(--app-danger)' : 'var(--app-success)'}">
+                        ${isElim ? `Elim. R${meu.rodadaEliminacao || '?'}` : 'Vivo'}
+                    </span>
+                </div>
+            `;
+        }
     }
 
-    const riscoLabel = emRisco > 0 && data.isLive
-        ? `<span style="color:var(--app-warning);font-size:9px;font-weight:700">${emRisco} em risco</span>`
-        : '';
+    // Quase! (penúltimo vivo)
+    const quaseIsMe = quase && String(quase.timeId) === meuId;
+    const quaseHtml = quase ? `
+        <div class="wh-compact-leader ${quaseIsMe ? 'wh-compact-leader--me' : ''}" style="border-left:2px solid var(--app-warning)">
+            <span class="wh-compact-pos" style="color:var(--app-warning)">${vivos.length - 1}</span>
+            <img class="wh-compact-escudo" src="${resolverEscudo(quase)}" onerror="this.src='/escudos/default.png'" alt="">
+            <span class="wh-compact-nome">${escapeHtml(quase.nomeTime || quase.nomeCartoleiro || 'Time')}</span>
+            <span class="wh-compact-valor" style="color:var(--app-warning)">Quase!</span>
+        </div>
+    ` : '';
+
+    // Eliminado (último vivo projetado / real)
+    const lantIsMe = lanterna && String(lanterna.timeId) === meuId;
+    const elimHtml = lanterna ? `
+        <div class="wh-ru-lanterna ${lantIsMe ? 'is-me' : ''}">
+            <span class="material-icons">warning</span>
+            <span style="flex:1">${lantIsMe ? 'VOCE sera eliminado!' : escapeHtml(lanterna.nomeTime || 'Time')}</span>
+            <span>ELIMINADO</span>
+        </div>
+    ` : '';
 
     return `
-        <div class="wh-card wh-card--resta-um" data-modal="resta-um">
+        <div class="wh-card wh-card--resta-um" data-modal="resta-um" style="grid-column:1/-1">
             <div class="wh-card-header">
-                <div class="wh-card-icon">
-                    <span class="material-icons">person_off</span>
-                </div>
+                <div class="wh-card-icon"><span class="material-icons">person_off</span></div>
                 <span class="wh-card-title">Resta Um</span>
+                <span style="margin-left:auto;font-size:9px;color:var(--app-text-muted)">
+                    <span style="color:var(--app-success);font-weight:700">${totalVivos}</span>/${total} vivos
+                </span>
             </div>
-            <div class="wh-card-metric">${vivosSeguro}/${total} <span style="font-size:var(--app-font-xs);color:var(--app-text-muted)">vivos</span></div>
             <div class="wh-card-progress">
                 <div class="wh-card-progress-bar" style="width:${pctVivos}%"></div>
             </div>
-            <div class="wh-card-subtitle" style="font-size:9px;line-height:1.4">${statusText}${riscoLabel ? ' · ' + riscoLabel : ''}</div>
+            <div style="padding:4px 0">
+                ${leaderHtml}
+                ${myHtml}
+                ${quaseHtml}
+                ${elimHtml}
+            </div>
+            <div style="padding:6px 0 2px">
+                <button class="wh-modal-navigate-btn" data-navigate="resta-um" style="width:100%;justify-content:center;font-size:10px;">
+                    <span class="material-icons" style="font-size:12px">open_in_new</span> Ver Resta Um completo
+                </button>
+            </div>
         </div>
     `;
 }

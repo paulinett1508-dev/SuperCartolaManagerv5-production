@@ -1,5 +1,58 @@
 # Tarefas Pendentes
 
+---
+
+## 🔴 [PRIMEIRA EXECUÇÃO] Widget "O que tá rolando?" — Card Resta Um com infos corretas
+
+**Status:** Pendente — múltiplas tentativas falharam, provavelmente cache do Service Worker impedindo visualização real das mudanças
+**Prioridade:** Alta — executar ANTES de qualquer outra tarefa
+
+### Contexto completo
+
+O widget "O que tá rolando?" (`public/participante/js/widgets/whats-happening-widget.js`) tem um card de Resta Um que só mostra `35/35 vivos` (dados agregados). O usuário quer que o card mostre:
+1. **Campeão da rodada** (1º lugar nos pontos da rodada)
+2. **Minha posição** (se não for líder/quase/eliminado)
+3. **Quase!** (penúltimo vivo — em perigo)
+4. **ELIMINADO** (último vivo projetado OU eliminado real)
+5. Botão **"Ver Resta Um completo"** que navega para o módulo
+
+### O que já foi feito (código já está no arquivo)
+
+O `renderCardRestaUm()` em `whats-happening-widget.js` **JÁ FOI REESCRITO** — ele agora tem:
+- `style="grid-column:1/-1"` para span full-width no grid
+- linhas de campeão, minha pos, quase, eliminado (classes `wh-compact-leader`)
+- botão "Ver Resta Um completo" com `stopPropagation`
+
+O backend `obterParciais` em `controllers/restaUmController.js` **JÁ FOI CORRIGIDO**:
+- `rodadaParaBuscar = edicao.rodadaAtual || edicao.rodadaInicial` (restaurado)
+- Só chama `_buscarPontosViaParciais` (API lenta) quando `edicao.rodadaAtual` existe
+- Para edição pendente (`rodadaAtual: null`), usa `rodadaInicial` (rodada 4) — busca na collection `Rodada`, sem timeout
+
+### Suspeita do problema atual
+
+**Service Worker** (`public/participante/service-worker.js`) está servindo versão antiga do widget em cache. As mudanças no código existem mas o browser recebe o arquivo antigo.
+
+### Diagnóstico para nova sessão
+
+1. **Verificar cache SW**: abrir DevTools → Application → Service Workers → verificar se está registrado e qual CACHE_NAME está ativo
+2. **Confirmar que o código mudou**: ler `renderCardRestaUm()` em `whats-happening-widget.js` — deve ter `grid-column:1/-1` e linhas de jogadores
+3. **Se SW for o problema**: bumpar `CACHE_NAME` no `public/participante/service-worker.js` para forçar invalidação de todos os caches
+
+### Arquivos chave
+- `public/participante/js/widgets/whats-happening-widget.js` — `renderCardRestaUm()` (linha ~1512)
+- `public/participante/js/participante-navigation.js` — importa widget com `?v=Date.now()` (linha ~377)
+- `public/participante/index.html` — versão atual do navigation: `v=27.02.26.0003`
+- `public/participante/service-worker.js` — CACHE_NAME a bumpar se necessário
+- `controllers/restaUmController.js` — `obterParciais()` (linha ~379)
+
+### Dados do Resta Um no DB (para referência)
+- Edição: `pendente`, `rodadaAtual: null`, `rodadaInicial: 4`
+- 35 participantes com `status: 'vivo'`, `pontosAcumulados: 0`
+- A ordenação correta vem dos pontos da rodada 4 na collection `Rodada` (ligaId relevante)
+- Exemplo esperado: CAMPEÃO: Vitim / QUASE: Rodrigo / ELIMINADO: Lucas Sousa
+
+---
+
 ## Baixar imagens dos estádios da Copa 2026
 
 **Status:** Pendente
