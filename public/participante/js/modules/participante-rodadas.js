@@ -235,7 +235,10 @@ function renderizarInterface(rodadas) {
     // 3. Renderizar Card de Desempenho (mantido como fallback)
     renderizarCardDesempenho(rodadas);
 
-    // 4. Mostrar container
+    // 4. Carregar destaques da rodada (abaixo do card Desempenho)
+    _carregarDestaquesRodada();
+
+    // 5. Mostrar container
     const container = document.getElementById('rodadasGruposContainer');
     if (container) container.style.display = 'flex';
 }
@@ -596,6 +599,186 @@ function obterMitoMicoDaRodada(rodada) {
         }
     };
 }
+
+// =====================================================================
+// DESTAQUES DA RODADA (Capitão / Maior / Menor pontuador)
+// =====================================================================
+let _rodadasDestaquesTimer = null;
+
+async function _carregarDestaquesRodada() {
+    const card = document.getElementById('rodadas-destaques-card');
+    if (!card) return;
+
+    const isAoVivo = statusMercadoAtual === 2;
+
+    // Determinar rodada a exibir: ao vivo usa rodada atual, senão a anterior
+    const rodada = isAoVivo ? rodadaAtualCartola : Math.max(1, rodadaAtualCartola - 1);
+    if (!rodada || rodada < 1) return;
+
+    const rodadaBadgeEl = document.getElementById('rod-destaques-rodada');
+    const liveBadgeEl = document.getElementById('rod-destaques-live-badge');
+
+    try {
+        // ── FONTE PRIMÁRIA (ao vivo): ParciaisModule já tem tudo calculado ──
+        if (isAoVivo && ParciaisModule?.obterDados) {
+            const dadosParciais = ParciaisModule.obterDados();
+            const meuTime = dadosParciais?.participantes?.find(
+                p => String(p.timeId) === String(meuTimeId)
+            );
+
+            if (meuTime?.atletas?.length > 0) {
+                const escalacaoLive = {
+                    atletas: meuTime.atletas.filter(a => !a.is_reserva),
+                    reservas: meuTime.atletas.filter(a => a.is_reserva),
+                    capitao_id: meuTime.capitao_id,
+                };
+                const todosZerados = meuTime.atletas.every(a => !a.pontos && !a.pontos_efetivos);
+
+                _renderizarDestaquesRodadas(escalacaoLive, rodada);
+                if (rodadaBadgeEl) rodadaBadgeEl.textContent = `Rodada ${rodada}`;
+                if (liveBadgeEl) {
+                    liveBadgeEl.textContent = todosZerados ? 'ESCALADO' : 'AO VIVO';
+                    liveBadgeEl.style.display = 'inline-flex';
+                    liveBadgeEl.classList.toggle('aguardando', todosZerados);
+                    liveBadgeEl.classList.toggle('ao-vivo', !todosZerados);
+                }
+                card.style.display = 'block';
+                _setupDestaquesRodadasAutoRefresh(rodada);
+                return;
+            }
+        }
+
+        // ── FONTE SECUNDÁRIA: Fetch direto da API ──
+        const response = await fetch(`/api/cartola/time/id/${meuTimeId}/${rodada}`);
+        if (!response.ok) {
+            if (response.status === 404 && rodada > 1) {
+                const fallbackResp = await fetch(`/api/cartola/time/id/${meuTimeId}/${rodada - 1}`);
+                if (fallbackResp.ok) {
+                    const fallbackData = await fallbackResp.json();
+                    if (fallbackData?.atletas?.length) {
+                        _renderizarDestaquesRodadas(fallbackData, rodada - 1);
+                        if (rodadaBadgeEl) rodadaBadgeEl.textContent = `Rodada ${rodada - 1}`;
+                        if (liveBadgeEl) liveBadgeEl.style.display = 'none';
+                        card.style.display = 'block';
+                        return;
+                    }
+                }
+            }
+            return;
+        }
+
+        const escalacao = await response.json();
+        if (!escalacao?.atletas?.length) return;
+
+        _renderizarDestaquesRodadas(escalacao, rodada);
+        if (rodadaBadgeEl) rodadaBadgeEl.textContent = `Rodada ${rodada}`;
+        if (liveBadgeEl) liveBadgeEl.style.display = 'none';
+        card.style.display = 'block';
+
+        if (isAoVivo) _setupDestaquesRodadasAutoRefresh(rodada);
+
+    } catch (error) {
+        if (window.Log) Log.warn("[PARTICIPANTE-RODADAS]", "Erro ao carregar destaques:", error);
+    }
+}
+
+function _setupDestaquesRodadasAutoRefresh(rodada) {
+    if (_rodadasDestaquesTimer) clearInterval(_rodadasDestaquesTimer);
+    _rodadasDestaquesTimer = setInterval(() => {
+        const card = document.getElementById('rodadas-destaques-card');
+        if (!card || !document.contains(card)) {
+            clearInterval(_rodadasDestaquesTimer);
+            _rodadasDestaquesTimer = null;
+            return;
+        }
+        if (statusMercadoAtual !== 2) {
+            clearInterval(_rodadasDestaquesTimer);
+            _rodadasDestaquesTimer = null;
+            return;
+        }
+        _carregarDestaquesRodada();
+    }, 60000);
+}
+
+function _renderizarDestaquesRodadas(escalacao, rodada) {
+    const atletas = [
+        ...(escalacao.atletas || []),
+        ...(escalacao.reservas || [])
+    ];
+    const capitaoId = escalacao.capitao_id;
+
+    // Normalizar campo de pontos: ParciaisModule usa `pontos`, API raw usa `pontos_num`
+    atletas.forEach(a => {
+        if (a.pontos_num === undefined && a.pontos !== undefined) a.pontos_num = a.pontos;
+    });
+
+    const _pts = a => parseFloat(a?.pontos_num ?? 0);
+    const capitao = atletas.find(a => a.atleta_id === capitaoId) || atletas[0];
+    const maior = atletas.reduce((max, a) => (_pts(a) > _pts(max) ? a : max), atletas[0]);
+    const menor = atletas.reduce((min, a) => (_pts(a) < _pts(min) ? a : min), atletas[0]);
+
+    _popularDestaquesCard('capitao', capitao, true);
+    _popularDestaquesCard('maior', maior, false);
+    _popularDestaquesCard('menor', menor, false);
+
+    const rodadaBadgeEl = document.getElementById('rod-destaques-rodada');
+    if (rodadaBadgeEl) rodadaBadgeEl.textContent = `Rodada ${rodada}`;
+
+    if (window.Log) Log.info("[PARTICIPANTE-RODADAS]", `Destaques carregados - Rodada ${rodada}`);
+}
+
+function _popularDestaquesCard(tipo, atleta, isCapitao = false) {
+    if (!atleta) return;
+
+    const nomeEl = document.getElementById(`rod-nome-${tipo}`);
+    const posicaoEl = document.getElementById(`rod-posicao-${tipo}`);
+    const pontosEl = document.getElementById(`rod-pontos-${tipo}`);
+    const escudoEl = document.getElementById(`rod-escudo-${tipo}`);
+
+    if (nomeEl) nomeEl.textContent = atleta.apelido || atleta.nome || '--';
+
+    if (posicaoEl) {
+        const posicoes = { 1: 'GOLEIRO', 2: 'LATERAL', 3: 'ZAGUEIRO', 4: 'MEIA', 5: 'ATACANTE', 6: 'TÉCNICO' };
+        posicaoEl.textContent = posicoes[atleta.posicao_id] || 'JOGADOR';
+    }
+
+    if (pontosEl) {
+        let pontosDisplay;
+        if (isCapitao && atleta.pontos_efetivos !== undefined) {
+            pontosDisplay = parseFloat(atleta.pontos_efetivos || 0);
+        } else if (isCapitao) {
+            pontosDisplay = parseFloat(atleta.pontos_num || 0) * 1.5;
+        } else {
+            pontosDisplay = parseFloat(atleta.pontos_num || 0);
+        }
+        pontosEl.textContent = (Math.trunc((pontosDisplay || 0) * 100) / 100).toFixed(2);
+    }
+
+    if (escudoEl && atleta.clube_id) {
+        const escudoImg = escudoEl.querySelector('img');
+        if (escudoImg) {
+            escudoImg.src = `/escudos/${atleta.clube_id}.png`;
+            escudoImg.onerror = () => { escudoImg.src = '/escudos/default.png'; };
+        }
+    }
+}
+
+function toggleRodadasDestaques() {
+    const card = document.getElementById('rodadas-destaques-card');
+    const content = document.getElementById('rod-destaques-content');
+    if (!card || !content) return;
+
+    const isExpanded = card.classList.contains('expanded');
+    if (isExpanded) {
+        card.classList.remove('expanded');
+        content.classList.add('collapsed');
+    } else {
+        card.classList.add('expanded');
+        content.classList.remove('collapsed');
+    }
+}
+
+window.toggleRodadasDestaques = toggleRodadasDestaques;
 
 // =====================================================================
 // POSIÇÕES E CORES - Cartola

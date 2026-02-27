@@ -867,6 +867,329 @@
     margin-bottom: 8px;
 }
 
+/* === CARD DESTAQUES DA RODADA (colapsável) === */
+#rodadas-destaques-card {
+    margin-top: 12px;
+}
+
+.rod-destaques-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 16px;
+    background: var(--rodadas-surface, #1e2330);
+    border: 1px solid var(--rodadas-border, rgba(255,255,255,0.08));
+    border-radius: 16px;
+    cursor: pointer;
+    transition: transform 0.15s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+
+.rod-destaques-header:active {
+    transform: scale(0.98);
+}
+
+.rod-destaques-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.rod-destaques-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--app-primary, #ff5500) 0%, #c2410c 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.rod-destaques-icon-wrapper .material-icons {
+    font-size: 20px;
+    color: #fff;
+}
+
+.rod-destaques-header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.rod-destaques-header-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--rodadas-text-muted, rgba(255,255,255,0.5));
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.rod-destaques-header-value-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rod-destaques-rodada-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--rodadas-text-primary, #fff);
+    letter-spacing: -0.3px;
+}
+
+.rod-destaques-live-badge {
+    display: inline-flex;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    color: #fff;
+    background: #ef4444;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    animation: rod-live-pulse 1.5s ease-in-out infinite;
+}
+
+.rod-destaques-live-badge.aguardando {
+    background: var(--app-warning, #f59e0b);
+    animation: rod-live-pulse 2s ease-in-out infinite;
+}
+
+@keyframes rod-live-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.rod-destaques-header-right {
+    display: flex;
+    align-items: center;
+}
+
+.rod-destaques-chevron {
+    font-size: 24px;
+    color: rgba(255,255,255,0.4);
+    transition: transform 0.3s ease;
+}
+
+#rodadas-destaques-card.expanded .rod-destaques-header {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: none;
+    box-shadow: none;
+}
+
+#rodadas-destaques-card.expanded .rod-destaques-chevron {
+    transform: rotate(180deg);
+}
+
+.rod-destaques-content {
+    max-height: 500px;
+    overflow: hidden;
+    transition: max-height 0.35s ease, opacity 0.3s ease, padding 0.3s ease;
+    background: var(--rodadas-surface, #1e2330);
+    border: 1px solid var(--rodadas-border, rgba(255,255,255,0.08));
+    border-top: none;
+    border-radius: 0 0 16px 16px;
+    padding: 14px 16px;
+    opacity: 1;
+}
+
+.rod-destaques-content.collapsed {
+    max-height: 0;
+    padding: 0 12px;
+    opacity: 0;
+    border: none;
+}
+
+.rod-destaques-strips {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.rod-destaque-strip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #1a1a1a 0%, #141414 100%);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 14px 16px;
+    transition: transform 0.15s;
+}
+
+.rod-destaque-strip:active {
+    transform: scale(0.98);
+}
+
+.rod-destaque-strip-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.rod-destaque-strip-escudo {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.rod-destaque-strip-escudo img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.rod-destaque-strip-badge {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #141414;
+}
+
+.rod-destaque-strip-badge--capitao {
+    background: var(--app-primary, #ff5500);
+    font-family: 'Russo One', sans-serif;
+    font-size: 10px;
+    color: #fff;
+    font-weight: 700;
+}
+
+.rod-destaque-strip-badge--up {
+    background: var(--app-success-light, #22c55e);
+    color: #fff;
+}
+
+.rod-destaque-strip-badge--down {
+    background: var(--app-danger, #ef4444);
+    color: #fff;
+}
+
+.rod-destaque-strip-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.rod-destaque-strip-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.rod-destaque-strip-value-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rod-destaque-strip-nome {
+    font-family: 'Russo One', sans-serif;
+    font-size: 13px;
+    color: var(--rodadas-text-primary, #fff);
+    letter-spacing: 0.3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rod-destaque-strip-multiplicador {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--app-primary, #ff5500);
+    padding: 2px 6px;
+    background: rgba(255, 85, 0, 0.12);
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.rod-destaque-strip-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+    flex-shrink: 0;
+}
+
+.rod-destaque-strip-right-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.rod-destaque-strip-pontos {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--rodadas-text-primary, #fff);
+    letter-spacing: -0.5px;
+}
+
+.rod-destaque-strip-pontos--verde {
+    color: var(--app-success-light, #22c55e);
+}
+
+.rod-destaque-strip-pontos--vermelho {
+    color: var(--app-danger, #ef4444);
+}
+
+.rod-destaques-ver-escalacao {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 8px 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    text-decoration: none;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.04);
+    transition: background 0.15s, color 0.15s;
+}
+
+.rod-destaques-ver-escalacao:active {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.7);
+}
+
+.rod-destaques-ver-escalacao .material-icons {
+    font-size: 16px;
+}
+
+.rod-destaques-ver-chevron {
+    margin-left: auto;
+    font-size: 16px !important;
+    color: rgba(255,255,255,0.2);
+}
+
 /* === TOAST === */
 .toast-desenvolvimento {
     position: fixed;
@@ -2473,6 +2796,100 @@
                 <div class="aproveitamento-fill" id="tempAproveitamentoBar" style="width: 0%"></div>
             </div>
             <span class="aproveitamento-hint" id="tempAproveitamentoHint">Rodadas acima da média da liga</span>
+        </div>
+    </div>
+
+    <!-- Card Destaques da Rodada (colapsável) — exibido abaixo do card Meu Desempenho -->
+    <div id="rodadas-destaques-card" style="display: none;">
+        <button class="rod-destaques-header" id="rod-destaques-toggle" onclick="window.toggleRodadasDestaques && window.toggleRodadasDestaques()">
+            <div class="rod-destaques-header-left">
+                <div class="rod-destaques-icon-wrapper">
+                    <span class="material-icons">emoji_events</span>
+                </div>
+                <div class="rod-destaques-header-info">
+                    <span class="rod-destaques-header-label">DESTAQUES DA RODADA</span>
+                    <div class="rod-destaques-header-value-row">
+                        <span class="rod-destaques-rodada-badge" id="rod-destaques-rodada">Rodada --</span>
+                        <span class="rod-destaques-live-badge" id="rod-destaques-live-badge" style="display:none">AO VIVO</span>
+                    </div>
+                </div>
+            </div>
+            <div class="rod-destaques-header-right">
+                <span class="material-icons rod-destaques-chevron" id="rod-destaques-chevron">expand_more</span>
+            </div>
+        </button>
+
+        <div class="rod-destaques-content collapsed" id="rod-destaques-content">
+            <div class="rod-destaques-strips">
+                <!-- Capitão -->
+                <div class="rod-destaque-strip" id="rod-destaque-capitao">
+                    <div class="rod-destaque-strip-left">
+                        <div class="rod-destaque-strip-escudo" id="rod-escudo-capitao">
+                            <img src="/escudos/default.png" alt="Escudo" loading="lazy">
+                            <span class="rod-destaque-strip-badge rod-destaque-strip-badge--capitao">C</span>
+                        </div>
+                        <div class="rod-destaque-strip-info">
+                            <span class="rod-destaque-strip-label">CAPITÃO</span>
+                            <div class="rod-destaque-strip-value-row">
+                                <span class="rod-destaque-strip-nome" id="rod-nome-capitao">--</span>
+                                <span class="rod-destaque-strip-multiplicador" id="rod-badge-multiplicador">×1.5</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="rod-destaque-strip-right">
+                        <span class="rod-destaque-strip-right-label" id="rod-posicao-capitao">--</span>
+                        <span class="rod-destaque-strip-pontos" id="rod-pontos-capitao">0.00</span>
+                    </div>
+                </div>
+
+                <!-- Maior Pontuador -->
+                <div class="rod-destaque-strip" id="rod-destaque-maior">
+                    <div class="rod-destaque-strip-left">
+                        <div class="rod-destaque-strip-escudo" id="rod-escudo-maior">
+                            <img src="/escudos/default.png" alt="Escudo" loading="lazy">
+                            <span class="rod-destaque-strip-badge rod-destaque-strip-badge--up">
+                                <i class="material-icons" style="font-size:12px">thumb_up</i>
+                            </span>
+                        </div>
+                        <div class="rod-destaque-strip-info">
+                            <span class="rod-destaque-strip-label">MAIOR PONTUADOR</span>
+                            <span class="rod-destaque-strip-nome" id="rod-nome-maior">--</span>
+                        </div>
+                    </div>
+                    <div class="rod-destaque-strip-right">
+                        <span class="rod-destaque-strip-right-label" id="rod-posicao-maior">--</span>
+                        <span class="rod-destaque-strip-pontos rod-destaque-strip-pontos--verde" id="rod-pontos-maior">0.00</span>
+                    </div>
+                </div>
+
+                <!-- Menor Pontuador -->
+                <div class="rod-destaque-strip" id="rod-destaque-menor">
+                    <div class="rod-destaque-strip-left">
+                        <div class="rod-destaque-strip-escudo" id="rod-escudo-menor">
+                            <img src="/escudos/default.png" alt="Escudo" loading="lazy">
+                            <span class="rod-destaque-strip-badge rod-destaque-strip-badge--down">
+                                <i class="material-icons" style="font-size:12px">thumb_down</i>
+                            </span>
+                        </div>
+                        <div class="rod-destaque-strip-info">
+                            <span class="rod-destaque-strip-label">MENOR PONTUADOR</span>
+                            <span class="rod-destaque-strip-nome" id="rod-nome-menor">--</span>
+                        </div>
+                    </div>
+                    <div class="rod-destaque-strip-right">
+                        <span class="rod-destaque-strip-right-label" id="rod-posicao-menor">--</span>
+                        <span class="rod-destaque-strip-pontos rod-destaque-strip-pontos--vermelho" id="rod-pontos-menor">0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Link para escalação completa -->
+            <a href="javascript:void(0)" class="rod-destaques-ver-escalacao"
+               onclick="window.participanteNav?.navegarPara('campinho')">
+                <span class="material-icons">groups</span>
+                Ver escalação completa
+                <span class="material-icons rod-destaques-ver-chevron">chevron_right</span>
+            </a>
         </div>
     </div>
 
