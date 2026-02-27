@@ -308,12 +308,6 @@ function pararAutoRefreshHome() {
         homeAutoRefreshId = null;
     }
 
-    // Parar refresh dos destaques ao vivo
-    if (_destaquesRefreshTimer) {
-        clearInterval(_destaquesRefreshTimer);
-        _destaquesRefreshTimer = null;
-    }
-
     // Parar parciais também
     if (ParciaisModule?.pararAutoRefresh) {
         ParciaisModule.pararAutoRefresh();
