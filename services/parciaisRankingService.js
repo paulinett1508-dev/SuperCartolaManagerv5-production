@@ -268,6 +268,23 @@ export async function buscarRankingParcial(ligaId) {
         // 4. Buscar escalação e calcular pontos de cada time
         const resultados = [];
 
+        // ✅ v1.4: Fallback DB — buscar dados da rodada atual já salvos localmente
+        // Quando a API Cartola está em manutenção, usamos os dados do banco como fallback
+        const fallbackRodadaMap = new Map();
+        const rodadaAtualDB = await Rodada.find({
+            ligaId: ligaObjectId,
+            temporada: CURRENT_SEASON,
+            rodada: rodadaAtual,
+        }).lean();
+
+        rodadaAtualDB.forEach((reg) => {
+            fallbackRodadaMap.set(reg.timeId, reg);
+        });
+
+        if (fallbackRodadaMap.size > 0) {
+            console.log(`${LOG_PREFIX} 📦 Fallback DB: ${fallbackRodadaMap.size} registros da rodada ${rodadaAtual} disponíveis`);
+        }
+
         // Processar em lotes para não sobrecarregar a API
         const BATCH_SIZE = 5;
         for (let i = 0; i < participantesAtivos.length; i += BATCH_SIZE) {
@@ -275,18 +292,40 @@ export async function buscarRankingParcial(ligaId) {
 
             const promessas = batch.map(async (participante) => {
                 const escalacao = await buscarEscalacaoTime(participante.time_id, rodadaAtual);
-                const { pontos, calculado } = calcularPontuacaoTime(escalacao, atletasPontuados);
+                let pontos, calculado;
+
+                if (escalacao) {
+                    // API respondeu: calcular pontos via atletas pontuados
+                    ({ pontos, calculado } = calcularPontuacaoTime(escalacao, atletasPontuados));
+                } else {
+                    // ✅ v1.4: API falhou — usar fallback do banco de dados
+                    const fallback = fallbackRodadaMap.get(participante.time_id);
+                    if (fallback && !fallback.rodadaNaoJogada) {
+                        pontos = fallback.pontos || 0;
+                        calculado = true;
+                        console.log(`${LOG_PREFIX} 📦 Fallback DB usado para time ${participante.time_id}: ${pontos} pts`);
+                    } else {
+                        pontos = 0;
+                        calculado = false;
+                    }
+                }
 
                 // ✅ v1.1: Somar com pontos acumulados das rodadas anteriores
                 const pontosAnteriores = pontosAcumulados[participante.time_id] || 0;
                 const pontosTotais = pontosAnteriores + pontos;
+
+                // ✅ v1.4: clube_id com fallback encadeado: API > DB > Liga.participantes
+                const fallbackDB = fallbackRodadaMap.get(participante.time_id);
+                const clubeIdFinal = escalacao?.time?.time_id_do_coracao
+                    || fallbackDB?.clube_id
+                    || participante.clube_id;
 
                 return {
                     timeId: participante.time_id,
                     nome_time: escalacao?.time?.nome || participante.nome_time || "N/D",
                     nome_cartola: escalacao?.time?.nome_cartola || participante.nome_cartola || "N/D",
                     escudo: escalacao?.time?.url_escudo_png || participante.foto_time || "",
-                    clube_id: escalacao?.time?.time_id || participante.clube_id,
+                    clube_id: clubeIdFinal,
                     pontos: truncarPontosNum(pontosTotais), // ✅ Pontos totais (acumulado + parcial)
                     pontos_rodada_atual: truncarPontosNum(pontos), // Pontos apenas da rodada atual
                     pontos_acumulados: truncarPontosNum(pontosAnteriores), // Pontos das rodadas anteriores
