@@ -37,4 +37,13 @@ router.put(
     calendarioController.atualizarStatusPartida
 );
 
+// POST /api/calendario-rodadas/:temporada/:rodada/importar-api
+// Importa partidas da API-Football (liga 71=Brasileirão A por padrão)
+// Query param opcional: ?liga=73 para Copa do Brasil, etc.
+router.post(
+    '/:temporada/:rodada/importar-api',
+    verificarAdmin,
+    calendarioController.importarDoAPI
+);
+
 export default router;

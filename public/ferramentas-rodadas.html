@@ -492,10 +492,16 @@
                                 <input type="number" id="cal-rodada" class="form-input" value="1" min="1" max="38" />
                             </div>
                         </div>
-                        <button id="btnCarregarCalendario" class="btn-secondary" style="margin-bottom:16px;">
-                            <span class="material-icons">search</span>
-                            Carregar Calendário
-                        </button>
+                        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+                            <button id="btnCarregarCalendario" class="btn-secondary">
+                                <span class="material-icons">search</span>
+                                Carregar Calendário
+                            </button>
+                            <button id="btnImportarAPI" class="btn-secondary" style="border-color:rgba(99,102,241,.3);color:#818cf8;" title="Importa automaticamente as partidas do Brasileirão A da API-Football">
+                                <span class="material-icons">cloud_download</span>
+                                Importar da API
+                            </button>
+                        </div>
 
                         <!-- Lista de Partidas -->
                         <div id="cal-partidas-list" style="display:none;margin-bottom:16px;">
@@ -792,7 +798,7 @@
                 // Reset calendário
                 _calPartidasLocal = [];
                 _calCarregado = false;
-                ['btnCarregarCalendario','btnAdicionarPartida','btnSalvarCalendario','btnToggleForm'].forEach(id => {
+                ['btnCarregarCalendario','btnImportarAPI','btnAdicionarPartida','btnSalvarCalendario','btnToggleForm'].forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el._calBound = false;
                 });
@@ -1006,11 +1012,65 @@
                 }
             }
 
+            async function importarDaAPI() {
+                const temporada = parseInt(document.getElementById('cal-temporada')?.value);
+                const rodada = parseInt(document.getElementById('cal-rodada')?.value);
+
+                if (!temporada || !rodada || rodada < 1 || rodada > 38) {
+                    if (window.SuperModal) SuperModal.toast.warning('Preencha temporada e rodada válidas antes de importar.');
+                    return;
+                }
+
+                const btn = document.getElementById('btnImportarAPI');
+                if (btn) { btn.disabled = true; btn.innerHTML = '<span class="material-icons">hourglass_empty</span> Importando...'; }
+
+                try {
+                    const res = await fetch(`/api/calendario-rodadas/${temporada}/${rodada}/importar-api`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    const data = await res.json();
+
+                    if (!res.ok || !data.success) {
+                        throw new Error(data.message || 'Erro desconhecido');
+                    }
+
+                    // Recarregar partidas do calendário recém importado
+                    _calPartidasLocal = (data.partidas || []).map(p => ({
+                        data: p.data,
+                        horario: p.horario,
+                        time_casa: p.time_casa,
+                        time_fora: p.time_fora,
+                        status: p.status || 'agendado'
+                    }));
+                    _calCarregado = true;
+
+                    const formAdd = document.getElementById('cal-form-add');
+                    if (formAdd) formAdd.style.display = 'block';
+
+                    _calRenderPartidas();
+
+                    if (window.SuperModal) SuperModal.toast.success(data.message);
+                } catch (err) {
+                    if (window.SuperModal) SuperModal.toast.error('Erro ao importar: ' + err.message);
+                    else alert('Erro ao importar: ' + err.message);
+                } finally {
+                    if (btn) { btn.disabled = false; btn.innerHTML = '<span class="material-icons">cloud_download</span> Importar da API'; }
+                }
+            }
+
             function bindCalendarioButtons() {
                 const btnCarregar = document.getElementById('btnCarregarCalendario');
                 if (btnCarregar && !btnCarregar._calBound) {
                     btnCarregar.addEventListener('click', carregarCalendario);
                     btnCarregar._calBound = true;
+                }
+
+                const btnImportar = document.getElementById('btnImportarAPI');
+                if (btnImportar && !btnImportar._calBound) {
+                    btnImportar.addEventListener('click', importarDaAPI);
+                    btnImportar._calBound = true;
                 }
 
                 const btnAdicionar = document.getElementById('btnAdicionarPartida');
