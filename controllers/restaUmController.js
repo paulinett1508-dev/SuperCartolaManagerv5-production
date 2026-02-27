@@ -392,13 +392,15 @@ export async function obterParciais(req, res) {
         }
 
         // ✅ Live Experience: buscar pontos da rodada atual da collection Rodada
+        // Para edicão 'pendente', usar rodadaInicial como fallback (1ª rodada em andamento)
+        const rodadaParaBuscar = edicao.rodadaAtual || edicao.rodadaInicial;
         let pontosLiveMap = new Map();
         let isLive = false;
 
-        if (edicao.rodadaAtual) {
+        if (rodadaParaBuscar) {
             const rodadasLive = await Rodada.find({
                 ligaId,
-                rodada: edicao.rodadaAtual,
+                rodada: rodadaParaBuscar,
                 temporada,
             }).lean();
 
@@ -439,6 +441,17 @@ export async function obterParciais(req, res) {
                 return (b.pontosAcumulados || 0) - (a.pontosAcumulados || 0);
             });
 
+        // Marcar os bottom N vivos como zonaRisco (projeção de eliminação ao vivo)
+        const n = edicao.eliminadosPorRodada || 1;
+        if (isLive && vivos.length > n) {
+            const zonaRiscoIds = new Set(
+                vivos.slice(-n).map(p => String(p.timeId))
+            );
+            vivos.forEach(p => {
+                p.zonaRisco = zonaRiscoIds.has(String(p.timeId));
+            });
+        }
+
         const eliminados = participantes
             .filter(p => p.status === 'eliminado')
             .sort((a, b) => (b.rodadaEliminacao || 0) - (a.rodadaEliminacao || 0));
@@ -453,7 +466,7 @@ export async function obterParciais(req, res) {
                 eliminadosPorRodada: edicao.eliminadosPorRodada,
             },
             participantes: [...vivos, ...eliminados],
-            rodadaAtual: edicao.rodadaAtual,
+            rodadaAtual: rodadaParaBuscar,
             ultimaAtualizacao: edicao.ultima_atualizacao,
         });
 

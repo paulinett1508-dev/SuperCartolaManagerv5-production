@@ -941,17 +941,20 @@ async function fetchRestaUm() {
         if (res.ok) {
             const data = await res.json();
             const participantes = data?.participantes || [];
-            const vivos = participantes.filter(p => p.status === 'vivo');
+            const vivos = participantes.filter(p => p.status === 'vivo' && !p.zonaRisco);
+            const zonaRisco = participantes.filter(p => p.status === 'vivo' && p.zonaRisco);
             const eliminados = participantes.filter(p => p.status === 'eliminado');
             WHState.data.restaUm = {
                 edicao: data.edicao,
                 vivos,
+                zonaRisco,
                 eliminados,
                 totalParticipantes: participantes.length,
                 rodadaAtual: data.rodadaAtual,
+                isLive: data.isLive || false,
                 parcial: data.parcial || false,
             };
-            if (window.Log) Log.info("[WHATS-HAPPENING] Resta Um:", vivos.length, "vivos,", eliminados.length, "eliminados");
+            if (window.Log) Log.info("[WHATS-HAPPENING] Resta Um:", vivos.length, "vivos,", zonaRisco.length, "em risco,", eliminados.length, "eliminados");
         }
     } catch (e) {
         // 404 = nenhuma edição ativa (normal)
@@ -1496,22 +1499,34 @@ function renderCardModulo(tipo) {
 /** Card: Resta Um — com nome participante + time */
 function renderCardRestaUm() {
     const data = WHState.data.restaUm;
-    if (!data || !data.vivos || data.vivos.length === 0) return null;
+    const totalVivosSeguro = (data?.vivos?.length || 0) + (data?.zonaRisco?.length || 0);
+    if (!data || totalVivosSeguro === 0) return null;
 
     const meuId = String(WHState.timeId);
-    const totalVivos = data.vivos.length;
+    const vivosSeguro = data.vivos.length;
+    const emRisco = data.zonaRisco?.length || 0;
     const totalEliminados = data.eliminados?.length || 0;
-    const total = data.totalParticipantes || (totalVivos + totalEliminados);
-    const pctVivos = total > 0 ? Math.round((totalVivos / total) * 100) : 0;
+    const total = data.totalParticipantes || (totalVivosSeguro + totalEliminados);
+    const pctVivos = total > 0 ? Math.round((totalVivosSeguro / total) * 100) : 0;
 
-    const meu = data.vivos.find(p => String(p.timeId) === meuId);
-    const isElim = !meu && data.eliminados?.find(p => String(p.timeId) === meuId);
+    const euVivo = data.vivos.find(p => String(p.timeId) === meuId);
+    const euEmRisco = data.zonaRisco?.find(p => String(p.timeId) === meuId);
+    const euEliminado = !euVivo && !euEmRisco && data.eliminados?.find(p => String(p.timeId) === meuId);
 
-    const statusText = meu
-        ? '<span style="color:var(--app-success)">Voce vivo!</span>'
-        : isElim
-            ? '<span style="color:var(--app-danger)">Voce foi eliminado</span>'
-            : `${totalVivos} sobreviventes`;
+    let statusText;
+    if (euEliminado) {
+        statusText = '<span style="color:var(--app-danger)">Voce foi eliminado</span>';
+    } else if (euEmRisco && data.isLive) {
+        statusText = '<span style="color:var(--app-warning)">Voce esta em risco!</span>';
+    } else if (euVivo) {
+        statusText = '<span style="color:var(--app-success)">Voce vivo!</span>';
+    } else {
+        statusText = `${totalVivosSeguro} sobreviventes`;
+    }
+
+    const riscoLabel = emRisco > 0 && data.isLive
+        ? `<span style="color:var(--app-warning);font-size:9px;font-weight:700">${emRisco} em risco</span>`
+        : '';
 
     return `
         <div class="wh-card wh-card--resta-um" data-modal="resta-um">
@@ -1521,11 +1536,11 @@ function renderCardRestaUm() {
                 </div>
                 <span class="wh-card-title">Resta Um</span>
             </div>
-            <div class="wh-card-metric">${totalVivos}/${total} <span style="font-size:var(--app-font-xs);color:var(--app-text-muted)">vivos</span></div>
+            <div class="wh-card-metric">${vivosSeguro}/${total} <span style="font-size:var(--app-font-xs);color:var(--app-text-muted)">vivos</span></div>
             <div class="wh-card-progress">
                 <div class="wh-card-progress-bar" style="width:${pctVivos}%"></div>
             </div>
-            <div class="wh-card-subtitle" style="font-size:9px;line-height:1.2">${statusText}</div>
+            <div class="wh-card-subtitle" style="font-size:9px;line-height:1.4">${statusText}${riscoLabel ? ' · ' + riscoLabel : ''}</div>
         </div>
     `;
 }
