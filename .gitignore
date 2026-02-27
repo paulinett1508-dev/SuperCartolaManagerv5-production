@@ -19,3 +19,6 @@ data/backups/
 
 # Google Service Account - NUNCA commitar
 credentials.json
+
+# Claude Code workspace config (debug, history, credentials locais)
+.claude_config/
