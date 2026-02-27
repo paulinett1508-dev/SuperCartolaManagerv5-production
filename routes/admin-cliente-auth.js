@@ -174,8 +174,10 @@ router.post("/login", async (req, res) => {
         }
 
         // Login bem sucedido - criar sessao
+        // ✅ FIX: Incluir _id para compatibilidade com middleware tenant
         req.session.admin = {
             id: admin._id.toString(),
+            _id: admin._id.toString(), // MongoDB _id para filtro de tenant
             email: admin.email,
             nome: admin.nome,
             foto: null,

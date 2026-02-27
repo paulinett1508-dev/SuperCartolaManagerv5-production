@@ -11,6 +11,7 @@
 import BaseManager from './BaseManager.js';
 import RestaUmCache from '../../../models/RestaUmCache.js';
 import Rodada from '../../../models/Rodada.js';
+import AjusteFinanceiro from '../../../models/AjusteFinanceiro.js';
 import { CURRENT_SEASON } from '../../../config/seasons.js';
 
 export default class RestaUmManager extends BaseManager {
@@ -125,6 +126,8 @@ export default class RestaUmManager extends BaseManager {
                 edicao.status = 'finalizada';
                 await edicao.save();
                 console.log(`[RESTA-UM] CAMPEÃO: ${vivos[0].nomeTime} (edição ${edicao.edicao})`);
+                await this._lancaCremiacao(edicao.liga_id, edicao.temporada, edicao)
+                    .catch(err => console.error('[RESTA-UM-FIN] Erro nos créditos:', err.message));
             }
             return { pronto: true, finalizada: true, campeao: vivos[0]?.nomeTime };
         }
@@ -227,6 +230,23 @@ export default class RestaUmManager extends BaseManager {
         edicao.ultima_atualizacao = new Date();
         await edicao.save();
 
+        // Fluxo financeiro: débitos para eliminados desta rodada
+        if (edicao.fluxoFinanceiroHabilitado && edicao.taxaEliminacao > 0) {
+            for (const el of eliminadosRodada) {
+                await this._lancarDebitoEliminacao(
+                    edicao.liga_id, edicao.temporada,
+                    el.timeId, el.nomeTime,
+                    edicao.taxaEliminacao, edicao.edicao, rodada,
+                ).catch(err => console.error('[RESTA-UM-FIN] Erro no débito:', err.message));
+            }
+        }
+
+        // Fluxo financeiro: créditos para premiados quando finalizar
+        if (edicao.status === 'finalizada') {
+            await this._lancaCremiacao(edicao.liga_id, edicao.temporada, edicao)
+                .catch(err => console.error('[RESTA-UM-FIN] Erro nos créditos:', err.message));
+        }
+
         console.log(`[RESTA-UM] R${rodada}: ${eliminadosRodada.length} eliminado(s), ${vivosAposEliminacao.length} vivos restantes`);
 
         return {
@@ -264,7 +284,90 @@ export default class RestaUmManager extends BaseManager {
     async onConsolidate(ctx) {
         console.log(`[RESTA-UM] Consolidando eliminação R${ctx.rodada}`);
         // Consolidação já é feita no onRoundFinalize
-        // Este hook pode ser usado para gerar lançamentos financeiros futuramente
         return { consolidado: true };
+    }
+
+    /**
+     * Cria débito idempotente para participante eliminado.
+     * Usa descricao única como chave de idempotência.
+     */
+    async _lancarDebitoEliminacao(ligaId, temporada, timeId, nomeTime, taxaEliminacao, edicaoNum, rodada) {
+        const descricao = `Resta Um E${edicaoNum} - Eliminado R${rodada}`;
+        const jaExiste = await AjusteFinanceiro.findOne({
+            liga_id: String(ligaId),
+            time_id: Number(timeId),
+            temporada: Number(temporada),
+            descricao,
+            ativo: true,
+        }).lean();
+
+        if (jaExiste) {
+            console.log(`[RESTA-UM-FIN] Débito já registrado: ${nomeTime} R${rodada} (idempotência)`);
+            return;
+        }
+
+        await AjusteFinanceiro.criar({
+            liga_id: String(ligaId),
+            time_id: timeId,
+            temporada,
+            descricao,
+            valor: -Math.abs(taxaEliminacao), // débito = negativo
+            criado_por: 'RestaUmManager',
+        });
+        console.log(`[RESTA-UM-FIN] Débito criado: ${nomeTime} -R$${taxaEliminacao} (R${rodada})`);
+    }
+
+    /**
+     * Cria créditos para campeão / vice / terceiro ao finalizar.
+     */
+    async _lancaCremiacao(ligaId, temporada, edicao) {
+        if (!edicao.fluxoFinanceiroHabilitado) return;
+
+        const prem = edicao.premiacao || {};
+        const campeao = edicao.participantes.find(p => p.status === 'campeao');
+
+        // Ordenar eliminados por rodadaEliminacao DESC → os últimos eliminados são vice/terceiro
+        const eliminadosOrdenados = edicao.participantes
+            .filter(p => p.status === 'eliminado')
+            .sort((a, b) => (b.rodadaEliminacao || 0) - (a.rodadaEliminacao || 0));
+
+        const premiados = [];
+        if (campeao) {
+            premiados.push({ p: campeao, valor: prem.campeao || 0, label: 'Campeao' });
+        }
+        if (prem.viceHabilitado !== false && eliminadosOrdenados[0]) {
+            premiados.push({ p: eliminadosOrdenados[0], valor: prem.vice || 0, label: 'Vice' });
+        }
+        if (prem.terceiroHabilitado !== false && eliminadosOrdenados[1]) {
+            premiados.push({ p: eliminadosOrdenados[1], valor: prem.terceiro || 0, label: '3o Lugar' });
+        }
+
+        for (const { p, valor, label } of premiados) {
+            if (!valor || valor <= 0) continue;
+
+            const descricao = `Resta Um E${edicao.edicao} - ${label}`;
+            const jaExiste = await AjusteFinanceiro.findOne({
+                liga_id: String(ligaId),
+                time_id: Number(p.timeId),
+                temporada: Number(temporada),
+                descricao,
+                ativo: true,
+            }).lean();
+
+            if (jaExiste) {
+                console.log(`[RESTA-UM-FIN] Crédito já registrado: ${p.nomeTime} ${label} (idempotência)`);
+                continue;
+            }
+
+            await AjusteFinanceiro.criar({
+                liga_id: String(ligaId),
+                time_id: p.timeId,
+                temporada,
+                descricao,
+                valor: Math.abs(valor), // crédito = positivo
+                criado_por: 'RestaUmManager',
+            });
+            console.log(`[RESTA-UM-FIN] Crédito criado: ${p.nomeTime} +R$${valor} (${label})`);
+        }
     }
 }

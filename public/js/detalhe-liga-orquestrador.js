@@ -413,29 +413,39 @@ class DetalheLigaOrquestrador {
 
                 case "resta-um": {
                     console.log('[ORQUESTRADOR] Iniciando resta-um...');
-                    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
                     try {
-                        if (!this.modules.restaUm) {
-                            await import("./admin/modules/admin-resta-um.js");
-                            this.modules.restaUm = true;
+                        const ligaId = window.obterLigaIdCache?.() || obterLigaIdCache?.();
+                        console.log('[ORQUESTRADOR] resta-um ligaId:', ligaId);
+                        if (!ligaId) {
+                            console.warn('[ORQUESTRADOR] ligaId não encontrado para resta-um');
+                            break;
                         }
-                        // Injetar ligaId do contexto e carregar direto
-                        if (window.adminRestaUm) {
-                            const ligaId = obterLigaIdCache();
-                            if (ligaId) {
-                                // Carregar ligas para sugestão de rodadas funcionar
-                                await window.adminRestaUm.carregarLigas();
-                                window.adminRestaUm.ligaId = ligaId;
-                                await window.adminRestaUm.carregarDashboard();
-                            } else {
-                                await window.adminRestaUm.init();
-                            }
+
+                        // Destruir instância anterior se existir (evita polling duplicado)
+                        if (this.modules.restaUm?.destroy) {
+                            this.modules.restaUm.destroy();
+                        }
+
+                        // Limpar referência anterior e forçar re-import da versão atual
+                        delete window.RestaUmModule;
+                        console.log('[ORQUESTRADOR] Importando resta-um-orquestrador.js...');
+                        await import('../participante/js/orquestradores/resta-um-orquestrador.js?v=3.0');
+                        console.log('[ORQUESTRADOR] Import concluído. RestaUmModule:', typeof window.RestaUmModule);
+
+                        if (window.RestaUmModule) {
+                            const container = document.getElementById('restaUmDados');
+                            console.log('[ORQUESTRADOR] Container restaUmDados:', !!container);
+                            const restaUm = new window.RestaUmModule();
+                            this.modules.restaUm = restaUm;
+                            await restaUm.init(ligaId, container);
+                        } else {
+                            console.error('[ORQUESTRADOR] window.RestaUmModule não definido após import');
                         }
                     } catch (error) {
                         console.error("[ORQUESTRADOR] Erro resta-um:", error);
-                        const ruContainer = document.getElementById("ruAdminContent");
-                        if (ruContainer) {
-                            ruContainer.innerHTML = `
+                        const container = document.getElementById('restaUmDados');
+                        if (container) {
+                            container.innerHTML = `
                                 <div style="padding: 20px; text-align: center; color: rgba(255,255,255,0.6);">
                                     <p><span class="material-icons" style="vertical-align: middle; color: #f43f5e;">warning</span> Erro ao carregar Resta Um</p>
                                     <p style="font-size: 12px;">${error.message}</p>
@@ -508,7 +518,7 @@ class DetalheLigaOrquestrador {
             "fluxo-financeiro": `<div id="fluxo-financeiro-content"><div class="loading-state">Carregando fluxo financeiro...</div></div>`,
             participantes: `<div id="participantes-content"><div class="loading-state">Carregando participantes...</div></div>`,
             "capitao-luxo": `<div id="capitao-luxo-content"><div class="capitao-luxo-loading"><div class="spinner"></div><p>Carregando Capitão de Luxo...</p></div></div>`,
-            "resta-um": `<div class="ru-admin-container" id="ru-admin-container"><div id="ruAdminContent"><div style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);"><div class="spinner"></div><p>Carregando Resta Um...</p></div></div></div>`,
+            "resta-um": `<div class="ru-admin-container" id="ru-admin-container"><div id="restaUmDados"><div style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);"><div class="spinner"></div><p>Carregando Resta Um...</p></div></div></div>`,
             regras: `<div id="regras-admin-container"><div style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">Carregando regras...</div></div>`,
         };
 

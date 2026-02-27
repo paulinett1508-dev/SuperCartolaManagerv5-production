@@ -13,6 +13,16 @@
  * @version 2.0.0
  */
 
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 class AdminRestaUm {
     constructor() {
         this.ligaId = null;
@@ -270,6 +280,37 @@ class AdminRestaUm {
         }
     }
 
+    atualizarTaxaPreview() {
+        const fluxoEl = document.getElementById('ruFluxoHabilitado');
+        const previewRow = document.getElementById('ruTaxaPreviewRow');
+        if (!previewRow) return;
+
+        if (!fluxoEl?.checked) {
+            previewRow.style.display = 'none';
+            return;
+        }
+        previewRow.style.display = '';
+
+        const liga = this.ligas.find(l => l._id === this.ligaId);
+        const totalPart = (liga?.participantes || liga?.times || []).filter(t => t.ativo !== false).length;
+
+        const campeao = parseFloat(document.getElementById('ruPremiacaoCampeao')?.value) || 0;
+        const viceHab = document.getElementById('ruViceHabilitado')?.checked !== false;
+        const vice = viceHab ? (parseFloat(document.getElementById('ruPremiacaoVice')?.value) || 0) : 0;
+        const terceiroHab = document.getElementById('ruTerceiroHabilitado')?.checked !== false;
+        const terceiro = terceiroHab ? (parseFloat(document.getElementById('ruPremiacaoTerceiro')?.value) || 0) : 0;
+
+        const numGanhadores = 2 + (terceiroHab ? 1 : 0);
+        const pool = campeao + vice + terceiro;
+        const payers = totalPart - numGanhadores;
+        const taxa = payers > 0 ? Math.trunc(pool / payers * 100) / 100 : 0;
+
+        const valorEl = document.getElementById('ruTaxaPreviewValor');
+        const detalheEl = document.getElementById('ruTaxaPreviewDetalhe');
+        if (valorEl) valorEl.textContent = `R$ ${taxa.toFixed(2).replace('.', ',')}`;
+        if (detalheEl) detalheEl.textContent = `(pool R$ ${pool.toFixed(0)} ÷ ${payers} pagadores)`;
+    }
+
     // ==========================================================================
     // DASHBOARD PRINCIPAL
     // ==========================================================================
@@ -399,25 +440,28 @@ class AdminRestaUm {
                 <div class="ru-form-row">
                     <div>
                         <label>Campeao</label>
-                        <input type="number" id="ruPremiacaoCampeao" value="100" min="0" step="10">
+                        <input type="number" id="ruPremiacaoCampeao" value="100" min="0" step="10"
+                               oninput="window.adminRestaUm.atualizarTaxaPreview()">
                     </div>
                     <div>
                         <label style="display:flex;align-items:center;gap:6px;">
                             <input type="checkbox" id="ruViceHabilitado" checked
-                                   onchange="window.adminRestaUm.onToggleVice()"
+                                   onchange="window.adminRestaUm.onToggleVice(); window.adminRestaUm.atualizarTaxaPreview();"
                                    style="width:auto;margin:0;">
                             Vice
                         </label>
-                        <input type="number" id="ruPremiacaoVice" value="50" min="0" step="10">
+                        <input type="number" id="ruPremiacaoVice" value="50" min="0" step="10"
+                               oninput="window.adminRestaUm.atualizarTaxaPreview()">
                     </div>
                     <div>
                         <label style="display:flex;align-items:center;gap:6px;">
                             <input type="checkbox" id="ruTerceiroHabilitado" checked
-                                   onchange="window.adminRestaUm.onToggleTerceiro()"
+                                   onchange="window.adminRestaUm.onToggleTerceiro(); window.adminRestaUm.atualizarTaxaPreview();"
                                    style="width:auto;margin:0;">
                             Terceiro
                         </label>
-                        <input type="number" id="ruPremiacaoTerceiro" value="25" min="0" step="5">
+                        <input type="number" id="ruPremiacaoTerceiro" value="25" min="0" step="5"
+                               oninput="window.adminRestaUm.atualizarTaxaPreview()">
                     </div>
                 </div>
 
@@ -435,6 +479,20 @@ class AdminRestaUm {
                         <label>Incremento (R$)</label>
                         <input type="number" id="ruBonusIncremento" value="0.5" min="0" step="0.1">
                     </div>
+                </div>
+
+                <div class="ru-form-section">Fluxo Financeiro Automatico</div>
+                <div class="ru-form-row">
+                    <div class="ru-form-checkbox">
+                        <input type="checkbox" id="ruFluxoHabilitado"
+                               onchange="window.adminRestaUm.atualizarTaxaPreview()">
+                        <span>Lancar debitos/creditos automaticamente ao eliminar</span>
+                    </div>
+                </div>
+                <div id="ruTaxaPreviewRow" style="display:none;font-size:var(--app-font-sm);color:var(--app-text-muted);margin-top:var(--app-space-1);padding:var(--app-space-2) var(--app-space-3);background:var(--module-restaum-muted);border-radius:var(--app-radius-md);">
+                    <span class="material-icons" style="font-size:14px;vertical-align:middle;color:var(--module-restaum-primary);">calculate</span>
+                    Taxa por eliminado: <strong id="ruTaxaPreviewValor" style="color:var(--app-text-primary);">R$ 0,00</strong>
+                    <span id="ruTaxaPreviewDetalhe" style="color:var(--app-text-muted);margin-left:4px;"></span>
                 </div>
 
                 <!-- Botoes contextuais -->
@@ -706,6 +764,10 @@ class AdminRestaUm {
         setVal('ruBonusValorBase', ed.bonusSobrevivencia?.valorBase || 2);
         setVal('ruBonusIncremento', ed.bonusSobrevivencia?.incremento || 0.5);
 
+        // Fluxo financeiro
+        setChecked('ruFluxoHabilitado', ed.fluxoFinanceiroHabilitado || false);
+        this.atualizarTaxaPreview();
+
         // Desabilitar campos que nao podem ser editados
         const edNumInput = document.getElementById('ruNovaEdicao');
         const rodIniInput = document.getElementById('ruRodadaInicial');
@@ -764,6 +826,8 @@ class AdminRestaUm {
         setChecked('ruBonusHabilitado', true);
         setVal('ruBonusValorBase', 2);
         setVal('ruBonusIncremento', 0.5);
+        setChecked('ruFluxoHabilitado', false);
+        this.atualizarTaxaPreview();
 
         // Reabilitar campos
         ['ruNovaEdicao', 'ruRodadaInicial', 'ruEliminadosPorRodada', 'ruProtecao'].forEach(id => {
@@ -805,6 +869,7 @@ class AdminRestaUm {
                 valorBase: parseFloat(document.getElementById('ruBonusValorBase')?.value) || 2,
                 incremento: parseFloat(document.getElementById('ruBonusIncremento')?.value) || 0.5,
             },
+            fluxoFinanceiroHabilitado: document.getElementById('ruFluxoHabilitado')?.checked || false,
         };
 
         try {
@@ -909,6 +974,7 @@ class AdminRestaUm {
                         terceiroHabilitado,
                     },
                     bonusSobrevivencia: { habilitado: bonusHabilitado, valorBase: bonusValorBase, incremento: bonusIncremento },
+                    fluxoFinanceiroHabilitado: document.getElementById('ruFluxoHabilitado')?.checked || false,
                 }),
             });
 

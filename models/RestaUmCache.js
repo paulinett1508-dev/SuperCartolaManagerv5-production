@@ -78,6 +78,10 @@ const RestaUmCacheSchema = new mongoose.Schema({
         incremento: { type: Number, default: 0.5 },
     },
 
+    // Fluxo financeiro automático
+    fluxoFinanceiroHabilitado: { type: Boolean, default: false },
+    taxaEliminacao: { type: Number, default: 0 }, // pré-calculado na criação
+
     ultima_atualizacao: { type: Date, default: Date.now },
 }, {
     timestamps: true,

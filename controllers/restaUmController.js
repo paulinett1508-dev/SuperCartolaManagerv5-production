@@ -12,6 +12,29 @@ import Liga from '../models/Liga.js';
 import { CURRENT_SEASON } from '../config/seasons.js';
 import logger from '../utils/logger.js';
 import { truncarPontosNum } from '../utils/type-helpers.js';
+import { buscarRankingParcial } from '../services/parciaisRankingService.js';
+
+/**
+ * Monta pontosLiveMap a partir do parciaisRankingService (fallback quando
+ * a collection Rodada ainda não tem dados da rodada em andamento).
+ * Retorna { pontosLiveMap: Map<String, number>, isLive: boolean }
+ */
+async function _buscarPontosViaParciais(ligaId) {
+    try {
+        const parciais = await buscarRankingParcial(ligaId);
+        if (!parciais?.disponivel || !parciais.ranking?.length) {
+            return { pontosLiveMap: new Map(), isLive: false };
+        }
+        const map = new Map();
+        parciais.ranking.forEach(r => {
+            map.set(String(r.timeId), r.pontos_rodada_atual || 0);
+        });
+        return { pontosLiveMap: map, isLive: true };
+    } catch (err) {
+        logger.warn('[RESTA-UM] Fallback parciais falhou:', err.message);
+        return { pontosLiveMap: new Map(), isLive: false };
+    }
+}
 
 /**
  * GET /:ligaId/status
@@ -59,6 +82,14 @@ export async function obterStatus(req, res) {
                         rodadasLive.forEach(r => {
                             pontosLiveMap.set(String(r.timeId), r.pontos || 0);
                         });
+                    } else {
+                        // Rodada em andamento mas ainda não consolidada → fallback parciais
+                        const fb = await _buscarPontosViaParciais(ligaId);
+                        if (fb.isLive) {
+                            isLive = true;
+                            rodadaAtualProvisoria = pendente.rodadaInicial;
+                            pontosLiveMap = fb.pontosLiveMap;
+                        }
                     }
                 }
 
@@ -126,6 +157,13 @@ export async function obterStatus(req, res) {
                 rodadasLive.forEach(r => {
                     pontosLiveMap.set(String(r.timeId), r.pontos || 0);
                 });
+            } else {
+                // Rodada em andamento mas ainda não consolidada → fallback parciais
+                const fb = await _buscarPontosViaParciais(ligaId);
+                if (fb.isLive) {
+                    isLive = true;
+                    pontosLiveMap = fb.pontosLiveMap;
+                }
             }
         }
 
@@ -200,6 +238,7 @@ export async function iniciarEdicao(req, res) {
             protecaoPrimeiraRodada = false,
             premiacao = {},
             bonusSobrevivencia = {},
+            fluxoFinanceiroHabilitado = false,
         } = req.body;
 
         // Validar liga
@@ -243,6 +282,21 @@ export async function iniciarEdicao(req, res) {
             vezesNaZona: 0,
         }));
 
+        // Calcular taxa de eliminação (pool ÷ pagadores, truncado)
+        const premiacaoFinal = {
+            campeao: premiacao.campeao || 100,
+            vice: premiacao.vice || 50,
+            viceHabilitado: premiacao.viceHabilitado !== false,
+            terceiro: premiacao.terceiro || 25,
+            terceiroHabilitado: premiacao.terceiroHabilitado !== false,
+        };
+        const numGanhadores = 2 + (premiacaoFinal.terceiroHabilitado ? 1 : 0);
+        const pool = premiacaoFinal.campeao
+            + (premiacaoFinal.viceHabilitado ? premiacaoFinal.vice : 0)
+            + (premiacaoFinal.terceiroHabilitado ? premiacaoFinal.terceiro : 0);
+        const payers = participantesAtivos.length - numGanhadores;
+        const taxaEliminacao = payers > 0 ? Math.trunc(pool / payers * 100) / 100 : 0;
+
         // Criar edição
         const novaEdicao = await RestaUmCache.create({
             liga_id: ligaId,
@@ -255,18 +309,14 @@ export async function iniciarEdicao(req, res) {
             protecaoPrimeiraRodada,
             status: 'pendente',
             participantes: participantesRestaUm,
-            premiacao: {
-                campeao: premiacao.campeao || 100,
-                vice: premiacao.vice || 50,
-                viceHabilitado: premiacao.viceHabilitado !== false,
-                terceiro: premiacao.terceiro || 25,
-                terceiroHabilitado: premiacao.terceiroHabilitado !== false,
-            },
+            premiacao: premiacaoFinal,
             bonusSobrevivencia: {
                 habilitado: bonusSobrevivencia.habilitado !== false,
                 valorBase: bonusSobrevivencia.valorBase || 2,
                 incremento: bonusSobrevivencia.incremento || 0.5,
             },
+            fluxoFinanceiroHabilitado: Boolean(fluxoFinanceiroHabilitado),
+            taxaEliminacao,
         });
 
         logger.log(`[RESTA-UM] Edição ${edicao} criada para liga ${ligaId} com ${participantesRestaUm.length} participantes`);
@@ -311,6 +361,8 @@ export async function listarEdicoes(req, res) {
             rodadaAtual: e.rodadaAtual,
             premiacao: e.premiacao || {},
             bonusSobrevivencia: e.bonusSobrevivencia || {},
+            fluxoFinanceiroHabilitado: e.fluxoFinanceiroHabilitado || false,
+            taxaEliminacao: e.taxaEliminacao || 0,
         })));
 
     } catch (error) {
@@ -355,6 +407,13 @@ export async function obterParciais(req, res) {
                 rodadasLive.forEach(r => {
                     pontosLiveMap.set(String(r.timeId), r.pontos || 0);
                 });
+            } else {
+                // Rodada em andamento mas ainda não consolidada → fallback parciais
+                const fb = await _buscarPontosViaParciais(ligaId);
+                if (fb.isLive) {
+                    isLive = true;
+                    pontosLiveMap = fb.pontosLiveMap;
+                }
             }
         }
 
@@ -432,7 +491,7 @@ export async function editarEdicao(req, res) {
             return res.status(400).json({ error: 'Edição finalizada não pode ser editada' });
         }
 
-        const { premiacao, bonusSobrevivencia, rodadaFinal, eliminadosPorRodada, protecaoPrimeiraRodada } = req.body;
+        const { premiacao, bonusSobrevivencia, rodadaFinal, eliminadosPorRodada, protecaoPrimeiraRodada, fluxoFinanceiroHabilitado } = req.body;
         const isPendente = edicao.status === 'pendente';
 
         // Campos editáveis sempre (pendente e em_andamento)
@@ -458,6 +517,22 @@ export async function editarEdicao(req, res) {
         if (isPendente) {
             if (eliminadosPorRodada !== undefined) edicao.eliminadosPorRodada = eliminadosPorRodada;
             if (protecaoPrimeiraRodada !== undefined) edicao.protecaoPrimeiraRodada = protecaoPrimeiraRodada;
+        }
+
+        // Fluxo financeiro
+        if (fluxoFinanceiroHabilitado !== undefined) {
+            edicao.fluxoFinanceiroHabilitado = Boolean(fluxoFinanceiroHabilitado);
+        }
+
+        // Recalcular taxa se premiação ou fluxo mudaram
+        if (premiacao !== undefined || fluxoFinanceiroHabilitado !== undefined) {
+            const p = edicao.premiacao;
+            const numGanhadores = 2 + (p.terceiroHabilitado ? 1 : 0);
+            const pool = p.campeao
+                + (p.viceHabilitado ? p.vice : 0)
+                + (p.terceiroHabilitado ? p.terceiro : 0);
+            const payers = (edicao.participantes || []).length - numGanhadores;
+            edicao.taxaEliminacao = payers > 0 ? Math.trunc(pool / payers * 100) / 100 : 0;
         }
 
         edicao.ultima_atualizacao = new Date();

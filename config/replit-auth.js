@@ -89,8 +89,25 @@ const verify = async (tokens, done) => {
     const isSuperAdminUser = checkSuperAdmin(email);
     console.log("[REPLIT-AUTH] 👑 SuperAdmin:", isSuperAdminUser);
 
+    // ✅ FIX: Buscar MongoDB _id do admin para usar no filtro de tenant
+    // O claims.sub é o ID do Replit, não o _id do MongoDB
+    let mongoAdminId = null;
+    try {
+      const adminDoc = await db.collection("admins").findOne(
+        { email: email },
+        { projection: { _id: 1 } }
+      );
+      if (adminDoc?._id) {
+        mongoAdminId = adminDoc._id.toString();
+        console.log("[REPLIT-AUTH] 🔗 MongoDB admin_id encontrado:", mongoAdminId);
+      }
+    } catch (dbErr) {
+      console.warn("[REPLIT-AUTH] ⚠️ Erro ao buscar MongoDB admin_id:", dbErr.message);
+    }
+
     const user = {
       id: claims.sub,
+      _id: mongoAdminId, // ✅ MongoDB _id para filtro de tenant
       email: email,
       nome: claims.first_name || email?.split("@")[0] || "Admin",
       foto: claims.profile_image_url,
