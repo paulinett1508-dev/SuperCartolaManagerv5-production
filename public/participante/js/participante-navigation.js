@@ -387,6 +387,7 @@ class ParticipanteNavigation {
                         artilheiro: this.modulosAtivos?.artilheiro || false,
                         luvaOuro: this.modulosAtivos?.luvaOuro || false,
                         capitaoLuxo: this.modulosAtivos?.capitaoLuxo || false,
+                        restaUm: this.modulosAtivos?.restaUm || false,
                     }
                 });
                 if (window.Log) Log.info('PARTICIPANTE-NAV', '🔥 Widget "O que tá rolando?" inicializado');
