@@ -9,10 +9,31 @@
 import RestaUmCache from '../models/RestaUmCache.js';
 import Rodada from '../models/Rodada.js';
 import Liga from '../models/Liga.js';
+import OrchestratorState from '../models/OrchestratorState.js';
 import { CURRENT_SEASON } from '../config/seasons.js';
 import logger from '../utils/logger.js';
 import { truncarPontosNum } from '../utils/type-helpers.js';
 import { buscarRankingParcial } from '../services/parciaisRankingService.js';
+
+/**
+ * Verifica se uma rodada está realmente ao vivo usando orchestrator_states.
+ * status_mercado == 2 (fechado) = jogos acontecendo agora.
+ * Evita chamar API externa na maioria dos casos.
+ * Retorna { rodadaLive: number|null, isLive: boolean }
+ */
+async function _verificarRodadaAoVivo(rodadaEsperada) {
+    try {
+        const state = await OrchestratorState.findOne({ chave: 'round_market_orchestrator' })
+            .select('status_mercado rodada_atual')
+            .lean();
+        if (!state) return { rodadaLive: null, isLive: false };
+        const isLive = state.status_mercado === 2 && state.rodada_atual === rodadaEsperada;
+        return { rodadaLive: state.rodada_atual, isLive };
+    } catch (err) {
+        logger.warn('[RESTA-UM] Não foi possível verificar estado do mercado:', err.message);
+        return { rodadaLive: null, isLive: false };
+    }
+}
 
 /**
  * Monta pontosLiveMap a partir do parciaisRankingService (fallback quando
@@ -141,50 +162,33 @@ export async function obterStatus(req, res) {
             return res.status(404).json({ error: 'Nenhuma edição encontrada' });
         }
 
-        // ✅ Live Experience: buscar pontos da rodada atual da collection Rodada
+        // ✅ Live Experience: detectar se rodada está ao vivo via orchestrator_states
+        // isLive = true SOMENTE se status_mercado==2 (jogos acontecendo) e rodada bate
         let pontosLiveMap = new Map();
         let isLive = false;
+        const rodadaRef = edicao.rodadaAtual || edicao.rodadaInicial;
 
-        if (edicao.status === 'pendente' && edicao.rodadaInicial) {
-            // Edição pendente encontrada diretamente (ex: admin com ?edicao=N durante R1)
-            // Buscar dados ao vivo da rodadaInicial — mesmo fluxo do fallback pendente
-            const rodadasLive = await Rodada.find({
-                ligaId,
-                rodada: edicao.rodadaInicial,
-                temporada,
-            }).lean();
+        if (rodadaRef && (edicao.status === 'em_andamento' || edicao.status === 'pendente')) {
+            const { isLive: mercadoLive } = await _verificarRodadaAoVivo(rodadaRef);
 
-            if (rodadasLive.length > 0) {
-                isLive = true;
-                rodadasLive.forEach(r => {
-                    pontosLiveMap.set(String(r.timeId), r.pontos || 0);
-                });
-            } else {
-                const fb = await _buscarPontosViaParciais(ligaId);
-                if (fb.isLive) {
+            if (mercadoLive) {
+                // Rodada realmente ao vivo: preferir Rodada collection (já populada pelo orchestrator)
+                const rodadasLive = await Rodada.find({ ligaId, rodada: rodadaRef, temporada }).lean();
+                if (rodadasLive.length > 0) {
                     isLive = true;
-                    pontosLiveMap = fb.pontosLiveMap;
+                    rodadasLive.forEach(r => pontosLiveMap.set(String(r.timeId), r.pontos || 0));
+                } else {
+                    // Ainda sem dados consolidados → fallback parciais (primeiros minutos da rodada)
+                    const fb = await _buscarPontosViaParciais(ligaId);
+                    if (fb.isLive) {
+                        isLive = true;
+                        pontosLiveMap = fb.pontosLiveMap;
+                    }
                 }
-            }
-        } else if (edicao.status === 'em_andamento' && edicao.rodadaAtual) {
-            const rodadasLive = await Rodada.find({
-                ligaId,
-                rodada: edicao.rodadaAtual,
-                temporada,
-            }).lean();
-
-            if (rodadasLive.length > 0) {
-                isLive = true;
-                rodadasLive.forEach(r => {
-                    pontosLiveMap.set(String(r.timeId), r.pontos || 0);
-                });
             } else {
-                // Rodada em andamento mas ainda não consolidada → fallback parciais
-                const fb = await _buscarPontosViaParciais(ligaId);
-                if (fb.isLive) {
-                    isLive = true;
-                    pontosLiveMap = fb.pontosLiveMap;
-                }
+                // Rodada consolidada: carregar pontos históricos para exibição (isLive permanece false)
+                const rodadasHist = await Rodada.find({ ligaId, rodada: rodadaRef, temporada }).lean();
+                rodadasHist.forEach(r => pontosLiveMap.set(String(r.timeId), r.pontos || 0));
             }
         }
 
@@ -412,33 +416,31 @@ export async function obterParciais(req, res) {
             return res.status(404).json({ error: 'Nenhuma edição em andamento' });
         }
 
-        // ✅ Live Experience: buscar pontos da rodada atual da collection Rodada
-        // Para edição pendente sem rodadaAtual, usa rodadaInicial para buscar dados consolidados
-        // Nunca chama API externa (Cartola) para edição pendente — evita timeout
+        // ✅ Live Experience: detectar ao vivo via orchestrator_states, depois buscar pontos
         const rodadaParaBuscar = edicao.rodadaAtual || edicao.rodadaInicial;
         let pontosLiveMap = new Map();
         let isLive = false;
 
         if (rodadaParaBuscar) {
-            const rodadasLive = await Rodada.find({
-                ligaId,
-                rodada: rodadaParaBuscar,
-                temporada,
-            }).lean();
+            const { isLive: mercadoLive } = await _verificarRodadaAoVivo(rodadaParaBuscar);
 
-            if (rodadasLive.length > 0) {
-                isLive = true;
-                rodadasLive.forEach(r => {
-                    pontosLiveMap.set(String(r.timeId), r.pontos || 0);
-                });
-            } else if (edicao.rodadaAtual) {
-                // Só busca parciais ao vivo se rodadaAtual existir (rodada realmente em andamento)
-                // Não chamar para edição pendente (rodadaInicial) — API lenta causaria timeout
-                const fb = await _buscarPontosViaParciais(ligaId);
-                if (fb.isLive) {
+            if (mercadoLive) {
+                // Ao vivo: preferir Rodada collection; fallback parciais se ainda sem dados
+                const rodadasLive = await Rodada.find({ ligaId, rodada: rodadaParaBuscar, temporada }).lean();
+                if (rodadasLive.length > 0) {
                     isLive = true;
-                    pontosLiveMap = fb.pontosLiveMap;
+                    rodadasLive.forEach(r => pontosLiveMap.set(String(r.timeId), r.pontos || 0));
+                } else if (edicao.rodadaAtual) {
+                    const fb = await _buscarPontosViaParciais(ligaId);
+                    if (fb.isLive) {
+                        isLive = true;
+                        pontosLiveMap = fb.pontosLiveMap;
+                    }
                 }
+            } else {
+                // Não ao vivo: carregar pontos históricos para exibição (isLive=false)
+                const rodadasHist = await Rodada.find({ ligaId, rodada: rodadaParaBuscar, temporada }).lean();
+                rodadasHist.forEach(r => pontosLiveMap.set(String(r.timeId), r.pontos || 0));
             }
         }
 
