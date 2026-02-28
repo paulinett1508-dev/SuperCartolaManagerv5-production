@@ -50,34 +50,6 @@
     "transmissao": []
   },
   {
-    "id": 349611,
-    "mandante": "Equador",
-    "visitante": "Paraguai",
-    "logoMandante": "https://s.sde.globo.com/media/organizations/2019/07/15/Equador-30.png",
-    "logoVisitante": "https://s.sde.globo.com/media/organizations/2019/07/15/Paraguai-30.png",
-    "golsMandante": 0,
-    "golsVisitante": 0,
-    "placar": "0 x 0",
-    "placarHT": null,
-    "tempo": "",
-    "tempoExtra": null,
-    "status": "Ao vivo",
-    "statusRaw": "LIVE",
-    "liga": "Sul-Americano Feminino Sub-20",
-    "ligaId": null,
-    "ligaOriginal": "Sul-Americano Feminino Sub-20",
-    "ligaLogo": null,
-    "estadio": "Carfem",
-    "cidade": null,
-    "horario": "18:00",
-    "timestamp": 1772312400000,
-    "fonte": "globo",
-    "transmissao": [
-      "sportv",
-      "globoplay"
-    ]
-  },
-  {
     "id": 345987,
     "mandante": "Grêmio Prudente",
     "visitante": "Ferroviária",
@@ -1979,5 +1951,33 @@
     "timestamp": 1772312400000,
     "fonte": "globo",
     "transmissao": []
+  },
+  {
+    "id": 349611,
+    "mandante": "Equador",
+    "visitante": "Paraguai",
+    "logoMandante": "https://s.sde.globo.com/media/organizations/2019/07/15/Equador-30.png",
+    "logoVisitante": "https://s.sde.globo.com/media/organizations/2019/07/15/Paraguai-30.png",
+    "golsMandante": 5,
+    "golsVisitante": 1,
+    "placar": "5 x 1",
+    "placarHT": null,
+    "tempo": "",
+    "tempoExtra": null,
+    "status": "Encerrado",
+    "statusRaw": "FT",
+    "liga": "Sul-Americano Feminino Sub-20",
+    "ligaId": null,
+    "ligaOriginal": "Sul-Americano Feminino Sub-20",
+    "ligaLogo": null,
+    "estadio": "Carfem",
+    "cidade": null,
+    "horario": "18:00",
+    "timestamp": 1772312400000,
+    "fonte": "globo",
+    "transmissao": [
+      "sportv",
+      "globoplay"
+    ]
   }
 ]
