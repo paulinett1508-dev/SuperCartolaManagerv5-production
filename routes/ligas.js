@@ -721,19 +721,24 @@ router.post("/:id/melhor-mes/reconsolidar", verificarAdmin, async (req, res) => 
     const melhorMesService = (await import("../services/melhorMesService.js"))
       .default;
     const Rodada = (await import("../models/Rodada.js")).default;
+    const { CURRENT_SEASON } = await import("../config/seasons.js");
 
-    // Buscar rodada atual
-    const ultimaRodada = await Rodada.findOne({ ligaId })
+    // ✅ v11.0: Respeitar temporada do body (evitar colisão 2025/2026)
+    const temporada = Number(req.body?.temporada) || CURRENT_SEASON;
+
+    // ✅ v11.0: Buscar rodada filtrada pela temporada correta
+    const ultimaRodada = await Rodada.findOne({ ligaId, temporada })
       .sort({ rodada: -1 })
       .select("rodada")
       .lean();
 
     const rodadaAtual = ultimaRodada?.rodada || 0;
 
-    // Forçar reconsolidação
+    // ✅ v11.0: Passar temporada para forcarReconsolidacao
     const dados = await melhorMesService.forcarReconsolidacao(
       ligaId,
       rodadaAtual,
+      temporada,
     );
 
     res.json({
@@ -756,8 +761,11 @@ router.delete("/:id/melhor-mes/cache", verificarAdmin, async (req, res) => {
   try {
     const melhorMesService = (await import("../services/melhorMesService.js"))
       .default;
+    const { CURRENT_SEASON } = await import("../config/seasons.js");
 
-    const resultado = await melhorMesService.invalidarCache(ligaId);
+    // ✅ v11.0: Passar temporada para não deletar cache de outra temporada
+    const temporada = Number(req.query?.temporada) || CURRENT_SEASON;
+    const resultado = await melhorMesService.invalidarCache(ligaId, temporada);
 
     res.json({
       sucesso: true,

@@ -437,53 +437,64 @@ function formatarResposta(cache) {
 
 /**
  * Força reconsolidação de uma liga (ignora cache)
+ * ✅ v11.0: Aceita temporada para evitar colisão 2025/2026
+ *           Reseta TODAS as edições (inclusive consolidadas) para refletir nova config
  */
-export async function forcarReconsolidacao(ligaId, rodadaAtual) {
-    console.log(`${LOG_PREFIX} ⚠️ Forçando reconsolidação para liga ${ligaId}`);
+export async function forcarReconsolidacao(ligaId, rodadaAtual, temporada = null) {
+    const { CURRENT_SEASON } = await import("../config/seasons.js");
+    const temporadaFiltro = temporada || CURRENT_SEASON;
+
+    console.log(`${LOG_PREFIX} ⚠️ Forçando reconsolidação para liga ${ligaId} (temporada ${temporadaFiltro})`);
 
     const ligaObjectId =
         typeof ligaId === "string"
             ? new mongoose.Types.ObjectId(ligaId)
             : ligaId;
 
-    // Buscar cache existente
-    let cache = await MelhorMesCache.findOne({ ligaId: ligaObjectId });
+    // ✅ v11.0: Filtrar por temporada para não afetar cache de outra temporada
+    let cache = await MelhorMesCache.findOne({ ligaId: ligaObjectId, temporada: temporadaFiltro });
 
     if (cache) {
-        // Resetar todas as edições NÃO consolidadas
+        // ✅ v11.0: Resetar TODAS as edições (inclusive consolidadas)
+        // Necessário quando a config de edições mudou — ex: fim mudou de R6 para R4
         cache.edicoes.forEach((e) => {
-            if (e.status !== "consolidado") {
-                e.ranking = [];
-                e.campeao = null;
-                e.total_participantes = 0;
-                e.rodada_atual = 0;
-            }
+            e.ranking = [];
+            e.campeao = null;
+            e.total_participantes = 0;
+            e.rodada_atual = 0;
+            e.status = "pendente";
+            e.consolidado_em = null;
         });
 
         cache.temporada_encerrada = false;
         await cache.save();
     }
 
-    // Reconsolidar
-    return await consolidarMelhorMes(ligaObjectId, rodadaAtual);
+    // ✅ v11.0: Passar temporada para consolidarMelhorMes
+    return await consolidarMelhorMes(ligaObjectId, rodadaAtual, temporadaFiltro);
 }
 
 /**
  * Invalida cache de uma liga (remove completamente)
+ * ✅ v11.0: Aceita temporada para não remover cache de outra temporada (evitar colisão 2025/2026)
  * CUIDADO: Isso remove edições já consolidadas!
  */
-export async function invalidarCache(ligaId) {
-    console.log(`${LOG_PREFIX} 🗑️ Invalidando cache para liga ${ligaId}`);
+export async function invalidarCache(ligaId, temporada = null) {
+    const { CURRENT_SEASON } = await import("../config/seasons.js");
+    const temporadaFiltro = temporada || CURRENT_SEASON;
+
+    console.log(`${LOG_PREFIX} 🗑️ Invalidando cache para liga ${ligaId} (temporada ${temporadaFiltro})`);
 
     const ligaObjectId =
         typeof ligaId === "string"
             ? new mongoose.Types.ObjectId(ligaId)
             : ligaId;
 
-    const resultado = await MelhorMesCache.deleteOne({ ligaId: ligaObjectId });
+    // ✅ v11.0: Filtrar por temporada para não deletar cache de outra temporada
+    const resultado = await MelhorMesCache.deleteOne({ ligaId: ligaObjectId, temporada: temporadaFiltro });
 
     console.log(
-        `${LOG_PREFIX} Cache removido: ${resultado.deletedCount} documento(s)`,
+        `${LOG_PREFIX} Cache removido: ${resultado.deletedCount} documento(s) (temporada ${temporadaFiltro})`,
     );
 
     return resultado;

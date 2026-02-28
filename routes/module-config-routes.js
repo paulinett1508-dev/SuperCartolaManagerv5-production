@@ -357,6 +357,14 @@ router.put('/liga/:ligaId/modulos/:modulo/config', verificarAdmin, async (req, r
                 await propagarRankingRodadaParaLiga(ligaId, wizard_respostas);
             }
 
+            // ✅ v11.0: Invalidar cache do melhor_mes quando edições são reconfiguradas
+            // Evita colisão 2025/2026 e garante que o cache seja recriado com a nova config
+            if (modulo === 'melhor_mes' && wizard_respostas.edicoes_intervalos) {
+                const melhorMesService = (await import('../services/melhorMesService.js')).default;
+                await melhorMesService.invalidarCache(ligaId, temporada);
+                console.log(`[MODULE-CONFIG] melhor_mes cache invalidado (temporada ${temporada}) — será recriado com nova config`);
+            }
+
             // ✅ Auto-build financeiro_override.valores_por_posicao a partir do wizard
             // Lê os campos com afeta = "financeiro_override.valores_por_posicao.N"
             // e respeita flags vice_habilitado / terceiro_habilitado
