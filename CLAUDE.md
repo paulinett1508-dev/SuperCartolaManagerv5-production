@@ -343,6 +343,7 @@ Documentação das skills: [`docs/skills/`](docs/skills/) (agnóstico, Markdown 
 | "auditar UX app", "revisar design participante", "visual do app" | **ux-auditor-app** | Project |
 | "auditar live", "experiência ao vivo", "parciais ao vivo", "orchestrator ok", "pre-flight rodada" | **live-experience** | Project |
 | "análise de branches", "comparar branches" | **analise-branches** | Project |
+| "deletar branches mergeadas", "limpar branches", "cleanup branches", "higienizar branches" | **delete-merged-branches** | Utility |
 | "auditoria mensal", "verificar mudanças", "check context7" | **context7-monthly-audit** | Project |
 | "criar skill", "skill nova" | **skill-creator** | Meta |
 | "instalar skill", "listar skills" | **skill-installer** | Meta |
@@ -445,6 +446,7 @@ As keywords ativam a mesma skill automaticamente (ver tabela acima).
 | `/newsession` | "nova sessão", "salvar contexto" |
 | `/liste-pr-github [período]` | "listar PRs", "PRs de hoje", "merges da semana" |
 | `/security-review` | "auditoria segurança", "security review", "revisar segurança do PR" |
+| `/delete-merged-branches` | "deletar branches mergeadas", "limpar branches", "cleanup branches", "higienizar branches" |
 
 > **`/liste-pr-github`** - Lista PRs do GitHub via API. Períodos: `hoje`, `ontem`, `semana`, `mes`, `YYYY-MM-DD` ou range `YYYY-MM-DD YYYY-MM-DD`. Sem argumento lista os últimos 10.
 
