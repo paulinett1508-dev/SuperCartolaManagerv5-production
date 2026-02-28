@@ -723,19 +723,8 @@ class RestaUmModule {
 
         const statusMap = { pendente: 'Pendente', em_andamento: 'Em Andamento', finalizada: 'Finalizada' };
 
-        // ── HEADER ──────────────────────────────────────────────
+        // ── CONTAINER ──────────────────────────────────────────────
         let html = `<div class="ruv-wrap">`;
-
-        html += `
-            <div class="ruv-header">
-                <h2 class="ruv-header-title">Resta Um</h2>
-                <span class="ruv-status-badge ${ed.status}">
-                    <span class="material-icons" style="font-size:10px;">
-                        ${ed.status === 'em_andamento' ? 'sports_score' : ed.status === 'finalizada' ? 'emoji_events' : 'pending'}
-                    </span>
-                    ${statusMap[ed.status] || ed.status}
-                </span>
-            </div>`;
 
         // live badge
         if (this.isLive) {
@@ -768,27 +757,6 @@ class RestaUmModule {
         }
         if (regrasChips.length) html += `<div class="ruv-regras">${regrasChips.join('')}</div>`;
 
-        // barra de progresso de sobreviventes
-        const totalEd = vivos.length + eliminados.length + (campeao ? 1 : 0);
-        const pctVivos = totalEd > 0 ? Math.round((vivos.length / totalEd) * 100) : 0;
-        const rodadasLabel = ed.rodadaAtual ? `R${ed.rodadaAtual}${ed.rodadaFinal ? ' · final R' + ed.rodadaFinal : ''}` : '';
-        html += `
-            <div class="ruv-progress-wrap">
-                <div class="ruv-progress-stat">
-                    <span class="ruv-progress-num vivos">${vivos.length + (campeao ? 1 : 0)}</span>
-                    <span class="ruv-progress-label">Vivos</span>
-                </div>
-                <div class="ruv-progress-bar-wrap">
-                    <div class="ruv-progress-bar">
-                        <div class="ruv-progress-fill" style="width:${pctVivos}%"></div>
-                    </div>
-                    ${rodadasLabel ? `<div class="ruv-progress-sub">${rodadasLabel}</div>` : ''}
-                </div>
-                <div class="ruv-progress-stat">
-                    <span class="ruv-progress-num elim">${eliminados.length}</span>
-                    <span class="ruv-progress-label">Eliminados</span>
-                </div>
-            </div>`;
 
         // ── CAMPEÃO ──────────────────────────────────────────────
         if (campeao) {

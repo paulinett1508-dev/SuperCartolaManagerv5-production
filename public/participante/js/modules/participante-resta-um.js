@@ -280,49 +280,14 @@ function _renderizarDisputa(dados, timeId) {
     const lider = vivos[0];
     const isCampeao = lider?.status === 'campeao';
 
-    // ── HEADER ──────────────────────────────────────────────────────
-    let html = `
-        <div class="resta-um-header">
-            <div class="resta-um-header-title">
-                <span class="material-icons" style="font-size: 20px; vertical-align: middle; color: var(--app-restaum-primary); margin-right: 4px;">person_off</span>
-                Resta Um
-                ${isLive ? '<span class="resta-um-live-indicator"><span class="resta-um-live-dot"></span>AO VIVO</span>' : ''}
-                ${isProjetado ? '<span class="ru-badge-projetado">PROJETADO</span>' : ''}
-            </div>
-        </div>
-    `;
-
-    // ── BARRA DE PROGRESSO ──────────────────────────────────────────
-    const pct = totalParticipantes > 0 ? Math.round(vivos.length / totalParticipantes * 100) : 0;
-    html += `
-        <div class="ru-progress-wrap">
-            <div class="ru-progress-bar">
-                <div class="ru-progress-fill" style="width: ${pct}%"></div>
-            </div>
-            <div class="ru-progress-label">
-                <span class="ru-progress-vivos">${vivos.length} sobrevivente${vivos.length !== 1 ? 's' : ''}</span>
-                <span class="ru-progress-total">${eliminados.length} eliminado${eliminados.length !== 1 ? 's' : ''}</span>
-            </div>
-        </div>
-    `;
-
-    // ── STATS ────────────────────────────────────────────────────────
-    html += `
-        <div class="resta-um-stats">
-            <div class="resta-um-stat">
-                <div class="resta-um-stat-value" style="color: var(--app-restaum-vivo);">${vivos.length}</div>
-                <div class="resta-um-stat-label">Vivos</div>
-            </div>
-            <div class="resta-um-stat">
-                <div class="resta-um-stat-value" style="color: var(--app-restaum-eliminado);">${eliminados.length}</div>
-                <div class="resta-um-stat-label">Eliminados</div>
-            </div>
-            <div class="resta-um-stat">
-                <div class="resta-um-stat-value">${totalParticipantes}</div>
-                <div class="resta-um-stat-label">Total</div>
-            </div>
-        </div>
-    `;
+    // ── STATUS BADGES (AO VIVO / PROJETADO) ──────────────────────────
+    let html = '';
+    if (isLive || isProjetado) {
+        html += `<div class="ru-status-badges" style="display:flex;gap:8px;margin-bottom:12px;">`;
+        if (isLive) html += '<span class="resta-um-live-indicator"><span class="resta-um-live-dot"></span>AO VIVO</span>';
+        if (isProjetado) html += '<span class="ru-badge-projetado">PROJETADO</span>';
+        html += `</div>`;
+    }
 
     // ── ALERTAS ──────────────────────────────────────────────────────
     if (isNaZonaPerigo && meuStatus?.status === 'vivo') {
