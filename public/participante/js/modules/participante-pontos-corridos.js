@@ -1068,9 +1068,10 @@ function buildLinhaConfronto(confronto, meuTimeId) {
             : vencedor === 1
               ? "text-red-500"
               : "text-yellow-500";
-    // Cor do nome: resultado quando há scores; fallback para comportamento padrão quando pendente
-    const corNome1 = p1 !== null ? cor1 : (isMeu1 ? "text-primary" : "text-white");
-    const corNome2 = p2 !== null ? cor2 : (isMeu2 ? "text-primary" : "text-white");
+    // Cor do nome: só aplica cor quando há scores reais (não 0 vs 0 = confronto pendente)
+    const temScoresReais = (p1 !== null && p2 !== null) && !(p1 === 0 && p2 === 0);
+    const corNome1 = temScoresReais ? cor1 : (isMeu1 ? "text-primary" : "text-white");
+    const corNome2 = temScoresReais ? cor2 : (isMeu2 ? "text-primary" : "text-white");
     const bg = isMeu1 || isMeu2 ? "bg-primary/5" : "";
 
     const label1 =
