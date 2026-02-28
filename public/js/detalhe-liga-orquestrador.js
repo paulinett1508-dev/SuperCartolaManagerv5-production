@@ -426,10 +426,11 @@ class DetalheLigaOrquestrador {
                             this.modules.restaUm.destroy();
                         }
 
-                        // Limpar referência anterior e forçar re-import da versão atual
-                        delete window.RestaUmModule;
+                        // Importar módulo (browser cacheia ES modules — não deletar window.RestaUmModule)
                         console.log('[ORQUESTRADOR] Importando resta-um-orquestrador.js...');
-                        await import('../participante/js/orquestradores/resta-um-orquestrador.js?v=3.0');
+                        if (!window.RestaUmModule) {
+                            await import('../participante/js/orquestradores/resta-um-orquestrador.js?v=3.0');
+                        }
                         console.log('[ORQUESTRADOR] Import concluído. RestaUmModule:', typeof window.RestaUmModule);
 
                         if (window.RestaUmModule) {

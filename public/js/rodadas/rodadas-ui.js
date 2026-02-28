@@ -18,6 +18,16 @@ import { getStatusMercado } from "./rodadas-core.js";
 // Cache de elementos DOM para performance
 const elementsCache = new Map();
 
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 // Estado da interface
 let rodadaAtualSelecionada = null;
 
