@@ -1,5 +1,9 @@
 /**
- * FLUXO-FINANCEIRO-CONTROLLER v8.17.0 (SaaS DINÂMICO)
+ * FLUXO-FINANCEIRO-CONTROLLER v8.18.0 (SaaS DINÂMICO)
+ * ✅ v8.18.0: FIX CRÍTICO - TOP10 agora SEMPRE recalcula (mesmo padrão MM v8.12)
+ *   - Bug: guard temTop10NoCache impedia recálculo quando participante saía do Top10
+ *   - Transações MITO/MICO ficavam congeladas no cache para sempre
+ *   - Fix: remove guard, desconta saldo antigo, recalcula com dados frescos
  * ✅ v8.17.0: FIX CRÍTICO - Inscrição persistida no cache ANTES do save
  *   - Bug: inscrição era calculada após cache.save() → nunca entrava em historico_transacoes
  *   - Consequência: extratoFinanceiroCacheController retornava saldo_lancamentos_iniciais=0
@@ -820,29 +824,38 @@ export const getExtratoFinanceiro = async (req, res) => {
 
         // ✅ v8.0: Calcular TOP10 histórico (separado do loop de rodadas)
         // ✅ v8.4.0: Só calcular se NÃO for temporada futura
+        // ✅ v8.18.0 FIX: SEMPRE recalcular TOP10 (remover guard temTop10NoCache)
+        // Mesmo bug corrigido no Mata-Mata v8.12.0:
+        // Transações MITO/MICO ficavam congeladas no cache quando participante
+        // saía do Top10 (alguém fez pontuação maior/menor).
         const top10Habilitado = isModuloHabilitado(liga, 'top10'); // ✅ C6 FIX: === true já verificado internamente
         if (top10Habilitado && !isTemporadaFutura && !usouFallback) {
-            // Verificar se já tem transações de TOP10 no cache
-            const temTop10NoCache = cache.historico_transacoes.some(
-                (t) => t.tipo === "MITO" || t.tipo === "MICO"
+            // Sempre remover transações de TOP10 antigas para recalcular com dados frescos
+            const top10Antigas = cache.historico_transacoes.filter(
+                t => t.tipo === "MITO" || t.tipo === "MICO"
             );
-
-            if (!temTop10NoCache || forcarRecalculo) {
-                // Remover transações de TOP10 antigas (se houver)
+            if (top10Antigas.length > 0) {
+                // Descontar saldo das transações antigas antes de recalcular
+                const saldoTop10Antigo = top10Antigas.reduce((acc, t) => acc + (t.valor || 0), 0);
+                cache.saldo_consolidado -= saldoTop10Antigo;
                 cache.historico_transacoes = cache.historico_transacoes.filter(
                     (t) => t.tipo !== "MITO" && t.tipo !== "MICO"
                 );
+                cacheModificado = true;
+                logger.log(`[FLUXO-CONTROLLER] TOP10: ${top10Antigas.length} transações antigas removidas (saldo ajustado: -${saldoTop10Antigo})`);
+            }
 
-                // ✅ v8.6: Passa temporada para filtrar cache correto
-                const transacoesTop10 = await calcularTop10Historico(liga, timeId, temporadaAtual);
-                if (transacoesTop10.length > 0) {
-                    novasTransacoes.push(...transacoesTop10);
-                    transacoesTop10.forEach((t) => (novoSaldo += t.valor));
-                    cacheModificado = true;
-                    logger.log(
-                        `[FLUXO-CONTROLLER] TOP10 histórico: ${transacoesTop10.length} transações`
-                    );
-                }
+            logger.log(`[FLUXO-CONTROLLER] Calculando TOP10 histórico para time ${timeId}`);
+
+            // ✅ v8.6: Passa temporada para filtrar cache correto
+            const transacoesTop10 = await calcularTop10Historico(liga, timeId, temporadaAtual);
+            if (transacoesTop10.length > 0) {
+                novasTransacoes.push(...transacoesTop10);
+                transacoesTop10.forEach((t) => (novoSaldo += t.valor));
+                cacheModificado = true;
+                logger.log(
+                    `[FLUXO-CONTROLLER] TOP10 histórico: ${transacoesTop10.length} transações`
+                );
             }
         }
 
