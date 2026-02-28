@@ -263,7 +263,7 @@ function _renderizarDisputa(dados, timeId) {
 
     const meuStatus = participantes?.find(p => String(p.timeId) === String(timeId));
 
-    const isLive = dados.isLive || _isRodadaAoVivo();
+    const isLive = dados.isLive === true; // confia na API (orchestrator_states) — _isRodadaAoVivo() pode vazar com mercadoFechado=true fora de jogo
     const isProjetado = dados.isProjetado === true;
 
     // Zona de perigo: apenas durante rodada ao vivo (sem live = sem zona visual)
@@ -286,7 +286,7 @@ function _renderizarDisputa(dados, timeId) {
         <div class="resta-um-header">
             <div class="resta-um-header-title">
                 <span class="material-icons" style="font-size: 20px; vertical-align: middle; color: var(--app-restaum-primary); margin-right: 4px;">person_off</span>
-                ${escapeHtml(edicao.nome || 'Resta Um')}
+                Resta Um
                 ${isLive ? '<span class="resta-um-live-indicator"><span class="resta-um-live-dot"></span>AO VIVO</span>' : ''}
             </div>
             <div class="resta-um-header-subtitle">
