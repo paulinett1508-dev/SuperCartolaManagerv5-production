@@ -1,5 +1,5 @@
-// === CARDS-CONDICIONAIS.JS v2.7 ===
-// v2.7: FIX - Módulos opt-in (restaUm, capitaoLuxo) ausentes de modulos_ativos são desabilitados em 2026+
+// === CARDS-CONDICIONAIS.JS v2.8 ===
+// v2.8: Troca /configuracoes por /modulos-ativos (com defaults) — remove workaround MODULOS_OPT_IN
 // v2.6: FIX - Invalida cache ao mudar de liga (navegação entre ligas)
 // v2.5: FIX BUG-002 - Módulos históricos só ocultados se EXPLICITAMENTE desabilitados
 // v2.5: Temporada 2026+ sem restrições automáticas - cards sempre visíveis
@@ -9,7 +9,7 @@
 // v2.0: Refatorado para SaaS - busca config do servidor via API
 // Sistema de desativação condicional de cards por liga
 
-console.log("[CARDS-CONDICIONAIS] v2.7 - Carregando sistema...");
+console.log("[CARDS-CONDICIONAIS] v2.8 - Carregando sistema...");
 
 // === CACHE DE CONFIG DA LIGA ===
 let ligaConfigCache = null;
@@ -36,7 +36,8 @@ function invalidarCache() {
 }
 
 /**
- * Buscar configuração da liga do servidor (v2.0 SaaS)
+ * Buscar configuração da liga do servidor (v2.8)
+ * v2.8: Usa /modulos-ativos (com defaults aplicados) em vez de /configuracoes (sem defaults)
  * v2.6 FIX: Invalida cache se liga mudou
  */
 async function fetchLigaConfig(ligaId) {
@@ -52,16 +53,22 @@ async function fetchLigaConfig(ligaId) {
     }
 
     try {
-        const response = await fetch(`/api/ligas/${ligaId}/configuracoes`);
+        // v2.8: /modulos-ativos já aplica defaults para todas as keys conhecidas,
+        // eliminando a necessidade de listas de módulos opt-in hardcoded
+        const response = await fetch(`/api/ligas/${ligaId}/modulos-ativos`);
         if (!response.ok) return null;
 
         const data = await response.json();
-        if (data.success) {
-            ligaConfigCache = data;
+        if (data.modulos) {
+            // Normalizar para o shape interno esperado pelo resto do módulo
+            ligaConfigCache = {
+                modulos_ativos: data.modulos,
+                cards_desabilitados: []
+            };
             cacheTimestamp = Date.now();
-            cachedLigaId = ligaId; // v2.6: Salvar ID da liga cacheada
-            console.log(`[CARDS-CONDICIONAIS] Config carregada para ${data.liga_nome}`);
-            return data;
+            cachedLigaId = ligaId;
+            console.log(`[CARDS-CONDICIONAIS] Config carregada (${Object.keys(data.modulos).length} módulos)`);
+            return ligaConfigCache;
         }
     } catch (error) {
         console.warn("[CARDS-CONDICIONAIS] Erro ao buscar config:", error.message);
@@ -264,23 +271,14 @@ async function ocultarModulosInexistentesEmHistorico() {
 }
 
 /**
- * Módulos que precisam estar EXPLICITAMENTE true em modulos_ativos para funcionar.
- * Se ausentes (undefined), são tratados como inativos em ligas 2026+.
- */
-const MODULOS_OPT_IN = ['restaUm', 'resta_um', 'capitaoLuxo', 'capitao_luxo'];
-
-/**
  * Aplicar configurações condicionais baseadas na liga (v2.0 - async)
- * v2.7 FIX: Módulos opt-in ausentes em modulos_ativos são desabilitados em 2026+
- * v2.3 FIX: Temporada 2026+ não tem restrições automáticas legacy de 2025
+ * v2.8: Simplificado — /modulos-ativos já retorna defaults, sem listas hardcoded
  * v2.2 FIX: Não desabilitar módulos em temporadas históricas
  */
 async function aplicarConfiguracaoCards() {
     console.log("[CARDS-CONDICIONAIS] Aplicando configuração dinâmica...");
 
     try {
-        const temporadaAtual = getTemporadaSelecionada();
-
         // v2.2: Não aplicar restrições em temporadas históricas
         if (isTemporadaHistorica()) {
             console.log("[CARDS-CONDICIONAIS] Temporada histórica detectada - mantendo todos os módulos habilitados");
@@ -296,7 +294,6 @@ async function aplicarConfiguracaoCards() {
 
         console.log(`[CARDS-CONDICIONAIS] Liga atual: ${ligaId}`);
 
-        // v2.0: Buscar configuração do servidor
         const config = await fetchLigaConfig(ligaId);
 
         if (!config) {
@@ -304,31 +301,14 @@ async function aplicarConfiguracaoCards() {
             return;
         }
 
-        // Obter lista de cards desabilitados da config
-        const cardsDesabilitados = config.cards_desabilitados || [];
-
-        // Verificar modulos_ativos para detectar módulos explicitamente desativados (false)
-        // v2.3 FIX: Usar mapeamento correto de nomes de módulos para data-module
+        // /modulos-ativos já retorna defaults para todos os módulos conhecidos.
+        // Qualquer key com false = módulo desativado pelo admin.
         const modulos = config.modulos_ativos || {};
         const modulosDesabilitados = Object.entries(modulos)
             .filter(([_, enabled]) => enabled === false)
-            .map(([key]) => {
-                if (MODULO_TO_CARD_MAP[key]) {
-                    return MODULO_TO_CARD_MAP[key];
-                }
-                return key.replace(/([A-Z])/g, '-$1').toLowerCase();
-            });
+            .map(([key]) => MODULO_TO_CARD_MAP[key] || key.replace(/([A-Z])/g, '-$1').toLowerCase());
 
-        // v2.7 FIX: Em 2026+, módulos opt-in ausentes de modulos_ativos são desabilitados.
-        // Estes módulos precisam estar explicitamente true para funcionar — ausência = inativo.
-        const modulosOptInAusentes = (temporadaAtual >= 2026 && Object.keys(modulos).length > 0)
-            ? MODULOS_OPT_IN
-                .filter(key => modulos[key] === undefined && MODULO_TO_CARD_MAP[key])
-                .map(key => MODULO_TO_CARD_MAP[key])
-            : [];
-
-        // Unir listas sem duplicatas
-        const todosDesabilitados = [...new Set([...cardsDesabilitados, ...modulosDesabilitados, ...modulosOptInAusentes])];
+        const todosDesabilitados = [...new Set(modulosDesabilitados)];
 
         if (todosDesabilitados.length === 0) {
             console.log("[CARDS-CONDICIONAIS] Nenhuma restrição para esta liga");
@@ -589,4 +569,4 @@ if (document.readyState === "loading") {
     setTimeout(inicializar, 150);
 }
 
-console.log("[CARDS-CONDICIONAIS] Módulo v2.7 carregado");
+console.log("[CARDS-CONDICIONAIS] Módulo v2.8 carregado");
