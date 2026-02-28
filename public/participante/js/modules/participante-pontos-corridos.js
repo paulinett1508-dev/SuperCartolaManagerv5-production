@@ -9,6 +9,11 @@
 
 if (window.Log) Log.info("[PONTOS-CORRIDOS] 📊 Módulo v5.6 carregando...");
 
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 const estadoPC = {
     ligaId: null,
     timeId: null,
