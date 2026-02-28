@@ -2,10 +2,84 @@
 import MelhorMesCache, {
     MELHOR_MES_EDICOES,
 } from "../models/MelhorMesCache.js";
+import ModuleConfig from "../models/ModuleConfig.js";
 import Rodada from "../models/Rodada.js";
 import mongoose from "mongoose";
 
 const LOG_PREFIX = "[MELHOR-MES-SERVICE]";
+
+// =====================================================================
+// BUSCAR EDIÇÕES DA LIGA (CONFIG DO ADMIN OU FALLBACK HARDCODED)
+// =====================================================================
+
+/**
+ * Busca configuração de edições do ModuleConfig da liga.
+ * Se existir wizard_respostas.edicoes_intervalos, usa essas.
+ * Senão, usa fallback MELHOR_MES_EDICOES (hardcoded).
+ *
+ * @param {ObjectId|string} ligaId - ID da liga
+ * @param {number} temporada - Temporada
+ * @returns {Promise<Array>} Array de edições no formato { id, nome, inicio, fim }
+ */
+async function getEdicoesConfig(ligaId, temporada) {
+    try {
+        const ligaObjectId = typeof ligaId === "string"
+            ? new mongoose.Types.ObjectId(ligaId)
+            : ligaId;
+
+        const config = await ModuleConfig.findOne({
+            liga_id: ligaObjectId,
+            modulo: "melhor_mes",
+            temporada: Number(temporada)
+        }).lean();
+
+        // Se existe config com edicoes_intervalos no wizard
+        if (config?.wizard_respostas?.edicoes_intervalos) {
+            const intervalos = config.wizard_respostas.edicoes_intervalos;
+            const edicoes = [];
+
+            // Converter formato do wizard para formato do sistema
+            // { "1": { inicio: 1, fim: 4 }, "2": { inicio: 5, fim: 8 }, ... }
+            Object.keys(intervalos)
+                .map(Number)
+                .sort((a, b) => a - b)
+                .forEach((id) => {
+                    const intervalo = intervalos[id] || intervalos[String(id)];
+                    if (intervalo && intervalo.inicio != null && intervalo.fim != null) {
+                        edicoes.push({
+                            id: Number(id),
+                            nome: `Edição ${String(id).padStart(2, "0")}`,
+                            inicio: Number(intervalo.inicio),
+                            fim: Number(intervalo.fim)
+                        });
+                    }
+                });
+
+            if (edicoes.length > 0) {
+                console.log(`${LOG_PREFIX} ✅ Usando ${edicoes.length} edições do ModuleConfig (liga ${ligaId})`);
+                return edicoes;
+            }
+        }
+    } catch (err) {
+        console.warn(`${LOG_PREFIX} ⚠️ Erro ao buscar config de edições:`, err.message);
+    }
+
+    // Fallback para hardcoded
+    console.log(`${LOG_PREFIX} ⚠️ Usando edições HARDCODED (fallback)`);
+    return MELHOR_MES_EDICOES;
+}
+
+/**
+ * Determina status de uma edição baseado na rodada atual (sem usar hardcoded).
+ * @param {Object} configEdicao - Config da edição { id, inicio, fim }
+ * @param {number} rodadaAtual - Rodada atual do sistema
+ * @returns {string} "pendente" | "em_andamento" | "consolidado"
+ */
+function getStatusEdicaoLocal(configEdicao, rodadaAtual) {
+    if (rodadaAtual < configEdicao.inicio) return "pendente";
+    if (rodadaAtual >= configEdicao.fim) return "consolidado";
+    return "em_andamento";
+}
 
 // =====================================================================
 // BUSCAR MELHOR MÊS (PRINCIPAL)
@@ -84,6 +158,9 @@ export async function consolidarMelhorMes(ligaId, rodadaAtual, temporada = null)
             ? new mongoose.Types.ObjectId(ligaId)
             : ligaId;
 
+    // ✅ v10.0: Buscar edições da config da liga (ou fallback hardcoded)
+    const edicoesConfig = await getEdicoesConfig(ligaObjectId, temporadaFiltro);
+
     // ✅ v9.0: Buscar cache existente FILTRANDO por temporada
     let cache = await MelhorMesCache.findOne({ ligaId: ligaObjectId, temporada: temporadaFiltro });
 
@@ -97,8 +174,8 @@ export async function consolidarMelhorMes(ligaId, rodadaAtual, temporada = null)
         });
     }
 
-    // Processar cada edição
-    for (const configEdicao of MELHOR_MES_EDICOES) {
+    // ✅ v10.0: Processar cada edição da CONFIG DA LIGA (não hardcoded)
+    for (const configEdicao of edicoesConfig) {
         // Buscar edição no cache
         let edicaoCache = cache.edicoes.find((e) => e.id === configEdicao.id);
 
@@ -110,11 +187,8 @@ export async function consolidarMelhorMes(ligaId, rodadaAtual, temporada = null)
             continue;
         }
 
-        // Determinar status da edição
-        const status = MelhorMesCache.getStatusEdicao(
-            configEdicao.id,
-            rodadaAtual,
-        );
+        // ✅ v10.0: Determinar status usando config da liga
+        const status = getStatusEdicaoLocal(configEdicao, rodadaAtual);
 
         // Se pendente (não iniciou), criar/atualizar com dados vazios
         if (status === "pendente") {
@@ -154,12 +228,12 @@ export async function consolidarMelhorMes(ligaId, rodadaAtual, temporada = null)
     // Ordenar edições por ID
     cache.edicoes.sort((a, b) => a.id - b.id);
 
-    // Verificar se temporada encerrada (todas consolidadas)
+    // ✅ v10.0: Verificar se temporada encerrada (todas consolidadas)
     const todasConsolidadas = cache.edicoes.every(
         (e) => e.status === "consolidado",
     );
     cache.temporada_encerrada =
-        todasConsolidadas && cache.edicoes.length === MELHOR_MES_EDICOES.length;
+        todasConsolidadas && cache.edicoes.length === edicoesConfig.length;
 
     // Atualizar timestamps
     cache.rodada_sistema = rodadaAtual;

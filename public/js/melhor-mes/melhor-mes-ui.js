@@ -210,8 +210,8 @@ export class MelhorMesUI {
         </td>
         <td style="text-align: left; padding-left: 12px;">
           <div>
-            <div class="time-nome">${escapeHtml(time.nome_cartola || "N/D")}</div>
-            <div style="font-size: 10px; color: var(--text-muted);">${escapeHtml(time.nome_time || "N/D")}</div>
+            <div class="time-nome">${window.escapeHtml(time.nome_cartola || "N/D")}</div>
+            <div style="font-size: 10px; color: var(--text-muted);">${window.escapeHtml(time.nome_time || "N/D")}</div>
           </div>
         </td>
         <td style="text-align: center;">
