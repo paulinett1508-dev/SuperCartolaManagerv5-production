@@ -942,7 +942,7 @@ async function fetchRestaUm() {
         if (res.ok) {
             const data = await res.json();
             const participantes = data?.participantes || [];
-            const vivos = participantes.filter(p => p.status === 'vivo' && !p.zonaRisco);
+            const vivos = participantes.filter(p => p.status === 'vivo');
             const zonaRisco = participantes.filter(p => p.status === 'vivo' && p.zonaRisco);
             const eliminados = participantes.filter(p => p.status === 'eliminado');
             WHState.data.restaUm = {
@@ -1525,14 +1525,14 @@ function renderCardRestaUm() {
     const lanterna = vivos.length > 1 ? vivos[vivos.length - 1] : null;
     const quase = vivos.length > 2 ? vivos[vivos.length - 2] : null;
 
-    // Líder / Campeão da rodada
+    // Líder / The Best Survivor da rodada
     const leaderIsMe = String(leader.timeId) === meuId;
     const leaderHtml = `
         <div class="wh-compact-leader ${leaderIsMe ? 'me' : ''}">
             <span class="wh-compact-pos">1</span>
             <img class="wh-compact-escudo" src="${resolverEscudo(leader)}" onerror="this.src='/escudos/default.png'" alt="">
             <span class="wh-compact-nome">${escapeHtml(leader.nomeTime || leader.nomeCartoleiro || 'Time')}</span>
-            <span class="wh-compact-valor" style="color:var(--app-success)">Campeao</span>
+            <span class="wh-compact-valor" style="color:var(--app-success)">Best Survivor</span>
         </div>
     `;
 
@@ -2154,17 +2154,17 @@ function renderModalRestaUm() {
         `;
     }
 
-    const leader = vivos[0];                                               // CAMPEÃO DA RODADA
+    const leader = vivos[0];                                               // THE BEST SURVIVOR
     const lanterna = vivos.length > 1 ? vivos[vivos.length - 1] : null;  // ELIMINADO (projetado)
 
-    // Campeão da rodada (#1)
+    // The Best Survivor (#1)
     const leaderIsMe = String(leader.timeId) === meuId;
     let listHtml = `
         <div class="wh-modal-rank-row gold ${leaderIsMe ? 'me' : ''}">
             <span class="wh-modal-rank-pos">1</span>
             <img class="wh-modal-rank-escudo" src="${resolverEscudo(leader)}" onerror="this.src='/escudos/default.png'" alt="">
             <span class="wh-modal-rank-nome">${escapeHtml(leader.nomeTime || leader.nomeCartoleiro || 'Time')}</span>
-            <span class="wh-modal-rank-pontos" style="color:var(--app-success)">Campeao</span>
+            <span class="wh-modal-rank-pontos" style="color:var(--app-success)">Best Survivor</span>
         </div>
     `;
 
@@ -2810,18 +2810,18 @@ function renderRestaUmSection() {
     const meu = vivos.find(p => String(p.timeId) === meuId)
         || data.eliminados?.find(p => String(p.timeId) === meuId);
 
-    const leader = vivos[0];                                               // CAMPEÃO DA RODADA
+    const leader = vivos[0];                                               // THE BEST SURVIVOR
     const lanterna = vivos.length > 1 ? vivos[vivos.length - 1] : null;  // ELIMINADO (projetado)
     const quase = vivos.length > 2 ? vivos[vivos.length - 2] : null;     // QUASE (penúltimo)
 
-    // Líder #1 (Campeão da rodada)
+    // Líder #1 (The Best Survivor)
     const leaderIsMe = String(leader.timeId) === meuId;
     const leaderHtml = `
         <div class="wh-compact-leader ${leaderIsMe ? 'me' : ''}">
             <span class="wh-compact-pos">1</span>
             <img class="wh-compact-escudo" src="${resolverEscudo(leader)}" onerror="this.src='/escudos/default.png'" alt="">
             <span class="wh-compact-nome">${escapeHtml(leader.nomeTime || leader.nomeCartoleiro || 'Time')}</span>
-            <span class="wh-compact-valor" style="color:var(--app-success)">Campeao</span>
+            <span class="wh-compact-valor" style="color:var(--app-success)">Best Survivor</span>
         </div>
     `;
 
