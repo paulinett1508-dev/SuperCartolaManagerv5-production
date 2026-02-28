@@ -1063,6 +1063,9 @@ function buildLinhaConfronto(confronto, meuTimeId) {
             : vencedor === 1
               ? "text-red-500"
               : "text-yellow-500";
+    // Cor do nome: resultado quando há scores; fallback para comportamento padrão quando pendente
+    const corNome1 = p1 !== null ? cor1 : (isMeu1 ? "text-primary" : "text-white");
+    const corNome2 = p2 !== null ? cor2 : (isMeu2 ? "text-primary" : "text-white");
     const bg = isMeu1 || isMeu2 ? "bg-primary/5" : "";
 
     const label1 =
@@ -1086,7 +1089,7 @@ function buildLinhaConfronto(confronto, meuTimeId) {
             <div class="flex items-center min-w-0 flex-1 ${vencedor === 2 ? "opacity-60" : ""}">
                 <img src="${esc1}" class="w-10 h-10 rounded-full mr-3 shrink-0 bg-zinc-700 object-cover" onerror="this.onerror=null;this.src='/escudos/default.png'">
                 <div class="min-w-0 flex-1">
-                    <p class="font-semibold text-sm truncate ${isMeu1 ? "text-primary" : "text-white"}">${escapeHtml(nome1)}</p>
+                    <p class="font-semibold text-sm truncate ${corNome1}">${escapeHtml(nome1)}</p>
                     <p class="text-[10px] text-gray-500 truncate">${escapeHtml(cartoleiro1)}</p>
                     <div class="flex items-center space-x-1.5 mt-0.5"><p class="text-sm font-bold ${cor1}">${p1 !== null ? p1.toFixed(1) : "-"}</p>${modal1}</div>
                 </div>
@@ -1094,7 +1097,7 @@ function buildLinhaConfronto(confronto, meuTimeId) {
             <span class="text-sm text-white/30 mx-2 shrink-0">x</span>
             <div class="flex items-center min-w-0 flex-1 justify-end ${vencedor === 1 ? "opacity-60" : ""}">
                 <div class="min-w-0 flex-1 text-right">
-                    <p class="font-semibold text-sm truncate ${isMeu2 ? "text-primary" : "text-white"}">${escapeHtml(nome2)}</p>
+                    <p class="font-semibold text-sm truncate ${corNome2}">${escapeHtml(nome2)}</p>
                     <p class="text-[10px] text-gray-500 truncate">${escapeHtml(cartoleiro2)}</p>
                     <div class="flex items-center justify-end space-x-1.5 mt-0.5"><p class="text-sm font-bold ${cor2}">${p2 !== null ? p2.toFixed(1) : "-"}</p>${modal2}</div>
                 </div>
