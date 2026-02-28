@@ -1,6 +1,7 @@
 // =====================================================================
-// PARTICIPANTE-ARTILHEIRO.JS - v4.3
+// PARTICIPANTE-ARTILHEIRO.JS - v5.0
 // =====================================================================
+// ✅ v5.0: UX elevada — ranking colapsável, card artilheiros premium, rodadas interativas
 // ✅ v4.3: MatchdayService integration — ranking-live endpoint + auto-refresh
 // ✅ v4.2: FIX pull-to-refresh loop — AbortController, scrollY, destrutor
 // ✅ v4.1: Reordenação - RODADA X → Seu Desempenho → Seus Artilheiros
@@ -9,7 +10,7 @@
 // ✅ v3.5: Detecção de temporada encerrada (R38 + mercado fechado)
 // =====================================================================
 
-if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Carregando módulo v4.3...");
+if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Carregando módulo v5.0...");
 
 // ✅ v4.0: RODADA_FINAL dinâmico - obtido da API, fallback 38
 let RODADA_FINAL = 38;
@@ -421,6 +422,25 @@ function renderizarBannerRodadaFinal(
 }
 
 // =====================================================================
+// v5.0: HELPER — Agrega top goleadores de um participante
+// =====================================================================
+function _agregaTopGoleadores(detalhePorRodada, limit = 4) {
+    if (!detalhePorRodada || !Array.isArray(detalhePorRodada)) return [];
+    const map = {};
+    detalhePorRodada.forEach(r => {
+        if (r.jogadores && Array.isArray(r.jogadores)) {
+            r.jogadores.forEach(j => {
+                if (j.gols > 0) {
+                    if (!map[j.nome]) map[j.nome] = { nome: j.nome, gols: 0 };
+                    map[j.nome].gols += j.gols;
+                }
+            });
+        }
+    });
+    return Object.values(map).sort((a, b) => b.gols - a.gols).slice(0, limit);
+}
+
+// =====================================================================
 // RENDERIZAÇÃO
 // =====================================================================
 async function renderizarArtilheiro(container, response, meuTimeId) {
@@ -536,8 +556,9 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
                 r.jogadores.forEach((j) => {
                     if (j.gols > 0) {
                         if (!jogadoresMap[j.nome])
-                            jogadoresMap[j.nome] = { nome: j.nome, gols: 0 };
+                            jogadoresMap[j.nome] = { nome: j.nome, gols: 0, rodadas: 0 };
                         jogadoresMap[j.nome].gols += j.gols;
+                        jogadoresMap[j.nome].rodadas += 1;
                     }
                 });
             }
@@ -646,35 +667,57 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
 
         ${
             meusArtilheiros.length > 0
-                ? `
-        <div style="background: rgba(255, 255, 255, 0.03); border-radius: 12px; padding: 12px; margin-bottom: 16px;">
-            <div style="font-size: 11px; color: #888; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 14px;">sports_soccer</span> Seus Artilheiros</div>
-            <div style="display: flex; flex-direction: column; gap: 6px;">
-                ${meusArtilheiros
-                    .map(
-                        (j, idx) => `
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: rgba(0,0,0,0.2); border-radius: 8px;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span class="material-symbols-outlined" style="font-size: 18px; color: ${idx === 0 ? "var(--app-gold)" : idx === 1 ? "var(--app-silver)" : "var(--app-bronze)"};">workspace_premium</span>
-                        <span style="color: var(--app-text-primary); font-size: 12px; font-weight: 500;">${escapeHtml(j.nome)}</span>
-                    </div>
-                    <span style="color: var(--app-success-light); font-weight: 800; font-size: 14px;">${j.gols} gols</span>
-                </div>
-                `,
-                    )
-                    .join("")}
+                ? (() => {
+                    const maxGols = meusArtilheiros[0].gols;
+                    const top1 = meusArtilheiros[0];
+                    const runners = meusArtilheiros.slice(1);
+                    const medalColors = ['var(--app-silver, #c0c0c0)', 'var(--app-bronze, #cd7f32)'];
+                    return `
+        <div class="art-meus-artilheiros">
+            <div class="art-meus-artilheiros-header">
+                <span class="material-icons">sports_soccer</span> Seus Artilheiros
             </div>
-        </div>
-        `
+            <div class="art-top1-card">
+                <div class="art-top1-left">
+                    <span class="material-icons art-top1-medal">workspace_premium</span>
+                    <div class="art-top1-info">
+                        <div class="art-top1-nome">${escapeHtml(top1.nome)}</div>
+                        <div class="art-top1-rodadas">${top1.rodadas} rodada${top1.rodadas !== 1 ? 's' : ''} com gol</div>
+                    </div>
+                </div>
+                <div class="art-top1-gols">
+                    <div class="art-top1-gols-valor">${top1.gols}</div>
+                    <div class="art-top1-gols-label">gols</div>
+                </div>
+            </div>
+            ${runners.map((j, idx) => {
+                const pct = maxGols > 0 ? Math.round((j.gols / maxGols) * 100) : 0;
+                return `
+            <div class="art-runner">
+                <div class="art-runner-medal"><span class="material-icons" style="color: ${medalColors[idx]};">workspace_premium</span></div>
+                <div class="art-runner-content">
+                    <div class="art-runner-top">
+                        <span class="art-runner-nome">${escapeHtml(j.nome)}</span>
+                        <span class="art-runner-gols">${j.gols} gols</span>
+                    </div>
+                    <div class="art-runner-bar-bg"><div class="art-runner-bar-fill" style="width: ${pct}%;"></div></div>
+                </div>
+            </div>`;
+            }).join('')}
+        </div>`;
+                })()
                 : ""
         }
 
         ${
             historicoRecente.length > 0
                 ? `
-        <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 12px; margin-bottom: 16px;">
-            <div style="font-size: 11px; color: #888; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 14px;">bar_chart</span> Últimas Rodadas</div>
-            <div style="display: flex; gap: 6px; justify-content: space-between;">
+        <div class="art-ultimas-rodadas">
+            <div class="art-ultimas-header">
+                <span class="material-icons">bar_chart</span> Últimas Rodadas
+                <span style="margin-left: auto; font: 400 9px 'Inter', sans-serif; color: #555; text-transform: none; letter-spacing: 0;">toque para ver artilheiros</span>
+            </div>
+            <div class="art-rodadas-grid">
                 ${historicoRecente
                     .map((r) => {
                         const saldo = (r.golsPro || 0) - (r.golsContra || 0);
@@ -691,14 +734,14 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
                                   ? "var(--app-danger)"
                                   : "#666";
                         return `
-                    <div style="flex: 1; background: ${bgColor}; border-radius: 8px; padding: 8px 4px; text-align: center;">
-                        <div style="font-size: 9px; color: #666; margin-bottom: 4px;">R${r.rodada}</div>
-                        <div style="font-size: 14px; font-weight: 800; color: ${textColor};">${saldo >= 0 ? "+" : ""}${saldo}</div>
-                    </div>
-                    `;
+                    <div class="art-rodada-box" style="background: ${bgColor};" data-rodada="${r.rodada}">
+                        <div class="art-rodada-num">R${r.rodada}</div>
+                        <div class="art-rodada-saldo" style="color: ${textColor};">${saldo >= 0 ? "+" : ""}${saldo}</div>
+                    </div>`;
                     })
                     .join("")}
             </div>
+            <div class="art-rodada-detalhe" id="art-rodada-detalhe"></div>
         </div>
         `
                 : ""
@@ -735,78 +778,84 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
 
         <details style="background: rgba(0,0,0,0.3); border-radius: 12px; overflow: hidden;" open>
             <summary style="background: rgba(34, 197, 94, 0.1); padding: 12px 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(34, 197, 94, 0.2);">
-                <span style="font-size: 13px; font-weight: 700; color: var(--app-success-light); display: flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 16px;">list_alt</span> Ranking Completo</span>
+                <span style="font-size: 13px; font-weight: 700; color: var(--app-success-light); display: flex; align-items: center; gap: 4px;"><span class="material-icons" style="font-size: 16px;">list_alt</span> Ranking Completo</span>
                 <span style="font-size: 11px; color: #888;">${rankingAtivos.length} participantes</span>
             </summary>
 
-            <div style="max-height: 300px; overflow-y: auto;">
+            <div style="font: 400 9px 'Inter', sans-serif; color: #555; text-align: center; padding: 6px 0 2px; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                <span class="material-icons" style="font-size: 11px; vertical-align: middle;">touch_app</span> toque no participante para ver artilheiros
+            </div>
+
+            <div style="max-height: 400px; overflow-y: auto;" id="art-ranking-list">
             ${(() => {
-                // Separar ativos e inativos
                 const ativos = rankingAtivos;
                 const inativos = ranking.filter(
                     (time) => time.ativo === false || time.status === "inativo",
                 );
 
-                let html = "";
+                let htmlR = "";
 
-                // Renderizar ATIVOS
                 ativos.forEach((time, idx) => {
                     const isMeuTime = isMyTime(time, meuTimeId);
                     const pos = idx + 1;
-                    const posicaoDisplay = pos === 1 ? '<span class="material-symbols-outlined" style="font-size: 16px; color: var(--app-success-light);">emoji_events</span>' : `${pos}º`;
+                    const posDisplay = pos === 1 ? '<span class="material-icons" style="font-size: 16px; color: var(--app-success-light);">emoji_events</span>' : pos + '\u00BA';
                     const saldo = getSaldo(time);
+                    const tid = time.timeId || time.time_id || '';
 
-                    html += `
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); ${isMeuTime ? "background: rgba(34, 197, 94, 0.15);" : ""}">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: ${pos === 1 ? "16px" : "12px"}; width: 26px; ${pos === 1 ? "" : "color: #888;"}">${posicaoDisplay}</span>
-                            <div>
-                                <div style="color: ${isMeuTime ? "var(--app-success-light)" : "var(--app-text-primary)"}; font-weight: ${isMeuTime ? "700" : "500"}; font-size: 12px;">${escapeHtml(time.nomeCartoleiro || time.nome_cartola || time.nome || 'N/D')}</div>
-                                <div style="color: #888; font-size: 11px;">${escapeHtml(time.nomeTime || time.nome_time || '')}</div>
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 12px; align-items: center;">
-                            <span style="color: #888; font-size: 11px;">${getGP(time)}/${getGC(time)}</span>
-                            <span style="color: ${saldo >= 0 ? "var(--app-success-light)" : "var(--app-danger)"}; font-weight: 700; font-size: 13px;">${saldo >= 0 ? "+" : ""}${saldo}</span>
-                        </div>
-                    </div>
-                    `;
+                    const topGol = _agregaTopGoleadores(time.detalhePorRodada, 4);
+
+                    htmlR += '<div class="art-ranking-row" data-timeid="' + tid + '" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.05);' + (isMeuTime ? 'background:rgba(34,197,94,0.15);' : '') + '">'
+                        + '<div style="display:flex;align-items:center;gap:10px;">'
+                        + '<span style="font-size:' + (pos === 1 ? '16px' : '12px') + ';width:26px;' + (pos === 1 ? '' : 'color:#888;') + '">' + posDisplay + '</span>'
+                        + '<div>'
+                        + '<div style="color:' + (isMeuTime ? 'var(--app-success-light)' : 'var(--app-text-primary)') + ';font-weight:' + (isMeuTime ? '700' : '500') + ';font-size:12px;">' + escapeHtml(time.nomeCartoleiro || time.nome_cartola || time.nome || 'N/D') + '</div>'
+                        + '<div style="color:#888;font-size:11px;">' + escapeHtml(time.nomeTime || time.nome_time || '') + '</div>'
+                        + '</div></div>'
+                        + '<div style="display:flex;gap:12px;align-items:center;">'
+                        + '<span style="color:#888;font-size:11px;">' + getGP(time) + '/' + getGC(time) + '</span>'
+                        + '<span style="color:' + (saldo >= 0 ? 'var(--app-success-light)' : 'var(--app-danger)') + ';font-weight:700;font-size:13px;">' + (saldo >= 0 ? '+' : '') + saldo + '</span>'
+                        + '<span class="material-icons art-expand-icon">expand_more</span>'
+                        + '</div></div>';
+
+                    htmlR += '<div class="art-collapse-panel" data-panel-timeid="' + tid + '">'
+                        + '<div class="art-collapse-inner">'
+                        + '<div class="art-collapse-title"><span class="material-icons">sports_soccer</span> Top Goleadores</div>';
+                    if (topGol.length > 0) {
+                        topGol.forEach(j => {
+                            htmlR += '<div class="art-collapse-jogador">'
+                                + '<span class="art-collapse-jogador-nome"><span class="material-icons" style="color:var(--module-artilheiro-primary);">person</span> ' + escapeHtml(j.nome) + '</span>'
+                                + '<span class="art-collapse-jogador-gols">' + j.gols + ' gol' + (j.gols !== 1 ? 's' : '') + '</span>'
+                                + '</div>';
+                        });
+                    } else {
+                        htmlR += '<div class="art-collapse-vazio">Nenhum gol registrado</div>';
+                    }
+                    htmlR += '</div></div>';
                 });
 
-                // Renderizar INATIVOS (se houver)
                 if (inativos.length > 0) {
-                    html += `
-                    <div style="padding: 8px 14px; background: rgba(100,100,100,0.15); border-top: 1px dashed rgba(100,100,100,0.4); border-bottom: 1px dashed rgba(100,100,100,0.4);">
-                        <span style="font-size: 9px; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">
-                            <span class="material-icons" style="font-size: 12px; vertical-align: middle; margin-right: 4px;">person_off</span>
-                            Participantes Inativos
-                        </span>
-                    </div>
-                    `;
+                    htmlR += '<div style="padding:8px 14px;background:rgba(100,100,100,0.15);border-top:1px dashed rgba(100,100,100,0.4);border-bottom:1px dashed rgba(100,100,100,0.4);">'
+                        + '<span style="font-size:9px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">'
+                        + '<span class="material-icons" style="font-size:12px;vertical-align:middle;margin-right:4px;">person_off</span>'
+                        + 'Participantes Inativos</span></div>';
 
                     inativos.forEach((time) => {
-                        const isMeuTime = isMyTime(time, meuTimeId);
                         const saldo = getSaldo(time);
-
-                        html += `
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.03); opacity: 0.5; filter: grayscale(60%);">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <span style="font-size: 12px; width: 26px; color: #555;">—</span>
-                                <div>
-                                    <div style="color: #666; font-weight: 400; font-size: 12px;">${escapeHtml(time.nomeCartoleiro || time.nome_cartola || time.nome || 'N/D')}</div>
-                                    <div style="color: #555; font-size: 11px;">${escapeHtml(time.nomeTime || time.nome_time || '')}</div>
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 12px; align-items: center;">
-                                <span style="color: #555; font-size: 11px;">${getGP(time)}/${getGC(time)}</span>
-                                <span style="color: #555; font-weight: 500; font-size: 13px;">${saldo >= 0 ? "+" : ""}${saldo}</span>
-                            </div>
-                        </div>
-                        `;
+                        htmlR += '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.03);opacity:0.5;filter:grayscale(60%);">'
+                            + '<div style="display:flex;align-items:center;gap:10px;">'
+                            + '<span style="font-size:12px;width:26px;color:#555;">\u2014</span>'
+                            + '<div>'
+                            + '<div style="color:#666;font-weight:400;font-size:12px;">' + escapeHtml(time.nomeCartoleiro || time.nome_cartola || time.nome || 'N/D') + '</div>'
+                            + '<div style="color:#555;font-size:11px;">' + escapeHtml(time.nomeTime || time.nome_time || '') + '</div>'
+                            + '</div></div>'
+                            + '<div style="display:flex;gap:12px;align-items:center;">'
+                            + '<span style="color:#555;font-size:11px;">' + getGP(time) + '/' + getGC(time) + '</span>'
+                            + '<span style="color:#555;font-weight:500;font-size:13px;">' + (saldo >= 0 ? '+' : '') + saldo + '</span>'
+                            + '</div></div>';
                     });
                 }
 
-                return html;
+                return htmlR;
             })()}
             </div>
         </details>
@@ -814,6 +863,100 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
     `;
 
     container.innerHTML = html;
+
+    // ✅ v5.0: Event listeners — Ranking colapsável
+    container.querySelectorAll('.art-ranking-row').forEach(row => {
+        row.addEventListener('click', () => {
+            const tid = row.dataset.timeid;
+            const panel = container.querySelector(`.art-collapse-panel[data-panel-timeid="${tid}"]`);
+            if (!panel) return;
+
+            const isOpen = panel.classList.contains('open');
+
+            // Fechar todos os outros painéis
+            container.querySelectorAll('.art-collapse-panel.open').forEach(p => {
+                p.classList.remove('open');
+                p.style.maxHeight = '0';
+            });
+            container.querySelectorAll('.art-ranking-row.expanded').forEach(r => r.classList.remove('expanded'));
+
+            if (!isOpen) {
+                row.classList.add('expanded');
+                panel.classList.add('open');
+                panel.style.maxHeight = panel.scrollHeight + 'px';
+            }
+        });
+    });
+
+    // ✅ v5.0: Event listeners — Últimas Rodadas interativo
+    const rodadaBoxes = container.querySelectorAll('.art-rodada-box');
+    const detalheContainer = container.querySelector('#art-rodada-detalhe');
+
+    if (rodadaBoxes.length > 0 && detalheContainer && meusDados?.detalhePorRodada) {
+        let selectedRodada = null;
+
+        rodadaBoxes.forEach(box => {
+            box.addEventListener('click', () => {
+                const rodadaNum = parseInt(box.dataset.rodada, 10);
+
+                // Toggle: se já selecionado, fechar
+                if (selectedRodada === rodadaNum) {
+                    selectedRodada = null;
+                    rodadaBoxes.forEach(b => b.classList.remove('selected'));
+                    detalheContainer.classList.remove('open');
+                    detalheContainer.style.maxHeight = '0';
+                    return;
+                }
+
+                selectedRodada = rodadaNum;
+                rodadaBoxes.forEach(b => b.classList.remove('selected'));
+                box.classList.add('selected');
+
+                // Buscar dados da rodada
+                const rodadaData = meusDados.detalhePorRodada.find(r => r.rodada === rodadaNum);
+                const gp = rodadaData?.golsPro || 0;
+                const gc = rodadaData?.golsContra || 0;
+                const jogadores = rodadaData?.jogadores || [];
+
+                let jogadoresHtml = '';
+                const golsPro = jogadores.filter(j => j.gols > 0);
+                const golsContra = jogadores.filter(j => j.golsContra > 0);
+
+                if (golsPro.length > 0) {
+                    golsPro.forEach(j => {
+                        jogadoresHtml += '<div class="art-detalhe-jogador">'
+                            + '<span class="art-detalhe-jogador-nome"><span class="material-icons" style="color:var(--module-artilheiro-primary);">sports_soccer</span> ' + escapeHtml(j.nome) + '</span>'
+                            + '<span class="art-detalhe-jogador-gols gp">+' + j.gols + '</span>'
+                            + '</div>';
+                    });
+                }
+                if (golsContra.length > 0) {
+                    golsContra.forEach(j => {
+                        jogadoresHtml += '<div class="art-detalhe-jogador gc-jogador">'
+                            + '<span class="art-detalhe-jogador-nome"><span class="material-icons" style="color:var(--color-danger);">shield</span> ' + escapeHtml(j.nome) + '</span>'
+                            + '<span class="art-detalhe-jogador-gols gc">-' + j.golsContra + '</span>'
+                            + '</div>';
+                    });
+                }
+                if (golsPro.length === 0 && golsContra.length === 0) {
+                    jogadoresHtml = '<div class="art-detalhe-vazio">Nenhum gol nesta rodada</div>';
+                }
+
+                detalheContainer.innerHTML = '<div class="art-rodada-detalhe-inner">'
+                    + '<div class="art-detalhe-header">'
+                    + '<span class="art-detalhe-rodada-label">Rodada ' + rodadaNum + '</span>'
+                    + '<div class="art-detalhe-stats">'
+                    + '<span class="art-detalhe-stat gp">GP ' + gp + '</span>'
+                    + '<span class="art-detalhe-stat gc">GC ' + gc + '</span>'
+                    + '</div></div>'
+                    + '<div class="art-detalhe-jogadores">' + jogadoresHtml + '</div>'
+                    + '</div>';
+
+                detalheContainer.classList.add('open');
+                detalheContainer.style.maxHeight = detalheContainer.scrollHeight + 'px';
+            });
+        });
+    }
 }
 
 // =====================================================================
@@ -1031,7 +1174,7 @@ export function destruirArtilheiroParticipante() {
 
 window.destruirArtilheiroParticipante = destruirArtilheiroParticipante;
 
-if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Modulo v4.3 carregado (MatchdayService integration)");
+if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Modulo v5.0 carregado (UX elevada + MatchdayService)");
 
 // =====================================================================
 // MODULE LP — Landing Page Utils (Artilheiro)
