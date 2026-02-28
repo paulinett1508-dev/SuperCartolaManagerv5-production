@@ -765,7 +765,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                     const pos = idx + 1;
                     const posDisplay = pos === 1 ? '<span class="material-symbols-outlined" style="font-size: 16px; color: var(--app-gold);">emoji_events</span>' : pos + '\u00BA';
                     const pts = getPontos(time).toFixed(1);
-                    const tid = time.timeId || time.time_id || '';
+                    const tid = time.participanteId || time.timeId || time.time_id || '';
 
                     const rodadas = _resumoRodadasGoleiro(time.rodadas);
 
