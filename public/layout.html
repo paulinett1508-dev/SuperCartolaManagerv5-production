@@ -1179,16 +1179,7 @@
                             mainContent.style.opacity = '1';
                         });
 
-                        // Executar scripts da nova página
-                        this.executeScripts(pageScripts, newScripts);
-
-                        // Atualizar navegação ativa
-                        if (window.navigationSystem) {
-                            window.navigationSystem.setActiveNavigation();
-                            window.navigationSystem.updatePageTitle();
-                        }
-
-                        // ✅ FIX: Limpar guards de página antes de reinicializar
+                        // ✅ FIX: Limpar guards de página ANTES de executar scripts
                         const pageName = url?.split('?')[0]?.split('/').pop();
 
                         // Resetar guards de páginas específicas para permitir re-inicialização
@@ -1200,7 +1191,7 @@
                             window.__gerenciar_state.initialized = false;
                             window.__gerenciar_state.lastInitTimestamp = 0;
                         }
-                        // ✅ FIX: Reset guards do gerenciar-modulos.html
+                        // Reset guards do gerenciar-modulos.html
                         if (window.__gm_state) {
                             window.__gm_state.initRunning = false;
                         }
@@ -1208,6 +1199,15 @@
                             window.__gm_ready_guard = false;
                             window.__gm_domcontent_guard = false;
                             window.__gm_spa_guard = false;
+                        }
+
+                        // Executar scripts da nova página (após reset de guards)
+                        this.executeScripts(pageScripts, newScripts);
+
+                        // Atualizar navegação ativa
+                        if (window.navigationSystem) {
+                            window.navigationSystem.setActiveNavigation();
+                            window.navigationSystem.updatePageTitle();
                         }
 
                         setTimeout(() => {
