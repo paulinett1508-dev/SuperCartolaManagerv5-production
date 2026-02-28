@@ -33,7 +33,7 @@ export class MelhorMesOrquestrador {
       MelhorMesUI = window.MelhorMesUI;
     } else {
       try {
-        const v = "20260228-2";
+        const v = "20260228-3";
         const configModule = await import(`./melhor-mes-config.js?v=${v}`);
         const coreModule = await import(`./melhor-mes-core.js?v=${v}`);
         const uiModule = await import(`./melhor-mes-ui.js?v=${v}`);

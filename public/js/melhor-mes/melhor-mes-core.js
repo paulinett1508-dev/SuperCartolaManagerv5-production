@@ -7,7 +7,7 @@ import {
   MELHOR_MES_CONFIG,
   getPremiosLiga,
   atualizarEdicoesDinamicas,
-} from "./melhor-mes-config.js";
+} from "./melhor-mes-config.js?v=20260228-3";
 
 console.log("[MELHOR-MES-CORE] Inicializando core business logic...");
 

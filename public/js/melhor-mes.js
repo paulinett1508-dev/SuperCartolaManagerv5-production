@@ -34,7 +34,7 @@ async function carregarModulos() {
 
   try {
     const orquestradorModule = await import(
-      "./melhor-mes/melhor-mes-orquestrador.js?v=20260228-2"
+      "./melhor-mes/melhor-mes-orquestrador.js?v=20260228-3"
     );
     melhorMesOrquestrador = orquestradorModule.melhorMesOrquestrador;
     modulosCarregados = true;
@@ -98,7 +98,7 @@ export async function getResultadosMelhorMes(ligaIdParam = null) {
 // ==============================
 
 import { getRankingRodadaEspecifica } from "./rodadas.js";
-import { MELHOR_MES_CONFIG } from "./melhor-mes/melhor-mes-config.js";
+import { MELHOR_MES_CONFIG } from "./melhor-mes/melhor-mes-config.js?v=20260228-3";
 
 // Fallback usa MELHOR_MES_CONFIG.edicoes (que pode ter sido atualizado dinamicamente)
 function getEdicoesFallback() {

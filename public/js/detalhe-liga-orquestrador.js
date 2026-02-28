@@ -1209,7 +1209,7 @@ async function carregarModuloMelhorMes() {
     if (!window.orquestrador.modules.melhorMes) {
         try {
             window.orquestrador.modules.melhorMes = await import(
-                "./melhor-mes.js?v=20260228-2"
+                "./melhor-mes.js?v=20260228-3"
             );
             await new Promise((resolve) => setTimeout(resolve, 200));
         } catch (error) {
