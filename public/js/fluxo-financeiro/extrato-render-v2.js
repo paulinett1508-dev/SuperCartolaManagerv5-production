@@ -262,13 +262,28 @@ function renderTimelineV2(rodadas, resumo, acertos, lancamentosIniciais) {
 
     // 2. Rodadas
     const rodadasValidas = (rodadas || []).filter(r => r.rodada && r.rodada > 0);
-    const rodadasOrdenadas = [...rodadasValidas].sort((a, b) => b.rodada - a.rodada); // Mais recente primeiro
+
+    // ✅ Gap-filling: preencher rodadas sem movimentação (alinhado com app participante)
+    const maxRodada = rodadasValidas.length > 0
+        ? Math.max(...rodadasValidas.map(r => r.rodada))
+        : 0;
+    const rodadasExistentes = new Map(rodadasValidas.map(r => [r.rodada, r]));
+    const rodadasCompletas = [];
+    for (let i = 1; i <= maxRodada; i++) {
+        rodadasCompletas.push(rodadasExistentes.get(i) || {
+            rodada: i, posicao: null, bonusOnus: 0, pontosCorridos: 0,
+            mataMata: 0, top10: 0, melhorMes: 0, artilheiro: 0, luvaOuro: 0,
+            _preenchida: true,
+        });
+    }
+
+    const rodadasOrdenadas = [...rodadasCompletas].sort((a, b) => b.rodada - a.rodada); // Mais recente primeiro
 
     let saldoAcumulado = lancamentosIniciais ? lancamentosIniciais.reduce((s, l) => s + (l.valor || 0), 0) : 0;
 
     // Calcular saldo acumulado para cada rodada (ordem cronológica)
     const saldosPorRodada = {};
-    [...rodadasValidas].sort((a, b) => a.rodada - b.rodada).forEach(r => {
+    [...rodadasCompletas].sort((a, b) => a.rodada - b.rodada).forEach(r => {
         const saldoRodada = (r.bonusOnus || 0) + (r.pontosCorridos || 0) + (r.mataMata || 0) + (r.top10 || 0) + (r.melhorMes || 0) + (r.artilheiro || 0) + (r.luvaOuro || 0);
         saldoAcumulado += saldoRodada;
         saldosPorRodada[r.rodada] = saldoAcumulado;
@@ -342,7 +357,7 @@ function renderTimelineV2(rodadas, resumo, acertos, lancamentosIniciais) {
                                     ${r.posicao ? ` · ${r.posicao}º` : ''}
                                     ${badgeHtml}
                                 </div>
-                                <div class="extrato-timeline-v2__group-subtitle">${details.length} módulo(s)</div>
+                                <div class="extrato-timeline-v2__group-subtitle">${details.length > 0 ? `${details.length} módulo(s)` : 'Sem movimentação'}</div>
                             </div>
                         </div>
                         <div class="extrato-timeline-v2__group-right">
