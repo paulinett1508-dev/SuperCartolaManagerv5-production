@@ -423,6 +423,16 @@ export const obterConfrontosPontosCorridos = async (
                 logger.log(`[PONTOS-CORRIDOS] 🔄 Cache vazio - tentando reconstruir de rodadas históricas (T${temporada}, passada=${isTemporadaPassada})...`);
                 dadosPorRodada = await reconstruirCacheDeRodadas(ligaId, temporada, config, timesMap);
             }
+        } else if (!mercadoFechado && rodadaAtualLiga > 1) {
+            // ✅ FIX: Cache parcialmente desatualizado — nova rodada consolidada pode não estar salva.
+            // Ocorre quando a consolidação avança o mercado mas o admin não salvou o cache explicitamente.
+            // Solução: se max(rodada no cache) < última rodada consolidada, reconstruir do zero.
+            const ultimaRodadaNoCache = Math.max(...dadosPorRodada.map(r => r.rodada));
+            const ultimaRodadaConsolidada = rodadaAtualLiga - 1;
+            if (ultimaRodadaConsolidada > 0 && ultimaRodadaNoCache < ultimaRodadaConsolidada) {
+                logger.log(`[PONTOS-CORRIDOS] 🔄 Cache desatualizado (R${ultimaRodadaNoCache} no cache, R${ultimaRodadaConsolidada} já consolidada) — reconstruindo rodadas faltantes...`);
+                dadosPorRodada = await reconstruirCacheDeRodadas(ligaId, temporada, config, timesMap);
+            }
         }
 
         // ✅ FIX: Atualizar caches permanentes com scores zerados usando dados reais da coleção rodadas.
