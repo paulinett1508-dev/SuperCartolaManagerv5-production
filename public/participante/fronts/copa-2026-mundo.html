@@ -53,17 +53,16 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════
-         JOGOS DO BRASIL (Destaque)
+         CALENDARIO DE JOGOS — Card consolidado (Stitch-style)
          ═══════════════════════════════════════════════════ -->
-    <section class="copa-section" id="copa-brasil-section">
+    <section class="copa-section" id="copa-calendario-section">
         <div class="copa-section-header">
-            <span class="copa-section-icon"><span class="material-icons">sports_soccer</span></span>
-            <h2 class="copa-section-title">Jogos do Brasil</h2>
-            <span class="copa-section-badge">Grupo C</span>
+            <span class="copa-section-icon"><span class="material-icons">calendar_month</span></span>
+            <h2 class="copa-section-title">Calendário de Jogos</h2>
         </div>
-        <div id="copa-brasil-jogos" class="copa-brasil-jogos">
-            <!-- Preenchido via JS -->
-            <div class="copa-loading-placeholder">Carregando...</div>
+        <div id="copa-calendario-card" class="copa-calendario-card">
+            <!-- Preenchido via JS: jogos organizados por grupo -->
+            <div class="copa-loading-placeholder">Carregando jogos...</div>
         </div>
     </section>
 
@@ -94,15 +93,15 @@
          ═══════════════════════════════════════════════════ -->
     <section class="copa-section" id="copa-grupos-section">
         <div class="copa-section-header">
-            <span class="copa-section-icon"><span class="material-icons">groups</span></span>
+            <span class="copa-section-icon"><span class="material-icons">emoji_events</span></span>
             <h2 class="copa-section-title">Fase de Grupos</h2>
-            <span class="copa-section-badge">12 grupos &bull; 48 selecoes</span>
+            <span class="copa-section-badge">12 grupos &bull; 48 seleções</span>
         </div>
 
         <!-- Toggle: Jogos vs Classificacao -->
         <div class="copa-view-toggle" id="copa-grupos-toggle">
             <button class="copa-view-toggle-btn copa-view-toggle-btn--active" data-view="jogos">Jogos</button>
-            <button class="copa-view-toggle-btn" data-view="classificacao">Classificacao</button>
+            <button class="copa-view-toggle-btn" data-view="classificacao">Classificação</button>
         </div>
 
         <!-- View: Jogos (accordion existente) -->
