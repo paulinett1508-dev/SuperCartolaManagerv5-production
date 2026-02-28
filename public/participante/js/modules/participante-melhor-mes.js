@@ -1,11 +1,18 @@
 // =====================================================================
-// PARTICIPANTE-MELHOR-MES.JS - v3.6 (Cache-First IndexedDB)
+// PARTICIPANTE-MELHOR-MES.JS - v3.7 (Cache-First IndexedDB)
+// ✅ v3.7: Fix escapeHtml local + comparação de cache robusta
 // ✅ v3.6: Cache-first com IndexedDB para carregamento instantâneo
 // ✅ v3.4: Scroll automático para última edição com dados
 // ✅ v3.5: Card "Seu Desempenho" com estatísticas do participante
 // =====================================================================
 
-if (window.Log) Log.info("[MELHOR-MES-PARTICIPANTE] 🏆 Módulo v3.6 carregando...");
+if (window.Log) Log.info("[MELHOR-MES-PARTICIPANTE] 🏆 Módulo v3.7 carregando...");
+
+// Sanitização XSS — local para não depender de ordem de carregamento
+function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
+}
 
 let ligaIdAtual = null;
 let timeIdAtual = null;
@@ -113,11 +120,13 @@ async function carregarMelhorMes(ligaId, timeId, usouCache = false, dadosCache =
             }
         }
 
-        // Só re-renderizar se dados mudaram ou se não usou cache antes
+        // v3.7: Comparação robusta — detecta mudanças em ranges, status e campeões
+        const edicoesFingerprint = (eds) =>
+            (eds || []).map(e => `${e.id}:${e.inicio}-${e.fim}:${e.status}:${e.campeao?.timeId || ''}`).join('|');
+
         const dadosMudaram = !usouCache ||
             !dadosCache ||
-            dadosCache.edicoes?.length !== dados.edicoes?.length ||
-            JSON.stringify(dadosCache.edicoes?.[0]?.campeao) !== JSON.stringify(dados.edicoes?.[0]?.campeao);
+            edicoesFingerprint(dadosCache.edicoes) !== edicoesFingerprint(dados.edicoes);
 
         if (dadosMudaram) {
             renderizarMelhorMes(dados.edicoes, timeId);
@@ -520,5 +529,5 @@ function mostrarErro(mensagem) {
 }
 
 if (window.Log) Log.info(
-    "[MELHOR-MES-PARTICIPANTE] ✅ Módulo v3.6 carregado (Cache-First IndexedDB)",
+    "[MELHOR-MES-PARTICIPANTE] ✅ Módulo v3.7 carregado (Cache-First IndexedDB)",
 );
