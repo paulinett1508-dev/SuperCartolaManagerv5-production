@@ -263,9 +263,11 @@ function _renderizarDisputa(dados, timeId) {
 
     const meuStatus = participantes?.find(p => String(p.timeId) === String(timeId));
 
-    // Zona de perigo: últimos min(qtdPerigo, vivos.length-1) da lista
-    const qtdPerigoDisplay = Math.min(qtdPerigo, Math.max(0, vivos.length - 1));
-    const isNaZonaPerigo = qtdPerigoDisplay > 0 &&
+    const isLive = dados.isLive || _isRodadaAoVivo();
+
+    // Zona de perigo: só durante live (entre rodadas não há perigo ativo)
+    const qtdPerigoDisplay = isLive ? Math.min(qtdPerigo, Math.max(0, vivos.length - 1)) : 0;
+    const isNaZonaPerigo = isLive && qtdPerigoDisplay > 0 &&
         vivos.slice(-qtdPerigoDisplay).some(v => String(v.timeId) === String(timeId));
 
     const escapouLanterna = _wasLanterna && !isNaZonaPerigo;
@@ -275,8 +277,6 @@ function _renderizarDisputa(dados, timeId) {
     if (parentContainer) {
         parentContainer.classList.toggle('user-is-lanterna', isNaZonaPerigo);
     }
-
-    const isLive = dados.isLive || _isRodadaAoVivo();
     const isProjetado = dados.isProjetado === true;
     const lider = vivos[0];
     const isCampeao = lider?.status === 'campeao';
@@ -402,10 +402,10 @@ function _renderizarDisputa(dados, timeId) {
         vivosRestantes.forEach((p, idx) => {
             const pos = idx + 2;
             const isMeuTime = String(p.timeId) === String(timeId);
-            const isNaZona = idx >= idxZonaInicio;
+            const isNaZona = isLive && idx >= idxZonaInicio;
 
-            // Separador antes da zona de perigo (só quando há vivos fora da zona)
-            if (idx === idxZonaInicio && idxZonaInicio > 0) {
+            // Separador antes da zona de perigo (só durante live quando há vivos fora da zona)
+            if (isLive && idx === idxZonaInicio && idxZonaInicio > 0) {
                 html += `
                     <div class="ru-zona-perigo${isProjetado ? ' projetado' : ''}">
                         <span class="material-icons" style="font-size: 13px; margin-right: 4px;">warning</span>
@@ -431,9 +431,10 @@ function _renderizarDisputa(dados, timeId) {
                         <div>${escapeHtml(p.nomeCartoleiro || p.nome_cartola || p.nome || 'N/D')}</div>
                         <div class="ru-nome-time">${escapeHtml(p.nomeTime || '')}</div>
                     </div>
+                    <span class="resta-um-pontos ${ptsClass}">${pontosStr}</span>
                     ${isNaZona
-                        ? `<span class="ru-tag-eliminado"><span class="material-icons" style="font-size: 11px; vertical-align: middle;">person_off</span>&nbsp;ELIMINADO</span>`
-                        : `<span class="resta-um-pontos ${ptsClass}">${pontosStr}</span>`
+                        ? `<span class="ru-tag-em-perigo"><span class="material-icons" style="font-size: 11px; vertical-align: middle;">warning</span>&nbsp;EM PERIGO</span>`
+                        : ''
                     }
                 </div>
             `;
