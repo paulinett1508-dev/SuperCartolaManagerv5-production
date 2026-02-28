@@ -7,6 +7,12 @@ console.log("[MELHOR-MES] Sistema modular carregando...");
 let melhorMesOrquestrador = null;
 let modulosCarregados = false;
 
+// Sanitização XSS — local para não depender de ordem de carregamento do shared
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
+}
+
 // FUNÇÃO UTILITÁRIA PARA OBTER LIGA ID
 function getLigaId() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -285,7 +291,7 @@ function renderTabelaFallback(ranking, edicao) {
             <th style="min-width: 110px; text-align: left">Time</th>
             <th style="width: 48px; text-align: center">Escudo</th>
             <th style="width: 80px; text-align: center">Pontos</th>
-            ${isLigaCartoleirosSobral ? '<th style="width: 80px; text-align: center">Prêmio</th>' : ""}
+            ${hasPremios ? '<th style="width: 80px; text-align: center">Prêmio</th>' : ""}
           </tr>
         </thead>
         <tbody>${tabelaBodyHtml}</tbody>
