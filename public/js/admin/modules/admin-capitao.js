@@ -16,6 +16,7 @@ class AdminCapitao {
         this.ligas = [];
         this.config = null;
         this.wizard = null;
+        this.consolidando = false;
     }
 
     // ==========================================================================
@@ -89,7 +90,7 @@ class AdminCapitao {
         }
     }
 
-    renderDashboard(container, data) {
+    async renderDashboard(container, data) {
         const config = this.config;
         const respostas = config.wizard_respostas || {};
         const perguntas = this.wizard?.perguntas || [];
@@ -105,6 +106,44 @@ class AdminCapitao {
         const configuradoPor = config.configurado_por || '-';
         const temporada = config.temporada || new Date().getFullYear();
 
+        // Buscar ranking consolidado para exibir no dashboard
+        let rankingHtml = '';
+        let ultimaRodada = '-';
+        let ultimaAtualizacao = '-';
+        let totalParticipantes = 0;
+        try {
+            const rankRes = await fetch(`/api/capitao/${this.ligaId}/ranking?temporada=${temporada}`);
+            const rankData = rankRes.ok ? await rankRes.json() : {};
+            if (rankData.success && rankData.ranking?.length > 0) {
+                const ranking = rankData.ranking;
+                totalParticipantes = ranking.length;
+                // Última rodada = maior rodada no histórico do 1o colocado
+                const historico = ranking[0]?.historico_rodadas || [];
+                ultimaRodada = historico.length > 0 ? Math.max(...historico.map(h => h.rodada)) : '-';
+                rankingHtml = this._renderRankingPreview(ranking);
+            }
+        } catch (e) {
+            console.warn('[ADMIN-CL] Erro ao buscar ranking:', e);
+        }
+
+        // Buscar rodada atual do mercado
+        let rodadaAtual = '-';
+        let mercadoAberto = true;
+        try {
+            const mRes = await fetch('/api/cartola/mercado/status');
+            if (mRes.ok) {
+                const mData = await mRes.json();
+                rodadaAtual = mData.rodada_atual || '-';
+                mercadoAberto = mData.status_mercado === 1;
+            }
+        } catch (e) { /* silencioso */ }
+
+        // Calcular rodada sugerida para consolidação
+        const rodadaSugerida = mercadoAberto && typeof rodadaAtual === 'number'
+            ? rodadaAtual - 1
+            : rodadaAtual;
+        const precisaConsolidar = typeof ultimaRodada === 'number' && typeof rodadaSugerida === 'number' && ultimaRodada < rodadaSugerida;
+
         container.innerHTML = `
             <!-- Status do Modulo -->
             <div class="cl-stats-grid">
@@ -119,8 +158,55 @@ class AdminCapitao {
                     <div class="cl-stat-label">Temporada</div>
                 </div>
                 <div class="cl-stat">
-                    <div class="cl-stat-value" style="font-size:var(--app-font-xs);word-break:break-all;">${configuradoPor}</div>
-                    <div class="cl-stat-label">Configurado por</div>
+                    <div class="cl-stat-value" style="color:${precisaConsolidar ? 'var(--app-warning)' : 'var(--app-success)'};">R${ultimaRodada}</div>
+                    <div class="cl-stat-label">Consolidado ate</div>
+                </div>
+                <div class="cl-stat">
+                    <div class="cl-stat-value">${totalParticipantes}</div>
+                    <div class="cl-stat-label">Participantes</div>
+                </div>
+            </div>
+
+            <!-- Consolidacao -->
+            <div class="cl-card">
+                <div class="cl-card-header">
+                    <span class="cl-card-title">
+                        <span class="material-icons">update</span>
+                        Consolidacao
+                    </span>
+                    ${precisaConsolidar ? '<span style="font-size:var(--app-font-xs);color:var(--app-warning);display:flex;align-items:center;gap:4px;"><span class="material-icons" style="font-size:14px;">warning</span> Pendente</span>' : '<span style="font-size:var(--app-font-xs);color:var(--app-success);display:flex;align-items:center;gap:4px;"><span class="material-icons" style="font-size:14px;">check_circle</span> Em dia</span>'}
+                </div>
+
+                <div style="display:flex;align-items:center;gap:var(--app-space-3);flex-wrap:wrap;">
+                    <div>
+                        <label style="font-size:var(--app-font-xs);color:var(--app-text-muted);display:block;margin-bottom:4px;">Consolidar ate rodada</label>
+                        <input type="number" id="clRodadaFinal" value="${rodadaSugerida}" min="1" max="38"
+                               style="width:80px;padding:0.5rem;background:var(--app-bg);color:white;border:1px solid var(--app-border);border-radius:var(--app-radius-md);font-family:var(--app-font-mono);font-size:var(--app-font-sm);">
+                    </div>
+                    <div style="padding-top:18px;">
+                        <button class="cl-btn cl-btn-primary" id="clBtnConsolidar" onclick="window.adminCapitao.consolidar()">
+                            <span class="material-icons">sync</span>
+                            Consolidar Ranking
+                        </button>
+                    </div>
+                    <div style="padding-top:18px;font-size:var(--app-font-xs);color:var(--app-text-muted);">
+                        Mercado: ${mercadoAberto ? 'Aberto' : 'Fechado'} | Rodada API: ${rodadaAtual}
+                    </div>
+                </div>
+                <div id="clConsolidacaoStatus" style="margin-top:var(--app-space-2);"></div>
+            </div>
+
+            <!-- Ranking Preview -->
+            <div class="cl-card">
+                <div class="cl-card-header">
+                    <span class="cl-card-title">
+                        <span class="material-icons">leaderboard</span>
+                        Ranking Atual
+                    </span>
+                    <span style="font-size:var(--app-font-xs);color:var(--app-text-muted);">Top 10 de ${totalParticipantes}</span>
+                </div>
+                <div id="clRankingPreview">
+                    ${rankingHtml || '<div class="cl-empty" style="padding:var(--app-space-3);"><p>Nenhum dado consolidado ainda</p></div>'}
                 </div>
             </div>
 
@@ -238,6 +324,84 @@ class AdminCapitao {
             console.error('[ADMIN-CL] Erro ao salvar config:', err);
             if (window.SuperModal) SuperModal.toast.error('Erro de conexao');
         }
+    }
+
+    // ==========================================================================
+    // CONSOLIDACAO
+    // ==========================================================================
+
+    async consolidar() {
+        if (this.consolidando) return;
+
+        const rodadaFinal = parseInt(document.getElementById('clRodadaFinal')?.value);
+        if (!rodadaFinal || rodadaFinal < 1 || rodadaFinal > 38) {
+            if (window.SuperModal) SuperModal.toast.error('Rodada invalida (1-38)');
+            return;
+        }
+
+        const btn = document.getElementById('clBtnConsolidar');
+        const statusEl = document.getElementById('clConsolidacaoStatus');
+        this.consolidando = true;
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-icons" style="animation:spin 1s linear infinite;">sync</span> Consolidando...';
+        }
+        if (statusEl) {
+            statusEl.innerHTML = '<span style="font-size:var(--app-font-xs);color:var(--app-text-muted);">Processando rodadas 1-' + rodadaFinal + '... Pode demorar alguns segundos.</span>';
+        }
+
+        try {
+            const res = await fetch(`/api/capitao/${this.ligaId}/consolidar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ rodadaFinal, temporada: new Date().getFullYear() }),
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                if (window.SuperModal) SuperModal.toast.success('Ranking consolidado ate R' + rodadaFinal + '!');
+                await this.carregarDashboard();
+            } else {
+                if (statusEl) statusEl.innerHTML = '<span style="font-size:var(--app-font-xs);color:var(--app-danger);">' + (data.error || 'Erro desconhecido') + '</span>';
+                if (window.SuperModal) SuperModal.toast.error(data.error || 'Erro ao consolidar');
+            }
+        } catch (err) {
+            console.error('[ADMIN-CL] Erro ao consolidar:', err);
+            if (statusEl) statusEl.innerHTML = '<span style="font-size:var(--app-font-xs);color:var(--app-danger);">Erro de conexao</span>';
+            if (window.SuperModal) SuperModal.toast.error('Erro de conexao');
+        } finally {
+            this.consolidando = false;
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-icons">sync</span> Consolidar Ranking';
+            }
+        }
+    }
+
+    // ==========================================================================
+    // RENDER: RANKING PREVIEW (Top 10)
+    // ==========================================================================
+
+    _renderRankingPreview(ranking) {
+        const top = ranking.slice(0, 10);
+        return top.map((p, i) => {
+            const pos = p.posicao_final || (i + 1);
+            const pts = (Math.trunc((p.pontuacao_total || 0) * 100) / 100).toFixed(2);
+            const media = (Math.trunc((p.media_capitao || 0) * 100) / 100).toFixed(2);
+            const rodadas = p.rodadas_jogadas || 0;
+            const escudo = p.escudo || '/escudos/default.png';
+            return '<div class="cl-ranking-row">'
+                + '<span class="cl-ranking-pos">' + pos + 'o</span>'
+                + '<img src="' + escudo + '" alt="" onerror="this.style.display=\'none\'">'
+                + '<span class="cl-ranking-nome">' + (p.nome_cartola || '---') + '</span>'
+                + '<span style="font-size:var(--app-font-xs);color:var(--app-text-muted);min-width:30px;text-align:center;">' + rodadas + 'R</span>'
+                + '<span style="font-size:var(--app-font-xs);color:var(--app-text-muted);min-width:45px;text-align:right;">' + media + '</span>'
+                + '<span class="cl-ranking-pontos">' + pts + '</span>'
+                + '</div>';
+        }).join('');
     }
 
     // ==========================================================================

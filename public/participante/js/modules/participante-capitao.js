@@ -238,8 +238,6 @@ function renderizarRanking(ranking) {
         const posicao = participante.posicao_final || index + 1;
         const isMeuTime = String(participante.timeId) === String(estadoCapitao.timeId);
         const isPodium1 = posicao === 1;
-        const isPodium2 = posicao === 2;
-        const isPodium3 = posicao === 3;
 
         const escudoSrc = participante.escudo || `/escudos/${participante.clube_id || 'default'}.png`;
         const pontos = typeof truncarPontos === 'function' ? truncarPontos(participante.pontuacao_total || 0) : (participante.pontuacao_total || 0).toFixed(2);
@@ -249,16 +247,16 @@ function renderizarRanking(ranking) {
             'capitao-card',
             isMeuTime ? 'meu-time' : '',
             isPodium1 ? 'podium-1' : '',
-            isPodium2 ? 'podium-2' : '',
-            isPodium3 ? 'podium-3' : '',
         ].filter(Boolean).join(' ');
 
-        const posicaoIcon = isPodium1 ? '🥇' : isPodium2 ? '🥈' : isPodium3 ? '🥉' : `${posicao}º`;
+        const posicaoIcon = `${posicao}º`;
 
-        // Badge de campeão confirmado
-        const campeaoBadge = isPodium1 && estadoCapitao.temporadaEncerrada
-            ? '<span class="capitao-badge-captain">CAMPEÃO</span>'
-            : '<span class="capitao-badge-captain">[C]</span>';
+        // Badge apenas para o campeão (só 1o lugar premia)
+        const campeaoBadge = isPodium1
+            ? (estadoCapitao.temporadaEncerrada
+                ? '<span class="capitao-badge-captain">CAMPEÃO</span>'
+                : '<span class="capitao-badge-captain">[C]</span>')
+            : '';
 
         // ✅ NOVO LAYOUT: Botão "Ver Histórico" compacto
         const historico = participante.historico_rodadas || [];
