@@ -34,7 +34,7 @@ async function carregarModulos() {
 
   try {
     const orquestradorModule = await import(
-      "./melhor-mes/melhor-mes-orquestrador.js"
+      "./melhor-mes/melhor-mes-orquestrador.js?v=20260228-2"
     );
     melhorMesOrquestrador = orquestradorModule.melhorMesOrquestrador;
     modulosCarregados = true;
