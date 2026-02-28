@@ -1,0 +1,548 @@
+/**
+ * CAMPEAO WIDGET CSS - v1.0
+ * ========================
+ * Widget reutilizavel de celebracao de campeao.
+ * Usado por modulos que possuem campeao:
+ * Artilheiro, Luva de Ouro, Mata-Mata, Pontos Corridos,
+ * Resta Um, Tiro Certo, Copa SC, etc.
+ *
+ * Namespace: .cw-* (campeao-widget)
+ * Tokens: _app-tokens.css (zero hardcoded)
+ */
+
+/* ========================================
+   1. VARIAVEIS LOCAIS (scoped ao widget)
+   ======================================== */
+.cw-overlay,
+.cw-banner {
+    --cw-accent: var(--app-gold);
+    --cw-accent-muted: var(--app-gold-muted);
+    --cw-accent-border: rgba(255, 215, 0, 0.4);
+    --cw-accent-glow: rgba(255, 215, 0, 0.35);
+    --cw-accent-gradient: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.05) 100%);
+    --cw-shine-color: var(--app-gold);
+}
+
+/* ========================================
+   2. VARIANTES POR MODULO
+   ======================================== */
+.cw--artilheiro {
+    --cw-accent: var(--app-success-light);
+    --cw-accent-muted: var(--app-success-muted);
+    --cw-accent-border: rgba(34, 197, 94, 0.4);
+    --cw-accent-glow: rgba(34, 197, 94, 0.35);
+    --cw-accent-gradient: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%);
+    --cw-shine-color: var(--app-success-light);
+}
+
+.cw--luva {
+    --cw-accent: var(--app-gold);
+    --cw-accent-muted: var(--app-gold-muted);
+    --cw-accent-border: rgba(255, 215, 0, 0.4);
+    --cw-accent-glow: rgba(255, 215, 0, 0.35);
+    --cw-accent-gradient: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.05) 100%);
+    --cw-shine-color: var(--app-gold);
+}
+
+.cw--capitao {
+    --cw-accent: var(--app-purple);
+    --cw-accent-muted: var(--app-purple-muted);
+    --cw-accent-border: rgba(139, 92, 246, 0.4);
+    --cw-accent-glow: rgba(139, 92, 246, 0.35);
+    --cw-accent-gradient: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.05) 100%);
+    --cw-shine-color: var(--app-purple);
+}
+
+.cw--mata-mata,
+.cw--pontos-corridos {
+    --cw-accent: var(--app-primary);
+    --cw-accent-muted: var(--app-primary-muted);
+    --cw-accent-border: var(--app-primary-border);
+    --cw-accent-glow: rgba(255, 85, 0, 0.35);
+    --cw-accent-gradient: linear-gradient(135deg, rgba(255, 85, 0, 0.15) 0%, rgba(255, 85, 0, 0.05) 100%);
+    --cw-shine-color: var(--app-primary);
+}
+
+.cw--resta-um,
+.cw--tiro-certo {
+    --cw-accent: var(--app-gold);
+    --cw-accent-muted: var(--app-gold-muted);
+    --cw-accent-border: rgba(255, 215, 0, 0.4);
+    --cw-accent-glow: rgba(255, 215, 0, 0.35);
+    --cw-accent-gradient: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.05) 100%);
+    --cw-shine-color: var(--app-gold);
+}
+
+.cw--copa {
+    --cw-accent: var(--app-gold);
+    --cw-accent-muted: var(--app-gold-muted);
+    --cw-accent-border: rgba(255, 215, 0, 0.4);
+    --cw-accent-glow: rgba(255, 215, 0, 0.35);
+    --cw-accent-gradient: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.05) 100%);
+    --cw-shine-color: var(--app-gold);
+}
+
+/* ========================================
+   3. CELEBRATION OVERLAY (full-screen)
+   ======================================== */
+.cw-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.88);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: var(--app-z-modal, 600);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+    will-change: opacity;
+}
+
+.cw-overlay.cw-visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Content card inside overlay */
+.cw-celebration {
+    position: relative;
+    width: 90%;
+    max-width: 380px;
+    background: var(--app-surface);
+    border-radius: var(--app-radius-xl, 16px);
+    border: 2px solid var(--cw-accent-border);
+    box-shadow:
+        0 8px 40px rgba(0, 0, 0, 0.5),
+        0 0 60px var(--cw-accent-glow);
+    overflow: hidden;
+    transform: translateY(30px) scale(0.92);
+    opacity: 0;
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 0.4s ease;
+}
+
+.cw-overlay.cw-visible .cw-celebration {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+/* Top accent bar */
+.cw-celebration::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, var(--cw-accent), transparent);
+    box-shadow: 0 0 20px var(--cw-accent-glow);
+}
+
+/* Close button */
+.cw-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--app-radius-full, 50%);
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    color: var(--app-text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--app-transition-fast, 0.15s ease),
+                color var(--app-transition-fast, 0.15s ease);
+    z-index: 2;
+}
+
+.cw-close:hover,
+.cw-close:active {
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--app-text-primary);
+}
+
+/* Trophy section */
+.cw-trophy-area {
+    position: relative;
+    padding: 32px 24px 16px;
+    text-align: center;
+}
+
+/* Trophy glow ring */
+.cw-trophy-glow {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 88px;
+    height: 88px;
+    border-radius: var(--app-radius-full, 50%);
+    background: var(--cw-accent-gradient);
+    border: 2px solid var(--cw-accent-border);
+    margin-bottom: 16px;
+    animation: cw-trophy-pulse 2s ease-in-out infinite;
+}
+
+.cw-trophy-glow::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: var(--app-radius-full, 50%);
+    border: 1px solid var(--cw-accent-border);
+    opacity: 0.4;
+    animation: cw-ring-expand 2s ease-in-out infinite;
+}
+
+.cw-trophy-icon {
+    font-size: 44px;
+    color: var(--cw-accent);
+    filter: drop-shadow(0 4px 16px var(--cw-accent-glow));
+}
+
+/* Title & subtitle */
+.cw-title {
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: var(--app-font-xl, 18px);
+    font-weight: 400;
+    color: var(--cw-accent);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+    background: linear-gradient(90deg, var(--cw-accent), var(--cw-shine-color), var(--cw-accent));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: cw-shine 3s linear infinite;
+}
+
+.cw-subtitle {
+    font-size: var(--app-font-sm, 11px);
+    color: var(--app-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Champion info */
+.cw-champion-info {
+    padding: 0 24px 24px;
+}
+
+.cw-champion-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--app-radius-lg, 12px);
+    padding: 14px 16px;
+    border: 1px solid var(--cw-accent-border);
+}
+
+.cw-champion-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.cw-champion-escudo {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--app-radius-full, 50%);
+    border: 2px solid var(--cw-accent-border);
+    box-shadow: 0 0 12px var(--cw-accent-glow);
+    flex-shrink: 0;
+    object-fit: contain;
+}
+
+.cw-champion-details {
+    min-width: 0;
+}
+
+.cw-champion-label {
+    font-size: var(--app-font-xs, 10px);
+    color: var(--cw-accent);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.cw-champion-name {
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: var(--app-font-md, 14px);
+    font-weight: 400;
+    color: var(--app-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cw-champion-team {
+    font-size: var(--app-font-sm, 11px);
+    color: var(--app-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Value highlight (points, goals, etc.) */
+.cw-champion-value {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.cw-value-number {
+    font-family: var(--app-font-mono, monospace);
+    font-size: var(--app-font-2xl, 20px);
+    font-weight: 700;
+    color: var(--cw-accent);
+    line-height: 1;
+}
+
+.cw-value-label {
+    font-size: 8px;
+    color: var(--app-text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+}
+
+/* Status badge */
+.cw-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 9px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-weight: 600;
+    background: var(--cw-accent-muted);
+    color: var(--cw-accent);
+    margin-top: 12px;
+}
+
+.cw-status .material-icons,
+.cw-status .material-symbols-outlined {
+    font-size: 12px;
+    vertical-align: middle;
+}
+
+/* ========================================
+   4. BANNER CARD (inline, dentro de modulos)
+   ======================================== */
+.cw-banner {
+    background: var(--cw-accent-gradient);
+    border: 2px solid var(--cw-accent-border);
+    border-radius: var(--app-radius-lg, 12px);
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    opacity: 0;
+    transform: translateY(12px);
+    animation: cw-banner-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.cw-banner-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.cw-banner-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cw-banner-title .material-icons {
+    font-size: 22px;
+    color: var(--cw-accent);
+    filter: drop-shadow(0 2px 8px var(--cw-accent-glow));
+}
+
+.cw-banner-badge {
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 10px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: linear-gradient(90deg, var(--cw-accent), var(--cw-shine-color), var(--cw-accent));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: cw-shine 3s linear infinite;
+}
+
+.cw-banner-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 9px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-weight: 600;
+    background: var(--cw-accent-muted);
+    color: var(--cw-accent);
+}
+
+.cw-banner-status .material-icons,
+.cw-banner-status .material-symbols-outlined {
+    font-size: 12px;
+    vertical-align: middle;
+}
+
+.cw-banner-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+
+.cw-banner-champion-label {
+    font-size: 9px;
+    color: var(--cw-accent);
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+
+.cw-banner-champion-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--app-text-primary);
+}
+
+.cw-banner-champion-team {
+    font-size: var(--app-font-sm, 11px);
+    color: var(--app-text-muted);
+    margin-top: 2px;
+}
+
+.cw-banner-value {
+    text-align: right;
+}
+
+.cw-banner-value-number {
+    font-family: var(--app-font-mono, monospace);
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--cw-accent);
+}
+
+.cw-banner-value-label {
+    font-size: 8px;
+    color: var(--app-text-dim);
+    text-transform: uppercase;
+}
+
+/* ========================================
+   5. KEYFRAMES
+   ======================================== */
+
+/* Shine gradient animation (title/badge text) */
+@keyframes cw-shine {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+}
+
+/* Trophy pulse */
+@keyframes cw-trophy-pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 20px var(--cw-accent-glow);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 35px var(--cw-accent-glow);
+    }
+}
+
+/* Ring expand effect */
+@keyframes cw-ring-expand {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.4;
+    }
+    50% {
+        transform: scale(1.15);
+        opacity: 0;
+    }
+}
+
+/* Banner enter animation */
+@keyframes cw-banner-enter {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
+   6. RESPONSIVE
+   ======================================== */
+@media (min-width: 768px) {
+    .cw-celebration {
+        max-width: 420px;
+    }
+
+    .cw-trophy-glow {
+        width: 100px;
+        height: 100px;
+    }
+
+    .cw-trophy-icon {
+        font-size: 52px;
+    }
+
+    .cw-title {
+        font-size: var(--app-font-2xl, 20px);
+        letter-spacing: 3px;
+    }
+}
+
+/* ========================================
+   7. REDUCED MOTION
+   ======================================== */
+@media (prefers-reduced-motion: reduce) {
+    .cw-celebration,
+    .cw-overlay,
+    .cw-banner {
+        transition-duration: 0.01ms !important;
+    }
+
+    .cw-trophy-glow,
+    .cw-trophy-glow::after {
+        animation: none !important;
+    }
+
+    .cw-banner {
+        animation: none !important;
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* ========================================
+   8. FORCADORES RUSSO ONE (consistencia)
+   ======================================== */
+.cw-title,
+.cw-champion-name,
+.cw-banner-badge {
+    font-family: 'Russo One', sans-serif !important;
+    font-weight: 400 !important;
+}
