@@ -201,6 +201,15 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 | **NÃO confundir** | Criar componente do zero → `frontend-crafter`; Apenas estilizar → `frontend-crafter`; Direção estética → `frontend-design` (roda ANTES) |
 | **Localização** | `docs/skills/03-utilities/stitch-adapter.md` |
 
+#### delete-merged-branches
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `deletar branches`, `limpar branches`, `cleanup branches`, `higienizar branches`, `branches mergeadas`, `remover branches antigas`, `limpeza de branches` |
+| **Frases PT-BR** | "deletar branches mergeadas", "limpar branches que já foram mergeadas", "quais branches já foram mergeadas?", "remover branches antigas", "higienizar repositório", "limpeza de branches", "cleanup de branches", "branches com PR mergeado" |
+| **Contexto** | Higienização organizacional de branches remotas cujos PRs já foram mergeados. Remove apenas ponteiros — não afeta histórico, commits ou PRs |
+| **NÃO confundir** | Análise de branches (status/funcionalidade) → `analise-branches`; Git push/commit → `git-commit-push` |
+| **Localização** | `docs/skills/03-utilities/delete-merged-branches.md` |
+
 ---
 
 ### 04 - Project-Specific (Específicas do Super Cartola)
@@ -349,6 +358,9 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | "revisar design do participante" | `ux-auditor-app` | Consistência visual do app |
 | "como tá o visual do app" | `ux-auditor-app` | Estado do design do app |
 | "quais branches existem" | `analise-branches` | Análise git |
+| "deletar branches mergeadas" | `delete-merged-branches` | Higienização git |
+| "limpar branches antigas" | `delete-merged-branches` | Cleanup organizacional |
+| "cleanup branches" | `delete-merged-branches` | Remover ponteiros merged |
 | "executar auditoria mensal" | `context7-monthly-audit` | Auditoria preventiva |
 | "já existe esse CSS?" | `anti-frankenstein` | Checkpoint pré-criação |
 | "antes de criar esse componente" | `anti-frankenstein` | Governança de frontend |
@@ -389,6 +401,7 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | Design com Stitch MCP | Stitch MCP (gerar) → `frontend-design` (validar estetica) → `stitch-adapter` (avaliar + adaptar) → `anti-frankenstein` (governanca) → `frontend-crafter` (implementar) |
 | Variantes com Stitch MCP | Stitch MCP (generate_variants) → `frontend-design` (escolher melhor) → `stitch-adapter` → `anti-frankenstein` → `frontend-crafter` |
 | Redesign com Stitch MCP | Screenshot atual → Stitch MCP (redesign) → `frontend-design` → `stitch-adapter` → `anti-frankenstein` → `frontend-crafter` |
+| Higienização de branches | `analise-branches` → `delete-merged-branches` |
 | Documentação | `system-scribe` |
 | Deploy completo | `git-commit-push` → `replit-pull` |
 | Consulta API Cartola | `cartola-api` → `fact-checker` |
