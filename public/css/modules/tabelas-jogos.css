@@ -1,0 +1,191 @@
+/* ADMIN TABELAS DE JOGOS CSS - Modulo Especifico (Web/Desktop)
+   Arquivo: public/css/modules/tabelas-jogos.css
+   Baseado em admin-capitao.css (prefixo tj-)
+*/
+
+/* === Layout === */
+.tj-admin-container { max-width: 900px; margin: 0 auto; padding: var(--app-space-4); }
+.tj-admin-header {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--app-space-3); margin-bottom: var(--app-space-6);
+    background: var(--app-surface); border: 1px solid var(--app-border);
+    border-radius: var(--app-radius-lg); padding: var(--app-space-4) var(--app-space-6);
+    position: relative; overflow: hidden;
+}
+.tj-admin-header::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--laranja), var(--laranja-hover));
+}
+.tj-admin-header h1 { font-family: var(--app-font-brand); font-size: 1.5rem; color: white; margin: 0; display: flex; align-items: center; gap: var(--app-space-2); }
+.tj-admin-header p { font-size: var(--app-font-sm); color: var(--app-text-muted); margin: 0.25rem 0 0; }
+
+/* === Botao Voltar === */
+.tj-btn-voltar {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: var(--app-space-2) var(--app-space-3);
+    background: transparent; color: var(--app-text-muted);
+    border: 1px solid var(--app-border); border-radius: var(--app-radius-sm);
+    font-size: var(--app-font-xs); font-weight: 500; text-decoration: none;
+    transition: 0.15s ease; white-space: nowrap;
+}
+.tj-btn-voltar:hover { color: var(--laranja); border-color: var(--laranja); }
+.tj-btn-voltar .material-icons { font-size: 16px; }
+
+/* === Stats Grid === */
+.tj-stats-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: var(--app-space-3); margin-bottom: var(--app-space-4);
+}
+.tj-stat {
+    text-align: center; padding: var(--app-space-3);
+    background: var(--app-surface); border: 1px solid var(--app-border);
+    border-radius: var(--app-radius-md);
+}
+.tj-stat-value {
+    font-family: var(--app-font-mono); font-size: 1.5rem;
+    font-weight: 700; color: white;
+}
+.tj-stat-label {
+    font-size: var(--app-font-xs); color: var(--app-text-muted); margin-top: 0.25rem;
+}
+
+/* === Card Campeonato === */
+.tj-card {
+    background: var(--app-surface); border: 1px solid var(--app-border);
+    border-radius: var(--app-radius-lg); overflow: hidden;
+    margin-bottom: var(--app-space-4);
+}
+.tj-card-header {
+    display: flex; align-items: center; gap: var(--app-space-3);
+    padding: var(--app-space-4) var(--app-space-5);
+    border-bottom: 1px solid var(--app-border);
+    background: linear-gradient(135deg, var(--color-success-muted) 0%, transparent 100%);
+}
+.tj-card-icon {
+    width: 40px; height: 40px; border-radius: var(--app-radius-md);
+    background: linear-gradient(135deg, var(--color-success), var(--color-success-light));
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.tj-card-icon .material-icons { font-size: 22px; color: white; }
+.tj-card-title { font-family: var(--app-font-brand); font-size: 0.95rem; color: white; }
+.tj-card-subtitle { font-size: var(--app-font-xs); color: var(--app-text-muted); margin-top: 2px; }
+.tj-card-body { padding: 0; }
+
+/* === Rodadas Accordion === */
+.tj-rodada {
+    border-bottom: 1px solid var(--app-border);
+}
+.tj-rodada:last-child { border-bottom: none; }
+
+.tj-rodada-header {
+    display: flex; align-items: center; gap: var(--app-space-3);
+    padding: var(--app-space-3) var(--app-space-4);
+    cursor: pointer; transition: background 0.15s ease;
+    user-select: none;
+}
+.tj-rodada-header:hover { background: rgba(255,255,255,0.02); }
+
+.tj-rodada-num {
+    font-family: var(--app-font-mono); font-size: var(--app-font-sm);
+    font-weight: 700; color: white; min-width: 80px;
+}
+.tj-rodada-datas {
+    font-size: var(--app-font-xs); color: var(--app-text-muted); flex: 1;
+}
+.tj-rodada-chevron {
+    font-size: 20px; color: var(--app-text-muted);
+    transition: transform 0.2s ease;
+}
+.tj-rodada.tj-expanded .tj-rodada-chevron { transform: rotate(180deg); }
+
+/* Badges de status */
+.tj-badge {
+    font-family: var(--app-font-mono); font-size: 0.65rem; font-weight: 700;
+    padding: 2px 8px; border-radius: 10px; letter-spacing: 0.03em;
+}
+.tj-badge-atual {
+    background: var(--color-danger-muted, rgba(239,68,68,0.15));
+    color: var(--color-danger, #ef4444);
+}
+.tj-badge-concluida {
+    background: var(--color-success-muted);
+    color: var(--color-success-text);
+}
+.tj-badge-futura {
+    background: rgba(255,255,255,0.05);
+    color: var(--app-text-muted);
+}
+
+/* Rodada atual destaque */
+.tj-rodada-atual .tj-rodada-header {
+    background: rgba(239,68,68,0.03);
+}
+.tj-rodada-atual .tj-rodada-num {
+    color: var(--color-danger, #ef4444);
+}
+
+/* === Jogos dentro da rodada === */
+.tj-jogos {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+.tj-rodada.tj-expanded .tj-jogos {
+    max-height: 800px;
+}
+
+.tj-jogos-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 1px; padding: 0 var(--app-space-4) var(--app-space-3);
+    background: transparent;
+}
+
+.tj-jogo {
+    display: grid; grid-template-columns: 1fr auto 1fr;
+    align-items: center; gap: var(--app-space-2);
+    padding: var(--app-space-2) var(--app-space-3);
+    background: var(--app-bg); border-radius: var(--app-radius-sm);
+    font-size: var(--app-font-xs);
+}
+.tj-jogo-mandante { text-align: right; color: white; font-weight: 500; }
+.tj-jogo-visitante { text-align: left; color: white; font-weight: 500; }
+.tj-jogo-centro {
+    text-align: center; min-width: 60px;
+    font-family: var(--app-font-mono); font-weight: 700;
+}
+.tj-jogo-placar { color: white; font-size: var(--app-font-sm); }
+.tj-jogo-horario { color: var(--app-text-muted); font-size: 0.7rem; }
+.tj-jogo-adiado { color: var(--color-warning, #f59e0b); font-size: 0.65rem; font-weight: 600; }
+
+/* Status do jogo */
+.tj-jogo-live { border-left: 2px solid var(--color-danger, #ef4444); }
+.tj-jogo-live .tj-jogo-placar { color: var(--color-danger, #ef4444); }
+.tj-jogo-encerrado .tj-jogo-placar { color: var(--color-success-text); }
+
+.tj-jogo-meta {
+    grid-column: 1 / -1; text-align: center;
+    font-size: 0.65rem; color: var(--app-text-muted);
+    padding-top: 2px; border-top: 1px solid var(--app-border);
+    margin-top: 2px;
+}
+
+/* === Loading === */
+.tj-loading {
+    text-align: center; padding: var(--app-space-6);
+    color: var(--app-text-muted); font-size: var(--app-font-sm);
+}
+.tj-loading .material-icons {
+    font-size: 32px; display: block; margin: 0 auto var(--app-space-2);
+    animation: tj-spin 1s linear infinite;
+}
+@keyframes tj-spin { to { transform: rotate(360deg); } }
+
+/* === Empty State === */
+.tj-empty {
+    text-align: center; color: var(--app-text-muted); padding: var(--app-space-6);
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+    .tj-stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .tj-jogos-grid { grid-template-columns: 1fr; }
+}

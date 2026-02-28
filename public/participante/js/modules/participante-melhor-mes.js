@@ -215,23 +215,6 @@ function renderizarMelhorMes(edicoes, meuTimeId) {
         .map((edicao) => renderizarEdicaoCard(edicao, meuTimeIdNum))
         .join("");
 
-    container.querySelectorAll(".mm-card-expand-btn").forEach((btn) => {
-        btn.addEventListener("click", function (e) {
-            e.stopPropagation();
-            const card = this.closest(".mm-edicao-card");
-            const ranking = card.querySelector(".mm-ranking-expandido");
-            const icon = this.querySelector(".expand-arrow");
-
-            if (ranking.style.display === "none" || !ranking.style.display) {
-                ranking.style.display = "block";
-                icon.style.transform = "rotate(180deg)";
-            } else {
-                ranking.style.display = "none";
-                icon.style.transform = "rotate(0deg)";
-            }
-        });
-    });
-
     // ✅ v3.5: Renderizar card "Seu Desempenho" ao final
     renderizarCardDesempenho(edicoes, meuTimeIdNum, container);
 
@@ -397,6 +380,7 @@ function renderizarConquistas(conquistas) {
 // =====================================================================
 function renderizarEdicaoCard(edicao, meuTimeIdNum) {
     const campeao = edicao.campeao;
+    const isConsolidado = edicao.status === "consolidado" || edicao.status === "concluido";
     // Só considerar "sou campeão" se estiver ativo
     const souCampeao =
         campeao &&
@@ -421,21 +405,13 @@ function renderizarEdicaoCard(edicao, meuTimeIdNum) {
     }
 
     const edicaoIcon = edicoesIcons[edicao.id] || '<span class="material-symbols-outlined" style="font-size: 20px; color: #ff5c00;">event</span>';
-    const pontosFormatados = campeao
-        ? (Math.trunc(campeao.pontos_total * 100) / 100).toLocaleString("pt-BR", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-          })
-        : "0,00";
     const rodadasInfo =
         edicao.inicio && edicao.fim ? `R${edicao.inicio} - R${edicao.fim}` : "";
 
-    // Top 3 apenas ativos
+    // Ranking apenas ativos
     const rankingAtivos = edicao.ranking
         ? edicao.ranking.filter((t) => t.ativo !== false)
         : [];
-    const top3 = rankingAtivos.slice(0, 3);
-
     return `
         <div class="mm-edicao-card ${souCampeao ? "meu-titulo" : ""}">
             <!-- Header do Card -->
@@ -450,211 +426,56 @@ function renderizarEdicaoCard(edicao, meuTimeIdNum) {
                 </span>
             </div>
 
-            <!-- Campeão ou Aguardando -->
-            ${
-                campeao
-                    ? `
-                <div class="mm-card-campeao ${souCampeao ? "meu" : ""} ${campeao.ativo === false ? "inativo" : ""}">
-                    <div class="mm-campeao-badge">
-                        <span class="mm-campeao-icon"><span class="material-symbols-outlined" style="font-size: 24px; ${souCampeao ? 'color: #fbbf24;' : 'color: var(--app-amber);'}">${souCampeao ? "military_tech" : "emoji_events"}</span></span>
-                        <span class="mm-campeao-label">${souCampeao ? "VOCÊ É O CAMPEÃO!" : "CAMPEÃO"}</span>
-                    </div>
-                    <div class="mm-campeao-info">
-                        <span class="mm-campeao-nome">${escapeHtml(campeao.nome_time)}</span>
-                        <span class="mm-campeao-pontos">${pontosFormatados} pts</span>
-                    </div>
+            <!-- Ranking Completo -->
+            ${rankingAtivos.length > 0 ? `
+                <div class="mm-ranking-list" style="max-height: 280px; overflow-y: auto;">
+                ${(() => {
+                    const labelLider = isConsolidado ? 'CAMPEÃO' : 'LÍDER';
+                    const inativos = edicao.ranking ? edicao.ranking.filter(t => t.ativo === false) : [];
+                    let h = '';
+                    rankingAtivos.forEach((time, idx) => {
+                        const pos = idx + 1;
+                        const isMeu = Number(time.timeId) === meuTimeIdNum && time.ativo !== false;
+                        const pts = (Math.trunc(time.pontos_total * 100) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        const posDisplay = pos === 1 ? '<span class="material-symbols-outlined" style="font-size:16px;color:#fbbf24;">emoji_events</span>' : pos + '\u00BA';
+
+                        h += '<div class="mm-ranking-row' + (pos === 1 ? ' mm-ranking-lider' : '') + (isMeu ? ' mm-ranking-meu' : '') + '">'
+                            + '<div style="display:flex;align-items:center;gap:10px;">'
+                            + '<span class="mm-ranking-pos">' + posDisplay + '</span>'
+                            + '<div>'
+                            + '<div class="mm-ranking-nome' + (isMeu ? ' meu' : '') + '">' + escapeHtml(time.nome_time || 'N/D') + '</div>'
+                            + (pos === 1 ? '<div class="mm-ranking-badge-lider">' + labelLider + '</div>' : '')
+                            + '</div></div>'
+                            + '<span class="mm-ranking-pts' + (pos === 1 ? ' lider' : '') + '">' + pts + '</span>'
+                            + '</div>';
+                    });
+
+                    if (inativos.length > 0) {
+                        h += '<div style="padding:6px 14px;background:rgba(100,100,100,0.15);border-top:1px dashed rgba(100,100,100,0.4);border-bottom:1px dashed rgba(100,100,100,0.4);">'
+                            + '<span style="font-size:9px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">'
+                            + '<span class="material-icons" style="font-size:12px;vertical-align:middle;margin-right:4px;">person_off</span>'
+                            + 'Inativos</span></div>';
+                        inativos.forEach(time => {
+                            const pts = (Math.trunc(time.pontos_total * 100) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            h += '<div class="mm-ranking-row mm-ranking-inativo">'
+                                + '<div style="display:flex;align-items:center;gap:10px;">'
+                                + '<span class="mm-ranking-pos" style="color:#555;">\u2014</span>'
+                                + '<div><div class="mm-ranking-nome" style="color:#666;">' + escapeHtml(time.nome_time || 'N/D') + '</div></div></div>'
+                                + '<span class="mm-ranking-pts" style="color:#555;">' + pts + '</span>'
+                                + '</div>';
+                        });
+                    }
+                    return h;
+                })()}
                 </div>
-            `
-                    : `
+            ` : `
                 <div class="mm-card-aguardando">
                     <span class="mm-aguardando-icon"><span class="material-symbols-outlined" style="font-size: 24px; color: #9ca3af;">hourglass_empty</span></span>
                     <span class="mm-aguardando-text">Aguardando resultado...</span>
                 </div>
-            `
-            }
-
-            <!-- Pódio (Top 3) -->
-            ${
-                top3.length > 0
-                    ? `
-                <div class="mm-card-podio">
-                    ${top3
-                        .map((time, idx) => {
-                            const isMeu =
-                                Number(time.timeId) === meuTimeIdNum &&
-                                time.ativo !== false;
-                            const medalhaIcons = [
-                                '<span class="material-symbols-outlined" style="font-size: 20px; color: #fbbf24;">trophy</span>',
-                                '<span class="material-symbols-outlined" style="font-size: 20px; color: #9ca3af;">workspace_premium</span>',
-                                '<span class="material-symbols-outlined" style="font-size: 20px; color: var(--app-bronze);">workspace_premium</span>'
-                            ];
-                            const medalha = medalhaIcons[idx] || medalhaIcons[2];
-                            const pts = (Math.trunc(time.pontos_total * 10) / 10).toLocaleString(
-                                "pt-BR",
-                                {
-                                    minimumFractionDigits: 1,
-                                    maximumFractionDigits: 1,
-                                },
-                            );
-                            return `
-                            <div class="mm-podio-item ${isMeu ? "meu" : ""}">
-                                <span class="mm-podio-medal">${medalha}</span>
-                                <span class="mm-podio-nome">${escapeHtml(truncarNome(time.nome_time, 12))}</span>
-                                <span class="mm-podio-pts">${pts}</span>
-                            </div>
-                        `;
-                        })
-                        .join("")}
-                </div>
-            `
-                    : ""
-            }
-
-            <!-- Botão Expandir Ranking -->
-            ${
-                edicao.ranking && edicao.ranking.length > 3
-                    ? `
-                <button class="mm-card-expand-btn">
-                    <span>Ver ranking completo (${edicao.ranking.length})</span>
-                    <span class="expand-arrow material-icons">expand_more</span>
-                </button>
-
-                <!-- Ranking Expandido -->
-                <div class="mm-ranking-expandido" style="display: none;">
-                    ${renderizarRankingCards(edicao.ranking, meuTimeIdNum)}
-                </div>
-            `
-                    : ""
-            }
+            `}
         </div>
-
-        <style>
-            .mm-card-campeao.inativo {
-                opacity: 0.5;
-                filter: grayscale(60%);
-            }
-            .mm-ranking-card-item.inativo {
-                opacity: 0.5;
-                filter: grayscale(60%);
-            }
-            .mm-ranking-card-item.inativo .mm-rank-pos { color: #6b7280; }
-            .mm-ranking-card-item.inativo .mm-rank-nome { color: #6b7280; }
-            .mm-ranking-card-item.inativo .mm-rank-pts { color: #6b7280; }
-            .mm-ranking-divisor-inativos {
-                background: rgba(63, 63, 70, 0.5);
-                border-top: 1px solid #3f3f46;
-                padding: 8px 12px;
-                font-size: 10px;
-                color: #6b7280;
-                font-weight: 500;
-                margin-top: 8px;
-            }
-        </style>
     `;
-}
-
-// =====================================================================
-// RENDERIZAR RANKING EM CARDS
-// =====================================================================
-function renderizarRankingCards(ranking, meuTimeIdNum) {
-    if (!ranking || ranking.length === 0) {
-        return `<div class="mm-ranking-vazio">Sem dados disponíveis</div>`;
-    }
-
-    // Separar ativos de inativos
-    const ativos = ranking.filter((t) => t.ativo !== false);
-    const inativos = ranking.filter((t) => t.ativo === false);
-
-    // Mostrar do 4º ao 10º (top 3 já está no pódio)
-    const restanteAtivos = ativos.slice(3, 10);
-
-    let minhaPosicao = null;
-    let meusDados = null;
-    for (let i = 0; i < ativos.length; i++) {
-        if (Number(ativos[i].timeId) === meuTimeIdNum) {
-            minhaPosicao = i + 1;
-            meusDados = ativos[i];
-            break;
-        }
-    }
-
-    let html = "";
-
-    // Renderizar ativos (4º ao 10º)
-    if (restanteAtivos.length > 0) {
-        html += `<div class="mm-ranking-cards">`;
-        html += restanteAtivos
-            .map((time) => {
-                const isMeuTime = Number(time.timeId) === meuTimeIdNum;
-                const pts = (Math.trunc(time.pontos_total * 10) / 10).toLocaleString("pt-BR", {
-                    minimumFractionDigits: 1,
-                    maximumFractionDigits: 1,
-                });
-                return `
-                <div class="mm-ranking-card-item ${isMeuTime ? "meu" : ""}">
-                    <span class="mm-rank-pos">${time.posicao}º</span>
-                    <span class="mm-rank-nome">${escapeHtml(time.nome_time)}</span>
-                    <span class="mm-rank-pts">${pts}</span>
-                </div>
-            `;
-            })
-            .join("");
-        html += `</div>`;
-    }
-
-    // Card especial se usuário está fora do top 10
-    if (minhaPosicao && minhaPosicao > 10 && meusDados) {
-        const pts = (Math.trunc(meusDados.pontos_total * 10) / 10).toLocaleString("pt-BR", {
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1,
-        });
-        html += `
-            <div class="mm-ranking-minha-pos">
-                <span class="mm-minha-pos-label"><span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle; color: #ff5c00;">location_on</span> Sua posição:</span>
-                <div class="mm-ranking-card-item meu destacado">
-                    <span class="mm-rank-pos">${minhaPosicao}º</span>
-                    <span class="mm-rank-nome">${escapeHtml(meusDados.nome_time)}</span>
-                    <span class="mm-rank-pts">${pts}</span>
-                </div>
-            </div>
-        `;
-    }
-
-    // Seção de inativos
-    if (inativos.length > 0) {
-        html += `
-            <div class="mm-ranking-divisor-inativos">
-                <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle; color: #6b7280;">person_off</span> Participantes Inativos (${inativos.length})
-            </div>
-            <div class="mm-ranking-cards">
-        `;
-        html += inativos
-            .slice(0, 5)
-            .map((time) => {
-                const pts = (Math.trunc(time.pontos_total * 10) / 10).toLocaleString("pt-BR", {
-                    minimumFractionDigits: 1,
-                    maximumFractionDigits: 1,
-                });
-                return `
-                <div class="mm-ranking-card-item inativo">
-                    <span class="mm-rank-pos">—</span>
-                    <span class="mm-rank-nome">${escapeHtml(time.nome_time)}</span>
-                    <span class="mm-rank-pts">${pts}</span>
-                </div>
-            `;
-            })
-            .join("");
-        html += `</div>`;
-    }
-
-    if (ativos.length > 10) {
-        html += `<div class="mm-ranking-mais">+${ativos.length - 10} participantes ativos</div>`;
-    }
-
-    return (
-        html ||
-        `<div class="mm-ranking-vazio">Apenas ${ranking.length} participantes</div>`
-    );
 }
 
 // =====================================================================
