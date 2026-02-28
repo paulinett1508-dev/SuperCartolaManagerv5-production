@@ -848,6 +848,7 @@ const buscarModulosAtivos = async (req, res) => {
       regras: true,
       cartolaPro: false,
       tiroCerto: false,
+      restaUm: false,
       whatsHappening: true,
       raioX: true,
     };
