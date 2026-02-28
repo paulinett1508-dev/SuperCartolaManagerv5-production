@@ -210,6 +210,12 @@
                                 </a>
                             </li>
                             <li>
+                                <a href="tabelas-jogos.html" class="sidebar-accordion-item" data-page="tabelas-jogos.html">
+                                    <span class="material-icons">sports_soccer</span>
+                                    <span>Tabelas de Jogos</span>
+                                </a>
+                            </li>
+                            <li>
                                 <a href="#" class="sidebar-accordion-item" data-page="gerenciar-modulos.html" onclick="navegarGerenciarModulos(event)">
                                     <span class="material-icons">widgets</span>
                                     <span>Gerenciar Módulos</span>
@@ -690,6 +696,7 @@
                         'analisar-participantes.html': 'participantes',
                         // Operações
                         'ferramentas-rodadas.html': 'operacoes',
+                        'tabelas-jogos.html': 'operacoes',
                         'gerenciar-modulos.html': 'operacoes',
                         'modo-manutencao-avancado.html': 'operacoes',
                         'notificador.html': 'operacoes',
@@ -951,6 +958,7 @@
                         "modo-manutencao-avancado.html": { title: "Modo Manutenção", subtitle: "Configuração e Controle" },
                         "dashboard-saude.html": { title: "Saúde do Sistema", subtitle: "Monitoramento e Diagnóstico" },
                         "api-football-analytics.html": { title: "API Football", subtitle: "Monitoramento de APIs" },
+                        "tabelas-jogos.html": { title: "Tabelas de Jogos", subtitle: "Jogos dos Campeonatos" },
                     };
 
                     const pageInfo = titles[currentPage] || {
@@ -1026,7 +1034,8 @@
                     'admin-analises-ia.html',
                     'admin-validacao-migracao.html',
                     'migrar-localstorage-mongodb.html',
-                    'modo-manutencao-avancado.html'
+                    'modo-manutencao-avancado.html',
+                    'tabelas-jogos.html'
                 ],
 
                 init() {

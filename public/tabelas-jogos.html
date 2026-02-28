@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Tabelas de Jogos - Super Cartola Manager</title>
+        <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+        <!-- Design Tokens (SEMPRE PRIMEIRO) -->
+        <link rel="stylesheet" href="css/_admin-tokens.css" />
+        <link rel="stylesheet" href="style.css" />
+        <link rel="stylesheet" href="css/modules/dashboard-redesign.css" />
+        <link rel="stylesheet" href="css/modules/layout-horizontal.css" />
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+        <link rel="stylesheet" href="css/modules/super-modal.css" />
+        <!-- BrasileiraoTabela CSS -->
+        <link rel="stylesheet" href="participante/css/brasileirao-tabela.css" />
+        <script src="js/super-modal.js"></script>
+        <style>
+            /* ============================================================
+               TABELAS DE JOGOS - Admin
+               ============================================================ */
+
+            .tabelas-jogos-page {
+                background: var(--bg-base, #121212);
+                min-height: 100vh;
+            }
+
+            .tabelas-jogos-content {
+                padding: 20px 40px;
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+
+            /* Header */
+            .tabelas-jogos-header {
+                background: var(--bg-card, #1a1a1a);
+                border-radius: var(--radius-md, 10px);
+                padding: 16px 18px;
+                margin-bottom: 16px;
+                border: 1px solid var(--border-color, #2d2d2d);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .tabelas-jogos-header-info h1 {
+                font-family: 'Russo One', sans-serif;
+                font-size: 1.2rem;
+                font-weight: 400;
+                color: var(--text-white, #ffffff);
+                margin: 0 0 4px 0;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .tabelas-jogos-header-info p {
+                font-size: 0.75rem;
+                color: var(--text-muted, #9ca3af);
+                margin: 0;
+            }
+
+            .btn-voltar {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                padding: 8px 14px;
+                background: var(--bg-secondary, #252525);
+                color: var(--text-muted, #9ca3af);
+                border: 1px solid var(--border-color, #2d2d2d);
+                border-radius: 6px;
+                font-size: 0.75rem;
+                font-weight: 500;
+                text-decoration: none;
+                transition: all 0.2s ease;
+            }
+
+            .btn-voltar:hover {
+                background: var(--border-color, #2d2d2d);
+                color: var(--laranja, #FF5500);
+                border-color: var(--laranja, #FF5500);
+            }
+
+            .btn-voltar .material-icons {
+                font-size: 16px;
+            }
+
+            /* Card de Campeonato */
+            .campeonato-card {
+                background: var(--bg-card, #1a1a1a);
+                border-radius: var(--radius-md, 10px);
+                border: 1px solid var(--border-color, #2d2d2d);
+                overflow: hidden;
+            }
+
+            .campeonato-card-header {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 16px 20px;
+                border-bottom: 1px solid var(--border-color, #2d2d2d);
+                background: linear-gradient(135deg, var(--color-success-muted) 0%, transparent 100%);
+            }
+
+            .campeonato-card-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: 8px;
+                background: linear-gradient(135deg, var(--color-success), var(--color-success-light));
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+
+            .campeonato-card-icon .material-icons {
+                font-size: 22px;
+                color: var(--text-white, #fff);
+            }
+
+            .campeonato-card-title {
+                font-family: 'Russo One', sans-serif;
+                font-size: 0.95rem;
+                font-weight: 400;
+                color: var(--text-white, #ffffff);
+                margin: 0 0 2px 0;
+            }
+
+            .campeonato-card-subtitle {
+                font-size: 0.72rem;
+                color: var(--text-muted, #9ca3af);
+                margin: 0;
+            }
+
+            .campeonato-card-body {
+                padding: 16px;
+            }
+
+            /* Loading state */
+            .tabelas-loading {
+                text-align: center;
+                padding: 40px 20px;
+                color: var(--text-muted, #9ca3af);
+            }
+
+            .tabelas-loading .material-icons {
+                font-size: 32px;
+                animation: spin 1s linear infinite;
+                display: block;
+                margin: 0 auto 8px;
+            }
+
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+
+            /* Responsive */
+            @media (max-width: 1200px) {
+                .tabelas-jogos-content {
+                    max-width: 100%;
+                    padding: 20px 24px;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .tabelas-jogos-content {
+                    padding: 16px;
+                }
+
+                .tabelas-jogos-header {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 12px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="app-container">
+            <div id="sidebar-placeholder"></div>
+
+            <main class="app-main tabelas-jogos-page">
+                <div class="tabelas-jogos-content">
+                    <!-- Header -->
+                    <header class="tabelas-jogos-header">
+                        <div class="tabelas-jogos-header-info">
+                            <h1>
+                                <span class="material-icons" style="color: var(--laranja, #FF5500);">sports_soccer</span>
+                                Tabelas de Jogos
+                            </h1>
+                            <p>Acompanhe os jogos dos campeonatos em tempo real</p>
+                        </div>
+                        <a href="painel.html" class="btn-voltar">
+                            <span class="material-icons">arrow_back</span>
+                            Voltar
+                        </a>
+                    </header>
+
+                    <!-- Card: Campeonato Brasileiro 2026 - Série A -->
+                    <div class="campeonato-card">
+                        <div class="campeonato-card-header">
+                            <div class="campeonato-card-icon">
+                                <span class="material-icons">emoji_events</span>
+                            </div>
+                            <div>
+                                <h2 class="campeonato-card-title">Campeonato Brasileiro 2026 - Serie A</h2>
+                                <p class="campeonato-card-subtitle">Tabela completa com placares ao vivo</p>
+                            </div>
+                        </div>
+                        <div class="campeonato-card-body">
+                            <div id="brasileirao-container">
+                                <div class="tabelas-loading">
+                                    <span class="material-icons">sync</span>
+                                    Carregando tabela...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- BrasileiraoTabela Component -->
+        <script src="participante/js/brasileirao-tabela.js"></script>
+
+        <script type="module">
+            // ============================================================
+            // TABELAS DE JOGOS - Admin Page
+            // ============================================================
+
+            let _isInitialized = false;
+            let _isInitializing = false;
+
+            async function loadLayout() {
+                try {
+                    if (document.querySelector('.app-sidebar')) {
+                        return;
+                    }
+
+                    const response = await fetch("layout.html");
+                    const layoutHtml = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(layoutHtml, "text/html");
+                    const sidebar = doc.querySelector(".app-sidebar");
+                    if (sidebar) {
+                        document.getElementById("sidebar-placeholder")?.replaceWith(sidebar);
+                    }
+
+                    if (!window.__layoutScriptsInjected) {
+                        window.__layoutScriptsInjected = true;
+                        const scripts = doc.querySelectorAll("script");
+                        scripts.forEach((script) => {
+                            if (script.textContent.trim()) {
+                                const newScript = document.createElement("script");
+                                newScript.textContent = `(function(){${script.textContent}})();`;
+                                document.head.appendChild(newScript);
+                            }
+                        });
+                    }
+
+                    await waitForAccordionManager();
+                } catch (error) {
+                    console.error("[TABELAS-JOGOS] Erro ao carregar layout:", error);
+                }
+            }
+
+            function waitForAccordionManager() {
+                return new Promise((resolve) => {
+                    let attempts = 0;
+                    const maxAttempts = 20;
+
+                    const check = () => {
+                        attempts++;
+                        if (window.AccordionManager) {
+                            if (!window.AccordionManager._initialized) {
+                                window.AccordionManager.init();
+                            }
+                            if (typeof window.verificarMenuSuperAdmin === 'function') {
+                                window.verificarMenuSuperAdmin();
+                            }
+                            resolve();
+                        } else if (attempts < maxAttempts) {
+                            setTimeout(check, 100);
+                        } else {
+                            resolve();
+                        }
+                    };
+                    check();
+                });
+            }
+
+            async function carregarBrasileirao() {
+                if (!window.BrasileiraoTabela) {
+                    console.warn('[TABELAS-JOGOS] BrasileiraoTabela nao disponivel');
+                    const container = document.getElementById('brasileirao-container');
+                    if (container) {
+                        container.innerHTML = '<p style="text-align:center;color:var(--text-muted,#9ca3af);padding:20px;">Componente de tabela nao carregado.</p>';
+                    }
+                    return;
+                }
+
+                const temporada = new Date().getFullYear();
+                await window.BrasileiraoTabela.renderizar({
+                    containerId: 'brasileirao-container',
+                    temporada
+                });
+            }
+
+            async function initTabelasJogos() {
+                if (_isInitialized || _isInitializing) return;
+                _isInitializing = true;
+                console.log("[TABELAS-JOGOS] Inicializando...");
+
+                try {
+                    await loadLayout();
+                    await carregarBrasileirao();
+                    _isInitialized = true;
+                } catch (error) {
+                    console.error("[TABELAS-JOGOS] Erro na inicializacao:", error);
+                } finally {
+                    _isInitializing = false;
+                }
+            }
+
+            function resetState() {
+                _isInitialized = false;
+                _isInitializing = false;
+            }
+
+            // Guards SPA
+            if (!window.__tabelas_jogos_state) {
+                window.__tabelas_jogos_state = {
+                    domBound: false,
+                    spaBound: false,
+                    readyChecked: false
+                };
+            }
+
+            if (!window.__tabelas_jogos_state.domBound) {
+                window.__tabelas_jogos_state.domBound = true;
+                document.addEventListener("DOMContentLoaded", async () => {
+                    if (!window.location.pathname.includes('tabelas-jogos.html')) return;
+                    await initTabelasJogos();
+                });
+            }
+
+            if (!window.__tabelas_jogos_state.spaBound) {
+                window.__tabelas_jogos_state.spaBound = true;
+                window.addEventListener('spa:navigated', async (e) => {
+                    const { pageName } = e.detail || {};
+                    if (pageName === 'tabelas-jogos.html') {
+                        console.log('[TABELAS-JOGOS] Navegacao SPA detectada, reinicializando...');
+                        resetState();
+                        await initTabelasJogos();
+                    }
+                });
+            }
+
+            if (!window.__tabelas_jogos_state.readyChecked) {
+                window.__tabelas_jogos_state.readyChecked = true;
+                if (document.readyState === 'complete' && window.location.pathname.includes('tabelas-jogos.html')) {
+                    requestAnimationFrame(() => initTabelasJogos());
+                }
+            }
+        </script>
+    </body>
+</html>
