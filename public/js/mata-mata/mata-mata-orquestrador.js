@@ -1,4 +1,5 @@
-// MATA-MATA ORQUESTRADOR - Coordenador Principal v1.5
+// MATA-MATA ORQUESTRADOR - Coordenador Principal v1.8
+// ✅ v1.8: FIX - Persistir fases intermediárias no MongoDB (evita oitavas/primeira órfãs)
 // ✅ v1.5: Importa RODADA_FINAL_CAMPEONATO de season-config.js (elimina hardcode 38)
 // Responsável por: coordenação de módulos, carregamento dinâmico, cache
 // ✅ v1.4: FIX CRÍTICO - Verifica temporada da API antes de assumir dados anteriores
@@ -1033,6 +1034,8 @@ async function carregarFase(fase, ligaId) {
                 pontosDaRodadaAnterior,
                 jogosFaseAnterior,
               );
+        // ✅ v1.8: Persistir fase intermediária no MongoDB (evita fases órfãs quando admin pula fases)
+        await salvarFaseNoMongoDB(ligaId, edicaoAtual, faseAnterior, confrontosAnteriores, rodada_atual);
         vencedoresAnteriores = await extrairVencedores(confrontosAnteriores);
       }
       timesParaConfronto = vencedoresAnteriores;
