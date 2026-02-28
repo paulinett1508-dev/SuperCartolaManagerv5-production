@@ -368,6 +368,12 @@
         "path": "public/participante/css/copa-mundo-2026.css",
         "loadedBy": ["participante/index.html"],
         "description": "Tema Copa do Mundo 2026 com identidade visual do mundial"
+      },
+      {
+        "path": "public/participante/css/campeao-widget.css",
+        "loadedBy": ["participante/index.html"],
+        "description": "Widget reutilizavel de celebracao de campeao (overlay + banner). Namespace .cw-*",
+        "moduleColor": "--cw-accent (mapeavel por modulo)"
       }
     ]
   },

@@ -165,6 +165,9 @@ class ParticipanteNavigation {
         // ✅ Inicializar Widget "Raio-X da Rodada" (análise pós-rodada)
         this.inicializarRaioXWidget();
 
+        // ✅ Pré-carregar Widget "Campeão" (celebração de campeões)
+        this.inicializarCampeaoWidget();
+
         // ✅ v4.8: Atualizar módulos ao retornar do background (app resume)
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
@@ -431,6 +434,20 @@ class ParticipanteNavigation {
             }
         } catch (error) {
             if (window.Log) Log.warn('PARTICIPANTE-NAV', '⚠️ Erro ao inicializar Widget Raio-X:', error);
+        }
+    }
+
+    /**
+     * Widget "Campeao" - Celebracao de campeoes
+     * Pre-carrega o modulo para que window.CampeaoWidget fique disponivel
+     * para qualquer modulo que precise disparar celebracoes.
+     */
+    async inicializarCampeaoWidget() {
+        try {
+            await import('/participante/js/widgets/campeao-widget.js');
+            if (window.Log) Log.info('PARTICIPANTE-NAV', 'Widget "Campeao" pre-carregado');
+        } catch (error) {
+            if (window.Log) Log.warn('PARTICIPANTE-NAV', 'Erro ao pre-carregar Widget Campeao:', error);
         }
     }
 
