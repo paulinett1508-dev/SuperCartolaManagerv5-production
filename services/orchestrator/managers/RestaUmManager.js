@@ -79,6 +79,13 @@ export default class RestaUmManager extends BaseManager {
                 });
 
                 if (pendente) {
+                    // Idempotência: não processar a mesma rodada duas vezes
+                    const jaProcessadaPendente = pendente.historicoEliminacoes?.some(h => h.rodada === rodada);
+                    if (jaProcessadaPendente) {
+                        console.log(`[RESTA-UM] R${rodada} já foi processada (edição pendente) para liga ${ligaId} — ignorando`);
+                        return { pronto: true, ignorado: true, motivo: 'rodada_ja_processada' };
+                    }
+
                     pendente.status = 'em_andamento';
                     pendente.rodadaAtual = rodada;
                     await pendente.save();
@@ -102,6 +109,13 @@ export default class RestaUmManager extends BaseManager {
             if (edicao.rodadaFinal && rodada > edicao.rodadaFinal) {
                 console.log(`[RESTA-UM] Rodada ${rodada} fora do range da edição (até R${edicao.rodadaFinal})`);
                 return { pronto: true, ignorado: true };
+            }
+
+            // Idempotência: não processar a mesma rodada duas vezes
+            const jaProcessada = edicao.historicoEliminacoes?.some(h => h.rodada === rodada);
+            if (jaProcessada) {
+                console.log(`[RESTA-UM] R${rodada} já foi processada para liga ${ligaId} — ignorando (idempotência)`);
+                return { pronto: true, ignorado: true, motivo: 'rodada_ja_processada' };
             }
 
             edicao.rodadaAtual = rodada;
