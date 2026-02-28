@@ -282,6 +282,9 @@ async function carregarDadosERenderizar(ligaId, timeId, participante) {
 
     // Carregar notícias do time do coração em background
     carregarNoticiasDoMeuTime(participante);
+
+    // Carregar tabela do Brasileirão em background
+    carregarTabelaBrasileirao();
 }
 
 // =====================================================================
@@ -1887,5 +1890,30 @@ async function buscarCartoletasTime(timeId) {
     }
 }
 
+// =====================================================================
+// CARREGAR TABELA DO BRASILEIRÃO
+// =====================================================================
+async function carregarTabelaBrasileirao() {
+    try {
+        // Verificar se componente está disponível
+        if (!window.BrasileiraoTabela) {
+            if (window.Log) Log.debug("PARTICIPANTE-HOME", "Brasileirão: componente não carregado");
+            return;
+        }
+
+        // Obter temporada atual
+        const temporada = new Date().getFullYear();
+
+        await window.BrasileiraoTabela.renderizar({
+            containerId: 'home-brasileirao-placeholder',
+            temporada
+        });
+
+        if (window.Log) Log.info("PARTICIPANTE-HOME", "Tabela do Brasileirão carregada");
+    } catch (error) {
+        if (window.Log) Log.warn("PARTICIPANTE-HOME", "Erro ao carregar Brasileirão:", error);
+    }
+}
+
 if (window.Log)
-    Log.info("PARTICIPANTE-HOME", "Modulo v1.4 carregado");
+    Log.info("PARTICIPANTE-HOME", "Modulo v1.5 carregado");

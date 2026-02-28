@@ -1,0 +1,272 @@
+// =====================================================================
+// BRASILEIRAO TABELA ROUTES - v1.1
+// Endpoints para calendário completo do Brasileirão Série A
+// v1.1: Endpoint /ao-vivo para placares em tempo real
+// =====================================================================
+
+import express from 'express';
+import brasileiraoService from '../services/brasileirao-tabela-service.js';
+
+const router = express.Router();
+
+// =====================================================================
+// ENDPOINTS PÚBLICOS (Participante)
+// =====================================================================
+
+/**
+ * GET /api/brasileirao/resumo/:temporada
+ * Retorna resumo para exibição na home (rodada atual + próximas)
+ */
+router.get('/resumo/:temporada', async (req, res) => {
+    try {
+        const temporada = parseInt(req.params.temporada, 10);
+
+        if (isNaN(temporada) || temporada < 2020 || temporada > 2030) {
+            return res.status(400).json({
+                success: false,
+                erro: 'Temporada inválida',
+            });
+        }
+
+        const resultado = await brasileiraoService.obterResumoParaExibicao(temporada);
+        res.json(resultado);
+
+    } catch (error) {
+        console.error('[BRASILEIRAO-ROUTES] Erro resumo:', error);
+        res.status(500).json({
+            success: false,
+            erro: 'Erro ao buscar resumo do Brasileirão',
+        });
+    }
+});
+
+/**
+ * GET /api/brasileirao/rodada/:temporada/:rodada
+ * Retorna jogos de uma rodada específica
+ */
+router.get('/rodada/:temporada/:rodada', async (req, res) => {
+    try {
+        const temporada = parseInt(req.params.temporada, 10);
+        const rodada = parseInt(req.params.rodada, 10);
+
+        if (isNaN(temporada) || isNaN(rodada) || rodada < 1 || rodada > 38) {
+            return res.status(400).json({
+                success: false,
+                erro: 'Parâmetros inválidos',
+            });
+        }
+
+        const resultado = await brasileiraoService.obterTodasRodadas(temporada);
+
+        if (!resultado.success) {
+            return res.status(404).json(resultado);
+        }
+
+        const dadosRodada = resultado.rodadas[rodada];
+
+        if (!dadosRodada) {
+            return res.status(404).json({
+                success: false,
+                erro: `Rodada ${rodada} não encontrada`,
+            });
+        }
+
+        res.json({
+            success: true,
+            temporada,
+            rodada: dadosRodada,
+        });
+
+    } catch (error) {
+        console.error('[BRASILEIRAO-ROUTES] Erro rodada:', error);
+        res.status(500).json({
+            success: false,
+            erro: 'Erro ao buscar rodada',
+        });
+    }
+});
+
+/**
+ * GET /api/brasileirao/completo/:temporada
+ * Retorna calendário completo (todas as 38 rodadas)
+ */
+router.get('/completo/:temporada', async (req, res) => {
+    try {
+        const temporada = parseInt(req.params.temporada, 10);
+
+        if (isNaN(temporada) || temporada < 2020 || temporada > 2030) {
+            return res.status(400).json({
+                success: false,
+                erro: 'Temporada inválida',
+            });
+        }
+
+        const resultado = await brasileiraoService.obterTodasRodadas(temporada);
+        res.json(resultado);
+
+    } catch (error) {
+        console.error('[BRASILEIRAO-ROUTES] Erro completo:', error);
+        res.status(500).json({
+            success: false,
+            erro: 'Erro ao buscar calendário completo',
+        });
+    }
+});
+
+/**
+ * GET /api/brasileirao/proximo-jogo/:temporada
+ * Retorna o próximo jogo (para ativar polling)
+ */
+router.get('/proximo-jogo/:temporada', async (req, res) => {
+    try {
+        const temporada = parseInt(req.params.temporada, 10);
+        const resultado = await brasileiraoService.obterResumoParaExibicao(temporada);
+
+        if (!resultado.success) {
+            return res.status(404).json(resultado);
+        }
+
+        res.json({
+            success: true,
+            temporada,
+            proximo_jogo: resultado.proximo_jogo,
+            tem_jogos_ao_vivo: resultado.tem_jogos_ao_vivo,
+            rodada_atual: resultado.rodada_atual,
+        });
+
+    } catch (error) {
+        console.error('[BRASILEIRAO-ROUTES] Erro próximo jogo:', error);
+        res.status(500).json({
+            success: false,
+            erro: 'Erro ao buscar próximo jogo',
+        });
+    }
+});
+
+/**
+ * GET /api/brasileirao/ao-vivo/:temporada
+ * Retorna resumo com placares ao vivo (busca no jogos-ao-vivo e atualiza MongoDB)
+ * Cache: 30s em memória no service
+ */
+router.get('/ao-vivo/:temporada', async (req, res) => {
+    try {
+        const temporada = parseInt(req.params.temporada, 10);
+
+        if (isNaN(temporada) || temporada < 2020 || temporada > 2030) {
+            return res.status(400).json({
+                success: false,
+                erro: 'Temporada inválida',
+            });
+        }
+
+        const resultado = await brasileiraoService.obterResumoAoVivo(temporada);
+        res.json(resultado);
+
+    } catch (error) {
+        console.error('[BRASILEIRAO-ROUTES] Erro ao-vivo:', error);
+        res.status(500).json({
+            success: false,
+            erro: 'Erro ao buscar dados ao vivo',
+        });
+    }
+});
+
+// =====================================================================
+// ENDPOINTS ADMIN (Requer autenticação)
+// =====================================================================
+
+/**
+ * POST /api/brasileirao/sync/:temporada
+ * Força sincronização do calendário (Admin)
+ */
+router.post('/sync/:temporada', async (req, res) => {
+    try {
+        // TODO: Verificar autenticação admin
+        // if (!req.session?.usuario?.isAdmin) {
+        //     return res.status(403).json({ success: false, erro: 'Acesso negado' });
+        // }
+
+        const temporada = parseInt(req.params.temporada, 10);
+
+        if (isNaN(temporada) || temporada < 2020 || temporada > 2030) {
+            return res.status(400).json({
+                success: false,
+                erro: 'Temporada inválida',
+            });
+        }
+
+        console.log(`[BRASILEIRAO-ROUTES] Admin solicitou sync da temporada ${temporada}`);
+
+        const resultado = await brasileiraoService.sincronizarTabela(temporada, true);
+        res.json(resultado);
+
+    } catch (error) {
+        console.error('[BRASILEIRAO-ROUTES] Erro sync:', error);
+        res.status(500).json({
+            success: false,
+            erro: 'Erro ao sincronizar calendário',
+            detalhes: error.message,
+        });
+    }
+});
+
+/**
+ * GET /api/brasileirao/status
+ * Retorna status do serviço (Admin)
+ */
+router.get('/status', async (req, res) => {
+    try {
+        const status = brasileiraoService.obterStatus();
+        res.json({
+            success: true,
+            ...status,
+        });
+
+    } catch (error) {
+        console.error('[BRASILEIRAO-ROUTES] Erro status:', error);
+        res.status(500).json({
+            success: false,
+            erro: 'Erro ao obter status',
+        });
+    }
+});
+
+/**
+ * GET /api/brasileirao/admin/:temporada
+ * Retorna dados completos para painel admin
+ */
+router.get('/admin/:temporada', async (req, res) => {
+    try {
+        const temporada = parseInt(req.params.temporada, 10);
+
+        if (isNaN(temporada)) {
+            return res.status(400).json({
+                success: false,
+                erro: 'Temporada inválida',
+            });
+        }
+
+        const [calendario, status] = await Promise.all([
+            brasileiraoService.obterCalendarioCompleto(temporada),
+            Promise.resolve(brasileiraoService.obterStatus()),
+        ]);
+
+        res.json({
+            success: true,
+            temporada,
+            calendario: calendario.calendario || null,
+            fonte: calendario.fonte,
+            stats: calendario.stats,
+            service_status: status,
+        });
+
+    } catch (error) {
+        console.error('[BRASILEIRAO-ROUTES] Erro admin:', error);
+        res.status(500).json({
+            success: false,
+            erro: 'Erro ao obter dados admin',
+        });
+    }
+});
+
+export default router;

@@ -374,6 +374,12 @@
         "loadedBy": ["participante/index.html"],
         "description": "Widget reutilizavel de celebracao de campeao (overlay + banner). Namespace .cw-*",
         "moduleColor": "--cw-accent (mapeavel por modulo)"
+      },
+      {
+        "path": "public/participante/css/brasileirao-tabela.css",
+        "loadedBy": ["participante/index.html"],
+        "description": "Faixa Tabela do Brasileirão colapsável (Landing Page style). Namespace .brasileirao-*",
+        "moduleColor": "--app-success (verde-campo)"
       }
     ]
   },

@@ -153,6 +153,12 @@ router.addRoute('/repositorio', async (params) => {
   await render(params);
 });
 
+// Calendario Brasileirao
+router.addRoute('/calendario-brasileirao', async (params) => {
+  const { render } = await import('./pages/calendario-brasileirao.js');
+  await render(params);
+});
+
 // Perfil
 router.addRoute('/profile', async (params) => {
   const { render } = await import('./pages/profile.js');

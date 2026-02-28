@@ -1,0 +1,943 @@
+/* =====================================================================
+   BRASILEIRAO TABELA - CSS v1.0
+   Faixa "Tabela do Brasileirão" com estilo Landing Page
+   Dark mode, verde-campo, design premium
+   ===================================================================== */
+
+/* === SECTION CONTAINER === */
+.brasileirao-section {
+    padding: 0;
+    position: relative;
+}
+
+/* === HEADER (Colapsável) === */
+.brasileirao-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 62px;
+    padding: 14px 16px;
+    /* Gradient verde-campo premium */
+    background: linear-gradient(135deg, #064e3b 0%, #0f172a 60%, #1e3a5f 100%);
+    border: 1px solid rgba(34, 197, 94, 0.28);
+    border-radius: 14px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+/* Linha decorativa no topo */
+.brasileirao-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #22c55e 0%, rgba(34, 197, 94, 0.25) 70%, transparent 100%);
+}
+
+/* Textura sutil */
+.brasileirao-header::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        -50deg,
+        transparent,
+        transparent 20px,
+        rgba(255, 255, 255, 0.008) 20px,
+        rgba(255, 255, 255, 0.008) 21px
+    );
+    pointer-events: none;
+}
+
+.brasileirao-header:active {
+    transform: scale(0.99);
+    opacity: 0.95;
+}
+
+.brasileirao-header-disabled {
+    cursor: default;
+    opacity: 0.7;
+}
+
+.brasileirao-header-disabled:active {
+    transform: none;
+    opacity: 0.7;
+}
+
+.brasileirao-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+}
+
+.brasileirao-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.brasileirao-icon .material-icons {
+    font-size: 22px;
+    color: #4ade80;
+}
+
+.brasileirao-header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.brasileirao-header-title {
+    font-family: 'Russo One', sans-serif;
+    font-size: 14px;
+    color: #ffffff;
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.brasileirao-header-sub {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.2;
+}
+
+.brasileirao-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    z-index: 1;
+}
+
+.brasileirao-live-badge {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Russo One', sans-serif;
+    font-size: 9px;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 4px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+}
+
+.brasileirao-live-dot {
+    width: 6px;
+    height: 6px;
+    background: #ef4444;
+    border-radius: 50%;
+    animation: brasileiraoPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes brasileiraoPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.brasileirao-chevron {
+    font-size: 22px;
+    color: rgba(255, 255, 255, 0.6);
+    transition: transform 0.3s ease;
+}
+
+/* Estado expandido */
+.brasileirao-section.expanded .brasileirao-header {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-color: transparent;
+}
+
+.brasileirao-section.expanded .brasileirao-chevron {
+    transform: rotate(180deg);
+}
+
+/* === CONTEÚDO COLAPSÁVEL === */
+.brasileirao-content {
+    max-height: 800px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+    background: linear-gradient(180deg, rgba(6, 78, 59, 0.12) 0%, var(--app-surface, #0a0a0a) 100%);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-top: none;
+    border-radius: 0 0 14px 14px;
+    opacity: 1;
+}
+
+.brasileirao-content.collapsed {
+    max-height: 0;
+    opacity: 0;
+    border: none;
+    overflow: hidden;
+}
+
+/* === RODADA ATUAL DESTACADA === */
+.brasileirao-rodada-atual {
+    padding: 12px;
+    background: rgba(34, 197, 94, 0.04);
+    border-bottom: 1px solid rgba(34, 197, 94, 0.1);
+}
+
+.brasileirao-rodada-header-inner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.brasileirao-rodada-badge {
+    font-family: 'Russo One', sans-serif;
+    font-size: 11px;
+    color: #4ade80;
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    padding: 4px 10px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+}
+
+.brasileirao-ao-vivo-pill {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.brasileirao-live-dot-sm {
+    width: 5px;
+    height: 5px;
+    background: #ef4444;
+    border-radius: 50%;
+    animation: brasileiraoPulse 1.5s ease-in-out infinite;
+}
+
+/* === LISTA DE JOGOS === */
+.brasileirao-jogos-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.brasileirao-jogo {
+    display: grid;
+    grid-template-columns: 36px 1fr 54px 1fr;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    transition: background 0.15s;
+}
+
+.brasileirao-jogo-live {
+    background: rgba(239, 68, 68, 0.06);
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.brasileirao-jogo-encerrado {
+    opacity: 0.7;
+}
+
+.brasileirao-jogo-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+}
+
+.brasileirao-jogo-data {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.4);
+    text-align: center;
+}
+
+.brasileirao-jogo-fim {
+    font-family: 'Inter', sans-serif;
+    font-size: 8px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.3);
+    text-transform: uppercase;
+}
+
+.brasileirao-jogo-live-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.brasileirao-live-dot-xs {
+    width: 8px;
+    height: 8px;
+    background: #ef4444;
+    border-radius: 50%;
+    animation: brasileiraoPulse 1.5s ease-in-out infinite;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+}
+
+.brasileirao-jogo-time {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.brasileirao-jogo-casa {
+    justify-content: flex-end;
+}
+
+.brasileirao-jogo-fora {
+    justify-content: flex-start;
+}
+
+.brasileirao-escudo {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.brasileirao-jogo-nome {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
+}
+
+.brasileirao-jogo-centro {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 54px;
+}
+
+.brasileirao-placar {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+}
+
+.brasileirao-horario {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: #4ade80;
+}
+
+.brasileirao-sem-jogos {
+    text-align: center;
+    padding: 20px;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 12px;
+}
+
+/* === PRÓXIMAS RODADAS === */
+.brasileirao-proximas {
+    padding: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.brasileirao-proximas-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Russo One', sans-serif;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.8px;
+    margin-bottom: 10px;
+}
+
+.brasileirao-proximas-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.brasileirao-proxima-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.brasileirao-proxima-num {
+    font-family: 'Russo One', sans-serif;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.brasileirao-proxima-datas {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* === CTA === */
+.brasileirao-cta {
+    padding: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.brasileirao-cta-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 10px;
+    font-family: 'Russo One', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+    background: linear-gradient(135deg, rgba(6, 78, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.brasileirao-cta-btn:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+}
+
+.brasileirao-cta-btn .material-icons {
+    font-size: 16px;
+    color: #4ade80;
+}
+
+/* === FOOTER === */
+.brasileirao-footer {
+    padding: 8px 12px;
+    text-align: center;
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.25);
+    border-top: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+/* === LOADING === */
+.brasileirao-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    background: linear-gradient(135deg, #064e3b 0%, #0f172a 100%);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: 14px;
+    gap: 12px;
+}
+
+.brasileirao-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid rgba(34, 197, 94, 0.2);
+    border-top-color: #4ade80;
+    border-radius: 50%;
+    animation: brasileiraoSpin 1s linear infinite;
+}
+
+@keyframes brasileiraoSpin {
+    to { transform: rotate(360deg); }
+}
+
+.brasileirao-loading span {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* === RESPONSIVO === */
+@media (min-width: 400px) {
+    .brasileirao-jogo-nome {
+        max-width: 100px;
+    }
+
+    .brasileirao-placar {
+        font-size: 15px;
+    }
+}
+
+@media (min-width: 500px) {
+    .brasileirao-jogo {
+        grid-template-columns: 40px 1fr 60px 1fr;
+    }
+
+    .brasileirao-jogo-nome {
+        max-width: 120px;
+        font-size: 12px;
+    }
+}
+
+/* =====================================================================
+   LANDING PAGE - TABELA COMPLETA (Full Screen)
+   ===================================================================== */
+
+.brasileirao-lp-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: var(--app-surface, #0a0a0a);
+    animation: brasileiraoLpSlideIn 0.3s ease-out;
+    overflow: hidden;
+}
+
+@keyframes brasileiraoLpSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.brasileirao-lp-overlay.brasileirao-lp-closing {
+    animation: brasileiraoLpSlideOut 0.3s ease-in forwards;
+}
+
+@keyframes brasileiraoLpSlideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+.brasileirao-lp-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Header da LP */
+.brasileirao-lp-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: linear-gradient(135deg, #064e3b 0%, #0f172a 100%);
+    border-bottom: 1px solid rgba(34, 197, 94, 0.2);
+    flex-shrink: 0;
+}
+
+.brasileirao-lp-back {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.brasileirao-lp-back:active {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.brasileirao-lp-back .material-icons {
+    font-size: 20px;
+    color: #ffffff;
+}
+
+.brasileirao-lp-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Russo One', sans-serif;
+    font-size: 16px;
+    color: #ffffff;
+    flex: 1;
+}
+
+.brasileirao-lp-title .material-icons {
+    font-size: 20px;
+    color: #4ade80;
+}
+
+.brasileirao-lp-spacer {
+    width: 36px;
+}
+
+/* Conteúdo da LP */
+.brasileirao-lp-content {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+.brasileirao-lp-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    gap: 16px;
+}
+
+.brasileirao-lp-loading span {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.brasileirao-lp-erro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    gap: 12px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.brasileirao-lp-erro .material-icons {
+    font-size: 48px;
+    color: rgba(239, 68, 68, 0.5);
+}
+
+/* Stats da LP */
+.brasileirao-lp-stats {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    padding: 20px 16px;
+    background: linear-gradient(180deg, rgba(6, 78, 59, 0.15) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.brasileirao-lp-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.brasileirao-lp-stat-valor {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.brasileirao-lp-stat-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.brasileirao-lp-stat-destaque .brasileirao-lp-stat-valor {
+    color: #4ade80;
+    font-size: 32px;
+}
+
+.brasileirao-lp-stat-destaque .brasileirao-lp-stat-label {
+    color: #4ade80;
+}
+
+/* Rodadas Acordeão */
+.brasileirao-lp-rodadas {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.brasileirao-lp-rodada {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.brasileirao-lp-rodada-atual {
+    background: rgba(34, 197, 94, 0.06);
+    border-color: rgba(34, 197, 94, 0.25);
+}
+
+.brasileirao-lp-rodada-passada {
+    opacity: 0.75;
+}
+
+.brasileirao-lp-rodada-header {
+    display: flex;
+    align-items: center;
+    padding: 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.brasileirao-lp-rodada-header:active {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.brasileirao-lp-rodada-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.brasileirao-lp-rodada-num {
+    font-family: 'Russo One', sans-serif;
+    font-size: 13px;
+    color: #ffffff;
+}
+
+.brasileirao-lp-rodada-datas {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.brasileirao-lp-badge-atual {
+    font-family: 'Russo One', sans-serif;
+    font-size: 8px;
+    color: #4ade80;
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    margin-right: 8px;
+}
+
+.brasileirao-lp-badge-concluida {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.06);
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-right: 8px;
+}
+
+.brasileirao-lp-rodada-chevron {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.4);
+    transition: transform 0.2s ease;
+}
+
+.brasileirao-lp-rodada.expanded .brasileirao-lp-rodada-chevron {
+    transform: rotate(180deg);
+}
+
+/* Jogos dentro da rodada */
+.brasileirao-lp-rodada-jogos {
+    padding: 0 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 600px;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.2s ease;
+}
+
+.brasileirao-lp-rodada-jogos.collapsed {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 0;
+}
+
+.brasileirao-lp-sem-jogos {
+    text-align: center;
+    padding: 16px;
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 12px;
+}
+
+.brasileirao-lp-jogo {
+    display: grid;
+    grid-template-columns: 1fr 70px 1fr;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.brasileirao-lp-jogo-live {
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.brasileirao-lp-jogo-encerrado {
+    opacity: 0.6;
+}
+
+.brasileirao-lp-jogo-time {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.brasileirao-lp-jogo-casa {
+    justify-content: flex-end;
+}
+
+.brasileirao-lp-jogo-fora {
+    justify-content: flex-start;
+}
+
+.brasileirao-lp-jogo-nome {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.brasileirao-lp-jogo-centro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
+
+.brasileirao-lp-placar {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.brasileirao-lp-horario {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: #4ade80;
+}
+
+.brasileirao-lp-live-dot {
+    width: 8px;
+    height: 8px;
+    background: #ef4444;
+    border-radius: 50%;
+    animation: brasileiraoPulse 1.5s ease-in-out infinite;
+}
+
+.brasileirao-lp-fim {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.35);
+    text-transform: uppercase;
+}
+
+/* === JOGOS ADIADOS === */
+.brasileirao-jogo-adiado {
+    background: rgba(251, 191, 36, 0.06);
+    border-color: rgba(251, 191, 36, 0.2);
+    opacity: 0.85;
+}
+
+.brasileirao-jogo-adiado-badge,
+.brasileirao-lp-adiado-badge {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    color: #fbbf24;
+    text-transform: uppercase;
+}
+
+.brasileirao-adiado,
+.brasileirao-lp-adiado {
+    font-family: 'Russo One', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.12);
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}
+
+.brasileirao-lp-jogo-adiado {
+    background: rgba(251, 191, 36, 0.06);
+    border-color: rgba(251, 191, 36, 0.2);
+    opacity: 0.85;
+}
+
+/* Data dentro do jogo na LP */
+.brasileirao-lp-jogo-data {
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.brasileirao-lp-data {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+/* Layout do jogo na LP com data */
+.brasileirao-lp-jogo {
+    display: grid;
+    grid-template-columns: 50px 1fr 70px 1fr;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    position: relative;
+}
+
+.brasileirao-lp-jogo-data {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 50px;
+}

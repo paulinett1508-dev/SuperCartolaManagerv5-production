@@ -114,6 +114,7 @@ import rodadaContextoRoutes from "./routes/rodada-contexto-routes.js";
 import rodadasCacheRoutes from "./routes/rodadasCacheRoutes.js";
 import rodadasCorrecaoRoutes from "./routes/rodadasCorrecaoRoutes.js";
 import calendarioRodadasRoutes from "./routes/calendario-rodadas-routes.js";
+import brasileiraoTabelaRoutes from "./routes/brasileirao-tabela-routes.js";
 import golsRoutes from "./routes/gols.js";
 import artilheiroCampeaoRoutes from "./routes/artilheiro-campeao-routes.js";
 import luvaDeOuroRoutes from "./routes/luva-de-ouro-routes.js";
@@ -217,6 +218,9 @@ import {
   alternarStatusParticipante,
 } from "./controllers/participanteStatusController.js";
 import { iniciarSchedulerConsolidacao } from "./utils/consolidacaoScheduler.js";
+
+// 📅 Sync Brasileirão (calendário completo)
+import syncBrasileirao from "./jobs/sync-brasileirao.js";
 
 // 🎯 Round-Market Orchestrator
 import orchestratorRoutes from "./routes/orchestrator-routes.js";
@@ -562,6 +566,7 @@ app.use("/api/rodada-contexto", rodadaContextoRoutes);
 app.use("/api/rodadas-cache", rodadasCacheRoutes);
 app.use("/api/rodadas-correcao", rodadasCorrecaoRoutes);
 app.use("/api/calendario-rodadas", calendarioRodadasRoutes);
+app.use("/api/brasileirao", brasileiraoTabelaRoutes);
 app.use("/api/gols", golsRoutes);
 app.use("/api/artilheiro-campeao", artilheiroCampeaoRoutes);
 app.use("/api/luva-de-ouro", luvaDeOuroRoutes);
@@ -982,6 +987,17 @@ if (process.env.NODE_ENV !== "test") {
       console.error('[SERVER] ⚠️ Orchestrator falhou ao iniciar (não-crítico):', err.message);
     }
   }, 15000);
+
+  // 📅 Inicializar Sync Brasileirão (sync diário do calendário às 06:00 BRT)
+  setTimeout(() => {
+    try {
+      console.log('[SERVER] 📅 Iniciando job de sync do Brasileirão...');
+      syncBrasileirao.iniciar();
+      console.log('[SERVER] 📅 Sync Brasileirão ativo (06:00 BRT diário)');
+    } catch (err) {
+      console.error('[SERVER] ⚠️ Sync Brasileirão falhou ao iniciar (não-crítico):', err.message);
+    }
+  }, 20000);
 
   // 🔔 CRON: Limpeza de push subscriptions expiradas
   // Toda segunda-feira às 3h da manhã
