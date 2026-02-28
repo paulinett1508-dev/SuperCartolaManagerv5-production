@@ -224,6 +224,11 @@ export async function consolidarMelhorMes(ligaId, rodadaAtual, temporada = null)
         } else {
             cache.edicoes.push(dadosEdicao);
         }
+
+        // ✅ Registrar prêmio no extrato quando edição é consolidada pela primeira vez
+        if (dadosEdicao.status === "consolidado" && dadosEdicao.campeao) {
+            await _premiarCampeao(ligaObjectId, configEdicao, dadosEdicao.campeao, temporadaFiltro);
+        }
     }
 
     // Ordenar edições por ID
@@ -430,6 +435,91 @@ function formatarResposta(cache) {
         temporada_encerrada: cache.temporada_encerrada,
         atualizado_em: cache.atualizado_em,
     };
+}
+
+// =====================================================================
+// INTEGRAÇÃO FINANCEIRA — PRÊMIO DO CAMPEÃO
+// =====================================================================
+
+/**
+ * Registra o prêmio de uma edição no extrato financeiro do campeão.
+ * Idempotente: verifica $elemMatch antes de inserir.
+ *
+ * @param {ObjectId|string} ligaId
+ * @param {Object} configEdicao - { id, nome, inicio, fim }
+ * @param {Object} campeao      - { timeId, nome_time, ... }
+ * @param {number} temporada
+ */
+async function _premiarCampeao(ligaId, configEdicao, campeao, temporada) {
+    try {
+        const ligaStr = String(ligaId);
+        const timeIdNum = Number(campeao.timeId);
+        const rodadaFim = Number(configEdicao.fim);
+
+        // Buscar config do wizard para obter valor do prêmio e flag integrar_extrato
+        const ligaObjectId = typeof ligaId === "string"
+            ? new mongoose.Types.ObjectId(ligaId)
+            : ligaId;
+        const config = await ModuleConfig.findOne({
+            liga_id: ligaObjectId,
+            modulo: "melhor_mes",
+            temporada: Number(temporada),
+        }).lean();
+
+        const integrarExtrato = config?.wizard_respostas?.integrar_extrato !== false;
+        const valorPremio = parseFloat(config?.wizard_respostas?.valor_campeao_edicao) || 0;
+
+        if (!integrarExtrato || valorPremio <= 0) {
+            console.log(`${LOG_PREFIX} ⏭️ Prêmio da edição ${configEdicao.id} não integrado (integrar_extrato=${integrarExtrato}, valor=${valorPremio})`);
+            return;
+        }
+
+        // Idempotência: verificar se já existe registro MELHOR_MES para este rodadaFim no extrato
+        const jaExiste = await ExtratoFinanceiroCache.findOne({
+            liga_id: ligaStr,
+            time_id: timeIdNum,
+            temporada: Number(temporada),
+            historico_transacoes: {
+                $elemMatch: { tipo: "MELHOR_MES", rodada: rodadaFim },
+            },
+        }).lean();
+
+        if (jaExiste) {
+            console.log(`${LOG_PREFIX} ✅ Prêmio edição ${configEdicao.id} já registrado para time ${timeIdNum}`);
+            return;
+        }
+
+        // Montar transação no formato suportado pelo extrato (consolidado + legado)
+        const novaTransacao = {
+            rodada: rodadaFim,
+            bonusOnus: 0,
+            pontosCorridos: 0,
+            mataMata: 0,
+            top10: 0,
+            melhorMes: valorPremio,
+            saldo: valorPremio,
+            saldoAcumulado: 0, // Recalculado pelo controller ao ler
+            tipo: "MELHOR_MES",
+            valor: valorPremio,
+            descricao: `Prêmio Melhor do Mês - ${configEdicao.nome} (Rods. ${configEdicao.inicio}-${configEdicao.fim})`,
+            data: new Date(),
+        };
+
+        // Inserir apenas se o extrato do participante já existe
+        const resultado = await ExtratoFinanceiroCache.updateOne(
+            { liga_id: ligaStr, time_id: timeIdNum, temporada: Number(temporada) },
+            { $push: { historico_transacoes: novaTransacao } },
+        );
+
+        if (resultado.matchedCount === 0) {
+            console.warn(`${LOG_PREFIX} ⚠️ Extrato do time ${timeIdNum} não encontrado — prêmio não inserido automaticamente`);
+        } else {
+            console.log(`${LOG_PREFIX} 💰 Prêmio R$${valorPremio} da edição ${configEdicao.id} registrado no extrato do time ${timeIdNum} (rod. ${rodadaFim})`);
+        }
+    } catch (err) {
+        // Não propaga erro — integração financeira não deve impedir consolidação
+        console.error(`${LOG_PREFIX} ❌ Erro ao registrar prêmio no extrato:`, err.message);
+    }
 }
 
 // =====================================================================
