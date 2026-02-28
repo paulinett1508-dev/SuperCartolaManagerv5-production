@@ -68,7 +68,12 @@
                 badge = '<span class="tj-badge tj-badge-atual">EM ANDAMENTO</span>';
             } else if (isPassada) {
                 const enc = rodada.jogos_encerrados || 0;
-                badge = '<span class="tj-badge tj-badge-concluida">' + enc + '/10</span>';
+                const total = rodada.total_jogos || 10;
+                const pendentes = total - enc;
+                badge = '<span class="tj-badge tj-badge-concluida">ENCERRADA</span>';
+                if (pendentes > 0) {
+                    badge += ' <span class="tj-badge tj-badge-pendente">' + pendentes + ' jogo' + (pendentes > 1 ? 's' : '') + ' pendente' + (pendentes > 1 ? 's' : '') + '</span>';
+                }
             } else {
                 badge = '<span class="tj-badge tj-badge-futura">A JOGAR</span>';
             }

@@ -115,6 +115,10 @@
     background: rgba(255,255,255,0.05);
     color: var(--app-text-muted);
 }
+.tj-badge-pendente {
+    background: var(--color-warning-muted, rgba(245,158,11,0.15));
+    color: var(--color-warning, #f59e0b);
+}
 
 /* Rodada atual destaque */
 .tj-rodada-atual .tj-rodada-header {
