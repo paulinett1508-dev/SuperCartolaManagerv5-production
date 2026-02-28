@@ -210,39 +210,34 @@ const BrasileiraoTabela = {
                            isEncerrado ? 'brasileirao-jogo-encerrado' :
                            isAdiado ? 'brasileirao-jogo-adiado' : '';
 
-        let centro;
-        if (temPlacar) {
-            centro = `<span class="brasileirao-placar">${jogo.placar_mandante ?? 0} - ${jogo.placar_visitante ?? 0}</span>`;
-        } else if (isAdiado) {
-            centro = `<span class="brasileirao-adiado">ADIADO</span>`;
-        } else {
-            centro = `<span class="brasileirao-horario">${jogo.horario || 'A definir'}</span>`;
-        }
-
-        // Data + status badge
         const dataFormatada = this._formatarDataCurta(jogo.data);
-        let statusBadge;
+
+        // Info line content based on status
+        let infoContent;
         if (isAoVivo) {
-            statusBadge = `<span class="brasileirao-jogo-live-badge"><span class="brasileirao-live-dot-xs"></span></span>`;
+            infoContent = `<span class="brasileirao-live-dot-xs"></span><span class="brasileirao-jogo-live-label">AO VIVO</span>`;
         } else if (isEncerrado) {
-            statusBadge = `<span class="brasileirao-jogo-fim">${dataFormatada}</span>`;
+            infoContent = `<span class="brasileirao-jogo-fim">FIM</span><span class="brasileirao-jogo-data">${dataFormatada}</span>`;
         } else if (isAdiado) {
-            statusBadge = `<span class="brasileirao-jogo-adiado-badge">${dataFormatada}</span>`;
+            infoContent = `<span class="brasileirao-adiado">ADIADO</span><span class="brasileirao-jogo-data">${dataFormatada}</span>`;
         } else {
-            statusBadge = `<span class="brasileirao-jogo-data">${dataFormatada}</span>`;
+            infoContent = `<span class="brasileirao-jogo-data">${dataFormatada}</span><span class="brasileirao-horario">${jogo.horario || 'A definir'}</span>`;
         }
 
         return `
             <div class="brasileirao-jogo ${statusClass}">
-                <div class="brasileirao-jogo-status">${statusBadge}</div>
-                <div class="brasileirao-jogo-time brasileirao-jogo-casa">
+                <div class="brasileirao-jogo-linha">
                     ${this._renderEscudo(jogo.mandante_id)}
                     <span class="brasileirao-jogo-nome">${this._abreviarTime(jogo.mandante)}</span>
+                    ${temPlacar ? `<span class="brasileirao-jogo-gol">${jogo.placar_mandante ?? 0}</span>` : ''}
                 </div>
-                <div class="brasileirao-jogo-centro">${centro}</div>
-                <div class="brasileirao-jogo-time brasileirao-jogo-fora">
-                    <span class="brasileirao-jogo-nome">${this._abreviarTime(jogo.visitante)}</span>
+                <div class="brasileirao-jogo-linha">
                     ${this._renderEscudo(jogo.visitante_id)}
+                    <span class="brasileirao-jogo-nome">${this._abreviarTime(jogo.visitante)}</span>
+                    ${temPlacar ? `<span class="brasileirao-jogo-gol">${jogo.placar_visitante ?? 0}</span>` : ''}
+                </div>
+                <div class="brasileirao-jogo-info">
+                    ${infoContent}
                 </div>
             </div>
         `;
@@ -532,42 +527,34 @@ const BrasileiraoTabela = {
                                isEncerrado ? 'brasileirao-lp-jogo-encerrado' :
                                isAdiado ? 'brasileirao-lp-jogo-adiado' : '';
 
-            let centro;
-            if (temPlacar) {
-                centro = `<span class="brasileirao-lp-placar">${jogo.placar_mandante ?? 0} - ${jogo.placar_visitante ?? 0}</span>`;
-            } else if (isAdiado) {
-                centro = `<span class="brasileirao-lp-adiado">ADIADO</span>`;
-            } else {
-                centro = `<span class="brasileirao-lp-horario">${jogo.horario || 'A definir'}</span>`;
-            }
-
-            // Data formatada para exibição
             const dataFormatada = this._formatarDataCurta(jogo.data);
 
-            let statusIndicador;
+            // Info line content based on status
+            let infoContent;
             if (isAoVivo) {
-                statusIndicador = '<span class="brasileirao-lp-live-dot"></span>';
+                infoContent = `<span class="brasileirao-lp-live-dot"></span><span class="brasileirao-jogo-live-label">AO VIVO</span>`;
             } else if (isEncerrado) {
-                statusIndicador = `<span class="brasileirao-lp-fim">${dataFormatada}</span>`;
+                infoContent = `<span class="brasileirao-lp-fim">${dataFormatada}</span>`;
             } else if (isAdiado) {
-                statusIndicador = `<span class="brasileirao-lp-adiado-badge">${dataFormatada}</span>`;
+                infoContent = `<span class="brasileirao-lp-adiado">ADIADO</span><span class="brasileirao-lp-data">${dataFormatada}</span>`;
             } else {
-                statusIndicador = `<span class="brasileirao-lp-data">${dataFormatada}</span>`;
+                infoContent = `<span class="brasileirao-lp-data">${dataFormatada}</span><span class="brasileirao-lp-horario">${jogo.horario || 'A definir'}</span>`;
             }
 
             return `
                 <div class="brasileirao-lp-jogo ${statusClass}">
-                    <div class="brasileirao-lp-jogo-data">${statusIndicador}</div>
-                    <div class="brasileirao-lp-jogo-time brasileirao-lp-jogo-casa">
+                    <div class="brasileirao-lp-jogo-linha">
                         ${this._renderEscudo(jogo.mandante_id)}
                         <span class="brasileirao-lp-jogo-nome">${this._abreviarTime(jogo.mandante)}</span>
+                        ${temPlacar ? `<span class="brasileirao-lp-jogo-gol">${jogo.placar_mandante ?? 0}</span>` : ''}
                     </div>
-                    <div class="brasileirao-lp-jogo-centro">
-                        ${centro}
-                    </div>
-                    <div class="brasileirao-lp-jogo-time brasileirao-lp-jogo-fora">
-                        <span class="brasileirao-lp-jogo-nome">${this._abreviarTime(jogo.visitante)}</span>
+                    <div class="brasileirao-lp-jogo-linha">
                         ${this._renderEscudo(jogo.visitante_id)}
+                        <span class="brasileirao-lp-jogo-nome">${this._abreviarTime(jogo.visitante)}</span>
+                        ${temPlacar ? `<span class="brasileirao-lp-jogo-gol">${jogo.placar_visitante ?? 0}</span>` : ''}
+                    </div>
+                    <div class="brasileirao-lp-jogo-info">
+                        ${infoContent}
                     </div>
                 </div>
             `;

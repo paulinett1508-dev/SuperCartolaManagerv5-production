@@ -241,10 +241,9 @@
 }
 
 .brasileirao-jogo {
-    display: grid;
-    grid-template-columns: 36px 1fr 54px 1fr;
-    align-items: center;
-    gap: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
     padding: 10px 12px;
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid rgba(255, 255, 255, 0.05);
@@ -261,32 +260,68 @@
     opacity: 0.7;
 }
 
-.brasileirao-jogo-status {
+.brasileirao-jogo-linha {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.brasileirao-escudo {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.brasileirao-jogo-nome {
+    flex: 1;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.brasileirao-jogo-gol {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    min-width: 22px;
+    text-align: center;
+}
+
+.brasileirao-jogo-info {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
+    gap: 6px;
+    padding-top: 4px;
+    margin-top: 2px;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .brasileirao-jogo-data {
     font-family: 'Inter', sans-serif;
-    font-size: 9px;
+    font-size: 10px;
     color: rgba(255, 255, 255, 0.4);
-    text-align: center;
 }
 
 .brasileirao-jogo-fim {
     font-family: 'Inter', sans-serif;
-    font-size: 8px;
+    font-size: 9px;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.3);
     text-transform: uppercase;
 }
 
-.brasileirao-jogo-live-badge {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.brasileirao-jogo-live-label {
+    font-family: 'Russo One', sans-serif;
+    font-size: 9px;
+    color: #ef4444;
+    letter-spacing: 0.5px;
 }
 
 .brasileirao-live-dot-xs {
@@ -296,54 +331,6 @@
     border-radius: 50%;
     animation: brasileiraoPulse 1.5s ease-in-out infinite;
     box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
-}
-
-.brasileirao-jogo-time {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    min-width: 0;
-}
-
-.brasileirao-jogo-casa {
-    justify-content: flex-end;
-}
-
-.brasileirao-jogo-fora {
-    justify-content: flex-start;
-}
-
-.brasileirao-escudo {
-    width: 20px;
-    height: 20px;
-    object-fit: contain;
-    flex-shrink: 0;
-}
-
-.brasileirao-jogo-nome {
-    font-family: 'Inter', sans-serif;
-    font-size: 11px;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.85);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 80px;
-}
-
-.brasileirao-jogo-centro {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 54px;
-}
-
-.brasileirao-placar {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 14px;
-    font-weight: 700;
-    color: #ffffff;
-    letter-spacing: -0.5px;
 }
 
 .brasileirao-horario {
@@ -481,23 +468,13 @@
 
 /* === RESPONSIVO === */
 @media (min-width: 400px) {
-    .brasileirao-jogo-nome {
-        max-width: 100px;
+    .brasileirao-escudo {
+        width: 24px;
+        height: 24px;
     }
 
-    .brasileirao-placar {
-        font-size: 15px;
-    }
-}
-
-@media (min-width: 500px) {
-    .brasileirao-jogo {
-        grid-template-columns: 40px 1fr 60px 1fr;
-    }
-
-    .brasileirao-jogo-nome {
-        max-width: 120px;
-        font-size: 12px;
+    .brasileirao-jogo-gol {
+        font-size: 18px;
     }
 }
 
@@ -789,10 +766,9 @@
 }
 
 .brasileirao-lp-jogo {
-    display: grid;
-    grid-template-columns: 1fr 70px 1fr;
-    align-items: center;
-    gap: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
     padding: 10px 12px;
     background: rgba(255, 255, 255, 0.02);
     border-radius: 8px;
@@ -808,24 +784,16 @@
     opacity: 0.6;
 }
 
-.brasileirao-lp-jogo-time {
+.brasileirao-lp-jogo-linha {
     display: flex;
     align-items: center;
     gap: 8px;
-    min-width: 0;
-}
-
-.brasileirao-lp-jogo-casa {
-    justify-content: flex-end;
-}
-
-.brasileirao-lp-jogo-fora {
-    justify-content: flex-start;
 }
 
 .brasileirao-lp-jogo-nome {
+    flex: 1;
     font-family: 'Inter', sans-serif;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.85);
     white-space: nowrap;
@@ -833,19 +801,23 @@
     text-overflow: ellipsis;
 }
 
-.brasileirao-lp-jogo-centro {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-}
-
-.brasileirao-lp-placar {
+.brasileirao-lp-jogo-gol {
     font-family: 'JetBrains Mono', monospace;
     font-size: 16px;
     font-weight: 700;
     color: #ffffff;
+    min-width: 22px;
+    text-align: center;
+}
+
+.brasileirao-lp-jogo-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding-top: 4px;
+    margin-top: 2px;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .brasileirao-lp-horario {
@@ -905,39 +877,9 @@
     opacity: 0.85;
 }
 
-/* Data dentro do jogo na LP */
-.brasileirao-lp-jogo-data {
-    position: absolute;
-    top: 4px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 8px;
-    color: rgba(255, 255, 255, 0.35);
-}
-
 .brasileirao-lp-data {
     font-family: 'Inter', sans-serif;
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.45);
-}
-
-/* Layout do jogo na LP com data */
-.brasileirao-lp-jogo {
-    display: grid;
-    grid-template-columns: 50px 1fr 70px 1fr;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 12px;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    position: relative;
-}
-
-.brasileirao-lp-jogo-data {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 50px;
 }
