@@ -441,6 +441,7 @@ function renderizarEdicaoCard(edicao, meuTimeIdNum) {
                             + '<span class="mm-ranking-pos">' + posDisplay + '</span>'
                             + '<div>'
                             + '<div class="mm-ranking-nome' + (isMeu ? ' meu' : '') + '">' + escapeHtml(time.nome_time || 'N/D') + '</div>'
+                            + (time.nome_cartola ? '<div style="font-size:10px;color:#888;margin-top:1px;">' + escapeHtml(time.nome_cartola) + '</div>' : '')
                             + (pos === 1 ? '<div class="mm-ranking-badge-lider">' + labelLider + '</div>' : '')
                             + '</div></div>'
                             + '<span class="mm-ranking-pts' + (pos === 1 ? ' lider' : '') + '">' + pts + '</span>'
@@ -457,7 +458,9 @@ function renderizarEdicaoCard(edicao, meuTimeIdNum) {
                             h += '<div class="mm-ranking-row mm-ranking-inativo">'
                                 + '<div style="display:flex;align-items:center;gap:10px;">'
                                 + '<span class="mm-ranking-pos" style="color:#555;">\u2014</span>'
-                                + '<div><div class="mm-ranking-nome" style="color:#666;">' + escapeHtml(time.nome_time || 'N/D') + '</div></div></div>'
+                                + '<div><div class="mm-ranking-nome" style="color:#666;">' + escapeHtml(time.nome_time || 'N/D') + '</div>'
+                                + (time.nome_cartola ? '<div style="font-size:10px;color:#555;margin-top:1px;">' + escapeHtml(time.nome_cartola) + '</div>' : '')
+                                + '</div></div>'
                                 + '<span class="mm-ranking-pts" style="color:#555;">' + pts + '</span>'
                                 + '</div>';
                         });
