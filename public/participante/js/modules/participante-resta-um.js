@@ -373,7 +373,7 @@ function _renderizarDisputa(dados, timeId) {
                 <div class="ru-lider-topo">
                     <span class="ru-lider-badge${isProjetado ? ' projetado' : ''}">
                         <span class="material-icons" style="font-size: 13px; vertical-align: middle; margin-right: 2px;">emoji_events</span>
-                        ${isCampeao ? 'Campe&atilde;o' : 'Campe&atilde;o da Rodada'}
+                        ${isCampeao ? 'Campe&atilde;o' : 'The Best Survivor'}
                     </span>
                     <span class="ru-lider-pos${isProjetado ? ' projetado' : ''}">1&deg;</span>
                 </div>
