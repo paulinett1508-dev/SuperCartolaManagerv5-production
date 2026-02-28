@@ -171,7 +171,10 @@ export async function inicializarMataMata(params) {
     if (window.Log) Log.warn("[MATA-MATA] ⚠️ Config não carregada, usando default:", estado.tamanhoTorneio);
   }
 
-  // ✅ v7.3: Atualizar navegação de fases após carregar tamanho do torneio
+  // ✅ v8.2: Carregar rodadaAtual ANTES da navegação (senão fases ficam todas liberadas/bloqueadas com rodadaAtual=1)
+  await carregarStatusMercado();
+
+  // ✅ v7.3: Atualizar navegação de fases após carregar tamanho do torneio e rodadaAtual
   atualizarNavegacaoFases();
   atualizarContador();
 
@@ -220,7 +223,6 @@ export async function inicializarMataMata(params) {
   }
 
   try {
-    await carregarStatusMercado();
     await carregarEdicoesDisponiveis(usouCache);
     if (!usouCache) {
       setupEventListeners();
