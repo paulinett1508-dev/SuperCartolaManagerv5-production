@@ -447,7 +447,7 @@ function _nomeCompacto(nome) {
 function _resumoRodadasGoleiro(rodadas) {
     if (!rodadas || !Array.isArray(rodadas)) return [];
     return rodadas
-        .filter(r => r.goleiroNome && r.goleiroNome !== 'Sem goleiro' && (r.pontos || 0) > 0)
+        .filter(r => r.goleiroNome && r.goleiroNome !== 'Sem goleiro')
         .sort((a, b) => a.rodada - b.rodada)
         .map(r => ({
             rodada: r.rodada,
@@ -558,7 +558,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
         meusDados.rodadas.forEach((r) => {
             const nome = r.goleiroNome;
             const pontos = r.pontos || 0;
-            if (nome && nome !== "Sem goleiro" && pontos > 0) {
+            if (nome && nome !== "Sem goleiro") {
                 if (!goleirosMap[nome]) goleirosMap[nome] = { nome, pontos: 0, rodadas: 0 };
                 goleirosMap[nome].pontos += pontos;
                 goleirosMap[nome].rodadas += 1;
@@ -785,11 +785,12 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                         + '<div class="luva-collapse-inner">';
                     if (rodadas.length > 0) {
                         rodadas.forEach(r => {
-                            const cor = r.pontos >= 5 ? 'var(--app-gold)' : r.pontos > 0 ? 'var(--app-info)' : '#888';
+                            const cor = r.pontos >= 5 ? 'var(--app-gold)' : r.pontos > 0 ? 'var(--app-info)' : r.pontos < 0 ? 'var(--app-danger)' : '#888';
+                            const corPts = r.pontos >= 5 ? 'var(--app-gold)' : r.pontos > 0 ? 'var(--app-info)' : r.pontos < 0 ? 'var(--app-danger)' : '#666';
                             htmlR += '<div class="luva-collapse-rodada">'
                                 + '<span class="luva-collapse-rodada-badge" style="color:' + cor + ';">R' + r.rodada + '</span>'
                                 + '<span class="luva-collapse-rodada-info">' + r.goleiro + '</span>'
-                                + '<span class="luva-collapse-rodada-pts">' + r.pontos.toFixed(1) + '</span>'
+                                + '<span class="luva-collapse-rodada-pts" style="color:' + corPts + ';">' + r.pontos.toFixed(1) + '</span>'
                                 + '</div>';
                         });
                     } else {

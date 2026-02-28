@@ -456,28 +456,37 @@
     .luva-collapse-inner {
         padding: 6px 14px 10px 50px;
         display: flex;
-        flex-wrap: wrap;
-        gap: 4px 12px;
+        flex-direction: column;
+        gap: 2px;
     }
     .luva-collapse-rodada {
-        display: inline-flex;
+        display: flex;
         align-items: center;
-        gap: 4px;
+        gap: 6px;
         font-size: 11px;
+        padding: 2px 0;
     }
     .luva-collapse-rodada-badge {
         font-weight: 700;
         font-size: 10px;
-        min-width: 24px;
+        min-width: 26px;
+        flex-shrink: 0;
     }
     .luva-collapse-rodada-info {
         color: var(--app-text-primary);
         font-size: 10px;
+        flex: 1;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .luva-collapse-rodada-pts {
         color: var(--app-gold);
         font-weight: 700;
         font-size: 10px;
+        flex-shrink: 0;
+        margin-left: auto;
     }
     .luva-collapse-vazio {
         color: #555;
