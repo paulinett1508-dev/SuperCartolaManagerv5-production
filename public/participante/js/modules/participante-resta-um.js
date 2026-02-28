@@ -287,10 +287,7 @@ function _renderizarDisputa(dados, timeId) {
                 <span class="material-icons" style="font-size: 20px; vertical-align: middle; color: var(--app-restaum-primary); margin-right: 4px;">person_off</span>
                 Resta Um
                 ${isLive ? '<span class="resta-um-live-indicator"><span class="resta-um-live-dot"></span>AO VIVO</span>' : ''}
-            </div>
-            <div class="resta-um-header-subtitle">
-                Rodada ${rodadaAtual || edicao.rodadaInicial || '?'} | ${vivos.length} sobrevivente${vivos.length !== 1 ? 's' : ''}
-                ${isProjetado ? '&nbsp;<span class="ru-badge-projetado">PROJETADO</span>' : ''}
+                ${isProjetado ? '<span class="ru-badge-projetado">PROJETADO</span>' : ''}
             </div>
         </div>
     `;
