@@ -150,6 +150,23 @@ export function getPremiosLiga(ligaId) {
   return MELHOR_MES_CONFIG.premios.default;
 }
 
+// v3.0: Sobrescrever edições com dados dinâmicos da API
+const CORES_EDICOES = ["#e74c3c", "#f39c12", "#f1c40f", "#2ecc71", "#3498db", "#9b59b6", "#34495e"];
+
+export function atualizarEdicoesDinamicas(edicoesAPI) {
+  if (!edicoesAPI || edicoesAPI.length === 0) return;
+
+  MELHOR_MES_CONFIG.edicoes = edicoesAPI.map((ed, i) => ({
+    id: ed.id,
+    nome: ed.nome || `Edição ${String(ed.id).padStart(2, "0")}`,
+    inicio: ed.inicio,
+    fim: ed.fim,
+    cor: CORES_EDICOES[i % CORES_EDICOES.length],
+  }));
+
+  console.log(`[MELHOR-MES-CONFIG] ✅ Edições atualizadas dinamicamente: ${MELHOR_MES_CONFIG.edicoes.length}`);
+}
+
 export function getEdicaoById(id) {
   return MELHOR_MES_CONFIG.edicoes.find((ed) => ed.id === id);
 }

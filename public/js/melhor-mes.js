@@ -98,16 +98,12 @@ export async function getResultadosMelhorMes(ligaIdParam = null) {
 // ==============================
 
 import { getRankingRodadaEspecifica } from "./rodadas.js";
+import { MELHOR_MES_CONFIG } from "./melhor-mes/melhor-mes-config.js";
 
-const EDICOES_FALLBACK = [
-  { nome: "Edição 01", inicio: 1, fim: 6 },
-  { nome: "Edição 02", inicio: 7, fim: 10 },
-  { nome: "Edição 03", inicio: 11, fim: 17 },
-  { nome: "Edição 04", inicio: 18, fim: 22 },
-  { nome: "Edição 05", inicio: 23, fim: 26 },
-  { nome: "Edição 06", inicio: 27, fim: 30 },
-  { nome: "Edição 07", inicio: 31, fim: 38 },
-];
+// Fallback usa MELHOR_MES_CONFIG.edicoes (que pode ter sido atualizado dinamicamente)
+function getEdicoesFallback() {
+  return MELHOR_MES_CONFIG.edicoes;
+}
 
 // FUNÇÃO FALLBACK DE INICIALIZAÇÃO
 async function inicializarMelhorMesFallback() {
@@ -131,7 +127,7 @@ function renderSelectEdicoesFallback(containerId = "edicoesContainer") {
     <div style="max-width: 480px; margin: 0 auto 18px auto; text-align: center;">
       <h3 style="margin-bottom: 16px; color: #333;">Melhor do Mês - Sistema Fallback</h3>
       <select id="edicaoSelect" class="melhor-mes-select" style="font-size: 1.1em; padding: 8px 12px; border-radius: 6px;">
-        ${EDICOES_FALLBACK.map(
+        ${getEdicoesFallback().map(
           (ed, idx) =>
             `<option value="${idx}">${escapeHtml(ed.nome)} (Rod. ${ed.inicio} a ${ed.fim})</option>`,
         ).join("")}
@@ -146,7 +142,7 @@ function renderSelectEdicoesFallback(containerId = "edicoesContainer") {
 
 // CARREGAR RANKING FALLBACK
 async function carregarRankingEdicaoFallback(idxEdicao) {
-  const edicao = EDICOES_FALLBACK[idxEdicao];
+  const edicao = getEdicoesFallback()[idxEdicao];
   if (!edicao) return;
 
   const container = document.getElementById("melhorMesTabela");
