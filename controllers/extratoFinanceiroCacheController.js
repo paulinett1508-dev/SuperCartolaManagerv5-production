@@ -404,15 +404,22 @@ function transformarTransacoesEmRodadas(transacoes, ligaId) {
     }
 
     // ✅ v4.0: Formato legado - reconstruir com valores contextuais
+    // ✅ v4.1 FIX: Posição da rodada deve vir de ONUS/BONUS, não de MICO/MITO
+    //   MICO/MITO têm `posicao` que indica posição no ranking histórico (top10),
+    //   não a posição do participante no ranking da rodada.
     const rodadasMap = {};
     transacoes.forEach((t) => {
         const numRodada = t.rodada;
         if (!numRodada) return;
 
         if (!rodadasMap[numRodada]) {
+            // ✅ v4.1: Só usar posição se for de transação de ranking (ONUS/BONUS)
+            const posicaoRanking = (t.tipo === 'ONUS' || t.tipo === 'BONUS' || t.tipo === 'BANCO_RODADA')
+                ? (t.posicao || null)
+                : null;
             rodadasMap[numRodada] = {
                 rodada: numRodada,
-                posicao: t.posicao || null,
+                posicao: posicaoRanking,
                 bonusOnus: 0,
                 pontosCorridos: 0,
                 mataMata: 0,
@@ -423,6 +430,9 @@ function transformarTransacoesEmRodadas(transacoes, ligaId) {
                 top10Status: null,
                 top10Posicao: null,
             };
+        } else if (!rodadasMap[numRodada].posicao && (t.tipo === 'ONUS' || t.tipo === 'BONUS' || t.tipo === 'BANCO_RODADA')) {
+            // ✅ v4.1: Se a rodada já existe mas não tem posição, usar desta transação de ranking
+            rodadasMap[numRodada].posicao = t.posicao || null;
         }
 
         const r = rodadasMap[numRodada];

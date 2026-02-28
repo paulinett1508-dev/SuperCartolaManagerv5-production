@@ -10,6 +10,23 @@
 import { fetchLigaConfig } from "./rodadas/rodadas-config.js";
 
 // ============================================================================
+// UTILITÁRIOS
+// ============================================================================
+
+/**
+ * Escapa caracteres HTML para prevenir XSS
+ */
+function escapeHtml(str) {
+    if (str === null || str === undefined) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// ============================================================================
 // CONFIGURAÇÃO DINÂMICA DO CAMPEONATO
 // ============================================================================
 const RODADA_FINAL_CAMPEONATO = 38; // Última rodada do Brasileirão (constante)

@@ -7,6 +7,17 @@
 
 import { RODADA_FINAL_CAMPEONATO } from './core/season-config.js';
 
+// Helper: escapar HTML para prevenir XSS
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 console.log("🎖️ [CAPITAO-LUXO] Sistema v1.1.0 carregando...");
 
 const CapitaoLuxo = {

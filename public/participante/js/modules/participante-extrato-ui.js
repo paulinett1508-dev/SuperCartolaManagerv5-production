@@ -1,6 +1,16 @@
 // =====================================================
-// MÓDULO: UI DO EXTRATO PARTICIPANTE - v11.0 BANK DIGITAL REDESIGN
+// MÓDULO: UI DO EXTRATO PARTICIPANTE - v11.2 FIX ZONA ICONS ROBUSTEZ
 // =====================================================
+// ✅ v11.2: FIX REFORÇADO - Múltiplas correções na classificação de zona
+//   - getFaixasParaRodada agora verifica se faixas explícitas existem antes de usar
+//   - classificarPosicao/getPosicaoZonaLabel tratam posições >= debito.inicio como débito
+//   - Posições acima do máximo configurado (ex: 34º em liga de 32) agora são débito
+//   - Validação defensiva de faixas antes de acessar propriedades
+// ✅ v11.1: FIX CRÍTICO - Ícones de zona (X/○/✓) mostravam errado
+//   - ligaConfigCache não era populado com dados do backend
+//   - Fallback de 32 participantes era usado mesmo com liga de 35+
+//   - Posições > 32 eram classificadas como "neutro" (○) ao invés de "débito" (X)
+//   - Agora usa extrato.ligaConfig.zonaConfig que já vem do backend
 // ✅ v11.0: REDESIGN COMPLETO — estilo banco digital (Nubank/Inter)
 //   - Hero Saldo Card com eye toggle + glassmorphism
 //   - Quick Stats Row (pills horizontais)
@@ -10,7 +20,7 @@
 //   - Zero mudanças no data contract (participante-extrato.js v4.11)
 // =====================================================
 
-if (window.Log) Log.info("[EXTRATO-UI] v11.0 BANK DIGITAL REDESIGN");
+if (window.Log) Log.info("[EXTRATO-UI] v11.2 FIX ZONA ICONS ROBUSTEZ");
 
 // ===== CONFIG CACHE =====
 let ligaConfigCache = null;
@@ -57,13 +67,28 @@ function getFaixasParaRodada(ligaId, rodada) {
     const config = ligaConfigCache || window.ligaConfigCache;
     if (!config?.ranking_rodada) return detectarFaixasPorTotal(32);
     const rankingConfig = config.ranking_rodada;
+
+    let faixas, totalTimes;
+
     if (rankingConfig.temporal) {
         const rodadaTransicao = rankingConfig.rodada_transicao || 30;
         const fase = rodada < rodadaTransicao ? "fase1" : "fase2";
         const faseConfig = rankingConfig[fase];
-        return { nome: config.liga_nome, totalTimes: faseConfig?.total_participantes || 32, ...faseConfig?.faixas };
+        faixas = faseConfig?.faixas;
+        totalTimes = faseConfig?.total_participantes || 32;
+    } else {
+        faixas = rankingConfig.faixas;
+        totalTimes = rankingConfig.total_participantes || 32;
     }
-    return { nome: config.liga_nome, totalTimes: rankingConfig.total_participantes || 32, ...rankingConfig.faixas };
+
+    // ✅ v11.1 FIX: Se faixas explícitas existem, usar. Senão, calcular dinamicamente.
+    // Isso garante que posições > totalTimes caiam na zona de débito corretamente.
+    if (faixas?.credito && faixas?.debito) {
+        return { nome: config.liga_nome, totalTimes, ...faixas };
+    }
+
+    // Fallback: calcular faixas dinamicamente
+    return detectarFaixasPorTotal(totalTimes);
 }
 
 function detectarFaixasPorTotal(totalTimes) {
@@ -86,20 +111,33 @@ function detectarFaixasPorTotal(totalTimes) {
 
 function classificarPosicao(posicao, faixas) {
     if (!posicao) return "neutro";
+    if (!faixas?.credito || !faixas?.debito) return "neutro";
+
+    // Zona de crédito (ganho)
     if (posicao >= faixas.credito.inicio && posicao <= faixas.credito.fim) return "credito";
-    if (posicao >= faixas.debito.inicio && posicao <= faixas.debito.fim) return "debito";
+
+    // Zona de débito (perda) - inclui posições ACIMA do máximo configurado
+    // Ex: Se debito.fim = 35, posições 36, 37, etc também são débito
+    if (posicao >= faixas.debito.inicio) return "debito";
+
     return "neutro";
 }
 
 function getPosicaoZonaLabel(posicao, faixas) {
     if (!posicao) return { label: null, tipo: "neutro" };
+    if (!faixas?.credito || !faixas?.debito) return { label: null, tipo: "neutro" };
+
+    // Zona de crédito (ganho)
     if (posicao >= faixas.credito.inicio && posicao <= faixas.credito.fim) {
         return { label: `G${posicao}`, tipo: "ganho" };
     }
-    if (posicao >= faixas.debito.inicio && posicao <= faixas.debito.fim) {
-        const zNum = faixas.debito.fim - posicao + 1;
+
+    // Zona de débito (perda) - inclui posições ACIMA do máximo configurado
+    if (posicao >= faixas.debito.inicio) {
+        const zNum = Math.max(1, faixas.debito.fim - posicao + 1);
         return { label: `Z${zNum}`, tipo: "perda" };
     }
+
     return { label: null, tipo: "neutro" };
 }
 
@@ -982,6 +1020,24 @@ export async function renderizarExtratoParticipante(extrato, participanteId) {
     if (!extrato || !extrato.rodadas || !Array.isArray(extrato.rodadas)) {
         container.innerHTML = renderizarErro();
         return;
+    }
+
+    // ✅ v11.1 FIX: Popular ligaConfigCache com dados que vêm do backend
+    // Isso corrige bug onde posições > 32 eram classificadas como "neutro"
+    // porque o fallback de 32 participantes era usado quando ligaConfigCache estava null
+    if (extrato.ligaConfig?.zonaConfig) {
+        const zonaConfig = extrato.ligaConfig.zonaConfig;
+        ligaConfigCache = {
+            ranking_rodada: {
+                total_participantes: zonaConfig.totalParticipantes || 32,
+                faixas: zonaConfig.faixas || null,
+                temporal: zonaConfig.temporal || false,
+                valores: zonaConfig.valores || {},
+            },
+            modulos_ativos: extrato.ligaConfig.modulosAtivos || {},
+        };
+        window.ligaConfigCache = ligaConfigCache;
+        if (window.Log) Log.debug("[EXTRATO-UI] ✅ ligaConfigCache populado:", { totalParticipantes: zonaConfig.totalParticipantes });
     }
 
     await verificarStatusRenovacao();
