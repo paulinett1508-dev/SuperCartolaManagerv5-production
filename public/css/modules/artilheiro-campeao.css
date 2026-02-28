@@ -1168,56 +1168,32 @@
     padding: 10px 14px 12px;
 }
 
-.art-collapse-title {
-    font: 600 9px "Inter", sans-serif;
-    color: #888;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 8px;
+.art-collapse-rodada {
     display: flex;
-    align-items: center;
-    gap: 4px;
+    align-items: baseline;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    animation: artCollapseSlideIn 0.2s ease both;
 }
 
-.art-collapse-title .material-icons {
-    font-size: 13px;
-    color: var(--module-artilheiro-primary);
+.art-collapse-rodada:last-child { border-bottom: none; }
+.art-collapse-rodada:nth-child(2) { animation-delay: 0.03s; }
+.art-collapse-rodada:nth-child(3) { animation-delay: 0.06s; }
+.art-collapse-rodada:nth-child(4) { animation-delay: 0.09s; }
+
+.art-collapse-rodada-badge {
+    font: 700 10px "JetBrains Mono", monospace;
+    min-width: 28px;
+    flex-shrink: 0;
 }
 
-.art-collapse-jogador {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 6px 10px;
-    margin-bottom: 4px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 6px;
-    border-left: 3px solid var(--module-artilheiro-primary);
-    animation: artCollapseSlideIn 0.25s ease both;
-}
-
-.art-collapse-jogador:nth-child(2) { animation-delay: 0.05s; }
-.art-collapse-jogador:nth-child(3) { animation-delay: 0.1s; }
-.art-collapse-jogador:nth-child(4) { animation-delay: 0.15s; }
-
-.art-collapse-jogador-nome {
-    font: 500 11px "Inter", sans-serif;
-    color: var(--text-primary, #eee);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.art-collapse-jogador-nome .material-icons {
-    font-size: 14px;
-}
-
-.art-collapse-jogador-gols {
-    font: 700 12px "JetBrains Mono", monospace;
-    color: var(--module-artilheiro-primary);
-    background: rgba(34, 197, 94, 0.12);
-    padding: 2px 8px;
-    border-radius: 10px;
+.art-collapse-rodada-nomes {
+    font: 400 10px "Inter", sans-serif;
+    color: var(--text-primary, #ccc);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .art-collapse-vazio {

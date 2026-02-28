@@ -422,22 +422,33 @@ function renderizarBannerRodadaFinal(
 }
 
 // =====================================================================
-// v5.0: HELPER — Agrega top goleadores de um participante
+// v5.0: HELPERS
 // =====================================================================
-function _agregaTopGoleadores(detalhePorRodada, limit = 4) {
+
+/** Compacta nome: "Carlos Vinícius" → "C. Vinícius", "Renato Kayzer" → "R. Kayzer" */
+function _nomeCompacto(nome) {
+    if (!nome) return '?';
+    const partes = nome.trim().split(/\s+/);
+    if (partes.length === 1) return partes[0].slice(0, 10);
+    return partes[0][0] + '. ' + partes[partes.length - 1].slice(0, 9);
+}
+
+/** Retorna array de rodadas com goleadores compactos para o painel colapsável */
+function _resumoRodadasCompacto(detalhePorRodada) {
     if (!detalhePorRodada || !Array.isArray(detalhePorRodada)) return [];
-    const map = {};
-    detalhePorRodada.forEach(r => {
-        if (r.jogadores && Array.isArray(r.jogadores)) {
-            r.jogadores.forEach(j => {
-                if (j.gols > 0) {
-                    if (!map[j.nome]) map[j.nome] = { nome: j.nome, gols: 0 };
-                    map[j.nome].gols += j.gols;
-                }
-            });
-        }
-    });
-    return Object.values(map).sort((a, b) => b.gols - a.gols).slice(0, limit);
+    return detalhePorRodada
+        .filter(r => {
+            if (!r.jogadores || !Array.isArray(r.jogadores)) return false;
+            return r.jogadores.some(j => j.gols > 0);
+        })
+        .sort((a, b) => a.rodada - b.rodada)
+        .map(r => {
+            const goleadores = r.jogadores
+                .filter(j => j.gols > 0)
+                .map(j => j.gols > 1 ? _nomeCompacto(j.nome) + '(' + j.gols + ')' : _nomeCompacto(j.nome));
+            const saldo = (r.golsPro || 0) - (r.golsContra || 0);
+            return { rodada: r.rodada, goleadores, saldo, gp: r.golsPro || 0 };
+        });
 }
 
 // =====================================================================
@@ -802,7 +813,7 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
                     const saldo = getSaldo(time);
                     const tid = time.timeId || time.time_id || '';
 
-                    const topGol = _agregaTopGoleadores(time.detalhePorRodada, 4);
+                    const rodadas = _resumoRodadasCompacto(time.detalhePorRodada);
 
                     htmlR += '<div class="art-ranking-row" data-timeid="' + tid + '" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.05);' + (isMeuTime ? 'background:rgba(34,197,94,0.15);' : '') + '">'
                         + '<div style="display:flex;align-items:center;gap:10px;">'
@@ -818,13 +829,13 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
                         + '</div></div>';
 
                     htmlR += '<div class="art-collapse-panel" data-panel-timeid="' + tid + '">'
-                        + '<div class="art-collapse-inner">'
-                        + '<div class="art-collapse-title"><span class="material-icons">sports_soccer</span> Top Goleadores</div>';
-                    if (topGol.length > 0) {
-                        topGol.forEach(j => {
-                            htmlR += '<div class="art-collapse-jogador">'
-                                + '<span class="art-collapse-jogador-nome"><span class="material-icons" style="color:var(--module-artilheiro-primary);">person</span> ' + escapeHtml(j.nome) + '</span>'
-                                + '<span class="art-collapse-jogador-gols">' + j.gols + ' gol' + (j.gols !== 1 ? 's' : '') + '</span>'
+                        + '<div class="art-collapse-inner">';
+                    if (rodadas.length > 0) {
+                        rodadas.forEach(r => {
+                            const cor = r.saldo > 0 ? 'var(--module-artilheiro-primary,#22c55e)' : r.saldo < 0 ? 'var(--app-danger,#ef4444)' : '#888';
+                            htmlR += '<div class="art-collapse-rodada">'
+                                + '<span class="art-collapse-rodada-badge" style="color:' + cor + ';">R' + r.rodada + '</span>'
+                                + '<span class="art-collapse-rodada-nomes">' + r.goleadores.join(', ') + '</span>'
                                 + '</div>';
                         });
                     } else {
