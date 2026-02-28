@@ -813,7 +813,7 @@ class RestaUmModule {
 
             vivosRestantes.forEach((p, idx) => {
                 const posGlobal = idx + 2; // +2 pois pos 1 = líder
-                const isLanterna = idx >= idxZonaInicio && vivosRestantes.length > 0;
+                const isLanterna = this.isLive && idx >= idxZonaInicio && vivosRestantes.length > 0;
                 const temPts = p.pontosRodada != null;
                 const animDelay = ((idx + 1) * 40).toFixed(0);
 
@@ -838,7 +838,7 @@ class RestaUmModule {
                         <div class="ruv-info">
                             <div class="ruv-time">${p.nomeTime || '—'}</div>
                             <div class="ruv-cartoleiro">${p.nomeCartoleiro || ''}</div>
-                            ${isLanterna ? `<div class="ruv-lanterna-tag"><span class="material-icons">power_off</span>Eliminado</div>` : ''}
+                            ${isLanterna ? `<div class="ruv-lanterna-tag"><span class="material-icons">warning</span>Em Perigo</div>` : ''}
                         </div>
                         <div class="ruv-stats">
                             <div class="ruv-pts-rodada${temPts ? '' : ' no-data'}">${temPts ? _fmtPts(p.pontosRodada) : '—'}</div>
