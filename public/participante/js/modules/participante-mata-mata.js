@@ -46,6 +46,50 @@ function getFasesAtuais() {
 // Compatibilidade: FASES agora é getter dinâmico
 const FASES = TODAS_FASES; // Fallback para código legado que itera todas
 
+// ✅ v8.2: Retorna a edição atual baseada na rodadaAtual
+// Prioridade: edição em andamento > última encerrada > última disponível
+function getEdicaoAtual() {
+  const rodada = estado.rodadaAtual;
+  const disponiveis = estado.edicoesDisponiveis;
+  if (!disponiveis.length) return null;
+
+  // Buscar edição cuja faixa cobre a rodada atual (inclui classificatória = rodadaInicial - 1)
+  for (const ed of [...disponiveis].reverse()) {
+    const config = EDICOES_MATA_MATA.find(e => e.id === ed.edicao);
+    if (!config) continue;
+    if (rodada >= config.rodadaInicial - 1 && rodada <= config.rodadaFinal) {
+      return ed.edicao;
+    }
+  }
+
+  // Entre edições: retornar última encerrada
+  for (const ed of [...disponiveis].reverse()) {
+    const config = EDICOES_MATA_MATA.find(e => e.id === ed.edicao);
+    if (config && rodada > config.rodadaFinal) {
+      return ed.edicao;
+    }
+  }
+
+  // Fallback: última disponível
+  return disponiveis[disponiveis.length - 1].edicao;
+}
+
+// ✅ v8.2: Retorna a fase mais avançada liberada para a edição
+// Ex: rodadaAtual=5, edicao1 (rodadaInicial=3) → fase idx 2 (quartas)
+function getFaseAtual(edicaoId) {
+  const config = EDICOES_MATA_MATA.find(e => e.id === edicaoId);
+  const fasesAtivas = getFasesAtuais();
+  if (!config || !fasesAtivas.length) return fasesAtivas[0] || "quartas";
+
+  let ultimaLiberada = null;
+  for (let idx = 0; idx < fasesAtivas.length; idx++) {
+    if (estado.rodadaAtual >= config.rodadaInicial + idx) {
+      ultimaLiberada = fasesAtivas[idx];
+    }
+  }
+  return ultimaLiberada || fasesAtivas[0];
+}
+
 // ✅ v6.8: FIX - Sempre retorna number para comparação consistente
 // Banco tem timeId inconsistente: às vezes string "1323370", às vezes number 1323370
 function extrairTimeId(time) {
@@ -206,15 +250,17 @@ export async function inicializarMataMata(params) {
             await recalcularHistoricoEdicao(ed.edicao);
           }
 
-          const ultimaEdicao = estado.edicoesDisponiveis[estado.edicoesDisponiveis.length - 1];
-          estado.edicaoSelecionada = ultimaEdicao.edicao;
+          // ✅ v8.2: Foco na edição e fase atuais
+          estado.edicaoSelecionada = getEdicaoAtual();
 
           const select = document.getElementById("mmEditionSelect");
-          if (select) select.value = ultimaEdicao.edicao;
+          if (select) select.value = estado.edicaoSelecionada;
 
-          // ✅ v7.3: Usar primeira fase válida para o tamanho do torneio
-          const primeiraFaseValida = getFasesAtuais()[0] || "quartas";
-          await carregarFase(estado.edicaoSelecionada, primeiraFaseValida);
+          const faseAtual = getFaseAtual(estado.edicaoSelecionada);
+          estado.faseSelecionada = faseAtual;
+          atualizarNavegacaoFases();
+          atualizarBotoesFases();
+          await carregarFase(estado.edicaoSelecionada, faseAtual);
         }
       }
     } catch (e) {
@@ -481,22 +527,27 @@ async function carregarEdicoesDisponiveis(usouCache = false) {
       }
 
       if (!usouCache) {
-        const ultimaEdicao =
-          estado.edicoesDisponiveis[estado.edicoesDisponiveis.length - 1];
-        estado.edicaoSelecionada = ultimaEdicao.edicao;
+        // ✅ v8.2: Foco na edição e fase atuais
+        estado.edicaoSelecionada = getEdicaoAtual();
 
         const select = document.getElementById("mmEditionSelect");
-        if (select) select.value = ultimaEdicao.edicao;
+        if (select) select.value = estado.edicaoSelecionada;
 
-        // ✅ v7.3: Usar primeira fase válida para o tamanho do torneio
-        const primeiraFaseValida = getFasesAtuais()[0] || "quartas";
-        await carregarFase(estado.edicaoSelecionada, primeiraFaseValida);
+        const faseAtual = getFaseAtual(estado.edicaoSelecionada);
+        estado.faseSelecionada = faseAtual;
+        atualizarNavegacaoFases();
+        atualizarBotoesFases();
+        await carregarFase(estado.edicaoSelecionada, faseAtual);
       } else if (dadosMudaram) {
-        // Re-renderizar se dados mudaram
+        // Re-renderizar se dados mudaram — manter foco inteligente
         popularSelectEdicoes();
-        const ultimaEdicao =
-          estado.edicoesDisponiveis[estado.edicoesDisponiveis.length - 1];
-        await carregarFase(ultimaEdicao.edicao, estado.faseSelecionada);
+        const edicaoAtual = getEdicaoAtual();
+        const faseAtual = getFaseAtual(edicaoAtual);
+        estado.edicaoSelecionada = edicaoAtual;
+        estado.faseSelecionada = faseAtual;
+        atualizarNavegacaoFases();
+        atualizarBotoesFases();
+        await carregarFase(edicaoAtual, faseAtual);
         if (window.Log) Log.info("[MATA-MATA] 🔄 Re-renderizado com dados frescos");
       }
     } else {
