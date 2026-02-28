@@ -1,4 +1,5 @@
-// === CARDS-CONDICIONAIS.JS v2.6 ===
+// === CARDS-CONDICIONAIS.JS v2.7 ===
+// v2.7: FIX - Módulos opt-in (restaUm, capitaoLuxo) ausentes de modulos_ativos são desabilitados em 2026+
 // v2.6: FIX - Invalida cache ao mudar de liga (navegação entre ligas)
 // v2.5: FIX BUG-002 - Módulos históricos só ocultados se EXPLICITAMENTE desabilitados
 // v2.5: Temporada 2026+ sem restrições automáticas - cards sempre visíveis
@@ -8,7 +9,7 @@
 // v2.0: Refatorado para SaaS - busca config do servidor via API
 // Sistema de desativação condicional de cards por liga
 
-console.log("[CARDS-CONDICIONAIS] v2.6 - Carregando sistema...");
+console.log("[CARDS-CONDICIONAIS] v2.7 - Carregando sistema...");
 
 // === CACHE DE CONFIG DA LIGA ===
 let ligaConfigCache = null;
@@ -263,8 +264,15 @@ async function ocultarModulosInexistentesEmHistorico() {
 }
 
 /**
+ * Módulos que precisam estar EXPLICITAMENTE true em modulos_ativos para funcionar.
+ * Se ausentes (undefined), são tratados como inativos em ligas 2026+.
+ */
+const MODULOS_OPT_IN = ['restaUm', 'resta_um', 'capitaoLuxo', 'capitao_luxo'];
+
+/**
  * Aplicar configurações condicionais baseadas na liga (v2.0 - async)
- * v2.3 FIX: Temporada 2026+ não tem restrições automáticas de cards
+ * v2.7 FIX: Módulos opt-in ausentes em modulos_ativos são desabilitados em 2026+
+ * v2.3 FIX: Temporada 2026+ não tem restrições automáticas legacy de 2025
  * v2.2 FIX: Não desabilitar módulos em temporadas históricas
  */
 async function aplicarConfiguracaoCards() {
@@ -272,13 +280,6 @@ async function aplicarConfiguracaoCards() {
 
     try {
         const temporadaAtual = getTemporadaSelecionada();
-
-        // v2.3: Temporada 2026+ - Sem restrições automáticas de cards
-        // Todos os módulos ficam visíveis; cada módulo mostra seu próprio estado (configurado/não)
-        if (temporadaAtual >= 2026) {
-            console.log("[CARDS-CONDICIONAIS] Temporada 2026+ - sem restrições automáticas de cards");
-            return;
-        }
 
         // v2.2: Não aplicar restrições em temporadas históricas
         if (isTemporadaHistorica()) {
@@ -306,21 +307,28 @@ async function aplicarConfiguracaoCards() {
         // Obter lista de cards desabilitados da config
         const cardsDesabilitados = config.cards_desabilitados || [];
 
-        // Também verificar modulos_ativos para detectar módulos desativados
+        // Verificar modulos_ativos para detectar módulos explicitamente desativados (false)
         // v2.3 FIX: Usar mapeamento correto de nomes de módulos para data-module
         const modulos = config.modulos_ativos || {};
         const modulosDesabilitados = Object.entries(modulos)
             .filter(([_, enabled]) => enabled === false)
             .map(([key]) => {
-                // Usar mapeamento se existir, senão converter camelCase para kebab-case
                 if (MODULO_TO_CARD_MAP[key]) {
                     return MODULO_TO_CARD_MAP[key];
                 }
                 return key.replace(/([A-Z])/g, '-$1').toLowerCase();
             });
 
+        // v2.7 FIX: Em 2026+, módulos opt-in ausentes de modulos_ativos são desabilitados.
+        // Estes módulos precisam estar explicitamente true para funcionar — ausência = inativo.
+        const modulosOptInAusentes = (temporadaAtual >= 2026 && Object.keys(modulos).length > 0)
+            ? MODULOS_OPT_IN
+                .filter(key => modulos[key] === undefined && MODULO_TO_CARD_MAP[key])
+                .map(key => MODULO_TO_CARD_MAP[key])
+            : [];
+
         // Unir listas sem duplicatas
-        const todosDesabilitados = [...new Set([...cardsDesabilitados, ...modulosDesabilitados])];
+        const todosDesabilitados = [...new Set([...cardsDesabilitados, ...modulosDesabilitados, ...modulosOptInAusentes])];
 
         if (todosDesabilitados.length === 0) {
             console.log("[CARDS-CONDICIONAIS] Nenhuma restrição para esta liga");
@@ -581,4 +589,4 @@ if (document.readyState === "loading") {
     setTimeout(inicializar, 150);
 }
 
-console.log("[CARDS-CONDICIONAIS] Módulo v2.6 carregado");
+console.log("[CARDS-CONDICIONAIS] Módulo v2.7 carregado");
