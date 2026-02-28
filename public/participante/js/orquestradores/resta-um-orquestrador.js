@@ -604,7 +604,9 @@ function _injetarCSS() {
 
 function _fmtPts(val) {
     if (val == null) return '-';
-    return parseFloat(val).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const num = parseFloat(val) || 0;
+    const truncado = Math.trunc(num * 100) / 100;
+    return truncado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function _escudoEl(escudoId, cls, size) {
@@ -862,7 +864,7 @@ class RestaUmModule {
                 const animDelay = ((idx + 1) * 40).toFixed(0);
 
                 // Inserir separador "Zona de Eliminação" antes do primeiro em perigo
-                if (isLanterna && idx === idxZonaInicio) {
+                if (isLanterna && idx === Math.max(0, idxZonaInicio)) {
                     html += `
                         <div class="ruv-zona-perigo">
                             <span class="material-icons">warning</span>
