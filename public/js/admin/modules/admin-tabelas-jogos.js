@@ -16,6 +16,7 @@
 
         try {
             const res = await fetch(`/api/brasileirao/completo/${TEMPORADA}`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
 
             if (!data.success || !data.rodadas) {

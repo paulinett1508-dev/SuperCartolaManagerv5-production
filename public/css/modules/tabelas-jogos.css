@@ -130,7 +130,7 @@
     transition: max-height 0.3s ease;
 }
 .tj-rodada.tj-expanded .tj-jogos {
-    max-height: 800px;
+    max-height: 2000px;
 }
 
 .tj-jogos-grid {
