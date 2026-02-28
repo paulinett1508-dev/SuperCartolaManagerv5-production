@@ -1,6 +1,7 @@
 // =====================================================================
-// PARTICIPANTE-LUVA-OURO.JS - v4.1 (MatchdayService + Cache-First)
+// PARTICIPANTE-LUVA-OURO.JS - v5.0 (UX Premium)
 // =====================================================================
+// ✅ v5.0: UX elevada — ranking colapsável, card goleiros premium, rodadas interativas
 // ✅ v4.1: MatchdayService integration (paridade com Capitão)
 //    - modeLive state, subscribeMatchdayEvents, endpoint switching
 //    - Fallback live → consolidado se mercado aberto
@@ -12,7 +13,7 @@
 // ✅ v3.7: Card Desempenho ao final
 // =====================================================================
 
-if (window.Log) Log.info("[PARTICIPANTE-LUVA-OURO] Carregando módulo v4.1...");
+if (window.Log) Log.info("[PARTICIPANTE-LUVA-OURO] Carregando módulo v5.0...");
 
 const RODADA_FINAL = 38;
 
@@ -431,6 +432,31 @@ function renderizarBannerRodadaFinal(
 }
 
 // =====================================================================
+// v5.0: HELPERS
+// =====================================================================
+
+/** Compacta nome: "Alisson Becker" → "A. Becker" */
+function _nomeCompacto(nome) {
+    if (!nome) return '?';
+    const partes = nome.trim().split(/\s+/);
+    if (partes.length === 1) return partes[0].slice(0, 10);
+    return partes[0][0] + '. ' + partes[partes.length - 1].slice(0, 9);
+}
+
+/** Retorna array de rodadas com goleiro compacto para painel colapsável */
+function _resumoRodadasGoleiro(rodadas) {
+    if (!rodadas || !Array.isArray(rodadas)) return [];
+    return rodadas
+        .filter(r => r.goleiroNome && r.goleiroNome !== 'Sem goleiro' && (r.pontos || 0) > 0)
+        .sort((a, b) => a.rodada - b.rodada)
+        .map(r => ({
+            rodada: r.rodada,
+            goleiro: _nomeCompacto(r.goleiroNome),
+            pontos: Math.trunc((r.pontos || 0) * 10) / 10,
+        }));
+}
+
+// =====================================================================
 // RENDERIZAÇÃO
 // =====================================================================
 async function renderizarLuvaOuro(container, response, meuTimeId) {
@@ -533,8 +559,9 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
             const nome = r.goleiroNome;
             const pontos = r.pontos || 0;
             if (nome && nome !== "Sem goleiro" && pontos > 0) {
-                if (!goleirosMap[nome]) goleirosMap[nome] = { nome, pontos: 0 };
+                if (!goleirosMap[nome]) goleirosMap[nome] = { nome, pontos: 0, rodadas: 0 };
                 goleirosMap[nome].pontos += pontos;
+                goleirosMap[nome].rodadas += 1;
             }
         });
         meusGoleiros = Object.values(goleirosMap)
@@ -605,35 +632,57 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
 
         ${
             meusGoleiros.length > 0
-                ? `
-        <div style="background: rgba(255, 255, 255, 0.03); border-radius: 12px; padding: 12px; margin-bottom: 16px;">
-            <div style="font-size: 11px; color: #888; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 14px;">sports_handball</span> Seus Goleiros</div>
-            <div style="display: flex; flex-direction: column; gap: 6px;">
-                ${meusGoleiros
-                    .map(
-                        (g, idx) => `
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: rgba(0,0,0,0.2); border-radius: 8px;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span style="font-size: 12px; width: 20px; color: #888;">${idx + 1}º</span>
-                        <span style="color: var(--app-text-primary); font-size: 12px; font-weight: 500;">${escapeHtml(g.nome)}</span>
-                    </div>
-                    <span style="color: var(--app-gold); font-weight: 800; font-size: 14px;">${(Math.trunc((g.pontos||0) * 10) / 10).toFixed(1)} pts</span>
-                </div>
-                `,
-                    )
-                    .join("")}
+                ? (() => {
+                    const maxPts = meusGoleiros[0].pontos;
+                    const top1 = meusGoleiros[0];
+                    const runners = meusGoleiros.slice(1);
+                    const medalColors = ['var(--app-silver, #c0c0c0)', 'var(--app-bronze, #cd7f32)'];
+                    return `
+        <div class="luva-meus-goleiros">
+            <div class="luva-meus-goleiros-header">
+                <span class="material-symbols-outlined">sports_handball</span> Seus Goleiros
             </div>
-        </div>
-        `
+            <div class="luva-top1-card">
+                <div class="luva-top1-left">
+                    <span class="material-icons luva-top1-medal">workspace_premium</span>
+                    <div class="luva-top1-info">
+                        <div class="luva-top1-nome">${escapeHtml(top1.nome)}</div>
+                        <div class="luva-top1-rodadas">${top1.rodadas} rodada${top1.rodadas !== 1 ? 's' : ''} escalado</div>
+                    </div>
+                </div>
+                <div class="luva-top1-pontos">
+                    <div class="luva-top1-pontos-valor">${(Math.trunc((top1.pontos||0) * 10) / 10).toFixed(1)}</div>
+                    <div class="luva-top1-pontos-label">pontos</div>
+                </div>
+            </div>
+            ${runners.map((g, idx) => {
+                const pct = maxPts > 0 ? Math.round((g.pontos / maxPts) * 100) : 0;
+                return `
+            <div class="luva-runner">
+                <div class="luva-runner-medal"><span class="material-icons" style="color: ${medalColors[idx]};">workspace_premium</span></div>
+                <div class="luva-runner-content">
+                    <div class="luva-runner-top">
+                        <span class="luva-runner-nome">${escapeHtml(g.nome)}</span>
+                        <span class="luva-runner-pts">${(Math.trunc((g.pontos||0) * 10) / 10).toFixed(1)} pts</span>
+                    </div>
+                    <div class="luva-runner-bar-bg"><div class="luva-runner-bar-fill" style="width: ${pct}%;"></div></div>
+                </div>
+            </div>`;
+            }).join('')}
+        </div>`;
+                })()
                 : ""
         }
 
         ${
             historicoRecente.length > 0
                 ? `
-        <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 12px; margin-bottom: 16px;">
-            <div style="font-size: 11px; color: #888; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 14px;">bar_chart</span> Últimas Rodadas</div>
-            <div style="display: flex; gap: 6px; justify-content: space-between;">
+        <div class="luva-ultimas-rodadas">
+            <div class="luva-ultimas-header">
+                <span class="material-symbols-outlined">bar_chart</span> Últimas Rodadas
+                <span style="margin-left: auto; font: 400 9px 'Inter', sans-serif; color: #555; text-transform: none; letter-spacing: 0;">toque para ver goleiro</span>
+            </div>
+            <div class="luva-rodadas-grid">
                 ${historicoRecente
                     .map((r) => {
                         const pontos = r.pontos || 0;
@@ -650,14 +699,14 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                                   ? "var(--app-info)"
                                   : "#666";
                         return `
-                    <div style="flex: 1; background: ${bgColor}; border-radius: 8px; padding: 8px 4px; text-align: center;">
-                        <div style="font-size: 9px; color: #666; margin-bottom: 4px;">R${r.rodada}</div>
-                        <div style="font-size: 14px; font-weight: 800; color: ${textColor};">${(Math.trunc((pontos||0) * 10) / 10).toFixed(1)}</div>
-                    </div>
-                    `;
+                    <div class="luva-rodada-box" style="background: ${bgColor};" data-rodada="${r.rodada}">
+                        <div class="luva-rodada-num">R${r.rodada}</div>
+                        <div class="luva-rodada-pts" style="color: ${textColor};">${(Math.trunc((pontos||0) * 10) / 10).toFixed(1)}</div>
+                    </div>`;
                     })
                     .join("")}
             </div>
+            <div class="luva-rodada-detalhe" id="luva-rodada-detalhe"></div>
         </div>
         `
                 : ""
@@ -698,66 +747,77 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                 <span style="font-size: 11px; color: #888;">${rankingAtivos.length} participantes</span>
             </summary>
 
-            <div style="max-height: 300px; overflow-y: auto;">
+            <div style="font: 400 9px 'Inter', sans-serif; color: #555; text-align: center; padding: 6px 0 2px; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                <span class="material-icons" style="font-size: 11px; vertical-align: middle;">touch_app</span> toque no participante para ver goleiros
+            </div>
+
+            <div style="max-height: 400px; overflow-y: auto;" id="luva-ranking-list">
             ${(() => {
-                // Separar ativos e inativos
                 const ativos = rankingAtivos;
                 const inativos = ranking.filter(
                     (time) => time.ativo === false || time.status === "inativo",
                 );
 
-                let html = "";
+                let htmlR = "";
 
-                // Renderizar ATIVOS
                 ativos.forEach((time, idx) => {
                     const isMeuTime = isMyTime(time, meuTimeId);
                     const pos = idx + 1;
-                    const posicaoDisplay = pos === 1 ? '<span class="material-symbols-outlined" style="font-size: 16px; color: var(--app-gold);">emoji_events</span>' : `${pos}º`;
+                    const posDisplay = pos === 1 ? '<span class="material-symbols-outlined" style="font-size: 16px; color: var(--app-gold);">emoji_events</span>' : pos + '\u00BA';
+                    const pts = getPontos(time).toFixed(1);
+                    const tid = time.timeId || time.time_id || '';
 
-                    html += `
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); ${isMeuTime ? "background: rgba(255, 215, 0, 0.15);" : ""}">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: ${pos === 1 ? "16px" : "12px"}; width: 26px; ${pos === 1 ? "" : "color: #888;"}">${posicaoDisplay}</span>
-                            <div>
-                                <div style="color: ${isMeuTime ? "var(--app-gold)" : "var(--app-text-primary)"}; font-weight: ${isMeuTime ? "700" : "500"}; font-size: 12px;">${escapeHtml(time.participanteNome || time.nomeCartoleiro || time.nome || 'N/D')}</div>
-                                <div style="color: #888; font-size: 11px;">${escapeHtml(time.nomeTime || time.nome_time || '')}</div>
-                            </div>
-                        </div>
-                        <span style="color: var(--app-gold); font-weight: 700; font-size: 13px;">${getPontos(time).toFixed(1)}</span>
-                    </div>
-                    `;
+                    const rodadas = _resumoRodadasGoleiro(time.rodadas);
+
+                    htmlR += '<div class="luva-ranking-row" data-timeid="' + tid + '"' + (isMeuTime ? ' style="background:rgba(255,215,0,0.15);"' : '') + '>'
+                        + '<div style="display:flex;align-items:center;gap:10px;">'
+                        + '<span style="font-size:' + (pos === 1 ? '16px' : '12px') + ';width:26px;' + (pos === 1 ? '' : 'color:#888;') + '">' + posDisplay + '</span>'
+                        + '<div>'
+                        + '<div style="color:' + (isMeuTime ? 'var(--app-gold)' : 'var(--app-text-primary)') + ';font-weight:' + (isMeuTime ? '700' : '500') + ';font-size:12px;">' + escapeHtml(time.participanteNome || time.nomeCartoleiro || time.nome || 'N/D') + '</div>'
+                        + '<div style="color:#888;font-size:11px;">' + escapeHtml(time.nomeTime || time.nome_time || '') + '</div>'
+                        + '</div></div>'
+                        + '<div style="display:flex;gap:12px;align-items:center;">'
+                        + '<span style="color:var(--app-gold);font-weight:700;font-size:13px;">' + pts + '</span>'
+                        + '<span class="material-icons luva-expand-icon">expand_more</span>'
+                        + '</div></div>';
+
+                    htmlR += '<div class="luva-collapse-panel" data-panel-timeid="' + tid + '">'
+                        + '<div class="luva-collapse-inner">';
+                    if (rodadas.length > 0) {
+                        rodadas.forEach(r => {
+                            const cor = r.pontos >= 5 ? 'var(--app-gold)' : r.pontos > 0 ? 'var(--app-info)' : '#888';
+                            htmlR += '<div class="luva-collapse-rodada">'
+                                + '<span class="luva-collapse-rodada-badge" style="color:' + cor + ';">R' + r.rodada + '</span>'
+                                + '<span class="luva-collapse-rodada-info">' + r.goleiro + '</span>'
+                                + '<span class="luva-collapse-rodada-pts">' + r.pontos.toFixed(1) + '</span>'
+                                + '</div>';
+                        });
+                    } else {
+                        htmlR += '<div class="luva-collapse-vazio">Nenhum goleiro registrado</div>';
+                    }
+                    htmlR += '</div></div>';
                 });
 
-                // Renderizar INATIVOS (se houver)
                 if (inativos.length > 0) {
-                    html += `
-                    <div style="padding: 8px 14px; background: rgba(100,100,100,0.15); border-top: 1px dashed rgba(100,100,100,0.4); border-bottom: 1px dashed rgba(100,100,100,0.4);">
-                        <span style="font-size: 9px; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">
-                            <span class="material-icons" style="font-size: 12px; vertical-align: middle; margin-right: 4px;">person_off</span>
-                            Participantes Inativos
-                        </span>
-                    </div>
-                    `;
+                    htmlR += '<div style="padding:8px 14px;background:rgba(100,100,100,0.15);border-top:1px dashed rgba(100,100,100,0.4);border-bottom:1px dashed rgba(100,100,100,0.4);">'
+                        + '<span style="font-size:9px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">'
+                        + '<span class="material-icons" style="font-size:12px;vertical-align:middle;margin-right:4px;">person_off</span>'
+                        + 'Participantes Inativos</span></div>';
 
                     inativos.forEach((time) => {
-                        const isMeuTime = isMyTime(time, meuTimeId);
-
-                        html += `
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.03); opacity: 0.5; filter: grayscale(60%);">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <span style="font-size: 12px; width: 26px; color: #555;">—</span>
-                                <div>
-                                    <div style="color: #666; font-weight: 400; font-size: 12px;">${escapeHtml(time.participanteNome || time.nomeCartoleiro || time.nome || 'N/D')}</div>
-                                    <div style="color: #555; font-size: 11px;">${escapeHtml(time.nomeTime || time.nome_time || '')}</div>
-                                </div>
-                            </div>
-                            <span style="color: #555; font-weight: 500; font-size: 13px;">${getPontos(time).toFixed(1)}</span>
-                        </div>
-                        `;
+                        htmlR += '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.03);opacity:0.5;filter:grayscale(60%);">'
+                            + '<div style="display:flex;align-items:center;gap:10px;">'
+                            + '<span style="font-size:12px;width:26px;color:#555;">\u2014</span>'
+                            + '<div>'
+                            + '<div style="color:#666;font-weight:400;font-size:12px;">' + escapeHtml(time.participanteNome || time.nomeCartoleiro || time.nome || 'N/D') + '</div>'
+                            + '<div style="color:#555;font-size:11px;">' + escapeHtml(time.nomeTime || time.nome_time || '') + '</div>'
+                            + '</div></div>'
+                            + '<span style="color:#555;font-weight:500;font-size:13px;">' + getPontos(time).toFixed(1) + '</span>'
+                            + '</div>';
                     });
                 }
 
-                return html;
+                return htmlR;
             })()}
             </div>
         </details>
@@ -765,6 +825,74 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
     `;
 
     container.innerHTML = html;
+
+    // ✅ v5.0: Event listeners — Ranking colapsável
+    container.querySelectorAll('.luva-ranking-row').forEach(row => {
+        row.addEventListener('click', () => {
+            const tid = row.dataset.timeid;
+            const panel = container.querySelector('.luva-collapse-panel[data-panel-timeid="' + tid + '"]');
+            if (!panel) return;
+
+            const isOpen = panel.classList.contains('open');
+
+            // Fechar todos os outros painéis
+            container.querySelectorAll('.luva-collapse-panel.open').forEach(p => {
+                p.classList.remove('open');
+                p.style.maxHeight = '0';
+            });
+            container.querySelectorAll('.luva-ranking-row.expanded').forEach(r => r.classList.remove('expanded'));
+
+            if (!isOpen) {
+                row.classList.add('expanded');
+                panel.classList.add('open');
+                panel.style.maxHeight = panel.scrollHeight + 'px';
+            }
+        });
+    });
+
+    // ✅ v5.0: Event listeners — Últimas Rodadas interativo
+    const rodadaBoxes = container.querySelectorAll('.luva-rodada-box');
+    const detalheContainer = container.querySelector('#luva-rodada-detalhe');
+
+    if (rodadaBoxes.length > 0 && detalheContainer && meusDados?.rodadas) {
+        let selectedRodada = null;
+
+        rodadaBoxes.forEach(box => {
+            box.addEventListener('click', () => {
+                const rodadaNum = parseInt(box.dataset.rodada, 10);
+
+                // Toggle: se já selecionado, fechar
+                if (selectedRodada === rodadaNum) {
+                    selectedRodada = null;
+                    rodadaBoxes.forEach(b => b.classList.remove('selected'));
+                    detalheContainer.classList.remove('open');
+                    detalheContainer.style.maxHeight = '0';
+                    return;
+                }
+
+                selectedRodada = rodadaNum;
+                rodadaBoxes.forEach(b => b.classList.remove('selected'));
+                box.classList.add('selected');
+
+                // Buscar dados da rodada
+                const rodadaData = meusDados.rodadas.find(r => r.rodada === rodadaNum);
+                const goleiro = rodadaData?.goleiroNome || 'Sem goleiro';
+                const pts = Math.trunc((rodadaData?.pontos || 0) * 10) / 10;
+
+                detalheContainer.innerHTML = `
+                    <div class="luva-rodada-detalhe-inner">
+                        <div class="luva-rodada-detalhe-goleiro">
+                            <span class="material-icons">sports_handball</span>
+                            ${escapeHtml(goleiro)}
+                        </div>
+                        <span class="luva-rodada-detalhe-pts">${pts.toFixed(1)} pts</span>
+                    </div>`;
+
+                detalheContainer.classList.add('open');
+                detalheContainer.style.maxHeight = detalheContainer.scrollHeight + 'px';
+            });
+        });
+    }
 }
 
 // =====================================================================

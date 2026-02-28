@@ -196,4 +196,293 @@
             padding: 15px;
         }
     }
+
+    /* =====================================================================
+       v5.0: UX Premium — Ranking colapsável, Seus Goleiros, Rodadas interativas
+       ===================================================================== */
+
+    /* --- Seus Goleiros: Top-1 card + runners --- */
+    .luva-meus-goleiros {
+        background: rgba(255,255,255,0.03);
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 16px;
+    }
+    .luva-meus-goleiros-header {
+        font-size: 11px;
+        color: #888;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .luva-meus-goleiros-header .material-icons,
+    .luva-meus-goleiros-header .material-symbols-outlined {
+        font-size: 14px;
+        color: var(--app-gold);
+    }
+    .luva-top1-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(135deg, rgba(255,215,0,0.12) 0%, rgba(255,215,0,0.04) 100%);
+        border: 1px solid rgba(255,215,0,0.25);
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 6px;
+    }
+    .luva-top1-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+    }
+    .luva-top1-medal {
+        font-size: 22px !important;
+        color: var(--app-gold);
+        flex-shrink: 0;
+    }
+    .luva-top1-info {
+        min-width: 0;
+    }
+    .luva-top1-nome {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--app-text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 160px;
+    }
+    .luva-top1-rodadas {
+        font-size: 9px;
+        color: #888;
+        margin-top: 1px;
+    }
+    .luva-top1-pontos {
+        text-align: right;
+        flex-shrink: 0;
+    }
+    .luva-top1-pontos-valor {
+        font-family: var(--luva-font-brand);
+        font-size: 20px;
+        font-weight: 400;
+        color: var(--app-gold);
+        line-height: 1;
+    }
+    .luva-top1-pontos-label {
+        font-size: 8px;
+        color: #888;
+        text-transform: uppercase;
+    }
+
+    /* Runners */
+    .luva-runner {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 4px;
+    }
+    .luva-runner-medal {
+        flex-shrink: 0;
+        width: 24px;
+        text-align: center;
+    }
+    .luva-runner-medal .material-icons {
+        font-size: 18px;
+    }
+    .luva-runner-content {
+        flex: 1;
+        min-width: 0;
+    }
+    .luva-runner-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 3px;
+    }
+    .luva-runner-nome {
+        font-size: 11px;
+        color: var(--app-text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 140px;
+    }
+    .luva-runner-pts {
+        font-size: 11px;
+        color: var(--app-gold);
+        font-weight: 700;
+        flex-shrink: 0;
+        margin-left: 8px;
+    }
+    .luva-runner-bar-bg {
+        height: 4px;
+        background: rgba(255,255,255,0.06);
+        border-radius: 2px;
+        overflow: hidden;
+    }
+    .luva-runner-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--app-gold), rgba(255,215,0,0.5));
+        border-radius: 2px;
+        transition: width 0.4s ease;
+    }
+
+    /* --- Últimas Rodadas interativo --- */
+    .luva-ultimas-rodadas {
+        background: rgba(255,255,255,0.03);
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 16px;
+    }
+    .luva-ultimas-header {
+        font-size: 11px;
+        color: #888;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .luva-ultimas-header .material-icons,
+    .luva-ultimas-header .material-symbols-outlined {
+        font-size: 14px;
+        color: var(--app-gold);
+    }
+    .luva-rodadas-grid {
+        display: flex;
+        gap: 6px;
+        justify-content: space-between;
+    }
+    .luva-rodada-box {
+        flex: 1;
+        border-radius: 8px;
+        padding: 8px 4px;
+        text-align: center;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        border: 2px solid transparent;
+    }
+    .luva-rodada-box:active {
+        transform: scale(0.95);
+    }
+    .luva-rodada-box.selected {
+        border-color: var(--app-gold);
+        box-shadow: 0 0 8px rgba(255,215,0,0.25);
+    }
+    .luva-rodada-num {
+        font-size: 9px;
+        color: #666;
+        margin-bottom: 4px;
+    }
+    .luva-rodada-pts {
+        font-size: 14px;
+        font-weight: 800;
+    }
+    .luva-rodada-detalhe {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        margin-top: 0;
+    }
+    .luva-rodada-detalhe.open {
+        margin-top: 8px;
+    }
+    .luva-rodada-detalhe-inner {
+        background: rgba(0,0,0,0.25);
+        border-radius: 8px;
+        padding: 10px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .luva-rodada-detalhe-goleiro {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--app-text-primary);
+    }
+    .luva-rodada-detalhe-goleiro .material-icons {
+        font-size: 16px;
+        color: var(--app-gold);
+    }
+    .luva-rodada-detalhe-pts {
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--app-gold);
+    }
+
+    /* --- Ranking colapsável --- */
+    .luva-ranking-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 14px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        cursor: pointer;
+        transition: background 0.15s ease;
+    }
+    .luva-ranking-row:active {
+        background: rgba(255,215,0,0.08) !important;
+    }
+    .luva-ranking-row.expanded {
+        background: rgba(255,215,0,0.06);
+        border-bottom-color: transparent;
+    }
+    .luva-expand-icon {
+        font-size: 18px !important;
+        color: #555;
+        transition: transform 0.25s ease;
+    }
+    .luva-ranking-row.expanded .luva-expand-icon {
+        transform: rotate(180deg);
+        color: var(--app-gold);
+    }
+
+    .luva-collapse-panel {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        background: rgba(255,215,0,0.03);
+    }
+    .luva-collapse-panel.open {
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .luva-collapse-inner {
+        padding: 6px 14px 10px 50px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 12px;
+    }
+    .luva-collapse-rodada {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+    }
+    .luva-collapse-rodada-badge {
+        font-weight: 700;
+        font-size: 10px;
+        min-width: 24px;
+    }
+    .luva-collapse-rodada-info {
+        color: var(--app-text-primary);
+        font-size: 10px;
+    }
+    .luva-collapse-rodada-pts {
+        color: var(--app-gold);
+        font-weight: 700;
+        font-size: 10px;
+    }
+    .luva-collapse-vazio {
+        color: #555;
+        font-size: 10px;
+        font-style: italic;
+        padding: 4px 0;
+    }
 </style>
