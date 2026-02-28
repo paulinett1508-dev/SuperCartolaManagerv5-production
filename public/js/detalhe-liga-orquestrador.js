@@ -12,6 +12,8 @@ class DetalheLigaOrquestrador {
         // Multi-Temporada: contexto de navegação
         this.temporada = this.obterTemporadaDaUrl();
         this.isTemporadaHistorica = false;
+        // Rastreia qual módulo está ativo (para refresh pós-consolidação)
+        this.moduloAtivo = null;
         this._initPromise = this.init();
     }
 
@@ -175,6 +177,9 @@ class DetalheLigaOrquestrador {
     }
 
     async executeModuleScripts(moduleName) {
+        // Rastrear módulo ativo para refresh pós-consolidação
+        this.moduloAtivo = moduleName;
+
         // ✅ v9.0: Preservar temporada antes de executar modulo
         // Alguns modulos (ex: fluxo-financeiro) podem sobrescrever window.temporadaAtual
         const temporadaPreservada = window.temporadaAtual;
@@ -1033,6 +1038,17 @@ class DetalheLigaOrquestrador {
         window.executeAction = (action) => this.executeAction(action);
         window.orquestrador = this;
 
+        // Listener para refresh pós-consolidação (disparado pelo ConsolidacaoScheduler)
+        window.addEventListener('consolidacao-detectada', (e) => {
+            const rodada = e.detail?.rodada;
+            console.log(`[ORQUESTRADOR] Consolidação detectada — rodada ${rodada}, módulo ativo: ${this.moduloAtivo || 'nenhum'}`);
+            // Refresh automático do módulo ativo (se houver um aberto)
+            if (this.moduloAtivo) {
+                // Pequeno delay para garantir que o banner apareceu primeiro
+                setTimeout(() => this.refreshModuloAtivo(), 500);
+            }
+        });
+
         // ✅ v3.2: Utilitário global para aguardar container no DOM
         // Usado por módulos para garantir que container existe após injeção de HTML
         window.aguardarContainerAdmin = async (containerId, maxTentativas = 10, intervalo = 100) => {
@@ -1072,6 +1088,71 @@ class DetalheLigaOrquestrador {
                 return baseUrl;
             }
         };
+    }
+
+    // ==============================
+    // REFRESH PÓS-CONSOLIDAÇÃO
+    // Chamado pelo banner ou pelo listener 'consolidacao-detectada'
+    // ==============================
+    async refreshModuloAtivo() {
+        const modulo = this.moduloAtivo;
+        if (!modulo) {
+            console.log('[ORQUESTRADOR] refreshModuloAtivo: nenhum módulo ativo');
+            return;
+        }
+
+        console.log(`[ORQUESTRADOR] Refreshing módulo: ${modulo}`);
+
+        // Mapa de funções de refresh por módulo
+        const refreshMap = {
+            'artilheiro-campeao': async () => {
+                if (window.ArtilheiroCampeao?.buscarRanking) {
+                    await window.ArtilheiroCampeao.buscarRanking(false);
+                }
+            },
+            'capitao-luxo': async () => {
+                if (window.CapitaoLuxo?.buscarRanking) {
+                    await window.CapitaoLuxo.buscarRanking(false);
+                } else if (typeof window.inicializarCapitaoLuxoAdmin === 'function') {
+                    await window.inicializarCapitaoLuxoAdmin();
+                }
+            },
+            'luva-de-ouro': async () => {
+                if (window.LuvaDeOuroOrquestrador?.carregarRanking) {
+                    await window.LuvaDeOuroOrquestrador.carregarRanking(false);
+                }
+            },
+            'pontos-corridos': async () => {
+                const mod = this.modules.pontosCorridos
+                    || await import('./pontos-corridos.js').catch(() => null);
+                if (mod?.carregarPontosCorridos) {
+                    await mod.carregarPontosCorridos();
+                }
+            },
+            'rodadas': async () => {
+                if (typeof window.carregarRodadas === 'function') {
+                    await window.carregarRodadas();
+                }
+            },
+            'ranking-geral': async () => {
+                if (typeof window.carregarRankingGeral === 'function') {
+                    await window.carregarRankingGeral();
+                }
+            },
+        };
+
+        const refreshFn = refreshMap[modulo];
+        if (!refreshFn) {
+            console.log(`[ORQUESTRADOR] Nenhum refresh mapeado para: ${modulo}`);
+            return;
+        }
+
+        try {
+            await refreshFn();
+            console.log(`[ORQUESTRADOR] Módulo ${modulo} atualizado após consolidação`);
+        } catch (error) {
+            console.warn(`[ORQUESTRADOR] Erro no refresh de ${modulo}:`, error.message);
+        }
     }
 }
 

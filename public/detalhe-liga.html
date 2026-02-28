@@ -1206,6 +1206,9 @@
         <!-- CONTEXTO DE TEMPORADA (deve carregar antes dos módulos) -->
         <script src="js/core/season-context.js"></script>
 
+        <!-- SCHEDULER DE CONSOLIDAÇÃO - detecta rodadas encerradas e notifica módulos -->
+        <script src="js/core/consolidacao-scheduler.js"></script>
+
         <!-- SCHEDULERS AUTOMÁTICOS (devem carregar antes dos módulos) -->
         <script src="js/luva-de-ouro/luva-de-ouro-scheduler.js"></script>
 
@@ -1271,6 +1274,164 @@
                     __dl_initLogoObserver();
                 }
             }
+        </script>
+
+        <!-- =============================================
+             BANNER: RODADA CONSOLIDADA DISPONÍVEL
+             Aparece quando ConsolidacaoScheduler detecta
+             que uma rodada foi encerrada.
+             ============================================= -->
+        <style>
+            .banner-consolidacao {
+                display: none;
+                position: fixed;
+                bottom: 24px;
+                left: 50%;
+                transform: translateX(-50%) translateY(20px);
+                z-index: 9990;
+                background: linear-gradient(135deg, #1a1a1a 0%, #111 100%);
+                border: 1px solid rgba(255, 85, 0, 0.5);
+                border-radius: 12px;
+                padding: 14px 20px;
+                display: none;
+                align-items: center;
+                gap: 12px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 16px rgba(255, 85, 0, 0.15);
+                opacity: 0;
+                transition: opacity 0.3s ease, transform 0.3s ease;
+                max-width: 420px;
+                width: calc(100% - 48px);
+                cursor: pointer;
+            }
+            .banner-consolidacao.show {
+                display: flex;
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+            .banner-consolidacao-icon {
+                color: #f97316;
+                font-size: 22px;
+                flex-shrink: 0;
+            }
+            .banner-consolidacao-texto {
+                flex: 1;
+            }
+            .banner-consolidacao-titulo {
+                font-size: 13px;
+                font-weight: 600;
+                color: #fff;
+                display: block;
+            }
+            .banner-consolidacao-subtitulo {
+                font-size: 11px;
+                color: #9ca3af;
+                display: block;
+                margin-top: 2px;
+            }
+            .banner-consolidacao-btn {
+                background: #f97316;
+                color: white;
+                border: none;
+                border-radius: 7px;
+                padding: 7px 14px;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                flex-shrink: 0;
+                transition: background 0.2s;
+            }
+            .banner-consolidacao-btn:hover {
+                background: #ea580c;
+            }
+            .banner-consolidacao-fechar {
+                background: none;
+                border: none;
+                color: #6b7280;
+                cursor: pointer;
+                padding: 4px;
+                display: flex;
+                align-items: center;
+                flex-shrink: 0;
+                transition: color 0.2s;
+            }
+            .banner-consolidacao-fechar:hover {
+                color: #fff;
+            }
+        </style>
+
+        <div id="bannerConsolidacao" class="banner-consolidacao" role="alert" aria-live="polite">
+            <span class="material-icons banner-consolidacao-icon">check_circle</span>
+            <div class="banner-consolidacao-texto">
+                <span class="banner-consolidacao-titulo" id="bannerConsolidacaoTitulo">Rodada consolidada</span>
+                <span class="banner-consolidacao-subtitulo">Clique em Atualizar para ver os dados mais recentes</span>
+            </div>
+            <button class="banner-consolidacao-btn" id="bannerConsolidacaoBtn">Atualizar</button>
+            <button class="banner-consolidacao-fechar" id="bannerConsolidacaoFechar" aria-label="Fechar">
+                <span class="material-icons" style="font-size: 18px;">close</span>
+            </button>
+        </div>
+
+        <script>
+            // === BANNER CONSOLIDAÇÃO ===
+            // Escuta o evento disparado pelo ConsolidacaoScheduler
+            (function () {
+                let _rodadaConsolidada = null;
+                let _autoFechamentoId  = null;
+
+                function mostrarBanner(rodada) {
+                    _rodadaConsolidada = rodada;
+                    const banner = document.getElementById('bannerConsolidacao');
+                    const titulo = document.getElementById('bannerConsolidacaoTitulo');
+                    if (!banner) return;
+
+                    if (titulo && rodada) {
+                        titulo.textContent = `Rodada ${rodada} disponível`;
+                    }
+
+                    // Forçar reflow antes de adicionar .show (para transição funcionar)
+                    banner.style.display = 'flex';
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => banner.classList.add('show'));
+                    });
+
+                    // Auto-fechar após 20s (não intrusivo)
+                    clearTimeout(_autoFechamentoId);
+                    _autoFechamentoId = setTimeout(() => fecharBanner(), 20000);
+                }
+
+                function fecharBanner() {
+                    const banner = document.getElementById('bannerConsolidacao');
+                    if (!banner) return;
+                    banner.classList.remove('show');
+                    clearTimeout(_autoFechamentoId);
+                    setTimeout(() => { banner.style.display = 'none'; }, 300);
+                }
+
+                function atualizarModuloAtivo() {
+                    fecharBanner();
+                    // Delegar ao orquestrador — ele sabe qual módulo está ativo
+                    if (window.orquestrador && typeof window.orquestrador.refreshModuloAtivo === 'function') {
+                        window.orquestrador.refreshModuloAtivo();
+                    }
+                }
+
+                // Escutar evento do scheduler
+                window.addEventListener('consolidacao-detectada', function (e) {
+                    const rodada = e.detail?.rodada || null;
+                    console.log(`[BANNER-CONSOLIDACAO] Rodada ${rodada} detectada — exibindo banner`);
+                    mostrarBanner(rodada);
+                });
+
+                // Botão Atualizar
+                document.addEventListener('click', function (e) {
+                    if (e.target.closest('#bannerConsolidacaoBtn')) {
+                        atualizarModuloAtivo();
+                    }
+                    if (e.target.closest('#bannerConsolidacaoFechar')) {
+                        fecharBanner();
+                    }
+                });
+            })();
         </script>
 
         <!-- ADMINISTRAÇÃO DA LIGA - HANDLERS -->
