@@ -15,6 +15,7 @@
 | 2026-02-28 | FRONTEND | `const isLive` usada antes de ser declarada em `_renderizarDisputa` — ReferenceError temporal dead zone | Ao mover/reordenar código em funções JS, verificar se todas as `const`/`let` são declaradas ANTES de serem usadas. `var` tem hoisting, `const`/`let` não. Revisão de ordem de declarações é obrigatória após edições que movem blocos de código. | Não |
 | 2026-02-28 | FRONTEND | `escapeHtml` usada sem estar definida em `top10.js` — ReferenceError | Módulos JS isolados (carregados via import dinâmico no admin) devem definir funções utilitárias como `escapeHtml` localmente. Padrão: copiar de `rodadas-ui.js`. Não depender de `window.escapeHtml` que pode não estar carregado. | Não |
 | 2026-02-28 | FRONTEND | `escapeHtml` usada sem estar definida em `capitao-luxo.js` — mesmo erro recorrente | **2ª ocorrência** — padrão confirmado: TODO módulo admin deve ter `escapeHtml` local. Checklist ao criar/editar módulo admin: verificar se usa `escapeHtml` e se está definida. | Não |
+| 2026-02-28 | FRONTEND | `escapeHtml` usada sem estar definida em `pontos-corridos-ui.js` — 3ª ocorrência | **3ª ocorrência** — escalação obrigatória. Módulos ES6 com `import` (não script global) NUNCA têm acesso a `window.escapeHtml`. Regra: ao criar qualquer módulo com template literals HTML, adicionar `escapeHtml` local imediatamente. Proposta de regra no CLAUDE.md adicionada. | Sim — ver Padroes Recorrentes |
 
 ### Categorias Validas
 - **DADOS** — Queries erradas, tipos de ID, collections incorretas
@@ -28,7 +29,20 @@
 
 > Quando 3+ licoes da mesma categoria aparecerem, documentar o padrao aqui e propor regra no CLAUDE.md.
 
-_(vazio)_
+### FRONTEND — `escapeHtml` não definida localmente (3 ocorrências)
+- `top10.js` (2026-02-28)
+- `capitao-luxo.js` (2026-02-28)
+- `pontos-corridos-ui.js` (2026-02-28)
+
+**Padrão:** Módulos JS carregados com `import` (ES6 modules) operam em escopo isolado — nunca enxergam `window.escapeHtml`. O template HTML usa a função mas ela não está definida localmente.
+
+**Regra:** Ao criar ou editar qualquer módulo que usa template literals com dados de usuário, adicionar esta função local no topo:
+```javascript
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+```
 
 ---
 

@@ -28,6 +28,12 @@ function safeNumber(value, defaultValue = 0) {
   return isNaN(num) ? defaultValue : num;
 }
 
+// Utilitário local para evitar XSS em templates HTML
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 // ✅ v2.8: Função para garantir string segura
 function safeString(value, defaultValue = "") {
   if (value === null || value === undefined) return defaultValue;
