@@ -80,8 +80,8 @@ async function _carregarDados() {
 
         dados.isLive = isLive;
 
-        // Modo PROJETADO: edição ativa + rodada ao vivo → sobrepor com parciais
-        if (isLive && dados.edicao?.status === 'em_andamento') {
+        // Modo PROJETADO: edição ativa (ou pendente na R1) + rodada ao vivo → sobrepor com parciais
+        if (isLive && (dados.edicao?.status === 'em_andamento' || dados.edicao?.status === 'pendente')) {
             const parciais = await _buscarParciais();
             if (parciais?.length) {
                 _mergeParciaisNaDados(dados, parciais);
@@ -263,8 +263,8 @@ function _renderizarDisputa(dados, timeId) {
 
     const meuStatus = participantes?.find(p => String(p.timeId) === String(timeId));
 
-    // Zona de perigo: últimos min(qtdPerigo, vivos.length-1) da lista
-    const qtdPerigoDisplay = Math.min(qtdPerigo, Math.max(0, vivos.length - 1));
+    // Zona de perigo: apenas durante rodada ao vivo (sem live = sem zona visual)
+    const qtdPerigoDisplay = isLive ? Math.min(qtdPerigo, Math.max(0, vivos.length - 1)) : 0;
     const isNaZonaPerigo = qtdPerigoDisplay > 0 &&
         vivos.slice(-qtdPerigoDisplay).some(v => String(v.timeId) === String(timeId));
 
@@ -431,9 +431,10 @@ function _renderizarDisputa(dados, timeId) {
                         <div>${escapeHtml(p.nomeCartoleiro || p.nome_cartola || p.nome || 'N/D')}</div>
                         <div class="ru-nome-time">${escapeHtml(p.nomeTime || '')}</div>
                     </div>
+                    <span class="resta-um-pontos ${ptsClass}">${pontosStr}</span>
                     ${isNaZona
-                        ? `<span class="ru-tag-eliminado"><span class="material-icons" style="font-size: 11px; vertical-align: middle;">person_off</span>&nbsp;ELIMINADO</span>`
-                        : `<span class="resta-um-pontos ${ptsClass}">${pontosStr}</span>`
+                        ? `<span class="ru-tag-perigo"><span class="material-icons" style="font-size: 11px; vertical-align: middle;">warning</span>&nbsp;EM PERIGO</span>`
+                        : ''
                     }
                 </div>
             `;

@@ -273,6 +273,7 @@ export default class RestaUmManager extends BaseManager {
                 const pontosRodada = pontuacoesMap.get(String(p.timeId)) || 0;
                 p.pontosAcumulados = (p.pontosAcumulados || 0) + pontosRodada;
                 p.rodadasSobrevividas = (p.rodadasSobrevividas || 0) + 1;
+                p.pontosRodada = pontosRodada;
             }
         }
 

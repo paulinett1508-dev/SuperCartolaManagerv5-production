@@ -145,7 +145,28 @@ export async function obterStatus(req, res) {
         let pontosLiveMap = new Map();
         let isLive = false;
 
-        if (edicao.status === 'em_andamento' && edicao.rodadaAtual) {
+        if (edicao.status === 'pendente' && edicao.rodadaInicial) {
+            // Edição pendente encontrada diretamente (ex: admin com ?edicao=N durante R1)
+            // Buscar dados ao vivo da rodadaInicial — mesmo fluxo do fallback pendente
+            const rodadasLive = await Rodada.find({
+                ligaId,
+                rodada: edicao.rodadaInicial,
+                temporada,
+            }).lean();
+
+            if (rodadasLive.length > 0) {
+                isLive = true;
+                rodadasLive.forEach(r => {
+                    pontosLiveMap.set(String(r.timeId), r.pontos || 0);
+                });
+            } else {
+                const fb = await _buscarPontosViaParciais(ligaId);
+                if (fb.isLive) {
+                    isLive = true;
+                    pontosLiveMap = fb.pontosLiveMap;
+                }
+            }
+        } else if (edicao.status === 'em_andamento' && edicao.rodadaAtual) {
             const rodadasLive = await Rodada.find({
                 ligaId,
                 rodada: edicao.rodadaAtual,
@@ -205,7 +226,7 @@ export async function obterStatus(req, res) {
                 eliminadosPorRodada: edicao.eliminadosPorRodada,
             },
             participantes: [...vivos, ...eliminados],
-            rodadaAtual: edicao.rodadaAtual,
+            rodadaAtual: edicao.rodadaAtual || (isLive ? edicao.rodadaInicial : null),
             historicoEliminacoes: edicao.historicoEliminacoes || [],
             premiacao: {
                 campeao: edicao.premiacao?.campeao || 0,
