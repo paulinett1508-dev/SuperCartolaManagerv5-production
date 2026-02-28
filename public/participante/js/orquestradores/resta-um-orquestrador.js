@@ -726,7 +726,7 @@ class RestaUmModule {
 
         html += `
             <div class="ruv-header">
-                <h2 class="ruv-header-title">${ed.nome || 'Resta Um'}</h2>
+                <h2 class="ruv-header-title">Resta Um</h2>
                 <span class="ruv-status-badge ${ed.status}">
                     <span class="material-icons" style="font-size:10px;">
                         ${ed.status === 'em_andamento' ? 'sports_score' : ed.status === 'finalizada' ? 'emoji_events' : 'pending'}
