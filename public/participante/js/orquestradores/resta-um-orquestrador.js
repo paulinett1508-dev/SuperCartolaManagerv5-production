@@ -117,6 +117,31 @@ function _injetarCSS() {
             font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
         }
 
+        /* Regras de negócio */
+        .ruv-regras {
+            display: flex;
+            gap: var(--app-space-2, 8px);
+            margin-bottom: var(--app-space-5, 20px);
+            flex-wrap: wrap;
+        }
+        .ruv-regra-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(244,63,94,0.12);
+            border: 1px solid rgba(244,63,94,0.25);
+            font-size: var(--app-font-xs, 10px);
+            color: var(--app-text-secondary, #d1d5db);
+            font-weight: 500;
+        }
+        .ruv-regra-chip.destaque {
+            background: rgba(234,179,8,0.12);
+            border-color: rgba(234,179,8,0.3);
+        }
+        .ruv-regra-chip .material-icons { font-size: 12px; color: rgba(244,63,94,0.8); }
+
         /* === CAMPEÃO card === */
         .ruv-campeao-card {
             display: flex;
@@ -606,6 +631,7 @@ class RestaUmModule {
         this.pollingInterval = null;
         this.pollingIntervalMs = 15000;
         this.container = null;
+        this.premiacao = null;
     }
 
     async init(ligaId, container = null) {
@@ -639,6 +665,7 @@ class RestaUmModule {
         this.edicaoAtual = data.edicao;
         this.participantes = data.participantes || [];
         this.isLive = data.isLive || false;
+        this.premiacao = data.premiacao || null;
         this.renderizar();
     }
 
@@ -650,6 +677,7 @@ class RestaUmModule {
             this.edicaoAtual = data.edicao;
             this.participantes = data.participantes || [];
             this.isLive = data.isLive || false;
+            this.premiacao = data.premiacao || null;
             this.renderizar();
         } catch (error) {
             console.error('[RESTA-UM] Erro ao carregar parciais:', error);
@@ -721,6 +749,22 @@ class RestaUmModule {
         if (ed.rodadaInicial) chips.push(`<span class="ruv-meta-chip"><span class="material-icons">flag</span>Início <strong>R${ed.rodadaInicial}</strong></span>`);
         if (ed.rodadaAtual)   chips.push(`<span class="ruv-meta-chip"><span class="material-icons">sports_score</span>Rodada <strong>${ed.rodadaAtual}</strong></span>`);
         if (chips.length) html += `<div class="ruv-meta">${chips.join('')}</div>`;
+
+        // ── REGRAS DE NEGÓCIO ────────────────────────────────────
+        const regrasChips = [];
+        if (ed.eliminadosPorRodada) {
+            regrasChips.push(`<span class="ruv-regra-chip"><span class="material-icons">person_off</span>${ed.eliminadosPorRodada === 1 ? '1 eliminado/rodada' : `${ed.eliminadosPorRodada} eliminados/rodada`}</span>`);
+        }
+        if (this.premiacao?.campeao > 0) {
+            regrasChips.push(`<span class="ruv-regra-chip destaque"><span class="material-icons" style="color:var(--color-warning,#eab308)">emoji_events</span>Campeão R$ ${this.premiacao.campeao.toFixed(2).replace('.', ',')}</span>`);
+        }
+        if (this.premiacao?.viceHabilitado && this.premiacao?.vice > 0) {
+            regrasChips.push(`<span class="ruv-regra-chip"><span class="material-icons">workspace_premium</span>Vice R$ ${this.premiacao.vice.toFixed(2).replace('.', ',')}</span>`);
+        }
+        if (this.premiacao?.terceiroHabilitado && this.premiacao?.terceiro > 0) {
+            regrasChips.push(`<span class="ruv-regra-chip"><span class="material-icons">military_tech</span>3º R$ ${this.premiacao.terceiro.toFixed(2).replace('.', ',')}</span>`);
+        }
+        if (regrasChips.length) html += `<div class="ruv-regras">${regrasChips.join('')}</div>`;
 
         // barra de progresso de sobreviventes
         const totalEd = vivos.length + eliminados.length + (campeao ? 1 : 0);
