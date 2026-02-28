@@ -1,6 +1,7 @@
 // =====================================================================
 // service-worker.js - Service Worker do PWA v4.3 (CACHE FALLBACK 5xx)
 // Destino: /participante/service-worker.js
+// ✅ v4.3: REPUBLISH RESILIENCE - SW intercepta HTML e mostra retry page quando servidor está down
 // ✅ v4.2: TTL DINÂMICO - Backend usa 30s com jogos ao vivo, 5min sem
 // ✅ v4.1: CACHE BUST - Forçar atualização de tabelas-esportes.js (tempo jogos + refresh 30s)
 // ✅ v4.0: FIX MOBILE MODULES - Não interceptar ES module imports (causa falha em mobile)
@@ -13,10 +14,10 @@
 // ✅ v3.2: FORCE CACHE CLEAR - Limpar cache antigo que causava erros
 // ✅ v3.1: Network-First com cache fallback (FIX fetch failures)
 // ✅ v3.0: Força limpeza de caches antigos
-// BUILD: 2026-02-24T00:00:00Z
+// BUILD: 2026-02-28T00:00:00Z
 // =====================================================================
 
-const CACHE_NAME = "super-cartola-v27-20260224";
+const CACHE_NAME = "super-cartola-v28-20260228";
 
 // Arquivos essenciais para cache inicial
 const STATIC_ASSETS = [
@@ -60,6 +61,62 @@ self.addEventListener("activate", (event) => {
     );
 });
 
+// ✅ v4.3: Página de retry quando servidor está down (Republish)
+function gerarPaginaRetry() {
+    var html = '<!DOCTYPE html><html lang="pt-BR"><head>' +
+        '<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+        '<title>Atualizando...</title>' +
+        '<style>' +
+        '*{margin:0;padding:0;box-sizing:border-box}' +
+        'body{background:#111827;color:#f3f4f6;font-family:"Inter",-apple-system,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh}' +
+        '.c{text-align:center;padding:2rem}' +
+        'h1{font-family:"Russo One",sans-serif;font-size:1.5rem;margin-bottom:.75rem;color:#60a5fa}' +
+        'p{font-size:.95rem;color:#9ca3af;margin-bottom:1.5rem}' +
+        '.spinner{width:36px;height:36px;border:3px solid #374151;border-top-color:#60a5fa;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}' +
+        '@keyframes spin{to{transform:rotate(360deg)}}' +
+        '#status{font-size:.8rem;color:#6b7280;margin-top:.5rem}' +
+        '#retry-btn{display:none;margin-top:1rem;padding:.6rem 1.5rem;background:#1d4ed8;color:#fff;border:none;border-radius:8px;font-size:.95rem;cursor:pointer}' +
+        '#retry-btn:active{background:#1e40af}' +
+        '</style></head>' +
+        '<body><div class="c">' +
+        '<div class="spinner"></div>' +
+        '<h1 style="margin-top:1.25rem">Servidor reiniciando</h1>' +
+        '<p>Uma atualizacao foi aplicada. A pagina sera recarregada automaticamente.</p>' +
+        '<div id="status"></div>' +
+        '<button id="retry-btn" onclick="location.reload()">Toque para recarregar</button>' +
+        '</div>' +
+        '<script>' +
+        '(function(){' +
+        'var t=0,max=90,iv=2000;' +
+        'var s=document.getElementById("status");' +
+        'var b=document.getElementById("retry-btn");' +
+        'function go(){' +
+        't++;' +
+        'if(s)s.textContent="Tentativa "+t+"...";' +
+        'fetch(location.href,{method:"HEAD",cache:"no-store"}).then(function(r){' +
+        'if(r.ok||r.status===304){location.reload();}' +
+        'else if(t<max){setTimeout(go,iv);}' +
+        'else{done();}' +
+        '}).catch(function(){' +
+        'if(t<max){setTimeout(go,iv);}' +
+        'else{done();}' +
+        '});' +
+        '}' +
+        'function done(){' +
+        'if(s)s.textContent="Servidor ainda indisponivel.";' +
+        'if(b)b.style.display="inline-block";' +
+        '}' +
+        'setTimeout(go,iv);' +
+        'setTimeout(function(){if(b)b.style.display="inline-block";},20000);' +
+        '})();' +
+        '<\/script>' +
+        '</body></html>';
+    return new Response(html, {
+        status: 503,
+        headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
+    });
+}
+
 // ✅ v2.0: Estratégias de cache otimizadas
 self.addEventListener("fetch", (event) => {
     const { request } = event;
@@ -80,11 +137,31 @@ self.addEventListener("fetch", (event) => {
         return;
     }
 
-    // ❌ NETWORK ONLY: HTML - sempre buscar versão mais recente
+    // ✅ v4.3: NETWORK FIRST + RETRY PAGE para HTML/navegação
+    // Quando servidor está DOWN (Republish), o proxy Replit retorna "Internal Server Error".
+    // Sem interceptação, o usuário fica preso nesse erro.
+    // Agora o SW detecta falha/5xx e responde com página de retry automático.
     if (url.pathname.endsWith('.html') ||
         url.pathname === '/participante/' ||
         url.pathname === '/participante') {
-        return; // Deixa o navegador buscar normalmente
+        event.respondWith(
+            fetch(request).then(function(response) {
+                // Servidor respondeu — se ok, retorna normal
+                if (response.ok || response.status === 304) {
+                    return response;
+                }
+                // Servidor retornou erro (5xx) — mostrar página de retry
+                if (response.status >= 500) {
+                    return gerarPaginaRetry();
+                }
+                // Outros status (3xx, 4xx) — retorna como está
+                return response;
+            }).catch(function() {
+                // Rede falhou completamente (servidor down) — página de retry
+                return gerarPaginaRetry();
+            })
+        );
+        return;
     }
 
     // ❌ NETWORK ONLY: ES Modules - respondWith() quebra dynamic import() em mobile
