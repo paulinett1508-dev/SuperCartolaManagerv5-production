@@ -4,6 +4,7 @@ import MelhorMesCache, {
 } from "../models/MelhorMesCache.js";
 import ModuleConfig from "../models/ModuleConfig.js";
 import Rodada from "../models/Rodada.js";
+import ExtratoFinanceiroCache from "../models/ExtratoFinanceiroCache.js";
 import mongoose from "mongoose";
 
 const LOG_PREFIX = "[MELHOR-MES-SERVICE]";

@@ -78,6 +78,11 @@ export class MelhorMesUI {
     const isAtiva = index === this.edicaoAtiva;
     const temDados = dados && dados.ranking && dados.ranking.length > 0;
 
+    // ✅ v1.4: Preferir inicio/fim da resposta da API (dados.edicao),
+    // que reflete a config do wizard. Fallback para a config estática.
+    const inicio = dados?.edicao?.inicio ?? edicao.inicio;
+    const fim = dados?.edicao?.fim ?? edicao.fim;
+
     // Determinar status
     let statusClass = "aguardando";
     if (temDados && dados.concluida) {
@@ -93,7 +98,7 @@ export class MelhorMesUI {
 
         <div class="edicao-numero">${String(index + 1).padStart(2, "0")}</div>
         <div class="edicao-label">EDIÇÃO</div>
-        <div class="edicao-rodadas">Rod. ${edicao.inicio}-${edicao.fim}</div>
+        <div class="edicao-rodadas">Rod. ${inicio}-${fim}</div>
 
       </div>
     `;
