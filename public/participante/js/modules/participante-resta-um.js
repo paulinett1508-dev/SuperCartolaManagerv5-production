@@ -263,6 +263,9 @@ function _renderizarDisputa(dados, timeId) {
 
     const meuStatus = participantes?.find(p => String(p.timeId) === String(timeId));
 
+    const isLive = dados.isLive || _isRodadaAoVivo();
+    const isProjetado = dados.isProjetado === true;
+
     // Zona de perigo: apenas durante rodada ao vivo (sem live = sem zona visual)
     const qtdPerigoDisplay = isLive ? Math.min(qtdPerigo, Math.max(0, vivos.length - 1)) : 0;
     const isNaZonaPerigo = qtdPerigoDisplay > 0 &&
@@ -275,9 +278,6 @@ function _renderizarDisputa(dados, timeId) {
     if (parentContainer) {
         parentContainer.classList.toggle('user-is-lanterna', isNaZonaPerigo);
     }
-
-    const isLive = dados.isLive || _isRodadaAoVivo();
-    const isProjetado = dados.isProjetado === true;
     const lider = vivos[0];
     const isCampeao = lider?.status === 'campeao';
 
