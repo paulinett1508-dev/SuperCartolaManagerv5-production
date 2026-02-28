@@ -348,6 +348,29 @@ const BrasileiraoTabela = {
     },
 
     /**
+     * Cache helpers para sessionStorage
+     */
+    _getCacheCompleto() {
+        try {
+            const raw = sessionStorage.getItem(`brasileirao_completo_${this._temporada}`);
+            if (!raw) return null;
+            const cached = JSON.parse(raw);
+            // TTL de 5 minutos
+            if (Date.now() - cached._ts > 5 * 60 * 1000) {
+                sessionStorage.removeItem(`brasileirao_completo_${this._temporada}`);
+                return null;
+            }
+            return cached.data;
+        } catch { return null; }
+    },
+
+    _setCacheCompleto(data) {
+        try {
+            sessionStorage.setItem(`brasileirao_completo_${this._temporada}`, JSON.stringify({ data, _ts: Date.now() }));
+        } catch { /* storage full — ok, sem cache */ }
+    },
+
+    /**
      * Abre LP com tabela completa de todas as rodadas
      */
     async _abrirTabelaCompleta() {
@@ -367,7 +390,9 @@ const BrasileiraoTabela = {
                         <span class="material-icons">emoji_events</span>
                         Brasileirão ${this._temporada}
                     </div>
-                    <div class="brasileirao-lp-spacer"></div>
+                    <button class="brasileirao-lp-refresh" id="brasileirao-lp-refresh" title="Atualizar dados">
+                        <span class="material-icons">refresh</span>
+                    </button>
                 </div>
                 <div class="brasileirao-lp-content" id="brasileirao-lp-content">
                     <div class="brasileirao-lp-loading">
@@ -386,16 +411,36 @@ const BrasileiraoTabela = {
             this._fecharTabelaCompleta(overlay);
         });
 
+        // Bind refresh
+        overlay.querySelector('#brasileirao-lp-refresh').addEventListener('click', () => {
+            this._refreshTabelaCompleta(overlay);
+        });
+
+        // Tentar cache primeiro
+        const cached = this._getCacheCompleto();
+        if (cached) {
+            console.log('[BRASILEIRAO-TABELA] Usando cache sessionStorage');
+            this._dadosCompletos = cached;
+            this._renderTabelaCompletaConteudo(overlay, cached);
+            return;
+        }
+
         // Buscar dados completos
+        await this._fetchTabelaCompleta(overlay);
+    },
+
+    async _fetchTabelaCompleta(overlay) {
+        const contentEl = overlay.querySelector('#brasileirao-lp-content');
         try {
             const response = await fetch(`/api/brasileirao/completo/${this._temporada}`);
             const data = await response.json();
 
             if (data.success) {
                 this._dadosCompletos = data;
+                this._setCacheCompleto(data);
                 this._renderTabelaCompletaConteudo(overlay, data);
             } else {
-                overlay.querySelector('#brasileirao-lp-content').innerHTML = `
+                contentEl.innerHTML = `
                     <div class="brasileirao-lp-erro">
                         <span class="material-icons">error_outline</span>
                         <p>Não foi possível carregar os dados</p>
@@ -404,13 +449,36 @@ const BrasileiraoTabela = {
             }
         } catch (err) {
             console.error('[BRASILEIRAO-TABELA] Erro ao carregar completo:', err);
-            overlay.querySelector('#brasileirao-lp-content').innerHTML = `
+            contentEl.innerHTML = `
                 <div class="brasileirao-lp-erro">
                     <span class="material-icons">wifi_off</span>
                     <p>Erro de conexão</p>
                 </div>
             `;
         }
+    },
+
+    async _refreshTabelaCompleta(overlay) {
+        const btn = overlay.querySelector('#brasileirao-lp-refresh');
+        if (btn.classList.contains('brasileirao-lp-refresh-spinning')) return; // debounce
+
+        btn.classList.add('brasileirao-lp-refresh-spinning');
+
+        // Invalidar cache
+        sessionStorage.removeItem(`brasileirao_completo_${this._temporada}`);
+
+        // Loading no conteúdo
+        const contentEl = overlay.querySelector('#brasileirao-lp-content');
+        contentEl.innerHTML = `
+            <div class="brasileirao-lp-loading">
+                <div class="brasileirao-spinner"></div>
+                <span>Atualizando...</span>
+            </div>
+        `;
+
+        await this._fetchTabelaCompleta(overlay);
+
+        setTimeout(() => btn.classList.remove('brasileirao-lp-refresh-spinning'), 600);
     },
 
     _fecharTabelaCompleta(overlay) {
@@ -448,19 +516,38 @@ const BrasileiraoTabela = {
         // Rodadas como acordeões (rodada atual expandida)
         let rodadasHtml = '<div class="brasileirao-lp-rodadas">';
 
+        const hoje = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+
         for (let r = 1; r <= 38; r++) {
             const rodada = rodadas[r];
             if (!rodada) continue;
 
-            const isAtual = r === rodadaAtual;
-            const isPassada = r < rodadaAtual;
-            const isFutura = r > rodadaAtual;
+            // Status baseado em datas + estado real dos jogos
+            const temAoVivo = rodada.jogos_ao_vivo > 0;
+            const todosEncerrados = rodada.jogos_encerrados === rodada.total_jogos && rodada.total_jogos > 0;
+            const rodadaPassou = rodada.data_fim && rodada.data_fim < hoje;
+            const isEncerrada = todosEncerrados || (rodadaPassou && !temAoVivo);
+            const isAtual = temAoVivo || (r === rodadaAtual && !isEncerrada);
+            const isFutura = !isEncerrada && !isAtual;
 
-            const statusClass = isAtual ? 'brasileirao-lp-rodada-atual' :
-                               isPassada ? 'brasileirao-lp-rodada-passada' : 'brasileirao-lp-rodada-futura';
-
-            const statusBadge = isAtual ? '<span class="brasileirao-lp-badge-atual">EM ANDAMENTO</span>' :
-                               isPassada ? `<span class="brasileirao-lp-badge-concluida">${rodada.jogos_encerrados}/10</span>` : '';
+            let statusClass, statusBadge;
+            if (temAoVivo) {
+                statusClass = 'brasileirao-lp-rodada-atual';
+                statusBadge = '<span class="brasileirao-lp-badge-atual"><span class="brasileirao-live-dot-xs" style="width:6px;height:6px;display:inline-block;vertical-align:middle;margin-right:4px"></span>AO VIVO</span>';
+            } else if (isEncerrada) {
+                statusClass = 'brasileirao-lp-rodada-passada';
+                const jogosFaltando = rodada.total_jogos - rodada.jogos_encerrados;
+                statusBadge = '<span class="brasileirao-lp-badge-encerrada">ENCERRADA</span>';
+                if (jogosFaltando > 0) {
+                    statusBadge += `<span class="brasileirao-lp-badge-concluida">${rodada.jogos_encerrados}/${rodada.total_jogos}</span>`;
+                }
+            } else if (isAtual) {
+                statusClass = 'brasileirao-lp-rodada-atual';
+                statusBadge = '<span class="brasileirao-lp-badge-atual">EM ANDAMENTO</span>';
+            } else {
+                statusClass = 'brasileirao-lp-rodada-futura';
+                statusBadge = '';
+            }
 
             const expandido = isAtual ? 'expanded' : '';
 

@@ -117,19 +117,24 @@ calendarioBrasileiraoSchema.methods.obterRodada = function(numeroRodada) {
  * Retorna a rodada atual (baseado em jogos em andamento ou próximos)
  */
 calendarioBrasileiraoSchema.methods.obterRodadaAtual = function() {
-    const agora = new Date();
-    const hoje = agora.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+    const hoje = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
 
-    // Encontrar rodada com jogos hoje ou próximos não encerrados
+    // Encontrar rodada atual usando datas + status
     for (let r = 1; r <= 38; r++) {
         const jogosRodada = this.partidas.filter(p => p.rodada === r);
-        const temJogosPendentes = jogosRodada.some(p =>
-            p.status === 'agendado' || p.status === 'ao_vivo' || p.status === 'a_definir'
-        );
+        if (jogosRodada.length === 0) continue;
 
-        if (temJogosPendentes) {
-            return r;
-        }
+        const todosEncerrados = jogosRodada.every(p => p.status === 'encerrado');
+        if (todosEncerrados) continue;
+
+        // Última data da rodada
+        const datas = jogosRodada.map(p => p.data).filter(Boolean).sort();
+        const dataFimRodada = datas.length > 0 ? datas[datas.length - 1] : null;
+
+        // Rodada já passou? Pular (encerrada com ressalvas)
+        if (dataFimRodada && dataFimRodada < hoje) continue;
+
+        return r;
     }
 
     return 38; // Todas encerradas
@@ -240,34 +245,47 @@ calendarioBrasileiraoSchema.methods.agruparPorRodada = function() {
 calendarioBrasileiraoSchema.methods.atualizarStats = function() {
     const total = this.partidas.length;
     const realizados = this.partidas.filter(p => p.status === 'encerrado').length;
+    const hoje = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
 
-    // Encontrar rodada atual
-    let rodadaAtual = 1;
+    // Encontrar rodada atual usando datas + status
+    let rodadaAtual = 0;
     let ultimaCompleta = 0;
 
     for (let r = 1; r <= 38; r++) {
         const jogosRodada = this.partidas.filter(p => p.rodada === r);
-        const todosEncerrados = jogosRodada.length > 0 &&
-            jogosRodada.every(p => p.status === 'encerrado');
+        if (jogosRodada.length === 0) continue;
 
+        const todosEncerrados = jogosRodada.every(p => p.status === 'encerrado');
         if (todosEncerrados) {
             ultimaCompleta = r;
+            continue;
         }
 
-        const temPendentes = jogosRodada.some(p =>
-            p.status === 'agendado' || p.status === 'ao_vivo' || p.status === 'a_definir'
-        );
+        // Última data da rodada (max das datas dos jogos)
+        const datas = jogosRodada.map(p => p.data).filter(Boolean).sort();
+        const dataFimRodada = datas.length > 0 ? datas[datas.length - 1] : null;
 
-        if (temPendentes && rodadaAtual === 1) {
+        // Rodada já passou no calendário? Considerar encerrada mesmo com jogos pendentes
+        if (dataFimRodada && dataFimRodada < hoje) {
+            continue; // Pular — rodada passada (jogos adiados/não realizados)
+        }
+
+        // Tem jogos ao vivo ou agendados com datas futuras → esta é a rodada atual
+        if (!rodadaAtual) {
             rodadaAtual = r;
         }
+    }
+
+    // Fallback: se nenhuma rodada ativa, próxima após a última completa
+    if (!rodadaAtual) {
+        rodadaAtual = Math.min(ultimaCompleta + 1, 38);
     }
 
     this.stats = {
         total_jogos: total,
         jogos_realizados: realizados,
         jogos_restantes: total - realizados,
-        rodada_atual: rodadaAtual || ultimaCompleta + 1,
+        rodada_atual: rodadaAtual,
         ultima_rodada_completa: ultimaCompleta
     };
 
