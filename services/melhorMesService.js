@@ -364,7 +364,8 @@ async function calcularRankingEdicao(ligaId, configEdicao, rodadaAtual, temporad
 // =====================================================================
 
 /**
- * Verifica se o cache precisa ser atualizado
+ * Verifica se o cache precisa ser atualizado.
+ * ✅ v10.0: Usa edições do próprio cache (já com config correta da liga).
  */
 function verificarNecessidadeAtualizacao(cache, rodadaAtual) {
     // Se não existe cache, precisa criar
@@ -376,16 +377,11 @@ function verificarNecessidadeAtualizacao(cache, rodadaAtual) {
     // Se rodada do sistema avançou, precisa atualizar
     if (cache.rodada_sistema < rodadaAtual) return true;
 
-    // Verificar se alguma edição precisa ser consolidada
-    for (const configEdicao of MELHOR_MES_EDICOES) {
-        const edicaoCache = cache.edicoes.find((e) => e.id === configEdicao.id);
-
-        // Se edição não existe no cache
-        if (!edicaoCache) return true;
-
+    // ✅ v10.0: Verificar usando edições do próprio cache (já tem config correta)
+    for (const edicaoCache of cache.edicoes) {
         // Se edição deveria estar consolidada mas não está
         if (
-            rodadaAtual >= configEdicao.fim &&
+            rodadaAtual >= edicaoCache.fim &&
             edicaoCache.status !== "consolidado"
         ) {
             return true;

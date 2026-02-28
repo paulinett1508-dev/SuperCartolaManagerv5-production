@@ -387,18 +387,15 @@ function renderizarEdicaoCard(edicao, meuTimeIdNum) {
         Number(campeao.timeId) === meuTimeIdNum &&
         campeao.ativo !== false;
 
-    let statusClass = "aguardando";
-    let statusIcon = '<span class="material-symbols-outlined" style="font-size: 14px;">event</span>';
-    let statusText = "AGUARDANDO";
+    let statusIcon = '<span class="material-symbols-outlined" style="font-size: 14px;">schedule</span>';
+    let statusText = "PENDENTE";
     let statusBgClass = "bg-zinc-700/50";
 
     if (edicao.status === "consolidado" || edicao.status === "concluido") {
-        statusClass = "concluido";
         statusIcon = '<span class="material-symbols-outlined" style="font-size: 14px;">check_circle</span>';
         statusText = "CONCLUÍDO";
         statusBgClass = "bg-green-500/20 text-green-400";
     } else if (edicao.status === "em_andamento") {
-        statusClass = "em_andamento";
         statusIcon = '<span class="material-symbols-outlined" style="font-size: 14px;">hourglass_empty</span>';
         statusText = "EM ANDAMENTO";
         statusBgClass = "bg-blue-500/20 text-blue-400";
@@ -426,9 +423,9 @@ function renderizarEdicaoCard(edicao, meuTimeIdNum) {
                 </span>
             </div>
 
-            <!-- Ranking Completo -->
+            <!-- Ranking Completo (só exibe se houver dados) -->
             ${rankingAtivos.length > 0 ? `
-                <div class="mm-ranking-list" style="max-height: 280px; overflow-y: auto;">
+                <div class="mm-ranking-list">
                 ${(() => {
                     const labelLider = isConsolidado ? 'CAMPEÃO' : 'LÍDER';
                     const inativos = edicao.ranking ? edicao.ranking.filter(t => t.ativo === false) : [];
@@ -468,12 +465,7 @@ function renderizarEdicaoCard(edicao, meuTimeIdNum) {
                     return h;
                 })()}
                 </div>
-            ` : `
-                <div class="mm-card-aguardando">
-                    <span class="mm-aguardando-icon"><span class="material-symbols-outlined" style="font-size: 24px; color: #9ca3af;">hourglass_empty</span></span>
-                    <span class="mm-aguardando-text">Aguardando resultado...</span>
-                </div>
-            `}
+            ` : ''}
         </div>
     `;
 }
