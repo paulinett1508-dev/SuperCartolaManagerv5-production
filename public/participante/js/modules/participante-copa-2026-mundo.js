@@ -783,5 +783,9 @@ function escapeHtml(str) {
         .replace(/"/g, '&quot;');
 }
 
+// ✅ Expor destroy no window para cleanup pela navegação SPA
+// (navegação busca window.destruir{ModuloCamelCase}Participante)
+window.destruirCopa2026MundoParticipante = destruirCopa2026Mundo;
+
 // Log de carregamento
 if (window.Log) Log.info('COPA-MUNDO', 'Módulo participante-copa-2026-mundo.js carregado');
