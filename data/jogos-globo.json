@@ -384,6 +384,31 @@
     "transmissao": []
   },
   {
+    "id": 349635,
+    "mandante": "URT",
+    "visitante": "Tombense",
+    "logoMandante": "https://s.sde.globo.com/media/original/2011/12/13/urt_30.png",
+    "logoVisitante": "https://s.sde.globo.com/media/organizations/2019/01/21/escudo30x.png",
+    "golsMandante": 0,
+    "golsVisitante": 0,
+    "placar": "0 x 0",
+    "placarHT": null,
+    "tempo": "",
+    "tempoExtra": null,
+    "status": "Ao vivo",
+    "statusRaw": "LIVE",
+    "liga": "Campeonato Mineiro",
+    "ligaId": null,
+    "ligaOriginal": "Campeonato Mineiro",
+    "ligaLogo": null,
+    "estadio": "Zama Maciel",
+    "cidade": null,
+    "horario": "20:00",
+    "timestamp": 1772319600000,
+    "fonte": "globo",
+    "transmissao": []
+  },
+  {
     "id": 350119,
     "mandante": "Novorizontino",
     "visitante": "Corinthians",
@@ -409,31 +434,6 @@
     "transmissao": [
       "HBO Max"
     ]
-  },
-  {
-    "id": 349635,
-    "mandante": "URT",
-    "visitante": "Tombense",
-    "logoMandante": "https://s.sde.globo.com/media/original/2011/12/13/urt_30.png",
-    "logoVisitante": "https://s.sde.globo.com/media/organizations/2019/01/21/escudo30x.png",
-    "golsMandante": 0,
-    "golsVisitante": 0,
-    "placar": "0 x 0",
-    "placarHT": null,
-    "tempo": "",
-    "tempoExtra": null,
-    "status": "Agendado",
-    "statusRaw": "NS",
-    "liga": "Campeonato Mineiro",
-    "ligaId": null,
-    "ligaOriginal": "Campeonato Mineiro",
-    "ligaLogo": null,
-    "estadio": "Zama Maciel",
-    "cidade": null,
-    "horario": "20:00",
-    "timestamp": 1772319600000,
-    "fonte": "globo",
-    "transmissao": []
   },
   {
     "id": 349609,
