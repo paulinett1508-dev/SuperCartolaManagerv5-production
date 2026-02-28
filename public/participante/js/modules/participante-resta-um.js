@@ -64,11 +64,7 @@ export async function inicializarRestaUmParticipante({ participante, ligaId, tim
 
 async function _carregarDados() {
     try {
-        // Buscar dados do Resta Um + status do mercado em paralelo
-        const [response, isLive] = await Promise.all([
-            fetch(`/api/resta-um/${_currentLigaId}/status`),
-            _detectarRodadaAoVivo(),
-        ]);
+        const response = await fetch(`/api/resta-um/${_currentLigaId}/status`);
 
         if (!response.ok) {
             if (response.status === 404) { _mostrarEstado('nao-iniciado'); return; }
@@ -78,6 +74,9 @@ async function _carregarDados() {
         const dados = await response.json();
         if (!dados?.edicao) { _mostrarEstado('nao-iniciado'); return; }
 
+        // Fonte canônica: API via orchestrator_states (status_mercado===2 + rodada bate)
+        // _detectarRodadaAoVivo() removida do fluxo — mercadoFechado=true vaza em transições pós-rodada
+        const isLive = dados.isLive === true;
         dados.isLive = isLive;
 
         // Modo PROJETADO: edição ativa (ou pendente na R1) + rodada ao vivo → sobrepor com parciais
