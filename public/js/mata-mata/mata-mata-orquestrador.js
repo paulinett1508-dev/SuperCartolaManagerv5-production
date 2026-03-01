@@ -359,18 +359,16 @@ export async function carregarMataMata() {
 
   const ligaId = getLigaId();
 
-  // ✅ v2.0: Buscar config para valores financeiros e edições (NÃO mais para tamanho)
+  // ✅ v3.0: Buscar config do admin (gerenciar-modulos) — fonte de verdade
   try {
     const resConfig = await fetch(`/api/liga/${ligaId}/modulos/mata_mata`);
     if (resConfig.ok) {
       const configData = await resConfig.json();
       const wizardRespostas = configData?.config?.wizard_respostas;
 
-      // ⚠️ NOTA: Tamanho do torneio agora vem do CACHE, não do wizard
-      // O wizard pode definir um "mínimo" mas não o tamanho real
-      console.log(`[MATA-ORQUESTRADOR] Config carregada (valores financeiros e edições)`);
+      console.log(`[MATA-ORQUESTRADOR] Config carregada do admin (gerenciar-modulos)`);
 
-      // Valores financeiros da config da liga
+      // ✅ Valores financeiros da config da liga
       const valorVitoria = Number(wizardRespostas?.valor_vitoria);
       const valorDerrota = Number(wizardRespostas?.valor_derrota);
       if (valorVitoria > 0 && valorDerrota < 0) {
@@ -378,15 +376,25 @@ export async function carregarMataMata() {
         console.log(`[MATA-ORQUESTRADOR] Valores financeiros: vitória=${valorVitoria}, derrota=${valorDerrota}`);
       }
 
-      // Carregar edições da config (se qtd_edicoes definida)
+      // ✅ FIX: Usar total_times do wizard para definir tamanhoTorneio ANTES do render
+      // Não mais defaultar para 32 (que mostra 5 fases ao invés de 3 para 8 times)
+      const totalTimesWizard = Number(wizardRespostas?.total_times);
+      if (totalTimesWizard && [8, 16, 32].includes(totalTimesWizard)) {
+        tamanhoTorneio = totalTimesWizard;
+        console.log(`[MATA-ORQUESTRADOR] tamanhoTorneio do wizard: ${tamanhoTorneio}`);
+      }
+
+      // ✅ FIX: Carregar edições do calendario_efetivo (gerado pelo admin)
+      // Prioridade: calendario_override (dinâmico) > JSON default
+      // Antes: lia de paths errados (configData.config.configuracao_override.calendario.edicoes → undefined)
+      const calendario = configData?.calendario_efetivo;
       const qtdEdicoes = Number(wizardRespostas?.qtd_edicoes);
-      if (qtdEdicoes && qtdEdicoes >= 1 && qtdEdicoes <= 10) {
-        const calendario = configData?.config?.configuracao_override?.calendario?.edicoes
-          || configData?.config?.calendario?.edicoes;
-        if (Array.isArray(calendario) && calendario.length > 0) {
-          setEdicoes(calendario.slice(0, qtdEdicoes));
-          console.log(`[MATA-ORQUESTRADOR] ${qtdEdicoes} edições configuradas`);
-        }
+      if (Array.isArray(calendario) && calendario.length > 0) {
+        const edicoesParaUsar = qtdEdicoes && qtdEdicoes >= 1 && qtdEdicoes <= 10
+          ? calendario.slice(0, qtdEdicoes)
+          : calendario;
+        setEdicoes(edicoesParaUsar);
+        console.log(`[MATA-ORQUESTRADOR] ${edicoesParaUsar.length} edições carregadas do admin config`);
       }
     }
   } catch (err) {

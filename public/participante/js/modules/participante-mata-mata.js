@@ -19,13 +19,10 @@
 
 import { CURRENT_SEASON } from "/js/config/seasons-client.js";
 
-const EDICOES_MATA_MATA = [
-  { id: 1, nome: "1ª Edição", rodadaInicial: 3, rodadaFinal: 7 },   // FIX: R2 é definição, competição começa R3
-  { id: 2, nome: "2ª Edição", rodadaInicial: 10, rodadaFinal: 14 }, // FIX: R9 é definição, competição começa R10
-  { id: 3, nome: "3ª Edição", rodadaInicial: 16, rodadaFinal: 21 }, // FIX: R15 é definição, competição começa R16
-  { id: 4, nome: "4ª Edição", rodadaInicial: 22, rodadaFinal: 26 },
-  { id: 5, nome: "5ª Edição", rodadaInicial: 31, rodadaFinal: 35 },
-];
+// ✅ FIX: Edições carregadas dinamicamente da API (gerenciar-modulos)
+// Antes: hardcoded com dados de 2025 para 32 times → colide com regras do admin
+// Agora: populado em inicializarMataMata() via calendario_efetivo da API
+let EDICOES_MATA_MATA = [];
 
 // ✅ v7.3: Fases dinâmicas baseadas no tamanho do torneio
 const TODAS_FASES = ["primeira", "oitavas", "quartas", "semis", "final"];
@@ -202,7 +199,7 @@ export async function inicializarMataMata(params) {
     return;
   }
 
-  // ✅ v7.2: Carregar tamanho do torneio da config do módulo
+  // ✅ v9.0: Carregar config do admin (gerenciar-modulos) — fonte de verdade
   try {
     const configRes = await fetch(`/api/liga/${estado.ligaId}/modulos/mata_mata`);
     if (configRes.ok) {
@@ -210,6 +207,22 @@ export async function inicializarMataMata(params) {
       const totalTimes = configData?.config?.wizard_respostas?.total_times;
       if (totalTimes) estado.tamanhoTorneio = Number(totalTimes);
       if (window.Log) Log.info(`[MATA-MATA] ⚙️ Tamanho torneio: ${estado.tamanhoTorneio}`);
+
+      // ✅ FIX: Carregar edições do calendario_efetivo (gerado pelo admin)
+      // Substitui o hardcoded EDICOES_MATA_MATA (dados de 2025, 32 times)
+      const calendario = configData?.calendario_efetivo;
+      if (Array.isArray(calendario) && calendario.length > 0) {
+        EDICOES_MATA_MATA = calendario.map(e => ({
+          id: e.id,
+          nome: e.nome,
+          rodadaInicial: e.rodadaInicial,
+          rodadaFinal: e.rodadaFinal,
+          rodadaDefinicao: e.rodadaDefinicao
+        }));
+        if (window.Log) Log.info(`[MATA-MATA] 📅 ${EDICOES_MATA_MATA.length} edições carregadas do admin config`);
+      } else {
+        if (window.Log) Log.warn("[MATA-MATA] ⚠️ Nenhuma edição no calendario_efetivo");
+      }
     }
   } catch (e) {
     if (window.Log) Log.warn("[MATA-MATA] ⚠️ Config não carregada, usando default:", estado.tamanhoTorneio);
