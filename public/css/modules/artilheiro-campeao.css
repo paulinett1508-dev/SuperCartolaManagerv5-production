@@ -30,6 +30,15 @@
   border-radius: 8px;
   border: 1px solid var(--module-artilheiro-border);
   overflow: hidden;
+  position: relative;
+}
+
+/* Blob glow decoration (verde = artilheiro) */
+.artilheiro-container::after {
+  content: ''; position: absolute; width: 300px; height: 300px;
+  border-radius: 50%; background: var(--module-artilheiro-primary, #22c55e);
+  filter: blur(60px); opacity: 0.10; top: -80px; right: -80px;
+  pointer-events: none; z-index: 0;
 }
 
 /* =============================================
