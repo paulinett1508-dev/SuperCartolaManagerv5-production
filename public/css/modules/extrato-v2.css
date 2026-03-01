@@ -67,6 +67,14 @@
     transition: opacity 0.3s ease;
 }
 
+/* Blob glow decoration (verde = financeiro) */
+.extrato-hero-v2::after {
+    content: ''; position: absolute; width: 300px; height: 300px;
+    border-radius: 50%; background: var(--color-success-light, #22c55e);
+    filter: blur(60px); opacity: 0.08; top: -80px; right: -80px;
+    pointer-events: none; z-index: 0;
+}
+
 /* Variantes de status */
 .extrato-hero-v2--positive {
     border-color: var(--extrato-border-positive);
