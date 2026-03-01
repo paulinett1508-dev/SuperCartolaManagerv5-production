@@ -17,7 +17,7 @@
 // BUILD: 2026-02-28T00:00:00Z
 // =====================================================================
 
-const CACHE_NAME = "super-cartola-v28-20260228";
+const CACHE_NAME = "super-cartola-v29-20260301";
 
 // Arquivos essenciais para cache inicial
 const STATIC_ASSETS = [

@@ -130,67 +130,67 @@ const GRUPOS = {
 const ESTADIOS = {
   'MetLife Stadium': {
     cidade: 'Nova York/Nova Jersey', pais: 'EUA', capacidade: 82500,
-    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Metlife_stadium_%28Aerial_view%29.jpg/640px-Metlife_stadium_%28Aerial_view%29.jpg'
+    foto: '/img/estadios/metlife-stadium.jpg'
   },
   'SoFi Stadium': {
     cidade: 'Los Angeles', pais: 'EUA', capacidade: 70000,
-    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/SoFi_Stadium_exterior_2.jpg/640px-SoFi_Stadium_exterior_2.jpg'
+    foto: '/img/estadios/sofi-stadium.jpg'
   },
   'AT&T Stadium': {
     cidade: 'Dallas', pais: 'EUA', capacidade: 94000,
-    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Cowboys_Stadium_full_view.jpg/640px-Cowboys_Stadium_full_view.jpg'
+    foto: '/img/estadios/att-stadium.jpg'
   },
   'Hard Rock Stadium': {
     cidade: 'Miami', pais: 'EUA', capacidade: 65000,
-    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Hard_Rock_Stadium_aerial_2023.jpg/640px-Hard_Rock_Stadium_aerial_2023.jpg'
+    foto: '/img/estadios/hard-rock-stadium.jpg'
   },
   'Mercedes-Benz Stadium': {
     cidade: 'Atlanta', pais: 'EUA', capacidade: 75000,
-    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Mercedes-Benz_Stadium%2C_October_2017.jpg/640px-Mercedes-Benz_Stadium%2C_October_2017.jpg'
+    foto: '/img/estadios/mercedes-benz-stadium.jpg'
   },
   'NRG Stadium': {
     cidade: 'Houston', pais: 'EUA', capacidade: 72000,
-    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/NRG_Stadium_-_Houston%2C_Texas.jpg/640px-NRG_Stadium_-_Houston%2C_Texas.jpg'
+    foto: '/img/estadios/nrg-stadium.jpg'
   },
   'Lumen Field': {
     cidade: 'Seattle', pais: 'EUA', capacidade: 69000,
-    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/CenturyLink_Field_-_MLS_Cup_2016.jpg/640px-CenturyLink_Field_-_MLS_Cup_2016.jpg'
+    foto: '/img/estadios/lumen-field.jpg'
   },
   'Lincoln Financial Field': {
     cidade: 'Filadélfia', pais: 'EUA', capacidade: 69000,
-    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Lincoln_Financial_Field_%28Aerial_view%29.jpg/640px-Lincoln_Financial_Field_%28Aerial_view%29.jpg'
+    foto: '/img/estadios/lincoln-financial-field.jpg'
   },
   'Arrowhead Stadium': {
     cidade: 'Kansas City', pais: 'EUA', capacidade: 73000,
-    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Arrowhead_Stadium_%2814586858494%29.jpg/640px-Arrowhead_Stadium_%2814586858494%29.jpg'
+    foto: '/img/estadios/arrowhead-stadium.jpg'
   },
   'Gillette Stadium': {
     cidade: 'Boston', pais: 'EUA', capacidade: 65000,
-    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Gillette_Stadium_%28Top_View%29.jpg/640px-Gillette_Stadium_%28Top_View%29.jpg'
+    foto: '/img/estadios/gillette-stadium.jpg'
   },
   "Levi's Stadium": {
     cidade: 'São Francisco', pais: 'EUA', capacidade: 71000,
-    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Levi%27s_Stadium_aerial.jpg/640px-Levi%27s_Stadium_aerial.jpg'
+    foto: '/img/estadios/levis-stadium.jpg'
   },
   'Estadio Azteca': {
     cidade: 'Cidade do México', pais: 'MEX', capacidade: 83000,
-    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Azteca_Entrance.jpg/640px-Azteca_Entrance.jpg'
+    foto: '/img/estadios/estadio-azteca.jpg'
   },
   'Estadio BBVA': {
     cidade: 'Monterrey', pais: 'MEX', capacidade: 53500,
-    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/EstadioRayados.JPG/640px-EstadioRayados.JPG'
+    foto: '/img/estadios/estadio-bbva.jpg'
   },
   'Estadio Akron': {
     cidade: 'Guadalajara', pais: 'MEX', capacidade: 48000,
-    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Estadio_Chivas.jpg/640px-Estadio_Chivas.jpg'
+    foto: '/img/estadios/estadio-akron.jpg'
   },
   'BC Place': {
     cidade: 'Vancouver', pais: 'CAN', capacidade: 54000,
-    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Interior_BC_Place_2015.jpg/640px-Interior_BC_Place_2015.jpg'
+    foto: '/img/estadios/bc-place.jpg'
   },
   'BMO Field': {
     cidade: 'Toronto', pais: 'CAN', capacidade: 45000,
-    foto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/BMO_Field_2016_East_Stand.jpg/640px-BMO_Field_2016_East_Stand.jpg'
+    foto: '/img/estadios/bmo-field.jpg'
   },
 };
 
