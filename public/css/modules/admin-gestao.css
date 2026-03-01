@@ -31,6 +31,7 @@
     margin-bottom: var(--space-6, 24px);
     border: 1px solid var(--gestao-accent);
     position: relative;
+    overflow: hidden;
 }
 .admin-header::before {
     content: '';
@@ -38,6 +39,13 @@
     top: 0; left: 0; right: 0;
     height: 3px;
     background: linear-gradient(90deg, var(--gestao-accent), var(--gestao-accent-light), var(--gestao-accent));
+}
+/* Blob glow decoration (::after preserva ::before gradient) */
+.admin-header::after {
+    content: ''; position: absolute; width: 300px; height: 300px;
+    border-radius: 50%; background: var(--gestao-accent);
+    filter: blur(60px); opacity: 0.12; top: -80px; right: -80px;
+    pointer-events: none; z-index: 0;
 }
 .admin-header h1 {
     display: flex;
