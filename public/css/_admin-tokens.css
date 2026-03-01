@@ -177,6 +177,43 @@
     --shadow-primary-lg: 0 8px 25px rgba(255, 85, 0, 0.5);
     --shadow-primary-glow: 0 0 15px rgba(255, 85, 0, 0.6);
 
+    /* Sombras suaves multi-layer (Smooth Shadow) */
+    /* Profundidade mais natural que single-layer. Dark mode calibrado. */
+    --shadow-smooth-sm:
+        0 0.5px 1px rgba(0, 0, 0, 0.12),
+        0 1px 2px rgba(0, 0, 0, 0.12),
+        0 2px 4px rgba(0, 0, 0, 0.1),
+        0 4px 8px rgba(0, 0, 0, 0.08);
+    --shadow-smooth-md:
+        0 0.5px 1px rgba(0, 0, 0, 0.1),
+        0 1px 3px rgba(0, 0, 0, 0.1),
+        0 3px 6px rgba(0, 0, 0, 0.1),
+        0 8px 14px rgba(0, 0, 0, 0.08),
+        0 16px 28px rgba(0, 0, 0, 0.06);
+    --shadow-smooth-lg:
+        0 0.5px 1px rgba(0, 0, 0, 0.08),
+        0 2px 3px rgba(0, 0, 0, 0.08),
+        0 4px 8px rgba(0, 0, 0, 0.08),
+        0 12px 18px rgba(0, 0, 0, 0.06),
+        0 24px 36px rgba(0, 0, 0, 0.06),
+        0 48px 64px rgba(0, 0, 0, 0.04);
+    --shadow-smooth-xl:
+        0 1px 1px rgba(0, 0, 0, 0.06),
+        0 2px 3px rgba(0, 0, 0, 0.06),
+        0 6px 8px rgba(0, 0, 0, 0.06),
+        0 12px 16px rgba(0, 0, 0, 0.06),
+        0 24px 32px rgba(0, 0, 0, 0.05),
+        0 48px 48px rgba(0, 0, 0, 0.04),
+        0 64px 80px rgba(0, 0, 0, 0.03);
+
+    /* Smooth glow laranja (multi-layer) */
+    --shadow-smooth-primary:
+        0 0.5px 2px rgba(255, 85, 0, 0.1),
+        0 2px 4px rgba(255, 85, 0, 0.08),
+        0 4px 8px rgba(255, 85, 0, 0.06),
+        0 8px 16px rgba(255, 85, 0, 0.06),
+        0 16px 32px rgba(255, 85, 0, 0.04);
+
     /* ========================================
        10. BORDAS
        ======================================== */
@@ -434,6 +471,161 @@
 
 .admin-animate-fade-in-up {
     animation: admin-fade-in-up var(--animation-duration-normal) ease-out;
+}
+
+/* ========================================
+   SMOOTH SHADOW UTILITIES
+   Classes utilitárias para sombras multi-layer.
+   Uso: class="shadow-smooth-md" em qualquer card/container.
+   ======================================== */
+
+.shadow-smooth-sm { box-shadow: var(--shadow-smooth-sm); }
+.shadow-smooth-md { box-shadow: var(--shadow-smooth-md); }
+.shadow-smooth-lg { box-shadow: var(--shadow-smooth-lg); }
+.shadow-smooth-xl { box-shadow: var(--shadow-smooth-xl); }
+.shadow-smooth-primary { box-shadow: var(--shadow-smooth-primary); }
+
+/* Hover: eleva para próximo nível */
+.shadow-smooth-hover {
+    transition: box-shadow var(--transition-normal);
+}
+.shadow-smooth-hover:hover {
+    box-shadow: var(--shadow-smooth-lg);
+}
+
+/* ========================================
+   WAVE DIVIDERS (SVG inline via data URI)
+   Separadores ondulados entre seções.
+   Uso: <div class="wave-divider wave-divider--dark"></div>
+   ======================================== */
+
+.wave-divider {
+    width: 100%;
+    height: 60px;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-position: center;
+    line-height: 0;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+/* Wave cor do background base (#121212) */
+.wave-divider--dark {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 80' preserveAspectRatio='none'%3E%3Cpath d='M0,40 C320,80 640,0 960,40 C1120,60 1280,20 1440,40 L1440,80 L0,80 Z' fill='%23121212'/%3E%3C/svg%3E");
+}
+
+/* Wave cor do card (#1a1a1a) */
+.wave-divider--card {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 80' preserveAspectRatio='none'%3E%3Cpath d='M0,40 C320,80 640,0 960,40 C1120,60 1280,20 1440,40 L1440,80 L0,80 Z' fill='%231a1a1a'/%3E%3C/svg%3E");
+}
+
+/* Wave cor primária (laranja sutil) */
+.wave-divider--primary {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 80' preserveAspectRatio='none'%3E%3Cpath d='M0,40 C320,80 640,0 960,40 C1120,60 1280,20 1440,40 L1440,80 L0,80 Z' fill='%23FF5500' opacity='0.08'/%3E%3C/svg%3E");
+}
+
+/* Invertido (flip vertical) */
+.wave-divider--inverted {
+    transform: scaleY(-1);
+}
+
+/* Menor (para espaços compactos) */
+.wave-divider--sm {
+    height: 36px;
+}
+
+/* Maior (para hero sections) */
+.wave-divider--lg {
+    height: 80px;
+}
+
+/* ========================================
+   BLOB GLOW (Decorações gradientes CSS-only)
+   Glows decorativos com radial-gradient + blur.
+   Uso: class="blob-glow blob-glow--primary" no container pai.
+   Conteúdo filho deve ter position:relative + z-index:1.
+   ======================================== */
+
+.blob-glow {
+    position: relative;
+    overflow: hidden;
+}
+
+.blob-glow::before {
+    content: '';
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.12;
+    pointer-events: none;
+    z-index: 0;
+    will-change: transform;
+}
+
+/* Laranja (top-right) */
+.blob-glow--primary::before {
+    background: var(--color-primary);
+    top: -80px;
+    right: -80px;
+}
+
+/* Laranja (bottom-left) */
+.blob-glow--primary-bl::before {
+    background: var(--color-primary);
+    bottom: -80px;
+    left: -80px;
+}
+
+/* Verde sucesso (top-right) */
+.blob-glow--success::before {
+    background: var(--color-success);
+    top: -80px;
+    right: -80px;
+}
+
+/* Azul info (top-right) */
+.blob-glow--info::before {
+    background: var(--color-info);
+    top: -80px;
+    right: -80px;
+}
+
+/* Dourado (centered-top) */
+.blob-glow--gold::before {
+    background: var(--color-gold);
+    top: -120px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Módulos específicos */
+.blob-glow--artilheiro::before {
+    background: var(--module-artilheiro-primary);
+    top: -80px;
+    right: -80px;
+}
+
+.blob-glow--capitao::before {
+    background: var(--module-capitao-primary);
+    top: -80px;
+    right: -80px;
+}
+
+.blob-glow--luva::before {
+    background: var(--module-luva-primary);
+    top: -80px;
+    right: -80px;
+}
+
+/* Intensidade aumentada (para hero sections) */
+.blob-glow--intense::before {
+    opacity: 0.2;
+    width: 400px;
+    height: 400px;
+    filter: blur(80px);
 }
 
 /* ========================================
