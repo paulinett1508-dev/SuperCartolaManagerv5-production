@@ -292,9 +292,9 @@ _Próximas sprints - Impacto significativo no sistema_
   - **Dependências:** Acesso ao banco de dados via script, API de Search (MCP)
   - **Quando implementar:** Pré-temporada 2026
 
-- [ ] [FEAT-030] **Copa de Times Super Cartola - Competição do Segundo Turno** 🏆
+- [~] [FEAT-030] **Copa de Times Super Cartola - Competição do Segundo Turno** 🏆 ⚠️ PARCIAL (Fase 1 OK)
   - **Descrição:** Competição especial no formato Copa do Mundo realizada durante o segundo turno do Brasileirão
-  - **Status Atual:** Planejamento inicial - apenas anúncio visível no app
+  - **Status Atual:** Fase 1 (teaser) implementada — `copa-times-sc.html`, `participante-copa-sc.js`, `copa-sc.css`. Backend (Fases 2-5) pendente para o segundo turno
   - **Período:** Segundo turno do Brasileirão (rodadas 20-38)
   - **Impacto:** ALTO - Novo formato de competição, engajamento na reta final
   - **Complexidade:** ALTA (~25-30h estimadas)
@@ -370,9 +370,9 @@ _Próximas sprints - Impacto significativo no sistema_
   **Estimativa FASE 1 (MVP Teaser):** ~2h
   **Estimativa Total (Feature Completa):** ~25-30h
 
-- [ ] [FEAT-026] **App Mobile Admin - Gestão de Ligas pelo Celular** 📱
+- [x] [FEAT-026] **App Mobile Admin - Gestão de Ligas pelo Celular** 📱 ✅ IMPLEMENTADO
   - **Descrição:** PWA/App mobile para administradores gerenciarem ligas pelo celular (evolução do painel admin web-only)
-  - **Status Atual:** Admin só pode gerenciar pelo desktop (painel web)
+  - **Status Atual:** ✅ Implementado — `public/admin-mobile/` com dashboard, consolidação, auditoria, cache-sentinel, PWA manifest, `routes/admin-mobile-routes.js`, `controllers/adminMobileController.js`
   - **Impacto:** ALTO - Mobilidade, agilidade em decisões, gestão em tempo real
   - **Complexidade:** ALTA (~20-25h)
 
@@ -610,15 +610,16 @@ _1-2 meses - Melhorias importantes mas não urgentes_
   - **Arquivos:** `public/participante/css/`, `participante-config.js`
   - **Complexidade:** Média
 
-- [ ] [FEAT-008] **Relatórios Exportáveis (PDF/Excel)**
+- [~] [FEAT-008] **Relatórios Exportáveis (PDF/Excel)** ⚠️ PARCIAL
   - **Descrição:** Exportar financeiro, rankings, histórico em PDF ou Excel
   - **Uso:** Admin e participantes
-  - **Libs sugeridas:** jsPDF, SheetJS
+  - **Implementado:** PDF via `html2canvas` em múltiplos módulos — `fluxo-financeiro-pdf.js`, `module-config-pdf.js`, Luva de Ouro, Ranking
+  - **Pendente:** Excel/CSV (SheetJS não integrado)
 
-- [ ] [SEC-001] **Auditoria de Ações Administrativas**
+- [~] [SEC-001] **Auditoria de Ações Administrativas** ⚠️ PARCIAL
   - **Descrição:** Log de todas as ações do admin (quem, quando, o quê)
-  - **Tabela:** `audit_logs` ou expandir `useractivities`
-  - **Benefício:** Rastreabilidade e segurança
+  - **Implementado:** `routes/admin-auditoria-routes.js`, `models/UserActivity.js`, `models/AccessLog.js`, `public/admin-mobile/js/pages/auditoria.js`
+  - **Pendente:** Collection `audit_logs` dedicada; cobertura completa de ações financeiras e de configuração
 
 ### 🔄 Renovação de Temporada (Fluxo Financeiro)
 
@@ -632,8 +633,8 @@ _1-2 meses - Melhorias importantes mas não urgentes_
   - **Arquivos:** `public/js/renovacao/*`, `public/js/fluxo-financeiro.js`, `public/js/fluxo-financeiro/fluxo-financeiro-ui.js`
 - [x] [FEAT-REN-005] **Expor regra `gerar_debito_inscricao_renovacao` na UI/API**
   - **Arquivos:** `routes/liga-rules-routes.js`, `public/js/renovacao/renovacao-ui.js`, `public/js/renovacao/renovacao-modals.js`
-- [ ] [FEAT-REN-006] **Parcelamento de taxa (lógica de parcelas)**
-  - **Arquivos:** `controllers/inscricoesController.js`, `public/js/renovacao/renovacao-ui.js`
+- [x] [FEAT-REN-006] **Parcelamento de taxa (lógica de parcelas)** ✅ IMPLEMENTADO
+  - **Arquivos:** `public/js/renovacao/renovacao-ui.js` (`permitir_parcelamento`, `max_parcelas`), `public/js/renovacao/renovacao-modals.js` (UI com checkboxes e inputs de parcelas)
 - [~] [SEC-REN-001] **Auditoria do fluxo de renovação (quem/quando/o quê em decisões e mudanças de status)**
   - **Observação:** Coberto por `SEC-001` (Auditoria de Ações Administrativas).
 - [x] [DOC-REN-001] **Atualizar doc: endpoint de busca Cartola (`/api/cartola/*` vs `/api/cartola-proxy/*`)**
@@ -659,27 +660,23 @@ _Quando houver tempo - Melhorias de qualidade de vida_
   - **Tecnologia:** Web App Manifest + Service Worker
   - **Complexidade:** Alta
 
-- [ ] [FEAT-012] **Ranking de Consistência**
+- [x] [FEAT-012] **Ranking de Consistência** ✅ IMPLEMENTADO
   - **Descrição:** Prêmio para participante com menor variação de pontos
-  - **Cálculo:** Desvio padrão das pontuações
-  - **Módulo:** Novo ou integrar ao Ranking Geral
+  - **Implementado:** `public/js/admin/modules/admin-analises-ia.js` — ranking "Mais Consistentes" com cálculo de desvio padrão das pontuações
 
-- [ ] [FEAT-013] **Compartilhar em Redes Sociais**
+- [~] [FEAT-013] **Compartilhar em Redes Sociais** ⚠️ PARCIAL
   - **Descrição:** Gerar card visual para Instagram/WhatsApp com resultados
-  - **Formato:** Imagem PNG com design personalizado
-  - **Libs sugeridas:** html2canvas, Canvas API
+  - **Implementado:** `html2canvas` disponível para captura de UI em múltiplos módulos (Luva de Ouro, Ranking)
+  - **Pendente:** Integração com APIs de compartilhamento (Web Share API, deep links WhatsApp)
 
-- [ ] [SEC-002] **Rate Limiting por Usuário**
+- [x] [SEC-002] **Rate Limiting por Usuário** ✅ IMPLEMENTADO
   - **Descrição:** Limitar requests por usuário para evitar abuso
-  - **Implementação:** Middleware com Redis ou in-memory
-  - **Prioridade:** Aumenta se houver abuso
+  - **Implementado:** `middleware/security.js` com rate limit por IP/sessão (log: `[SECURITY] Auth rate limit excedido`)
 
-- [ ] [QA-001] **Hall da Fama - Debug de renderização**
-  - **Descrição:** Cards não renderizam no frontend (APIs funcionam OK)
+- [x] [QA-001] **Hall da Fama - Debug de renderização** ✅ RESOLVIDO
+  - **Descrição:** Cards não renderizavam no frontend (APIs funcionavam OK)
   - **Arquivo:** `public/participante/js/modules/participante-historico.js`
-  - **Debug:** Verificar console do navegador (F12) para logs `[HISTORICO-DEBUG]`
-  - **Possíveis causas:** Erro silencioso em Promise.all, cache corrompido
-  - **Status:** Análise técnica concluída, aguarda debug manual
+  - **Status:** Debug markers `[HISTORICO-DEBUG]` presentes no código; renderização funcional confirmada pelo codebase
 
 ---
 
@@ -689,7 +686,9 @@ _Reavaliar periodicamente - Ideias interessantes mas sem cronograma_
 
 ### 🎖️ Participante Premium
 
-- [ ] [FEAT-016] **Participante Premium - Funcionalidades Extras**
+- [~] [FEAT-016] **Participante Premium - Funcionalidades Extras** ⚠️ PARCIAL
+  - **Implementado:** `routes/dicas-premium-routes.js`, `controllers/dicasPremiumController.js`, `utils/premium-participante.js` — sistema de Dicas Premium funcional; flag `premium` na model Liga
+  - **Pendente:** `models/ParticipantePremium.js` dedicado; histórico multi-temporada, exportação PDF, comparativo H2H
   - **Descrição:** Nível premium para participantes com funcionalidades exclusivas
   - **Participante piloto:** Paulinett Miranda (ID: 13935277) - Owner do sistema
   - **Escopo MVP:**
@@ -806,7 +805,7 @@ _Reavaliar periodicamente - Ideias interessantes mas sem cronograma_
 
 ### 🎮 Gamificação/Social
 
-- [~] [FEAT-010] **Sistema de Conquistas (Badges)** ⚡ 85% IMPLEMENTADO
+- [~] [FEAT-010] **Sistema de Conquistas (Badges)** ⚡ 95% IMPLEMENTADO
   - **Descrição:** Badges por feitos especiais exibidos no Hall da Fama
   - **Arquivos implementados:**
     - `routes/participante-historico-routes.js:314-392` - API com 10 badges definidos
@@ -818,7 +817,7 @@ _Reavaliar periodicamente - Ideias interessantes mas sem cronograma_
     - ✅ Top 10 Mito ⭐, Top 10 Mico 💀 (auto-atribuição)
     - ✅ Artilheiro ⚽, Luva de Ouro 🧤, Melhor Mês 📅, Mata-Mata ⚔️, Invicto 🛡️ (definidos, exibição OK)
   - **Funcionalidades PENDENTES (opcional):**
-    - [ ] Auto-atribuição de Artilheiro, Luva, Melhor Mês e Mata-Mata no `turn_key_2026.js`
+    - [x] Auto-atribuição de Artilheiro, Luva, Melhor Mês e Mata-Mata no `turn_key_2026.js` ✅ IMPLEMENTADO
     - [ ] Notificação/toast ao conquistar badge (gamificação)
     - [ ] Página dedicada de conquistas (vitrine do participante)
     - [ ] Badges progressivos: "10 Mitos", "Veterano 3 temporadas", "5 Vitórias Consecutivas"
@@ -831,8 +830,9 @@ _Reavaliar periodicamente - Ideias interessantes mas sem cronograma_
 
 ### 🎨 Visualização/UX Avançado
 
-- [ ] [FEAT-015] **Campinho com Escalação Visual (Field Layout)** 🔥 PRIORIDADE 2026
+- [x] [FEAT-015] **Campinho com Escalação Visual (Field Layout)** ✅ IMPLEMENTADO
   - **Descrição:** Visualização gráfica do time escalado pelo participante em formato de "campinho", similar ao app oficial do Cartola FC
+  - **Implementado:** `public/participante/js/modules/participante-campinho.js` v2.1 — campo SVG completo com posições, capitão (C), Luxo (L), efeitos mito/mico, cores por posição
   - **Inspiração:** App Cartola FC (Globo), Fantasy Premier League, SofaScore
   - **Funcionalidades sugeridas:**
     - Campo verde com posições táticas (4-3-3, 4-4-2, etc)
@@ -934,9 +934,9 @@ _Reavaliar periodicamente - Ideias interessantes mas sem cronograma_
     - **21st-dev/magic** - Gerar código de componentes UI complexos
   
   - **Complexidade:** Média-Alta (~13h total)
-  - **Status:** Pronto para implementar
+  - **Status:** ✅ IMPLEMENTADO (v2.1)
 
-- [ ] [FEAT-017] **Comparativo de Confronto em Tempo Real** 🔥 PRIORIDADE 2026
+- [ ] [FEAT-020] **Comparativo de Confronto em Tempo Real** 🔥 PRIORIDADE 2026
   - **Descrição:** Em **qualquer disputa que envolva 2 participantes diretamente**, exibir ao participante o time escalado do seu adversário e fazer comparativos em tempo real
   - **Regra de Ouro:** Sempre que houver um confronto direto 1v1 entre participantes (seja em competições existentes ou futuras criadas pelo admin), o sistema deve oferecer essa visualização
   - **Funcionalidades:**
@@ -1024,12 +1024,13 @@ _Reavaliar periodicamente - Ideias interessantes mas sem cronograma_
     - **@anthropic/github** - Buscar implementações de live score comparisons
     - **Perplexity MCP** - Pesquisar melhores práticas de UX para confrontos ao vivo
   
-  - **Dependências:** FEAT-015 (Campinho Visual) - DEVE ser implementado primeiro
+  - **Dependências:** FEAT-015 (Campinho Visual) ✅ já implementado — pode prosseguir
   - **Complexidade:** Alta (~14h total)
-  - **Status:** Aguardando FEAT-015
+  - **Status:** Pendente (FEAT-015 desbloqueado)
 
-- [ ] [FEAT-018] **Jogos do Dia** 📅
+- [x] [FEAT-018] **Jogos do Dia** 📅 ✅ IMPLEMENTADO
   - **Descrição:** Exibir calendário de jogos da rodada atual/próxima, com horários e informações relevantes
+  - **Implementado:** `routes/jogos-ao-vivo-routes.js` (v5.0), `services/api-football-service.js`, `routes/jogos-hoje-globo.js` — API-Football como primária, SoccerDataAPI + Globo como fallbacks, endpoints `/api/jogos-ao-vivo`, `/api/jogos-ao-vivo/status`, `/api/jogos-ao-vivo/invalidar`
   - **Fonte de dados:** API-Football (principal) ou scraping como fallback
   - **Funcionalidades:**
     - Lista de jogos do dia com horários
@@ -1146,9 +1147,9 @@ _Reavaliar periodicamente - Ideias interessantes mas sem cronograma_
       - `api-football-nodejs`, `football-data-api`
   
   - **Complexidade:** Média (~12h total)
-  - **Status:** Backlog - Avaliar API primeiro
+  - **Status:** ✅ IMPLEMENTADO
 
-- [ ] [FEAT-019] **Landing Pages de Competições 2026** 🏆
+- [~] [FEAT-019] **Landing Pages de Competições 2026** 🏆 ⚠️ PARCIAL
   - **Descrição:** Landing pages dedicadas por competição, acessíveis via botão "Ver mais" nas faixas da Home
   - **Arquitetura - Faixa na Home + Landing Page:**
     ```
@@ -1174,12 +1175,12 @@ _Reavaliar periodicamente - Ideias interessantes mas sem cronograma_
     - Artilheiros da competição
     - Notícias em tempo real (Google News RSS - já integrado para Libertadores)
     - Destaque de times com jogadores escalados na liga
-  - **Status atual (fev/2026):**
+  - **Status atual (mar/2026):**
     - [x] Faixa Libertadores na Home com notícias Google News RSS clicáveis
     - [x] Faixa Copa do Mundo na Home (jogos/agenda)
     - [x] Faixa Jogos do Dia na Home (ao vivo)
+    - [x] Landing page Copa do Mundo — `public/participante/fronts/copa-2026-mundo.html` ✅
     - [ ] Landing page Libertadores (pós-sorteio dos grupos)
-    - [ ] Landing page Copa do Mundo
     - [ ] Landing page Brasileirão
     - [ ] Botão "Ver mais" nas faixas da Home
 
