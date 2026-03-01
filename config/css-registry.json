@@ -10,13 +10,13 @@
     "admin": {
       "path": "public/css/_admin-tokens.css",
       "description": "Design tokens do painel admin (desktop). SEMPRE carregado primeiro.",
-      "sections": ["cores-primarias", "superficies", "status", "ranking", "texto", "tipografia", "espacamento", "radius", "sombras", "bordas", "transicoes", "z-index", "componentes", "modulos", "breakpoints"],
+      "sections": ["cores-primarias", "superficies", "status", "ranking", "texto", "tipografia", "espacamento", "radius", "sombras", "sombras-suaves", "bordas", "transicoes", "z-index", "componentes", "modulos", "breakpoints", "wave-dividers", "blob-decorations"],
       "keyframes": ["admin-spin", "admin-fade-in", "admin-fade-in-up", "admin-pulse", "spin", "pulse", "fadeIn", "slideUp", "pulse-live"]
     },
     "app": {
       "path": "public/participante/css/_app-tokens.css",
       "description": "Design tokens do app participante (mobile PWA). SEMPRE carregado primeiro.",
-      "sections": ["cores-primarias", "superficies", "status", "posicoes", "texto", "tipografia", "espacamento"],
+      "sections": ["cores-primarias", "superficies", "status", "posicoes", "texto", "tipografia", "espacamento", "sombras-suaves", "wave-dividers", "blob-decorations"],
       "keyframes": ["app-spin", "app-fade-in", "app-fade-in-up"]
     }
   },
