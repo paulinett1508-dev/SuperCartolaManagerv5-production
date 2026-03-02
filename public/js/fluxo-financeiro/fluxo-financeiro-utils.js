@@ -2,12 +2,8 @@
 // ✅ v2.1.0: Funções globais de formatação de moeda brasileira
 // ✅ v2.0.0: Preparado para SaaS Multi-Tenant
 
-// ===== CONSTANTES DE IDENTIFICACAO (FALLBACK) =====
-// NOTA: Estas constantes sao mantidas para compatibilidade.
-// O sistema agora busca configs de /api/ligas/:id/configuracoes
-// Use fetchLigaConfig() de rodadas-config.js para configs dinamicas.
-export const ID_SUPERCARTOLA_2025 = "684cb1c8af923da7c7df51de";
-export const ID_CARTOLEIROS_SOBRAL = "684d821cf1a7ae16d1f89572";
+// ===== CONSTANTES =====
+// IDs de liga e configs dinâmicas: usar fetchLigaConfig() de rodadas-config.js
 export const RODADA_INICIAL_PONTOS_CORRIDOS = 7;
 
 // NOTA: Os valores de bonus/onus por posicao estao em ../rodadas/rodadas-config.js

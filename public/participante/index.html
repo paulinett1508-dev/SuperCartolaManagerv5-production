@@ -2005,9 +2005,6 @@
 
         <!-- Script do Modal Premiações 2026 -->
         <script>
-            // ID da liga Super Cartola (única com premiações configuradas)
-            const LIGA_SUPER_CARTOLA_ID = '684cb1c8af923da7c7df51de';
-
             // Mini-modal "Aguarde"
             function abrirModalAguarde() {
                 const modal = document.getElementById('modal-aguarde');
@@ -2042,10 +2039,13 @@
             window.fecharModalAguarde = fecharModalAguarde;
 
             // Funções do Modal Premiações 2026
-            function abrirPremiacoes2026() {
-                // Verificar se a liga tem premiações configuradas
+            async function abrirPremiacoes2026() {
+                // Verificar se a liga tem regras/premiações configuradas via API
                 const ligaId = window.participanteAuth?.ligaId;
-                if (ligaId !== LIGA_SUPER_CARTOLA_ID) {
+                try {
+                    const res = await fetch(`/api/liga-rules/${ligaId}/2026`);
+                    if (!res.ok) throw new Error('Sem config');
+                } catch {
                     // Liga sem configurações - mostrar mini-modal
                     abrirModalAguarde();
                     console.log('[PREMIACOES] Liga sem configurações, exibindo modal aguarde');
@@ -2854,17 +2854,7 @@
         <script>
             // Funcoes do Modal Regras 2026
             async function abrirRegras2026() {
-                // ID da liga Super Cartola (única com regras configuradas)
-                const LIGA_SUPER_CARTOLA_ID = '684cb1c8af923da7c7df51de';
-
-                // Verificar se a liga tem regras configuradas
                 const ligaId = window.participanteAuth?.ligaId;
-                if (ligaId !== LIGA_SUPER_CARTOLA_ID) {
-                    // Liga sem configurações - mostrar mini-modal
-                    abrirModalAguarde();
-                    console.log('[REGRAS] Liga sem configurações, exibindo modal aguarde');
-                    return;
-                }
 
                 const modal = document.getElementById('modal-regras-2026');
                 const card = document.getElementById('regras-card');

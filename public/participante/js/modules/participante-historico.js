@@ -705,31 +705,62 @@ async function buscarPontosCorridos(tempLigaId) {
     } catch { return null; }
 }
 
+// Cache de valores Top10 por liga (evita fetch repetido)
+const _top10ValoresCache = new Map();
+
+async function _buscarValoresTop10(ligaId) {
+    // Retorna do cache se disponível
+    if (_top10ValoresCache.has(ligaId)) return _top10ValoresCache.get(ligaId);
+
+    // Defaults: formula padrão conforme top_10.json (base=30, decremento=2)
+    const DEFAULT_BASE = 30;
+    const DEFAULT_DECREMENTO = 2;
+
+    function gerarValores(base, dec, qtd = 10) {
+        const mito = {}, mico = {};
+        for (let i = 1; i <= qtd; i++) {
+            mito[i] = base - (i - 1) * dec;
+            mico[i] = -(base - (i - 1) * dec);
+        }
+        return { mito, mico };
+    }
+
+    try {
+        const res = await fetch(`/api/liga/${ligaId}/modulos/top_10`);
+        if (res.ok) {
+            const data = await res.json();
+            const wr = data.config?.wizard_respostas;
+            if (wr) {
+                const base = Number(wr.valor_mito_1) || DEFAULT_BASE;
+                const dec = Number(wr.decremento_valor) || DEFAULT_DECREMENTO;
+                const qtd = Number(wr.qtd_mitos) || 10;
+                const valores = gerarValores(base, dec, qtd);
+                _top10ValoresCache.set(ligaId, valores);
+                return valores;
+            }
+        }
+    } catch (err) {
+        if (window.Log) Log.warn("HISTORICO", "Erro ao buscar config Top10, usando defaults", { erro: err.message });
+    }
+
+    // Fallback: formula padrão
+    const valores = gerarValores(DEFAULT_BASE, DEFAULT_DECREMENTO);
+    _top10ValoresCache.set(ligaId, valores);
+    return valores;
+}
+
 async function buscarTop10(tempLigaId) {
     // v10.3: Lógica corrigida - TOP10 Histórico com valores por liga + debug
     // O ranking armazena TODAS as pontuações extremas da temporada, ordenadas
     // Apenas as 10 primeiras posições geram bônus/ônus financeiro
     // Um participante pode ocupar MÚLTIPLAS posições se teve várias pontuações extremas
 
-    // Valores de bônus/ônus por posição (1º ao 10º) - ESPECÍFICOS POR LIGA
-    const LIGA_SOBRAL_ID = '684d821cf1a7ae16d1f89572';
-
-    // Super Cartola: valores maiores (liga principal com 32 times)
-    const VALORES_SUPER_CARTOLA = {
-        mito: { 1: 30, 2: 28, 3: 26, 4: 24, 5: 22, 6: 20, 7: 18, 8: 16, 9: 14, 10: 12 },
-        mico: { 1: -30, 2: -28, 3: -26, 4: -24, 5: -22, 6: -20, 7: -18, 8: -16, 9: -14, 10: -12 }
-    };
-
-    // Cartoleiros do Sobral: valores menores (liga com 6 times)
-    const VALORES_SOBRAL = {
-        mito: { 1: 10, 2: 9, 3: 8, 4: 7, 5: 6, 6: 5, 7: 4, 8: 3, 9: 2, 10: 1 },
-        mico: { 1: -10, 2: -9, 3: -8, 4: -7, 5: -6, 6: -5, 7: -4, 8: -3, 9: -2, 10: -1 }
-    };
-
-    // Selecionar valores baseado na liga
-    const valoresLiga = (tempLigaId === LIGA_SOBRAL_ID) ? VALORES_SOBRAL : VALORES_SUPER_CARTOLA;
-    const VALORES_MITO = valoresLiga.mito;
-    const VALORES_MICO = valoresLiga.mico;
+    // Valores de bônus/ônus por posição (1º ao 10º) - DINÂMICO via ModuleConfig
+    // Busca config do módulo Top10 da liga (wizard define valores por liga)
+    // Fallback: formula padrão (base=30, decremento=2) conforme top_10.json
+    const valoresTop10 = await _buscarValoresTop10(tempLigaId);
+    const VALORES_MITO = valoresTop10.mito;
+    const VALORES_MICO = valoresTop10.mico;
 
     try {
         const res = await fetch(`/api/top10/cache/${tempLigaId}`);

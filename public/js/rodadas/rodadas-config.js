@@ -58,46 +58,10 @@ const FALLBACK_VALORES_SUPERCARTOLA = {
   27: -15.0, 28: -16.0, 29: -17.0, 30: -18.0, 31: -19.0, 32: -20.0,
 };
 
-// Valores de banco fallback - Sobral Fase 1 (6 times)
-const FALLBACK_VALORES_SOBRAL_FASE1 = {
-  1: 7.0, 2: 4.0, 3: 0.0, 4: -2.0, 5: -5.0, 6: -10.0,
-};
-
-// Valores de banco fallback - Sobral Fase 2 (4 times)
-const FALLBACK_VALORES_SOBRAL_FASE2 = {
-  1: 5.0, 2: 0.0, 3: 0.0, 4: -5.0,
-};
-
 // =====================================================================
-// EXPORTS LEGADOS (compatibilidade com codigo existente)
+// EXPORT LEGADO (compatibilidade com rodadas-core.js)
 // =====================================================================
-
-// Manter exports para compatibilidade
 export const valoresBancoPadrao = FALLBACK_VALORES_SUPERCARTOLA;
-export const valoresFase1_6times = FALLBACK_VALORES_SOBRAL_FASE1;
-export const valoresFase2_4times = FALLBACK_VALORES_SOBRAL_FASE2;
-export const valoresBancoCartoleirosSobral = FALLBACK_VALORES_SOBRAL_FASE2;
-export const RODADA_TRANSICAO_SOBRAL = 29;
-
-export const faixasFase1 = {
-  totalTimes: 6,
-  credito: { inicio: 1, fim: 2 },
-  neutro: { inicio: 3, fim: 3 },
-  debito: { inicio: 4, fim: 6 },
-};
-
-export const faixasFase2 = {
-  totalTimes: 4,
-  credito: { inicio: 1, fim: 1 },
-  neutro: { inicio: 2, fim: 3 },
-  debito: { inicio: 4, fim: 4 },
-};
-
-// IDs de ligas (ainda necessarios para identificacao)
-export const LIGAS_CONFIG = {
-  SUPERCARTOLA: "684cb1c8af923da7c7df51de",
-  CARTOLEIROS_SOBRAL: "684d821cf1a7ae16d1f89572",
-};
 
 // =====================================================================
 // ✅ v5.0: FUNCOES DINAMICAS (buscam do servidor)
@@ -235,12 +199,7 @@ export function getBancoPorRodada(ligaId, rodada) {
     }
     return rc.valores || {};
   }
-  // 2. Fallback hardcoded (ligas conhecidas)
-  if (ligaId === LIGAS_CONFIG.CARTOLEIROS_SOBRAL) {
-    return rodada < RODADA_TRANSICAO_SOBRAL
-      ? FALLBACK_VALORES_SOBRAL_FASE1
-      : FALLBACK_VALORES_SOBRAL_FASE2;
-  }
+  // 2. Fallback generico (sem cache = usa defaults SuperCartola)
   return FALLBACK_VALORES_SUPERCARTOLA;
 }
 
@@ -248,9 +207,6 @@ export function getBancoPorLiga(ligaId) {
   const config = _getCachedConfig(ligaId);
   if (config?.ranking_rodada) {
     return config.ranking_rodada.valores || {};
-  }
-  if (ligaId === LIGAS_CONFIG.CARTOLEIROS_SOBRAL) {
-    return FALLBACK_VALORES_SOBRAL_FASE2;
   }
   return FALLBACK_VALORES_SUPERCARTOLA;
 }
@@ -272,9 +228,7 @@ export function getFaixasPorRodada(ligaId, rodada) {
       ...rc.faixas,
     };
   }
-  if (ligaId === LIGAS_CONFIG.CARTOLEIROS_SOBRAL) {
-    return rodada < RODADA_TRANSICAO_SOBRAL ? faixasFase1 : faixasFase2;
-  }
+  // Fallback generico
   return {
     totalTimes: 32,
     credito: { inicio: 1, fim: 11 },
@@ -292,9 +246,6 @@ export function getTotalTimesPorRodada(ligaId, rodada) {
       return rc[fase]?.total_participantes || 0;
     }
     return rc.total_participantes || config.total_participantes || 0;
-  }
-  if (ligaId === LIGAS_CONFIG.CARTOLEIROS_SOBRAL) {
-    return rodada < RODADA_TRANSICAO_SOBRAL ? 6 : 4;
   }
   return 32;
 }
@@ -323,68 +274,6 @@ export const STATUS_MERCADO_DEFAULT = {
   status_mercado: 1,  // Mercado aberto (pré-temporada padrão)
   temporada: new Date().getFullYear(),  // Ano atual
 };
-
-// =====================================================================
-// CONFIGURACAO DE LABELS DE POSICAO
-// =====================================================================
-
-export const POSICAO_CONFIG = {
-  SUPERCARTOLA: {
-    mito: {
-      pos: 1,
-      label: "MITO",
-      style: "color:#fff; font-weight:bold; background:#198754; border-radius:4px; padding:1px 8px; font-size:12px;",
-    },
-    g2_g11: {
-      range: [2, 11],
-      getLabel: (pos) => `G${pos}`,
-      className: "pos-g",
-    },
-    zona: {
-      condition: (pos, total) => pos >= total - 10 && pos < total,
-      getLabel: (pos, total) => `${pos}° | Z${total - pos}`,
-      className: "pos-z",
-    },
-    mico: {
-      condition: (pos, total) => pos === total && total > 1,
-      label: "MICO",
-      className: "pos-mico",
-    },
-  },
-  CARTOLEIROS_SOBRAL: {
-    mito: { pos: 1, label: "MITO", style: "color:#fff; font-weight:bold; background:#198754; border-radius:4px; padding:1px 8px; font-size:12px;" },
-    g2: { pos: 2, label: "2º", className: "pos-neutro" },
-    neutro: { pos: 3, label: "3º", className: "pos-neutro" },
-    mico: { pos: 4, label: "MICO", style: "color:#fff; font-weight:bold; background:#dc3545; border-radius:4px; padding:1px 8px; font-size:12px;" },
-  },
-  CARTOLEIROS_SOBRAL_FASES: {
-    fase1: {
-      totalTimes: 6,
-      mito: { pos: 1, label: "MITO" },
-      g2: { pos: 2, label: "G2", className: "pos-g" },
-      neutro: { pos: 3, label: "3º", className: "pos-neutro" },
-      z3: { pos: 4, label: "Z3", className: "pos-z" },
-      z2: { pos: 5, label: "Z2", className: "pos-z" },
-      mico: { pos: 6, label: "MICO", className: "pos-mico" },
-    },
-    fase2: {
-      totalTimes: 4,
-      mito: { pos: 1, label: "MITO" },
-      neutro1: { pos: 2, label: "2º", className: "pos-neutro" },
-      neutro2: { pos: 3, label: "3º", className: "pos-neutro" },
-      mico: { pos: 4, label: "MICO", className: "pos-mico" },
-    },
-  },
-};
-
-export function getPosicaoConfigPorRodada(ligaId, rodada) {
-  if (ligaId === LIGAS_CONFIG.CARTOLEIROS_SOBRAL) {
-    return rodada < RODADA_TRANSICAO_SOBRAL
-      ? POSICAO_CONFIG.CARTOLEIROS_SOBRAL_FASES.fase1
-      : POSICAO_CONFIG.CARTOLEIROS_SOBRAL_FASES.fase2;
-  }
-  return POSICAO_CONFIG.SUPERCARTOLA;
-}
 
 export const TIMEOUTS_CONFIG = {
   renderizacao: 500,

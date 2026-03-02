@@ -5,12 +5,9 @@
 // Responsável por: renderização de componentes, manipulação DOM, eventos
 
 import {
-  POSICAO_CONFIG,
-  LIGAS_CONFIG,
   getBancoPorRodada,
   getBancoPorRodadaAsync,
   getFaixasPorRodadaAsync,
-  RODADA_TRANSICAO_SOBRAL,
 } from "./rodadas-config.js";
 import { RODADA_FINAL_CAMPEONATO } from "../config/seasons-client.js";
 
@@ -317,33 +314,14 @@ export function getPosLabel(index, total, ligaId, rodada) {
     return `${pos}°`;
   }
 
-  // Fallback: lógica hardcoded original (se servidor não respondeu)
-  const isLigaCartoleirosSobral = ligaId === LIGAS_CONFIG.CARTOLEIROS_SOBRAL;
-
-  if (isLigaCartoleirosSobral) {
-    const isFase1 = rodada < RODADA_TRANSICAO_SOBRAL;
-
-    if (isFase1) {
-      if (pos === 1) return `<span style="color:#fff; font-weight:bold; background:#198754; border-radius:4px; padding:1px 8px; font-size:12px;">MITO</span>`;
-      if (pos === 2) return `<span class="pos-g">G2</span>`;
-      if (pos === 3) return `<span class="pos-neutro">3º</span>`;
-      if (pos === 4) return `<span class="pos-z">Z3</span>`;
-      if (pos === 5) return `<span class="pos-z">Z2</span>`;
-      if (pos === 6) return `<span style="color:#fff; font-weight:bold; background:#dc3545; border-radius:4px; padding:1px 8px; font-size:12px;">MICO</span>`;
-    } else {
-      if (pos === 1) return `<span style="color:#fff; font-weight:bold; background:#198754; border-radius:4px; padding:1px 8px; font-size:12px;">MITO</span>`;
-      if (pos === 2 || pos === 3) return `<span class="pos-neutro">${pos}º</span>`;
-      if (pos === 4) return `<span style="color:#fff; font-weight:bold; background:#dc3545; border-radius:4px; padding:1px 8px; font-size:12px;">MICO</span>`;
-    }
-    return `${pos}°`;
-  } else {
-    const config = POSICAO_CONFIG.SUPERCARTOLA;
-    if (pos === config.mito.pos) return `<span style="${config.mito.style}">${config.mito.label}</span>`;
-    if (config.g2_g11.range[0] <= pos && pos <= config.g2_g11.range[1]) return `<span class="${config.g2_g11.className}">${config.g2_g11.getLabel(pos)}</span>`;
-    if (config.zona.condition(pos, total)) return `<span class="${config.zona.className}">${config.zona.getLabel(pos, total)}</span>`;
-    if (config.mico.condition(pos, total)) return `<span class="${config.mico.className}">${config.mico.label}</span>`;
-    return `${pos}°`;
+  // Fallback genérico: MITO (1º), MICO (último), posição neutra (demais)
+  if (pos === 1) {
+    return `<span style="color:#fff; font-weight:bold; background:#198754; border-radius:4px; padding:1px 8px; font-size:12px;">MITO</span>`;
   }
+  if (pos === total && total > 1) {
+    return `<span style="color:#fff; font-weight:bold; background:#dc3545; border-radius:4px; padding:1px 8px; font-size:12px;">MICO</span>`;
+  }
+  return `${pos}°`;
 }
 
 // HELPER PARA RENDERIZAR CARD (APP MODE)
