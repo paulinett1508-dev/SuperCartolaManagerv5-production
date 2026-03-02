@@ -12,8 +12,9 @@
 
 if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Carregando módulo v5.0...");
 
-// ✅ v4.0: RODADA_FINAL dinâmico - obtido da API, fallback 38
-let RODADA_FINAL = 38;
+import { RODADA_FINAL_CAMPEONATO } from "/js/config/seasons-client.js";
+// ✅ v4.0: RODADA_FINAL dinâmico - obtido da API, fallback centralizado
+let RODADA_FINAL = RODADA_FINAL_CAMPEONATO;
 
 // Estado do módulo
 let estadoArtilheiro = {

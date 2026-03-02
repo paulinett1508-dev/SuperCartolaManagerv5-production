@@ -5,6 +5,8 @@
 // v2.2: Integração matchday + placares ao vivo via /ao-vivo endpoint
 // =====================================================================
 
+const RODADA_FINAL_CAMPEONATO = 38; // Brasileirão (centralizado em config/seasons.js)
+
 const BrasileiraoTabela = {
     _containerId: null,
     _temporada: null,
@@ -518,7 +520,7 @@ const BrasileiraoTabela = {
 
         const hoje = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
 
-        for (let r = 1; r <= 38; r++) {
+        for (let r = 1; r <= RODADA_FINAL_CAMPEONATO; r++) {
             const rodada = rodadas[r];
             if (!rodada) continue;
 

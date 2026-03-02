@@ -23,6 +23,8 @@ function escapeHtml(str) {
         .replace(/'/g, '&#39;');
 }
 
+const RODADA_FINAL_CAMPEONATO = 38; // Brasileirão (centralizado em config/seasons.js)
+
 class AdminRestaUm {
     constructor() {
         this.ligaId = null;
@@ -122,7 +124,7 @@ class AdminRestaUm {
         let alerta = null;
 
         // Tentar encontrar bloco livre
-        for (let inicio = 1; inicio <= 38 - rodadasNecessarias + 1; inicio++) {
+        for (let inicio = 1; inicio <= RODADA_FINAL_CAMPEONATO - rodadasNecessarias + 1; inicio++) {
             let blocoLivre = true;
             for (let r = inicio; r < inicio + rodadasNecessarias; r++) {
                 if (rodadasOcupadas.includes(r)) {
@@ -137,12 +139,12 @@ class AdminRestaUm {
             }
         }
 
-        if (rodadaFinal > 38) {
-            rodadaFinal = 38;
-            alerta = `Precisa de ${rodadasNecessarias} rodadas mas so restam ${38 - rodadaInicial + 1} disponiveis. Considere aumentar eliminados/rodada.`;
+        if (rodadaFinal > RODADA_FINAL_CAMPEONATO) {
+            rodadaFinal = RODADA_FINAL_CAMPEONATO;
+            alerta = `Precisa de ${rodadasNecessarias} rodadas mas so restam ${RODADA_FINAL_CAMPEONATO - rodadaInicial + 1} disponiveis. Considere aumentar eliminados/rodada.`;
         }
 
-        const rodadasLivresRestantes = 38 - rodadaFinal;
+        const rodadasLivresRestantes = RODADA_FINAL_CAMPEONATO - rodadaFinal;
         const info = `${totalParticipantes} participantes, ${eliminacoesNecessarias} eliminacoes, ${rodadasNecessarias} rodadas necessarias` +
             (rodadasLivresRestantes > 0 ? ` (sobram ${rodadasLivresRestantes} rodadas para outra edicao)` : '');
 
@@ -198,7 +200,7 @@ class AdminRestaUm {
         inputInicial.dataset.editadoManualmente = 'true';
 
         const rodadaInicial = parseInt(inputInicial.value);
-        if (!rodadaInicial || rodadaInicial < 1 || rodadaInicial > 38) return;
+        if (!rodadaInicial || rodadaInicial < 1 || rodadaInicial > RODADA_FINAL_CAMPEONATO) return;
 
         const liga = this.ligas.find(l => l._id === this.ligaId);
         const totalParticipantes = (liga?.participantes || liga?.times || []).filter(t => t.ativo !== false).length;
@@ -210,7 +212,7 @@ class AdminRestaUm {
         const eliminacoesNecessarias = totalParticipantes - 1;
         const rodadasDeEliminacao = Math.ceil(eliminacoesNecessarias / eliminadosPorRodada);
         const rodadasNecessarias = rodadasDeEliminacao + (protecao ? 1 : 0);
-        const rodadaFinalCalculada = Math.min(rodadaInicial + rodadasNecessarias - 1, 38);
+        const rodadaFinalCalculada = Math.min(rodadaInicial + rodadasNecessarias - 1, RODADA_FINAL_CAMPEONATO);
 
         inputFinal.value = rodadaFinalCalculada;
         delete inputFinal.dataset.editadoManualmente;
@@ -218,7 +220,7 @@ class AdminRestaUm {
         // Atualizar painel de sugestao com alerta se necessario
         const painelSugestao = document.getElementById('ruSugestaoRodadas');
         if (painelSugestao) {
-            const rodadasDisponiveis = 38 - rodadaInicial + 1;
+            const rodadasDisponiveis = RODADA_FINAL_CAMPEONATO - rodadaInicial + 1;
             const cabe = rodadasNecessarias <= rodadasDisponiveis;
             const alertaHtml = !cabe
                 ? `<div style="color:var(--app-warning);margin-top:4px;font-weight:600;">

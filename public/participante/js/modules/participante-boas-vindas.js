@@ -1,4 +1,5 @@
 import { renderizarAvisos } from './participante-avisos.js';
+import { RODADA_FINAL_CAMPEONATO } from "/js/config/seasons-client.js";
 
 // =====================================================================
 // PARTICIPANTE-BOAS-VINDAS.JS - v12.1 (Correção Rodada Disputada)
@@ -699,7 +700,7 @@ function renderizarBoasVindas(container, data, ligaRules) {
                         <span class="text-yellow-300">Cartola PRO</span>
                     </button>` : '';
     // ✅ v10.11: Badge de ambiente movido para o header (próximo à versão)
-    const rodadasRestantes = Math.max(0, 38 - rodadaAtual);
+    const rodadasRestantes = Math.max(0, RODADA_FINAL_CAMPEONATO - rodadaAtual);
     const pontosUltimaRodada = ultimaRodada
         ? truncarPontos(parseFloat(ultimaRodada.pontos))
         : "0,00";

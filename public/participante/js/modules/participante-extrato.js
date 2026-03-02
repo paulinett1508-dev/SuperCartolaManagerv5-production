@@ -66,7 +66,7 @@
 // =====================================================================
 
 // ⚽ CONFIGURAÇÃO DO CAMPEONATO - Usa config global do app
-const RODADA_FINAL_CAMPEONATO = 38;
+import { RODADA_FINAL_CAMPEONATO } from "/js/config/seasons-client.js";
 // ✅ v3.6 FIX: Detectar temporada encerrada via config global
 const CONFIG = window.ParticipanteConfig || {};
 const CAMPEONATO_ENCERRADO = CONFIG.isPreparando?.() || false; // Durante pré-temporada, 2025 está encerrada

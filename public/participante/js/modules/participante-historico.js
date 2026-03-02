@@ -36,6 +36,7 @@
 // =====================================================================
 
 import { getZonaInfo } from "./zona-utils.js";
+import { RODADA_FINAL_CAMPEONATO } from "/js/config/seasons-client.js";
 
 if (window.Log) Log.info("HISTORICO", "Hall da Fama v12.12 carregando...");
 
@@ -308,7 +309,7 @@ async function renderizarTodasLigas() {
         const posicaoReal = ranking?.posicao ?? pc?.posicao ?? tempRecente.estatisticas?.posicao_final ?? '-';
         const pontosReais = ranking?.pontos ?? pc?.pontos ?? tempRecente.estatisticas?.pontos_totais ?? 0;
         const totalParticipantes = ranking?.total ?? pc?.total ?? tempRecente.estatisticas?.total_participantes ?? historicoData?.historico?.length ?? 0;
-        const rodadasJogadas = ranking?.rodadas ?? (pc ? (pc.vitorias + pc.empates + pc.derrotas) : null) ?? tempRecente.estatisticas?.rodadas_jogadas ?? 38;
+        const rodadasJogadas = ranking?.rodadas ?? (pc ? (pc.vitorias + pc.empates + pc.derrotas) : null) ?? tempRecente.estatisticas?.rodadas_jogadas ?? RODADA_FINAL_CAMPEONATO;
 
         // v12.2: Saldo - prioridade para extrato da API, fallback para JSON
         const saldoHistorico = extrato?.saldo ?? tempRecente.financeiro?.saldo_final ?? 0;
@@ -1035,7 +1036,7 @@ async function buscarRanking(tempLigaId) {
 // v8.0: Buscar melhor rodada (maior pontuação do participante)
 async function buscarMelhorRodada(tempLigaId) {
     try {
-        const res = await fetch(`/api/rodadas/${tempLigaId}/rodadas?inicio=1&fim=38`);
+        const res = await fetch(`/api/rodadas/${tempLigaId}/rodadas?inicio=1&fim=${RODADA_FINAL_CAMPEONATO}`);
         if (!res.ok) return null;
         const rodadas = await res.json();
         if (!rodadas || !Array.isArray(rodadas)) return null;
@@ -1341,7 +1342,7 @@ async function renderizarDadosTempoReal(ligaId) {
                         <span class="material-icons achievement-icon">timer</span>
                         <div class="achievement-content">
                             <div class="achievement-title">Rodadas Disputadas</div>
-                            <div class="achievement-value"><span class="highlight">${rodadasJogadas}</span> de 38 rodadas</div>
+                            <div class="achievement-value"><span class="highlight">${rodadasJogadas}</span> de ${RODADA_FINAL_CAMPEONATO} rodadas</div>
                         </div>
                     </div>
                     <div class="achievement-item">

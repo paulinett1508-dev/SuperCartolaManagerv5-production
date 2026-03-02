@@ -12,6 +12,7 @@ import {
   getFaixasPorRodadaAsync,
   RODADA_TRANSICAO_SOBRAL,
 } from "./rodadas-config.js";
+import { RODADA_FINAL_CAMPEONATO } from "../config/seasons-client.js";
 
 import { getStatusMercado } from "./rodadas-core.js";
 
@@ -51,7 +52,7 @@ function getElement(id) {
  */
 function isTemporadaEncerrada(rodada_atual, status_mercado) {
   // Se não é a última rodada, temporada não encerrou
-  if (rodada_atual < 38) return false;
+  if (rodada_atual < RODADA_FINAL_CAMPEONATO) return false;
 
   // Status do mercado Cartola FC:
   // 1 = Mercado aberto
@@ -98,7 +99,7 @@ export function isRodadaConsolidada(rodada, rodada_atual, status_mercado, tempor
   if (rodada < rodada_atual) return true;
 
   // Rodada atual só está consolidada se temporada encerrou
-  if (rodada === rodada_atual && rodada === 38) {
+  if (rodada === rodada_atual && rodada === RODADA_FINAL_CAMPEONATO) {
     return isTemporadaEncerrada(rodada_atual, status_mercado);
   }
 
@@ -158,7 +159,7 @@ export async function renderizarMiniCardsRodadas() {
 
   let cardsHTML = "";
 
-  for (let i = 1; i <= 38; i++) {
+  for (let i = 1; i <= RODADA_FINAL_CAMPEONATO; i++) {
     let statusClass = "";
     let statusText = "";
     let isDisabled = false;
@@ -181,7 +182,7 @@ export async function renderizarMiniCardsRodadas() {
         statusClass = "vigente";
         statusText = "Aberta";
         isDisabled = true;
-      } else if (temporadaEncerrada && i === 38) {
+      } else if (temporadaEncerrada && i === RODADA_FINAL_CAMPEONATO) {
         // ✅ FIX: Rodada 38 com temporada encerrada = ENCERRADA
         statusClass = "encerrada";
         statusText = "Encerrada";

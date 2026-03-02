@@ -4,6 +4,7 @@
 import { getZonaInfo } from "./zona-utils.js";
 import * as ParciaisModule from "./participante-rodada-parcial.js";
 import { getClubesNomeMap } from "/js/shared/clubes-data.js";
+import { RODADA_FINAL_CAMPEONATO } from "/js/config/seasons-client.js";
 // v1.3: FIX - Distinguir rodada do mercado vs última rodada disputada
 //       - Quando mercado aberto, usa rodada-1 para buscar escalação
 //       - Evita erro 404 ao buscar dados de rodada não disputada
@@ -213,7 +214,7 @@ async function carregarDadosERenderizar(ligaId, timeId, participante) {
         const [ligaFresh, rankingFresh, rodadasFresh] = await Promise.all([
             fetch(`/api/ligas/${ligaId}`).then(r => r.ok ? r.json() : liga),
             fetch(`/api/ligas/${ligaId}/ranking?temporada=${temporada}`).then(r => r.ok ? r.json() : ranking),
-            fetch(`/api/rodadas/${ligaId}/rodadas?inicio=1&fim=38&temporada=${temporada}`).then(r => r.ok ? r.json() : rodadas),
+            fetch(`/api/rodadas/${ligaId}/rodadas?inicio=1&fim=${RODADA_FINAL_CAMPEONATO}&temporada=${temporada}`).then(r => r.ok ? r.json() : rodadas),
             buscarStatusMercado()   // preenche mercadoStatus antes do render
         ]);
 
@@ -390,7 +391,7 @@ async function buscarDadosHomeFresh(ligaId, timeId) {
     const [ligaFresh, rankingFresh, rodadasFresh] = await Promise.all([
         fetch(`/api/ligas/${ligaId}`).then(r => r.ok ? r.json() : null).catch(() => null),
         fetch(`/api/ligas/${ligaId}/ranking?temporada=${temporada}`).then(r => r.ok ? r.json() : null).catch(() => null),
-        fetch(`/api/rodadas/${ligaId}/rodadas?inicio=1&fim=38&temporada=${temporada}`).then(r => r.ok ? r.json() : null).catch(() => null)
+        fetch(`/api/rodadas/${ligaId}/rodadas?inicio=1&fim=${RODADA_FINAL_CAMPEONATO}&temporada=${temporada}`).then(r => r.ok ? r.json() : null).catch(() => null)
     ]);
 
     if (!Array.isArray(rankingFresh) || !Array.isArray(rodadasFresh)) return null;
@@ -1009,7 +1010,7 @@ function renderizarHome(container, data, ligaId) {
     } = data;
 
     const isPremium = participantePremium;
-    const totalRodadas = 38;
+    const totalRodadas = RODADA_FINAL_CAMPEONATO;
 
     // === PAINEL DE AVISOS ===
     atualizarPainelAvisos(rodadaAtual, totalParticipantes, { saldoFinanceiro, posicao, posicaoAnterior });

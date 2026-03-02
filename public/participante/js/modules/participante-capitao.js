@@ -8,6 +8,7 @@
 //       - Detecção de temporada encerrada
 //       - Spinner e loading padronizados
 // =============================================
+import { RODADA_FINAL_CAMPEONATO } from "/js/config/seasons-client.js";
 if (window.Log) Log.info('PARTICIPANTE-CAPITAO', 'Módulo v2.0 carregando...');
 
 let estadoCapitao = {
@@ -129,7 +130,7 @@ async function detectarEstadoTemporada() {
             const data = await response.json();
             const rodada = data.rodada_atual || 1;
             const mercadoAberto = data.status_mercado !== 2;
-            estadoCapitao.temporadaEncerrada = rodada >= 38 && mercadoAberto;
+            estadoCapitao.temporadaEncerrada = rodada >= RODADA_FINAL_CAMPEONATO && mercadoAberto;
         }
     } catch (error) {
         if (window.Log) Log.warn('PARTICIPANTE-CAPITAO', 'Erro detectar temporada:', error);
@@ -261,7 +262,7 @@ function renderizarRanking(ranking) {
         // ✅ NOVO LAYOUT: Botão "Ver Histórico" compacto
         const historico = participante.historico_rodadas || [];
         const rodadasJogadas = historico.length;
-        const totalRodadas = 38;
+        const totalRodadas = RODADA_FINAL_CAMPEONATO;
 
         // Botão Ver Histórico (somente se tiver dados)
         let btnHistoricoHtml = '';

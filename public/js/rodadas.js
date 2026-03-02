@@ -4,6 +4,7 @@
 
 // VERIFICAÇÃO DE AMBIENTE
 const isBackend = typeof window === "undefined";
+const RODADA_FINAL_CAMPEONATO = 38; // Brasileirão (centralizado em config/seasons.js)
 const isFrontend = typeof window !== "undefined";
 
 // IMPORTAÇÕES CONDICIONAIS PARA FRONTEND
@@ -155,7 +156,7 @@ export async function getRankingRodadaEspecifica(ligaId, rodadaNum, temporadaOve
 export async function getRankingsEmLote(
   ligaId,
   rodadaInicio = 1,
-  rodadaFim = 38,
+  rodadaFim = RODADA_FINAL_CAMPEONATO,
   forcarRecarga = false,
 ) {
   const ligaIdNormalizado = String(ligaId);
@@ -223,7 +224,7 @@ export async function getRankingsEmLote(
  * @param {string} ligaId - ID da liga
  * @param {number} ultimaRodada - Última rodada a carregar
  */
-export async function preCarregarRodadas(ligaId, ultimaRodada = 38) {
+export async function preCarregarRodadas(ligaId, ultimaRodada = RODADA_FINAL_CAMPEONATO) {
   console.log(`[RODADAS] 📦 preCarregarRodadas(${ligaId}, ${ultimaRodada})`);
 
   if (isBackend) {

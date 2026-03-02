@@ -18,8 +18,7 @@ import * as ParciaisModule from "./participante-rodada-parcial.js";
 // Importar módulo de polling inteligente
 import * as PollingInteligenteModule from "./participante-rodadas-polling.js";
 
-// Brasileirão = 38 rodadas (constante centralizada)
-const RODADA_FINAL_CAMPEONATO = 38;
+import { RODADA_FINAL_CAMPEONATO } from "/js/config/seasons-client.js";
 
 // Estado do módulo
 let todasRodadasCache = [];
@@ -263,7 +262,7 @@ function renderizarGridRodadas(rodadas) {
 
     container.innerHTML = `
         <div class="rodadas-mini-grid" id="grid-todas-rodadas" style="padding:0 4px;">
-            ${renderizarMiniCards(1, 38, rodadasMap)}
+            ${renderizarMiniCards(1, RODADA_FINAL_CAMPEONATO, rodadasMap)}
         </div>
     `;
 }
