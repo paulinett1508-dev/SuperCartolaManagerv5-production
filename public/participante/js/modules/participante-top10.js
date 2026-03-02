@@ -662,13 +662,13 @@ async function obterRodadasParaResumo(ligaId, temporadaParam = null) {
 
     if (cache && cache.getRodadasAsync) {
         return cache.getRodadasAsync(ligaId, async () => {
-            const res = await fetch(`/api/rodadas/${ligaId}/rodadas?inicio=1&fim=38&temporada=${temporada}`);
+            const res = await fetch(`/api/rodadas/${ligaId}/rodadas?inicio=1&fim=${RODADA_FINAL_CAMPEONATO}&temporada=${temporada}`);
             return res.ok ? res.json() : [];
         }, null, temporada);
     }
 
     try {
-        const res = await fetch(`/api/rodadas/${ligaId}/rodadas?inicio=1&fim=38&temporada=${temporada}`);
+        const res = await fetch(`/api/rodadas/${ligaId}/rodadas?inicio=1&fim=${RODADA_FINAL_CAMPEONATO}&temporada=${temporada}`);
         return res.ok ? res.json() : [];
     } catch (e) {
         return [];

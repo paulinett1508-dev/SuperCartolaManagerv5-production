@@ -8,6 +8,9 @@
 // VERSAO DO SISTEMA FINANCEIRO (para invalidacao de cache)
 export const VERSAO_SISTEMA_FINANCEIRO = "5.0.0";
 
+// Default de participantes (fallback quando API não retorna total_participantes)
+const DEFAULT_TOTAL_PARTICIPANTES = 32;
+
 // =====================================================================
 // CACHE LOCAL DE CONFIGS (carregado do servidor)
 // =====================================================================
@@ -115,7 +118,7 @@ export async function getFaixasPorRodadaAsync(ligaId, rodada) {
     }
 
     return {
-      totalTimes: rankingConfig.total_participantes || 32,
+      totalTimes: rankingConfig.total_participantes || DEFAULT_TOTAL_PARTICIPANTES,
       ...rankingConfig.faixas,
     };
   }

@@ -22,6 +22,9 @@
 
 if (window.Log) Log.info("[EXTRATO-UI] v11.2 FIX ZONA ICONS ROBUSTEZ");
 
+// ===== CONSTANTES =====
+const DEFAULT_TOTAL_PARTICIPANTES = 32; // Fallback quando API não retorna total_participantes
+
 // ===== CONFIG CACHE =====
 let ligaConfigCache = null;
 let statusRenovacaoParticipante = null;
@@ -65,7 +68,7 @@ async function fetchLigaConfigSilent(ligaId) {
 // ===== FAIXAS E CLASSIFICAÇÃO =====
 function getFaixasParaRodada(ligaId, rodada) {
     const config = ligaConfigCache || window.ligaConfigCache;
-    if (!config?.ranking_rodada) return detectarFaixasPorTotal(32);
+    if (!config?.ranking_rodada) return detectarFaixasPorTotal(DEFAULT_TOTAL_PARTICIPANTES);
     const rankingConfig = config.ranking_rodada;
 
     let faixas, totalTimes;
@@ -75,10 +78,10 @@ function getFaixasParaRodada(ligaId, rodada) {
         const fase = rodada < rodadaTransicao ? "fase1" : "fase2";
         const faseConfig = rankingConfig[fase];
         faixas = faseConfig?.faixas;
-        totalTimes = faseConfig?.total_participantes || 32;
+        totalTimes = faseConfig?.total_participantes || DEFAULT_TOTAL_PARTICIPANTES;
     } else {
         faixas = rankingConfig.faixas;
-        totalTimes = rankingConfig.total_participantes || 32;
+        totalTimes = rankingConfig.total_participantes || DEFAULT_TOTAL_PARTICIPANTES;
     }
 
     // ✅ v11.1 FIX: Se faixas explícitas existem, usar. Senão, calcular dinamicamente.
@@ -162,7 +165,7 @@ function getZonaIndicator(posicao, faixas) {
 function calcularPosicaoTop10(valor, ligaId) {
     const absValor = Math.abs(valor);
     const config = ligaConfigCache || window.ligaConfigCache;
-    const totalParticipantes = config?.total_participantes || config?.ranking_rodada?.total_participantes || 32;
+    const totalParticipantes = config?.total_participantes || config?.ranking_rodada?.total_participantes || DEFAULT_TOTAL_PARTICIPANTES;
     const isLigaGrande = totalParticipantes > 20;
     if (isLigaGrande) {
         const pos = Math.round((30 - absValor) / 2) + 1;
@@ -1029,7 +1032,7 @@ export async function renderizarExtratoParticipante(extrato, participanteId) {
         const zonaConfig = extrato.ligaConfig.zonaConfig;
         ligaConfigCache = {
             ranking_rodada: {
-                total_participantes: zonaConfig.totalParticipantes || 32,
+                total_participantes: zonaConfig.totalParticipantes || DEFAULT_TOTAL_PARTICIPANTES,
                 faixas: zonaConfig.faixas || null,
                 temporal: zonaConfig.temporal || false,
                 valores: zonaConfig.valores || {},

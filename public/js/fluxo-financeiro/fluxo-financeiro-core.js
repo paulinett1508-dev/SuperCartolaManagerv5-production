@@ -25,7 +25,7 @@
 // ============================================================================
 // ⚽ IMPORTS E CONFIGURAÇÕES
 // ============================================================================
-import { CURRENT_SEASON, RODADA_FINAL_CAMPEONATO } from "../config/seasons-client.js";
+import { CURRENT_SEASON, RODADA_FINAL_CAMPEONATO, DEFAULT_TOTAL_PARTICIPANTES } from "../config/seasons-client.js";
 import { seasonStatus } from "../core/season-status-manager.js";
 import { calcularFinanceiroConfronto } from "../pontos-corridos-utils.js";
 import { obterLigaId } from "../pontos-corridos-utils.js";
@@ -563,7 +563,7 @@ export class FluxoFinanceiroCore {
                             resumo: resumoCompleto,
                             camposEditaveis: camposEditaveis,
                             acertos: acertos, // ✅ v6.1: Incluir acertos no extrato
-                            totalTimes: rodadasFiltradas[0]?.totalTimes || 32,
+                            totalTimes: rodadasFiltradas[0]?.totalTimes || DEFAULT_TOTAL_PARTICIPANTES,
                             updatedAt: cacheValido.updatedAt,
                             // ✅ v4.1: Informações de inativo
                             inativo: isInativo,

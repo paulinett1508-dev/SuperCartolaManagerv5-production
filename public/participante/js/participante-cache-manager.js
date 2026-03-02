@@ -7,6 +7,8 @@
 // Estratégia: Cache-First com Stale-While-Revalidate
 // =====================================================================
 
+const RODADA_FINAL_CAMPEONATO = 38; // Brasileirão (centralizado em config/seasons.js)
+
 if (window.Log) Log.info('CACHE-MANAGER', '🚀 Carregando sistema v2.1...');
 
 const CACHE_PREFIX = 'participante_cache_';
@@ -374,7 +376,7 @@ class ParticipanteCacheManager {
         // Rodadas
         promises.push(
             this.getRodadasAsync(ligaId, async () => {
-                const res = await fetch(`/api/rodadas/${ligaId}/rodadas?inicio=1&fim=38&temporada=${temporada}`);
+                const res = await fetch(`/api/rodadas/${ligaId}/rodadas?inicio=1&fim=${RODADA_FINAL_CAMPEONATO}&temporada=${temporada}`);
                 return res.ok ? res.json() : [];
             }, null, temporada)
         );

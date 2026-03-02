@@ -144,7 +144,7 @@ export function enriquecerRankingsComStatus(rankings, timesStatus) {
 export async function getRankingsEmLote(
   ligaId,
   rodadaInicio = 1,
-  rodadaFim = 38,
+  rodadaFim = RODADA_FINAL_CAMPEONATO,
   forcarRecarga = false,
 ) {
   const ligaIdNormalizado = String(ligaId);
@@ -257,7 +257,7 @@ export async function getRankingRodadaEspecifica(ligaId, rodadaNum, temporadaOve
   return await fetchAndProcessRankingRodada(ligaId, rodadaNum, temporadaOverride);
 }
 
-export async function preCarregarRodadas(ligaId, ultimaRodada = 38) {
+export async function preCarregarRodadas(ligaId, ultimaRodada = RODADA_FINAL_CAMPEONATO) {
   console.log(`[RODADAS-CORE] 📦 Pré-carregando rodadas 1-${ultimaRodada}...`);
 
   try {
