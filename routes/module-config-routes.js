@@ -19,6 +19,59 @@ import Liga from '../models/Liga.js';
 const router = express.Router();
 
 // =============================================================================
+// GERAÇÃO DINÂMICA DE CALENDÁRIO MATA-MATA
+// =============================================================================
+
+/**
+ * Gera calendario_override dinâmico para o mata-mata baseado nos parâmetros do wizard.
+ * Elimina dependência do JSON hardcoded (2025, 32 times).
+ *
+ * @param {number} totalTimes - Tamanho do torneio (8, 16 ou 32)
+ * @param {number} qtdEdicoes - Número de edições desejadas (1-10)
+ * @param {number} rodadaFinalCampeonato - Última rodada do campeonato (default: 38)
+ * @returns {Array} Array de edições com rodada_inicial, rodada_final, rodada_definicao
+ */
+function gerarCalendarioMataMata(totalTimes, qtdEdicoes, rodadaFinalCampeonato = 38) {
+    // Calcular número de fases baseado no tamanho do torneio
+    let numFases;
+    if (totalTimes >= 32) numFases = 5; // primeira, oitavas, quartas, semis, final
+    else if (totalTimes >= 16) numFases = 4; // oitavas, quartas, semis, final
+    else if (totalTimes >= 8) numFases = 3; // quartas, semis, final
+    else return [];
+
+    // Cada edição precisa: 1 rodada de definição + N rodadas de fases
+    // Espaçamento: sem gap entre edições (consistente com o JSON original onde
+    // rodadaDefinicao da próxima = rodadaFinal da anterior, ex: ed4 final=R26, ed5 def=R26)
+    const calendario = [];
+    let rodadaAtual = 1; // Começar pela rodada 1
+
+    for (let i = 0; i < qtdEdicoes; i++) {
+        const rodadaDefinicao = rodadaAtual;
+        const rodadaInicial = rodadaDefinicao + 1;
+        const rodadaFinal = rodadaInicial + numFases - 1;
+
+        // Validar que cabe no campeonato
+        if (rodadaFinal > rodadaFinalCampeonato) {
+            console.warn(`[CALENDARIO-MM] Edição ${i + 1} excede rodada ${rodadaFinalCampeonato} (rodadaFinal=${rodadaFinal}). Parando em ${i} edições.`);
+            break;
+        }
+
+        calendario.push({
+            edicao: i + 1,
+            nome: `${i + 1}ª Edição`,
+            rodada_inicial: rodadaInicial,
+            rodada_final: rodadaFinal,
+            rodada_definicao: rodadaDefinicao
+        });
+
+        // Próxima edição: definição começa na rodada seguinte ao final
+        rodadaAtual = rodadaFinal + 1;
+    }
+
+    return calendario;
+}
+
+// =============================================================================
 // PROPAGAÇÃO: moduleconfigs → liga.configuracoes (ranking_rodada)
 // =============================================================================
 
@@ -170,6 +223,22 @@ router.get('/liga/:ligaId/modulos/:modulo', async (req, res) => {
         // Buscar config do banco
         const configDb = await ModuleConfig.buscarConfig(ligaId, modulo, temporada);
 
+        // ✅ FIX: Construir calendario_efetivo normalizado (camelCase)
+        // Prioridade: calendario_override do DB > calendario do JSON default
+        // Isso elimina a necessidade do frontend adivinhar o path correto
+        let calendario_efetivo = null;
+        if (configDb?.calendario_override?.length > 0) {
+            calendario_efetivo = configDb.calendario_override.map(e => ({
+                id: e.edicao,
+                nome: e.nome,
+                rodadaInicial: e.rodada_inicial,
+                rodadaFinal: e.rodada_final,
+                rodadaDefinicao: e.rodada_definicao
+            }));
+        } else if (regrasJson?.calendario?.edicoes?.length > 0) {
+            calendario_efetivo = regrasJson.calendario.edicoes;
+        }
+
         res.json({
             sucesso: true,
             liga_id: ligaId,
@@ -186,7 +255,8 @@ router.get('/liga/:ligaId/modulos/:modulo', async (req, res) => {
                 configurado: false
             },
             regras_default: regrasJson,
-            wizard: regrasJson.wizard || null
+            wizard: regrasJson.wizard || null,
+            calendario_efetivo
         });
 
     } catch (error) {
@@ -355,6 +425,24 @@ router.put('/liga/:ligaId/modulos/:modulo/config', verificarAdmin, async (req, r
             // Propagar ranking_rodada para liga.configuracoes
             if (modulo === 'ranking_rodada' && wizard_respostas.valores_manual) {
                 await propagarRankingRodadaParaLiga(ligaId, wizard_respostas);
+            }
+
+            // ✅ FIX: Gerar calendario_override dinâmico para mata_mata
+            // Quando admin configura total_times + qtd_edicoes, o calendário deve ser
+            // gerado automaticamente adaptado ao número de fases do torneio.
+            // Isso elimina a dependência do JSON hardcoded (2025, 32 times).
+            if (modulo === 'mata_mata' && wizard_respostas.total_times && wizard_respostas.qtd_edicoes) {
+                const calendarioGerado = gerarCalendarioMataMata(
+                    Number(wizard_respostas.total_times),
+                    Number(wizard_respostas.qtd_edicoes)
+                );
+                if (calendarioGerado.length > 0) {
+                    await ModuleConfig.findOneAndUpdate(
+                        { liga_id: new mongoose.Types.ObjectId(ligaId), modulo, temporada: Number(temporada) },
+                        { $set: { calendario_override: calendarioGerado } }
+                    );
+                    console.log(`[MODULE-CONFIG] calendario_override gerado para mata_mata: ${calendarioGerado.length} edições (${wizard_respostas.total_times} times)`);
+                }
             }
 
             // ✅ v11.0: Invalidar cache do melhor_mes quando edições são reconfiguradas

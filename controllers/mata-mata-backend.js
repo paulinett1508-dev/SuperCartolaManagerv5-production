@@ -45,6 +45,20 @@ async function getMataMataConfig(ligaId) {
             const mergedConfig = _.merge(defaultConfig, moduleConfig.configuracao_override || {});
             // ✅ FIX: Incluir wizard_respostas para que calcularResultadosEdicao respeite total_times configurado
             mergedConfig.wizard_respostas = moduleConfig.wizard_respostas || {};
+
+            // ✅ FIX: Usar calendario_override do admin (gerado dinamicamente)
+            // Prioridade: calendario_override (dinâmico, adaptado ao total_times) > JSON default (2025, 32 times)
+            if (moduleConfig.calendario_override?.length > 0) {
+                mergedConfig.calendario.edicoes = moduleConfig.calendario_override.map(e => ({
+                    id: e.edicao,
+                    nome: e.nome,
+                    rodadaInicial: e.rodada_inicial,
+                    rodadaFinal: e.rodada_final,
+                    rodadaDefinicao: e.rodada_definicao
+                }));
+                logger.log(`[MATA-BACKEND] ✅ Usando calendario_override: ${mergedConfig.calendario.edicoes.length} edições (admin config)`);
+            }
+
             return mergedConfig;
         }
 
@@ -510,8 +524,12 @@ export async function getResultadosMataMataCompleto(ligaId, rodadaAtual) {
     const config = await getMataMataConfig(ligaId);
     const todosResultados = [];
 
+    // ✅ FIX: Respeitar qtd_edicoes do wizard (admin pode ter definido menos edições que o calendário)
+    const qtdEdicoes = Number(config.wizard_respostas?.qtd_edicoes) || config.calendario.edicoes.length;
+    const edicoesAtivas = config.calendario.edicoes.slice(0, qtdEdicoes);
+
     // Filtrar edições que já começaram
-    const edicoesProcessaveis = config.calendario.edicoes.filter(
+    const edicoesProcessaveis = edicoesAtivas.filter(
         (edicao) => rodadaAtual > edicao.rodadaInicial,
     );
 

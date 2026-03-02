@@ -1,57 +1,12 @@
 // MATA-MATA CONFIG - Configurações e Constantes
 // Responsável por: definições de edições, funções auxiliares de texto/rodadas
+//
+// ⚠️ IMPORTANTE: As edições NÃO são hardcoded aqui.
+// São carregadas dinamicamente via setEdicoes() a partir do calendario_efetivo
+// gerado pelo admin em gerenciar-modulos (fonte de verdade).
+// O array inicia vazio — o orquestrador popula antes do render.
 
-// Definição das edições do Mata-Mata (array mutável para carregamento dinâmico)
-let _edicoes = [
-  {
-    id: 1,
-    nome: "1ª Edição",
-    rodadaInicial: 3,
-    rodadaFinal: 7,
-    rodadaDefinicao: 2,
-    ativo: true,
-  },
-  {
-    id: 2,
-    nome: "2ª Edição",
-    rodadaInicial: 10,
-    rodadaFinal: 14,
-    rodadaDefinicao: 9,
-    ativo: true,
-  },
-  {
-    id: 3,
-    nome: "3ª Edição",
-    rodadaInicial: 16,
-    rodadaFinal: 20,
-    rodadaDefinicao: 15,
-    ativo: false,
-  },
-  {
-    id: 4,
-    nome: "4ª Edição",
-    rodadaInicial: 22,
-    rodadaFinal: 26,
-    rodadaDefinicao: 21,
-    ativo: false,
-  },
-  {
-    id: 5,
-    nome: "5ª Edição",
-    rodadaInicial: 27,
-    rodadaFinal: 31,
-    rodadaDefinicao: 26,
-    ativo: false,
-  },
-  {
-    id: 6,
-    nome: "6ª Edição",
-    rodadaInicial: 33,
-    rodadaFinal: 37,
-    rodadaDefinicao: 32,
-    ativo: false,
-  },
-];
+let _edicoes = [];
 
 // Getter para compatibilidade (todos os importadores continuam usando `edicoes`)
 export const edicoes = _edicoes;
