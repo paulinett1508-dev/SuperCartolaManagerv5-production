@@ -7,18 +7,14 @@
 import {
   RODADAS_ENDPOINTS,
   STATUS_MERCADO_DEFAULT,
-  LIGAS_CONFIG,
   valoresBancoPadrao,
-  valoresBancoCartoleirosSobral,
   TIMEOUTS_CONFIG,
-  // ✅ v4.3: Imports contextuais para Cartoleiros Sobral
-  RODADA_TRANSICAO_SOBRAL,
-  valoresFase1_6times,
-  valoresFase2_4times,
   getBancoPorRodada,
+  getBancoPorLiga,
   getFaixasPorRodada,
   getTotalTimesPorRodada,
 } from "./rodadas-config.js";
+import { RODADA_FINAL_CAMPEONATO } from "../config/seasons-client.js";
 
 // VERIFICAÇÃO DE AMBIENTE
 const isBackend = typeof window === "undefined";
@@ -148,7 +144,7 @@ export function enriquecerRankingsComStatus(rankings, timesStatus) {
 export async function getRankingsEmLote(
   ligaId,
   rodadaInicio = 1,
-  rodadaFim = 38,
+  rodadaFim = RODADA_FINAL_CAMPEONATO,
   forcarRecarga = false,
 ) {
   const ligaIdNormalizado = String(ligaId);
@@ -261,7 +257,7 @@ export async function getRankingRodadaEspecifica(ligaId, rodadaNum, temporadaOve
   return await fetchAndProcessRankingRodada(ligaId, rodadaNum, temporadaOverride);
 }
 
-export async function preCarregarRodadas(ligaId, ultimaRodada = 38) {
+export async function preCarregarRodadas(ligaId, ultimaRodada = RODADA_FINAL_CAMPEONATO) {
   console.log(`[RODADAS-CORE] 📦 Pré-carregando rodadas 1-${ultimaRodada}...`);
 
   try {
@@ -600,17 +596,8 @@ export async function calcularPontosParciais(liga, rodada) {
 // FUNÇÕES DE UTILIDADE
 // ==============================
 
-// Função legada - usa tabela atual (fase2 para Cartoleiros Sobral)
-export function getBancoPorLiga(ligaId) {
-  const isLigaCartoleirosSobral = ligaId === LIGAS_CONFIG.CARTOLEIROS_SOBRAL;
-  return isLigaCartoleirosSobral
-    ? valoresBancoCartoleirosSobral
-    : valoresBancoPadrao;
-}
-
-// ✅ v4.3: getBancoPorRodada já importado do rodadas-config.js
-// Re-exportar para compatibilidade com outros módulos
-export { getBancoPorRodada, getFaixasPorRodada, getTotalTimesPorRodada };
+// Re-exportar de rodadas-config.js para compatibilidade com outros módulos
+export { getBancoPorRodada, getBancoPorLiga, getFaixasPorRodada, getTotalTimesPorRodada };
 
 export async function buscarRodadas() {
   try {
@@ -626,7 +613,7 @@ export async function buscarRodadas() {
 
     console.log(`[RODADAS-CORE] Buscando rodadas para liga: ${ligaId} - Temporada: ${temporada}`);
     const response = await fetch(
-      `/api/rodadas/${ligaId}/rodadas?inicio=1&fim=38&temporada=${temporada}`,
+      `/api/rodadas/${ligaId}/rodadas?inicio=1&fim=${RODADA_FINAL_CAMPEONATO}&temporada=${temporada}`,
     );
 
     if (!response.ok) {

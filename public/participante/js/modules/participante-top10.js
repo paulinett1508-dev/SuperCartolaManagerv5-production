@@ -14,7 +14,7 @@ if (window.Log) Log.info("[PARTICIPANTE-TOP10] Carregando módulo v5.3...");
 // =====================================================================
 // CONFIGURAÇÃO DINÂMICA DO CAMPEONATO
 // =====================================================================
-const RODADA_FINAL_CAMPEONATO = 38; // Última rodada do Brasileirão (constante)
+import { RODADA_FINAL_CAMPEONATO } from "/js/config/seasons-client.js";
 const TEMPORADA_ATUAL = window.ParticipanteConfig?.CURRENT_SEASON || new Date().getFullYear();
 
 /**
@@ -35,7 +35,7 @@ function detectarTemporadaStatus(status) {
         // CASO 1: API retorna ano ANTERIOR ao atual (ex: Janeiro/2026, API ainda diz 2025)
         // Podemos buscar dados completos da temporada passada
         if (temporadaAPI < anoAtual) {
-            if (window.Log) Log.info(`[PARTICIPANTE-TOP10] Pré-temporada ${anoAtual}: buscando 38 rodadas de ${temporadaAPI}`);
+            if (window.Log) Log.info(`[PARTICIPANTE-TOP10] Pré-temporada ${anoAtual}: buscando ${RODADA_FINAL_CAMPEONATO} rodadas de ${temporadaAPI}`);
             return {
                 isTemporadaPassada: true,
                 ultimaRodadaCompleta: RODADA_FINAL_CAMPEONATO,
@@ -57,7 +57,7 @@ function detectarTemporadaStatus(status) {
 
     // Se estamos na rodada 38 com mercado fechado, temporada atual encerrou
     if (rodadaAtual === RODADA_FINAL_CAMPEONATO && !mercadoAberto) {
-        if (window.Log) Log.info(`[PARTICIPANTE-TOP10] Temporada ${temporadaAPI} encerrada - usando rodada 38`);
+        if (window.Log) Log.info(`[PARTICIPANTE-TOP10] Temporada ${temporadaAPI} encerrada - usando rodada ${RODADA_FINAL_CAMPEONATO}`);
         return {
             isTemporadaPassada: false,
             ultimaRodadaCompleta: RODADA_FINAL_CAMPEONATO,
@@ -662,13 +662,13 @@ async function obterRodadasParaResumo(ligaId, temporadaParam = null) {
 
     if (cache && cache.getRodadasAsync) {
         return cache.getRodadasAsync(ligaId, async () => {
-            const res = await fetch(`/api/rodadas/${ligaId}/rodadas?inicio=1&fim=38&temporada=${temporada}`);
+            const res = await fetch(`/api/rodadas/${ligaId}/rodadas?inicio=1&fim=${RODADA_FINAL_CAMPEONATO}&temporada=${temporada}`);
             return res.ok ? res.json() : [];
         }, null, temporada);
     }
 
     try {
-        const res = await fetch(`/api/rodadas/${ligaId}/rodadas?inicio=1&fim=38&temporada=${temporada}`);
+        const res = await fetch(`/api/rodadas/${ligaId}/rodadas?inicio=1&fim=${RODADA_FINAL_CAMPEONATO}&temporada=${temporada}`);
         return res.ok ? res.json() : [];
     } catch (e) {
         return [];

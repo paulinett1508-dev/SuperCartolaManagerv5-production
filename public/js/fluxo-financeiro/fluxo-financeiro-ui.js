@@ -1,4 +1,4 @@
-import { CURRENT_SEASON } from "../config/seasons-client.js";
+import { CURRENT_SEASON, DEFAULT_TOTAL_PARTICIPANTES } from "../config/seasons-client.js";
 import { FluxoFinanceiroCampos } from "./fluxo-financeiro-campos.js";
 import {
     FluxoFinanceiroAuditoria,
@@ -1895,7 +1895,7 @@ export class FluxoFinanceiroUI {
     formatarPosicao(rodada) {
         // ✅ v5.4: Usar config dinâmica em vez de liga ID hardcoded
         // O total de times vem da config da liga ou do cache do extrato
-        let totalTimesFase = rodada.totalTimesFase || window.ligaConfig?.totalParticipantes || 32;
+        let totalTimesFase = rodada.totalTimesFase || window.ligaConfig?.totalParticipantes || DEFAULT_TOTAL_PARTICIPANTES;
 
         // Se tiver config temporal no cache, usar as fases corretas
         const config = window.ligaConfigCache;

@@ -3,6 +3,8 @@
 (function () {
   "use strict";
 
+  const RODADA_FINAL_CAMPEONATO = 38; // Brasileirão (centralizado em config/seasons.js)
+
   // State
   let participantes = [];
   let resumoData = null;
@@ -742,7 +744,7 @@
     // ── SELETOR DE RODADA + REFRESH (topo) ──
     // Gerar opções para todas as 38 rodadas (indica quais têm dados no Data Lake)
     let selectOptions = '';
-    for (let r = 1; r <= 38; r++) {
+    for (let r = 1; r <= RODADA_FINAL_CAMPEONATO; r++) {
       const temDados = rodadasDisp.includes(r);
       const isSelected = r === rodadaAtual;
       const label = `Rodada ${r}${isSelected ? ' (visualizando)' : ''}${temDados ? '' : ' *'}`;
@@ -863,7 +865,7 @@
           <div class="dl-chart-title">Performance rodada a rodada</div>
           <div class="dl-chart-container">
       `;
-      for (let r = 1; r <= 38; r++) {
+      for (let r = 1; r <= RODADA_FINAL_CAMPEONATO; r++) {
         const h = historico.find(x => x.rodada === r);
         const pts = h ? (h.pontos || 0) : 0;
         const hasData = !!h;
@@ -878,7 +880,7 @@
       }
       html += '</div>';
       html += '<div class="dl-chart-labels">';
-      for (let r = 1; r <= 38; r++) {
+      for (let r = 1; r <= RODADA_FINAL_CAMPEONATO; r++) {
         html += `<div class="dl-chart-label ${r === rodadaAtual ? 'selected' : ''}">${r}</div>`;
       }
       html += '</div></div>';

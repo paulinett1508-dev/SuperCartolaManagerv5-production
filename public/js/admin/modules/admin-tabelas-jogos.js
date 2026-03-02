@@ -9,6 +9,7 @@
     'use strict';
 
     const TEMPORADA = new Date().getFullYear();
+    const RODADA_FINAL_CAMPEONATO = 38; // Brasileirão (centralizado em config/seasons.js)
 
     async function carregarDados() {
         const container = document.getElementById('tjRodadasContainer');
@@ -52,7 +53,7 @@
 
         let html = '';
 
-        for (let r = 1; r <= 38; r++) {
+        for (let r = 1; r <= RODADA_FINAL_CAMPEONATO; r++) {
             const rodada = rodadas[r];
             if (!rodada) continue;
 

@@ -8,6 +8,7 @@
 // ✅ Usando imports dinâmicos para compatibilidade com rodadas.js
 
 import { fetchLigaConfig } from "./rodadas/rodadas-config.js";
+import { RODADA_FINAL_CAMPEONATO } from "./config/seasons-client.js";
 
 // ============================================================================
 // UTILITÁRIOS
@@ -29,7 +30,7 @@ function escapeHtml(str) {
 // ============================================================================
 // CONFIGURAÇÃO DINÂMICA DO CAMPEONATO
 // ============================================================================
-const RODADA_FINAL_CAMPEONATO = 38; // Última rodada do Brasileirão (constante)
+// RODADA_FINAL_CAMPEONATO importado de seasons-client.js
 
 // ==============================
 // VARIÁVEIS GLOBAIS E DE ESTADO

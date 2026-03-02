@@ -1,7 +1,7 @@
 // MATA-MATA CONFRONTOS - Lógica de Negócio
 // Responsável por: cálculo de confrontos, vencedores, pontos por rodada
 
-import { VALORES_FASE } from "./mata-mata-config.js";
+import { VALORES_FASE, TAMANHO_TORNEIO_DEFAULT } from "./mata-mata-config.js";
 
 // Cache para getRankingRodadaEspecifica
 let getRankingRodadaEspecifica = null;
@@ -82,7 +82,7 @@ export async function getPontosDaRodada(ligaId, rodada) {
 }
 
 // Função para montar confrontos da primeira fase (dinâmico por tamanho)
-export function montarConfrontosPrimeiraFase(rankingBase, pontosRodadaAtual, tamanhoTorneio = 32) {
+export function montarConfrontosPrimeiraFase(rankingBase, pontosRodadaAtual, tamanhoTorneio = TAMANHO_TORNEIO_DEFAULT) {
     const numJogos = tamanhoTorneio / 2;
     const confrontos = [];
     for (let i = 0; i < numJogos; i++) {

@@ -3,6 +3,7 @@
  * Visualização e sincronização da tabela completa do Brasileirão Série A
  * v1.0
  */
+const RODADA_FINAL_CAMPEONATO = 38; // Brasileirão (centralizado em config/seasons.js)
 
 import { showLoading, showError, showToast } from '../app.js';
 
@@ -281,7 +282,7 @@ function renderStatCard(label, value, color) {
 function renderRodadas(calendario) {
     // Agrupar partidas por rodada
     const rodadas = {};
-    for (let r = 1; r <= 38; r++) {
+    for (let r = 1; r <= RODADA_FINAL_CAMPEONATO; r++) {
         rodadas[r] = calendario.partidas.filter(p => p.rodada === r).sort((a, b) => {
             if (a.data !== b.data) return a.data.localeCompare(b.data);
             return a.horario.localeCompare(b.horario);

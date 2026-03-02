@@ -18,12 +18,14 @@ import * as ParciaisModule from "./participante-rodada-parcial.js";
 // Importar módulo de polling inteligente
 import * as PollingInteligenteModule from "./participante-rodadas-polling.js";
 
+import { RODADA_FINAL_CAMPEONATO } from "/js/config/seasons-client.js";
+
 // Estado do módulo
 let todasRodadasCache = [];
 let meuTimeId = null;
 let ligaId = null;
 let rodadaSelecionada = null;
-let rodadaAtualCartola = 38;
+let rodadaAtualCartola = 1; // Safe default: será atualizado por buscarRodadaAtual()
 let statusMercadoAtual = 1;
 let parciaisInfo = null;
 // Ground truth: jogos realmente ao vivo (não apenas status_mercado=2)
@@ -100,7 +102,7 @@ export async function inicializarRodadasParticipante({
 
         // 3. Buscar rodadas consolidadas
         const response = await fetch(
-            `/api/rodadas/${ligaId}/rodadas?inicio=1&fim=38&temporada=${TEMPORADA_ATUAL}`,
+            `/api/rodadas/${ligaId}/rodadas?inicio=1&fim=${RODADA_FINAL_CAMPEONATO}&temporada=${TEMPORADA_ATUAL}`,
         );
         if (!response.ok) {
             if (!usouCache) throw new Error(`Erro HTTP ${response.status}`);
@@ -150,7 +152,7 @@ async function buscarRodadaAtual() {
         const response = await fetch("/api/cartola/mercado/status");
         if (response.ok) {
             const data = await response.json();
-            rodadaAtualCartola = data.rodada_atual || 38;
+            rodadaAtualCartola = data.rodada_atual || 1;
             statusMercadoAtual = data.status_mercado || 1;
             if (window.Log)
                 Log.info(
@@ -260,7 +262,7 @@ function renderizarGridRodadas(rodadas) {
 
     container.innerHTML = `
         <div class="rodadas-mini-grid" id="grid-todas-rodadas" style="padding:0 4px;">
-            ${renderizarMiniCards(1, 38, rodadasMap)}
+            ${renderizarMiniCards(1, RODADA_FINAL_CAMPEONATO, rodadasMap)}
         </div>
     `;
 }

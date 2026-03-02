@@ -759,7 +759,7 @@ function criarTabelaRanking(
     turno = "geral",
     status = "",
     rodadaInicio = 1,
-    rodadaFim = 38,
+    rodadaFim = RODADA_FINAL_CAMPEONATO,
     isParcial = false,
     mensagemParcial = "",
 ) {
@@ -1326,7 +1326,9 @@ async function obterConfigLiga(ligaId) {
     return null;
 }
 
-function obterLabelPosicao(index, ligaId, totalParticipantes = 32) {
+const RODADA_FINAL_CAMPEONATO = 38; // Brasileirão (centralizado em config/seasons.js)
+const DEFAULT_TOTAL_PARTICIPANTES = 32; // Fallback (centralizado em config/seasons.js)
+function obterLabelPosicao(index, ligaId, totalParticipantes = DEFAULT_TOTAL_PARTICIPANTES) {
     switch (index) {
         case 0:
             return `<span class="trofeu-ouro" title="Campeão"><span class="material-icons" style="color:#ffd700;">emoji_events</span></span>`;

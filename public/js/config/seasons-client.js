@@ -12,6 +12,12 @@
 // =============================================================================
 export const CURRENT_SEASON = 2026;
 
+// Brasileirão = 38 rodadas (espelho de config/seasons.js:rodadaFinal)
+export const RODADA_FINAL_CAMPEONATO = 38;
+
+// Default de participantes por liga (fallback quando API não retorna total_participantes)
+export const DEFAULT_TOTAL_PARTICIPANTES = 32;
+
 // =============================================================================
 // FUNÇÕES AUXILIARES
 // =============================================================================

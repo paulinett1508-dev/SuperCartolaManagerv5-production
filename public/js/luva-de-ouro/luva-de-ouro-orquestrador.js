@@ -1,6 +1,8 @@
 // public/js/luva-de-ouro/luva-de-ouro-orquestrador.js - V2.1 COM UI AGUARDANDO DADOS
 console.log("🎯 [LUVA-ORQUESTRADOR] Módulo orquestrador v2.1 carregando...");
 
+const RODADA_FINAL_CAMPEONATO = 38; // Brasileirão (centralizado em config/seasons.js)
+
 const LuvaDeOuroOrquestrador = {
   estado: {
     ranking: [],
@@ -384,8 +386,8 @@ const LuvaDeOuroOrquestrador = {
       // ✅ Atualizar status no header (remover "Carregando...")
       let rodadaInfo;
       const rodadaFinal = dados.rodadaFim || rodadaAtual;
-      if (rodadaFinal >= 38) {
-        rodadaInfo = `R1-R38 (Temporada Encerrada)`;
+      if (rodadaFinal >= RODADA_FINAL_CAMPEONATO) {
+        rodadaInfo = `R1-R${RODADA_FINAL_CAMPEONATO} (Temporada Encerrada)`;
       } else if (dados.rodadaParcial) {
         rodadaInfo = `R1-R${rodadaFinal} (R${dados.rodadaParcial} em andamento)`;
       } else {

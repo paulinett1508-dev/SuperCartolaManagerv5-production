@@ -4,6 +4,9 @@
 // =====================================================================
 
 const LigaConfigService = (function () {
+  // Constantes
+  const DEFAULT_TOTAL_PARTICIPANTES = 32; // Fallback quando API não retorna total_participantes
+
   // Cache de configuracoes por liga
   const configCache = new Map();
   const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
@@ -139,7 +142,7 @@ const LigaConfigService = (function () {
     }
 
     return {
-      totalTimes: rankingConfig.total_participantes || 32,
+      totalTimes: rankingConfig.total_participantes || DEFAULT_TOTAL_PARTICIPANTES,
       ...rankingConfig.faixas,
     };
   }

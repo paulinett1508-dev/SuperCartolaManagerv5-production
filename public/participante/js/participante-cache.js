@@ -3,12 +3,14 @@
 // ✅ v3.1: Adiciona utilitário global aguardarContainerDOM
 console.log('[PARTICIPANTE-CACHE] 🚀 Carregando sistema de cache inteligente v3.1...');
 
+const RODADA_FINAL_CAMPEONATO = 38; // Brasileirão (centralizado em config/seasons.js)
+
 class ParticipanteCache {
     constructor() {
         this.db = null;
         this.dbName = 'ParticipanteCacheDB';
         this.version = 3; // v3: Força limpeza de cache 2025 para nova temporada 2026
-        this.RODADA_MAXIMA = 38;
+        this.RODADA_MAXIMA = RODADA_FINAL_CAMPEONATO;
         this.RODADA_FECHADA_LIMITE = 35; // Rodadas até 35 são permanentes
         this.rodadaAtual = null;
         this.inicializar();

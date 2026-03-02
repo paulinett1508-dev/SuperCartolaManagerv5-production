@@ -8,7 +8,7 @@
  * ✅ Export PDF/Excel
  */
 
-import { CURRENT_SEASON } from "../config/seasons-client.js";
+import { CURRENT_SEASON, DEFAULT_TOTAL_PARTICIPANTES } from "../config/seasons-client.js";
 import { obterLigaId } from "../pontos-corridos-utils.js";
 import { FluxoFinanceiroCampos } from "./fluxo-financeiro-campos.js";
 import {
@@ -156,7 +156,7 @@ export class FluxoFinanceiroAuditoria {
                         detalhes.push({
                             rodada: r.rodada,
                             posicao: r.posicao,
-                            totalTimes: r.totalTimes || 32,
+                            totalTimes: r.totalTimes || DEFAULT_TOTAL_PARTICIPANTES,
                             valor: r.bonusOnus,
                             tipo: r.bonusOnus > 0 ? "BÔNUS" : "ÔNUS",
                         });
@@ -292,7 +292,7 @@ export class FluxoFinanceiroAuditoria {
             auditoria.push({
                 rodada: r.rodada,
                 posicao: r.posicao,
-                totalTimes: r.totalTimes || 32,
+                totalTimes: r.totalTimes || DEFAULT_TOTAL_PARTICIPANTES,
                 valores: {
                     bonusOnus: {
                         registrado: r.bonusOnus || 0,

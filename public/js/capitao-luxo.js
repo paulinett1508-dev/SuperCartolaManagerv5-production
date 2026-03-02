@@ -411,7 +411,7 @@ const CapitaoLuxo = {
 
             // ✅ NOVO LAYOUT: Botão "Ver Histórico" + Barra de progresso
             const historico = participante.historico_rodadas || [];
-            const totalRodadas = 38;
+            const totalRodadas = RODADA_FINAL_CAMPEONATO;
             const percentualProgresso = (rodadas / totalRodadas) * 100;
 
             // Botão Ver Histórico (somente se tiver dados)

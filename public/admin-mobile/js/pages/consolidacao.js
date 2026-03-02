@@ -2,6 +2,7 @@
  * Consolidacao Page - Consolidacao manual de rodadas
  * Redesign v2 - Mobile-first, sem headers duplicados, sem links externos
  */
+const RODADA_FINAL_CAMPEONATO = 38; // Brasileirão (centralizado em config/seasons.js)
 
 import API from '../api.js';
 import { showLoading, showError, showToast } from '../app.js';
@@ -129,7 +130,7 @@ function setupEventListeners() {
 
 function validateForm() {
   const btnConsolidar = document.getElementById('btn-consolidar');
-  const isValid = ligaSelecionada && rodadaSelecionada && rodadaSelecionada >= 1 && rodadaSelecionada <= 38;
+  const isValid = ligaSelecionada && rodadaSelecionada && rodadaSelecionada >= 1 && rodadaSelecionada <= RODADA_FINAL_CAMPEONATO;
   btnConsolidar.disabled = !isValid || consolidando;
 }
 
