@@ -1,4 +1,5 @@
 import { buscarStatusMercado as getMercadoStatus } from "./pontos-corridos-utils.js";
+import { RODADA_FINAL_CAMPEONATO } from "./config/seasons-client.js";
 import { FluxoFinanceiroCampos } from "./fluxo-financeiro/fluxo-financeiro-campos.js";
 import {
     FluxoFinanceiroAuditoria,
@@ -168,7 +169,7 @@ async function inicializarFluxoFinanceiro() {
             // Se encerrou, usar rodada atual (38). Se não, usar rodada anterior.
             const temporadaEncerrada = status.game_over === true;
             const mercadoFechado = status.status_mercado !== 1 && !status.mercado_aberto;
-            const rodadaFinal = status.rodada_final || 38;
+            const rodadaFinal = status.rodada_final || RODADA_FINAL_CAMPEONATO;
 
             if (temporadaEncerrada || (mercadoFechado && rodadaAtual >= rodadaFinal)) {
                 // Temporada encerrada ou última rodada com mercado fechado: usar rodada atual
@@ -184,8 +185,8 @@ async function inicializarFluxoFinanceiro() {
 
             console.log("[FLUXO-ADMIN] Rodada atual:", rodadaAtual, "| Última completa:", ultimaRodadaCompleta);
         } catch (error) {
-            rodadaAtual = 38;
-            ultimaRodadaCompleta = 38; // ✅ FIX: Padrão para 38 (temporada encerrada)
+            rodadaAtual = RODADA_FINAL_CAMPEONATO;
+            ultimaRodadaCompleta = RODADA_FINAL_CAMPEONATO; // Fallback: última rodada do campeonato
             console.warn(
                 "[FLUXO-ADMIN] Usando rodada padrão:",
                 ultimaRodadaCompleta,

@@ -218,7 +218,24 @@ export async function getCardsDesabilitadosAsync(ligaId) {
 // FUNCOES SINCRONAS (fallback - compatibilidade)
 // =====================================================================
 
+// Helper: tenta obter config do cache local (sincrono, sem fetch)
+function _getCachedConfig(ligaId) {
+  const cached = configsCache.get(ligaId);
+  return cached?.data || null;
+}
+
 export function getBancoPorRodada(ligaId, rodada) {
+  // 1. Tentar cache do servidor (funciona para QUALQUER liga)
+  const config = _getCachedConfig(ligaId);
+  if (config?.ranking_rodada) {
+    const rc = config.ranking_rodada;
+    if (rc.temporal) {
+      const fase = rodada < (rc.rodada_transicao || 30) ? "fase1" : "fase2";
+      return rc[fase]?.valores || {};
+    }
+    return rc.valores || {};
+  }
+  // 2. Fallback hardcoded (ligas conhecidas)
   if (ligaId === LIGAS_CONFIG.CARTOLEIROS_SOBRAL) {
     return rodada < RODADA_TRANSICAO_SOBRAL
       ? FALLBACK_VALORES_SOBRAL_FASE1
@@ -228,6 +245,10 @@ export function getBancoPorRodada(ligaId, rodada) {
 }
 
 export function getBancoPorLiga(ligaId) {
+  const config = _getCachedConfig(ligaId);
+  if (config?.ranking_rodada) {
+    return config.ranking_rodada.valores || {};
+  }
   if (ligaId === LIGAS_CONFIG.CARTOLEIROS_SOBRAL) {
     return FALLBACK_VALORES_SOBRAL_FASE2;
   }
@@ -235,6 +256,22 @@ export function getBancoPorLiga(ligaId) {
 }
 
 export function getFaixasPorRodada(ligaId, rodada) {
+  const config = _getCachedConfig(ligaId);
+  if (config?.ranking_rodada) {
+    const rc = config.ranking_rodada;
+    if (rc.temporal) {
+      const fase = rodada < (rc.rodada_transicao || 30) ? "fase1" : "fase2";
+      const faseConfig = rc[fase];
+      return {
+        totalTimes: faseConfig?.total_participantes || 0,
+        ...faseConfig?.faixas,
+      };
+    }
+    return {
+      totalTimes: rc.total_participantes || config.total_participantes || 0,
+      ...rc.faixas,
+    };
+  }
   if (ligaId === LIGAS_CONFIG.CARTOLEIROS_SOBRAL) {
     return rodada < RODADA_TRANSICAO_SOBRAL ? faixasFase1 : faixasFase2;
   }
@@ -247,6 +284,15 @@ export function getFaixasPorRodada(ligaId, rodada) {
 }
 
 export function getTotalTimesPorRodada(ligaId, rodada) {
+  const config = _getCachedConfig(ligaId);
+  if (config?.ranking_rodada) {
+    const rc = config.ranking_rodada;
+    if (rc.temporal) {
+      const fase = rodada < (rc.rodada_transicao || 30) ? "fase1" : "fase2";
+      return rc[fase]?.total_participantes || 0;
+    }
+    return rc.total_participantes || config.total_participantes || 0;
+  }
   if (ligaId === LIGAS_CONFIG.CARTOLEIROS_SOBRAL) {
     return rodada < RODADA_TRANSICAO_SOBRAL ? 6 : 4;
   }

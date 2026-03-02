@@ -25,7 +25,7 @@
 // ============================================================================
 // ⚽ IMPORTS E CONFIGURAÇÕES
 // ============================================================================
-import { CURRENT_SEASON } from "../config/seasons-client.js";
+import { CURRENT_SEASON, RODADA_FINAL_CAMPEONATO } from "../config/seasons-client.js";
 import { seasonStatus } from "../core/season-status-manager.js";
 import { calcularFinanceiroConfronto } from "../pontos-corridos-utils.js";
 import { obterLigaId } from "../pontos-corridos-utils.js";
@@ -232,7 +232,7 @@ export class FluxoFinanceiroCore {
 
     async _carregarMataMataMap(resultadosMataMata) {
         this.mataMataMap.clear();
-        let ultimaRodadaConsolidada = 38; // ✅ FIX: Padrão para R38 (temporada 2025 encerrada)
+        let ultimaRodadaConsolidada = RODADA_FINAL_CAMPEONATO; // Fallback: última rodada do campeonato
 
         try {
             const mercadoResponse = await fetch("/api/cartola/mercado/status");
@@ -242,7 +242,7 @@ export class FluxoFinanceiroCore {
                     mercadoData.mercado_aberto ||
                     mercadoData.status_mercado === 1;
                 const temporadaEncerrada = mercadoData.game_over === true;
-                const rodadaFinal = mercadoData.rodada_final || 38;
+                const rodadaFinal = mercadoData.rodada_final || RODADA_FINAL_CAMPEONATO;
 
                 // ✅ FIX: Só usar rodada-1 se mercado aberto E temporada NÃO encerrada
                 if (temporadaEncerrada || mercadoData.rodada_atual >= rodadaFinal) {
@@ -361,7 +361,7 @@ export class FluxoFinanceiroCore {
                         mercadoData.status_mercado === 1;
                     const rodadaAtualMercado = mercadoData.rodada_atual;
                     const temporadaEncerrada = mercadoData.game_over === true;
-                    const rodadaFinal = mercadoData.rodada_final || 38;
+                    const rodadaFinal = mercadoData.rodada_final || RODADA_FINAL_CAMPEONATO;
                     temporadaMercado = mercadoData.temporada; // Ex: 2025
 
                     // ✅ v6.8: DETECTAR PRÉ-TEMPORADA (MELHORADO)
