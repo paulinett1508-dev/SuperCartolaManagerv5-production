@@ -196,7 +196,9 @@
       "Bash(do echo \"=== $branch ===\" git log main..origin/$branch --oneline)",
       "mcp__claude_ai_Vercel__web_fetch_vercel_url",
       "Bash(if curl -s \"http://localhost:5000/api/cartola/mercado/status\" 2>/dev/null > /dev/null; then\n  echo \"✅ Servidor online!\"\nelse\n  echo \"⚠️ Servidor não respondeu após 15s — últimas linhas do log:\"\n  tail -25 /tmp/server.log 2>/dev/null\nfi)",
-      "Bash(wget -q --user-agent=\"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36\" \\\\\n  --referer=\"https://en.wikipedia.org/\" \\\\\n  -O /home/runner/workspace/public/img/estadios/sofi-stadium.jpg \\\\\n  \"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/SoFi_Stadium_exterior_2.jpg/640px-SoFi_Stadium_exterior_2.jpg\" \\\\\n  --server-response 2>&1 | grep \"HTTP/\")"
+      "Bash(wget -q --user-agent=\"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36\" \\\\\n  --referer=\"https://en.wikipedia.org/\" \\\\\n  -O /home/runner/workspace/public/img/estadios/sofi-stadium.jpg \\\\\n  \"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/SoFi_Stadium_exterior_2.jpg/640px-SoFi_Stadium_exterior_2.jpg\" \\\\\n  --server-response 2>&1 | grep \"HTTP/\")",
+      "Bash(claude mcp list 2>/dev/null || echo \"comando não disponível\")",
+      "Bash(which gcloud 2>/dev/null && gcloud --version 2>/dev/null || echo \"gcloud: NOT FOUND\")"
     ]
   },
   "enableAllProjectMcpServers": true,
