@@ -43,7 +43,7 @@ function gerarCalendarioMataMata(totalTimes, qtdEdicoes, rodadaFinalCampeonato =
     // Espaçamento: sem gap entre edições (consistente com o JSON original onde
     // rodadaDefinicao da próxima = rodadaFinal da anterior, ex: ed4 final=R26, ed5 def=R26)
     const calendario = [];
-    let rodadaAtual = 1; // Começar pela rodada 1
+    let rodadaAtual = 2; // Rodada 1 é aquecimento; definição começa na rodada 2
 
     for (let i = 0; i < qtdEdicoes; i++) {
         const rodadaDefinicao = rodadaAtual;
@@ -224,8 +224,9 @@ router.get('/liga/:ligaId/modulos/:modulo', async (req, res) => {
         const configDb = await ModuleConfig.buscarConfig(ligaId, modulo, temporada);
 
         // ✅ FIX: Construir calendario_efetivo normalizado (camelCase)
-        // Prioridade: calendario_override do DB > calendario do JSON default
-        // Isso elimina a necessidade do frontend adivinhar o path correto
+        // Prioridade 1: calendario_override do DB (salvo pelo admin)
+        // Prioridade 2: gerado dinamicamente de wizard_respostas (fix PR#176 incompleto)
+        // Prioridade 3: fallback JSON hardcoded (último recurso)
         let calendario_efetivo = null;
         if (configDb?.calendario_override?.length > 0) {
             calendario_efetivo = configDb.calendario_override.map(e => ({
@@ -235,6 +236,22 @@ router.get('/liga/:ligaId/modulos/:modulo', async (req, res) => {
                 rodadaFinal: e.rodada_final,
                 rodadaDefinicao: e.rodada_definicao
             }));
+        } else if (modulo === 'mata_mata' && configDb?.wizard_respostas?.total_times && configDb?.wizard_respostas?.qtd_edicoes) {
+            // Gerar dinamicamente quando calendario_override está vazio mas wizard foi configurado
+            const gerado = gerarCalendarioMataMata(
+                Number(configDb.wizard_respostas.total_times),
+                Number(configDb.wizard_respostas.qtd_edicoes)
+            );
+            if (gerado.length > 0) {
+                calendario_efetivo = gerado.map(e => ({
+                    id: e.edicao,
+                    nome: e.nome,
+                    rodadaInicial: e.rodada_inicial,
+                    rodadaFinal: e.rodada_final,
+                    rodadaDefinicao: e.rodada_definicao
+                }));
+                console.log(`[MODULE-CONFIG] calendario_efetivo gerado de wizard_respostas: ${gerado.length} edições (${configDb.wizard_respostas.total_times} times)`);
+            }
         } else if (regrasJson?.calendario?.edicoes?.length > 0) {
             calendario_efetivo = regrasJson.calendario.edicoes;
         }

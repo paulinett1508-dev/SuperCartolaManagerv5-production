@@ -22,6 +22,45 @@ import logger from '../utils/logger.js';
 
 
 // ============================================================================
+// GERAÇÃO DINÂMICA DE CALENDÁRIO (espelho de module-config-routes.js)
+// ============================================================================
+
+/**
+ * Gera edições do mata-mata a partir dos parâmetros do wizard.
+ * Retorna array com id, nome, rodadaInicial, rodadaFinal, rodadaDefinicao.
+ */
+function _gerarCalendarioBackend(totalTimes, qtdEdicoes, rodadaFinalCampeonato = 38) {
+    let numFases;
+    if (totalTimes >= 32) numFases = 5;
+    else if (totalTimes >= 16) numFases = 4;
+    else if (totalTimes >= 8) numFases = 3;
+    else return [];
+
+    const edicoes = [];
+    let rodadaAtual = 2; // Rodada 1 é aquecimento; definição começa na rodada 2
+
+    for (let i = 0; i < qtdEdicoes; i++) {
+        const rodadaDefinicao = rodadaAtual;
+        const rodadaInicial = rodadaDefinicao + 1;
+        const rodadaFinal = rodadaInicial + numFases - 1;
+
+        if (rodadaFinal > rodadaFinalCampeonato) break;
+
+        edicoes.push({
+            id: i + 1,
+            nome: `${i + 1}ª Edição`,
+            rodadaInicial,
+            rodadaFinal,
+            rodadaDefinicao
+        });
+
+        rodadaAtual = rodadaFinal + 1;
+    }
+
+    return edicoes;
+}
+
+// ============================================================================
 // CONFIGURAÇÃO DINÂMICA
 // ============================================================================
 
@@ -47,7 +86,9 @@ async function getMataMataConfig(ligaId) {
             mergedConfig.wizard_respostas = moduleConfig.wizard_respostas || {};
 
             // ✅ FIX: Usar calendario_override do admin (gerado dinamicamente)
-            // Prioridade: calendario_override (dinâmico, adaptado ao total_times) > JSON default (2025, 32 times)
+            // Prioridade 1: calendario_override (salvo no DB pelo admin)
+            // Prioridade 2: gerado de wizard_respostas (fix PR#176 incompleto — override vazio mas wizard configurado)
+            // Prioridade 3: JSON default hardcoded (fallback final)
             if (moduleConfig.calendario_override?.length > 0) {
                 mergedConfig.calendario.edicoes = moduleConfig.calendario_override.map(e => ({
                     id: e.edicao,
@@ -57,6 +98,14 @@ async function getMataMataConfig(ligaId) {
                     rodadaDefinicao: e.rodada_definicao
                 }));
                 logger.log(`[MATA-BACKEND] ✅ Usando calendario_override: ${mergedConfig.calendario.edicoes.length} edições (admin config)`);
+            } else if (mergedConfig.wizard_respostas?.total_times && mergedConfig.wizard_respostas?.qtd_edicoes) {
+                const totalTimes = Number(mergedConfig.wizard_respostas.total_times);
+                const qtdEdicoes = Number(mergedConfig.wizard_respostas.qtd_edicoes);
+                const gerado = _gerarCalendarioBackend(totalTimes, qtdEdicoes);
+                if (gerado.length > 0) {
+                    mergedConfig.calendario.edicoes = gerado;
+                    logger.log(`[MATA-BACKEND] ✅ Calendário gerado de wizard_respostas: ${gerado.length} edições (${totalTimes} times)`);
+                }
             }
 
             return mergedConfig;
