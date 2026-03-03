@@ -5,7 +5,7 @@
 // v2.2: Integração matchday + placares ao vivo via /ao-vivo endpoint
 // =====================================================================
 
-const RODADA_FINAL_CAMPEONATO = 38; // Brasileirão (centralizado em config/seasons.js)
+// RODADA_FINAL_CAMPEONATO disponível via participante-cache-manager.js (global)
 
 const BrasileiraoTabela = {
     _containerId: null,
