@@ -333,6 +333,22 @@ router.post('/liga/:ligaId/modulos/:modulo/ativar', verificarAdmin, async (req, 
             await propagarRankingRodadaParaLiga(ligaId, wizard_respostas);
         }
 
+        // ✅ FIX: Gerar calendario_override para mata_mata ao ativar (mesma lógica do PUT /config)
+        // Sem isso, o calendario_override fica vazio e o sistema cai no JSON default (32 times)
+        if (modulo === 'mata_mata' && wizard_respostas?.total_times && wizard_respostas?.qtd_edicoes) {
+            const calendarioGerado = gerarCalendarioMataMata(
+                Number(wizard_respostas.total_times),
+                Number(wizard_respostas.qtd_edicoes)
+            );
+            if (calendarioGerado.length > 0) {
+                await ModuleConfig.findOneAndUpdate(
+                    { liga_id: new mongoose.Types.ObjectId(ligaId), modulo, temporada: Number(temporada) },
+                    { $set: { calendario_override: calendarioGerado } }
+                );
+                console.log(`[MODULE-CONFIG] calendario_override gerado ao ativar mata_mata: ${calendarioGerado.length} edições`);
+            }
+        }
+
         console.log(`[MODULE-CONFIG] Modulo ${modulo} ativado para liga ${ligaId} por ${usuario}`);
 
         res.json({

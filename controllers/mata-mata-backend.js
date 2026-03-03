@@ -384,10 +384,15 @@ async function calcularResultadosEdicao(ligaId, edicao, rodadaAtual, config) {
         const totalParticipantesHistorico = rankingBase.length;
         let tamanhoTorneio;
 
-        // ✅ v1.3 FIX CRÍTICO: Ler tamanhoTorneio E dados_torneio do MataMataCache
-        // O bracket salvo é a FONTE DE VERDADE para quem participa do torneio.
-        // v1.3: Também lê dados_torneio para cross-validar quais timeIds realmente
-        // estão no bracket — resolve bug onde participantes não classificados eram cobrados.
+        // ✅ FIX: wizard_respostas.total_times é a FONTE DE VERDADE para o tamanho do torneio.
+        // O cache MongoDB pode ter valor stale (ex: 32) quando admin reconfigurou para 8.
+        const totalTimesConfig = Number(config.wizard_respostas?.total_times);
+        const tetoWizard = (totalTimesConfig && [8, 16, 32].includes(totalTimesConfig))
+            ? totalTimesConfig
+            : null;
+
+        // ✅ v1.3: Ler dados_torneio do MataMataCache para cross-validar quais timeIds
+        // realmente estão no bracket — resolve bug onde participantes não classificados eram cobrados.
         let participantesNoBracket = null; // Set de timeIds que realmente estão nos confrontos
         try {
             const cacheEdicao = await MataMataCache.findOne({
@@ -398,7 +403,13 @@ async function calcularResultadosEdicao(ligaId, edicao, rodadaAtual, config) {
 
             if (cacheEdicao && cacheEdicao.tamanhoTorneio && [8, 16, 32, 64].includes(cacheEdicao.tamanhoTorneio)) {
                 tamanhoTorneio = cacheEdicao.tamanhoTorneio;
-                logger.log(`[MATA-BACKEND] ✅ tamanhoTorneio do cache: ${tamanhoTorneio} (bracket salvo pelo admin)`);
+                // ✅ FIX: Respeitar teto do wizard — cache pode ter valor stale
+                if (tetoWizard && tamanhoTorneio > tetoWizard) {
+                    logger.warn(`[MATA-BACKEND] ⚠️ Cache tem tamanho ${tamanhoTorneio} mas wizard diz ${tetoWizard} — usando wizard`);
+                    tamanhoTorneio = tetoWizard;
+                } else {
+                    logger.log(`[MATA-BACKEND] ✅ tamanhoTorneio do cache: ${tamanhoTorneio} (bracket salvo pelo admin)`);
+                }
             }
 
             // ✅ v1.3: Extrair timeIds do bracket real (dados_torneio) como whitelist
@@ -414,14 +425,14 @@ async function calcularResultadosEdicao(ligaId, edicao, rodadaAtual, config) {
 
         // Fallback: calcular dinamicamente se não há cache
         if (!tamanhoTorneio) {
-            tamanhoTorneio = calcularTamanhoIdealMataMata(totalParticipantesHistorico);
-
-            // Respeitar total_times configurado no wizard como teto
-            const totalTimesConfig = Number(config.wizard_respostas?.total_times);
-            if (totalTimesConfig && [8, 16, 32].includes(totalTimesConfig)) {
-                tamanhoTorneio = Math.min(tamanhoTorneio, totalTimesConfig);
+            if (tetoWizard) {
+                // Wizard é a fonte de verdade — usar direto
+                tamanhoTorneio = tetoWizard;
+                logger.log(`[MATA-BACKEND] ✅ tamanhoTorneio do wizard: ${tamanhoTorneio}`);
+            } else {
+                tamanhoTorneio = calcularTamanhoIdealMataMata(totalParticipantesHistorico);
+                logger.log(`[MATA-BACKEND] ⚠️ Sem cache/wizard, tamanhoTorneio calculado: ${tamanhoTorneio} (fallback dinâmico)`);
             }
-            logger.log(`[MATA-BACKEND] ⚠️ Sem cache, tamanhoTorneio calculado: ${tamanhoTorneio} (fallback dinâmico)`);
         }
 
         if (tamanhoTorneio === 0) {

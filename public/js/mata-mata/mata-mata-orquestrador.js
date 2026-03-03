@@ -130,10 +130,21 @@ async function salvarFaseNoMongoDB(
       console.warn("[MATA-ORQUESTRADOR] Cache não existe ainda, criando novo");
     }
 
-    // 2. Atualizar apenas a fase calculada
+    // 2. Limpar fases stale que não pertencem ao tamanho atual do torneio
+    // Ex: se reconfigurou de 32 para 8 times, remover "primeira" e "oitavas" stale
+    const fasesValidas = getFasesParaTamanho(tamanhoTorneio);
+    const todasFases = ["primeira", "oitavas", "quartas", "semis", "final"];
+    for (const f of todasFases) {
+      if (!fasesValidas.includes(f) && dadosAtuais[f]) {
+        console.warn(`[MATA-ORQUESTRADOR] 🧹 Removendo fase stale "${f}" do cache (não pertence a torneio de ${tamanhoTorneio} times)`);
+        delete dadosAtuais[f];
+      }
+    }
+
+    // 3. Atualizar a fase calculada
     dadosAtuais[fase] = confrontos;
 
-    // 3. Se for a final e tiver vencedor, salvar o campeão
+    // 5. Se for a final e tiver vencedor, salvar o campeão
     if (fase === "final" && confrontos.length > 0) {
       const confrontoFinal = confrontos[0];
       const pontosA = parseFloat(confrontoFinal.timeA?.pontos) || 0;
@@ -146,10 +157,7 @@ async function salvarFaseNoMongoDB(
       }
     }
 
-    // ✅ 3.5. Adicionar metadata do tamanho calculado
-    // ✅ FIX: SEMPRE enviar tamanhoTorneio, inclusive quando é o default (32).
-    // Bug anterior: quando tamanhoTorneio === 32, metadata não era enviada,
-    // e o backend não recebia o tamanho explícito, podendo usar fallback incorreto.
+    // 6. Adicionar metadata do tamanho calculado
     if (tamanhoTorneio) {
       dadosAtuais.metadata = {
         tamanhoTorneio: tamanhoTorneio,
@@ -157,7 +165,7 @@ async function salvarFaseNoMongoDB(
       };
     }
 
-    // 4. Salvar no MongoDB
+    // 7. Salvar no MongoDB
     const resPost = await fetch(`/api/mata-mata/cache/${ligaId}/${edicao}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -225,14 +233,26 @@ async function getRankingBaseCached(ligaId, rodadaDefinicao) {
   return rankingBase;
 }
 
-// ✅ FUNÇÃO PARA OBTER TAMANHO DO TORNEIO (prioriza cache MongoDB)
+// ✅ FUNÇÃO PARA OBTER TAMANHO DO TORNEIO
+// ✅ FIX: wizard_respostas.total_times é a FONTE DE VERDADE (teto autoritativo).
+// O cache MongoDB pode ter valor stale (ex: 32) quando o admin já reconfigurou para 8.
 async function getTamanhoTorneioCached(ligaId, edicao) {
   const cacheKey = `${ligaId}_tamanho_${edicao}`;
 
+  // 0. Limite autoritativo: wizard total_times (se disponível)
+  // tamanhoTorneio global já foi setado de wizard_respostas em carregarMataMata()
+  const tetoWizard = (tamanhoTorneio && [8, 16, 32].includes(tamanhoTorneio))
+    ? tamanhoTorneio
+    : null;
+
   // 1. Verificar cache local
   if (tamanhoTorneioCache.has(cacheKey)) {
-    console.log(`[MATA-ORQUESTRADOR] 💾 Cache hit: tamanho edição ${edicao}`);
-    return tamanhoTorneioCache.get(cacheKey);
+    const cached = tamanhoTorneioCache.get(cacheKey);
+    // Respeitar teto do wizard (cache local pode estar stale)
+    const resultado = tetoWizard ? Math.min(cached, tetoWizard) : cached;
+    console.log(`[MATA-ORQUESTRADOR] 💾 Cache hit: tamanho edição ${edicao} = ${resultado}${tetoWizard && cached !== resultado ? ` (limitado pelo wizard: ${tetoWizard})` : ''}`);
+    tamanhoTorneioCache.set(cacheKey, resultado);
+    return resultado;
   }
 
   // 2. Buscar do MongoDB
@@ -241,10 +261,15 @@ async function getTamanhoTorneioCached(ligaId, edicao) {
     if (resCache.ok) {
       const cacheData = await resCache.json();
       if (cacheData.cached) {
-        const tamanhoDoMongo = Number(cacheData.dados?.tamanhoTorneio) || 
+        let tamanhoDoMongo = Number(cacheData.dados?.tamanhoTorneio) ||
                                Number(cacheData.dados?.metadata?.tamanhoTorneio);
-        
+
         if (tamanhoDoMongo && tamanhoDoMongo >= 8) {
+          // ✅ FIX: Respeitar teto do wizard — cache pode ter valor stale
+          if (tetoWizard && tamanhoDoMongo > tetoWizard) {
+            console.warn(`[MATA-ORQUESTRADOR] ⚠️ Cache MongoDB tem tamanho ${tamanhoDoMongo} mas wizard diz ${tetoWizard} — usando wizard`);
+            tamanhoDoMongo = tetoWizard;
+          }
           tamanhoTorneioCache.set(cacheKey, tamanhoDoMongo);
           console.log(`[MATA-ORQUESTRADOR] Tamanho (MongoDB): ${tamanhoDoMongo}`);
           return tamanhoDoMongo;
@@ -255,7 +280,14 @@ async function getTamanhoTorneioCached(ligaId, edicao) {
     console.warn(`[MATA-ORQUESTRADOR] Erro ao buscar tamanho do MongoDB:`, err.message);
   }
 
-  // 3. Fallback: calcular localmente
+  // 3. Se wizard tem valor, usar diretamente (sem precisar calcular)
+  if (tetoWizard) {
+    tamanhoTorneioCache.set(cacheKey, tetoWizard);
+    console.log(`[MATA-ORQUESTRADOR] Tamanho do wizard: ${tetoWizard} (sem cache MongoDB)`);
+    return tetoWizard;
+  }
+
+  // 4. Fallback: calcular localmente
   console.log(`[MATA-ORQUESTRADOR] Calculando tamanho localmente...`);
   const edicaoData = edicoes.find(e => e.id === edicao);
   if (!edicaoData) {
@@ -267,7 +299,7 @@ async function getTamanhoTorneioCached(ligaId, edicao) {
     const rankingCompleto = await getRankingRodadaEspecifica(ligaId, edicaoData.rodadaDefinicao);
     const timesAtivos = rankingCompleto.filter(t => t.ativo !== false).length;
     const tamanhoCalculado = calcularTamanhoIdeal(timesAtivos);
-    
+
     if (tamanhoCalculado > 0) {
       tamanhoTorneioCache.set(cacheKey, tamanhoCalculado);
       console.log(`[MATA-ORQUESTRADOR] Tamanho calculado: ${tamanhoCalculado} (${timesAtivos} ativos)`);
