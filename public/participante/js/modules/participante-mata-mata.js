@@ -40,8 +40,9 @@ function getFasesAtuais() {
   return getFasesParaTamanho(estado.tamanhoTorneio);
 }
 
-// Compatibilidade: FASES agora é getter dinâmico
-const FASES = TODAS_FASES; // Fallback para código legado que itera todas
+// ✅ FIX: FASES não deve mais ser usado para iterar dados — usar getFasesAtuais()
+// Mantido para retrocompatibilidade de código que precisa de todas as fases
+const FASES = TODAS_FASES;
 
 // ✅ v8.2: Retorna a edição atual baseada na rodadaAtual
 // Prioridade: edição em andamento > última encerrada > última disponível
@@ -118,7 +119,8 @@ function recalcularHistoricoEdicao(edicao) {
   let ultimaFaseParticipada = null;
   let foiEliminado = false;
 
-  FASES.forEach((f) => {
+  // ✅ FIX: Iterar apenas fases válidas para o tamanho do torneio (ignora stale "primeira"/"oitavas")
+  getFasesAtuais().forEach((f) => {
     const cacheKey = `${edicao}-${f}`;
     const confrontos = estado.cacheConfrontos[cacheKey];
 
@@ -604,7 +606,8 @@ async function carregarTodasFases(edicao) {
     let ultimaFaseParticipada = null;
     let foiEliminado = false;
 
-    FASES.forEach((f) => {
+    // ✅ FIX: Iterar apenas fases válidas para o tamanho do torneio (ignora stale)
+    getFasesAtuais().forEach((f) => {
       if (dadosFases[f]) {
         estado.cacheConfrontos[`${edicao}-${f}`] = dadosFases[f];
 
@@ -729,7 +732,8 @@ function setupEventListeners() {
   }
 
   const buttons = document.querySelectorAll(".mm-phase-btn");
-  FASES.forEach((fase, i) => {
+  // ✅ FIX: Usar fases válidas para o tamanho do torneio ao atribuir dataset
+  getFasesAtuais().forEach((fase, i) => {
     if (buttons[i]) buttons[i].dataset.fase = fase;
   });
 
@@ -1014,7 +1018,8 @@ async function carregarFase(edicao, fase) {
         throw new Error("Dados não encontrados");
       }
 
-      FASES.forEach((f) => {
+      // ✅ FIX: Iterar apenas fases válidas para o tamanho do torneio (ignora stale)
+      getFasesAtuais().forEach((f) => {
         if (dadosFases[f]) {
           estado.cacheConfrontos[`${edicao}-${f}`] = dadosFases[f];
         }
@@ -1364,8 +1369,8 @@ function renderCardDesempenho() {
       let derrotasEdicao = 0;
       let pontosEdicao = 0;
 
-      // Calcular stats da edição
-      FASES.forEach((f) => {
+      // ✅ FIX: Iterar apenas fases válidas para o tamanho do torneio (ignora stale)
+      getFasesAtuais().forEach((f) => {
         const chaveCache = `${edicao}-${f}`;
         const confrontos = estado.cacheConfrontos[chaveCache];
 
