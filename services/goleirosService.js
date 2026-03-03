@@ -1014,7 +1014,3 @@ export async function consolidarRodada(ligaId, rodada) {
     throw error;
   }
 }
-
-console.log(
-  "[GOLEIROS-SERVICE] ✅ Serviço v3.0 carregado - dinâmico, temporada, desempate",
-);

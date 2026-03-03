@@ -802,7 +802,7 @@ function atualizarNavegacaoFases(fasesAtivas) {
       let isDisabled = false;
       if (edicaoSelecionada && rodadaAtualGlobal > 0) {
         const rodadaDaFase = edicaoSelecionada.rodadaInicial + idx;
-        isDisabled = rodadaAtualGlobal < rodadaDaFase;
+        isDisabled = rodadaAtualGlobal <= rodadaDaFase;
       }
       const disabledClass = isDisabled ? " disabled" : "";
       const lockIcon = isDisabled ? ' 🔒' : '';
@@ -1006,17 +1006,20 @@ async function carregarFase(fase, ligaId) {
       prevFaseRodada,
     } = currentFaseInfo;
 
-    let isPending = rodada_atual < rodadaPontosNum;
+    let isPending = rodada_atual <= rodadaPontosNum;
     console.log(
       `[MATA-ORQUESTRADOR] Rodada ${rodadaPontosNum} - Status: ${isPending ? "Pendente" : "Concluída"}`,
     );
 
-    // ✅ v1.7: BLOQUEAR fases cuja rodada ainda não chegou
-    // Não exibir pré-classificação - apenas mostrar mensagem de bloqueio
+    // ✅ v1.9: BLOQUEAR fases cujos classificados ainda não são conhecidos
+    // Se prevFaseRodada já aconteceu, podemos mostrar os classificados em modo pendente
     if (isPending) {
-      console.log(`[MATA-ORQUESTRADOR] 🔒 Fase ${fase} bloqueada - Rodada ${rodadaPontosNum} ainda não aconteceu (atual: ${rodada_atual})`);
-      renderFaseBloqueada("mataMataContent", faseLabel, rodadaPontosNum);
-      return;
+      if (!prevFaseRodada || rodada_atual <= prevFaseRodada) {
+        console.log(`[MATA-ORQUESTRADOR] 🔒 Fase ${fase} bloqueada - Rodada ${rodadaPontosNum} ainda não aconteceu (atual: ${rodada_atual})`);
+        renderFaseBloqueada("mataMataContent", faseLabel, rodadaPontosNum);
+        return;
+      }
+      console.log(`[MATA-ORQUESTRADOR] ⏳ Fase ${fase} pendente - exibindo classificados (fase anterior encerrada na rodada ${prevFaseRodada})`);
     }
 
     // ✅ TENTAR CACHE PRIMEIRO (apenas para rodadas consolidadas)
@@ -1030,12 +1033,14 @@ async function carregarFase(fase, ligaId) {
 
       if (cachedConfrontos) {
         console.log(`[MATA-ORQUESTRADOR] 💾 Confrontos recuperados do cache`);
+        calcularValoresConfronto(cachedConfrontos, false, fase);
         renderTabelaMataMata(
           cachedConfrontos,
           contentId,
           faseLabel,
           edicaoAtual,
           isPending,
+          rodadaPontosNum,
         );
 
         if (fase === "final" && cachedConfrontos.length > 0) {
@@ -1081,9 +1086,9 @@ async function carregarFase(fase, ligaId) {
       timesParaConfronto = vencedoresAnteriores;
     }
 
-    // ✅ v1.7: isPending=true já retornou acima com bloqueio
-    // Aqui a rodada já aconteceu - buscar pontos normalmente
-    const pontosRodadaAtual = await getPontosDaRodadaCached(ligaId, rodadaPontosNum);
+    // ✅ v1.9: Fase pendente com classificados conhecidos usa pontos vazios
+    // Fase concluída busca pontos normalmente
+    const pontosRodadaAtual = isPending ? {} : await getPontosDaRodadaCached(ligaId, rodadaPontosNum);
 
     const fasesDoTorneioCalc = getFasesParaTamanho(tamanhoTorneio);
     const primeiraFaseCalc = fasesDoTorneioCalc[0];
@@ -1092,17 +1097,19 @@ async function carregarFase(fase, ligaId) {
         ? montarConfrontosPrimeiraFase(rankingBase, pontosRodadaAtual, tamanhoTorneio)
         : montarConfrontosFase(timesParaConfronto, pontosRodadaAtual, numJogos);
 
-    // ✅ v1.7: Aqui isPending é sempre false (bloqueio retorna antes)
-    // Salvar no cache local
-    await setCachedConfrontos(
-      ligaId,
-      edicaoAtual,
-      fase,
-      rodadaPontosNum,
-      confrontos,
-    );
+    // ✅ v1.9: Session cache apenas para fases com pontos reais (evita cache de pontos nulos)
+    if (!isPending) {
+      await setCachedConfrontos(
+        ligaId,
+        edicaoAtual,
+        fase,
+        rodadaPontosNum,
+        confrontos,
+      );
+    }
 
-    // Salvar no MongoDB
+    // MongoDB: salvar sempre que classificados são conhecidos (pending ou não)
+    // Quando a rodada jogar, o admin recomputa com pontos reais e sobrescreve
     await salvarFaseNoMongoDB(
       ligaId,
       edicaoAtual,
@@ -1111,20 +1118,21 @@ async function carregarFase(fase, ligaId) {
       rodada_atual,
     );
 
-    // Calcular valores dos confrontos
-    calcularValoresConfronto(confrontos, false, fase);
+    // Calcular valores dos confrontos (isPending=true → valores=0)
+    calcularValoresConfronto(confrontos, isPending, fase);
 
-    // Renderizar tabela
+    // Renderizar tabela (rodadaPontosNum garante texto correto independente do tamanho do torneio)
     renderTabelaMataMata(
       confrontos,
       contentId,
       faseLabel,
       edicaoAtual,
-      false,
+      isPending,
+      rodadaPontosNum,
     );
 
-    // Renderizar banner do campeão na FINAL
-    if (fase === "final" && confrontos.length > 0) {
+    // Renderizar banner do campeão na FINAL apenas quando rodada já aconteceu
+    if (fase === "final" && confrontos.length > 0 && !isPending) {
       const edicaoNome = edicaoSelecionada.nome;
       renderBannerCampeao(contentId, confrontos[0], edicaoNome, false);
       console.log(

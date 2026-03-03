@@ -81,7 +81,7 @@ function getFaseAtual(edicaoId) {
 
   let ultimaLiberada = null;
   for (let idx = 0; idx < fasesAtivas.length; idx++) {
-    if (estado.rodadaAtual >= config.rodadaInicial + idx) {
+    if (estado.rodadaAtual > config.rodadaInicial + idx) {
       ultimaLiberada = fasesAtivas[idx];
     }
   }
@@ -792,7 +792,7 @@ function atualizarNavegacaoFases() {
       let isDisabled = false;
       if (edicaoConfig && estado.rodadaAtual > 0) {
         const rodadaDaFase = edicaoConfig.rodadaInicial + idx;
-        isDisabled = estado.rodadaAtual < rodadaDaFase;
+        isDisabled = estado.rodadaAtual <= rodadaDaFase;
       }
       const disabledClass = isDisabled ? ' disabled' : '';
       const lockIcon = isDisabled ? ' 🔒' : '';
@@ -807,7 +807,7 @@ function atualizarNavegacaoFases() {
   // Definir primeira fase como selecionada se não houver ou se está bloqueada
   const fasesLiberadas = fasesAtivas.filter((fase, idx) => {
     if (!edicaoConfig || estado.rodadaAtual <= 0) return true;
-    return estado.rodadaAtual >= edicaoConfig.rodadaInicial + idx;
+    return estado.rodadaAtual > edicaoConfig.rodadaInicial + idx;
   });
 
   if (!estado.faseSelecionada || !fasesLiberadas.includes(estado.faseSelecionada)) {
@@ -964,26 +964,32 @@ async function carregarFase(edicao, fase) {
   const container = document.getElementById("mata-mata-container");
   if (!container) return;
 
-  // ✅ v8.2: Bloquear fases cuja rodada não chegou
+  // ✅ v8.3: Bloquear fases cujos classificados ainda não são conhecidos
+  // Se a fase anterior já aconteceu, exibir classificados em modo pendente
   const edicaoConfig = EDICOES_MATA_MATA.find(e => e.id === edicao);
   if (edicaoConfig && estado.rodadaAtual > 0) {
     const fasesAtivas = getFasesAtuais();
     const faseIndex = fasesAtivas.indexOf(fase);
     if (faseIndex >= 0) {
       const rodadaDaFase = edicaoConfig.rodadaInicial + faseIndex;
-      if (estado.rodadaAtual < rodadaDaFase) {
-        if (window.Log) Log.info(`[MATA-MATA] 🔒 Fase ${fase} bloqueada - Rodada ${rodadaDaFase} não aconteceu (atual: ${estado.rodadaAtual})`);
-        const nomeFase = { primeira: "1ª FASE", oitavas: "OITAVAS", quartas: "QUARTAS", semis: "SEMIFINAL", final: "FINAL" }[fase] || fase.toUpperCase();
-        container.innerHTML = `
-          <div class="mm-vazio mm-fase-bloqueada">
-            <span class="material-symbols-outlined" style="font-size:48px;color:#6b7280;">lock</span>
-            <h3>Fase Bloqueada</h3>
-            <p>A fase <strong>${nomeFase}</strong> será disputada na <strong>Rodada ${rodadaDaFase}</strong> do Brasileirão.</p>
-            <p style="font-size:12px;color:rgba(255,255,255,0.3);margin-top:4px;">Os confrontos serão exibidos quando a rodada for iniciada.</p>
-          </div>
-        `;
-        atualizarInfoFase(fase);
-        return;
+      if (estado.rodadaAtual <= rodadaDaFase) {
+        const prevRodada = faseIndex > 0 ? edicaoConfig.rodadaInicial + faseIndex - 1 : null;
+        const faseAnteriorFeita = prevRodada && estado.rodadaAtual > prevRodada;
+        if (!faseAnteriorFeita) {
+          if (window.Log) Log.info(`[MATA-MATA] 🔒 Fase ${fase} bloqueada - Rodada ${rodadaDaFase} não aconteceu (atual: ${estado.rodadaAtual})`);
+          const nomeFase = { primeira: "1ª FASE", oitavas: "OITAVAS", quartas: "QUARTAS", semis: "SEMIFINAL", final: "FINAL" }[fase] || fase.toUpperCase();
+          container.innerHTML = `
+            <div class="mm-vazio mm-fase-bloqueada">
+              <span class="material-symbols-outlined" style="font-size:48px;color:#6b7280;">lock</span>
+              <h3>Fase Bloqueada</h3>
+              <p>A fase <strong>${nomeFase}</strong> será disputada na <strong>Rodada ${rodadaDaFase}</strong> do Brasileirão.</p>
+              <p style="font-size:12px;color:rgba(255,255,255,0.3);margin-top:4px;">Os confrontos serão exibidos quando a rodada for iniciada.</p>
+            </div>
+          `;
+          atualizarInfoFase(fase);
+          return;
+        }
+        if (window.Log) Log.info(`[MATA-MATA] ⏳ Fase ${fase} pendente - exibindo classificados da fase anterior (rodada ${prevRodada})`);
       }
     }
   }

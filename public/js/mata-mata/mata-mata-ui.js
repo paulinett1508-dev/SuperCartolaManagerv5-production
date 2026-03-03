@@ -210,6 +210,7 @@ export function renderTabelaMataMata(
   faseLabel,
   edicaoAtual,
   isPending = false,
+  rodadaNum = null,
 ) {
   const container = document.getElementById(containerId);
   if (!container) return;
@@ -228,7 +229,7 @@ export function renderTabelaMataMata(
         ${gerarTextoConfronto(faseLabel)}
       </div>
       <div class="mata-mata-rodada">
-        ${getRodadaPontosText(faseLabel, edicaoAtual)}
+        ${rodadaNum ? `Pontuação da Rodada ${rodadaNum}` : getRodadaPontosText(faseLabel, edicaoAtual)}
       </div>
     </div>
     <div class="mata-mata-table-container">
