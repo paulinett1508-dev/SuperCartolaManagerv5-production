@@ -4,6 +4,16 @@
  * @version 2.1.1 - Fix endpoint buscar-time por ID
  */
 
+// Fallback: garante escapeHtml disponível mesmo se escape-html.js não carregou antes
+const _escapeHtml = (typeof window.escapeHtml === 'function')
+    ? window.escapeHtml
+    : function(str) {
+        if (str == null) return '';
+        return String(str).replace(/[&<>"']/g, function(ch) {
+            return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch];
+        });
+    };
+
 // Estado do modal
 let timeSelecionado = null;
 let dadosCompletosAPI = null; // Dados brutos da API Cartola
@@ -837,8 +847,8 @@ async function buscarPorId() {
                     alt="Escudo"
                 />
                 <div class="pt-resultado-info">
-                    <p class="pt-resultado-nome">${escapeHtml(time.nome_time || 'Time sem nome')}</p>
-                    <p class="pt-resultado-cartoleiro">${escapeHtml(time.nome_cartoleiro || 'Cartoleiro')}</p>
+                    <p class="pt-resultado-nome">${_escapeHtml(time.nome_time || 'Time sem nome')}</p>
+                    <p class="pt-resultado-cartoleiro">${_escapeHtml(time.nome_cartoleiro || 'Cartoleiro')}</p>
                 </div>
                 <span class="pt-resultado-id">#${time.time_id}</span>
             </div>
@@ -932,8 +942,8 @@ async function buscarTimes(query) {
                     alt="Escudo"
                 />
                 <div class="pt-resultado-info">
-                    <p class="pt-resultado-nome">${escapeHtml(time.nome_time || 'Time sem nome')}</p>
-                    <p class="pt-resultado-cartoleiro">${escapeHtml(time.nome_cartoleiro || 'Cartoleiro')}</p>
+                    <p class="pt-resultado-nome">${_escapeHtml(time.nome_time || 'Time sem nome')}</p>
+                    <p class="pt-resultado-cartoleiro">${_escapeHtml(time.nome_cartoleiro || 'Cartoleiro')}</p>
                 </div>
                 <span class="pt-resultado-id">#${time.time_id}</span>
             </div>
@@ -978,8 +988,8 @@ async function selecionarTime(time) {
                     onerror="this.onerror=null;this.src='/escudos/default.png'"
                     alt="Escudo"
                 />
-                <h4>${escapeHtml(time.nome_time)}</h4>
-                <p>${escapeHtml(time.nome_cartoleiro)} - ID #${time.time_id}</p>
+                <h4>${_escapeHtml(time.nome_time)}</h4>
+                <p>${_escapeHtml(time.nome_cartoleiro)} - ID #${time.time_id}</p>
             </div>
             <div class="pt-loading-dados">
                 <div class="pt-search-spinner ativo" style="position: static; transform: none;"></div>
@@ -1032,8 +1042,8 @@ function renderizarConfirmacao(time) {
                     onerror="this.onerror=null;this.src='/escudos/default.png'"
                     alt="Escudo"
                 />
-                <h4>${escapeHtml(timeData.nome || time.nome_time)}</h4>
-                <p>${escapeHtml(timeData.nome_cartola || time.nome_cartoleiro)} - ID #${time.time_id}</p>
+                <h4>${_escapeHtml(timeData.nome || time.nome_time)}</h4>
+                <p>${_escapeHtml(timeData.nome_cartola || time.nome_cartoleiro)} - ID #${time.time_id}</p>
             </div>
 
             ${dadosCompletosAPI ? `
@@ -1213,13 +1223,13 @@ async function mostrarListaLigas() {
                 Voltar
             </div>
             <p style="color: #888; font-size: 13px; margin-bottom: 12px;">
-                Selecione a liga para adicionar <strong style="color: #FF5500;">${escapeHtml(timeSelecionado.nome_time)}</strong>:
+                Selecione a liga para adicionar <strong style="color: #FF5500;">${_escapeHtml(timeSelecionado.nome_time)}</strong>:
             </p>
             <div class="pt-ligas-lista">
                 ${ligas.map(liga => `
                     <div class="pt-liga-item" onclick="adicionarTimeLiga('${liga._id}')">
                         <div>
-                            <p class="pt-liga-nome">${escapeHtml(liga.nome)}</p>
+                            <p class="pt-liga-nome">${_escapeHtml(liga.nome)}</p>
                             <p class="pt-liga-info">${liga.times?.length || 0} participantes</p>
                         </div>
                         <span class="pt-liga-badge">${TEMPORADA_ATUAL}</span>
@@ -1307,7 +1317,7 @@ async function adicionarTimeLiga(ligaId) {
             <div class="pt-sucesso">
                 <span class="material-icons">check_circle</span>
                 <h4>Participante adicionado!</h4>
-                <p><strong>${escapeHtml(timeSelecionado.nome_time)}</strong> foi adicionado a <strong>${escapeHtml(ligaNome)}</strong> na temporada ${TEMPORADA_ATUAL}.</p>
+                <p><strong>${_escapeHtml(timeSelecionado.nome_time)}</strong> foi adicionado a <strong>${_escapeHtml(ligaNome)}</strong> na temporada ${TEMPORADA_ATUAL}.</p>
                 <div class="pt-botoes" style="margin-top: 20px;">
                     <button class="pt-btn pt-btn-primary" onclick="fecharModalPesquisarTime()">
                         Fechar

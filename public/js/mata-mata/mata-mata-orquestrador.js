@@ -42,6 +42,16 @@ import {
 import { cacheManager } from "../core/cache-manager.js";
 import { RODADA_FINAL_CAMPEONATO } from "../core/season-config.js";
 
+// Fallback: garante escapeHtml disponível mesmo se escape-html.js não carregou antes
+const _escapeHtml = (typeof window.escapeHtml === 'function')
+    ? window.escapeHtml
+    : function(str) {
+        if (str == null) return '';
+        return String(str).replace(/[&<>"']/g, function(ch) {
+            return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch];
+        });
+    };
+
 // Variáveis dinâmicas para rodadas
 let getRankingRodadaEspecifica = null;
 let rodadasCarregados = false;
@@ -580,8 +590,8 @@ async function carregarClassificadosParciais(contentElement, ligaId, edicaoId, e
           <div class="time-info">
             <img src="/escudos/${t.clube_id}.png" class="escudo-img" onerror="this.onerror=null;this.src='/escudos/default.png'">
             <div class="time-details">
-              <span class="time-nome">${escapeHtml(t.nome_time || "—")}</span>
-              <span class="time-cartoleiro">${escapeHtml(t.nome_cartola || "—")}</span>
+              <span class="time-nome">${_escapeHtml(t.nome_time || "—")}</span>
+              <span class="time-cartoleiro">${_escapeHtml(t.nome_cartola || "—")}</span>
             </div>
           </div>
         </td>
@@ -597,8 +607,8 @@ async function carregarClassificadosParciais(contentElement, ligaId, edicaoId, e
           <div class="time-info">
             <img src="/escudos/${t.clube_id}.png" class="escudo-img" onerror="this.onerror=null;this.src='/escudos/default.png'">
             <div class="time-details">
-              <span class="time-nome">${escapeHtml(t.nome_time || "—")}</span>
-              <span class="time-cartoleiro">${escapeHtml(t.nome_cartola || "—")}</span>
+              <span class="time-nome">${_escapeHtml(t.nome_time || "—")}</span>
+              <span class="time-cartoleiro">${_escapeHtml(t.nome_cartola || "—")}</span>
             </div>
           </div>
         </td>
@@ -723,7 +733,7 @@ async function carregarConfrontosParciais(contentElement, ligaId, edicaoId, edic
     contentElement.insertAdjacentHTML("afterbegin", `
       <div class="parciais-header">
         <span class="parciais-live-badge">AO VIVO</span>
-        <h4>Confrontos da ${faseLabel} — ${escapeHtml(edicaoSelecionada.nome || "Edição " + edicaoId)}</h4>
+        <h4>Confrontos da ${faseLabel} — ${_escapeHtml(edicaoSelecionada.nome || "Edição " + edicaoId)}</h4>
         <p>Baseado nas parciais da Rodada ${data.rodada}. Sujeito a alteração.</p>
       </div>
     `);

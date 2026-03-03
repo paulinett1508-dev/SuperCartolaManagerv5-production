@@ -7,6 +7,16 @@
 import { LayoutManager } from "../core/layout-manager.js";
 import { ApiClient } from "../core/api-client.js";
 
+// Fallback: garante escapeHtml disponível mesmo se escape-html.js não carregou antes
+const _escapeHtml = (typeof window.escapeHtml === 'function')
+    ? window.escapeHtml
+    : function(str) {
+        if (str == null) return '';
+        return String(str).replace(/[&<>"']/g, function(ch) {
+            return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch];
+        });
+    };
+
 export class FerramentasManager {
     constructor() {
         this.layoutManager = new LayoutManager();
@@ -209,7 +219,7 @@ export class FerramentasManager {
                     .map(
                         (liga) => `
                     <div class="liga-modal-item" data-liga-id="${liga._id}">
-                        <strong>${escapeHtml(liga.nome)}</strong>
+                        <strong>${_escapeHtml(liga.nome)}</strong>
                         <span>${liga.times ? liga.times.length : 0} times</span>
                         <button class="btn-primary" onclick="popularRodadas('${liga._id}')">
                             Popular Rodadas

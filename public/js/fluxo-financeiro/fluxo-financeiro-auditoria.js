@@ -20,6 +20,16 @@ import {
     fetchLigaConfig,
 } from "../rodadas/rodadas-config.js";
 
+// Fallback: garante escapeHtml disponível mesmo se escape-html.js não carregou antes
+const _escapeHtml = (typeof window.escapeHtml === 'function')
+    ? window.escapeHtml
+    : function(str) {
+        if (str == null) return '';
+        return String(str).replace(/[&<>"']/g, function(ch) {
+            return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch];
+        });
+    };
+
 export class FluxoFinanceiroAuditoria {
     constructor(cache, core) {
         this.cache = cache;
@@ -399,8 +409,8 @@ export class FluxoFinanceiroAuditoria {
                                 : '<div class="audit-escudo-placeholder"><span class="material-icons" style="font-size: 24px;">sports_soccer</span></div>'
                         }
                         <div>
-                            <div class="audit-nome">${escapeHtml(participante.nome_cartola)}</div>
-                            <div class="audit-time">${escapeHtml(participante.nome_time)}</div>
+                            <div class="audit-nome">${_escapeHtml(participante.nome_cartola)}</div>
+                            <div class="audit-time">${_escapeHtml(participante.nome_time)}</div>
                         </div>
                     </div>
                     <div class="audit-periodo">
@@ -522,7 +532,7 @@ export class FluxoFinanceiroAuditoria {
                             .map(
                                 (campo) => `
                             <tr ${resumo.manual[campo].valor === 0 ? 'class="text-muted"' : ""}>
-                                <td>${escapeHtml(resumo.manual[campo].nome)}</td>
+                                <td>${_escapeHtml(resumo.manual[campo].nome)}</td>
                                 <td class="text-right ${resumo.manual[campo].valor >= 0 ? "text-success" : "text-danger"}">
                                     ${resumo.manual[campo].valor !== 0 ? `R$ ${resumo.manual[campo].valor.toFixed(2)}` : "-"}
                                 </td>
@@ -601,7 +611,7 @@ export class FluxoFinanceiroAuditoria {
 
                 return `
                 <div class="audit-section">
-                    <h3>${escapeHtml(cat.nome)} <span class="badge-count">${dados.totalRegistros} registros</span></h3>
+                    <h3>${_escapeHtml(cat.nome)} <span class="badge-count">${dados.totalRegistros} registros</span></h3>
                     <div class="audit-table-scroll">
                         <table class="audit-table compact">
                             <thead>

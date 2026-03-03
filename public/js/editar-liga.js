@@ -3,6 +3,16 @@
  * Refatoração completa mantendo 100% da funcionalidade original
  */
 
+// Fallback: garante escapeHtml disponível mesmo se escape-html.js não carregou antes
+const _escapeHtml = (typeof window.escapeHtml === 'function')
+    ? window.escapeHtml
+    : function(str) {
+        if (str == null) return '';
+        return String(str).replace(/[&<>"']/g, function(ch) {
+            return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch];
+        });
+    };
+
 class EditarLigaManager {
     constructor() {
         this.urlParams = new URLSearchParams(window.location.search);
@@ -258,7 +268,7 @@ class EditarLigaManager {
             // Atualizar título com indicador de temporada
             if (this.elements.tituloLiga) {
                 const temporadaLabel = this.temporadaSelecionada ? ` (${this.temporadaSelecionada})` : '';
-                this.elements.tituloLiga.innerHTML = `Editar Times da <span>${escapeHtml(this.ligaAtual.nome)}</span>${temporadaLabel}`;
+                this.elements.tituloLiga.innerHTML = `Editar Times da <span>${_escapeHtml(this.ligaAtual.nome)}</span>${temporadaLabel}`;
             }
 
             // 2. Buscar participantes filtrados por temporada
@@ -343,9 +353,9 @@ class EditarLigaManager {
                               (clube) => `
                     <option value="${clube.id}"
                             data-escudo="/escudos/${clube.id}.png"
-                            data-nome="${escapeHtml(clube.nome)}"
+                            data-nome="${_escapeHtml(clube.nome)}"
                             ${time.clube_id === clube.id ? "selected" : ""}>
-                        ${escapeHtml(clube.nome)}
+                        ${_escapeHtml(clube.nome)}
                     </option>
                 `,
                           )
@@ -360,7 +370,7 @@ class EditarLigaManager {
                 </td>
                 <td class="col-cartoleiro">
                     <span class="cartoleiro-name ${time.error ? "error" : ""}">
-                        ${escapeHtml(time.nome_cartoleiro)}
+                        ${_escapeHtml(time.nome_cartoleiro)}
                     </span>
                 </td>
                 <td class="col-brasao">
@@ -428,8 +438,8 @@ class EditarLigaManager {
                           (clube) => `
                 <option value="${clube.id}"
                         data-escudo="/escudos/${clube.id}.png"
-                        data-nome="${escapeHtml(clube.nome)}">
-                    ${escapeHtml(clube.nome)}
+                        data-nome="${_escapeHtml(clube.nome)}">
+                    ${_escapeHtml(clube.nome)}
                 </option>
             `,
                       )

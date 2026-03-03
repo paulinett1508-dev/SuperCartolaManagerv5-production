@@ -3,6 +3,16 @@
  * Extrai o JavaScript inline sem complexidade desnecessária
  */
 
+// Fallback: garante escapeHtml disponível mesmo se escape-html.js não carregou antes
+const _escapeHtml = (typeof window.escapeHtml === 'function')
+    ? window.escapeHtml
+    : function(str) {
+        if (str == null) return '';
+        return String(str).replace(/[&<>"']/g, function(ch) {
+            return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch];
+        });
+    };
+
 // Variáveis globais (mantidas para compatibilidade)
 let timesSelecionados = [];
 
@@ -195,8 +205,8 @@ function atualizarListaTimes() {
                              onerror="this.onerror=null;this.src='/escudos/default.png'"
                              alt="Escudo do time">
                         <div class="time-details">
-                            <div class="time-nome">${escapeHtml(time.nome)}</div>
-                            <div class="time-cartoleiro">${escapeHtml(time.cartoleiro)}</div>
+                            <div class="time-nome">${_escapeHtml(time.nome)}</div>
+                            <div class="time-cartoleiro">${_escapeHtml(time.cartoleiro)}</div>
                         </div>
                     </div>
                     <button onclick="removerTime(${time.id})" class="btn-remove">
@@ -257,8 +267,8 @@ function atualizarResumo() {
                              onerror="this.onerror=null;this.src='/escudos/default.png'"
                              alt="Escudo do time">
                         <div class="time-details">
-                            <div class="time-nome">${escapeHtml(time.nome)}</div>
-                            <div class="time-cartoleiro">${escapeHtml(time.cartoleiro)}</div>
+                            <div class="time-nome">${_escapeHtml(time.nome)}</div>
+                            <div class="time-cartoleiro">${_escapeHtml(time.cartoleiro)}</div>
                         </div>
                     </div>
                 </li>

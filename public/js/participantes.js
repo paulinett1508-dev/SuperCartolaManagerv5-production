@@ -4,6 +4,16 @@
 // v2.14: Cache-bust fix (2026-01-22)
 import { CLUBES as _CLUBES_SOURCE } from "/js/shared/clubes-data.js";
 
+// Fallback: garante escapeHtml disponível mesmo se escape-html.js não carregou antes
+const _escapeHtml = (typeof window.escapeHtml === 'function')
+    ? window.escapeHtml
+    : function(str) {
+        if (str == null) return '';
+        return String(str).replace(/[&<>"']/g, function(ch) {
+            return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch];
+        });
+    };
+
 const urlParams = new URLSearchParams(window.location.search);
 const ligaId = urlParams.get("id");
 const CAMPINHO_TARGET_KEY = 'scm_campinho_target';
@@ -256,19 +266,19 @@ async function carregarParticipantesPorTemporada(temporada) {
                            class="batch-checkbox"
                            data-time-id="${p.time_id}"
                            data-status="${p.status || 'pendente'}"
-                           data-nome="${escapeHtml(p.nome_cartoleiro || '')}"
+                           data-nome="${_escapeHtml(p.nome_cartoleiro || '')}"
                            onclick="event.stopPropagation(); window.toggleSelecaoBatch(${p.time_id})">
                     ` : ''}
                     <div class="participante-avatar-mini">
                         <img src="${p.escudo || CLUBES_CONFIG.PATHS.defaultImage}"
-                             alt="${escapeHtml(p.nome_cartoleiro)}"
+                             alt="${_escapeHtml(p.nome_cartoleiro)}"
                              onerror="this.onerror=null;this.src='${CLUBES_CONFIG.PATHS.defaultImage}'">
                         <span class="status-dot ${estaAtivo ? "status-ativo" : "status-inativo"}"></span>
                     </div>
 
                     <div class="participante-info-compact">
-                        <span class="participante-nome-compact">${escapeHtml(p.nome_cartoleiro || "N/D")}</span>
-                        <span class="participante-time-compact">${escapeHtml(p.nome_time || "Time N/A")}</span>
+                        <span class="participante-nome-compact">${_escapeHtml(p.nome_cartoleiro || "N/D")}</span>
+                        <span class="participante-time-compact">${_escapeHtml(p.nome_time || "Time N/A")}</span>
                     </div>
 
                     ${temClubeCoracao ? `
@@ -287,7 +297,7 @@ async function carregarParticipantesPorTemporada(temporada) {
                         <button class="btn-compact btn-compact-validar ${jaSincronizado ? 'ja-validado' : ''}"
                                 data-action="validar-id"
                                 data-time-id="${p.time_id}"
-                                data-nome="${escapeHtml(p.nome_cartoleiro || "")}"
+                                data-nome="${_escapeHtml(p.nome_cartoleiro || "")}"
                                 data-sincronizado="${jaSincronizado}"
                                 title="${jaSincronizado ? 'Já sincronizado - clique para atualizar' : 'Validar ID na API Cartola'}">
                             <span class="material-symbols-outlined" style="${jaSincronizado ? 'color: #22c55e;' : ''}">${jaSincronizado ? 'check_circle' : 'verified'}</span>
@@ -303,15 +313,15 @@ async function carregarParticipantesPorTemporada(temporada) {
                         <button class="btn-compact btn-compact-senha"
                                 data-action="gerenciar-senha"
                                 data-time-id="${p.time_id}"
-                                data-nome="${escapeHtml(p.nome_cartoleiro || "")}"
+                                data-nome="${_escapeHtml(p.nome_cartoleiro || "")}"
                                 title="Senha">
                             <span class="material-symbols-outlined">key</span>
                         </button>
                         <button class="btn-compact btn-compact-dados"
                                 data-action="ver-api-cartola"
                                 data-time-id="${p.time_id}"
-                                data-nome="${escapeHtml(p.nome_cartoleiro || "")}"
-                                data-time-nome="${escapeHtml(p.nome_time || "")}"
+                                data-nome="${_escapeHtml(p.nome_cartoleiro || "")}"
+                                data-time-nome="${_escapeHtml(p.nome_time || "")}"
                                 title="API Cartola">
                             <span class="material-symbols-outlined">cloud_sync</span>
                         </button>
@@ -654,14 +664,14 @@ async function carregarParticipantesComBrasoes() {
                     <span class="participante-numero">${String(index + 1).padStart(2, '0')}</span>
                     <div class="participante-avatar-mini">
                         <img src="${BrasoesHelper.getTimeFantasyBrasao(timeData)}"
-                             alt="${escapeHtml(timeData.nome_cartoleiro)}"
+                             alt="${_escapeHtml(timeData.nome_cartoleiro)}"
                              onerror="this.onerror=null;this.src='${CLUBES_CONFIG.PATHS.defaultImage}'">
                         <span class="status-dot ${statusClass}"></span>
                     </div>
 
                     <div class="participante-info-compact">
-                        <span class="participante-nome-compact">${escapeHtml(timeData.nome_cartoleiro || "N/D")}</span>
-                        <span class="participante-time-compact">${escapeHtml(timeData.nome_time || "Time N/A")}</span>
+                        <span class="participante-nome-compact">${_escapeHtml(timeData.nome_cartoleiro || "N/D")}</span>
+                        <span class="participante-time-compact">${_escapeHtml(timeData.nome_time || "Time N/A")}</span>
                     </div>
 
                     ${temClubeCoracao ? `
@@ -683,15 +693,15 @@ async function carregarParticipantesComBrasoes() {
                         <button class="btn-compact btn-compact-senha"
                                 data-action="gerenciar-senha"
                                 data-time-id="${timeData.id}"
-                                data-nome="${escapeHtml(timeData.nome_cartoleiro || "")}"
+                                data-nome="${_escapeHtml(timeData.nome_cartoleiro || "")}"
                                 title="Senha">
                             <span class="material-symbols-outlined">key</span>
                         </button>
                         <button class="btn-compact btn-compact-dados"
                                 data-action="ver-api-cartola"
                                 data-time-id="${timeData.id}"
-                                data-nome="${escapeHtml(timeData.nome_cartoleiro || "")}"
-                                data-time-nome="${escapeHtml(timeData.nome_time || "")}"
+                                data-nome="${_escapeHtml(timeData.nome_cartoleiro || "")}"
+                                data-time-nome="${_escapeHtml(timeData.nome_time || "")}"
                                 title="API Cartola">
                             <span class="material-symbols-outlined">cloud_sync</span>
                         </button>
@@ -1316,8 +1326,8 @@ function renderizarAtletasCards(atletas) {
                     ${atleta.capitao ? '<span class="jv-capitao">C</span>' : ''}
                 </div>
                 <div class="jv-atleta-info">
-                    <span class="jv-atleta-nome" title="${escapeHtml(atleta.apelido)}">${escapeHtml(atleta.apelido || 'N/D')}</span>
-                    <span class="jv-atleta-clube">${escapeHtml(atleta.clube?.nome || '')}</span>
+                    <span class="jv-atleta-nome" title="${_escapeHtml(atleta.apelido)}">${_escapeHtml(atleta.apelido || 'N/D')}</span>
+                    <span class="jv-atleta-clube">${_escapeHtml(atleta.clube?.nome || '')}</span>
                 </div>
                 <div class="jv-atleta-stats">
                     <span class="jv-atleta-pontos ${pontosClasse}">${atleta.pontos_num ? (Math.trunc(atleta.pontos_num * 10) / 10).toFixed(1) : '-'}</span>
@@ -1642,8 +1652,8 @@ function renderizarConteudoRodada(rawJson, verificacao, rodada, timeId = null, r
                     <span class="pontos-valor">${pontos ? (Math.trunc(pontos * 100) / 100).toFixed(2) : 'N/D'}</span>
                 </div>
                 <div class="rodada-meta">
-                    <span><span class="material-symbols-outlined">person</span> ${escapeHtml(time.nome_cartola || time.nome || 'N/D')}</span>
-                    <span><span class="material-symbols-outlined">shield</span> ${escapeHtml(time.nome || 'N/D')}</span>
+                    <span><span class="material-symbols-outlined">person</span> ${_escapeHtml(time.nome_cartola || time.nome || 'N/D')}</span>
+                    <span><span class="material-symbols-outlined">shield</span> ${_escapeHtml(time.nome || 'N/D')}</span>
                 </div>
             </div>
 
@@ -1817,11 +1827,11 @@ function criarModalApiCartola(timeId, nomeCartoleiro, nomeTime, data) {
                             <span class="api-card-label">Escudo</span>
                         </div>
                         <div class="api-card">
-                            <span class="api-card-value">${escapeHtml(time.nome || nomeTime || "N/D")}</span>
+                            <span class="api-card-value">${_escapeHtml(time.nome || nomeTime || "N/D")}</span>
                             <span class="api-card-label">Nome do Time</span>
                         </div>
                         <div class="api-card">
-                            <span class="api-card-value">${escapeHtml(time.nome_cartola || nomeCartoleiro || "N/D")}</span>
+                            <span class="api-card-value">${_escapeHtml(time.nome_cartola || nomeCartoleiro || "N/D")}</span>
                             <span class="api-card-label">Cartoleiro</span>
                         </div>
                         <div class="api-card">
@@ -1867,12 +1877,12 @@ function criarModalApiCartola(timeId, nomeCartoleiro, nomeTime, data) {
                     <div class="api-grid api-grid-clube">
                         <div class="api-card api-card-escudo-clube">
                             <img src="/escudos/${clube.id}.png"
-                                 alt="${escapeHtml(clube.nome || 'Clube')}"
+                                 alt="${_escapeHtml(clube.nome || 'Clube')}"
                                  class="escudo-clube"
                                  onerror="this.onerror=null; this.src='${clubeEscudo || '/escudos/default.png'}'">
                         </div>
                         <div class="api-card">
-                            <span class="api-card-value">${escapeHtml(clube.nome || "N/D")}</span>
+                            <span class="api-card-value">${_escapeHtml(clube.nome || "N/D")}</span>
                             <span class="api-card-label">Nome</span>
                         </div>
                         <div class="api-card">
@@ -2069,14 +2079,14 @@ function criarModalDadosGlobo(timeId, nomeCartoleiro, nomeTime, data) {
                     <span class="resumo-icon material-symbols-outlined">person</span>
                     <div class="resumo-info">
                         <span class="resumo-label">Cartoleiro</span>
-                        <span class="resumo-value">${escapeHtml(time.nome_cartola || nomeCartoleiro)}</span>
+                        <span class="resumo-value">${_escapeHtml(time.nome_cartola || nomeCartoleiro)}</span>
                     </div>
                 </div>
                 <div class="resumo-item">
                     <span class="resumo-icon material-symbols-outlined">sports_soccer</span>
                     <div class="resumo-info">
                         <span class="resumo-label">Time</span>
-                        <span class="resumo-value">${escapeHtml(time.nome || nomeTime)}</span>
+                        <span class="resumo-value">${_escapeHtml(time.nome || nomeTime)}</span>
                     </div>
                 </div>
                 ${patrimonio !== undefined ? `
@@ -2114,8 +2124,8 @@ function criarModalDadosGlobo(timeId, nomeCartoleiro, nomeTime, data) {
                 <div class="atletas-grid">
                     ${atletas.slice(0, 12).map(a => `
                         <div class="atleta-card">
-                            <img src="${a.foto || '/escudos/placeholder.png'}" alt="${escapeHtml(a.apelido)}" onerror="this.onerror=null;this.src='/escudos/placeholder.png'">
-                            <span class="atleta-nome">${escapeHtml(a.apelido || a.nome)}</span>
+                            <img src="${a.foto || '/escudos/placeholder.png'}" alt="${_escapeHtml(a.apelido)}" onerror="this.onerror=null;this.src='/escudos/placeholder.png'">
+                            <span class="atleta-nome">${_escapeHtml(a.apelido || a.nome)}</span>
                             <span class="atleta-pontos">${a.pontos_num ? (Math.trunc(a.pontos_num * 10) / 10).toFixed(1) : '-'} pts</span>
                         </div>
                     `).join("")}
@@ -2679,8 +2689,8 @@ function mostrarModalValidacao(data) {
                                 <div class="historico-item" style="border-left: 3px solid #22c55e;">
                                     <span class="material-icons" style="color: #22c55e;">person</span>
                                     <div class="historico-info">
-                                        <span class="historico-data">${escapeHtml(r.nome_registrado)}</span>
-                                        <span class="historico-tipo">${escapeHtml(r.nome_time_registrado)}${r.nome_time_atual !== r.nome_time_registrado ? ` → ${escapeHtml(r.nome_time_atual)}` : ""}</span>
+                                        <span class="historico-data">${_escapeHtml(r.nome_registrado)}</span>
+                                        <span class="historico-tipo">${_escapeHtml(r.nome_time_registrado)}${r.nome_time_atual !== r.nome_time_registrado ? ` → ${_escapeHtml(r.nome_time_atual)}` : ""}</span>
                                     </div>
                                     <span style="font-size: 0.75rem; color: #666;">#${r.time_id}</span>
                                 </div>
@@ -2697,8 +2707,8 @@ function mostrarModalValidacao(data) {
                                 <div class="historico-item" style="border-left: 3px solid #fbbf24;">
                                     <span class="material-icons" style="color: #fbbf24;">swap_horiz</span>
                                     <div class="historico-info" style="flex: 1;">
-                                        <span class="historico-data" style="color: #fbbf24;">${escapeHtml(r.nome_registrado)} → ${escapeHtml(r.nome_atual)}</span>
-                                        <span class="historico-tipo">${escapeHtml(r.nome_time_registrado)} → ${escapeHtml(r.nome_time_atual)}</span>
+                                        <span class="historico-data" style="color: #fbbf24;">${_escapeHtml(r.nome_registrado)} → ${_escapeHtml(r.nome_atual)}</span>
+                                        <span class="historico-tipo">${_escapeHtml(r.nome_time_registrado)} → ${_escapeHtml(r.nome_time_atual)}</span>
                                     </div>
                                     <button class="toolbar-btn btn-primary" style="padding: 4px 8px; font-size: 0.7rem;"
                                             onclick="sincronizarParticipanteValidacao('${r.time_id}', ${temporada})">
@@ -2719,7 +2729,7 @@ function mostrarModalValidacao(data) {
                                 <div class="historico-item" style="border-left: 3px solid #ef4444;">
                                     <span class="material-icons" style="color: #ef4444;">cancel</span>
                                     <div class="historico-info">
-                                        <span class="historico-data" style="color: #ef4444;">${escapeHtml(r.nome_registrado)}</span>
+                                        <span class="historico-data" style="color: #ef4444;">${_escapeHtml(r.nome_registrado)}</span>
                                         <span class="historico-tipo">ID ${r.time_id} não existe mais</span>
                                     </div>
                                 </div>
@@ -2738,8 +2748,8 @@ function mostrarModalValidacao(data) {
                                 <div class="historico-item" style="opacity: 0.6;">
                                     <span class="material-icons">error_outline</span>
                                     <div class="historico-info">
-                                        <span class="historico-data">${escapeHtml(r.nome_registrado)}</span>
-                                        <span class="historico-tipo">${escapeHtml(r.mensagem)}</span>
+                                        <span class="historico-data">${_escapeHtml(r.nome_registrado)}</span>
+                                        <span class="historico-tipo">${_escapeHtml(r.mensagem)}</span>
                                     </div>
                                 </div>
                             `).join("")}
@@ -3076,7 +3086,7 @@ async function mostrarModalConfirmacaoBatch(acao, titulo, timeIds) {
                                         ${String(p.num).padStart(numWidth, '0')}
                                     </td>
                                     <td style="padding: 8px 12px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 350px;">
-                                        ${escapeHtml(p.nome)}
+                                        ${_escapeHtml(p.nome)}
                                     </td>
                                 </tr>
                                 `).join('')}
@@ -3617,8 +3627,8 @@ window.buscarTimeNovoParticipante = async function() {
                      alt="Escudo"
                      onerror="this.onerror=null;this.src='/escudos/default.png'">
                 <div class="resultado-info">
-                    <div class="resultado-nome">${escapeHtml(time.nome_time || time.nome || 'Time sem nome')}</div>
-                    <div class="resultado-cartoleiro">${escapeHtml(time.nome_cartoleiro || time.nome_cartola || '-')}</div>
+                    <div class="resultado-nome">${_escapeHtml(time.nome_time || time.nome || 'Time sem nome')}</div>
+                    <div class="resultado-cartoleiro">${_escapeHtml(time.nome_cartoleiro || time.nome_cartola || '-')}</div>
                     <div class="resultado-id">ID: ${time.time_id}</div>
                 </div>
             </div>
