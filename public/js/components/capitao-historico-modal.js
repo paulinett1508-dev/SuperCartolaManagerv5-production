@@ -4,6 +4,16 @@
 // v1.0: Layout limpo com tabela scrollável
 // =============================================
 
+// Fallback: garante escapeHtml disponível mesmo se escape-html.js não carregou antes
+const _escapeHtml = (typeof window.escapeHtml === 'function')
+    ? window.escapeHtml
+    : function(str) {
+        if (str == null) return '';
+        return String(str).replace(/[&<>"']/g, function(ch) {
+            return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch];
+        });
+    };
+
 const CapitaoHistoricoModal = {
     /**
      * Renderiza modal com histórico completo de um participante
@@ -65,7 +75,7 @@ const CapitaoHistoricoModal = {
             return `
                 <tr class="${rowClass}">
                     <td class="col-rodada">${r.rodada}</td>
-                    <td class="col-atleta">${escapeHtml(r.atleta_nome || 'N/A')}</td>
+                    <td class="col-atleta">${_escapeHtml(r.atleta_nome || 'N/A')}</td>
                     <td class="col-pontos" style="color: ${corPontuacao}; font-weight: 700;">${pts}</td>
                     <td class="col-status">${statusHtml}</td>
                 </tr>
@@ -83,7 +93,7 @@ const CapitaoHistoricoModal = {
                                 <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">military_tech</span>
                                 Histórico de Capitães
                             </h2>
-                            <p class="modal-subtitle-capitao">${escapeHtml(nomeCartola)}${nomeTime ? ` - ${escapeHtml(nomeTime)}` : ''}</p>
+                            <p class="modal-subtitle-capitao">${_escapeHtml(nomeCartola)}${nomeTime ? ` - ${_escapeHtml(nomeTime)}` : ''}</p>
                         </div>
                         <button class="modal-close-btn" onclick="CapitaoHistoricoModal.fechar()" aria-label="Fechar">
                             <span class="material-icons">close</span>
