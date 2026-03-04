@@ -9,6 +9,16 @@
     border-radius: 12px;
     color: var(--text-primary, #fff);
     font-family: 'Inter', -apple-system, sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Blob glow decoration (emerald = resta um) */
+.ru-container::after {
+    content: ''; position: absolute; width: 300px; height: 300px;
+    border-radius: 50%; background: var(--module-restaum-primary, #10b981);
+    filter: blur(60px); opacity: 0.10; top: -80px; right: -80px;
+    pointer-events: none; z-index: 0;
 }
 
 .ru-header {

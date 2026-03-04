@@ -6,6 +6,28 @@
   border-radius: var(--border-radius-md, 8px);
   padding: var(--spacing-lg, 20px);
   margin: var(--spacing-md, 15px) 0;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--color-primary-muted, rgba(255, 69, 0, 0.1));
+}
+
+/* Top gradient bar (padrão dos outros módulos) */
+#mata-mata::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(135deg, var(--laranja, #FF4500) 0%, var(--laranja-dark, #e8472b) 100%);
+}
+
+/* Blob glow decoration */
+#mata-mata::after {
+  content: ''; position: absolute; width: 300px; height: 300px;
+  border-radius: 50%; background: var(--laranja, #FF4500);
+  filter: blur(60px); opacity: 0.10; top: -80px; right: -80px;
+  pointer-events: none; z-index: 0;
 }
 
 /* Seletor de Edição */

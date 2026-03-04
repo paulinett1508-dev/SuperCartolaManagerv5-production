@@ -30,6 +30,15 @@
   border-radius: 8px;
   border: 1px solid var(--module-capitao-border);
   overflow: hidden;
+  position: relative;
+}
+
+/* Blob glow decoration (roxo = capitão) */
+.capitao-luxo-container::after {
+  content: ''; position: absolute; width: 300px; height: 300px;
+  border-radius: 50%; background: var(--module-capitao-primary, #8b5cf6);
+  filter: blur(60px); opacity: 0.10; top: -80px; right: -80px;
+  pointer-events: none; z-index: 0;
 }
 
 /* =============================================

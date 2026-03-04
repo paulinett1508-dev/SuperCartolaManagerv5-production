@@ -24,6 +24,14 @@
   background: linear-gradient(135deg, var(--laranja) 0%, var(--laranja-dark) 100%);
 }
 
+/* Blob glow decoration */
+#rodadas::after {
+  content: ''; position: absolute; width: 300px; height: 300px;
+  border-radius: 50%; background: var(--laranja);
+  filter: blur(60px); opacity: 0.10; top: -80px; right: -80px;
+  pointer-events: none; z-index: 0;
+}
+
 /* === HEADER DO MÓDULO === */
 .module-header-section {
   text-align: center;

@@ -15,6 +15,13 @@
     content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
     background: var(--gradient-tirocerto);
 }
+/* Blob glow decoration (::after preserva ::before gradient) */
+.tc-admin-header::after {
+    content: ''; position: absolute; width: 300px; height: 300px;
+    border-radius: 50%; background: var(--module-tirocerto-primary);
+    filter: blur(60px); opacity: 0.12; top: -80px; right: -80px;
+    pointer-events: none; z-index: 0;
+}
 .tc-admin-header h1 { font-family: var(--app-font-brand); font-size: 1.5rem; color: white; margin: 0; display: flex; align-items: center; gap: var(--app-space-2); }
 .tc-admin-header p { font-size: var(--app-font-sm); color: var(--app-text-muted); margin: 0.25rem 0 0; }
 
