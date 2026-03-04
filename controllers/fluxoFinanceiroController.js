@@ -544,7 +544,20 @@ async function calcularFinanceiroDaRodada(
     const minhaPontuacaoObj = pontuacoes.find(
         (p) => String(p.timeId) === String(timeId),
     );
-    if (!minhaPontuacaoObj) return { transacoes, saldo: 0 };
+    // ✅ v8.19.0 FIX: SEMPRE criar transação para garantir que rodada aparece no extrato
+    // Antes: retornava vazio → rodada era pulada permanentemente no cache
+    // Agora: cria transação NEUTRO para manter continuidade do extrato
+    if (!minhaPontuacaoObj) {
+        transacoes.push({
+            rodada: rodadaNumero,
+            tipo: "NEUTRO",
+            descricao: `Banco R${rodadaNumero}: Sem participação`,
+            valor: 0,
+            posicao: null,
+            data: new Date(),
+        });
+        return { transacoes, saldo: 0 };
+    }
 
     const meusPontos = minhaPontuacaoObj.pontos;
 
