@@ -181,7 +181,11 @@ class RoundMarketOrchestrator extends EventEmitter {
 
         this._ativo = false;
 
-        await OrchestratorState.salvar({ polling_ativo: false });
+        try {
+            await OrchestratorState.salvar({ polling_ativo: false });
+        } catch (e) {
+            // MongoDB pode estar desconectado durante shutdown graceful — esperado
+        }
         console.log('[ORCHESTRATOR] Orchestrator parado');
     }
 
