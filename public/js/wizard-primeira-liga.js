@@ -8,6 +8,12 @@
  * @since 2026-01-03
  */
 
+// 🛡️ Escape HTML seguro (evita XSS)
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 class WizardPrimeiraLiga {
     constructor() {
         this.etapaAtual = 1;

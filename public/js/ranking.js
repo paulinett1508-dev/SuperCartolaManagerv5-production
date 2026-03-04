@@ -6,6 +6,12 @@
 // ✅ NOVO: Card destaque do líder + Card "Seu Desempenho" + Posições por turno
 // ✅ FIX: Material Icons via FontFace API
 
+// 🛡️ Escape HTML seguro (evita XSS)
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 // 🛡️ SISTEMA DE PROTEÇÃO CONTRA LOOP
 let rankingProcessando = false;
 let ultimoProcessamento = 0;

@@ -3,6 +3,12 @@
 (function () {
   "use strict";
 
+  // 🛡️ Escape HTML seguro (evita XSS)
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
   const RODADA_FINAL_CAMPEONATO = 38; // Brasileirão (centralizado em config/seasons.js)
 
   // State
