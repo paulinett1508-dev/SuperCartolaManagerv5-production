@@ -423,11 +423,17 @@ export class FluxoFinanceiroCore {
                 // ✅ v6.14 FIX: Usar resumo do backend quando cache é de pré-temporada
                 // Cenário: backend marcou preTemporada=true (inscrição + acertos calculados),
                 // mas frontend diz isPreTemporada=false (rodada_atual > 1).
-                // Sem este fix, o frontend ignora o resumo e recalcula do zero,
-                // perdendo a inscrição (-180) e mostrando apenas rodadas + acertos.
+                // ✅ v6.15 FIX: Se o backend diz preTemporada=true mas o frontend sabe que não é
+                // pré-temporada, não usar cache stale — o backend (v8.1) já deve ter retornado
+                // valido=false nesse caso. Se chegou aqui com essa discrepância, é edge case
+                // (ex: rodadas collection vazia para esta liga) — ainda usar para mostrar inscrição.
                 const cacheEhPreTemporada = isPreTemporada || cacheValido.preTemporada === true;
                 if (cacheEhPreTemporada && cacheValido.resumo) {
-                    console.log(`[FLUXO-CORE] ✅ PRÉ-TEMPORADA (backend=${cacheValido.preTemporada}, frontend=${isPreTemporada}): Usando resumo do backend cache`);
+                    if (cacheValido.preTemporada === true && !isPreTemporada) {
+                        console.warn(`[FLUXO-CORE] ⚠️ Cache pré-temporada stale recebido com temporada já iniciada — usando para exibir inscrição mas dados de rodadas ausentes`);
+                    } else {
+                        console.log(`[FLUXO-CORE] ✅ PRÉ-TEMPORADA (backend=${cacheValido.preTemporada}, frontend=${isPreTemporada}): Usando resumo do backend cache`);
+                    }
 
                     // Usar campos e acertos do cache
                     let camposEditaveis;
@@ -463,6 +469,7 @@ export class FluxoFinanceiroCore {
                         totalTimes: 0,
                         camposEditaveis: camposEditaveis,
                         acertos: acertos,
+                        lancamentosIniciais: cacheValido.lancamentosIniciais || [], // ✅ v6.15: propagar para timeline
                         inativo: isInativo,
                         rodadaDesistencia: rodadaDesistencia,
                         extratoTravado: false,

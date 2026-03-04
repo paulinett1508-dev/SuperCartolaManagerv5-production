@@ -1,12 +1,11 @@
 /**
  * ROTAS DE GESTÃO DE RENOVAÇÕES - Temporada 2026
  *
- * Endpoints para gerenciar o users_registry.json
- * - Leitura dos participantes
- * - Atualização de status de renovação
- * - Registro de pagamentos
+ * @deprecated Sistema legado baseado em arquivo JSON (users_registry.json).
+ * Use /api/inscricoes (MongoDB InscricaoTemporada) para novas integrações.
+ * Estas rotas continuam funcionando mas serão removidas em temporada futura.
  *
- * @version 1.0.0
+ * @version 1.1.0-deprecated
  */
 
 import express from 'express';
@@ -20,6 +19,35 @@ const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const REGISTRY_PATH = join(__dirname, '..', 'data', 'users_registry.json');
+
+// =============================================================================
+// DEPRECATION MIDDLEWARE
+// =============================================================================
+
+/**
+ * Middleware de deprecação — aplicado em todas as rotas /api/renovacoes.
+ * Adiciona cabeçalho Deprecation e campo deprecated na resposta via res.json override.
+ */
+function deprecationMiddleware(req, res, next) {
+    res.setHeader('Deprecation', 'true');
+    res.setHeader('Link', '</api/inscricoes>; rel="successor-version"');
+    res.setHeader('Sunset', '2027-01-01');
+
+    // Sobrescreve res.json para injetar aviso sem alterar cada handler
+    const originalJson = res.json.bind(res);
+    res.json = (body) => {
+        if (body && typeof body === 'object') {
+            body._deprecated = true;
+            body._deprecated_message = 'Este endpoint (/api/renovacoes) é legado. Use /api/inscricoes para novas integrações.';
+        }
+        return originalJson(body);
+    };
+
+    next();
+}
+
+// Aplicar em todas as rotas deste router
+router.use(deprecationMiddleware);
 
 // =============================================================================
 // HELPERS

@@ -17,7 +17,7 @@ import FluxoFinanceiroCampos from "../models/FluxoFinanceiroCampos.js";
 import AcertoFinanceiro from "../models/AcertoFinanceiro.js";
 import AjusteFinanceiro from "../models/AjusteFinanceiro.js";
 import InscricaoTemporada from "../models/InscricaoTemporada.js";
-import { CURRENT_SEASON } from "../config/seasons.js";
+import { CURRENT_SEASON, PREVIOUS_SEASON } from "../config/seasons.js";
 import {
     calcularResumoDeRodadas,
     transformarTransacoesEmRodadas,
@@ -54,10 +54,10 @@ export async function calcularSaldoParticipante(ligaId, timeId, temporada = CURR
             ligaId
         );
 
-        // ✅ A3 FIX: FluxoFinanceiroCampos apenas para pre-2026
-        // Para 2026+, AjusteFinanceiro é o sistema vigente — incluir ambos causava double-count
+        // ✅ A3 FIX: FluxoFinanceiroCampos apenas para temporadas até PREVIOUS_SEASON
+        // Para CURRENT_SEASON+, AjusteFinanceiro é o sistema vigente — incluir ambos causava double-count
         let camposAtivos = [];
-        if (Number(temporada) < 2026) {
+        if (Number(temporada) <= PREVIOUS_SEASON) {
             const camposDoc = await FluxoFinanceiroCampos.findOne({
                 liga_id: String(ligaId),
                 time_id: Number(timeId),
@@ -94,9 +94,9 @@ export async function calcularSaldoParticipante(ligaId, timeId, temporada = CURR
         // Usar saldo consolidado do cache (fallback)
         saldoConsolidado = cache?.saldo_consolidado || 0;
 
-        // ✅ A3 FIX: FluxoFinanceiroCampos apenas para pre-2026
-        // Para 2026+, AjusteFinanceiro é o sistema vigente — incluir ambos causava double-count
-        if (Number(temporada) < 2026) {
+        // ✅ A3 FIX: FluxoFinanceiroCampos apenas para temporadas até PREVIOUS_SEASON
+        // Para CURRENT_SEASON+, AjusteFinanceiro é o sistema vigente — incluir ambos causava double-count
+        if (Number(temporada) <= PREVIOUS_SEASON) {
             const camposDoc = await FluxoFinanceiroCampos.findOne({
                 liga_id: String(ligaId),
                 time_id: Number(timeId),

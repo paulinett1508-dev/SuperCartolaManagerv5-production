@@ -2882,10 +2882,10 @@ export class FluxoFinanceiroUI {
             // ✅ v4.6 FIX: Obter temporada do modal
             const temporada = this.temporadaModalExtrato || window.temporadaAtual || CURRENT_SEASON;
 
-            // ✅ v4.6 FIX: NÃO popular cache de 2026 durante pré-temporada
-            // O extrato 2026 só deve ter dados quando a temporada começar
-            if (temporada === 2026) {
-                console.log(`[FLUXO-UI] ⏸️ Skipping cache 2026 (pré-temporada)`);
+            // ✅ v4.7 FIX: Bloquear apenas quando em pré-temporada real, não toda a temporada 2026
+            // v4.6 bloqueava TODO o cache de 2026 — corrigido para usar flag preTemporada do extrato
+            if (extrato?.preTemporada === true) {
+                console.log(`[FLUXO-UI] ⏸️ Skipping cache backend (pré-temporada ativa)`);
                 return;
             }
 

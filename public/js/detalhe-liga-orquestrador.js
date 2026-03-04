@@ -6,7 +6,7 @@
 // v3.1: FIX - Evita re-injeção de scripts do layout + invalida cache ao navegar entre ligas
 
 // 🔖 Versão de cache-busting — atualize ao fazer deploy para forçar reload dos módulos JS
-const ADMIN_JS_VERSION = '20260304.2';
+const ADMIN_JS_VERSION = '20260304.3';
 
 // Wrapper de import dinâmico com cache-busting automático
 const vImport = (path) => {

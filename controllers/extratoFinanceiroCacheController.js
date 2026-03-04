@@ -1286,6 +1286,19 @@ export const verificarCacheValido = async (req, res) => {
                                      cacheExistente.historico_transacoes?.length > 0;
 
         if (isPreTemporadaCache) {
+            // ✅ v8.1 FIX: Mirror do fix v6.8 — verificar se temporada já iniciou com rodadas reais
+            // Cache criado na pré-temporada (ultima_rodada=0) pode estar stale após início do campeonato
+            const rodadasCol = mongoose.connection.db.collection('rodadas');
+            const rodadaRealExiste = await rodadasCol.findOne({
+                ligaId: String(ligaId),
+                temporada: temporadaNum,
+                rodada: { $gt: 0 },
+            });
+            if (rodadaRealExiste) {
+                logger.log(`[CACHE-CONTROLLER] ⚠️ PRÉ-TEMPORADA ignorada: temporada ${temporadaNum} já tem rodadas reais (R${rodadaRealExiste.rodada}). Cache stale — forçando recálculo.`);
+                return res.json({ valido: false, motivo: 'cache_desatualizado_pos_temporada' });
+            }
+
             logger.log(`[CACHE-CONTROLLER] ✅ PRÉ-TEMPORADA: Cache válido com ${cacheExistente.historico_transacoes.length} transações iniciais`);
 
             // Extrair lançamentos iniciais (inscrição, transferência)
@@ -1334,6 +1347,7 @@ export const verificarCacheValido = async (req, res) => {
                 resumo: resumoCalculado,
                 camposManuais: camposAtivos,
                 acertos: acertos,
+                lancamentosIniciais: lancamentosIniciais, // ✅ Fix: incluir para timeline mostrar inscrição
                 inativo: isInativo,
                 rodadaDesistencia,
                 extratoTravado: false,
