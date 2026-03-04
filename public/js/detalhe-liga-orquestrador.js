@@ -1,8 +1,18 @@
-// DETALHE-LIGA ORQUESTRADOR - COORDENADOR OTIMIZADO v3.2
+// DETALHE-LIGA ORQUESTRADOR - COORDENADOR OTIMIZADO v3.3
 // Responsável por coordenar navegação e carregar módulos sob demanda
+// v3.3: Cache-busting via ADMIN_JS_VERSION em todos os imports dinâmicos
 // v3.2: FIX CRÍTICO - Double RAF para garantir container no DOM após injeção de HTML
 //       Resolve problema de "renderização perdida" em refresh (F5)
 // v3.1: FIX - Evita re-injeção de scripts do layout + invalida cache ao navegar entre ligas
+
+// 🔖 Versão de cache-busting — atualize ao fazer deploy para forçar reload dos módulos JS
+const ADMIN_JS_VERSION = '20260304.1';
+
+// Wrapper de import dinâmico com cache-busting automático
+const vImport = (path) => {
+    const url = path.includes('?') ? `${path}&_v=${ADMIN_JS_VERSION}` : `${path}?_v=${ADMIN_JS_VERSION}`;
+    return import(url);
+};
 
 class DetalheLigaOrquestrador {
     constructor() {
@@ -247,7 +257,7 @@ class DetalheLigaOrquestrador {
                         pontosCorridosContainer.classList.add("active");
 
                     try {
-                        const pontosCorridosModule = await import(
+                        const pontosCorridosModule = await vImport(
                             "./pontos-corridos.js"
                         );
                         if (pontosCorridosModule?.carregarPontosCorridos) {
@@ -352,7 +362,7 @@ class DetalheLigaOrquestrador {
 
                 case "participantes":
                     try {
-                        await import("./participantes.js");
+                        await vImport("./participantes.js");
                         // ✅ v3.2: Double RAF em vez de setTimeout fixo
                         await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
@@ -434,7 +444,7 @@ class DetalheLigaOrquestrador {
                         // Importar módulo (browser cacheia ES modules — não deletar window.RestaUmModule)
                         console.log('[ORQUESTRADOR] Importando resta-um-orquestrador.js...');
                         if (!window.RestaUmModule) {
-                            await import('../participante/js/orquestradores/resta-um-orquestrador.js?v=3.3');
+                            await vImport('../participante/js/orquestradores/resta-um-orquestrador.js?v=3.3');
                         }
                         console.log('[ORQUESTRADOR] Import concluído. RestaUmModule:', typeof window.RestaUmModule);
 
@@ -906,8 +916,8 @@ class DetalheLigaOrquestrador {
     async loadModules() {
         try {
             // Apenas módulos que aparecem na tela inicial
-            this.modules.ranking = await import("./ranking.js");
-            this.modules.top10 = await import("./top10.js");
+            this.modules.ranking = await vImport("./ranking.js");
+            this.modules.top10 = await vImport("./top10.js");
 
             // Configuração lazy loading para os demais
             setupLazyModuleLoading();
@@ -1124,7 +1134,7 @@ class DetalheLigaOrquestrador {
             },
             'pontos-corridos': async () => {
                 const mod = this.modules.pontosCorridos
-                    || await import('./pontos-corridos.js').catch(() => null);
+                    || await vImport('./pontos-corridos.js').catch(() => null);
                 if (mod?.carregarPontosCorridos) {
                     await mod.carregarPontosCorridos();
                 }
@@ -1162,14 +1172,14 @@ class DetalheLigaOrquestrador {
 
 async function carregarModuloRanking() {
     if (!window.orquestrador.modules.ranking) {
-        window.orquestrador.modules.ranking = await import("./ranking.js");
+        window.orquestrador.modules.ranking = await vImport("./ranking.js");
     }
     return window.orquestrador.modules.ranking;
 }
 
 async function carregarModuloTop10() {
     if (!window.orquestrador.modules.top10) {
-        window.orquestrador.modules.top10 = await import("./top10.js");
+        window.orquestrador.modules.top10 = await vImport("./top10.js");
     }
     return window.orquestrador.modules.top10;
 }
@@ -1177,7 +1187,7 @@ async function carregarModuloTop10() {
 async function carregarModuloRodadas() {
     if (!window.orquestrador.modules.rodadas) {
         try {
-            window.orquestrador.modules.rodadas = await import("./rodadas.js");
+            window.orquestrador.modules.rodadas = await vImport("./rodadas.js");
             await new Promise((resolve) => setTimeout(resolve, 200));
         } catch (error) {
             console.error("[ORQUESTRADOR] Erro ao importar rodadas:", error);
@@ -1189,7 +1199,7 @@ async function carregarModuloRodadas() {
 
 async function carregarModuloMataMata() {
     if (!window.orquestrador.modules.mataMata) {
-        window.orquestrador.modules.mataMata = await import(
+        window.orquestrador.modules.mataMata = await vImport(
             "/js/mata-mata/mata-mata-orquestrador.js"
         );
     }
@@ -1198,7 +1208,7 @@ async function carregarModuloMataMata() {
 
 async function carregarModuloPontosCorridos() {
     if (!window.orquestrador.modules.pontosCorridos) {
-        window.orquestrador.modules.pontosCorridos = await import(
+        window.orquestrador.modules.pontosCorridos = await vImport(
             "./pontos-corridos.js"
         );
     }
@@ -1208,7 +1218,7 @@ async function carregarModuloPontosCorridos() {
 async function carregarModuloMelhorMes() {
     if (!window.orquestrador.modules.melhorMes) {
         try {
-            window.orquestrador.modules.melhorMes = await import(
+            window.orquestrador.modules.melhorMes = await vImport(
                 "./melhor-mes.js?v=20260228-3"
             );
             await new Promise((resolve) => setTimeout(resolve, 200));
@@ -1222,7 +1232,7 @@ async function carregarModuloMelhorMes() {
 
 async function carregarModuloArtilheiroCampeao() {
     if (!window.orquestrador.modules.artilheiroCampeao) {
-        window.orquestrador.modules.artilheiroCampeao = await import(
+        window.orquestrador.modules.artilheiroCampeao = await vImport(
             "./artilheiro-campeao.js"
         );
     }
@@ -1233,13 +1243,13 @@ async function carregarModuloArtilheiroCampeao() {
 async function carregarModuloLuvaDeOuro() {
     if (!window.orquestrador.modules.luvaDeOuro) {
         // Carrega dependências apenas quando necessário
-        await import("./luva-de-ouro/luva-de-ouro-config.js");
-        await import("./luva-de-ouro/luva-de-ouro-core.js");
-        await import("./luva-de-ouro/luva-de-ouro-ui.js");
-        await import("./luva-de-ouro/luva-de-ouro-utils.js");
-        await import("./luva-de-ouro/luva-de-ouro-cache.js");
-        await import("./luva-de-ouro/luva-de-ouro-orquestrador.js");
-        window.orquestrador.modules.luvaDeOuro = await import(
+        await vImport("./luva-de-ouro/luva-de-ouro-config.js");
+        await vImport("./luva-de-ouro/luva-de-ouro-core.js");
+        await vImport("./luva-de-ouro/luva-de-ouro-ui.js");
+        await vImport("./luva-de-ouro/luva-de-ouro-utils.js");
+        await vImport("./luva-de-ouro/luva-de-ouro-cache.js");
+        await vImport("./luva-de-ouro/luva-de-ouro-orquestrador.js");
+        window.orquestrador.modules.luvaDeOuro = await vImport(
             "./luva-de-ouro.js"
         );
     }
@@ -1248,7 +1258,7 @@ async function carregarModuloLuvaDeOuro() {
 
 async function carregarModuloCapitaoLuxo() {
     if (!window.orquestrador.modules.capitaoLuxo) {
-        window.orquestrador.modules.capitaoLuxo = await import(
+        window.orquestrador.modules.capitaoLuxo = await vImport(
             "./capitao-luxo.js"
         );
     }
@@ -1257,7 +1267,7 @@ async function carregarModuloCapitaoLuxo() {
 
 async function carregarModuloFluxoFinanceiro() {
     if (!window.orquestrador.modules.fluxoFinanceiro) {
-        window.orquestrador.modules.fluxoFinanceiro = await import(
+        window.orquestrador.modules.fluxoFinanceiro = await vImport(
             "./fluxo-financeiro.js?v8.0"
         );
     }
