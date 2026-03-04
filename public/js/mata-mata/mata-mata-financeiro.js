@@ -1,7 +1,7 @@
 // MATA-MATA FINANCEIRO - Cálculos e Resultados Financeiros
 // Responsável por: cálculos de premiação, consolidação de resultados, fluxo financeiro
 
-import { edicoes, getLigaId, VALORES_FASE, TAMANHO_TORNEIO_DEFAULT, getFasesParaTamanho, FASE_NUM_JOGOS, setValoresFase } from "./mata-mata-config.js";
+import { edicoes, getLigaId, VALORES_FASE, TAMANHO_TORNEIO_DEFAULT, getFasesParaTamanho, FASE_NUM_JOGOS, setValoresFase, setEdicoes } from "./mata-mata-config.js";
 import {
   getPontosDaRodada,
   montarConfrontosPrimeiraFase,
@@ -198,6 +198,19 @@ export async function getResultadosMataMataFluxo(ligaIdParam = null) {
           const valorDerrota = Number(wizardRespostas?.valor_derrota);
           if (valorVitoria > 0 && valorDerrota < 0) {
             setValoresFase(valorVitoria, valorDerrota);
+          }
+          // FIX-5: Carregar edições do calendario_efetivo quando array ainda vazio
+          // (fluxo-financeiro não passa pelo orquestrador que chama setEdicoes)
+          if (edicoes.length === 0) {
+            const calendario = configData?.calendario_efetivo;
+            if (Array.isArray(calendario) && calendario.length > 0) {
+              const qtdEdicoes = Number(wizardRespostas?.qtd_edicoes);
+              const edicoesParaUsar = qtdEdicoes >= 1 && qtdEdicoes <= 10
+                ? calendario.slice(0, qtdEdicoes)
+                : calendario;
+              setEdicoes(edicoesParaUsar);
+              console.log(`[MATA-FINANCEIRO] FIX-5: ${edicoesParaUsar.length} edições carregadas do calendario_efetivo`);
+            }
           }
         }
       } catch (err) {
