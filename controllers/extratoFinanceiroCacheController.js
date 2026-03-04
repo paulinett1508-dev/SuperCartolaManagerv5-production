@@ -414,7 +414,8 @@ function transformarTransacoesEmRodadas(transacoes, ligaId) {
 
         if (!rodadasMap[numRodada]) {
             // ✅ v4.1: Só usar posição se for de transação de ranking (ONUS/BONUS)
-            const posicaoRanking = (t.tipo === 'ONUS' || t.tipo === 'BONUS' || t.tipo === 'BANCO_RODADA')
+            // ✅ v8.19.0: Incluir NEUTRO (zona neutra / sem participação)
+            const posicaoRanking = (t.tipo === 'ONUS' || t.tipo === 'BONUS' || t.tipo === 'BANCO_RODADA' || t.tipo === 'NEUTRO')
                 ? (t.posicao || null)
                 : null;
             rodadasMap[numRodada] = {
@@ -430,7 +431,7 @@ function transformarTransacoesEmRodadas(transacoes, ligaId) {
                 top10Status: null,
                 top10Posicao: null,
             };
-        } else if (!rodadasMap[numRodada].posicao && (t.tipo === 'ONUS' || t.tipo === 'BONUS' || t.tipo === 'BANCO_RODADA')) {
+        } else if (!rodadasMap[numRodada].posicao && (t.tipo === 'ONUS' || t.tipo === 'BONUS' || t.tipo === 'BANCO_RODADA' || t.tipo === 'NEUTRO')) {
             // ✅ v4.1: Se a rodada já existe mas não tem posição, usar desta transação de ranking
             rodadasMap[numRodada].posicao = t.posicao || null;
         }
@@ -482,6 +483,10 @@ function transformarTransacoesEmRodadas(transacoes, ligaId) {
                 break;
             case "RESTA_UM":
                 r.restaUm = (r.restaUm || 0) + valor;
+                break;
+            case "NEUTRO":
+                // ✅ v8.19.0: Zona neutra ou sem participação — valor=0 mas rodada deve existir
+                r.bonusOnus += valor;
                 break;
             default:
                 // Tipo desconhecido ou genérico vai para bonusOnus

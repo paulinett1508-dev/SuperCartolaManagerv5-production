@@ -945,6 +945,10 @@ function transformarDadosController(dados) {
             case "ONUS":
                 r.bonusOnus += valor;
                 break;
+            case "NEUTRO":
+                // v8.19.0: Zona neutra ou sem participacao - valor=0 mas rodada deve existir
+                r.bonusOnus += valor;
+                break;
             default:
                 r.bonusOnus += valor;
         }
