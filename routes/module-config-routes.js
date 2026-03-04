@@ -134,6 +134,59 @@ async function propagarRankingRodadaParaLiga(ligaId, wizardRespostas) {
 }
 
 // =============================================================================
+// PROPAGAÇÃO: moduleconfigs → liga.configuracoes (top_10)
+// =============================================================================
+
+/**
+ * Propaga valores do wizard top_10 para liga.configuracoes.top10
+ * Necessário para que top10.js encontre valores_mito e valores_mico
+ */
+async function propagarTop10ParaLiga(ligaId, wizardRespostas) {
+    const {
+        qtd_mitos = 10,
+        qtd_micos = 10,
+        valor_mito_1 = 30,
+        valor_mico_1 = -30,
+        decremento_valor = 2
+    } = wizardRespostas || {};
+
+    const qtdM = Number(qtd_mitos);
+    const qtdC = Number(qtd_micos);
+    const vMito1 = Number(valor_mito_1);
+    const vMico1 = Number(valor_mico_1);
+    const dec = Number(decremento_valor);
+
+    // Gerar mapa posição → valor para mitos (decresce a cada posição)
+    const valores_mito = {};
+    for (let i = 1; i <= qtdM; i++) {
+        valores_mito[String(i)] = vMito1 - dec * (i - 1);
+    }
+
+    // Gerar mapa posição → valor para micos (valor negativo, cresce em módulo)
+    // mico_1 é negativo (ex: -30), cada próxima posição fica menos negativa (+dec)
+    const valores_mico = {};
+    for (let i = 1; i <= qtdC; i++) {
+        valores_mico[String(i)] = vMico1 + dec * (i - 1);
+    }
+
+    const top10Config = {
+        valores_mito,
+        valores_mico,
+        qtd_mitos: qtdM,
+        qtd_micos: qtdC,
+        configurado: true
+    };
+
+    const result = await Liga.updateOne(
+        { _id: ligaId },
+        { $set: { 'configuracoes.top10': top10Config } }
+    );
+
+    console.log(`[MODULE-CONFIG] top10 propagado para liga ${ligaId}: ${qtdM} mitos / ${qtdC} micos, dec=${dec}, ${result.modifiedCount} doc atualizado`);
+    return result.modifiedCount > 0;
+}
+
+// =============================================================================
 // LISTAR MODULOS
 // =============================================================================
 
@@ -333,6 +386,11 @@ router.post('/liga/:ligaId/modulos/:modulo/ativar', verificarAdmin, async (req, 
             await propagarRankingRodadaParaLiga(ligaId, wizard_respostas);
         }
 
+        // Propagar top_10 para liga.configuracoes
+        if (modulo === 'top_10') {
+            await propagarTop10ParaLiga(ligaId, wizard_respostas);
+        }
+
         // ✅ FIX: Gerar calendario_override para mata_mata ao ativar (mesma lógica do PUT /config)
         // Sem isso, o calendario_override fica vazio e o sistema cai no JSON default (32 times)
         if (modulo === 'mata_mata' && wizard_respostas?.total_times && wizard_respostas?.qtd_edicoes) {
@@ -458,6 +516,11 @@ router.put('/liga/:ligaId/modulos/:modulo/config', verificarAdmin, async (req, r
             // Propagar ranking_rodada para liga.configuracoes
             if (modulo === 'ranking_rodada' && wizard_respostas.valores_manual) {
                 await propagarRankingRodadaParaLiga(ligaId, wizard_respostas);
+            }
+
+            // Propagar top_10 para liga.configuracoes
+            if (modulo === 'top_10') {
+                await propagarTop10ParaLiga(ligaId, wizard_respostas);
             }
 
             // ✅ FIX: Gerar calendario_override dinâmico para mata_mata
