@@ -313,186 +313,32 @@ Documentação das skills: [`docs/skills/`](docs/skills/) (agnóstico, Markdown 
 3. Consultar [`SKILL-KEYWORD-MAP.md`](docs/skills/SKILL-KEYWORD-MAP.md) para skills complementares
 4. Executar protocolo na ordem: frontend-design → anti-frankenstein → skill específica
 
-### Tabela Rápida - Keyword → Skill
-
-| Quando o usuário diz... | Skill Ativada | Categoria |
-|--------------------------|---------------|-----------|
-| "redesign", "nova tela", "nova home", "visual do app", "deixar bonito", "UX premium" | **frontend-design** | Design (PRIORIDADE 1) |
-| "quero criar feature", "como fazer", "por onde começar" | **workflow** | Core |
-| "pesquise", "analise o código", "gere PRD" | **pesquisa** | Core |
-| "especifique", "mapeie dependências", "fase 2" | **spec** | Core |
-| "implemente", "aplique mudanças", "fase 3" | **code** | Core |
-| "crie tela", "ajuste CSS", "layout", "componente" | **frontend-crafter** | Specialist |
-| "como funciona", "explique módulo", "documente" | **system-scribe** | Specialist |
-| "regra de negócio", "cálculo", "config liga" | **league-architect** | Specialist |
-| "script DB", "backup", "migration", "limpeza" | **db-guardian** | Specialist |
-| "auditar código", "security review", "OWASP" | **code-inspector** | Specialist |
-| "já existe esse CSS?", "anti-frank", "ative modo anti-frank", "antes de criar CSS", "blindar frontend" | **anti-frankenstein** | Specialist |
-| "git push", "commit", "suba mudanças" | **git-commit-push** | Utility |
-| "reiniciar servidor", "restart" | **restart-server** | Utility |
-| "pull no replit", "deploy", "sincronizar" | **replit-pull** | Utility |
-| "nova sessão", "handover", "retomar" | **newsession** | Utility |
-| "verifique se", "confirme que", "é verdade?" | **fact-checker** | Utility |
-| "tá complexo", "duplicado", "antes de codar" | **ai-problems-detection** | Utility |
-| "refatorar arquivo grande", "separar módulos" | **Refactor-Monolith** | Utility |
-| "adaptar html", "converter html externo", "html do stitch", "stitch mcp", "gerar tela no stitch", "design no stitch", "mockup no stitch", "variante no stitch" | **stitch-adapter** | Utility |
-| "API Cartola", "endpoint", "scout", "mercado" | **cartola-api** | Project |
-| "auditar cache", "cache lento", "Service Worker" | **cache-auditor** | Project |
-| "cache stale", "cache antigo", "sentinel", "monitorar cache", "dado antigo no app", "vasculhar caches" | **cache-sentinel** | Project |
-| "auditar módulo", "checklist módulo" | **auditor-module** | Project |
-| "auditar UX app", "revisar design participante", "visual do app" | **ux-auditor-app** | Project |
-| "auditar live", "experiência ao vivo", "parciais ao vivo", "orchestrator ok", "pre-flight rodada" | **live-experience** | Project |
-| "análise de branches", "comparar branches" | **analise-branches** | Project |
-| "deletar branches mergeadas", "limpar branches", "cleanup branches", "higienizar branches" | **delete-merged-branches** | Utility |
-| "auditoria mensal", "verificar mudanças", "check context7" | **context7-monthly-audit** | Project |
-| "criar skill", "skill nova" | **skill-creator** | Meta |
-| "instalar skill", "listar skills" | **skill-installer** | Meta |
-
-### High Senior Protocol (Workflow Completo)
-```
-workflow → FASE 1: pesquisa → PRD.md
-         → FASE 2: spec → SPEC.md
-         → FASE 3: [frontend-design se visual] → [anti-frankenstein] → code → Implementado
-```
+Tabela completa de keywords: [`docs/skills/SKILL-KEYWORD-MAP.md`](docs/skills/SKILL-KEYWORD-MAP.md)
 
 ### Anti-Frankenstein Protocol (Governança Frontend)
-```
-Qualquer criação/modificação CSS/HTML
-    ↓
-CHECK 1: Já existe? (consultar css-registry.json)
-CHECK 2: Onde vive? (diretório correto)
-CHECK 3: Usa tokens? (zero hardcoded)
-CHECK 4: Segue convenções? (naming, escopo, header)
-CHECK 5: É necessário? (editar existente vs criar novo)
-    ↓
-Todos passaram? → Prosseguir
-Algum falhou? → PARAR e corrigir
-```
-**Arquivos:** `config/css-registry.json`, `docs/rules/audit-frontend.md`
+Antes de criar/modificar CSS/HTML: verificar `config/css-registry.json`, usar tokens, seguir convenções.
 
 **Diretório:** `.claude/docs/PRD-[nome].md` e `SPEC-[nome].md`
 
 ## 🔌 MCPs Disponíveis
 
-### Context7 - Documentação Técnica
-Busca docs sempre atualizadas de frameworks/APIs (Mongoose, Express, MDN, OWASP)
-- **✅ USE:** Verificar mudanças API, security audits, implementar features novas
-- **❌ NÃO USE:** Lógica de negócio interna, debug de código custom
-- **Limitação:** Repositórios nicho não indexados (usar Perplexity)
+**Context7** (docs frameworks), **Perplexity** (pesquisa web), **Mongo MCP** (queries DB), **Stitch MCP** (design-to-code).
+Detalhes de uso: consultar skill `project-reference` ou [`docs/skills/03-utilities/project-reference.md`](docs/skills/03-utilities/project-reference.md)
 
-### Perplexity - Pesquisa Web Inteligente
-| Tool | Quando Usar |
-|------|-------------|
-| `perplexity_ask` | Dúvidas rápidas, info factual |
-| `perplexity_search` | URLs, notícias recentes |
-| `perplexity_research` | Análises extensas |
-| `perplexity_reason` | Raciocínio complexo |
-
-**Context7 vs Perplexity:**
-- Docs oficiais frameworks → Context7
-- API Cartola FC não-documentada → Perplexity
-- Notícias últimas 48h → Perplexity
-
-### Mongo MCP - Acesso Direto ao Banco
-| Tool | Função |
-|------|--------|
-| `list_collections` | Listar collections |
-| `find_documents` | Buscar com query JSON |
-| `get_collection_schema` | Analisar estrutura |
-
-**Quando usar:** Consultas rápidas, debug. **Não usar:** Operações destrutivas (usar scripts com `--dry-run`)
-
-### Stitch MCP - Design-to-Code (Google Stitch)
-Gera mockups visuais, variantes e extrai HTML via Google Stitch AI.
-
-| Tool | Função |
-|------|--------|
-| `list_projects` | Listar projetos do usuario |
-| `list_screens` | Listar telas de um projeto |
-| `get_screen` | Obter detalhes + HTML de uma tela |
-| `generate_screen_from_text` | Gerar tela a partir de prompt |
-| `edit_screens` | Editar telas existentes |
-| `generate_variants` | Gerar variações de design |
-
-**Pipeline completo:** [`docs/guides/STITCH-MCP-PIPELINE.md`](docs/guides/STITCH-MCP-PIPELINE.md)
-**Prompt padrão:** `.claude/STITCH-DESIGN-PROMPT.md`
-
-**Integração com skills:**
-```
-Stitch MCP (gerar) → frontend-design (validar) → stitch-adapter (adaptar) → anti-frankenstein (governar) → frontend-crafter (implementar)
-```
-
-**Quando usar:** Ideação rápida de UI, explorar variantes de design, redesign de telas
-**Não usar:** Código final direto (sempre passar pelo stitch-adapter antes)
-
-## 🎯 Slash Commands & Ativação por Keywords
+## 🎯 Slash Commands
 
 Skills podem ser invocadas por `/nome` OU por keywords naturais na conversa.
-As keywords ativam a mesma skill automaticamente (ver tabela acima).
-
-| Comando Direto | Keywords Equivalentes |
-|----------------|----------------------|
-| `/workflow` | "como fazer feature", "por onde começar" |
-| `/pesquisa` | "pesquise no código", "gere PRD" |
-| `/spec` | "especifique mudanças", "mapeie dependências" |
-| `/code` | "implemente", "aplique spec" |
-| `/auditor-module [modulo]` | "audite o módulo X", "checklist módulo" |
-| `/cache-auditor [modo]` | "auditar cache", "cache desatualizado" |
-| `/cache-sentinel [modo]` | "cache stale", "cache antigo prevalecendo", "monitorar cache participante", "vasculhar caches" |
-| `/ux-auditor-app` | "auditar UX do app", "revisar design participante", "visual do app tá ok?" |
-| `/live-experience` | "auditar experiência ao vivo", "parciais tão ok?", "orchestrator tá rodando?", "pre-flight rodada" |
-| `/anti-frankenstein` | "anti-frank", "ative modo anti-frank", "antes de criar CSS", "já existe?", "blindar frontend", "HTMLs no modo anti-frank" |
-| `/stitch-adapter` | "stitch mcp", "gerar tela no stitch", "design no stitch", "mockup no stitch", "variante no stitch", "adaptar html do stitch" |
-| `/newsession` | "nova sessão", "salvar contexto" |
-| `/liste-pr-github [período]` | "listar PRs", "PRs de hoje", "merges da semana" |
-| `/security-review` | "auditoria segurança", "security review", "revisar segurança do PR" |
-| `/delete-merged-branches` | "deletar branches mergeadas", "limpar branches", "cleanup branches", "higienizar branches" |
-
-> **`/liste-pr-github`** - Lista PRs do GitHub via API. Períodos: `hoje`, `ontem`, `semana`, `mes`, `YYYY-MM-DD` ou range `YYYY-MM-DD YYYY-MM-DD`. Sem argumento lista os últimos 10.
-
-> **`/security-review`** - Auditoria de segurança do diff da branch atual (baseado no [claude-code-security-review](https://github.com/anthropics/claude-code-security-review) da Anthropic). Analisa vulnerabilidades com confiança >80%, gera relatório com severidade e recomendações. Customizado para o projeto: NoSQL injection, XSS innerHTML, session management, idempotência financeira.
+Tabela completa de comandos e keywords: skill `project-reference` ou [`docs/skills/03-utilities/project-reference.md`](docs/skills/03-utilities/project-reference.md)
 
 ## 🔄 Sistema de Renovação de Temporada
 
-**Documentação Completa:** [`docs/SISTEMA-RENOVACAO-TEMPORADA.md`](docs/SISTEMA-RENOVACAO-TEMPORADA.md)
+**Documentação:** [`docs/SISTEMA-RENOVACAO-TEMPORADA.md`](docs/SISTEMA-RENOVACAO-TEMPORADA.md) | Detalhes: skill `project-reference`
 
-### Princípios
-1. **Zero hardcode** - Regras configuráveis via `ligarules`
-2. **Independência por liga** - Cada liga tem regras diferentes
-3. **Auditoria completa** - Registro em `inscricoestemporada`
-4. **Separação de temporadas** - Extratos independentes
+**Conceitos-chave:** `ligarules` (config por liga), `inscricoestemporada` (registro), `pagouInscricao` (true=pago, false=vira debito)
 
-### Collections
-- `ligarules` - Regras configuráveis (taxa, prazo, parcelamento)
-- `inscricoestemporada` - Registro de inscrições/renovações
+## 🕐 Pré-Temporada
 
-### Flag `pagouInscricao`
-- `true` → Taxa registrada, NÃO vira débito
-- `false` → Taxa VIRA DÉBITO no extrato
-
-## 🕐 Pré-Temporada (Conceito Crítico)
-
-Período entre fim de temporada e início da próxima:
-- **API Cartola** retorna `temporada: [ano anterior]`
-- **Brasileirão** não começou (sem rodadas)
-- **Participantes** podem renovar/inscrever
-
-### Detecção
-```javascript
-// Frontend
-const isPreTemporada = temporadaSelecionada > mercadoData.temporada;
-
-// Backend
-const preTemporada = temporada > statusMercado.temporada;
-```
-
-### Terminologia Financeira
-| Termo | Descrição |
-|-------|-----------|
-| **Ajustes** | Campos editáveis (campo1-4) para valores extras |
-| **Acertos** | Pagamentos/recebimentos que movimentam saldo |
-| **Legado** | Saldo transferido da temporada anterior |
-| **Inscrição** | Taxa para nova temporada |
+Periodo entre temporadas: API Cartola retorna ano anterior, sem rodadas. Detectar com `temporadaSelecionada > mercadoData.temporada`.
 
 ## 🧩 Sistema de Módulos
 
@@ -522,28 +368,10 @@ const preTemporada = temporada > statusMercado.temporada;
 - Schema: `id` (Number), `nome_time`, `nome_cartoleiro`, `ativo`, `temporada`
 
 ### Tipos de ID por Collection
-| Collection | Campo | Tipo | Por quê |
-|------------|-------|------|---------|
-| `extratofinanceirocaches` | `time_id` | Number | Performance |
-| `fluxofinanceirocampos` | `timeId` | String | Flexibilidade |
-| `acertofinanceiros` | `timeId` | String | Consistência |
-| `ajustefinanceiros` | `time_id` | Number | Histórico |
-| `inscricoestemporada` | `time_id` | Number | Histórico |
-
-**Mongoose faz coerção:** `String("13935277") == 13935277`
-
-**⚠️ G2/G3 — Dívida técnica conhecida (auditoria 2026-02-25):**
-- `AcertoFinanceiro`/`FluxoFinanceiroCampos` usam camelCase (`timeId: String`)
-- `AjusteFinanceiro`/`ExtratoFinanceiroCache`/`InscricaoTemporada` usam snake_case (`time_id: Number`)
-- **Regra de ouro para novas queries:**
-  - `extratofinanceirocaches` → `time_id: Number(id)` (raw) / `timeIds.map(Number)` (bulk)
-  - `fluxofinanceirocampos` → `timeId: { $in: ids.map(String) }` (Mongoose)
-  - `acertofinanceiros` → `timeId: String(id)` (Mongoose)
-- Migração completa requer script de dados — Sprint 3 futura
+**Cuidado:** Collections usam tipos mistos (`time_id: Number` vs `timeId: String`). Detalhes: skill `project-reference`.
 
 ### Escudos
-Localização: `/public/escudos/{clube_id}.png` (262=Flamengo, 263=Botafogo, etc.)
-Fallback: `onerror="this.src='/escudos/default.png'"`
+Localização: `/public/escudos/{clube_id}.png` — Fallback: `onerror="this.src='/escudos/default.png'"`
 
 ## 🔐 Sistema de Autenticação Admin
 
@@ -594,57 +422,13 @@ node scripts/[script].js --dry-run  # Validar
 node scripts/[script].js --force    # Executar
 ```
 
-## ⚽ Jogos do Dia (API-Football + Fallbacks)
+## ⚽ Jogos do Dia / 📦 Versionamento / 📝 Backlog
 
-**Documentação:** [`docs/JOGOS-DO-DIA-API.md`](docs/JOGOS-DO-DIA-API.md)
+Detalhes destes sistemas: skill `project-reference` ou [`docs/skills/03-utilities/project-reference.md`](docs/skills/03-utilities/project-reference.md)
 
-**Cobertura:** Brasileirão A/B/C/D, Copa do Brasil, TODOS Estaduais, Copinha
-
-**Fallback:** API-Football → SoccerDataAPI → Cache Stale → Globo Esporte
-
-**Endpoints:**
-- `GET /api/jogos-ao-vivo` → Jogos do dia
-- `GET /api/jogos-ao-vivo/status` → Diagnóstico APIs
-- `GET /api/jogos-ao-vivo/invalidar` → Força refresh
-
-## 📦 Sistema de Versionamento
-
-**Propósito:** Força atualizações no app quando há mudanças
-**API:** `/api/app/check-version` (versões independentes admin/app)
-
-**Funcionamento:**
-1. App verifica versão ao iniciar/voltar do background
-2. Compara local vs servidor
-3. Se diferente → modal obrigatório
-4. Atualizar → limpa cache + reload
-
-**Arquivos:** `config/appVersion.js`, `public/js/app/app-version.js`
-
-## 📝 Sistema de Gestão de Ideias e Backlog
-
-### Sistema Híbrido
-- **BACKLOG.md** → Backlog central único (fonte da verdade)
-- **TODOs no código** → Padrão: `// TODO-[LEVEL]: [descrição]`
-- **.cursorrules** → Regras que instruem IA
-
-### Padrões
-```javascript
-// TODO-CRITICAL: Bugs graves, segurança
-// TODO-HIGH: Features importantes, performance
-// TODO-MEDIUM: Melhorias UX, refatorações
-// TODO-LOW: Nice to have
-// TODO-FUTURE: Backlog distante
-```
-
-### CLI
-```bash
-node scripts/backlog-helper.js list      # Listar TODOs
-node scripts/backlog-helper.js validate  # Validar IDs
-node scripts/backlog-helper.js search "termo"  # Buscar
-```
-
-### IDs no BACKLOG
-`BUG-XXX`, `SEC-XXX`, `FEAT-XXX`, `PERF-XXX`, `UX-XXX`, `REFACTOR-XXX`, `IDEA-XXX`, `NICE-XXX`, `FUTURE-XXX`
+- **Jogos:** API-Football → SoccerDataAPI → Cache Stale → Globo Esporte. Docs: [`docs/JOGOS-DO-DIA-API.md`](docs/JOGOS-DO-DIA-API.md)
+- **Versionamento:** `config/appVersion.js`, API `/api/app/check-version`
+- **Backlog:** `BACKLOG.md` + TODOs no codigo (`// TODO-[LEVEL]`). CLI: `node scripts/backlog-helper.js`
 
 ## 🚫 Regra Absoluta: Zero Arredondamento de Pontos
 
