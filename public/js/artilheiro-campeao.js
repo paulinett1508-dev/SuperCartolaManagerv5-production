@@ -7,6 +7,11 @@
 
 import { RODADA_FINAL_CAMPEONATO } from './core/season-config.js';
 
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 console.log("🏆 [ARTILHEIRO] Sistema v4.7.0 SaaS carregando...");
 
 const ArtilheiroCampeao = {

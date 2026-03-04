@@ -16,6 +16,7 @@
 | 2026-02-28 | FRONTEND | `escapeHtml` usada sem estar definida em `top10.js` — ReferenceError | Módulos JS isolados (carregados via import dinâmico no admin) devem definir funções utilitárias como `escapeHtml` localmente. Padrão: copiar de `rodadas-ui.js`. Não depender de `window.escapeHtml` que pode não estar carregado. | Não |
 | 2026-02-28 | FRONTEND | `escapeHtml` usada sem estar definida em `capitao-luxo.js` — mesmo erro recorrente | **2ª ocorrência** — padrão confirmado: TODO módulo admin deve ter `escapeHtml` local. Checklist ao criar/editar módulo admin: verificar se usa `escapeHtml` e se está definida. | Não |
 | 2026-02-28 | FRONTEND | `escapeHtml` usada sem estar definida em `pontos-corridos-ui.js` — 3ª ocorrência | **3ª ocorrência** — escalação obrigatória. Módulos ES6 com `import` (não script global) NUNCA têm acesso a `window.escapeHtml`. Regra: ao criar qualquer módulo com template literals HTML, adicionar `escapeHtml` local imediatamente. Proposta de regra no CLAUDE.md adicionada. | Sim — ver Padroes Recorrentes |
+| 2026-03-04 | PROCESSO | Após corrigir `artilheiro-campeao.js`, não atualizei `ADMIN_JS_VERSION` — browser carregou cache antigo e o fix não chegou ao usuário | **Ao editar QUALQUER arquivo JS carregado dinamicamente pelo orquestrador admin, SEMPRE incrementar `ADMIN_JS_VERSION` em `detalhe-liga-orquestrador.js` (linha 9) como último passo do fix.** | Sim |
 
 ### Categorias Validas
 - **DADOS** — Queries erradas, tipos de ID, collections incorretas

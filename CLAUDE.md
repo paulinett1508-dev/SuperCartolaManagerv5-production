@@ -75,7 +75,7 @@ Sempre use este template ao planejar:
 | Tipo de Mudança | Verificação Mínima |
 |-----------------|-------------------|
 | **Backend** (controller/route/model) | Testar endpoint (curl/Postman), verificar logs do servidor |
-| **Frontend** (JS/HTML) | Verificar console do browser, testar interação |
+| **Frontend** (JS/HTML) | Verificar console do browser, testar interação. **Se arquivo carregado via `vImport()` no orquestrador admin → incrementar `ADMIN_JS_VERSION` em `detalhe-liga-orquestrador.js`** |
 | **Script** (migration/cron) | Rodar com `--dry-run` primeiro |
 | **CSS/Visual** | Confirmar render visual, checar responsivo |
 | **Config/DB** | Validar schema, testar query |
