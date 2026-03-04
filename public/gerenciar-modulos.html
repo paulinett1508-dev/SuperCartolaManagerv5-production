@@ -660,62 +660,36 @@
                 }
             }
 
-            if (!window.__gm_state.listenersBound) {
-                window.__gm_state.listenersBound = true;
-                document.getElementById('salvarBtn')?.addEventListener('click', salvarModulos);
-                document.getElementById('btnExportarPDF')?.addEventListener('click', () => {
-                    if (window.exportarParametrizacoesPDF) {
-                        window.exportarParametrizacoesPDF(ligaId);
-                    } else {
-                        showMessage('Módulo de exportação PDF não carregado', 'error');
-                    }
-                });
-            }
-
-            if (!window.__gm_domcontent_guard) {
-                window.__gm_domcontent_guard = true;
-                document.addEventListener('DOMContentLoaded', () => {
-                    if (!window.location.pathname.includes('gerenciar-modulos.html')) return;
-                    init();
-                    // Re-bind do botão após init
-                    const btn = document.getElementById('salvarBtn');
-                    if (btn && !btn._bound) {
-                        btn.addEventListener('click', salvarModulos);
-                        btn._bound = true;
-                    }
-                });
-            }
-
-            // ✅ FIX: Reinicializar após navegação SPA
-            if (!window.__gm_spa_guard) {
-                window.__gm_spa_guard = true;
-                window.addEventListener('spa:navigated', (e) => {
-                    const { pageName } = e.detail || {};
-                    if (pageName === 'gerenciar-modulos.html') {
-                        console.log('[GERENCIAR-MODULOS] Reinicializando após navegação SPA...');
-                        init();
-                        const btn = document.getElementById('salvarBtn');
-                        if (btn && !btn._bound) {
-                            btn.addEventListener('click', salvarModulos);
-                            btn._bound = true;
-                        }
-                    }
-                });
-
-                // ✅ FIX: Recarregar estado após salvar configuração do modal
-                window.addEventListener('modulo-config-saved', async (e) => {
-                    console.log('[GERENCIAR-MODULOS] Configuração salva via modal, recarregando estado...');
-                    await loadModulos();
-                    showMessage('Módulo configurado e ativado com sucesso!', 'success');
-                });
-            }
-
-            // ✅ FIX: Inicializar se DOM já pronto (navegação SPA)
-            if (!window.__gm_ready_guard) {
-                window.__gm_ready_guard = true;
-                if (document.readyState !== 'loading' && window.location.pathname.includes('gerenciar-modulos.html')) {
-                    init();
+            // Rebind buttons — DOM é trocado em cada navegação SPA
+            document.getElementById('salvarBtn')?.addEventListener('click', salvarModulos);
+            document.getElementById('btnExportarPDF')?.addEventListener('click', () => {
+                if (window.exportarParametrizacoesPDF) {
+                    window.exportarParametrizacoesPDF(ligaId);
+                } else {
+                    showMessage('Módulo de exportação PDF não carregado', 'error');
                 }
+            });
+
+            // spa:navigated — remove listener anterior para evitar acúmulo
+            if (window._gmSpaHandler) window.removeEventListener('spa:navigated', window._gmSpaHandler);
+            window._gmSpaHandler = (e) => {
+                if (e.detail?.pageName === 'gerenciar-modulos.html') init();
+            };
+            window.addEventListener('spa:navigated', window._gmSpaHandler);
+
+            // modulo-config-saved — idem
+            if (window._gmConfigSavedHandler) window.removeEventListener('modulo-config-saved', window._gmConfigSavedHandler);
+            window._gmConfigSavedHandler = async () => {
+                await loadModulos();
+                showMessage('Módulo configurado e ativado com sucesso!', 'success');
+            };
+            window.addEventListener('modulo-config-saved', window._gmConfigSavedHandler);
+
+            // ✅ SPA Init Pattern (CLAUDE.md) — init() sempre ao carregar o módulo
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init(); // SPA: DOM já pronto, executar imediatamente
             }
         </script>
     </body>
