@@ -884,17 +884,29 @@ export const getExtratoFinanceiro = async (req, res) => {
         // temporada, gerando cobranças indevidas no cache.
         const mataHabilitado = isModuloHabilitado(liga, 'mata_mata'); // ✅ C6 FIX
         if (mataHabilitado && !isTemporadaFutura && !usouFallback) {
-            // Sempre remover transações de MATA_MATA antigas para recalcular com dados frescos
+            // ✅ v8.20.0 FIX: Remover tanto transações legacy (tipo=MATA_MATA) quanto
+            // resetar o campo mataMata nos summaries consolidados (tipo=undefined)
+            let saldoMMantigo = 0;
             const mmAntigas = cache.historico_transacoes.filter(t => t.tipo === "MATA_MATA");
             if (mmAntigas.length > 0) {
-                // Descontar saldo das transações antigas antes de recalcular
-                const saldoMMantigo = mmAntigas.reduce((acc, t) => acc + (t.valor || 0), 0);
-                cache.saldo_consolidado -= saldoMMantigo;
+                saldoMMantigo += mmAntigas.reduce((acc, t) => acc + (t.valor || 0), 0);
                 cache.historico_transacoes = cache.historico_transacoes.filter(
                     (t) => t.tipo !== "MATA_MATA"
                 );
                 cacheModificado = true;
-                logger.log(`[FLUXO-CONTROLLER] MATA-MATA: ${mmAntigas.length} transações antigas removidas (saldo ajustado: -${saldoMMantigo})`);
+                logger.log(`[FLUXO-CONTROLLER] MATA-MATA: ${mmAntigas.length} transações legacy removidas`);
+            }
+            // Resetar mataMata em summaries consolidados (formato 2026+)
+            cache.historico_transacoes.forEach(r => {
+                if (r.tipo === undefined && (r.mataMata || 0) !== 0) {
+                    saldoMMantigo += r.mataMata;
+                    r.saldo = (r.saldo || 0) - r.mataMata;
+                    r.mataMata = 0;
+                    cacheModificado = true;
+                }
+            });
+            if (saldoMMantigo !== 0) {
+                cache.saldo_consolidado -= saldoMMantigo;
             }
 
             logger.log(`[FLUXO-CONTROLLER] Calculando MATA-MATA histórico para time ${timeId}`);
@@ -929,8 +941,20 @@ export const getExtratoFinanceiro = async (req, res) => {
                 });
 
             if (transacoesMM.length > 0) {
-                novasTransacoes.push(...transacoesMM);
-                transacoesMM.forEach((t) => (novoSaldo += t.valor));
+                // ✅ v8.20.0 FIX: Atualizar summary consolidado in-place (se existir)
+                // ao invés de sempre adicionar como transação legacy
+                transacoesMM.forEach((t) => {
+                    novoSaldo += t.valor;
+                    const rodadaSummary = cache.historico_transacoes.find(
+                        r => r.tipo === undefined && r.rodada === t.rodada
+                    );
+                    if (rodadaSummary) {
+                        rodadaSummary.mataMata = (rodadaSummary.mataMata || 0) + t.valor;
+                        rodadaSummary.saldo = (rodadaSummary.saldo || 0) + t.valor;
+                    } else {
+                        novasTransacoes.push(t);
+                    }
+                });
                 cacheModificado = true;
                 logger.log(
                     `[FLUXO-CONTROLLER] MATA-MATA histórico: ${transacoesMM.length} transações`
@@ -1364,16 +1388,27 @@ export const getFluxoFinanceiroLiga = async (ligaId, rodadaNumero) => {
                 // ✅ v8.0: Calcular MATA-MATA histórico na consolidação
                 // Usa isModuloHabilitado ao invés de hardcoded ID
                 // ✅ v8.12.0 FIX: SEMPRE recalcular MATA_MATA (mesma lógica do getExtratoFinanceiro)
+                // ✅ v8.20.0 FIX: Atualizar summaries consolidados in-place
                 const mataHabilitado = isModuloHabilitado(liga, 'mata_mata'); // ✅ C6 FIX
                 if (mataHabilitado) {
-                    // Sempre remover transações de MATA_MATA antigas para recalcular
+                    // Remover transações legacy e resetar mataMata em summaries consolidados
+                    let saldoMMantigo = 0;
                     const mmAntigas = cache.historico_transacoes.filter(t => t.tipo === "MATA_MATA");
                     if (mmAntigas.length > 0) {
-                        const saldoMMantigo = mmAntigas.reduce((acc, t) => acc + (t.valor || 0), 0);
-                        cache.saldo_consolidado -= saldoMMantigo;
+                        saldoMMantigo += mmAntigas.reduce((acc, t) => acc + (t.valor || 0), 0);
                         cache.historico_transacoes = cache.historico_transacoes.filter(
                             (t) => t.tipo !== "MATA_MATA"
                         );
+                    }
+                    cache.historico_transacoes.forEach(r => {
+                        if (r.tipo === undefined && (r.mataMata || 0) !== 0) {
+                            saldoMMantigo += r.mataMata;
+                            r.saldo = (r.saldo || 0) - r.mataMata;
+                            r.mataMata = 0;
+                        }
+                    });
+                    if (saldoMMantigo !== 0) {
+                        cache.saldo_consolidado -= saldoMMantigo;
                     }
 
                     logger.log(`[FLUXO-CONSOLIDAÇÃO] Recalculando MATA-MATA histórico para time ${timeId}`);
@@ -1405,8 +1440,20 @@ export const getFluxoFinanceiroLiga = async (ligaId, rodadaNumero) => {
                         });
 
                     if (transacoesMM.length > 0) {
-                        cache.historico_transacoes.push(...transacoesMM);
-                        transacoesMM.forEach((t) => (cache.saldo_consolidado += t.valor));
+                        // Atualizar summary consolidado in-place (se existir)
+                        transacoesMM.forEach((t) => {
+                            const rodadaSummary = cache.historico_transacoes.find(
+                                r => r.tipo === undefined && r.rodada === t.rodada
+                            );
+                            if (rodadaSummary) {
+                                rodadaSummary.mataMata = (rodadaSummary.mataMata || 0) + t.valor;
+                                rodadaSummary.saldo = (rodadaSummary.saldo || 0) + t.valor;
+                                cache.saldo_consolidado += t.valor;
+                            } else {
+                                cache.historico_transacoes.push(t);
+                                cache.saldo_consolidado += t.valor;
+                            }
+                        });
                         logger.log(`[FLUXO-CONSOLIDAÇÃO] ✅ MATA-MATA: ${transacoesMM.length} transações adicionadas para time ${timeId}`);
                     }
                 }

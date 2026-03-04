@@ -1086,19 +1086,19 @@ export class FluxoFinanceiroUI {
             return `<span class="${cls}">${sinal}R$ ${formatted}</span>`;
         };
 
-        // Colunas de módulos baseadas nos módulos ativos
+        // Colunas de módulos baseadas nos módulos ativos (data-modulo para update dinâmico)
         let modulosCols = '';
-        if (this._modulosAtivos?.banco !== false) modulosCols += `<td class="col-modulo">${fmtModulo(breakdown.banco)}</td>`;
-        if (this._modulosAtivos?.pontosCorridos) modulosCols += `<td class="col-modulo">${fmtModulo(breakdown.pontosCorridos)}</td>`;
-        if (this._modulosAtivos?.mataMata) modulosCols += `<td class="col-modulo">${fmtModulo(breakdown.mataMata)}</td>`;
-        if (this._modulosAtivos?.top10) modulosCols += `<td class="col-modulo">${fmtModulo(breakdown.top10)}</td>`;
-        if (this._modulosAtivos?.melhorMes) modulosCols += `<td class="col-modulo">${fmtModulo(breakdown.melhorMes)}</td>`;
-        if (this._modulosAtivos?.artilheiro) modulosCols += `<td class="col-modulo">${fmtModulo(breakdown.artilheiro)}</td>`;
-        if (this._modulosAtivos?.luvaOuro) modulosCols += `<td class="col-modulo">${fmtModulo(breakdown.luvaOuro)}</td>`;
-        if (this._modulosAtivos?.restaUm) modulosCols += `<td class="col-modulo">${fmtModulo(breakdown.restaUm)}</td>`;
-        if (this._modulosAtivos?.capitaoLuxo) modulosCols += `<td class="col-modulo">${fmtModulo(breakdown.capitaoLuxo)}</td>`;
-        modulosCols += `<td class="col-modulo">${fmtModulo(breakdown.campos)}</td>`;
-        modulosCols += `<td class="col-modulo">${fmtModulo(breakdown.acertos)}</td>`;
+        if (this._modulosAtivos?.banco !== false) modulosCols += `<td class="col-modulo" data-modulo="banco">${fmtModulo(breakdown.banco)}</td>`;
+        if (this._modulosAtivos?.pontosCorridos) modulosCols += `<td class="col-modulo" data-modulo="pontosCorridos">${fmtModulo(breakdown.pontosCorridos)}</td>`;
+        if (this._modulosAtivos?.mataMata) modulosCols += `<td class="col-modulo" data-modulo="mataMata">${fmtModulo(breakdown.mataMata)}</td>`;
+        if (this._modulosAtivos?.top10) modulosCols += `<td class="col-modulo" data-modulo="top10">${fmtModulo(breakdown.top10)}</td>`;
+        if (this._modulosAtivos?.melhorMes) modulosCols += `<td class="col-modulo" data-modulo="melhorMes">${fmtModulo(breakdown.melhorMes)}</td>`;
+        if (this._modulosAtivos?.artilheiro) modulosCols += `<td class="col-modulo" data-modulo="artilheiro">${fmtModulo(breakdown.artilheiro)}</td>`;
+        if (this._modulosAtivos?.luvaOuro) modulosCols += `<td class="col-modulo" data-modulo="luvaOuro">${fmtModulo(breakdown.luvaOuro)}</td>`;
+        if (this._modulosAtivos?.restaUm) modulosCols += `<td class="col-modulo" data-modulo="restaUm">${fmtModulo(breakdown.restaUm)}</td>`;
+        if (this._modulosAtivos?.capitaoLuxo) modulosCols += `<td class="col-modulo" data-modulo="capitaoLuxo">${fmtModulo(breakdown.capitaoLuxo)}</td>`;
+        modulosCols += `<td class="col-modulo" data-modulo="campos">${fmtModulo(breakdown.campos)}</td>`;
+        modulosCols += `<td class="col-modulo" data-modulo="acertos">${fmtModulo(breakdown.acertos)}</td>`;
 
         // Formatar saldo final
         const saldoFormatado = Math.abs(saldoFinal).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -1256,13 +1256,16 @@ export class FluxoFinanceiroUI {
 
         // Classe da linha baseada no saldo
         const classeLinha = saldoFinalIntegrado > 0 ? '' : saldoFinalIntegrado < 0 ? 'row-devedor' : '';
+        // data-situacao usa 'devedor'/'credor'/'quitado' para compatibilidade com filtros de dropdown
+        const situacaoRow = saldoFinalIntegrado > 0.01 ? 'credor' : saldoFinalIntegrado < -0.01 ? 'devedor' : 'quitado';
 
         return `
             <tr class="linha-participante ${classeLinha}"
                 data-nome="${escapeHtml((p.nome_cartola || '').toLowerCase())}"
                 data-time="${escapeHtml((p.nome_time || '').toLowerCase())}"
                 data-time-id="${timeId}"
-                data-situacao="${statusClass}">
+                data-saldo="${saldoFinalIntegrado}"
+                data-situacao="${situacaoRow}">
                 <td class="col-num">${idx + 1}</td>
                 <td class="col-participante">
                     <div class="participante-cell" onclick="window.selecionarParticipante('${timeId}')">
@@ -1787,7 +1790,7 @@ export class FluxoFinanceiroUI {
             console.log(`[FLUXO-UI] 🔄 Mudando temporada: ${temporadaAnterior} → ${temporadaNum}`);
 
             // Mostrar loading visual na tabela
-            const container = document.getElementById('fluxo-financeiro-container');
+            const container = document.getElementById('fluxoFinanceiroButtons');
             if (container) {
                 container.innerHTML = `
                     <div class="loading-container" style="padding: 60px; text-align: center;">
@@ -3263,6 +3266,130 @@ export class FluxoFinanceiroUI {
 
         console.log(`[FLUXO-UI] ✅ Relatório consolidado renderizado (${relatorio.length} participantes)`);
     }
+
+    /**
+     * Atualiza a célula de saldo e data-attributes de uma linha da tabela.
+     * Chamado pelo bulk calculation em background.
+     * @param {string} timeId
+     * @param {number} saldoFinal
+     * @param {string} situacao - 'credor' | 'devedor' | 'quitado'
+     */
+    atualizarSaldoLinha(timeId, saldoFinal, situacao) {
+        const row = document.querySelector(`tr[data-time-id="${timeId}"]`);
+        if (!row) return;
+
+        // Atualizar data-attributes para sort/filter
+        row.dataset.saldo = saldoFinal;
+        row.dataset.situacao = situacao;
+
+        // Atualizar classe de devedor
+        row.classList.remove('row-devedor');
+        if (situacao === 'devedor') row.classList.add('row-devedor');
+
+        // Atualizar célula .col-saldo
+        const saldoCell = row.querySelector('.col-saldo');
+        if (saldoCell) {
+            const abs = Math.abs(saldoFinal);
+            let html;
+            if (abs < 0.01) {
+                html = '<span class="val-zero">R$ 0,00</span>';
+            } else {
+                const cls = saldoFinal > 0 ? 'val-positivo' : 'val-negativo';
+                const sinal = saldoFinal > 0 ? '+' : '';
+                const fmt = abs.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                html = `<span class="${cls}">${sinal}R$ ${fmt}</span>`;
+            }
+            saldoCell.className = `col-saldo ${saldoFinal > 0.01 ? 'val-positivo' : saldoFinal < -0.01 ? 'val-negativo' : ''}`;
+            saldoCell.innerHTML = `<strong>${html}</strong>`;
+        }
+    }
+
+    /**
+     * Recalcula os cards KPI e re-ordena a tabela com os saldos calculados em bulk.
+     * @param {Array<{timeId, saldoFinal, situacao, breakdown}>} resultados
+     */
+    atualizarDashboard(resultados) {
+        // 1. Atualizar cada linha (saldo + módulos)
+        resultados.forEach(({ timeId, saldoFinal, situacao, breakdown }) => {
+            this.atualizarSaldoLinha(timeId, saldoFinal, situacao);
+
+            // Atualizar células de módulos (Timeline/banco, Pontos Corridos, etc.)
+            if (breakdown) {
+                const row = document.querySelector(`tr[data-time-id="${timeId}"]`);
+                if (row) {
+                    const fmtMod = (val) => {
+                        if (!val || Math.abs(val) < 0.01) return '<span class="val-zero">-</span>';
+                        const cls = val > 0 ? 'val-positivo' : 'val-negativo';
+                        const sinal = val > 0 ? '+' : '';
+                        const fmt = Math.abs(val).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        return `<span class="${cls}">${sinal}R$ ${fmt}</span>`;
+                    };
+                    const modCells = row.querySelectorAll('td.col-modulo[data-modulo]');
+                    modCells.forEach(cell => {
+                        const mod = cell.dataset.modulo;
+                        if (mod && breakdown[mod] !== undefined) {
+                            cell.innerHTML = fmtMod(breakdown[mod]);
+                        }
+                    });
+                }
+            }
+        });
+
+        // 2. Recalcular totais
+        let credores = 0, devedores = 0, quitados = 0;
+        let totalAPagar = 0, totalAReceber = 0;
+        resultados.forEach(({ saldoFinal, situacao }) => {
+            if (situacao === 'credor')  { credores++;  totalAPagar   += saldoFinal; }
+            else if (situacao === 'devedor') { devedores++; totalAReceber += Math.abs(saldoFinal); }
+            else quitados++;
+        });
+
+        // 3. Atualizar cards
+        const fmtBR = (v) => v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        const cardAreceber = document.querySelector('.card-areceber');
+        if (cardAreceber) {
+            const valorEl = cardAreceber.querySelector('.resumo-valor');
+            const badgeEl = cardAreceber.querySelector('.resumo-badge');
+            if (valorEl) valorEl.textContent = `R$ ${fmtBR(totalAReceber)}`;
+            if (badgeEl) badgeEl.textContent = devedores;
+        }
+
+        const cardApagar = document.querySelector('.card-apagar');
+        if (cardApagar) {
+            const valorEl = cardApagar.querySelector('.resumo-valor');
+            const badgeEl = cardApagar.querySelector('.resumo-badge');
+            if (valorEl) valorEl.textContent = `R$ ${fmtBR(totalAPagar)}`;
+            if (badgeEl) badgeEl.textContent = credores;
+        }
+
+        const cardQuitados = document.querySelector('.card-quitados');
+        if (cardQuitados) {
+            const valorEl = cardQuitados.querySelector('.resumo-valor');
+            const badgeEl = cardQuitados.querySelector('.resumo-badge');
+            if (valorEl) valorEl.textContent = quitados;
+            if (badgeEl) badgeEl.textContent = quitados;
+        }
+
+        // 4. Re-ordenar tabela por saldo (devedores primeiro → quitados → credores)
+        const tbody = document.getElementById('participantesTableBody');
+        if (tbody) {
+            const rows = Array.from(tbody.querySelectorAll('tr.linha-participante'));
+            rows.sort((a, b) => {
+                const sa = parseFloat(a.dataset.saldo || '0');
+                const sb = parseFloat(b.dataset.saldo || '0');
+                return sa - sb; // menor (mais devedor) primeiro
+            });
+            // Renumerar e reinserir
+            rows.forEach((row, idx) => {
+                const numCell = row.querySelector('.col-num');
+                if (numCell) numCell.textContent = idx + 1;
+                tbody.appendChild(row);
+            });
+        }
+
+        console.log(`[FLUXO-UI] ✅ Dashboard atualizado: ${credores} credores, ${devedores} devedores, ${quitados} quitados`);
+    }
 }
 
 // =========================================================================
@@ -4215,7 +4342,8 @@ window.removerAjuste = async function(ajusteId) {
  */
 window.abrirNovoParticipante = function() {
     const urlParams = new URLSearchParams(window.location.search);
-    const ligaId = urlParams.get('id');
+    // Suporte a ?id= (detalhe-liga.html) e ?liga= (fluxo-financeiro.html)
+    const ligaId = urlParams.get('id') || urlParams.get('liga');
     const temporada = window.temporadaAtual || CURRENT_SEASON;
 
     if (!ligaId) {

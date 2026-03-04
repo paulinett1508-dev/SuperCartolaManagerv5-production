@@ -8,7 +8,7 @@
  * Tesouraria, extrato-cache, acertos-financeiros e inscrições
  * TODOS devem usar estas funções.
  *
- * @version 2.0.0
+ * @version 2.1.1
  */
 
 import mongoose from "mongoose";
@@ -167,8 +167,11 @@ export async function calcularSaldoParticipante(ligaId, timeId, temporada = CURR
                 saldoAnteriorTransferido = inscricao.saldo_transferido || 0;
                 dividaAnterior = inscricao.divida_anterior || 0;
 
-                if (!pagouInscricao) {
-                    // Saldo inicial = saldo anterior - taxa - dívida anterior
+                // ✅ FIX: sempre deduzir taxa. Quando paga via AcertoFinanceiro,
+                // o +taxa em saldoAcertos cancela automaticamente (net = 0).
+                // Quando paga via saldo_transferido, o crédito cobre o débito.
+                // Só quando não paga o débito permanece.
+                if (taxaInscricaoValor > 0) {
                     saldoConsolidado -= taxaInscricaoValor;
                 }
 
@@ -296,7 +299,8 @@ export function aplicarAjusteInscricaoBulk(saldoConsolidado, inscricaoData, hist
         saldoAnteriorTransferido = inscricaoData.saldo_transferido || 0;
         dividaAnterior = inscricaoData.divida_anterior || 0;
 
-        if (!pagouInscricao) {
+        // ✅ FIX: sempre deduzir taxa (ver calcularSaldoParticipante para explicação)
+        if (taxaInscricao > 0) {
             saldo -= taxaInscricao;
         }
         if (saldoAnteriorTransferido !== 0) {

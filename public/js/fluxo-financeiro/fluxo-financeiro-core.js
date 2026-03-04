@@ -554,6 +554,7 @@ export class FluxoFinanceiroCore {
                             // Frontend não conhece AjusteFinanceiro — confiar no valor já calculado pelo backend
                             saldoAjustes: cacheValido?.resumo?.saldoAjustes ?? 0,
                             // ✅ v6.12: Preservar módulos opcionais do cache (quando existirem)
+                            top10: cacheValido?.resumo?.top10 ?? resumoRecalculado.top10 ?? 0,
                             melhorMes: cacheValido?.resumo?.melhorMes ?? resumoRecalculado.melhorMes ?? 0,
                             artilheiro: cacheValido?.resumo?.artilheiro ?? resumoRecalculado.artilheiro ?? 0,
                             luvaOuro: cacheValido?.resumo?.luvaOuro ?? resumoRecalculado.luvaOuro ?? 0,

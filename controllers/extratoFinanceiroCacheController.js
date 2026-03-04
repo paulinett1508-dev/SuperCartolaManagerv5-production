@@ -1013,21 +1013,28 @@ export const salvarExtratoCache = async (req, res) => {
             rodadasEnviadas.some(r => r.rodada > 0);
 
         if (temRodadasNoEnvio && temporadaNum >= anoAtual) {
-            // Verificar se existem rodadas REAIS para esta temporada
-            const rodadasDb = mongoose.connection.db.collection('rodadas');
-            const rodadaExiste = await rodadasDb.findOne({
-                temporada: temporadaNum,
-                numero: { $gt: 0 }
-            });
+            // ✅ v8.3 FIX: ultimaRodadaCalculada > 0 confirma que o frontend validou rodadas via API Cartola.
+            // A collection 'rodadas' pode estar vazia para ligas sem dados persistidos (ex: Os Fuleros).
+            // Mesmo padrão do fix v8.2 em verificarCacheValido.
+            const rodadasConfirmadasPeloFrontend = ultimaRodadaCalculada && Number(ultimaRodadaCalculada) > 0;
 
-            if (!rodadaExiste) {
-                logger.warn(`[CACHE-CONTROLLER] ⚠️ BLOQUEADO: Tentativa de salvar rodadas fantasmas para temporada ${temporadaNum} (pré-temporada)`);
-                return res.status(400).json({
-                    success: false,
-                    error: `Temporada ${temporadaNum} ainda não iniciou. Não é possível salvar rodadas.`,
+            if (!rodadasConfirmadasPeloFrontend) {
+                // Fallback: verificar collection 'rodadas' (para ligas com dados persistidos)
+                const rodadasDb = mongoose.connection.db.collection('rodadas');
+                const rodadaExiste = await rodadasDb.findOne({
                     temporada: temporadaNum,
-                    preTemporada: true
+                    numero: { $gt: 0 }
                 });
+
+                if (!rodadaExiste) {
+                    logger.warn(`[CACHE-CONTROLLER] ⚠️ BLOQUEADO: Tentativa de salvar rodadas fantasmas para temporada ${temporadaNum} (pré-temporada)`);
+                    return res.status(400).json({
+                        success: false,
+                        error: `Temporada ${temporadaNum} ainda não iniciou. Não é possível salvar rodadas.`,
+                        temporada: temporadaNum,
+                        preTemporada: true
+                    });
+                }
             }
         }
 
@@ -1152,6 +1159,19 @@ export const verificarCacheValido = async (req, res) => {
                 rodadaDesistencia,
                 temporadaFinalizada: statusTemporada.finalizada,
             });
+        }
+
+        // ✅ v8.4 FIX: Verificar se config do TOP10 foi atualizada após o cache
+        // Quando wizard TOP10 muda, liga.configuracoes.top10.atualizado_em é setado.
+        // Se for mais novo que o cache, forçar recálculo para usar novos valores financeiros.
+        if (!statusTemporada.finalizada && !cacheExistente.cache_permanente) {
+            const ligaDoc = await Liga.findById(ligaId).select('configuracoes.top10').lean();
+            const top10AtualizadoEm = ligaDoc?.configuracoes?.top10?.atualizado_em;
+            const cacheAtualizadoEm = cacheExistente.data_ultima_atualizacao || cacheExistente.updatedAt;
+            if (top10AtualizadoEm && cacheAtualizadoEm && new Date(top10AtualizadoEm) > new Date(cacheAtualizadoEm)) {
+                logger.log(`[CACHE-CONTROLLER] 🔄 TOP10 config atualizada (${top10AtualizadoEm}) após cache (${cacheAtualizadoEm}) — forçando recálculo`);
+                return res.json({ valido: false, motivo: 'top10_config_desatualizada' });
+            }
         }
 
         // ✅ v5.2 FIX: Acertos já buscados em paralelo acima
@@ -1286,8 +1306,14 @@ export const verificarCacheValido = async (req, res) => {
                                      cacheExistente.historico_transacoes?.length > 0;
 
         if (isPreTemporadaCache) {
-            // ✅ v8.1 FIX: Mirror do fix v6.8 — verificar se temporada já iniciou com rodadas reais
-            // Cache criado na pré-temporada (ultima_rodada=0) pode estar stale após início do campeonato
+            // ✅ v8.2 FIX: Usar rodadaAtualInt do frontend como sinal primário
+            // A collection `rodadas` pode estar vazia para ligas sem dados cacheados ainda.
+            // O frontend sempre envia rodadaAtual correto do status-mercado da API Cartola.
+            if (rodadaAtualInt > 0) {
+                logger.log(`[CACHE-CONTROLLER] ⚠️ PRÉ-TEMPORADA ignorada: frontend reporta rodada ${rodadaAtualInt} ativa. Cache stale — forçando recálculo.`);
+                return res.json({ valido: false, motivo: 'cache_desatualizado_pos_temporada' });
+            }
+            // Fallback: verificar collection rodadas (para ligas com dados persistidos)
             const rodadasCol = mongoose.connection.db.collection('rodadas');
             const rodadaRealExiste = await rodadasCol.findOne({
                 ligaId: String(ligaId),

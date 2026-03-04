@@ -15,6 +15,7 @@ import ModuleConfig, { MODULOS_DISPONIVEIS } from '../models/ModuleConfig.js';
 import { getRuleById, allRules } from '../config/rules/index.js';
 import { CURRENT_SEASON } from '../config/seasons.js';
 import Liga from '../models/Liga.js';
+import Top10Cache from '../models/Top10Cache.js';
 
 const router = express.Router();
 
@@ -174,7 +175,9 @@ async function propagarTop10ParaLiga(ligaId, wizardRespostas) {
         valores_mico,
         qtd_mitos: qtdM,
         qtd_micos: qtdC,
-        configurado: true
+        configurado: true,
+        // ✅ Timestamp para invalidação de cache: verificarCacheValido compara com data_ultima_atualizacao
+        atualizado_em: new Date()
     };
 
     const result = await Liga.updateOne(
@@ -182,7 +185,15 @@ async function propagarTop10ParaLiga(ligaId, wizardRespostas) {
         { $set: { 'configuracoes.top10': top10Config } }
     );
 
-    console.log(`[MODULE-CONFIG] top10 propagado para liga ${ligaId}: ${qtdM} mitos / ${qtdC} micos, dec=${dec}, ${result.modifiedCount} doc atualizado`);
+    // ✅ Invalidar top10caches para forçar recálculo com novos valores financeiros
+    // Só caches sem cache_permanente (temporadas ativas) são removidos
+    const ligaIdQuery = mongoose.Types.ObjectId.isValid(ligaId) ? new mongoose.Types.ObjectId(ligaId) : ligaId;
+    const top10Deleted = await Top10Cache.deleteMany({
+        liga_id: ligaIdQuery,
+        cache_permanente: { $ne: true }
+    });
+
+    console.log(`[MODULE-CONFIG] top10 propagado para liga ${ligaId}: ${qtdM} mitos / ${qtdC} micos, dec=${dec}, ${result.modifiedCount} doc atualizado, ${top10Deleted.deletedCount} top10caches invalidados`);
     return result.modifiedCount > 0;
 }
 

@@ -11,7 +11,7 @@ import "./fluxo-financeiro/fluxo-financeiro-quitacao.js";
 import "./fluxo-financeiro/fluxo-financeiro-ajustes-api.js";
 
 // Cache-buster para forçar reload de módulos (incrementar a cada mudança)
-const CACHE_BUSTER = "v8.6"; // v8.6: Colunas RestaUm e CapitaoLuxo na tabela financeira
+const CACHE_BUSTER = "v8.7"; // v8.7: Background bulk calculation + dashboard update
 
 // VARIÁVEIS GLOBAIS
 let rodadaAtual = 0;
@@ -20,6 +20,7 @@ let mercadoAberto = false;
 let isDataLoading = false;
 let isDataLoaded = false;
 let isCalculating = false;
+let isBulkCalculating = false;
 
 function getTemporadaSistemaFallback() {
     if (window.SeasonContext?.getTemporadaSistema) {
@@ -279,6 +280,12 @@ async function inicializarSistemaFinanceiro(ligaId) {
     fluxoFinanceiroUI.renderizarMensagemInicial();
     isDataLoaded = true;
 
+    // Background: calcular saldos reais de todos os participantes (sem bloquear UI)
+    // Necessário quando o cache MongoDB está vazio — usa a mesma lógica do extrato individual
+    if (ultimaRodadaCompleta > 0) {
+        calcularSaldosBulk(ligaId).catch(e => console.warn('[FLUXO-BULK] Erro silencioso:', e));
+    }
+
     // Expor função de recarregar para uso após acertos
     window.fluxoFinanceiroOrquestrador = {
         recarregar: () => inicializarSistemaFinanceiro(obterLigaId()),
@@ -333,6 +340,68 @@ async function calcularEExibirExtrato(timeId) {
     } finally {
         isCalculating = false;
     }
+}
+
+/**
+ * Calcula saldos reais de todos os participantes em background.
+ * Atualiza a tabela e os cards KPI sem bloquear a UI.
+ * Reutiliza calcularExtratoFinanceiro() — mesma lógica do modal individual.
+ */
+async function calcularSaldosBulk(ligaId) {
+    if (isBulkCalculating || ultimaRodadaCompleta === 0) return;
+    if (!fluxoFinanceiroCore || !fluxoFinanceiroUI) return;
+
+    const participantes = window.participantesFluxo || [];
+    if (!participantes.length) return;
+
+    isBulkCalculating = true;
+    console.log(`[FLUXO-BULK] Calculando saldos para ${participantes.length} participantes (R${ultimaRodadaCompleta})...`);
+
+    const resultados = [];
+    const BATCH_SIZE = 4;
+
+    for (let i = 0; i < participantes.length; i += BATCH_SIZE) {
+        const batch = participantes.slice(i, i + BATCH_SIZE);
+        const batchResultados = await Promise.all(
+            batch.map(async (p) => {
+                const timeId = String(p.time_id || p.id);
+                try {
+                    const extrato = await fluxoFinanceiroCore.calcularExtratoFinanceiro(
+                        timeId,
+                        ultimaRodadaCompleta,
+                    );
+                    const resumo = extrato?.resumo || {};
+                    const saldoFinal = resumo.saldo ?? 0;
+                    const situacao = saldoFinal > 0.01 ? 'credor' : saldoFinal < -0.01 ? 'devedor' : 'quitado';
+                    // Extrair breakdown para atualizar colunas de módulos (Timeline/banco etc.)
+                    const breakdown = {
+                        banco: (resumo.bonus || 0) + (resumo.onus || 0),
+                        pontosCorridos: resumo.pontosCorridos || 0,
+                        mataMata: resumo.mataMata || 0,
+                        top10: resumo.top10 || 0,
+                        melhorMes: resumo.melhorMes || 0,
+                        artilheiro: resumo.artilheiro || 0,
+                        luvaOuro: resumo.luvaOuro || 0,
+                        campos: (resumo.campo1 || 0) + (resumo.campo2 || 0) + (resumo.campo3 || 0) + (resumo.campo4 || 0),
+                        ajustes: resumo.saldoAjustes || 0,
+                    };
+                    return { timeId, saldoFinal, situacao, breakdown };
+                } catch (e) {
+                    console.warn(`[FLUXO-BULK] Erro ao calcular ${timeId}:`, e.message);
+                    return null;
+                }
+            })
+        );
+        batchResultados.filter(Boolean).forEach(r => resultados.push(r));
+    }
+
+    console.log(`[FLUXO-BULK] ✅ ${resultados.length} saldos calculados`);
+
+    if (resultados.length > 0 && fluxoFinanceiroUI.atualizarDashboard) {
+        fluxoFinanceiroUI.atualizarDashboard(resultados);
+    }
+
+    isBulkCalculating = false;
 }
 
 async function gerarRelatorioFinanceiro() {
