@@ -433,6 +433,38 @@
         color: #9ca3af !important;
     }
 
+    /* ✅ v8.4: Visual de fase pendente (confrontos projetados) */
+    .mm-proxima-fase-banner {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: rgba(251, 191, 36, 0.08);
+        border: 1px solid rgba(251, 191, 36, 0.25);
+        border-radius: 10px;
+        padding: 12px 16px;
+        margin-bottom: 16px;
+    }
+    .mm-proxima-fase-banner .material-symbols-outlined {
+        font-size: 28px;
+        color: #fbbf24;
+        flex-shrink: 0;
+    }
+    .mm-prox-titulo {
+        font-size: 13px;
+        font-weight: 700;
+        color: #fbbf24;
+        margin: 0 0 2px 0;
+    }
+    .mm-prox-sub {
+        font-size: 11px;
+        color: rgba(251, 191, 36, 0.6);
+        margin: 0;
+    }
+    .mm-confronto-previsto { opacity: 0.85; }
+    .mm-conf-pendente { color: #6b7280 !important; }
+    .mm-pts-pendente { color: #6b7280; font-size: 14px; font-weight: 700; }
+    .mm-meu-card-previsto { border-color: rgba(251, 191, 36, 0.3) !important; }
+
     /* ===== INFO DA FASE ===== */
     .mm-phase-info {
         text-align: center;

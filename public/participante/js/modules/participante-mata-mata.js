@@ -1041,6 +1041,25 @@ async function carregarFase(edicao, fase) {
         renderParciaisOptionsApp(container, edicao);
         return;
       }
+
+      // ✅ v8.4: Fase pendente — mostrar classificados projetados da fase anterior
+      // Quando a fase anterior já aconteceu mas esta ainda não, os vencedores já são conhecidos
+      const fasesAtivas = getFasesAtuais();
+      const faseIdx = fasesAtivas.indexOf(fase);
+      const edicaoCfg = EDICOES_MATA_MATA.find((e) => e.id === edicao);
+      if (faseIdx > 0 && edicaoCfg && estado.rodadaAtual > 0) {
+        const rodadaDaFase = edicaoCfg.rodadaInicial + faseIdx;
+        if (estado.rodadaAtual <= rodadaDaFase) {
+          const fasePrev = fasesAtivas[faseIdx - 1];
+          const confrontosPrev = estado.cacheConfrontos[`${edicao}-${fasePrev}`];
+          if (confrontosPrev && confrontosPrev.length > 0) {
+            if (window.Log) Log.info(`[MATA-MATA] ⏳ Fase ${fase} pendente — exibindo confrontos projetados (vencedores de ${fasePrev})`);
+            renderConfrontosProjetados(confrontosPrev, fase, rodadaDaFase);
+            return;
+          }
+        }
+      }
+
       container.innerHTML = `
         <div class="mm-vazio">
           <span class="material-symbols-outlined">sports_mma</span>
@@ -1178,6 +1197,141 @@ function renderConfrontosCards(confrontos, fase, aoVivo = false, rodadaParciais 
       if (btn) btn.classList.remove("mm-spinning");
     });
   }
+}
+
+// =====================================================================
+// RENDER CONFRONTOS PROJETADOS (fase futura — classificados conhecidos)
+// =====================================================================
+function renderConfrontosProjetados(confrontosFaseAnterior, fase, rodadaDaFase) {
+  const container = document.getElementById("mata-mata-container");
+  if (!container) return;
+
+  const meuTimeId = estado.timeId ? parseInt(estado.timeId) : null;
+  const nomeFase = { primeira: "1ª Fase", oitavas: "Oitavas", quartas: "Quartas", semis: "Semifinal", final: "Final" }[fase] || fase.toUpperCase();
+
+  // Extrair vencedores da fase anterior, mantendo ordem do bracket
+  const sorted = [...confrontosFaseAnterior].sort((a, b) => (a.jogo || 0) - (b.jogo || 0));
+  const vencedores = [];
+  sorted.forEach((confronto) => {
+    const { timeA, timeB } = confronto;
+    if (!timeA || !timeB) return;
+    const ptsA = typeof timeA.pontos === "number" ? timeA.pontos : -1;
+    const ptsB = typeof timeB.pontos === "number" ? timeB.pontos : -1;
+    let vencedor;
+    if (ptsA >= 0 && ptsB >= 0) {
+      if (ptsA > ptsB) vencedor = timeA;
+      else if (ptsB > ptsA) vencedor = timeB;
+      else vencedor = (timeA.rankR2 || 999) < (timeB.rankR2 || 999) ? timeA : timeB;
+    } else {
+      vencedor = (timeA.rankR2 || 999) < (timeB.rankR2 || 999) ? timeA : timeB;
+    }
+    if (vencedor) vencedores.push({ ...vencedor, _jogoAnterior: confronto.jogo });
+  });
+
+  if (vencedores.length === 0) {
+    container.innerHTML = `
+      <div class="mm-vazio">
+        <span class="material-symbols-outlined">sports_mma</span>
+        <h3>Aguardando</h3>
+        <p>Confrontos desta fase ainda não disponíveis</p>
+      </div>
+    `;
+    return;
+  }
+
+  // Montar confrontos projetados: pareamento bracket (1v2, 3v4, ...)
+  const confrontosProjetados = [];
+  for (let i = 0; i < vencedores.length; i += 2) {
+    confrontosProjetados.push({ jogo: Math.floor(i / 2) + 1, timeA: vencedores[i], timeB: vencedores[i + 1] || null });
+  }
+
+  let html = `
+    <div class="mm-proxima-fase-banner">
+      <span class="material-symbols-outlined">schedule</span>
+      <div>
+        <p class="mm-prox-titulo">${nomeFase} — Confrontos Projetados</p>
+        <p class="mm-prox-sub">Disputa na Rodada ${rodadaDaFase} · Com base nos classificados da fase anterior</p>
+      </div>
+    </div>
+  `;
+
+  // Card "Seu próximo confronto"
+  const meuConfronto = confrontosProjetados.find(
+    (c) => extrairTimeId(c.timeA) === meuTimeId || (c.timeB && extrairTimeId(c.timeB) === meuTimeId)
+  );
+  if (meuConfronto) {
+    const souTimeA = extrairTimeId(meuConfronto.timeA) === meuTimeId;
+    const eu = souTimeA ? meuConfronto.timeA : meuConfronto.timeB;
+    const adv = souTimeA ? meuConfronto.timeB : meuConfronto.timeA;
+    html += `
+      <div class="mm-meu-card mm-meu-card-previsto">
+        <div class="mm-meu-status empatando">
+          <span class="material-symbols-outlined">schedule</span>
+          <span>Seu próximo confronto</span>
+        </div>
+        <div class="mm-meu-times">
+          <div class="mm-meu-time">
+            <img src="${getEscudoUrl(eu)}" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
+            <span class="mm-meu-nome">${escapeHtml(truncate(eu?.nome_time || "Você", 12))}</span>
+            <span class="mm-meu-pts mm-pts-pendente">—</span>
+          </div>
+          <div class="mm-meu-vs">VS</div>
+          <div class="mm-meu-time">
+            ${adv
+              ? `<img src="${getEscudoUrl(adv)}" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
+                 <span class="mm-meu-nome">${escapeHtml(truncate(adv?.nome_time || "Adversário", 12))}</span>
+                 <span class="mm-meu-pts mm-pts-pendente">—</span>`
+              : `<span class="mm-meu-nome">A definir</span>`
+            }
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  html += `
+    <div class="mm-outros-header">
+      <span>Todos os Confrontos Previstos</span>
+    </div>
+    <div class="mm-confrontos-lista">
+  `;
+
+  confrontosProjetados.forEach((c, idx) => {
+    const timeA = c.timeA || {};
+    const timeB = c.timeB || {};
+    const isMinha = extrairTimeId(timeA) === meuTimeId || extrairTimeId(timeB) === meuTimeId;
+    html += `
+      <div class="mm-confronto-card mm-confronto-previsto ${isMinha ? "minha" : ""}">
+        <div class="mm-conf-numero">${idx + 1}</div>
+        <div class="mm-conf-times">
+          <div class="mm-conf-time">
+            <img class="mm-conf-escudo" src="${getEscudoUrl(timeA)}" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
+            <div class="mm-conf-info">
+              <span class="mm-conf-nome">${escapeHtml(truncate(timeA.nome_time || "A definir", 14))}</span>
+              <span class="mm-conf-cartola">${escapeHtml(truncate(timeA.nome_cartola || timeA.nome_cartoleiro || "", 16))}</span>
+            </div>
+            <span class="mm-conf-pts empate">—</span>
+          </div>
+          <div class="mm-conf-vs">×</div>
+          <div class="mm-conf-time">
+            ${timeB
+              ? `<img class="mm-conf-escudo" src="${getEscudoUrl(timeB)}" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
+                 <div class="mm-conf-info">
+                   <span class="mm-conf-nome">${escapeHtml(truncate(timeB.nome_time || "A definir", 14))}</span>
+                   <span class="mm-conf-cartola">${escapeHtml(truncate(timeB.nome_cartola || timeB.nome_cartoleiro || "", 16))}</span>
+                 </div>
+                 <span class="mm-conf-pts empate">—</span>`
+              : `<div class="mm-conf-info"><span class="mm-conf-nome">A definir</span></div>`
+            }
+          </div>
+        </div>
+        <div class="mm-conf-diff mm-conf-pendente">Rodada ${rodadaDaFase}</div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+  container.innerHTML = html;
 }
 
 // =====================================================================
