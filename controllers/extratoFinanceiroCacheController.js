@@ -61,6 +61,7 @@ import mongoose from "mongoose";
 import { CURRENT_SEASON, getFinancialSeason } from "../config/seasons.js";
 import { apiError, apiServerError } from '../utils/apiResponse.js';
 import logger from '../utils/logger.js';
+import { hasAccessToLiga } from '../middleware/tenant.js';
 
 // ✅ v5.1: Buscar acertos financeiros do participante
 // ✅ v5.6 FIX: Default usa CURRENT_SEASON (dinâmico)
@@ -972,6 +973,19 @@ export const salvarExtratoCache = async (req, res) => {
         if (isNaN(Number(timeId))) {
             return res.status(400).json({ erro: "ID do time inválido" });
         }
+
+        // ✅ SEC-FIX v1.1: Multi-tenant guard — admin só pode escrever cache na própria liga
+        if (req.session?.admin) {
+            const ligaDoc = await Liga.findById(ligaId).select('admin_id owner_email nome').lean();
+            if (!ligaDoc) {
+                return res.status(404).json({ error: 'Liga não encontrada' });
+            }
+            if (!hasAccessToLiga(ligaDoc, req.session.admin)) {
+                logger.log(`[CACHE] Acesso negado: admin ${req.session.admin.email} tentou escrever cache da liga ${ligaDoc.nome}`);
+                return res.status(403).json({ error: 'Sem autorização para esta liga' });
+            }
+        }
+
         const {
             historico_transacoes,
             extrato,
@@ -1018,23 +1032,22 @@ export const salvarExtratoCache = async (req, res) => {
             // Mesmo padrão do fix v8.2 em verificarCacheValido.
             const rodadasConfirmadasPeloFrontend = ultimaRodadaCalculada && Number(ultimaRodadaCalculada) > 0;
 
-            if (!rodadasConfirmadasPeloFrontend) {
-                // Fallback: verificar collection 'rodadas' (para ligas com dados persistidos)
-                const rodadasDb = mongoose.connection.db.collection('rodadas');
-                const rodadaExiste = await rodadasDb.findOne({
-                    temporada: temporadaNum,
-                    numero: { $gt: 0 }
-                });
+            // ✅ SEC-FIX v1.0: Sempre verificar DB com campo correto ('rodada', não 'numero').
+            // Bloqueia pré-temporada apenas se DB não confirma E frontend também não confirma.
+            const rodadasDb = mongoose.connection.db.collection('rodadas');
+            const rodadaExisteNoDB = await rodadasDb.findOne({
+                temporada: temporadaNum,
+                rodada: { $gt: 0 }
+            });
 
-                if (!rodadaExiste) {
-                    logger.warn(`[CACHE-CONTROLLER] ⚠️ BLOQUEADO: Tentativa de salvar rodadas fantasmas para temporada ${temporadaNum} (pré-temporada)`);
-                    return res.status(400).json({
-                        success: false,
-                        error: `Temporada ${temporadaNum} ainda não iniciou. Não é possível salvar rodadas.`,
-                        temporada: temporadaNum,
-                        preTemporada: true
-                    });
-                }
+            if (!rodadaExisteNoDB && !rodadasConfirmadasPeloFrontend) {
+                logger.warn(`[CACHE-CONTROLLER] ⚠️ BLOQUEADO: Tentativa de salvar rodadas fantasmas para temporada ${temporadaNum} (pré-temporada)`);
+                return res.status(400).json({
+                    success: false,
+                    error: `Temporada ${temporadaNum} ainda não iniciou. Não é possível salvar rodadas.`,
+                    temporada: temporadaNum,
+                    preTemporada: true
+                });
             }
         }
 

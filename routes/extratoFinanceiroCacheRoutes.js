@@ -6,7 +6,7 @@
 // =====================================================================
 
 import express from "express";
-import { verificarAdmin } from "../middleware/auth.js";
+import { verificarAdmin, verificarAdminOuDono } from "../middleware/auth.js";
 import {
     getExtratoCache,
     salvarExtratoCache,
@@ -23,17 +23,20 @@ const router = express.Router();
 // =====================================================================
 
 // Obter cache de um time específico
-router.get("/:ligaId/times/:timeId/cache", getExtratoCache);
+// 🔒 SEC-FIX v1.1: Requer admin OU participante acessando seu próprio timeId
+router.get("/:ligaId/times/:timeId/cache", verificarAdminOuDono, getExtratoCache);
 
 // Salvar/atualizar cache de um time
 // 🔒 SEC-FIX: Escrita de cache requer admin
 router.post("/:ligaId/times/:timeId/cache", verificarAdmin, salvarExtratoCache);
 
 // Verificar se cache é válido (validação inteligente)
-router.get("/:ligaId/times/:timeId/cache/valido", verificarCacheValido);
+// 🔒 SEC-FIX v1.1: Requer admin OU participante acessando seu próprio timeId
+router.get("/:ligaId/times/:timeId/cache/valido", verificarAdminOuDono, verificarCacheValido);
 
 // Ler cache com validação
-router.get("/:ligaId/times/:timeId", lerCacheExtratoFinanceiro);
+// 🔒 SEC-FIX v1.1: Requer admin OU participante acessando seu próprio timeId
+router.get("/:ligaId/times/:timeId", verificarAdminOuDono, lerCacheExtratoFinanceiro);
 
 // =====================================================================
 // ROTAS DE ESTATÍSTICAS
