@@ -210,6 +210,15 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 | **NÃO confundir** | Análise de branches (status/funcionalidade) → `analise-branches`; Git push/commit → `git-commit-push` |
 | **Localização** | `docs/skills/03-utilities/delete-merged-branches.md` |
 
+#### project-reference
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `referencia projeto`, `detalhes MCPs`, `collections`, `tipos de ID`, `keyword map`, `slash commands detalhados` |
+| **Frases PT-BR** | "quais MCPs temos?", "detalhes das collections", "tabela de keywords", "como usar Perplexity", "como usar Stitch MCP", "sistema de renovacao", "backlog helper" |
+| **Contexto** | Referencia detalhada do projeto: MCPs, collections MongoDB, keyword→skill map completo, slash commands, sistema de renovacao, versionamento, backlog |
+| **NÃO confundir** | Regras de codigo → CLAUDE.md; Skills especificas → skill individual |
+| **Localização** | `docs/skills/03-utilities/project-reference.md` |
+
 ---
 
 ### 04 - Project-Specific (Específicas do Super Cartola)
@@ -377,6 +386,9 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | "pre-flight da rodada" | `live-experience` | Check antes da rodada |
 | "criar uma skill nova" | `skill-creator` | Meta |
 | "instalar skill X" | `skill-installer` | Meta |
+| "quais MCPs temos?" | `project-reference` | Referencia detalhada |
+| "detalhes das collections" | `project-reference` | Tipos de ID, divida tecnica |
+| "tabela de keywords completa" | `project-reference` | Keyword→Skill map |
 
 ---
 
