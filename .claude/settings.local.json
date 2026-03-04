@@ -205,8 +205,7 @@
   "enabledMcpjsonServers": [
     "mongo",
     "perplexity",
-    "context7",
-    "stitch"
+    "context7"
   ],
   "hooks": {
     "SessionStart": [
