@@ -336,6 +336,34 @@ async function getValoresBonusOnusAsync(ligaId) {
             }
         }
 
+        // ✅ Fallback: liga.configuracoes.top10 pode estar ausente se o wizard foi salvo
+        // antes de propagarTop10ParaLiga existir. Buscar wizard_respostas do ModuleConfig
+        // e calcular valores localmente (mesma lógica do backend).
+        try {
+            const modRes = await fetch(`/api/liga/${ligaId}/modulos/top_10`);
+            if (modRes.ok) {
+                const modData = await modRes.json();
+                const wizard = modData?.config?.wizard_respostas;
+                if (wizard && Object.keys(wizard).length > 0) {
+                    const qtdM = Number(wizard.qtd_mitos || 10);
+                    const qtdC = Number(wizard.qtd_micos || 10);
+                    const vMito1 = Number(wizard.valor_mito_1 || 30);
+                    const vMico1 = Number(wizard.valor_mico_1 || -30);
+                    const dec = Number(wizard.decremento_valor || 2);
+                    const mitos = {};
+                    const micos = {};
+                    for (let i = 1; i <= qtdM; i++) mitos[String(i)] = vMito1 - dec * (i - 1);
+                    for (let i = 1; i <= qtdC; i++) micos[String(i)] = vMico1 + dec * (i - 1);
+                    if (Object.keys(mitos).length > 0) {
+                        console.log(`[TOP10] ✅ Valores calculados do ModuleConfig (wizard_respostas) para liga ${ligaId}`);
+                        return { mitos, micos };
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn(`[TOP10] Fallback ModuleConfig falhou:`, e.message);
+        }
+
         console.log(`[TOP10] ℹ️ Usando valores padrao (config sem top10)`);
         return valoresBonusOnusPadrao;
     } catch (error) {
