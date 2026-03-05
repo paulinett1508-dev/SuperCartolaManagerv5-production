@@ -6,7 +6,7 @@
 // v3.1: FIX - Evita re-injeção de scripts do layout + invalida cache ao navegar entre ligas
 
 // 🔖 Versão de cache-busting — atualize ao fazer deploy para forçar reload dos módulos JS
-const ADMIN_JS_VERSION = '20260305.1';
+const ADMIN_JS_VERSION = '20260305.2';
 
 // Wrapper de import dinâmico com cache-busting automático
 const vImport = (path) => {
@@ -1326,10 +1326,21 @@ function initOrquestrador() {
     }
 }
 
-// INICIALIZAÇÃO - DOMContentLoaded
-document.addEventListener("DOMContentLoaded", () => {
+// ✅ FIX v3.2: Inicialização unificada — um único trigger para carga inicial
+// DOMContentLoaded só dispara em full page load; readyState fallback cobre SPA
+let _initDisparado = false;
+function _dispararInitUnico() {
+    if (_initDisparado) return;
+    _initDisparado = true;
     initOrquestrador();
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener("DOMContentLoaded", _dispararInitUnico);
+} else {
+    // DOM já pronto (navegação SPA) — executar imediatamente
+    _dispararInitUnico();
+}
 
 // ✅ FIX: Reinicializar após navegação SPA
 window.addEventListener('spa:navigated', (e) => {
@@ -1350,12 +1361,7 @@ window.addEventListener('spa:navigated', (e) => {
             window.detalheLigaOrquestrador._navigationInitialized = false;
         }
         _orquestradorInitPending = false; // Permitir novo init
+        _initDisparado = false; // Permitir novo dispatch
         initOrquestrador();
     }
 });
-
-// ✅ FIX: Também inicializar se o DOM já estiver pronto (para navegação SPA)
-if (document.readyState !== 'loading') {
-    // Delay mínimo para evitar race condition com DOMContentLoaded
-    setTimeout(() => initOrquestrador(), 10);
-}

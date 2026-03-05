@@ -49,6 +49,8 @@ export class LayoutManager {
                 if (typeof window.verificarMenuSuperAdmin === 'function') {
                     window.verificarMenuSuperAdmin();
                 }
+                // Notificar que o layout (sidebar) está 100% pronto
+                window.dispatchEvent(new CustomEvent('layout:ready'));
             }, 150);
 
             this.layoutLoaded = true;

@@ -1961,6 +1961,8 @@
 
             // Flag para evitar inicialização duplicada
             let layoutInicializado = window._layoutInicializado || false;
+            let _layoutRetryCount = 0;
+            const _LAYOUT_MAX_RETRIES = 20; // 20 × 100ms = 2s máximo
 
             // Inicialização - verificar se sidebar já existe no DOM
             function tentarInicializarLayout() {
@@ -1972,12 +1974,17 @@
                 const sidebar = document.getElementById('appSidebar');
                 if (sidebar) {
                     console.log('[LAYOUT] Sidebar encontrado, inicializando...');
+                    _layoutRetryCount = 0;
                     layoutInicializado = true;
                     window._layoutInicializado = true;
                     inicializarLayout();
-                } else {
-                    console.log('[LAYOUT] Sidebar não encontrado, aguardando...');
+                } else if (_layoutRetryCount < _LAYOUT_MAX_RETRIES) {
+                    _layoutRetryCount++;
+                    console.log(`[LAYOUT] Sidebar não encontrado, retry ${_layoutRetryCount}/${_LAYOUT_MAX_RETRIES}...`);
                     setTimeout(tentarInicializarLayout, 100);
+                } else {
+                    console.error(`[LAYOUT] Sidebar não encontrado após ${_LAYOUT_MAX_RETRIES} tentativas. Abortando.`);
+                    _layoutRetryCount = 0;
                 }
             }
 
@@ -1997,6 +2004,14 @@
             // para garantir que o DOM foi atualizado
             console.log('[LAYOUT] Agendando inicialização... readyState:', document.readyState);
             setTimeout(tentarInicializarLayout, 200);
+
+            // Fallback: se layout:ready disparar antes do retry encontrar sidebar
+            window.addEventListener('layout:ready', () => {
+                if (!layoutInicializado && !window._layoutInicializado) {
+                    console.log('[LAYOUT] layout:ready recebido, inicializando...');
+                    tentarInicializarLayout();
+                }
+            }, { once: true });
 
             // Recarregar ao voltar para página
             window.addEventListener("pageshow", (event) => {
