@@ -200,7 +200,9 @@
       "Bash(claude mcp list 2>/dev/null || echo \"comando não disponível\")",
       "Bash(which gcloud 2>/dev/null && gcloud --version 2>/dev/null || echo \"gcloud: NOT FOUND\")",
       "Bash(if curl -s \"http://localhost:3000/api/cartola/mercado/status\" 2>/dev/null > /dev/null; then\n  echo \"✅ Servidor reiniciado com sucesso!\"\nelse\n  echo \"⚠️ Verificando log...\"\n  tail -20 /tmp/server.log\nfi)",
-      "WebFetch(domain:supercartolamanager.com.br)"
+      "WebFetch(domain:supercartolamanager.com.br)",
+      "Bash(else echo \"Servidor não respondeu após 15s\")",
+      "Read(//tmp/**)"
     ]
   },
   "enableAllProjectMcpServers": true,

@@ -24,67 +24,12 @@ export function injetarEstilosWrapper() {
     const style = document.createElement("style");
     style.id = "participante-wrapper-styles";
     style.textContent = `
-        /* ✅ v4.5: Layout profissional do header */
-        .fluxo-controls-header {
-            background: linear-gradient(135deg, rgba(30, 30, 35, 0.95) 0%, rgba(25, 25, 30, 0.98) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .fluxo-controls-row {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .fluxo-search-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .search-container {
-            flex: 1;
-            min-width: 200px;
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-        .search-container .search-icon {
-            position: absolute;
-            left: 12px;
-            color: #888;
-            font-size: 18px;
-            pointer-events: none;
-        }
-        .input-search {
-            width: 100%;
-            padding: 10px 12px 10px 40px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: #fff;
-            font-size: 14px;
-            transition: all 0.2s ease;
-        }
-        .input-search:focus {
-            outline: none;
-            border-color: var(--laranja, #ff6b35);
-            background: rgba(255, 255, 255, 0.08);
-        }
-        .input-search::placeholder {
-            color: #666;
-        }
-        .participantes-count {
-            color: #888;
-            font-size: 13px;
-            white-space: nowrap;
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
-        /* ✅ v4.5: Botões profissionais */
+        /* Base btn-fluxo (usado no modal de relatorio) */
         .btn-fluxo {
             display: inline-flex;
             align-items: center;
@@ -97,114 +42,12 @@ export function injetarEstilosWrapper() {
             cursor: pointer;
             transition: all 0.2s ease;
             white-space: nowrap;
-        }
-        .btn-fluxo .material-icons {
-            font-size: 18px;
-        }
-        .btn-fluxo:hover {
-            transform: translateY(-2px);
-        }
-        .btn-fluxo:active {
-            transform: translateY(0);
-        }
-        .btn-fluxo:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-        .btn-fluxo.loading .material-icons {
-            animation: spin 1s linear infinite;
-        }
-
-        /* Cores dos botões */
-        .btn-relatorio {
-            background: linear-gradient(135deg, #ff6b35 0%, #f54d00 100%);
             color: white;
-            box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
         }
-        .btn-relatorio:hover {
-            box-shadow: 0 4px 16px rgba(255, 107, 53, 0.4);
-        }
-
-        .btn-limpar {
-            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-            color: white;
-            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
-        }
-        .btn-limpar:hover {
-            box-shadow: 0 4px 16px rgba(220, 38, 38, 0.4);
-        }
-
-        .btn-recalcular {
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
-            color: white;
-            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
-        }
-        .btn-recalcular:hover {
-            box-shadow: 0 4px 16px rgba(5, 150, 105, 0.4);
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        /* Responsivo */
-        @media (max-width: 600px) {
-            .fluxo-controls-row {
-                flex-direction: column;
-            }
-            .btn-fluxo {
-                width: 100%;
-                justify-content: center;
-            }
-            .fluxo-search-row {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .participantes-count {
-                text-align: center;
-            }
-        }
-
-        /* Cards de participante */
-        .participante-card-wrapper {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .participante-card-wrapper .btn-auditar {
-            width: 100%;
-            justify-content: center;
-        }
-
-        /* Botão limpar cache individual */
-        .btn-recalc-cache {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            transition: all 0.2s ease;
-        }
-        .btn-recalc-cache:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
-        }
-        .btn-recalc-cache:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .btn-recalc-cache.loading .material-icons {
-            animation: spin 1s linear infinite;
-        }
+        .btn-fluxo .material-icons { font-size: 18px; }
+        .btn-fluxo:hover { transform: translateY(-1px); }
+        .btn-fluxo:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+        .btn-fluxo.loading .material-icons { animation: spin 1s linear infinite; }
     `;
     document.head.appendChild(style);
 }
@@ -510,131 +353,160 @@ export function injetarEstilosTabelaExpandida() {
             font-size: 0.9rem;
         }
 
-        /* Cards de Resumo */
-        .fluxo-resumo-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .resumo-card {
-            background: #1a1a1a;
-            border-radius: 10px;
-            padding: 14px 16px;
-            display: flex;
+        /* Stat Pills v9.0 — inline no toolbar */
+        .fluxo-stat-pills {
+            display: inline-flex;
+            gap: 6px;
+            margin-left: 12px;
             align-items: center;
-            gap: 12px;
-            border: 1px solid #2d2d2d;
-            position: relative;
-            transition: all 0.2s ease;
         }
 
-        .resumo-card.clickable {
+        .stat-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            border-radius: 8px;
+            border: 1px solid #2d2d2d;
+            background: #1a1a1a;
             cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'JetBrains Mono', monospace;
+            white-space: nowrap;
         }
-        .resumo-card.clickable:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        .stat-pill:hover {
+            border-color: #555;
+            background: #222;
         }
-        .resumo-card.clickable:active {
-            transform: translateY(0);
-        }
-        .resumo-card.clickable.active {
-            transform: scale(1.02);
+        .stat-pill.active {
             box-shadow: 0 0 0 2px currentColor;
         }
-        .resumo-card.card-areceber.active {
-            box-shadow: 0 0 0 2px #10b981, 0 4px 16px rgba(16, 185, 129, 0.3);
-        }
-        .resumo-card.card-apagar.active {
-            box-shadow: 0 0 0 2px #ef4444, 0 4px 16px rgba(239, 68, 68, 0.3);
-        }
-        .resumo-card.card-quitados.active {
-            box-shadow: 0 0 0 2px #9ca3af, 0 4px 16px rgba(156, 163, 175, 0.3);
-        }
-
-        .resumo-card.card-apagar {
-            border-color: rgba(239, 68, 68, 0.3);
-        }
-        .resumo-card.card-areceber {
+        .stat-pill.pill-areceber {
             border-color: rgba(16, 185, 129, 0.3);
         }
-        .resumo-card.card-quitados {
+        .stat-pill.pill-areceber .pill-valor { color: #10b981; }
+        .stat-pill.pill-areceber.active {
+            box-shadow: 0 0 0 2px #10b981, 0 2px 8px rgba(16, 185, 129, 0.25);
+            background: rgba(16, 185, 129, 0.08);
+        }
+        .stat-pill.pill-apagar {
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+        .stat-pill.pill-apagar .pill-valor { color: #ef4444; }
+        .stat-pill.pill-apagar.active {
+            box-shadow: 0 0 0 2px #ef4444, 0 2px 8px rgba(239, 68, 68, 0.25);
+            background: rgba(239, 68, 68, 0.08);
+        }
+        .stat-pill.pill-quitados {
             border-color: rgba(156, 163, 175, 0.3);
         }
-
-        .resumo-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .stat-pill.pill-quitados .pill-valor { color: #9ca3af; }
+        .stat-pill.pill-quitados.active {
+            box-shadow: 0 0 0 2px #9ca3af, 0 2px 8px rgba(156, 163, 175, 0.25);
+            background: rgba(156, 163, 175, 0.08);
         }
 
-        .card-apagar .resumo-icon {
-            background: rgba(239, 68, 68, 0.15);
-            color: #ef4444;
-        }
-        .card-areceber .resumo-icon {
-            background: rgba(16, 185, 129, 0.15);
-            color: #10b981;
-        }
-        .card-quitados .resumo-icon {
-            background: rgba(156, 163, 175, 0.15);
-            color: #9ca3af;
-        }
-
-        .resumo-icon .material-icons {
-            font-size: 22px;
-        }
-
-        .resumo-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .resumo-valor {
-            font-size: 1.2rem;
+        .pill-valor {
+            font-size: 0.8rem;
             font-weight: 700;
             color: #fff;
         }
-        .card-apagar .resumo-valor { color: #ef4444; }
-        .card-areceber .resumo-valor { color: #10b981; }
+        .pill-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            background: rgba(255,255,255,0.1);
+            color: #ccc;
+            padding: 1px 6px;
+            border-radius: 8px;
+        }
 
-        .resumo-label {
-            font-size: 0.7rem;
-            color: #888;
-            text-transform: uppercase;
+        /* Toolbar v9 — header premium com accent bar + blob glow */
+        .fluxo-toolbar-v9.module-toolbar {
+            background: linear-gradient(135deg, var(--surface-card, #1a1a1a) 0%, var(--surface-card-elevated, #242424) 100%);
+            border: 1px solid rgba(255, 85, 0, 0.15);
+            border-radius: var(--radius-lg, 12px);
+            padding: 14px 16px;
+            position: relative;
+            overflow: visible;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: var(--space-4, 16px);
+            border-bottom: none;
+        }
+        .fluxo-toolbar-v9.module-toolbar::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--color-primary, #FF5500), var(--color-primary-light, #ff6b35), var(--color-primary, #FF5500));
+            border-radius: var(--radius-lg, 12px) var(--radius-lg, 12px) 0 0;
+        }
+        .fluxo-toolbar-v9.module-toolbar::after {
+            content: '';
+            position: absolute;
+            width: 200px; height: 200px;
+            border-radius: 50%;
+            background: var(--color-primary, #FF5500);
+            filter: blur(60px);
+            opacity: 0.06;
+            top: -60px; right: -40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .fluxo-toolbar-v9 .toolbar-left,
+        .fluxo-toolbar-v9 .toolbar-right {
+            position: relative;
+            z-index: 1;
+        }
+        .fluxo-toolbar-v9 .toolbar-left {
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        .fluxo-toolbar-v9 .module-title {
+            margin-right: 0;
+            font-family: var(--font-family-brand, 'Russo One', sans-serif);
+            font-size: var(--font-size-lg, 16px);
             letter-spacing: 0.5px;
         }
 
-        .resumo-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(255,255,255,0.1);
-            color: #fff;
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 2px 8px;
-            border-radius: 10px;
+        /* Botao sutil (refresh) — discreto no canto */
+        .toolbar-btn-subtle {
+            opacity: 0.35;
+            transition: opacity 0.2s ease;
+        }
+        .toolbar-btn-subtle:hover {
+            opacity: 1;
         }
 
-        /* Filtro de Situação */
-        .toolbar-select {
-            background: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 6px;
-            padding: 8px 12px;
-            color: #fff;
-            font-size: 0.85rem;
-            cursor: pointer;
-            outline: none;
+        /* Responsivo — toolbar v9 + stat pills */
+        @media (max-width: 768px) {
+            .fluxo-toolbar-v9 .toolbar-right {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .fluxo-toolbar-v9 .search-inline {
+                min-width: 120px;
+            }
         }
-        .toolbar-select:focus {
-            border-color: #FF5500;
+        @media (max-width: 480px) {
+            .fluxo-stat-pills {
+                margin-left: 0;
+                width: 100%;
+                gap: 4px;
+            }
+            .stat-pill {
+                padding: 4px 8px;
+            }
+            .pill-valor {
+                font-size: 0.72rem;
+            }
+            .fluxo-toolbar-v9 .toolbar-left {
+                width: 100%;
+            }
+            .fluxo-toolbar-v9 .toolbar-right {
+                width: 100%;
+            }
         }
 
         /* ✅ v7.9: Seletor de Temporada */
@@ -894,14 +766,15 @@ export function injetarEstilosTabelaExpandida() {
         }
 
         @media (max-width: 600px) {
-            .fluxo-resumo-cards {
-                grid-template-columns: 1fr 1fr;
+            .fluxo-stat-pills {
+                margin-left: 0;
+                margin-top: 8px;
             }
-            .resumo-card {
-                padding: 10px 12px;
+            .stat-pill {
+                padding: 4px 7px;
             }
-            .resumo-valor {
-                font-size: 1rem;
+            .pill-valor {
+                font-size: 0.7rem;
             }
             .tabela-expandida th.col-situacao,
             .tabela-expandida td.col-situacao {

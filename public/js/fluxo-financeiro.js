@@ -11,7 +11,7 @@ import "./fluxo-financeiro/fluxo-financeiro-quitacao.js";
 import "./fluxo-financeiro/fluxo-financeiro-ajustes-api.js";
 
 // Cache-buster para forçar reload de módulos (incrementar a cada mudança)
-const CACHE_BUSTER = "v8.7"; // v8.7: Background bulk calculation + dashboard update
+const CACHE_BUSTER = "v9.1"; // v9.1: Header condensado, stat pills, cleanup CSS morto
 
 // VARIÁVEIS GLOBAIS
 let rodadaAtual = 0;
@@ -279,6 +279,14 @@ async function inicializarSistemaFinanceiro(ligaId) {
     await fluxoFinanceiroUI.renderizarBotoesParticipantes(participantes);
     fluxoFinanceiroUI.renderizarMensagemInicial();
     isDataLoaded = true;
+
+    // v9.0 FIX: Após render, ligaPrimeiraTemporada é conhecida.
+    // Se temporada selecionada é anterior à primeira da liga, corrigir antes do bulk calc.
+    if (window.ligaPrimeiraTemporada && window.temporadaAtual < window.ligaPrimeiraTemporada) {
+        console.warn(`[FLUXO-ADMIN] ⚠️ Corrigindo temporada: ${window.temporadaAtual} → ${window.ligaPrimeiraTemporada} (liga não existia)`);
+        window.temporadaAtual = window.ligaPrimeiraTemporada;
+        localStorage.setItem('temporadaSelecionada', window.ligaPrimeiraTemporada);
+    }
 
     // Background: calcular saldos reais de todos os participantes (sem bloquear UI)
     // Necessário quando o cache MongoDB está vazio — usa a mesma lógica do extrato individual

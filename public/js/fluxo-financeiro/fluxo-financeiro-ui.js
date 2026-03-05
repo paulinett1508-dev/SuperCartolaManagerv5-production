@@ -592,6 +592,11 @@ export class FluxoFinanceiroUI {
                 // ✅ v8.8.1: Salvar primeira temporada da liga para condicionar tabs
                 window.ligaPrimeiraTemporada = dadosSaldo.primeiraTemporada || 2025;
                 console.log(`[FLUXO-UI] 📅 primeiraTemporada da API: ${dadosSaldo.primeiraTemporada} → ligaPrimeiraTemporada: ${window.ligaPrimeiraTemporada}`);
+                // v9.0 FIX: Se temporada selecionada é anterior à primeira temporada da liga, corrigir
+                if (window.temporadaAtual < window.ligaPrimeiraTemporada) {
+                    console.warn(`[FLUXO-UI] ⚠️ temporadaAtual=${window.temporadaAtual} < primeiraTemporada=${window.ligaPrimeiraTemporada}. Corrigindo.`);
+                    window.temporadaAtual = window.ligaPrimeiraTemporada;
+                }
             }
         } catch (error) {
             console.warn("[FLUXO-UI] Erro ao buscar saldos:", error);
@@ -686,15 +691,11 @@ export class FluxoFinanceiroUI {
         const mostrarTab2025 = (window.ligaPrimeiraTemporada || 2025) < 2026;
         console.log(`[FLUXO-UI] 📅 Renderizando tabs: ligaPrimeiraTemporada=${window.ligaPrimeiraTemporada}, mostrar2025=${mostrarTab2025}`);
 
-        // Layout Dashboard com Cards de Resumo + Tabela Expandida
+        // Layout Dashboard — Header condensado v9.0
         container.innerHTML = `
-            <div class="module-toolbar">
+            <div class="module-toolbar fluxo-toolbar-v9">
                 <div class="toolbar-left">
-                    <h2 class="module-title">
-                        <span class="material-icons">account_balance_wallet</span>
-                        Financeiro
-                    </h2>
-                    <!-- ✅ v8.8.1: Seletor de Temporada - oculta 2025 se liga foi criada em 2026 -->
+                    <h2 class="module-title">Financeiro</h2>
                     <div id="temporada-tabs-fluxo" class="temporada-tabs-inline">
                         <button class="tab-btn-inline ${(window.temporadaAtual || CURRENT_SEASON) === 2026 ? 'active' : ''}"
                                 data-temporada="2026"
@@ -709,71 +710,23 @@ export class FluxoFinanceiroUI {
                         </button>
                         ` : ''}
                     </div>
-                    <div class="toolbar-stats">
-                        <span class="stat-badge">
-                            <span class="material-icons">people</span>
-                            <span class="participantes-count">${totalParticipantesBase}</span>
-                        </span>
+                    <!-- Stat pills clicáveis (substituem os cards grandes) -->
+                    <div class="fluxo-stat-pills">
+                        <button class="stat-pill pill-areceber clickable" data-filter="devedor" onclick="window.filtrarPorCard('devedor')" title="A Receber — clique para filtrar devedores">
+                            <span class="pill-valor">${formatarMoedaBR(totais.totalAReceber)}</span>
+                            <span class="pill-badge">${totais.quantidadeDevedores}</span>
+                        </button>
+                        <button class="stat-pill pill-apagar clickable" data-filter="credor" onclick="window.filtrarPorCard('credor')" title="A Pagar — clique para filtrar credores">
+                            <span class="pill-valor">${formatarMoedaBR(totais.totalAPagar)}</span>
+                            <span class="pill-badge">${totais.quantidadeCredores}</span>
+                        </button>
+                        <button class="stat-pill pill-quitados clickable" data-filter="quitado" onclick="window.filtrarPorCard('quitado')" title="Quitados — clique para filtrar">
+                            <span class="material-icons" style="font-size:14px;color:var(--text-muted, #9ca3af)">check_circle</span>
+                            <span class="pill-valor">${totais.quantidadeQuitados}</span>
+                        </button>
                     </div>
                 </div>
-                <div class="toolbar-right">
-                    <div class="search-inline">
-                        <span class="material-icons">search</span>
-                        <input type="text" id="searchParticipante" placeholder="Buscar..."
-                               onkeyup="window.filtrarParticipantesTabela(this.value)">
-                    </div>
-                    <select id="filtroSituacao" onchange="window.filtrarPorDropdown(this.value)" class="toolbar-select">
-                        <option value="">Todos</option>
-                        <option value="devedor">Devedores</option>
-                        <option value="credor">Credores</option>
-                        <option value="quitado">Quitados</option>
-                    </select>
-                    <button onclick="window.gerarRelatorioFinanceiro()" class="toolbar-btn btn-primary" title="Gerar Relatório">
-                        <span class="material-icons">assessment</span>
-                        <span class="btn-text">Relatório</span>
-                    </button>
-                    <div class="toolbar-separator"></div>
-                    <button id="btnConfig2026" onclick="window.abrirConfigRenovacao && window.abrirConfigRenovacao()" class="toolbar-btn btn-outline-warning" title="Configurar Renovação 2026">
-                        <span class="material-icons">settings</span>
-                        <span class="btn-text">2026</span>
-                    </button>
-                    <button id="btnNovoParticipante2026" onclick="window.abrirNovoParticipante && window.abrirNovoParticipante()" class="toolbar-btn btn-outline-info" title="Adicionar Participante 2026">
-                        <span class="material-icons">person_add</span>
-                    </button>
-                    <button onclick="window.recarregarFluxoFinanceiro()" class="toolbar-btn" title="Atualizar">
-                        <span class="material-icons">sync</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Cards de Resumo Financeiro (Clicáveis) -->
-            <!-- A Receber = Devedores (participantes com saldo negativo, devem à liga) -->
-            <!-- A Pagar = Credores (participantes com saldo positivo, liga deve a eles) -->
-            <div class="fluxo-resumo-cards">
-                <div class="resumo-card card-areceber clickable" data-filter="devedor" onclick="window.filtrarPorCard('devedor')" title="Clique para ver devedores">
-                    <div class="resumo-icon"><span class="material-icons">trending_up</span></div>
-                    <div class="resumo-info">
-                        <span class="resumo-valor">${formatarMoedaBR(totais.totalAReceber)}</span>
-                        <span class="resumo-label">A Receber</span>
-                    </div>
-                    <span class="resumo-badge">${totais.quantidadeDevedores}</span>
-                </div>
-                <div class="resumo-card card-apagar clickable" data-filter="credor" onclick="window.filtrarPorCard('credor')" title="Clique para ver credores">
-                    <div class="resumo-icon"><span class="material-icons">trending_down</span></div>
-                    <div class="resumo-info">
-                        <span class="resumo-valor">${formatarMoedaBR(totais.totalAPagar)}</span>
-                        <span class="resumo-label">A Pagar</span>
-                    </div>
-                    <span class="resumo-badge">${totais.quantidadeCredores}</span>
-                </div>
-                <div class="resumo-card card-quitados clickable" data-filter="quitado" onclick="window.filtrarPorCard('quitado')" title="Clique para ver quitados">
-                    <div class="resumo-icon"><span class="material-icons">check_circle</span></div>
-                    <div class="resumo-info">
-                        <span class="resumo-valor">${totais.quantidadeQuitados}</span>
-                        <span class="resumo-label">Quitados</span>
-                    </div>
-                    <span class="resumo-badge">${totais.quantidadeQuitados}</span>
-                </div>
+                <div class="toolbar-right"></div>
             </div>
 
             <!-- Tabela Financeira v4.2 - Layout Condicional por Temporada + Sticky Header -->
@@ -3347,28 +3300,26 @@ export class FluxoFinanceiroUI {
         // 3. Atualizar cards
         const fmtBR = (v) => v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-        const cardAreceber = document.querySelector('.card-areceber');
+        const cardAreceber = document.querySelector('.pill-areceber');
         if (cardAreceber) {
-            const valorEl = cardAreceber.querySelector('.resumo-valor');
-            const badgeEl = cardAreceber.querySelector('.resumo-badge');
+            const valorEl = cardAreceber.querySelector('.pill-valor');
+            const badgeEl = cardAreceber.querySelector('.pill-badge');
             if (valorEl) valorEl.textContent = `R$ ${fmtBR(totalAReceber)}`;
             if (badgeEl) badgeEl.textContent = devedores;
         }
 
-        const cardApagar = document.querySelector('.card-apagar');
+        const cardApagar = document.querySelector('.pill-apagar');
         if (cardApagar) {
-            const valorEl = cardApagar.querySelector('.resumo-valor');
-            const badgeEl = cardApagar.querySelector('.resumo-badge');
+            const valorEl = cardApagar.querySelector('.pill-valor');
+            const badgeEl = cardApagar.querySelector('.pill-badge');
             if (valorEl) valorEl.textContent = `R$ ${fmtBR(totalAPagar)}`;
             if (badgeEl) badgeEl.textContent = credores;
         }
 
-        const cardQuitados = document.querySelector('.card-quitados');
+        const cardQuitados = document.querySelector('.pill-quitados');
         if (cardQuitados) {
-            const valorEl = cardQuitados.querySelector('.resumo-valor');
-            const badgeEl = cardQuitados.querySelector('.resumo-badge');
+            const valorEl = cardQuitados.querySelector('.pill-valor');
             if (valorEl) valorEl.textContent = quitados;
-            if (badgeEl) badgeEl.textContent = quitados;
         }
 
         // 4. Re-ordenar tabela por saldo (devedores primeiro → quitados → credores)
@@ -3982,7 +3933,7 @@ window.filtrarPorDropdown = function(situacao) {
     window.filtrarPorSituacao(situacao);
 
     // Atualizar estado visual dos cards
-    const cards = document.querySelectorAll('.resumo-card.clickable');
+    const cards = document.querySelectorAll('.stat-pill.clickable');
     cards.forEach(card => {
         const cardFilter = card.dataset.filter;
         if (situacao && cardFilter === situacao) {
@@ -4016,7 +3967,7 @@ window.filtrarPorCard = function(situacao) {
     }
 
     // Atualizar estado visual dos cards
-    const cards = document.querySelectorAll('.resumo-card.clickable');
+    const cards = document.querySelectorAll('.stat-pill.clickable');
     cards.forEach(card => {
         const cardFilter = card.dataset.filter;
         if (situacao && cardFilter === situacao) {
@@ -4040,7 +3991,15 @@ window.filtrarParticipantes = window.filtrarParticipantesTabela;
 
 // ✅ v8.5: Modal de Auditoria e funcoes PDF movidas para fluxo-financeiro-pdf.js
 
-console.log("[FLUXO-UI] v8.8.1 - Tab 2025 usa criadaEm (ano real de criação)");
+console.log("[FLUXO-UI] v9.0 - Header condensado, stat pills, overflow menu");
+
+// Fechar overflow menu ao clicar fora
+document.addEventListener('click', (e) => {
+    const overflow = document.getElementById('toolbarOverflow');
+    if (overflow && !overflow.contains(e.target)) {
+        overflow.classList.remove('open');
+    }
+});
 
 // =============================================================================
 // AJUSTES DINAMICOS (Temporada 2026+)
