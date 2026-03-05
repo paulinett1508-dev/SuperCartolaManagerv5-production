@@ -11,6 +11,7 @@ let httpServer = null;
 const cronJobs = [];
 let consolidacaoIntervalId = null;
 let rateLimitCleanupIntervalId = null;
+let initAsyncPromise = null; // Rastrear IIFE para shutdown aguardar
 
 const cronGloboScraper = cron.schedule("0 6 * * *", () => {
   console.log("[CRON] Executando atualização de jogos do Globo Esporte...");
@@ -922,7 +923,8 @@ if (process.env.NODE_ENV !== "test") {
 // ====================================================================
 // ✅ FIX: connectDB() já fez await, conexão já está aberta neste ponto.
 // Usar IIFE em vez de .once("open") que nunca dispara (evento já passou).
-(async () => {
+// initAsyncPromise rastreada para graceful shutdown aguardar antes de fechar MongoDB.
+initAsyncPromise = (async () => {
   const logInit = IS_PRODUCTION ? originalConsole.log : console.log;
   const logInitError = IS_PRODUCTION ? originalConsole.error : console.error;
 
@@ -1100,7 +1102,14 @@ async function gracefulShutdown(signal) {
       logShutdown("[SHUTDOWN] ✅ Rate limiting cleanup parado");
     }
     
-    // 5. Fechar conexão MongoDB
+    // 5. Aguardar init-async terminar antes de fechar MongoDB
+    if (initAsyncPromise) {
+      logShutdown("[SHUTDOWN] Aguardando init-async finalizar...");
+      try { await initAsyncPromise; } catch { /* erro já logado no .catch da IIFE */ }
+      logShutdown("[SHUTDOWN] ✅ Init-async finalizado");
+    }
+
+    // 6. Fechar conexão MongoDB
     if (mongoose.connection.readyState === 1) {
       logShutdown("[SHUTDOWN] Fechando conexão MongoDB...");
       await mongoose.connection.close();
