@@ -1127,8 +1127,10 @@ export const getExtratoFinanceiro = async (req, res) => {
         res.json({
             success: true,
             saldo_atual: saldoTotal,
+            saldo_final: saldoTotal,         // C5: alias canônico (= saldo_atual)
             saldo_temporada: saldoTemporada,
             saldo_acertos: acertosInfo.saldoAcertos,
+            situacao: saldoTotal < -0.01 ? 'devedor' : saldoTotal > 0.01 ? 'credor' : 'quitado',
             extrato: todasTransacoes,
             acertos: {
                 lista: transacoesAcertos,
@@ -1279,7 +1281,9 @@ export const resetarCampos = async (req, res) => {
         }
 
         await FluxoFinanceiroCampos.deleteOne({ liga_id: String(ligaId), time_id: Number(timeId), temporada });
-        logger.log(`[FLUXO] Campos resetados: liga=${ligaId}, time=${timeId}, temporada=${temporada}`);
+        // C4 FIX: Invalidar cache ao resetar campos
+        await onCamposSaved(ligaId, timeId, temporada);
+        logger.log(`[FLUXO] Campos resetados: liga=${ligaId}, time=${timeId}, temporada=${temporada} (cache invalidado)`);
         res.json({ message: "Campos resetados com sucesso", temporada });
     } catch (error) {
         logger.error('[FLUXO] Erro ao resetar campos:', error);
@@ -1311,22 +1315,12 @@ export const getFluxoFinanceiroLiga = async (ligaId, rodadaNumero) => {
         for (const participante of liga.participantes) {
             const timeId = participante.time_id;
 
-            // ✅ v8.2.0 FIX: Incluir temporada na query (evita duplicados)
-            // ✅ v8.11.0 FIX: Busca normalizada (String e ObjectId) para evitar duplicatas
+            // C7 FIX: liga_id normalizado para String (sem fallback ObjectId)
             let cache = await ExtratoFinanceiroCache.findOne({
-                liga_id: ligaId,
+                liga_id: String(ligaId),
                 time_id: timeId,
                 temporada: temporadaAtual,
             });
-
-            // Fallback: buscar com liga_id como String
-            if (!cache && typeof ligaId !== "string") {
-                cache = await ExtratoFinanceiroCache.findOne({
-                    liga_id: String(ligaId),
-                    time_id: timeId,
-                    temporada: temporadaAtual,
-                });
-            }
 
             if (!cache) {
                 cache = new ExtratoFinanceiroCache({

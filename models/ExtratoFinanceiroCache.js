@@ -3,12 +3,13 @@ import { CURRENT_SEASON } from "../config/seasons.js";
 
 const ExtratoFinanceiroCacheSchema = new mongoose.Schema(
     {
-        // ✅ v6.0 FIX: Aceitar String ou ObjectId para compatibilidade
-        // Dados históricos armazenados como String, novos podem ser ObjectId
+        // C7 FIX: Normalizado para String (era Mixed, causava queries inconsistentes)
+        // Migration: docs com ObjectId devem ser convertidos via script
         liga_id: {
-            type: mongoose.Schema.Types.Mixed,
+            type: String,
             required: true,
             index: true,
+            set: (v) => String(v), // Força String ao salvar
         },
         time_id: { type: Number, required: true, index: true },
         // ✅ TEMPORADA - Segregação de dados por ano

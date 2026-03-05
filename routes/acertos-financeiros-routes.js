@@ -32,6 +32,8 @@ import { calcularSaldoParticipante } from "../utils/saldo-calculator.js";
 import { triggerAcertoFinanceiro } from "../services/notificationTriggers.js";
 // C1/C2 FIX: Lógica transacional centralizada (sem duplicar em tesouraria-routes)
 import { salvarAcertoTransacional, desativarAcerto } from "../services/acertoService.js";
+// C4 FIX: Invalidar ExtratoFinanceiroCache quando acerto é criado/deletado
+import { onAcertoCreated } from "../utils/cache-invalidator.js";
 
 const router = express.Router();
 
@@ -357,13 +359,12 @@ router.post("/:ligaId/:timeId", verificarAdmin, async (req, res) => {
         });
 
         // =========================================================================
-        // ✅ v1.4.0: NÃO DELETAR CACHE DO EXTRATO
-        // Acertos são armazenados em coleção separada (AcertoFinanceiro) e são
-        // integrados no momento da consulta em getExtratoFinanceiro().
-        // Deletar o cache zerava todos os dados históricos (Timeline, P.Corridos, etc.)
+        // C4 FIX: Invalidar ExtratoFinanceiroCache para que leituras cached
+        // (extratoFinanceiroCacheController) retornem saldo atualizado.
+        // Executar em background para nao atrasar resposta.
         // =========================================================================
-        // Cache do extrato NÃO precisa ser invalidado - acertos são calculados separadamente
-        console.log(`[ACERTOS] ✅ Acerto registrado para time ${timeId} (cache preservado)`);
+        setImmediate(() => onAcertoCreated(ligaId, timeId, temporada));
+        console.log(`[ACERTOS] ✅ Acerto registrado para time ${timeId} (cache invalidado)`);
 
         // Calcular novo saldo (já incluindo o troco se houver)
         const saldoInfo = await AcertoFinanceiro.calcularSaldoAcertos(ligaId, timeId, temporada);
@@ -454,13 +455,15 @@ router.put("/:id", verificarAdmin, async (req, res) => {
             });
         }
 
-        // ✅ v1.4.0: NÃO deletar cache - acertos são calculados separadamente
-        console.log(`[ACERTOS] ✅ Acerto atualizado (cache preservado)`);
+        // C4 FIX: Invalidar cache para que leituras cached reflitam a atualização
+        setImmediate(() => onAcertoCreated(acertoAtualizado.liga_id, acertoAtualizado.time_id, acertoAtualizado.temporada));
+        console.log(`[ACERTOS] ✅ Acerto atualizado (cache invalidado)`);
 
         // Calcular novo saldo
+        // C4 FIX: Usar liga_id/time_id (schema G2/G3 migrado)
         const saldoInfo = await AcertoFinanceiro.calcularSaldoAcertos(
-            acertoAtualizado.ligaId,
-            acertoAtualizado.timeId,
+            acertoAtualizado.liga_id,
+            acertoAtualizado.time_id,
             acertoAtualizado.temporada,
         );
 
@@ -495,12 +498,16 @@ router.delete("/:id", verificarAdmin, async (req, res) => {
             });
         }
 
-        console.log(`[ACERTOS] ✅ Acerto ${id} desativado (soft delete, cache preservado)`);
+        console.log(`[ACERTOS] ✅ Acerto ${id} desativado (soft delete)`);
+
+        // C4 FIX: Invalidar cache para que leituras cached reflitam a remoção
+        setImmediate(() => onAcertoCreated(acerto.liga_id, acerto.time_id, acerto.temporada));
 
         // Calcular novo saldo
+        // C4 FIX: Usar liga_id/time_id (schema G2/G3 migrado)
         const saldoInfo = await AcertoFinanceiro.calcularSaldoAcertos(
-            acerto.ligaId,
-            acerto.timeId,
+            acerto.liga_id,
+            acerto.time_id,
             acerto.temporada,
         );
 

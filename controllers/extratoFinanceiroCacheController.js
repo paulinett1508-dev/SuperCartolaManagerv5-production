@@ -63,42 +63,18 @@ import { apiError, apiServerError } from '../utils/apiResponse.js';
 import logger from '../utils/logger.js';
 import { hasAccessToLiga } from '../middleware/tenant.js';
 
-// ✅ v5.1: Buscar acertos financeiros do participante
-// ✅ v5.6 FIX: Default usa CURRENT_SEASON (dinâmico)
+// C4 REFACTOR: Usar model statics canônicos (fonte única de verdade)
+// Antes: lógica inline duplicava cálculo de totalPago/totalRecebido/saldo
+// Agora: delega para AcertoFinanceiro.buscarPorTime() + calcularSaldoAcertos()
 async function buscarAcertosFinanceiros(ligaId, timeId, temporada = CURRENT_SEASON) {
     try {
-        const acertos = await AcertoFinanceiro.find({
-            liga_id: String(ligaId),
-            time_id: Number(timeId),
-            temporada,
-            ativo: true,
-        }).sort({ dataAcerto: -1 }).lean();
-
-        if (!acertos || acertos.length === 0) {
-            return {
-                lista: [],
-                resumo: { totalPago: 0, totalRecebido: 0, saldo: 0 },
-            };
-        }
-
-        // Calcular totais
-        let totalPago = 0;
-        let totalRecebido = 0;
-        acertos.forEach((a) => {
-            if (a.tipo === "pagamento") {
-                totalPago += a.valor;
-            } else {
-                totalRecebido += a.valor;
-            }
-        });
-
-        // ✅ v5.2 FIX: Usar mesma lógica do Model (totalPago - totalRecebido)
-        // PAGAMENTO = participante pagou → AUMENTA saldo (quita dívida)
-        // RECEBIMENTO = participante recebeu → DIMINUI saldo (usa crédito)
-        const saldo = parseFloat((totalPago - totalRecebido).toFixed(2));
+        const [acertos, saldoInfo] = await Promise.all([
+            AcertoFinanceiro.buscarPorTime(ligaId, timeId, temporada),
+            AcertoFinanceiro.calcularSaldoAcertos(ligaId, timeId, temporada),
+        ]);
 
         return {
-            lista: acertos.map((a) => ({
+            lista: (acertos || []).map((a) => ({
                 _id: a._id,
                 tipo: a.tipo,
                 valor: a.valor,
@@ -108,9 +84,9 @@ async function buscarAcertosFinanceiros(ligaId, timeId, temporada = CURRENT_SEAS
                 observacoes: a.observacoes,
             })),
             resumo: {
-                totalPago: parseFloat(totalPago.toFixed(2)),
-                totalRecebido: parseFloat(totalRecebido.toFixed(2)),
-                saldo,
+                totalPago: saldoInfo.totalPago,
+                totalRecebido: saldoInfo.totalRecebido,
+                saldo: saldoInfo.saldoAcertos,
             },
         };
     } catch (error) {
@@ -613,18 +589,14 @@ export const getExtratoCache = async (req, res) => {
         const ligaPromise = Liga.findById(ligaId).select('modulos_ativos configuracoes.ranking_rodada participantes').lean()
             .catch(() => null);
 
-        // ✅ v5.7 FIX: Usar query nativa para evitar conversão de tipo pelo Mongoose
-        // O schema define liga_id como ObjectId, mas alguns registros estão como String
+        // C7 FIX: liga_id normalizado para String (sem mais $or com ObjectId)
         const db = mongoose.connection.db;
         const cache = await db.collection('extratofinanceirocaches').findOne({
-            $or: [
-                { liga_id: new mongoose.Types.ObjectId(ligaId) },
-                { liga_id: String(ligaId) }
-            ],
+            liga_id: String(ligaId),
             time_id: Number(timeId),
             temporada: temporadaNum,
         });
-        logger.log('[CACHE-CONTROLLER] Cache encontrado via query nativa:', cache ? 'SIM' : 'NÃO');
+        logger.log('[CACHE-CONTROLLER] Cache encontrado:', cache ? 'SIM' : 'NÃO');
 
         // ✅ v5.1: Aguardar acertos, ajustes e liga
         const [acertos, ajustesInfo, ligaData] = await Promise.all([acertosPromise, ajustesPromise, ligaPromise]);
@@ -1606,14 +1578,18 @@ export const lerCacheExtratoFinanceiro = async (req, res) => {
             fonte: 'cache',
             qtdRodadas: rodadasConsolidadas.length,
             rodada_calculada: rodadaCache,
-            dados: rodadasConsolidadas,
-            dados_extrato: rodadasConsolidadas,
+            dados: rodadasConsolidadas,       // legado (= rodadas)
+            dados_extrato: rodadasConsolidadas, // legado (= rodadas)
             rodadas: rodadasConsolidadas,
             saldo_total: resumoCalculado.saldo,
+            saldo_final: resumoCalculado.saldo,  // C5: alias canônico (= saldo_total)
+            saldo_temporada: resumoCalculado.saldo_temporada ?? resumoCalculado.saldo,
+            saldo_acertos: resumoCalculado.saldo_acertos ?? 0,
+            situacao: resumoCalculado.saldo < -0.01 ? 'devedor' : resumoCalculado.saldo > 0.01 ? 'credor' : 'quitado',
             resumo: resumoCalculado,
             camposManuais: camposAtivos,
-            lancamentosIniciais: lancamentosIniciais, // ✅ v6.0: Incluir lançamentos iniciais
-            acertos: acertos, // ✅ v5.2: Incluir acertos na resposta
+            lancamentosIniciais: lancamentosIniciais,
+            acertos: acertos,
             updatedAt: cache.updatedAt || cache.data_ultima_atualizacao,
             inativo: isInativo,
             rodadaDesistencia,

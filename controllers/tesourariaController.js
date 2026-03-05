@@ -14,7 +14,7 @@ import FluxoFinanceiroCampos from "../models/FluxoFinanceiroCampos.js";
 import AcertoFinanceiro from "../models/AcertoFinanceiro.js";
 import InscricaoTemporada from "../models/InscricaoTemporada.js";
 import AjusteFinanceiro from "../models/AjusteFinanceiro.js";
-import { CURRENT_SEASON } from "../config/seasons.js";
+import { CURRENT_SEASON, PREVIOUS_SEASON } from "../config/seasons.js";
 import {
     calcularResumoDeRodadas,
     transformarTransacoesEmRodadas,
@@ -24,6 +24,8 @@ import {
     aplicarAjusteInscricaoBulk,
 } from "../utils/saldo-calculator.js";
 import { salvarAcertoTransacional, desativarAcerto } from "../services/acertoService.js";
+// C4 FIX: Invalidar ExtratoFinanceiroCache quando acerto é criado/deletado
+import { onAcertoCreated } from "../utils/cache-invalidator.js";
 
 // =============================================================================
 // ✅ C3 FIX: Helper interno — elimina cálculo de saldo triplicado nos 3 GET endpoints
@@ -64,7 +66,11 @@ function _calcularSaldoCore({ ligaId, temporadaNum, historico, extrato, camposAt
         }
     } else {
         const rodadasProcessadas = transformarTransacoesEmRodadas(historico, ligaId);
-        resumoCalculado = calcularResumoDeRodadas(rodadasProcessadas, camposAtivos);
+        // C4 FIX: FluxoFinanceiroCampos apenas para temporadas <= PREVIOUS_SEASON
+        // Para CURRENT_SEASON+, AjusteFinanceiro é o sistema vigente — incluir ambos causava double-count
+        // (alinhado com saldo-calculator.js A3 FIX)
+        const camposParaCalculo = temporadaNum <= PREVIOUS_SEASON ? camposAtivos : [];
+        resumoCalculado = calcularResumoDeRodadas(rodadasProcessadas, camposParaCalculo);
         saldoConsolidado = resumoCalculado.saldo;
     }
 
@@ -288,10 +294,13 @@ export async function getParticipantes(req, res) {
                     ativo,
                     temporada,
                     saldoTemporada: parseFloat(saldoTemporada.toFixed(2)),
+                    saldo_temporada: parseFloat(saldoTemporada.toFixed(2)),  // C5: alias snake_case
                     saldoAcertos: parseFloat(saldoAcertos.toFixed(2)),
+                    saldo_acertos: parseFloat(saldoAcertos.toFixed(2)),      // C5: alias snake_case
                     totalPago: parseFloat(totalPago.toFixed(2)),
                     totalRecebido: parseFloat(totalRecebido.toFixed(2)),
                     saldoFinal: parseFloat(saldoFinal.toFixed(2)),
+                    saldo_final: parseFloat(saldoFinal.toFixed(2)),          // C5: alias snake_case
                     situacao,
                     quantidadeAcertos: acertosTemporada.length,
                     breakdown: {
@@ -409,11 +418,9 @@ export async function getLiga(req, res) {
         console.log(`[TESOURARIA] Buscando dados para temporada ${temporadaNum}`);
 
         const [todosExtratos, todosCampos, todosAcertos, todosAjustes] = await Promise.all([
+            // C7 FIX: liga_id normalizado para String (sem mais $or com ObjectId)
             mongoose.connection.db.collection('extratofinanceirocaches').find({
-                $or: [
-                    { liga_id: ligaIdStr },
-                    { liga_id: new mongoose.Types.ObjectId(ligaId) }
-                ],
+                liga_id: ligaIdStr,
                 // ✅ G2 FIX: coerção defensiva — extratofinanceirocaches armazena time_id como Number
                 time_id: { $in: timeIds.map(Number) },
                 temporada: { $in: [temporadaNum, temporadaNum - 1] }
@@ -610,10 +617,13 @@ export async function getLiga(req, res) {
                 contato: participante.contato || null,
                 clube_id: participante.clube_id || participante.time_coracao || null,
                 saldoTemporada: parseFloat(saldoTemporada.toFixed(2)),
+                saldo_temporada: parseFloat(saldoTemporada.toFixed(2)),  // C5: alias snake_case
                 saldoAcertos: parseFloat(saldoAcertos.toFixed(2)),
+                saldo_acertos: parseFloat(saldoAcertos.toFixed(2)),      // C5: alias snake_case
                 totalPago: parseFloat(totalPago.toFixed(2)),
                 totalRecebido: parseFloat(totalRecebido.toFixed(2)),
                 saldoFinal: parseFloat(saldoFinal.toFixed(2)),
+                saldo_final: parseFloat(saldoFinal.toFixed(2)),          // C5: alias snake_case
                 situacao,
                 quantidadeAcertos: acertosTemporada.length,
                 breakdown: {
@@ -824,10 +834,13 @@ export async function getParticipante(req, res) {
                 saldoConsolidado: parseFloat(((saldo.saldoTemporada || 0) - (saldo.saldoAjustes || 0)).toFixed(2)),
                 saldoCampos: saldo.saldoAjustes || 0,
                 saldoTemporada: saldo.saldoTemporada,
+                saldo_temporada: saldo.saldoTemporada,    // C5: alias snake_case canônico
                 saldoAcertos: saldo.saldoAcertos,
+                saldo_acertos: saldo.saldoAcertos,         // C5: alias snake_case canônico
                 totalPago: saldo.totalPago,
                 totalRecebido: saldo.totalRecebido,
                 saldoFinal: saldo.saldoFinal,
+                saldo_final: saldo.saldoFinal,             // C5: alias snake_case canônico
                 situacao,
             },
             resumo,
@@ -1021,7 +1034,9 @@ export async function postAcerto(req, res) {
             }
         }
 
-        console.log(`[TESOURARIA] ✅ Acerto registrado para time ${timeId} (cache preservado)`)
+        // C4 FIX: Invalidar cache para que leituras cached reflitam o novo acerto
+        setImmediate(() => onAcertoCreated(ligaId, timeId, temporada));
+        console.log(`[TESOURARIA] ✅ Acerto registrado para time ${timeId} (cache invalidado)`);
 
         const novoSaldo = await calcularSaldoParticipante(ligaId, timeId, temporada);
 
@@ -1114,11 +1129,13 @@ export async function deleteAcerto(req, res) {
             });
         }
 
-        console.log(`[TESOURARIA] ✅ Acerto desativado para time ${acerto.timeId} (cache preservado)`)
+        // C4 FIX: Invalidar cache para que leituras cached reflitam a remoção
+        setImmediate(() => onAcertoCreated(acerto.liga_id, acerto.time_id, acerto.temporada));
+        console.log(`[TESOURARIA] ✅ Acerto desativado para time ${acerto.time_id} (cache invalidado)`);
 
         const novoSaldo = await calcularSaldoParticipante(
-            acerto.ligaId,
-            acerto.timeId,
+            acerto.liga_id,
+            acerto.time_id,
             acerto.temporada
         );
 
