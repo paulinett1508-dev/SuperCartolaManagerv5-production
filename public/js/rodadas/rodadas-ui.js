@@ -111,14 +111,34 @@ export function isRodadaConsolidada(rodada, rodada_atual, status_mercado, tempor
 export async function renderizarMiniCardsRodadas() {
   console.log("[RODADAS-UI] renderizarMiniCardsRodadas iniciada");
 
-  const cardsContainer = getElement("rodadasCards");
+  // ✅ FIX: Bypass cache DOM — buscar elemento DIRETO do DOM para evitar referências stale
+  // Quando loadModule re-injeta HTML via innerHTML, o elemento cacheado pode apontar
+  // para um nó removido do DOM (detached), fazendo innerHTML não ter efeito visual
+  const cardsContainer = document.getElementById("rodadasCards");
+  // Atualizar cache com referência fresca
+  elementsCache.set("rodadasCards", cardsContainer);
   console.log(
     "[RODADAS-UI] Container rodadasCards encontrado:",
     !!cardsContainer,
+    "| isConnected:", cardsContainer?.isConnected,
   );
 
   if (!cardsContainer) {
     console.error("[RODADAS-UI] Container rodadasCards não encontrado!");
+    return;
+  }
+
+  if (!cardsContainer.isConnected) {
+    console.error("[RODADAS-UI] Container rodadasCards existe mas está DETACHED do DOM! Buscando novamente...");
+    elementsCache.delete("rodadasCards");
+    const freshContainer = document.getElementById("rodadasCards");
+    if (freshContainer && freshContainer.isConnected) {
+      elementsCache.set("rodadasCards", freshContainer);
+      // Usar o fresh container daqui pra frente não é possível com const, então logamos e re-call
+      console.log("[RODADAS-UI] Encontrou container fresco, re-chamando renderização...");
+      return renderizarMiniCardsRodadas();
+    }
+    console.error("[RODADAS-UI] Não foi possível encontrar container conectado ao DOM!");
     return;
   }
 
@@ -208,6 +228,7 @@ export async function renderizarMiniCardsRodadas() {
   }
 
   cardsContainer.innerHTML = cardsHTML;
+  console.log(`[RODADAS-UI] ✅ Mini cards renderizados: ${RODADA_FINAL_CAMPEONATO} cards, HTML length: ${cardsHTML.length}, container children: ${cardsContainer.children.length}`);
 }
 
 // ==============================

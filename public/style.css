@@ -106,9 +106,11 @@ body {
   margin-left: 280px;
   background: var(--bg-secondary);
   min-height: 100vh;
-  transition: margin-left 0.3s ease;
+  transition: margin-left 0.3s ease, max-width 0.3s ease;
   /* Limite máximo + centralização para telas UltraWide */
   max-width: calc(100vw - 280px);
+  /* ✅ Garantir que o conteúdo preencha toda a largura disponível */
+  width: calc(100vw - 280px);
 }
 
 /* Content wrapper para centralização em telas grandes */
@@ -118,10 +120,11 @@ body {
   margin-right: auto;
 }
 
-/* Sidebar colapsada: ajustar max-width */
+/* Sidebar colapsada: ajustar max-width — ganhar 200px de espaço */
 body.sidebar-collapsed .app-main {
   margin-left: 80px;
   max-width: calc(100vw - 80px);
+  width: calc(100vw - 80px);
 }
 
 /* Mobile: sem margem lateral (sidebar escondida) */
@@ -129,6 +132,7 @@ body.sidebar-collapsed .app-main {
   .app-main {
     margin-left: 0;
     max-width: 100vw;
+    width: 100vw;
   }
 }
 

@@ -10,8 +10,9 @@
 }
 
 .detalhe-liga-redesign .page-content {
-    padding: 24px 20px !important;
+    padding: 20px 12px !important;
     /* Removido max-width e margin auto que causavam desalinhamento com sidebar */
+    /* ✅ Reduzido de 24px/20px para 20px/12px — otimizar espaço horizontal */
 }
 
 /* === HEADER DA LIGA (COMPACTO) === */

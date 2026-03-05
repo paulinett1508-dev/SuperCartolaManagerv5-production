@@ -347,7 +347,7 @@
 
 /* Detalhe Liga: Content wide - sem max-width/margin auto para não conflitar com sidebar */
 .detalhe-liga-page .app-main {
-    padding: 20px 40px;
+    padding: 16px 20px; /* ✅ Reduzido de 20px/40px — ganhar ~40px horizontal para conteúdo */
 }
 
 /* Analisar Participantes: Full wide */

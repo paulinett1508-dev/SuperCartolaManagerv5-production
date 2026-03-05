@@ -436,7 +436,7 @@
     display: none;
     background: var(--bg-card);
     border-radius: var(--radius-lg);
-    padding: 28px;
+    padding: 20px 16px; /* ✅ Reduzido de 28px para 20px/16px — ganhar espaço para tabelas com ações */
     border: 1px solid var(--border-color);
     margin-top: 24px;
     animation: fadeInUp 0.3s ease-out forwards; /* ✅ v2.7: forwards mantém transform: none após animação */
