@@ -217,7 +217,7 @@ function preencherTodasRodadas(rodadasExistentes) {
         if (rodadasMap.has(i)) {
             todasRodadas.push(rodadasMap.get(i));
         } else {
-            todasRodadas.push({ rodada: i, posicao: null, bonusOnus: 0, pontosCorridos: 0, mataMata: 0, top10: 0, melhorMes: 0, artilheiro: 0, luvaOuro: 0, restaUm: 0, _preenchida: true });
+            todasRodadas.push({ rodada: i, posicao: null, bonusOnus: 0, pontosCorridos: 0, mataMata: 0, top10: 0, _preenchida: true });
         }
     }
     return todasRodadas;
@@ -281,8 +281,7 @@ function renderQuickStatsRow(resumo, rodadas, acertos) {
     let melhorRodada = null;
     let melhorSaldo = -Infinity;
     rodadas.forEach(r => {
-        const s = (r.bonusOnus || 0) + (r.pontosCorridos || 0) + (r.mataMata || 0) + (r.top10 || 0)
-                + (r.melhorMes || 0) + (r.artilheiro || 0) + (r.luvaOuro || 0) + (r.restaUm || 0);
+        const s = (r.bonusOnus || 0) + (r.pontosCorridos || 0) + (r.mataMata || 0) + (r.top10 || 0);
         if (s > melhorSaldo) { melhorSaldo = s; melhorRodada = r.rodada; }
     });
 
@@ -452,12 +451,7 @@ function renderTransactionTimeline(rodadas, acertos, lancamentosIniciais, ligaId
         const pontosCorridos = r.pontosCorridos || 0;
         const mataMata = r.mataMata || 0;
         const top10 = r.top10 || 0;
-        const melhorMes = r.melhorMes || 0;
-        const artilheiro = r.artilheiro || 0;
-        const luvaOuro = r.luvaOuro || 0;
-        const restaUm = r.restaUm || 0;
-        const saldoRodada = bonusOnus + pontosCorridos + mataMata + top10
-                          + melhorMes + artilheiro + luvaOuro + restaUm;
+        const saldoRodada = bonusOnus + pontosCorridos + mataMata + top10;
         saldoAcumulado += saldoRodada;
 
         const faixas = getFaixasParaRodada(ligaId, r.rodada);
@@ -492,20 +486,6 @@ function renderTransactionTimeline(rodadas, acertos, lancamentosIniciais, ligaId
             const iconColor = top10 > 0 ? 'var(--app-warning)' : 'var(--app-danger)';
             detalhes.push({ icon: iconName, iconColor, label: labelTop10, valor: top10 });
         }
-        // ✅ v5.6: Módulos opcionais (casamento com admin)
-        if (melhorMes !== 0) {
-            detalhes.push({ icon: 'calendar_month', iconColor: 'var(--app-primary)', label: 'Melhor Mês', valor: melhorMes });
-        }
-        if (artilheiro !== 0) {
-            detalhes.push({ icon: 'sports_soccer', iconColor: 'var(--module-artilheiro-primary, #22c55e)', label: 'Artilheiro', valor: artilheiro });
-        }
-        if (luvaOuro !== 0) {
-            detalhes.push({ icon: 'back_hand', iconColor: 'var(--module-luva-primary, #ffd700)', label: 'Luva de Ouro', valor: luvaOuro });
-        }
-        if (restaUm !== 0) {
-            detalhes.push({ icon: 'gavel', iconColor: 'var(--app-danger)', label: 'Resta Um', valor: restaUm });
-        }
-
         // Contar módulos extras (exclui bônus/ônus de posição base)
         const modulosExtras = detalhes.filter(d => !['casino', 'star', 'sentiment_very_dissatisfied'].includes(d.icon)).length;
 

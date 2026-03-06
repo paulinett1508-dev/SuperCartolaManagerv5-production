@@ -449,19 +449,6 @@ function transformarTransacoesEmRodadas(transacoes, ligaId) {
             case "ONUS":
                 r.bonusOnus += valor; // valor já é negativo
                 break;
-            case "MELHOR_MES":
-                r.melhorMes = (r.melhorMes || 0) + valor;
-                break;
-            case "ARTILHEIRO":
-            case "ARTILHEIRO_PREMIACAO":
-                r.artilheiro = (r.artilheiro || 0) + valor;
-                break;
-            case "LUVA_OURO":
-                r.luvaOuro = (r.luvaOuro || 0) + valor;
-                break;
-            case "RESTA_UM":
-                r.restaUm = (r.restaUm || 0) + valor;
-                break;
             case "NEUTRO":
                 // ✅ v8.19.0: Zona neutra ou sem participação — valor=0 mas rodada deve existir
                 r.bonusOnus += valor;
@@ -472,9 +459,7 @@ function transformarTransacoesEmRodadas(transacoes, ligaId) {
                     r.bonusOnus += valor;
                 }
         }
-        r.saldo = r.bonusOnus + r.pontosCorridos + r.mataMata + r.top10
-                + (r.melhorMes || 0) + (r.artilheiro || 0)
-                + (r.luvaOuro || 0) + (r.restaUm || 0);
+        r.saldo = r.bonusOnus + r.pontosCorridos + r.mataMata + r.top10;
     });
 
     const rodadasArray = Object.values(rodadasMap).sort(
