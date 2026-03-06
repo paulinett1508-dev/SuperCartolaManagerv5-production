@@ -925,6 +925,11 @@ function transformarDadosController(dados) {
                 pontosCorridos: 0,
                 mataMata: 0,
                 top10: 0,
+                // ✅ v5.6: Campos de módulos opcionais (casamento com admin)
+                melhorMes: 0,
+                artilheiro: 0,
+                luvaOuro: 0,
+                restaUm: 0,
                 saldo: 0,
                 isMito: false,
                 isMico: false,
@@ -960,10 +965,27 @@ function transformarDadosController(dados) {
                 // v8.19.0: Zona neutra ou sem participacao - valor=0 mas rodada deve existir
                 r.bonusOnus += valor;
                 break;
+            // ✅ v5.6: Handlers para módulos opcionais (casamento com admin)
+            case "MELHOR_MES":
+                r.melhorMes += valor;
+                break;
+            case "ARTILHEIRO":
+            case "ARTILHEIRO_PREMIACAO":
+                r.artilheiro += valor;
+                break;
+            case "LUVA_OURO":
+                r.luvaOuro += valor;
+                break;
+            case "RESTA_UM":
+                r.restaUm += valor;
+                break;
             default:
                 r.bonusOnus += valor;
         }
-        r.saldo = r.bonusOnus + r.pontosCorridos + r.mataMata + r.top10;
+        // ✅ v5.6: Saldo inclui TODOS os módulos (casamento com admin _calcularSaldoTemporada)
+        r.saldo = r.bonusOnus + r.pontosCorridos + r.mataMata + r.top10
+                + (r.melhorMes || 0) + (r.artilheiro || 0)
+                + (r.luvaOuro || 0) + (r.restaUm || 0);
 
         // Atualizar posição se veio na transação
         if (t.posicao && !r.posicao) {

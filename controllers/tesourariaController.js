@@ -247,7 +247,7 @@ export async function getParticipantes(req, res) {
 
                 historico.forEach(t => {
                     if (t.tipo === 'MELHOR_MES') breakdown.melhorMes += t.valor || 0;
-                    else if (t.tipo === 'ARTILHEIRO') breakdown.artilheiro += t.valor || 0;
+                    else if (t.tipo === 'ARTILHEIRO' || t.tipo === 'ARTILHEIRO_PREMIACAO') breakdown.artilheiro += t.valor || 0;
                     else if (t.tipo === 'LUVA_OURO') breakdown.luvaOuro += t.valor || 0;
                     else if (t.tipo === 'RESTA_UM') breakdown.restaUm += t.valor || 0;
                 });
@@ -572,7 +572,7 @@ export async function getLiga(req, res) {
 
             historico.forEach(t => {
                 if (t.tipo === 'MELHOR_MES') breakdown.melhorMes += t.valor || 0;
-                else if (t.tipo === 'ARTILHEIRO') breakdown.artilheiro += t.valor || 0;
+                else if (t.tipo === 'ARTILHEIRO' || t.tipo === 'ARTILHEIRO_PREMIACAO') breakdown.artilheiro += t.valor || 0;
                 else if (t.tipo === 'LUVA_OURO') breakdown.luvaOuro += t.valor || 0;
                 else if (t.tipo === 'RESTA_UM') breakdown.restaUm += t.valor || 0;
             });

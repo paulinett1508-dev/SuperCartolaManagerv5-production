@@ -453,6 +453,7 @@ function transformarTransacoesEmRodadas(transacoes, ligaId) {
                 r.melhorMes = (r.melhorMes || 0) + valor;
                 break;
             case "ARTILHEIRO":
+            case "ARTILHEIRO_PREMIACAO":
                 r.artilheiro = (r.artilheiro || 0) + valor;
                 break;
             case "LUVA_OURO":
