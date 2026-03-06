@@ -902,7 +902,18 @@ function transformarDadosController(dados) {
             return; // Não processar como rodada normal
         }
 
-        // ✅ v3.3: Ignora ajustes manuais e acertos financeiros aqui (processados separadamente)
+        // ✅ v5.5: Capturar Ajustes Financeiros (Resta Um, multas, etc.) como lançamentos visíveis
+        if (t.tipo === "AJUSTE" || t.tipo === "AJUSTE_MANUAL") {
+            lancamentosIniciais.push({
+                tipo: t.tipo,
+                descricao: t.descricao || "Ajuste financeiro",
+                valor: parseFloat(t.valor) || 0,
+                data: t.data,
+            });
+            return;
+        }
+
+        // ✅ v3.3: Ignora acertos financeiros e rodada null/0 (processados separadamente)
         if (t.rodada === null || t.rodada === 0 || t.tipo === "ACERTO_FINANCEIRO") return;
 
         const numRodada = t.rodada;
@@ -1020,10 +1031,20 @@ function transformarDadosController(dados) {
 
     // ✅ v4.1 FIX: Incluir lançamentos iniciais no cálculo
     // Taxa de inscrição é débito (negativo), saldo anterior pode ser + ou -
-    const saldoLancamentosIniciais = -taxaInscricaoCalculada + saldoAnteriorTransferido;
+    // ✅ v5.5: Incluir ajustes (Resta Um, multas) no saldo de lançamentos
+    let saldoAjustesLocal = 0;
+    lancamentosIniciais.forEach(l => {
+        if (l.tipo === "AJUSTE" || l.tipo === "AJUSTE_MANUAL") {
+            saldoAjustesLocal += l.valor;
+        }
+    });
+    const saldoLancamentosIniciais = -taxaInscricaoCalculada + saldoAnteriorTransferido + saldoAjustesLocal;
     if (saldoAnteriorTransferido > 0) totalGanhos += saldoAnteriorTransferido;
     if (saldoAnteriorTransferido < 0) totalPerdas += saldoAnteriorTransferido;
     if (taxaInscricaoCalculada > 0) totalPerdas -= taxaInscricaoCalculada; // Taxa é débito
+    // ✅ v5.5: Ajustes podem ser ganho ou perda
+    if (saldoAjustesLocal > 0) totalGanhos += saldoAjustesLocal;
+    if (saldoAjustesLocal < 0) totalPerdas += saldoAjustesLocal;
 
     // ✅ v4.1 FIX: Construir resumo com taxaInscricao incluída
     // Se dados.resumo existe (do cache), usar e complementar

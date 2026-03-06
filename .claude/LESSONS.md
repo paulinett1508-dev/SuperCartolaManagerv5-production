@@ -20,6 +20,7 @@
 | 2026-03-04 | LOGICA | `verificarCacheValido` aceitava cache pré-temporada (ultima_rodada=0) mesmo após a temporada ter iniciado com rodadas reais. Fixes v6.8 aplicados só em `getExtratoCache`, esquecendo `verificarCacheValido`. | Quando um fix é aplicado a uma função de um controller, verificar se existem funções irmãs que fazem a mesma operação e precisam do mesmo fix. `verificarCacheValido` e `getExtratoCache` têm lógica duplicada de detecção de pré-temporada. | Não |
 | 2026-03-04 | LOGICA | `verificarCacheValido` calculava `lancamentosIniciais` internamente mas não incluía no JSON de resposta, causando timeline vazia. Todos os outros paths da mesma função incluem `lancamentosIniciais`. | Ao adicionar novos fields a um objeto de resposta em um path, verificar TODOS os outros paths da mesma função e garantir consistência. | Não |
 | 2026-03-04 | LOGICA | `popularCacheBackend` bloqueava `if (temporada === 2026) return` por todo o ano 2026, impedindo cache de extrato com rodadas reais. Deveria bloquear apenas durante pré-temporada real (`extrato.preTemporada === true`). | Nunca usar o ano hardcoded como proxy de "pré-temporada". Usar a flag `preTemporada` do objeto de dados. Anni passam, a flag persiste correta. | Não |
+| 2026-03-06 | LOGICA | Adicionei campos por-rodada (melhorMes, artilheiro, luvaOuro, restaUm) no transformer e renderers, mas esses módulos NÃO geram transações por rodada. | **Módulos de premiação final** (Artilheiro, Luva de Ouro, Capitão, Resta Um, Bolão, Copa, Melhor Mês) premiam apenas ao final da disputa. O admin lança manualmente como Ajuste Financeiro (tipo "AJUSTE", rodada: null). Nunca criar campos por-rodada para esses módulos — eles aparecem na seção "Ajustes" do extrato, não nas rodadas. | Sim |
 
 ### Categorias Validas
 - **DADOS** — Queries erradas, tipos de ID, collections incorretas
@@ -56,4 +57,4 @@ function escapeHtml(str) {
 
 | Data | Regra | Secao do CLAUDE.md | Licao Origem |
 |------|-------|--------------------|--------------|
-| — | _(vazio)_ | — | — |
+| 2026-03-06 | Módulos de premiação final NUNCA geram campos por-rodada | Seção "Módulos por Rodada vs Módulos de Premiação Final" | Campos per-rodada para Artilheiro/Luva/RestaUm/MelhorMes |

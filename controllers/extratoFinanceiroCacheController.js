@@ -449,18 +449,6 @@ function transformarTransacoesEmRodadas(transacoes, ligaId) {
             case "ONUS":
                 r.bonusOnus += valor; // valor já é negativo
                 break;
-            case "MELHOR_MES":
-                r.melhorMes = (r.melhorMes || 0) + valor;
-                break;
-            case "ARTILHEIRO":
-                r.artilheiro = (r.artilheiro || 0) + valor;
-                break;
-            case "LUVA_OURO":
-                r.luvaOuro = (r.luvaOuro || 0) + valor;
-                break;
-            case "RESTA_UM":
-                r.restaUm = (r.restaUm || 0) + valor;
-                break;
             case "NEUTRO":
                 // ✅ v8.19.0: Zona neutra ou sem participação — valor=0 mas rodada deve existir
                 r.bonusOnus += valor;
@@ -471,9 +459,7 @@ function transformarTransacoesEmRodadas(transacoes, ligaId) {
                     r.bonusOnus += valor;
                 }
         }
-        r.saldo = r.bonusOnus + r.pontosCorridos + r.mataMata + r.top10
-                + (r.melhorMes || 0) + (r.artilheiro || 0)
-                + (r.luvaOuro || 0) + (r.restaUm || 0);
+        r.saldo = r.bonusOnus + r.pontosCorridos + r.mataMata + r.top10;
     });
 
     const rodadasArray = Object.values(rodadasMap).sort(
@@ -585,6 +571,11 @@ export const getExtratoCache = async (req, res) => {
         const ajustesPromise = AjusteFinanceiro.calcularTotal(
             String(ligaId), Number(timeId), Number(temporadaNum)
         ).catch(() => ({ total: 0, quantidade: 0 }));
+        // ✅ v7.1: Buscar ajustes individuais para exibição no extrato (Resta Um, multas, etc.)
+        const ajustesListaPromise = (temporadaNum >= 2026)
+            ? AjusteFinanceiro.listarPorParticipante(String(ligaId), Number(timeId), Number(temporadaNum))
+                .catch(() => [])
+            : Promise.resolve([]);
         // ✅ v7.0: Buscar config da liga para enriquecer resposta (módulos + zonas)
         const ligaPromise = Liga.findById(ligaId).select('modulos_ativos configuracoes.ranking_rodada participantes').lean()
             .catch(() => null);
@@ -599,7 +590,7 @@ export const getExtratoCache = async (req, res) => {
         logger.log('[CACHE-CONTROLLER] Cache encontrado:', cache ? 'SIM' : 'NÃO');
 
         // ✅ v5.1: Aguardar acertos, ajustes e liga
-        const [acertos, ajustesInfo, ligaData] = await Promise.all([acertosPromise, ajustesPromise, ligaPromise]);
+        const [acertos, ajustesInfo, ajustesLista, ligaData] = await Promise.all([acertosPromise, ajustesPromise, ajustesListaPromise, ligaPromise]);
         const saldoAjustesGlobal = ajustesInfo.total || 0;
 
         // ✅ v7.0: Extrair config de zona e módulos ativos da liga
@@ -824,10 +815,26 @@ export const getExtratoCache = async (req, res) => {
             }
         });
 
+        // Calcular saldo ANTES de incluir ajustes (ajustes já são contabilizados via saldoAjustesGlobal)
         const saldoLancamentosIniciais = lancamentosIniciais.reduce((acc, t) =>
             acc + (parseFloat(t.valor) || 0), 0
         );
         logger.log(`[CACHE-CONTROLLER] 📋 Lançamentos iniciais: ${lancamentosIniciais.length}, taxa=${taxaInscricaoValor}, saldoAnterior=${saldoAnteriorTransferidoValor}, total=${saldoLancamentosIniciais}`);
+
+        // ✅ v7.1: Incluir ajustes financeiros individuais (Resta Um, multas) APÓS cálculo de saldo
+        // (saldo dos ajustes já é computado separadamente via saldoAjustesGlobal — evitar double-counting)
+        if (ajustesLista && ajustesLista.length > 0) {
+            ajustesLista.forEach(a => {
+                lancamentosIniciais.push({
+                    rodada: null,
+                    tipo: 'AJUSTE',
+                    descricao: a.descricao,
+                    valor: a.valor,
+                    data: a.criado_em,
+                });
+            });
+            logger.log(`[CACHE-CONTROLLER] 📋 Ajustes financeiros incluídos para display: ${ajustesLista.length} entries`);
+        }
 
         let rodadasConsolidadas = transformarTransacoesEmRodadas(
             transacoesRaw,
@@ -1120,7 +1127,7 @@ export const verificarCacheValido = async (req, res) => {
 
         // ✅ v5.7 FIX: Executar queries independentes em PARALELO
         // ✅ v7.0: Incluir ajustes na busca paralela
-        const [statusTime, statusTemporada, cacheExistente, acertos, ajustesInfoVal] = await Promise.all([
+        const [statusTime, statusTemporada, cacheExistente, acertos, ajustesInfoVal, ajustesListaVal] = await Promise.all([
             buscarStatusTime(ligaId, timeId),
             verificarTemporadaFinalizada(ligaId),
             ExtratoFinanceiroCache.findOne({
@@ -1131,6 +1138,11 @@ export const verificarCacheValido = async (req, res) => {
             buscarAcertosFinanceiros(ligaId, timeId),
             AjusteFinanceiro.calcularTotal(String(ligaId), Number(timeId), Number(temporadaNum))
                 .catch(() => ({ total: 0, quantidade: 0 })),
+            // ✅ v7.1: Buscar ajustes individuais para exibição no extrato
+            (temporadaNum >= 2026)
+                ? AjusteFinanceiro.listarPorParticipante(String(ligaId), Number(timeId), Number(temporadaNum))
+                    .catch(() => [])
+                : Promise.resolve([]),
         ]);
 
         const isInativo = statusTime.ativo === false;
@@ -1321,10 +1333,20 @@ export const verificarCacheValido = async (req, res) => {
                 t.tipo === 'LEGADO_ANTERIOR'
             );
 
-            // Calcular saldo dos lançamentos iniciais
+            // Calcular saldo ANTES de incluir ajustes (ajustes contabilizados via ajustesInfoVal)
             const saldoLancamentosIniciais = lancamentosIniciais.reduce((acc, t) =>
                 acc + (parseFloat(t.valor) || 0), 0
             );
+
+            // ✅ v7.1: Incluir ajustes financeiros individuais APÓS cálculo de saldo (display only)
+            if (ajustesListaVal && ajustesListaVal.length > 0) {
+                ajustesListaVal.forEach(a => {
+                    lancamentosIniciais.push({
+                        rodada: null, tipo: 'AJUSTE',
+                        descricao: a.descricao, valor: a.valor, data: a.criado_em,
+                    });
+                });
+            }
 
             const camposAtivos = await buscarCamposManuais(ligaId, timeId, temporadaNum);
 
@@ -1519,10 +1541,21 @@ export const lerCacheExtratoFinanceiro = async (req, res) => {
             (t.rodada === 0 || t.rodada === null || t.rodada === undefined)
         );
 
+        // Calcular saldo ANTES de incluir ajustes (ajustes contabilizados via ajustesInfoLer/ajustesInfoVal)
         let saldoLancamentosIniciais = 0;
         lancamentosIniciais.forEach(l => {
             saldoLancamentosIniciais += parseFloat(l.valor) || 0;
         });
+
+        // ✅ v7.1: Incluir ajustes financeiros individuais APÓS cálculo de saldo (display only)
+        if (ajustesListaVal && ajustesListaVal.length > 0) {
+            ajustesListaVal.forEach(a => {
+                lancamentosIniciais.push({
+                    rodada: null, tipo: 'AJUSTE',
+                    descricao: a.descricao, valor: a.valor, data: a.criado_em,
+                });
+            });
+        }
 
         const camposAtivos = await buscarCamposManuais(ligaId, timeId, temporadaNum);
         const resumoCalculado = calcularResumoDeRodadas(

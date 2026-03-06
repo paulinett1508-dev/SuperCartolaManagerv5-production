@@ -86,7 +86,7 @@ export async function calcularSaldoParticipante(ligaId, timeId, temporada = CURR
             // Calcular campos especiais do histórico legado
             (cache.historico_transacoes || []).forEach(t => {
                 if (t.tipo === 'MELHOR_MES') breakdown.melhorMes += t.valor || 0;
-                else if (t.tipo === 'ARTILHEIRO') breakdown.artilheiro += t.valor || 0;
+                else if (t.tipo === 'ARTILHEIRO' || t.tipo === 'ARTILHEIRO_PREMIACAO') breakdown.artilheiro += t.valor || 0;
                 else if (t.tipo === 'LUVA_OURO') breakdown.luvaOuro += t.valor || 0;
             });
         }
