@@ -1,6 +1,7 @@
 // =====================================================================
-// service-worker.js - Service Worker do PWA v4.3 (CACHE FALLBACK 5xx)
+// service-worker.js - Service Worker do PWA v4.4 (FIX REPUBLISH FREEZE)
 // Destino: /participante/service-worker.js
+// ✅ v4.4: FIX REPUBLISH FREEZE - Não substituir 503 do backend (já tem retry inteligente), melhorar fallback SW
 // ✅ v4.3: REPUBLISH RESILIENCE - SW intercepta HTML e mostra retry page quando servidor está down
 // ✅ v4.2: TTL DINÂMICO - Backend usa 30s com jogos ao vivo, 5min sem
 // ✅ v4.1: CACHE BUST - Forçar atualização de tabelas-esportes.js (tempo jogos + refresh 30s)
@@ -14,10 +15,10 @@
 // ✅ v3.2: FORCE CACHE CLEAR - Limpar cache antigo que causava erros
 // ✅ v3.1: Network-First com cache fallback (FIX fetch failures)
 // ✅ v3.0: Força limpeza de caches antigos
-// BUILD: 2026-02-28T00:00:00Z
+// BUILD: 2026-03-06T00:00:00Z
 // =====================================================================
 
-const CACHE_NAME = "super-cartola-v29-20260301";
+const CACHE_NAME = "super-cartola-v30-20260306";
 
 // Arquivos essenciais para cache inicial
 const STATIC_ASSETS = [
@@ -61,7 +62,9 @@ self.addEventListener("activate", (event) => {
     );
 });
 
-// ✅ v4.3: Página de retry quando servidor está down (Republish)
+// ✅ v4.4: Página de retry quando servidor está COMPLETAMENTE down (sem resposta)
+// Usa /api/app/check-version como health check (mesmo endpoint do backend)
+// Backoff progressivo (2s→8s) para não sobrecarregar servidor reiniciando
 function gerarPaginaRetry() {
     var html = '<!DOCTYPE html><html lang="pt-BR"><head>' +
         '<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
@@ -74,7 +77,7 @@ function gerarPaginaRetry() {
         'p{font-size:.95rem;color:#9ca3af;margin-bottom:1.5rem}' +
         '.spinner{width:36px;height:36px;border:3px solid #374151;border-top-color:#60a5fa;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}' +
         '@keyframes spin{to{transform:rotate(360deg)}}' +
-        '#status{font-size:.8rem;color:#6b7280;margin-top:.5rem}' +
+        '#status{font-size:.8rem;color:#6b7280;margin-top:.5rem;transition:color .3s}' +
         '#retry-btn{display:none;margin-top:1rem;padding:.6rem 1.5rem;background:#1d4ed8;color:#fff;border:none;border-radius:8px;font-size:.95rem;cursor:pointer}' +
         '#retry-btn:active{background:#1e40af}' +
         '</style></head>' +
@@ -87,27 +90,32 @@ function gerarPaginaRetry() {
         '</div>' +
         '<script>' +
         '(function(){' +
-        'var t=0,max=90,iv=2000;' +
+        'var HEALTH="/api/app/check-version";' +
+        'var t=0,max=60,iv=2000,ivMax=8000,ivStep=500;' +
         'var s=document.getElementById("status");' +
         'var b=document.getElementById("retry-btn");' +
         'function go(){' +
         't++;' +
-        'if(s)s.textContent="Tentativa "+t+"...";' +
-        'fetch(location.href,{method:"HEAD",cache:"no-store"}).then(function(r){' +
-        'if(r.ok||r.status===304){location.reload();}' +
-        'else if(t<max){setTimeout(go,iv);}' +
+        'if(s)s.textContent="Reconectando... ("+t+")";' +
+        'fetch(HEALTH,{cache:"no-store"}).then(function(r){' +
+        'if(r.ok){' +
+        'if(s){s.textContent="Servidor online! Recarregando...";s.style.color="#34d399";}' +
+        'setTimeout(function(){location.reload();},300);' +
+        '}' +
+        'else if(t<max){agendar();}' +
         'else{done();}' +
         '}).catch(function(){' +
-        'if(t<max){setTimeout(go,iv);}' +
+        'if(t<max){agendar();}' +
         'else{done();}' +
         '});' +
         '}' +
+        'function agendar(){setTimeout(go,iv);if(iv<ivMax)iv+=ivStep;}' +
         'function done(){' +
         'if(s)s.textContent="Servidor ainda indisponivel.";' +
         'if(b)b.style.display="inline-block";' +
         '}' +
         'setTimeout(go,iv);' +
-        'setTimeout(function(){if(b)b.style.display="inline-block";},20000);' +
+        'setTimeout(function(){if(b)b.style.display="inline-block";},15000);' +
         '})();' +
         '<\/script>' +
         '</body></html>';
@@ -137,10 +145,10 @@ self.addEventListener("fetch", (event) => {
         return;
     }
 
-    // ✅ v4.3: NETWORK FIRST + RETRY PAGE para HTML/navegação
-    // Quando servidor está DOWN (Republish), o proxy Replit retorna "Internal Server Error".
-    // Sem interceptação, o usuário fica preso nesse erro.
-    // Agora o SW detecta falha/5xx e responde com página de retry automático.
+    // ✅ v4.4: NETWORK FIRST para HTML/navegação
+    // Se servidor retorna 5xx: PASSA a resposta do backend (já tem retry inteligente com
+    // health check, loop detection e backoff). Só usa gerarPaginaRetry() quando a rede
+    // falha completamente (servidor down sem resposta nenhuma).
     if (url.pathname.endsWith('.html') ||
         url.pathname === '/participante/' ||
         url.pathname === '/participante') {
@@ -150,14 +158,17 @@ self.addEventListener("fetch", (event) => {
                 if (response.ok || response.status === 304) {
                     return response;
                 }
-                // Servidor retornou erro (5xx) — mostrar página de retry
+                // Servidor retornou 5xx — PASSAR a resposta do backend (já tem retry inteligente
+                // com health check via /api/app/check-version, loop detection e backoff).
+                // Antes o SW substituía por gerarPaginaRetry() que usava HEAD na mesma URL,
+                // causando loop infinito pós-Republish.
                 if (response.status >= 500) {
-                    return gerarPaginaRetry();
+                    return response;
                 }
                 // Outros status (3xx, 4xx) — retorna como está
                 return response;
             }).catch(function() {
-                // Rede falhou completamente (servidor down) — página de retry
+                // Rede falhou completamente (servidor down, sem resposta) — página de retry do SW
                 return gerarPaginaRetry();
             })
         );
