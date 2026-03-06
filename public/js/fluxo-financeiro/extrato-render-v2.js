@@ -216,48 +216,87 @@ function renderAcertosCardV2(acertos) {
 function renderTimelineV2(rodadas, resumo, acertos, lancamentosIniciais) {
     const groups = [];
 
-    // 1. Lançamentos iniciais (inscrição, legado)
+    // 1. Lançamentos iniciais (inscrição, legado) + Ajustes financeiros (Resta Um, multas)
     if (lancamentosIniciais && lancamentosIniciais.length > 0) {
-        const totalInicial = lancamentosIniciais.reduce((s, l) => s + (l.valor || 0), 0);
-        const detailsHtml = lancamentosIniciais.map(l => `
+        // Separar inscrição/legado dos ajustes financeiros
+        const entradas = lancamentosIniciais.filter(l => l.tipo !== 'AJUSTE' && l.tipo !== 'AJUSTE_MANUAL');
+        const ajustes = lancamentosIniciais.filter(l => l.tipo === 'AJUSTE' || l.tipo === 'AJUSTE_MANUAL');
+
+        const renderDetailItem = (l) => `
             <div class="extrato-timeline-v2__detail-item">
                 <div class="extrato-timeline-v2__detail-label">
-                    <span class="material-icons">${l.tipo === 'INSCRICAO_TEMPORADA' ? 'receipt_long' : 'savings'}</span>
+                    <span class="material-icons">${l.tipo === 'INSCRICAO_TEMPORADA' ? 'receipt_long' : (l.tipo === 'AJUSTE' || l.tipo === 'AJUSTE_MANUAL') ? 'gavel' : 'savings'}</span>
                     ${l.descricao || l.tipo}
                 </div>
                 <div class="extrato-timeline-v2__detail-value extrato-timeline-v2__detail-value--${getStatusClass(l.valor)}">
                     ${sinalMoeda(l.valor)}
                 </div>
             </div>
-        `).join('');
+        `;
 
-        groups.push({
-            order: 0,
-            html: `
-                <div class="extrato-timeline-v2__group">
-                    <div class="extrato-timeline-v2__group-header" onclick="window.toggleTimelineGroupV2(this)">
-                        <div class="extrato-timeline-v2__group-left">
-                            <div class="extrato-timeline-v2__group-icon extrato-timeline-v2__group-icon--inscricao">
-                                <span class="material-icons">receipt_long</span>
+        // 1a. Grupo inscrição/legado
+        if (entradas.length > 0) {
+            const totalInicial = entradas.reduce((s, l) => s + (l.valor || 0), 0);
+            groups.push({
+                order: 0,
+                html: `
+                    <div class="extrato-timeline-v2__group">
+                        <div class="extrato-timeline-v2__group-header" onclick="window.toggleTimelineGroupV2(this)">
+                            <div class="extrato-timeline-v2__group-left">
+                                <div class="extrato-timeline-v2__group-icon extrato-timeline-v2__group-icon--inscricao">
+                                    <span class="material-icons">receipt_long</span>
+                                </div>
+                                <div class="extrato-timeline-v2__group-info">
+                                    <div class="extrato-timeline-v2__group-title">Inscrição</div>
+                                    <div class="extrato-timeline-v2__group-subtitle">${entradas.length} lançamento(s)</div>
+                                </div>
                             </div>
-                            <div class="extrato-timeline-v2__group-info">
-                                <div class="extrato-timeline-v2__group-title">Inscrição</div>
-                                <div class="extrato-timeline-v2__group-subtitle">${lancamentosIniciais.length} lançamento(s)</div>
+                            <div class="extrato-timeline-v2__group-right">
+                                <div class="extrato-timeline-v2__group-value extrato-timeline-v2__group-value--${getStatusClass(totalInicial)}">
+                                    ${sinalMoeda(totalInicial)}
+                                </div>
+                                <span class="material-icons extrato-timeline-v2__expand-icon">expand_more</span>
                             </div>
                         </div>
-                        <div class="extrato-timeline-v2__group-right">
-                            <div class="extrato-timeline-v2__group-value extrato-timeline-v2__group-value--${getStatusClass(totalInicial)}">
-                                ${sinalMoeda(totalInicial)}
-                            </div>
-                            <span class="material-icons extrato-timeline-v2__expand-icon">expand_more</span>
+                        <div class="extrato-timeline-v2__group-details">
+                            ${entradas.map(renderDetailItem).join('')}
                         </div>
                     </div>
-                    <div class="extrato-timeline-v2__group-details">
-                        ${detailsHtml}
+                `
+            });
+        }
+
+        // 1b. Grupo ajustes financeiros (Resta Um, multas, etc.)
+        if (ajustes.length > 0) {
+            const totalAjustes = ajustes.reduce((s, l) => s + (l.valor || 0), 0);
+            groups.push({
+                order: 0.5,
+                html: `
+                    <div class="extrato-timeline-v2__group">
+                        <div class="extrato-timeline-v2__group-header" onclick="window.toggleTimelineGroupV2(this)">
+                            <div class="extrato-timeline-v2__group-left">
+                                <div class="extrato-timeline-v2__group-icon extrato-timeline-v2__group-icon--${totalAjustes < 0 ? 'negative' : 'positive'}">
+                                    <span class="material-icons">gavel</span>
+                                </div>
+                                <div class="extrato-timeline-v2__group-info">
+                                    <div class="extrato-timeline-v2__group-title">Ajustes</div>
+                                    <div class="extrato-timeline-v2__group-subtitle">${ajustes.length} lançamento(s)</div>
+                                </div>
+                            </div>
+                            <div class="extrato-timeline-v2__group-right">
+                                <div class="extrato-timeline-v2__group-value extrato-timeline-v2__group-value--${getStatusClass(totalAjustes)}">
+                                    ${sinalMoeda(totalAjustes)}
+                                </div>
+                                <span class="material-icons extrato-timeline-v2__expand-icon">expand_more</span>
+                            </div>
+                        </div>
+                        <div class="extrato-timeline-v2__group-details">
+                            ${ajustes.map(renderDetailItem).join('')}
+                        </div>
                     </div>
-                </div>
-            `
-        });
+                `
+            });
+        }
     }
 
     // 2. Rodadas
@@ -300,11 +339,15 @@ function renderTimelineV2(rodadas, resumo, acertos, lancamentosIniciais) {
         const saldoRodada = bonusOnus + pontosCorridos + mataMata + top10 + melhorMes + artilheiro + luvaOuro;
         const saldoAcum = saldosPorRodada[r.rodada] || 0;
 
-        // Badges
+        // Badges — isMito/isMico (posição na rodada) TEM PRIORIDADE sobre top10 (valor financeiro do módulo Top10)
         let badgeHtml = '';
-        if (r.isMito || r.top10 > 0) {
+        if (r.isMito) {
             badgeHtml = '<span class="extrato-timeline-v2__group-badge extrato-timeline-v2__group-badge--mito">MITO</span>';
-        } else if (r.isMico || r.top10 < 0) {
+        } else if (r.isMico) {
+            badgeHtml = '<span class="extrato-timeline-v2__group-badge extrato-timeline-v2__group-badge--mico">MICO</span>';
+        } else if (r.top10 > 0) {
+            badgeHtml = '<span class="extrato-timeline-v2__group-badge extrato-timeline-v2__group-badge--mito">MITO</span>';
+        } else if (r.top10 < 0) {
             badgeHtml = '<span class="extrato-timeline-v2__group-badge extrato-timeline-v2__group-badge--mico">MICO</span>';
         } else if (r.posicao && r.posicao <= 10) {
             badgeHtml = `<span class="extrato-timeline-v2__group-badge extrato-timeline-v2__group-badge--zona-g">G${r.posicao}</span>`;
@@ -315,7 +358,7 @@ function renderTimelineV2(rodadas, resumo, acertos, lancamentosIniciais) {
         if (bonusOnus !== 0) details.push({ icon: 'casino', label: 'Bônus/Ônus', valor: bonusOnus });
         if (pontosCorridos !== 0) details.push({ icon: 'sports_soccer', label: 'Pontos Corridos', valor: pontosCorridos });
         if (mataMata !== 0) details.push({ icon: 'emoji_events', label: 'Mata-Mata', valor: mataMata });
-        if (top10 !== 0) details.push({ icon: top10 > 0 ? 'military_tech' : 'sentiment_dissatisfied', label: 'Top 10', valor: top10 });
+        if (top10 !== 0) details.push({ icon: top10 > 0 ? 'military_tech' : 'sentiment_dissatisfied', label: r.top10Status ? `Top 10 (${r.top10Status})` : 'Top 10', valor: top10 });
         if (melhorMes !== 0) details.push({ icon: 'calendar_month', label: 'Melhor Mês', valor: melhorMes });
         if (artilheiro !== 0) details.push({ icon: 'sports_soccer', label: 'Artilheiro', valor: artilheiro });
         if (luvaOuro !== 0) details.push({ icon: 'back_hand', label: 'Luva de Ouro', valor: luvaOuro });
@@ -459,8 +502,11 @@ function renderPerformanceV2(rodadas) {
     rodadas.filter(r => r.rodada > 0).forEach(r => {
         const saldo = (r.bonusOnus || 0) + (r.pontosCorridos || 0) + (r.mataMata || 0) + (r.top10 || 0);
 
-        if (r.top10 > 0 || r.isMito) mitos++;
-        if (r.top10 < 0 || r.isMico) micos++;
+        // isMito/isMico (posição) tem prioridade; top10 é fallback (módulo Top10)
+        if (r.isMito) mitos++;
+        else if (r.isMico) micos++;
+        else if (r.top10 > 0) mitos++;
+        else if (r.top10 < 0) micos++;
         if (r.posicao && r.posicao <= 10) zonaG++;
         if (r.posicao && r.posicao >= 25) zonaZ++; // Assumindo ~32 participantes
 

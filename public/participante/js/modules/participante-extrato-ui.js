@@ -373,12 +373,17 @@ function renderEvolutionChart(isPreTemporadaMode) {
 function renderTransactionTimeline(rodadas, acertos, lancamentosIniciais, ligaId) {
     const items = [];
 
-    // 1. Lançamentos iniciais (inscrição, saldo anterior)
+    // 1. Lançamentos iniciais (inscrição, saldo anterior) + Ajustes financeiros (Resta Um, multas)
     if (lancamentosIniciais && lancamentosIniciais.length > 0) {
-        const groupItems = lancamentosIniciais.map(l => {
+        // Separar inscrição/legado dos ajustes financeiros
+        const entradas = lancamentosIniciais.filter(l => l.tipo !== 'AJUSTE' && l.tipo !== 'AJUSTE_MANUAL');
+        const ajustes = lancamentosIniciais.filter(l => l.tipo === 'AJUSTE' || l.tipo === 'AJUSTE_MANUAL');
+
+        const renderLancamentoItem = (l) => {
             const isDebit = l.valor < 0;
-            const iconType = l.tipo === 'INSCRICAO_TEMPORADA' ? 'inscricao' : (isDebit ? 'debit' : 'credit');
-            const iconName = l.tipo === 'INSCRICAO_TEMPORADA' ? 'receipt_long' : (isDebit ? 'trending_down' : 'savings');
+            const isAjuste = l.tipo === 'AJUSTE' || l.tipo === 'AJUSTE_MANUAL';
+            const iconType = l.tipo === 'INSCRICAO_TEMPORADA' ? 'inscricao' : (isAjuste ? (isDebit ? 'debit' : 'credit') : (isDebit ? 'debit' : 'credit'));
+            const iconName = l.tipo === 'INSCRICAO_TEMPORADA' ? 'receipt_long' : (isAjuste ? 'gavel' : (isDebit ? 'trending_down' : 'savings'));
             return `
                 <div class="extrato-timeline__item">
                     <div class="extrato-timeline__item-icon extrato-timeline__item-icon--${iconType}">
@@ -392,23 +397,47 @@ function renderTransactionTimeline(rodadas, acertos, lancamentosIniciais, ligaId
                     </div>
                 </div>
             `;
-        });
+        };
+
+        // 1a. Grupo de inscrição/legado
+        if (entradas.length > 0) {
+            const groupItems = entradas.map(renderLancamentoItem);
+            const totalInicial = entradas.reduce((s, l) => s + (l.valor || 0), 0);
+            items.push({
+                order: 0,
+                html: `
+                    <div class="extrato-timeline__group">
+                        <div class="extrato-timeline__group-header">
+                            <span class="extrato-timeline__group-label">Inscrição</span>
+                            <span class="extrato-timeline__group-total" style="color: ${totalInicial >= 0 ? 'var(--app-success-light)' : 'var(--app-danger-light)'}">
+                                ${sinalMoeda(totalInicial)}
+                            </span>
+                        </div>
+                        <div class="extrato-timeline__group-items">${groupItems.join('')}</div>
+                    </div>`
+            });
+        }
+
+        // 1b. Grupo de ajustes financeiros (Resta Um, multas, etc.)
+        if (ajustes.length > 0) {
+            const ajusteItems = ajustes.map(renderLancamentoItem);
+            const totalAjustes = ajustes.reduce((s, l) => s + (l.valor || 0), 0);
+            items.push({
+                order: 0.5, // Entre inscrição (0) e rodadas (1+)
+                html: `
+                    <div class="extrato-timeline__group">
+                        <div class="extrato-timeline__group-header">
+                            <span class="extrato-timeline__group-label">Ajustes</span>
+                            <span class="extrato-timeline__group-total" style="color: ${totalAjustes >= 0 ? 'var(--app-success-light)' : 'var(--app-danger-light)'}">
+                                ${sinalMoeda(totalAjustes)}
+                            </span>
+                        </div>
+                        <div class="extrato-timeline__group-items">${ajusteItems.join('')}</div>
+                    </div>`
+            });
+        }
 
         const totalInicial = lancamentosIniciais.reduce((s, l) => s + (l.valor || 0), 0);
-        items.push({
-            order: 0,
-            html: `
-                <div class="extrato-timeline__group">
-                    <div class="extrato-timeline__group-header">
-                        <span class="extrato-timeline__group-label">Inscrição</span>
-                        <span class="extrato-timeline__group-total" style="color: ${totalInicial >= 0 ? 'var(--app-success-light)' : 'var(--app-danger-light)'}">
-                            ${sinalMoeda(totalInicial)}
-                        </span>
-                    </div>
-                    ${groupItems.join('')}
-                </div>
-            `
-        });
     }
 
     // 2. Rodadas - NOVO DESIGN: Timeline Vertical (estilo banco digital)
