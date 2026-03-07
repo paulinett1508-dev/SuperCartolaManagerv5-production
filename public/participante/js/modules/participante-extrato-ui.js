@@ -217,7 +217,7 @@ function preencherTodasRodadas(rodadasExistentes) {
         if (rodadasMap.has(i)) {
             todasRodadas.push(rodadasMap.get(i));
         } else {
-            todasRodadas.push({ rodada: i, posicao: null, bonusOnus: 0, pontosCorridos: 0, mataMata: 0, top10: 0, _preenchida: true });
+            todasRodadas.push({ rodada: i, posicao: null, bonusOnus: 0, pontosCorridos: 0, mataMata: 0, top10: 0, restaUm: 0, _preenchida: true });
         }
     }
     return todasRodadas;
@@ -281,7 +281,7 @@ function renderQuickStatsRow(resumo, rodadas, acertos) {
     let melhorRodada = null;
     let melhorSaldo = -Infinity;
     rodadas.forEach(r => {
-        const s = (r.bonusOnus || 0) + (r.pontosCorridos || 0) + (r.mataMata || 0) + (r.top10 || 0);
+        const s = (r.bonusOnus || 0) + (r.pontosCorridos || 0) + (r.mataMata || 0) + (r.top10 || 0) + (r.restaUm || 0);
         if (s > melhorSaldo) { melhorSaldo = s; melhorRodada = r.rodada; }
     });
 
@@ -451,7 +451,8 @@ function renderTransactionTimeline(rodadas, acertos, lancamentosIniciais, ligaId
         const pontosCorridos = r.pontosCorridos || 0;
         const mataMata = r.mataMata || 0;
         const top10 = r.top10 || 0;
-        const saldoRodada = bonusOnus + pontosCorridos + mataMata + top10;
+        const restaUm = r.restaUm || 0;
+        const saldoRodada = bonusOnus + pontosCorridos + mataMata + top10 + restaUm;
         saldoAcumulado += saldoRodada;
 
         const faixas = getFaixasParaRodada(ligaId, r.rodada);
@@ -485,6 +486,10 @@ function renderTransactionTimeline(rodadas, acertos, lancamentosIniciais, ligaId
             const iconName = top10 > 0 ? 'military_tech' : 'thumb_down';
             const iconColor = top10 > 0 ? 'var(--app-warning)' : 'var(--app-danger)';
             detalhes.push({ icon: iconName, iconColor, label: labelTop10, valor: top10 });
+        }
+        if (restaUm !== 0) {
+            const restaUmLabel = r.restaUmDescricao || 'Resta Um - Eliminado';
+            detalhes.push({ icon: 'person_remove', iconColor: 'var(--app-danger)', label: restaUmLabel, valor: restaUm });
         }
         // Contar módulos extras (exclui bônus/ônus de posição base)
         const modulosExtras = detalhes.filter(d => !['casino', 'star', 'sentiment_very_dissatisfied'].includes(d.icon)).length;
@@ -667,7 +672,7 @@ function renderPerformanceCard(rodadas, ligaId) {
 
     rodadas.forEach(r => {
         const faixas = getFaixasParaRodada(ligaId, r.rodada);
-        const saldo = (r.bonusOnus || 0) + (r.pontosCorridos || 0) + (r.mataMata || 0) + (r.top10 || 0);
+        const saldo = (r.bonusOnus || 0) + (r.pontosCorridos || 0) + (r.mataMata || 0) + (r.top10 || 0) + (r.restaUm || 0);
         if (r.top10 > 0) totalMito++;
         if (r.top10 < 0) totalMico++;
         if (r.posicao && r.posicao <= faixas.credito.fim) zonaCredito++;
@@ -1116,7 +1121,7 @@ function renderizarGraficoEvolucao(rodadas, range = "all") {
 
     let saldoAcumulado = 0;
     const pontos = dadosOrdenados.map(r => {
-        saldoAcumulado += (r.bonusOnus || 0) + (r.pontosCorridos || 0) + (r.mataMata || 0) + (r.top10 || 0);
+        saldoAcumulado += (r.bonusOnus || 0) + (r.pontosCorridos || 0) + (r.mataMata || 0) + (r.top10 || 0) + (r.restaUm || 0);
         return { rodada: r.rodada, saldo: saldoAcumulado };
     });
 
@@ -1352,7 +1357,7 @@ function mostrarPopupDetalhamento(isGanhos) {
     if (extrato.rodadas && Array.isArray(extrato.rodadas)) {
         extrato.rodadas.filter(r => r.rodada <= rodadaLimite).forEach(r => {
             const faixas = getFaixasParaRodada(ligaId, r.rodada);
-            const saldo = (r.bonusOnus || 0) + (r.pontosCorridos || 0) + (r.mataMata || 0) + (r.top10 || 0);
+            const saldo = (r.bonusOnus || 0) + (r.pontosCorridos || 0) + (r.mataMata || 0) + (r.top10 || 0) + (r.restaUm || 0);
             if (saldo > 0) rodadasComGanho++;
             if (saldo < 0) rodadasComPerda++;
             if (r.top10 > 0) totalMito++;

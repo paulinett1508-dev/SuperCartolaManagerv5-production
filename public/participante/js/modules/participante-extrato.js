@@ -875,6 +875,7 @@ function transformarDadosController(dados) {
     let taxaInscricaoCalculada = 0;
     let saldoAnteriorTransferido = 0;
     const lancamentosIniciais = [];
+    const pendingRestaUm = []; // ✅ v5.6: Ajustes Resta Um para injetar nas rodadas
 
     transacoes.forEach((t) => {
         // ✅ v4.1: Processar lançamentos iniciais separadamente
@@ -903,7 +904,18 @@ function transformarDadosController(dados) {
         }
 
         // ✅ v5.5: Capturar Ajustes Financeiros (Resta Um, multas, etc.) como lançamentos visíveis
+        // ✅ v5.6: Ajustes de eliminação Resta Um → embutidos na rodada correspondente
         if (t.tipo === "AJUSTE" || t.tipo === "AJUSTE_MANUAL") {
+            const matchRestaUm = (t.descricao || '').match(/Resta Um E\d+ - Eliminado R(\d+)/);
+            if (matchRestaUm) {
+                // Guardar para injetar na rodada após o loop principal
+                pendingRestaUm.push({
+                    rodada: parseInt(matchRestaUm[1]),
+                    descricao: t.descricao,
+                    valor: parseFloat(t.valor) || 0,
+                });
+                return;
+            }
             lancamentosIniciais.push({
                 tipo: t.tipo,
                 descricao: t.descricao || "Ajuste financeiro",
@@ -963,12 +975,35 @@ function transformarDadosController(dados) {
             default:
                 r.bonusOnus += valor;
         }
-        r.saldo = r.bonusOnus + r.pontosCorridos + r.mataMata + r.top10;
+        r.saldo = r.bonusOnus + r.pontosCorridos + r.mataMata + r.top10 + (r.restaUm || 0);
 
         // Atualizar posição se veio na transação
         if (t.posicao && !r.posicao) {
             r.posicao = t.posicao;
         }
+    });
+
+    // ✅ v5.6: Injetar ajustes Resta Um (eliminação) nas rodadas correspondentes
+    pendingRestaUm.forEach(ru => {
+        if (!rodadasMap[ru.rodada]) {
+            rodadasMap[ru.rodada] = {
+                rodada: ru.rodada,
+                posicao: null,
+                bonusOnus: 0,
+                pontosCorridos: 0,
+                mataMata: 0,
+                top10: 0,
+                restaUm: 0,
+                saldo: 0,
+                isMito: false,
+                isMico: false,
+            };
+        }
+        const r = rodadasMap[ru.rodada];
+        if (!r.restaUm) r.restaUm = 0;
+        r.restaUm += ru.valor;
+        r.restaUmDescricao = ru.descricao;
+        r.saldo = r.bonusOnus + r.pontosCorridos + r.mataMata + r.top10 + r.restaUm;
     });
 
     // ✅ v4.1: Log de lançamentos iniciais para debug
