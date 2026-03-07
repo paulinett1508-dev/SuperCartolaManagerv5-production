@@ -51,12 +51,12 @@ const connectDB = async () => {
     if (!MONGO_URI) {
       console.error(`${colors.red}${colors.bright}❌ MONGO_URI não encontrada (tentativa ${attempt}/${MAX_RETRIES})${colors.reset}`);
       if (attempt < MAX_RETRIES) {
-        console.error(`   Aguardando ${RETRY_DELAY_MS / 1000}s para Replit Secrets sincronizarem...`);
+        console.error(`   Aguardando ${RETRY_DELAY_MS / 1000}s e tentando novamente...`);
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
         continue;
       }
       console.error(`${colors.red}${colors.bright}❌ ERRO FATAL: Variável MONGO_URI não configurada após ${MAX_RETRIES} tentativas!${colors.reset}`);
-      console.error('   Configure a Secret MONGO_URI nos Replit Secrets.');
+      console.error('   Configure a variavel de ambiente MONGO_URI (.env ou env vars do sistema).');
       process.exit(1);
     }
 

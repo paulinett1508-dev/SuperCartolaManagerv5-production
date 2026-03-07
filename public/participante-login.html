@@ -952,7 +952,7 @@
                 const hostname = window.location.hostname;
                 const dominiosPermitidos = [
                     'localhost', '127.0.0.1',
-                    '.replit.dev', '.repl.co', '.replit.app'
+                    '.supercartolamanager.com.br'
                 ];
                 return dominiosPermitidos.some(d => {
                     if (d.startsWith('.')) return hostname.endsWith(d);
@@ -967,12 +967,12 @@
                 const directForm = document.getElementById('globoDirectForm');
 
                 if (isOAuthDisponivel()) {
-                    // Dominio Replit: mostrar botao OAuth direto
+                    // Dominio com OAuth disponivel: mostrar botao direto
                     if (oauthBtn) oauthBtn.style.display = 'flex';
                     if (popupBtn) popupBtn.style.display = 'none';
                     if (directForm) directForm.style.display = 'none';
                 } else {
-                    // Dominio customizado: mostrar botao Popup (OAuth via Replit)
+                    // Dominio sem OAuth: mostrar botao Popup
                     if (oauthBtn) oauthBtn.style.display = 'none';
                     if (popupBtn) popupBtn.style.display = 'flex';
                     if (directForm) directForm.style.display = 'none'; // Ocultar form direto
@@ -1094,9 +1094,9 @@
             // POPUP OAUTH - Para domínios customizados
             // =====================================================================
 
-            // URL do domínio Replit para OAuth (funciona com callback autorizado)
-            // Este domínio é onde o OAuth da Globo está autorizado
-            const REPLIT_OAUTH_DOMAIN = 'e1034b6e-dfb9-401a-8e7f-80ffa6030f79-00-2dc692elmitoe.spock.replit.dev';
+            // URL do dominio para OAuth (onde o callback da Globo esta autorizado)
+            // Atualizar para o dominio de producao quando migrar
+            const OAUTH_DOMAIN = window.location.host;
 
             let popupWindow = null;
 
@@ -1108,8 +1108,8 @@
                 loading.classList.add('show');
                 errorMessage.classList.remove('show');
 
-                // Abrir popup no domínio Replit
-                const popupUrl = `https://${REPLIT_OAUTH_DOMAIN}/api/participante/auth/globo/popup?origin=${encodeURIComponent(window.location.origin)}`;
+                // Abrir popup para OAuth
+                const popupUrl = `https://${OAUTH_DOMAIN}/api/participante/auth/globo/popup?origin=${encodeURIComponent(window.location.origin)}`;
                 const popupFeatures = 'width=500,height=600,scrollbars=yes,resizable=yes,status=yes';
 
                 popupWindow = window.open(popupUrl, 'GloboAuth', popupFeatures);
@@ -1132,8 +1132,8 @@
 
             // Listener para mensagens do popup
             window.addEventListener('message', async (event) => {
-                // Validar origem (aceitar do domínio Replit)
-                if (!event.origin.includes('replit')) {
+                // Validar origem (aceitar do mesmo dominio)
+                if (event.origin !== window.location.origin) {
                     return;
                 }
 

@@ -202,7 +202,7 @@ self.addEventListener("fetch", (event) => {
                         return networkResponse;
                     }
 
-                    // ✅ v4.3: Servidor retornou 5xx (ex: 503 pós-republish Replit)
+                    // ✅ v4.3: Servidor retornou 5xx (ex: 503 durante deploy)
                     // Antes de entregar o erro, tenta servir do cache (versão anterior ainda válida)
                     if (networkResponse.status >= 500) {
                         return caches.match(cleanRequest).then((cachedResponse) => {

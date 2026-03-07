@@ -216,7 +216,7 @@
                                 ${admin.ativo === false ? '<span class="badge badge-inactive">Inativo</span>' : ''}
                             </div>
                             <div class="admin-email">${admin.email}</div>
-                            <div class="admin-date">${admin.isEnvDefined ? 'Dono do sistema (Replit)' : 'Criado em: ' + (admin.criadoEm ? new Date(admin.criadoEm).toLocaleDateString('pt-BR') : 'N/A')}</div>
+                            <div class="admin-date">${admin.isEnvDefined ? 'Super Admin (ENV)' : 'Criado em: ' + (admin.criadoEm ? new Date(admin.criadoEm).toLocaleDateString('pt-BR') : 'N/A')}</div>
                         </div>
                         ${!admin.isEnvDefined ? `
                             <div class="admin-actions">

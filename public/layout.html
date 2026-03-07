@@ -1756,7 +1756,7 @@
                     .then(data => {
                         const nome = data.user?.name || data.user?.username || 'Admin';
                         const email = data.user?.email || 'Nao informado';
-                        const provider = data.user?.provider || 'replit';
+                        const provider = data.user?.provider || 'google';
                         const isSuperAdmin = data.user?.superAdmin || false;
 
                         mostrarModalPerfil({
@@ -1785,7 +1785,7 @@
 
                 const roleText = dados.isSuperAdmin ? 'Super Administrador' : 'Administrador';
                 const roleClass = dados.isSuperAdmin ? 'super-admin' : 'admin';
-                const providerIcon = dados.provider === 'replit' ? 'cloud' : 'person';
+                const providerIcon = dados.provider === 'google' ? 'login' : 'person';
 
                 const modalHtml = `
                     <div id="modalPerfilAdmin" class="modal-perfil-overlay" onclick="fecharModalPerfil(event)">
@@ -1817,7 +1817,7 @@
                                     <span class="material-icons">${providerIcon}</span>
                                     <div>
                                         <label>Autenticacao</label>
-                                        <span>${dados.provider === 'replit' ? 'Replit Auth (SSO)' : 'Local'}</span>
+                                        <span>${dados.provider === 'google' ? 'Google OAuth' : 'Local'}</span>
                                     </div>
                                 </div>
                                 <div class="modal-perfil-item">
