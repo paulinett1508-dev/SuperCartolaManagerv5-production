@@ -1385,7 +1385,7 @@ const ManutencaoScreen = {
     // Métodos compartilhados (Ranking Geral - lógica existente preservada)
     // =====================================================================
     // =====================================================================
-    // DEV BYPASS: Login admin via Replit Auth para acessar app em manutenção
+    // DEV BYPASS: Login admin para acessar app em manutencao
     // =====================================================================
     iniciarDevBypass() {
         if (window.Log) Log.info('MANUTENCAO', 'Dev bypass - mostrando opções de acesso');

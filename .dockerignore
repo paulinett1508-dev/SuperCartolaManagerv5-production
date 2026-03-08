@@ -1,0 +1,44 @@
+# Git
+.git
+.gitignore
+
+# Replit (não necessário no Docker)
+.replit
+replit.nix
+google-cloud-sdk/
+.cache/
+.upm/
+
+# Node
+node_modules
+npm-debug.log*
+
+# Ambiente
+.env
+.env.*
+!.env.example
+
+# Desenvolvimento
+.claude/
+coverage/
+test/
+*.test.js
+.eslintrc*
+nodemon.json
+
+# Docs desnecessários no runtime
+docs/
+BACKLOG.md
+CHANGELOG.md
+CLAUDE.md
+README.md
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

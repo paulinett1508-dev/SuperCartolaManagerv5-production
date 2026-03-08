@@ -1,0 +1,37 @@
+# ===========================
+# Deploy Production - Super Cartola Manager
+# ===========================
+# Trigger: Tags de versao (v*)
+# Destino: VPS Hostinger (container scm-prod)
+
+name: Deploy Production
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  deploy:
+    name: Deploy to Production VPS
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /opt/super-cartola-manager
+            git fetch --tags
+            git checkout ${{ github.ref_name }}
+            docker compose build scm-prod
+            docker compose up -d scm-prod
+            echo "Production deployed: ${{ github.ref_name }} at $(date)"
+            docker logs --tail 20 scm-prod

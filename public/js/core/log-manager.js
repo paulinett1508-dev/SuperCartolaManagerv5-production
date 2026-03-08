@@ -10,9 +10,7 @@
     const isDevelopment = (
         hostname === "localhost" ||
         hostname === "127.0.0.1" ||
-        hostname.includes(".repl.co") ||
-        hostname.includes("replit.dev") ||
-        hostname.includes("replit.app") ||
+        hostname.includes("staging.") ||
         hostname.includes("webcontainer")
     );
     const isProduction = !isDevelopment;

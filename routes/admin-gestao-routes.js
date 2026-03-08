@@ -13,11 +13,8 @@ import { isSuperAdmin as checkSuperAdmin, SUPER_ADMIN_EMAILS, PRIMARY_SUPER_ADMI
 const { ObjectId } = mongoose.Types;
 const router = express.Router();
 
-const REPL_OWNER = process.env.REPL_OWNER || "";
-
 console.log("[ADMIN-GESTAO] Rotas de gestao de admins carregadas");
 console.log("[ADMIN-GESTAO] Super Admins (via env):", SUPER_ADMIN_EMAILS);
-console.log("[ADMIN-GESTAO] Repl Owner:", REPL_OWNER || "(nao configurado)");
 
 /**
  * Verifica se o admin logado é o Super Admin (DEV/Owner)
@@ -27,35 +24,15 @@ function isSuperAdmin(sessionAdmin) {
     if (!sessionAdmin) return false;
 
     const email = sessionAdmin.email?.toLowerCase();
-    const nome = sessionAdmin.nome?.toLowerCase();
-    const claims = sessionAdmin.claims;
 
-    // 1. Verificar via config centralizada
+    // Verificar via config centralizada (ADMIN_EMAILS env + flag superAdmin na sessao)
     if (checkSuperAdmin(email)) {
         return true;
     }
 
-    // 2. Verificar se é o REPL_OWNER (dono do Replit)
-    if (REPL_OWNER) {
-        const replOwnerLower = REPL_OWNER.toLowerCase();
-
-        // Verificar pelo nome do usuário
-        if (nome === replOwnerLower) {
-            return true;
-        }
-
-        // Verificar pelos claims do Replit Auth (username, preferred_username, etc.)
-        if (claims) {
-            const username = (claims.preferred_username || claims.name || claims.sub || "").toLowerCase();
-            if (username === replOwnerLower) {
-                return true;
-            }
-        }
-
-        // Verificar se o email começa com o username do owner
-        if (email && email.startsWith(replOwnerLower + "@")) {
-            return true;
-        }
+    // Flag definida pelo Google OAuth no login
+    if (sessionAdmin.superAdmin === true) {
+        return true;
     }
 
     return false;
@@ -114,7 +91,7 @@ router.get("/check-super", requireAdmin, (req, res) => {
         isSuperAdmin: isSuper,
         email: req.session.admin.email,
         nome: req.session.admin.nome,
-        replOwner: REPL_OWNER
+        provider: "google-oauth"
     });
 });
 

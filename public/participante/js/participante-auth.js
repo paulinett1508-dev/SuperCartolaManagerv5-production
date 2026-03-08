@@ -525,7 +525,7 @@ class ParticipanteAuth {
             const envBadge = document.getElementById("app-env-badge");
             if (envBadge) {
                 const isPremium = participanteDataNaLiga?.premium === true;
-                const isProduction = window.Log?.isProduction ?? !window.location.hostname.includes('replit');
+                const isProduction = window.Log?.isProduction ?? !window.location.hostname.includes('staging.');
                 if (isPremium) {
                     envBadge.classList.remove('hidden');
                     if (isProduction) {

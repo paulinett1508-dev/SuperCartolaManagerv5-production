@@ -74,8 +74,8 @@ if (IS_PRODUCTION) {
 // ⚡ USAR CONEXÃO OTIMIZADA
 import connectDB from "./config/database.js";
 
-// 🔐 REPLIT AUTH
-import passport, { setupReplitAuthRoutes } from "./config/replit-auth.js";
+// 🔐 AUTH (Google OAuth - substitui Replit Auth)
+import passport, { setupGoogleAuthRoutes } from "./config/google-oauth.js";
 
 // 🛡️ SEGURANÇA
 import { setupSecurity, authRateLimiter, getRateLimitCleanupIntervalId } from "./middleware/security.js";
@@ -283,8 +283,8 @@ app.use(cors({
     if (!origin) return callback(null, true);
     // Em desenvolvimento, permitir qualquer origem
     if (IS_DEVELOPMENT) return callback(null, true);
-    // Permitir origens do mesmo domínio Replit (*.replit.dev)
-    if (origin.endsWith('.replit.dev') || origin.endsWith('.repl.co') || origin.endsWith('.replit.app') || origin.endsWith('supercartolamanager.com.br')) {
+    // Permitir origens do dominio principal e staging
+    if (origin.endsWith('supercartolamanager.com.br')) {
       return callback(null, true);
     }
     // Verificar whitelist
@@ -415,8 +415,8 @@ const servePublicAssets = express.static("public", {
     }
   }
 });
-// ✅ FIX EIO: Interceptar erros transitórios de I/O pós-Replit-republish.
-// express.static lança EIO/EMFILE durante a janela de estabilização do filesystem.
+// ✅ FIX EIO: Interceptar erros transitórios de I/O pós-deploy.
+// express.static pode lançar EIO/EMFILE durante estabilização do filesystem.
 // Uma única retry após 500ms resolve na maioria dos casos sem chegar ao error handler.
 app.use((req, res, next) => {
   if (!/\.(js|mjs|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|map|webp|webmanifest|json)$/i.test(req.path)) {
@@ -472,15 +472,15 @@ app.use(
   }),
 );
 
-// 🔐 Inicializar Passport (Replit Auth)
+// 🔐 Inicializar Passport (Google OAuth)
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Setup Replit Auth routes (synchronous registration with lazy OIDC discovery)
-setupReplitAuthRoutes(app);
-console.log("[SERVER] 🔐 Replit Auth ativado");
+// Setup Google OAuth routes (substitui Replit Auth)
+setupGoogleAuthRoutes(app);
+console.log("[SERVER] Google OAuth ativado");
 
-// 🔐 Rotas de autenticação admin (Replit Auth) - ANTES do protegerRotas
+// 🔐 Rotas de autenticação admin (Google OAuth) - ANTES do protegerRotas
 app.use("/api/admin/auth", adminAuthRoutes);
 console.log("[DEBUG] Rota /api/admin/auth registrada");
 
@@ -902,7 +902,7 @@ if (process.env.NODE_ENV !== "test") {
 
       if (IS_DEVELOPMENT) {
         console.log(`💾 Sessões persistentes: ATIVADAS (MongoDB Store)`);
-        console.log(`🔐 Autenticação Admin: Replit Auth`);
+        console.log(`🔐 Autenticação Admin: Google OAuth`);
         console.log(`🔐 Autenticação Participante: Senha do Time`);
         console.log(`🛡️ Segurança: Headers + Rate Limiting ATIVADOS`);
         console.log(`📝 Logs: VERBOSE (desenvolvimento)`);

@@ -44,9 +44,7 @@ function isOAuthDisponivel() {
     const dominiosPermitidos = [
         'localhost',
         '127.0.0.1',
-        '.replit.dev',      // Replit preview
-        '.repl.co',         // Replit antigo
-        '.replit.app'       // Replit apps
+        '.supercartolamanager.com.br'  // Producao e staging
     ];
 
     return dominiosPermitidos.some(d => {
