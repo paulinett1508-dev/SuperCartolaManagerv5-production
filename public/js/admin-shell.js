@@ -96,7 +96,7 @@
                 scripts.forEach(script => {
                     if (script.textContent.trim()) {
                         const s = document.createElement('script');
-                        s.textContent = '(function(){' + script.textContent + '})();';
+                        s.textContent = script.textContent;
                         document.head.appendChild(s);
                         injected++;
                     }
