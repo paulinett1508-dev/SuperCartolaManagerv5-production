@@ -12,7 +12,7 @@ run = ["npm", "start"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["lsof", "codex", "undollar"]
+packages = ["lsof", "codex", "undollar", "nix-output-monitor"]
 
 [agent]
 expertMode = true
