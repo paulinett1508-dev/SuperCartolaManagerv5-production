@@ -230,7 +230,7 @@ export async function obterStatus(req, res) {
                 eliminadosPorRodada: edicao.eliminadosPorRodada,
             },
             participantes: [...vivos, ...eliminados],
-            rodadaAtual: edicao.rodadaAtual || (isLive ? edicao.rodadaInicial : null),
+            rodadaAtual: rodadaRef || null,
             historicoEliminacoes: edicao.historicoEliminacoes || [],
             premiacao: {
                 campeao: edicao.premiacao?.campeao || 0,
