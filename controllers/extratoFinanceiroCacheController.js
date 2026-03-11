@@ -1,5 +1,9 @@
 // =====================================================================
-// extratoFinanceiroCacheController.js v6.9 - FIX pagouInscricao no path normal do cache
+// extratoFinanceiroCacheController.js v7.2 - FIX inscrição ausente no cache
+// ✅ v7.2: FIX CRÍTICO - Cache sem INSCRICAO_TEMPORADA ignorava taxa no saldo
+//   - Quando cache existe (R1-R4) mas sem R0, inscrição não era deduzida
+//   - Agora busca InscricaoTemporada e compensa taxa/saldo/divida no resumo
+//   - Inclui lançamento visual para frontend exibir inscrição no extrato
 // ✅ v6.8: FIX CRÍTICO - getExtratoCache retornava 'inscricao-nova-temporada' com rodadas: []
 //   - Mesmo quando rodadas REAIS já existiam no banco para a temporada
 //   - Agora verifica collection 'rodadas' antes de retornar pré-temporada
@@ -870,6 +874,10 @@ export const getExtratoCache = async (req, res) => {
         resumoCalculado.taxaInscricao = taxaInscricaoValor;
         resumoCalculado.saldoAnteriorTransferido = saldoAnteriorTransferidoValor;
         // ✅ v6.9 FIX: Buscar pagouInscricao de inscricoestemporada para exibição no extrato
+        // ✅ v7.2 FIX CRÍTICO: Quando cache existe mas NÃO contém INSCRICAO_TEMPORADA,
+        //   compensar a taxa no saldo (mesma lógica do saldo-calculator.js).
+        //   Bug: cache criado sem R0 → cache controller retornava saldo sem inscrição
+        //   → participante via saldo errado (ex: +51 ao invés de -129).
         try {
             const InscricaoTemporada = mongoose.model('InscricaoTemporada');
             const inscDoc = await InscricaoTemporada.findOne({
@@ -878,6 +886,51 @@ export const getExtratoCache = async (req, res) => {
                 temporada: temporadaNum,
             }).lean();
             resumoCalculado.pagouInscricao = inscDoc?.pagou_inscricao === true;
+
+            // ✅ v7.2: Se inscrição existe mas NÃO está no cache, compensar no saldo
+            const inscricaoNoCache = taxaInscricaoValor > 0;
+            if (inscDoc && !inscricaoNoCache && temporadaNum >= CURRENT_SEASON) {
+                const taxaInsc = inscDoc.taxa_inscricao || 0;
+                const saldoTransf = inscDoc.saldo_transferido || 0;
+                const dividaAnt = inscDoc.divida_anterior || 0;
+
+                if (taxaInsc > 0) {
+                    resumoCalculado.saldo -= taxaInsc;
+                    resumoCalculado.saldo_final -= taxaInsc;
+                    resumoCalculado.totalPerdas -= taxaInsc;
+                    resumoCalculado.taxaInscricao = taxaInsc;
+                    logger.log(`[CACHE-CONTROLLER] ✅ v7.2 FIX: Inscrição ausente no cache — deduzindo taxa R$ ${taxaInsc}`);
+                }
+                if (saldoTransf !== 0) {
+                    resumoCalculado.saldo += saldoTransf;
+                    resumoCalculado.saldo_final += saldoTransf;
+                    resumoCalculado.saldoAnteriorTransferido = saldoTransf;
+                    if (saldoTransf > 0) resumoCalculado.totalGanhos += saldoTransf;
+                    else resumoCalculado.totalPerdas += saldoTransf;
+                }
+                if (dividaAnt > 0) {
+                    resumoCalculado.saldo -= dividaAnt;
+                    resumoCalculado.saldo_final -= dividaAnt;
+                    resumoCalculado.totalPerdas -= dividaAnt;
+                }
+
+                lancamentosIniciais.unshift({
+                    rodada: 0,
+                    tipo: 'INSCRICAO_TEMPORADA',
+                    descricao: `Taxa de inscrição ${temporadaNum}`,
+                    valor: -taxaInsc,
+                    data: inscDoc.criado_em || new Date(`${temporadaNum}-01-01`),
+                });
+                if (saldoTransf !== 0) {
+                    lancamentosIniciais.push({
+                        rodada: 0,
+                        tipo: 'SALDO_TEMPORADA_ANTERIOR',
+                        descricao: saldoTransf > 0 ? 'Crédito da temporada anterior' : 'Dívida da temporada anterior',
+                        valor: saldoTransf,
+                        data: inscDoc.criado_em || new Date(`${temporadaNum}-01-01`),
+                    });
+                }
+            }
         } catch (e) {
             logger.warn('[CACHE-CONTROLLER] ⚠️ Erro ao buscar pagouInscricao:', e.message);
             resumoCalculado.pagouInscricao = false;

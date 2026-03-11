@@ -2473,5 +2473,18 @@ function mostrarErro(mensagem) {
     }
 }
 
+// Cleanup para navegação SPA — chamado por participante-navigation.js ao sair do módulo
+window.destruirRodadasParticipante = function () {
+    ParciaisModule.pararAutoRefresh?.();
+    PollingInteligenteModule.parar?.();
+    if (_rodadasDestaquesTimer) {
+        clearInterval(_rodadasDestaquesTimer);
+        _rodadasDestaquesTimer = null;
+    }
+    if (window.MatchdayService?.destroy) {
+        window.MatchdayService.destroy();
+    }
+};
+
 if (window.Log)
     Log.info("[PARTICIPANTE-RODADAS] Modulo v7.0 carregado (CARTOLA-STYLE + CHART)");

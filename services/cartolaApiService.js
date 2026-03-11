@@ -265,6 +265,7 @@ class CartolaApiService {
       const data = {
         rodadaAtual: response.data.rodada_atual || rodadaAtualReal, // BEGIN dynamic-round fix
         mercadoAberto: response.data.mercado_aberto || false,
+        status_mercado: response.data.status_mercado ?? null,
         fechamento: response.data.fechamento || null,
         temporadaId: response.data.temporada_id || null
       };
@@ -289,6 +290,7 @@ class CartolaApiService {
       return {
         rodadaAtual: rodadaAtualReal, // BEGIN dynamic-round fix
         mercadoAberto: false,
+        status_mercado: null,
         fechamento: null,
         temporadaId: null
       };

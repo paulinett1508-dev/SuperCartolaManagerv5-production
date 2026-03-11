@@ -146,13 +146,26 @@ async function verificarEConsolidar() {
             statusAtual.status_mercado === 1
         ) {
             const rodadaFinalizada = rodadaAtual - 1;
-            console.log(
-                `[SCHEDULER] 🔔 TRANSIÇÃO DETECTADA: Mercado abriu! R${rodadaFinalizada} finalizada - populando e consolidando`,
-            );
 
-            // Primeiro popular, depois consolidar
-            await popularRodadaParaTodasLigas(rodadaFinalizada);
-            await consolidarRodadaAutomatica(rodadaFinalizada);
+            // v4.1: Verificar se orchestrator já consolidou esta rodada (evitar trabalho duplicado)
+            const jaConsolidadaPeloOrchestrator = await RodadaSnapshot.findOne({
+                rodada: rodadaFinalizada,
+                status: "consolidada",
+            }).lean();
+
+            if (jaConsolidadaPeloOrchestrator) {
+                console.log(
+                    `[SCHEDULER] ⏭️ R${rodadaFinalizada} já consolidada (orchestrator processou primeiro)`,
+                );
+            } else {
+                console.log(
+                    `[SCHEDULER] 🔔 TRANSIÇÃO DETECTADA: Mercado abriu! R${rodadaFinalizada} finalizada - populando e consolidando`,
+                );
+
+                // Primeiro popular, depois consolidar
+                await popularRodadaParaTodasLigas(rodadaFinalizada);
+                await consolidarRodadaAutomatica(rodadaFinalizada);
+            }
         }
 
         // Detectar transição: mercado fechou (era aberto, agora fechado)

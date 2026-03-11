@@ -14,8 +14,10 @@ router.get('/status', async (req, res) => {
   try {
     const status = await cartolaApiService.obterStatusMercado();
 
-    // Matchday ativo quando mercado fechado (status_mercado === 2)
-    const matchdayAtivo = status.status_mercado === 2;
+    // Matchday ativo quando mercado fechado (status_mercado === 2) ou mercadoAberto === false
+    const matchdayAtivo = status.status_mercado != null
+      ? status.status_mercado === 2
+      : status.mercadoAberto === false;
 
     // Buscar informações do calendário para polling inteligente
     let calendario = null;
