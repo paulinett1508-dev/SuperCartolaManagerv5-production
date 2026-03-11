@@ -202,7 +202,8 @@
       "Bash(if curl -s \"http://localhost:3000/api/cartola/mercado/status\" 2>/dev/null > /dev/null; then\n  echo \"✅ Servidor reiniciado com sucesso!\"\nelse\n  echo \"⚠️ Verificando log...\"\n  tail -20 /tmp/server.log\nfi)",
       "WebFetch(domain:supercartolamanager.com.br)",
       "Bash(else echo \"Servidor não respondeu após 15s\")",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(gh repo view paulinett1508-dev/agnostic-core 2>&1 | head -30)"
     ]
   },
   "enableAllProjectMcpServers": true,
