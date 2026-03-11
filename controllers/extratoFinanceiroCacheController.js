@@ -1,5 +1,8 @@
 // =====================================================================
-// extratoFinanceiroCacheController.js v7.2 - FIX inscrição ausente no cache
+// extratoFinanceiroCacheController.js v7.3 - FIX saldo_lancamentos_iniciais no resumo
+// ✅ v7.3: FIX - Expor saldo_lancamentos_iniciais no resumo para frontend admin
+//   - Frontend recalcula saldo via _calcularSaldoFinal() e esperava este campo
+//   - Sem ele, inscrição/legado/dívida sumiam do SALDO PENDENTE no admin
 // ✅ v7.2: FIX CRÍTICO - Cache sem INSCRICAO_TEMPORADA ignorava taxa no saldo
 //   - Quando cache existe (R1-R4) mas sem R0, inscrição não era deduzida
 //   - Agora busca InscricaoTemporada e compensa taxa/saldo/divida no resumo
@@ -1627,6 +1630,9 @@ export const lerCacheExtratoFinanceiro = async (req, res) => {
                 resumoCalculado.totalGanhos = (resumoCalculado.totalGanhos || 0) + saldoLancamentosIniciais;
             }
         }
+        // ✅ v7.3 FIX: Expor saldo_lancamentos_iniciais como campo separado no resumo
+        // Frontend admin recalcula saldo via _calcularSaldoFinal() e espera este campo
+        resumoCalculado.saldo_lancamentos_iniciais = saldoLancamentosIniciais;
 
         // ✅ v5.2 FIX: Buscar acertos financeiros e incluir no saldo final
         // ✅ v5.6 FIX: Passar temporada para buscar acertos da temporada correta
