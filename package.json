@@ -17,6 +17,7 @@
     "test:coverage": "cross-env NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules' jest --coverage --detectOpenHandles --forceExit",
     "test:artilheiro": "cross-env NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules' jest test/artilheiro.test.js --detectOpenHandles --forceExit",
     "predeploy": "npm version patch --no-git-tag-version",
+    "build": "npx @tailwindcss/cli -i public/participante/css/tailwind-input.css -o public/participante/css/tailwind.css --minify",
     "build:css": "npx @tailwindcss/cli -i public/participante/css/tailwind-input.css -o public/participante/css/tailwind.css --minify",
     "build:css:watch": "npx @tailwindcss/cli -i public/participante/css/tailwind-input.css -o public/participante/css/tailwind.css --watch",
     "lint": "eslint . --ext .js",
