@@ -1186,8 +1186,11 @@ export class FluxoFinanceiroCore {
     }
 
     calcularPontosCorridosParaRodada(timeId, rodada) {
-        if (rodada < RODADA_INICIAL_PONTOS_CORRIDOS) return null;
-        const idxRodada = rodada - RODADA_INICIAL_PONTOS_CORRIDOS;
+        // ✅ v6.14 FIX: Usar rodadaInicial da config da liga (fallback para constante 7)
+        const rodadaInicialPC = this.ligaConfig?.configuracoes?.pontos_corridos?.rodadaInicial
+            ?? RODADA_INICIAL_PONTOS_CORRIDOS;
+        if (rodada < rodadaInicialPC) return null;
+        const idxRodada = rodada - rodadaInicialPC;
         const confrontos = this.cache.getConfrontosPontosCorridos();
         if (!confrontos || idxRodada >= confrontos.length) return null;
 

@@ -1,5 +1,9 @@
 // =====================================================================
-// extratoFinanceiroCacheController.js v7.3 - FIX saldo_lancamentos_iniciais no resumo
+// extratoFinanceiroCacheController.js v7.4 - FIX formato consolidado + saldo_lancamentos_iniciais
+// ✅ v7.4: FIX - Detectar formato consolidado (admin) vs raw transactions no cache
+//   - Admin salva objetos consolidados (bonusOnus, pontosCorridos) sem campo 'tipo'
+//   - transformarTransacoesEmRodadas destruía os dados ao re-parsear sem 'tipo'
+//   - Agora detecta formato e usa diretamente (bypass re-parsing)
 // ✅ v7.3: FIX - Expor saldo_lancamentos_iniciais no resumo para frontend admin
 //   - Frontend recalcula saldo via _calcularSaldoFinal() e esperava este campo
 //   - Sem ele, inscrição/legado/dívida sumiam do SALDO PENDENTE no admin
@@ -843,10 +847,37 @@ export const getExtratoCache = async (req, res) => {
             logger.log(`[CACHE-CONTROLLER] 📋 Ajustes financeiros incluídos para display: ${ajustesLista.length} entries`);
         }
 
-        let rodadasConsolidadas = transformarTransacoesEmRodadas(
-            transacoesRaw,
-            ligaId,
-        );
+        // ✅ v7.4 FIX: Detectar formato consolidado vs raw transactions
+        // Admin frontend salva objetos consolidados (bonusOnus, pontosCorridos, mataMata...)
+        // sem campo 'tipo'. transformarTransacoesEmRodadas espera raw transactions com 'tipo'.
+        // Se formato é consolidado, usar diretamente sem re-parsing.
+        const isFormatoConsolidado = transacoesRaw.length > 0 &&
+            transacoesRaw.some(t => t.tipo === undefined && t.bonusOnus !== undefined);
+
+        let rodadasConsolidadas;
+        if (isFormatoConsolidado) {
+            // Formato consolidado: já são rodadas prontas (salvas pelo admin frontend)
+            rodadasConsolidadas = transacoesRaw
+                .filter(t => t.rodada > 0)
+                .sort((a, b) => (a.rodada || 0) - (b.rodada || 0));
+            // Recalcular saldo e saldoAcumulado para consistência
+            let saldoAcum = 0;
+            rodadasConsolidadas.forEach(r => {
+                r.saldo = (parseFloat(r.bonusOnus) || 0) +
+                          (parseFloat(r.pontosCorridos) || 0) +
+                          (parseFloat(r.mataMata) || 0) +
+                          (parseFloat(r.top10) || 0);
+                saldoAcum += r.saldo;
+                r.saldoAcumulado = saldoAcum;
+            });
+            logger.log(`[CACHE-CONTROLLER] 📦 Formato consolidado detectado: ${rodadasConsolidadas.length} rodadas (bypass transformar)`);
+        } else {
+            // Formato raw: transações individuais com tipo (BONUS, PONTOS_CORRIDOS, etc.)
+            rodadasConsolidadas = transformarTransacoesEmRodadas(
+                transacoesRaw,
+                ligaId,
+            );
+        }
 
         if (isInativo && rodadaDesistencia) {
             rodadasConsolidadas = filtrarRodadasParaInativo(

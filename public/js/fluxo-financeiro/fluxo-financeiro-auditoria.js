@@ -80,7 +80,7 @@ export class FluxoFinanceiroAuditoria {
                 totaisAutomaticos.pontosCorridos.derrotas++;
             else if (
                 r.pontosCorridos === 0 &&
-                r.rodada >= RODADA_INICIAL_PONTOS_CORRIDOS
+                r.rodada >= (this.ligaConfig?.configuracoes?.pontos_corridos?.rodadaInicial ?? RODADA_INICIAL_PONTOS_CORRIDOS)
             ) {
                 totaisAutomaticos.pontosCorridos.empates++;
             }
@@ -176,7 +176,7 @@ export class FluxoFinanceiroAuditoria {
 
             case "pontosCorridos":
                 rodadas
-                    .filter((r) => r.rodada >= RODADA_INICIAL_PONTOS_CORRIDOS)
+                    .filter((r) => r.rodada >= (this.ligaConfig?.configuracoes?.pontos_corridos?.rodadaInicial ?? RODADA_INICIAL_PONTOS_CORRIDOS))
                     .forEach((r) => {
                         const confronto = this.cache?.getConfrontoRodada?.(
                             r.rodada,
