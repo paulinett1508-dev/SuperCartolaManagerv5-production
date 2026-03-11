@@ -1700,7 +1700,7 @@ function renderizarDetalhamentoRodada(rodadaData, isParcial = false, inativos = 
         const clubeId = participante.clube_id;
         const escudoSrc = clubeId ? `/escudos/${clubeId}.png` : null;
         const escudoHTML = escudoSrc
-            ? `<img src="${escudoSrc}" alt="" class="rk-escudo" onerror="this.style.display='none'">`
+            ? `<img src="${escudoSrc}" alt="" class="rk-escudo" onerror="this.onerror=null;this.src='/escudos/default.png'">`
             : '<span class="rk-escudo-placeholder"></span>';
 
         // Badge "X/12 em campo" para parciais
