@@ -330,6 +330,13 @@ Detalhes de uso: consultar skill `project-reference` ou [`docs/skills/03-utiliti
 Skills podem ser invocadas por `/nome` OU por keywords naturais na conversa.
 Tabela completa de comandos e keywords: skill `project-reference` ou [`docs/skills/03-utilities/project-reference.md`](docs/skills/03-utilities/project-reference.md)
 
+### Commands Registrados (`.claude/commands/`)
+
+| Command | Descrição | Argumentos |
+|---------|-----------|------------|
+| `/liste-pr-github` | Lista PRs do repositório GitHub com filtro por período | `hoje`, `ontem`, `semana`, `mes`, `YYYY-MM-DD`, `YYYY-MM-DD YYYY-MM-DD`, ou vazio (últimos 10) |
+| `/security-review` | Review de segurança senior das mudanças na branch atual | Nenhum (analisa diff automático contra origin/HEAD) |
+
 ## 🔄 Sistema de Renovação de Temporada
 
 **Documentação:** [`docs/SISTEMA-RENOVACAO-TEMPORADA.md`](docs/SISTEMA-RENOVACAO-TEMPORADA.md) | Detalhes: skill `project-reference`
