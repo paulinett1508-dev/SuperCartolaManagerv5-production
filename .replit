@@ -1,96 +1,13 @@
-run = "npm install --prefer-offline --no-audit --no-fund && npm start"
+run = "npm run dev"
 modules = ["nodejs-20", "python-3.11"]
 
 [[ports]]
 localPort = 3000
 externalPort = 80
 
-[[ports]]
-localPort = 3001
-externalPort = 3000
-
-[[ports]]
-localPort = 5000
-externalPort = 5000
-exposeLocalhost = true
-
-[[ports]]
-localPort = 9999
-externalPort = 3001
-
-[[ports]]
-localPort = 11148
-externalPort = 3001
-exposeLocalhost = true
-
-[[ports]]
-localPort = 13776
-externalPort = 8099
-exposeLocalhost = true
-
-[[ports]]
-localPort = 15179
-externalPort = 3002
-exposeLocalhost = true
-
-[[ports]]
-localPort = 17453
-externalPort = 6000
-exposeLocalhost = true
-
-[[ports]]
-localPort = 19061
-externalPort = 4200
-exposeLocalhost = true
-
-[[ports]]
-localPort = 22262
-externalPort = 9000
-exposeLocalhost = true
-
-[[ports]]
-localPort = 23442
-externalPort = 8000
-exposeLocalhost = true
-
-[[ports]]
-localPort = 24912
-externalPort = 5173
-exposeLocalhost = true
-
-[[ports]]
-localPort = 26971
-externalPort = 8008
-exposeLocalhost = true
-
-[[ports]]
-localPort = 31046
-externalPort = 5000
-exposeLocalhost = true
-
-[[ports]]
-localPort = 31052
-externalPort = 8080
-exposeLocalhost = true
-
-[[ports]]
-localPort = 63602
-externalPort = 8081
-exposeLocalhost = true
-
-[[ports]]
-localPort = 64260
-externalPort = 3003
-exposeLocalhost = true
-
-[[ports]]
-localPort = 64700
-externalPort = 6800
-exposeLocalhost = true
-
 [deployment]
 deploymentTarget = "autoscale"
-build = ["sh", "-c", "npm install --include=dev && npm run build:css"]
+build = ["sh", "-c", "npm install --include=dev && npm run build"]
 run = ["npm", "start"]
 
 [nix]
@@ -101,29 +18,34 @@ packages = ["lsof", "codex", "undollar"]
 expertMode = true
 
 [workflows]
-runButton = "Project"
+runButton = "Dev"
 
 [[workflows.workflow]]
-name = "Run"
-author = 40973227
+name = "Dev"
+author = "agent"
+mode = "sequential"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+waitForPort = 3000
+
+[[workflows.workflow]]
+name = "Build"
+author = "agent"
 mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm start"
+args = "npm run build"
 
 [[workflows.workflow]]
-name = "Project"
-mode = "parallel"
+name = "Start (Prod)"
 author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Super Cartola Server"
-
-[[workflows.workflow]]
-name = "Super Cartola Server"
-author = "agent"
+mode = "sequential"
 
 [workflows.workflow.metadata]
 outputType = "webview"
