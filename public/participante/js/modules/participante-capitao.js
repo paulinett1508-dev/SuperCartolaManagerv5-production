@@ -25,6 +25,9 @@ let estadoCapitao = {
 const CACHE_KEY_PREFIX = 'capitao_ranking_';
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
 
+// Guard para evitar dupla subscrição de MatchdayService em SPA navigation
+let _matchdaySubscribed = false;
+
 // =============================================
 // INICIALIZAÇÃO
 // =============================================
@@ -54,7 +57,7 @@ export async function inicializarCapitaoParticipante(params) {
     const cartolaStateLive = window.cartolaState?.statusMercado === 2 || window.cartolaState?.mercadoFechado === true;
     if (matchdayAtivo || cartolaStateLive) {
         estadoCapitao.modeLive = true;
-        if (window.MatchdayService) subscribeMatchdayEvents();
+        if (window.MatchdayService && !_matchdaySubscribed) subscribeMatchdayEvents();
     } else {
         // Último fallback: fetch rápido do status do mercado
         try {
@@ -128,9 +131,7 @@ async function detectarEstadoTemporada() {
         const response = await fetch('/api/cartola/mercado/status');
         if (response.ok) {
             const data = await response.json();
-            const rodada = data.rodada_atual || 1;
-            const mercadoAberto = data.status_mercado !== 2;
-            estadoCapitao.temporadaEncerrada = rodada >= RODADA_FINAL_CAMPEONATO && mercadoAberto;
+            estadoCapitao.temporadaEncerrada = data.status_mercado === 4 || data.status_mercado === 6;
         }
     } catch (error) {
         if (window.Log) Log.warn('PARTICIPANTE-CAPITAO', 'Erro detectar temporada:', error);
@@ -187,6 +188,7 @@ async function carregarRanking() {
             : `/api/capitao/${estadoCapitao.ligaId}/ranking?temporada=${estadoCapitao.temporada}`;
 
         const response = await fetch(endpoint);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
 
         if (!data.success || !data.ranking || data.ranking.length === 0) {
@@ -509,6 +511,7 @@ function renderizarErro(mensagem) {
 // =============================================
 function subscribeMatchdayEvents() {
     if (!window.MatchdayService) return;
+    _matchdaySubscribed = true;
 
     window.MatchdayService.on('data:parciais', () => {
         if (window.Log) Log.info('PARTICIPANTE-CAPITAO', 'Atualizando com parciais');
