@@ -337,5 +337,88 @@ ls .claude/docs/SPEC-*.md 2>/dev/null || echo "Nenhum SPEC encontrado"
 
 ---
 
+## TECNICA: GOAL-BACKWARD PLANNING (Novo - agnostic-core)
+
+Metodologia complementar: planejar do objetivo para as tarefas (em vez de tarefas para o objetivo).
+
+### Quando Usar
+
+- Features complexas com multiplas dependencias
+- Quando nao sabe por onde comecar
+- Para evitar trabalho desnecessario (foco no que PRECISA existir)
+
+### Framework em 4 Passos
+
+#### 1. GOAL — Estado Final Observable
+
+Descrever o resultado desejado como algo **observavel e testavel**, nao a acao.
+
+```markdown
+## Exemplo Correto
+GOAL: "Participante pode ver ranking de artilheiros da sua liga, ordenado por gols,
+com escudo do time e destaque para o lider"
+
+## Exemplo Errado
+GOAL: "Implementar modulo artilheiro" (vago — o que significa "implementar"?)
+```
+
+#### 2. VERDADES OBSERVAVEIS — Pre-condicoes
+
+Listar tudo que DEVE ser verdade para o GOAL existir:
+
+```markdown
+- [ ] GET /api/participante/:ligaId/artilheiro retorna lista ordenada por gols
+- [ ] Dados incluem: nome_time, nome_cartoleiro, total_gols, escudo_url
+- [ ] Frontend renderiza lista com escudos e destaque do lider
+- [ ] Cache de 10min configurado (ranking nao muda a cada segundo)
+- [ ] liga_id no filtro (multi-tenant)
+```
+
+#### 3. ARTEFATOS NECESSARIOS
+
+Quais arquivos PRECISAM existir ou mudar:
+
+```markdown
+- controllers/admin/artilheiro-controller.js (ou existente)
+- services/orchestrator/artilheiro-manager.js (ou existente)
+- public/participante/js/modules/participante-artilheiro.js
+- models/ArtilheiroCampeao.js
+- routes/participante-routes.js (adicionar rota)
+```
+
+#### 4. WAVES DE EXECUCAO
+
+Agrupar por dependencia real (nao por camada tecnica):
+
+```markdown
+Wave 1 (paralelo): Model + Service (nao dependem um do outro)
+Wave 2 (depende de 1): Controller + Route
+Wave 3 (depende de 2): Frontend module
+Wave 4 (depende de 3): Cache + Testes
+```
+
+### Niveis de Pesquisa Previa
+
+| Nivel | Quando | Acao |
+|-------|--------|------|
+| 0 | Ja sei como fazer | Usar conhecimento existente |
+| 1 | Sei mais ou menos | Ler README e exemplos basicos |
+| 2 | Nao sei | Estudar docs completas e exemplos de producao |
+| 3 | Ninguem sabe | POC comparativa, pesquisa com Perplexity/Context7 |
+
+### Integracao com High Senior Protocol
+
+```
+Goal-Backward Planning → Define GOAL e pre-condicoes
+    ↓
+FASE 1: Pesquisa → Valida pre-condicoes no codebase
+    ↓
+FASE 2: Spec → Artefatos necessarios → Waves de execucao
+    ↓
+FASE 3: Code → Executar waves em ordem
+```
+
+---
+
 **STATUS:** WORKFLOW MASTER - ARMED & ORCHESTRATING
-**Versao:** 1.0 (High Senior Protocol)
+**Versao:** 2.0 (Enriquecido com Goal-Backward Planning do agnostic-core)

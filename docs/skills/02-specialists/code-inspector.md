@@ -1964,8 +1964,70 @@ async function exportarModulo(elementId) {
 
 ---
 
-**STATUS:** 🔐 Code Inspector - ARMED & READY
+## OWASP Deep Dive — Mitigacoes Detalhadas (Novo - agnostic-core)
 
-**Versão:** 2.0 (Super Cartola Edition)
+Complemento a tabela OWASP 2.1 com acoes especificas para o projeto.
 
-**Última atualização:** 2026-01-16
+### A01 — Broken Access Control (Detalhado)
+
+```markdown
+□ Todo endpoint POST/PUT/DELETE tem middleware de auth (verificarAdmin ou verificarParticipante)
+□ Participante so acessa dados da propria liga (liga_id no filtro)
+□ Admin so acessa ligas que administra (admin_id check)
+□ Sem IDOR: participante nao altera dados de outro (time_id validado contra sessao)
+□ Rotas admin nao acessiveis por participante
+□ API de debug/diagnostico protegida em producao
+```
+
+```bash
+# Auditoria automatica
+grep -rn "router\.\(post\|put\|delete\|patch\)" routes/ | grep -v "verificar\|isAdmin\|isAuth" | head -20
+```
+
+### A03 — Injection (Detalhado para MongoDB)
+
+```markdown
+□ Sem $where em queries (executa JS no servidor)
+□ Sem eval() ou new Function() com input de usuario
+□ RegExp criado a partir de input tem caracteres escapados
+□ req.body nao usado diretamente como filtro de query (sanitizar campos)
+□ Operadores MongoDB ($gt, $ne, $exists) bloqueados em input de usuario
+```
+
+```javascript
+// RISCO: req.body usado direto como query
+const user = await User.findOne(req.body); // Se body = {"$gt": ""} → retorna qualquer user
+
+// SEGURO: Extrair campos esperados
+const { email } = req.body;
+const user = await User.findOne({ email: String(email), liga_id: ligaId });
+```
+
+### A05 — Security Misconfiguration (Detalhado para Express)
+
+```markdown
+□ CORS nao usa origin: '*' em producao (middleware/security.js)
+□ Headers de seguranca ativos (X-Content-Type-Options, X-Frame-Options, HSTS)
+□ X-Powered-By removido (nao expor Express)
+□ Debug/stack traces desabilitados em producao
+□ Rate limiting ativo (500 req/min conforme middleware/security.js)
+□ Session cookie com httpOnly, secure, sameSite
+```
+
+### A09 — Logging Failures (Detalhado)
+
+```markdown
+□ Falhas de autenticacao logadas (quem tentou, quando)
+□ Operacoes financeiras logadas (follow the money)
+□ Sem dados sensiveis em logs (emails de admin OK, senhas/tokens NUNCA)
+□ Logs incluem contexto suficiente para debug (liga_id, time_id, rodada)
+□ Logs estruturados (utils/logger.js) em vez de console.log solto
+```
+
+---
+
+**STATUS:** Code Inspector - ARMED & READY
+
+**Versao:** 3.0 (Enriquecido com OWASP Deep Dive do agnostic-core)
+
+**Ultima atualizacao:** 2026-03-12

@@ -643,8 +643,188 @@ echo "Events: $(grep -c 'addEventListener\|on[A-Z]' [arquivo])"
 
 ---
 
+## PROBLEMA 6: ALUCINACAO DE APIs E FUNCOES (Novo - agnostic-core)
+
+### Sintomas
+- IA inventa funcoes, metodos ou parametros que nao existem na lib/framework
+- Codigo parece correto mas falha em runtime
+- Usa versao de API desatualizada ou inexistente
+- Parametros opcionais inventados com nomes plausíveis
+
+### Protocolo de Deteccao
+
+```markdown
+## TESTE DE VERACIDADE DE API
+
+- [ ] Toda funcao/metodo gerado foi verificado na documentacao oficial
+- [ ] Parametros opcionais verificados (IA frequentemente inventa nomes plausiveis)
+- [ ] Versao da biblioteca confirmada (package.json vs docs)
+- [ ] Testes executados (nao apenas "parece certo")
+```
+
+### Exemplos Concretos (Super Cartola)
+
+```javascript
+// ALUCINADO: Parametro que nao existe no MongoDB driver v6
+await collection.findOneAndUpdate(
+  { _id: id },
+  { $set: data },
+  { returnOriginal: false }  // OBSOLETO no driver v4+
+);
+
+// VERIFICADO NA DOC: Opcao correta
+await collection.findOneAndUpdate(
+  { _id: id },
+  { $set: data },
+  { returnDocument: 'after' }  // CORRETO
+);
+```
+
+```javascript
+// ALUCINADO: Metodo inventado do Express
+app.useAsync(middleware);  // NAO EXISTE
+
+// CORRETO: Express nao tem async nativo, usar wrapper
+import 'express-async-errors'; // Pacote que trata promises
+app.use(middleware);
+```
+
+### Comandos de Verificacao
+
+```bash
+# Verificar versao real da dependencia
+node -e "console.log(require('mongoose/package.json').version)"
+node -e "console.log(require('express/package.json').version)"
+
+# Verificar como o projeto JA usa determinado metodo
+grep -rn "findOneAndUpdate\|findByIdAndUpdate" --include="*.js" controllers/ services/
+
+# Consultar docs via Context7 MCP
+# mcp__context7__query_docs({ libraryId: "mongoose", query: "findOneAndUpdate options" })
+```
+
+---
+
+## PROBLEMA 7: SEGURANCA E DADOS SENSIVEIS (Novo - agnostic-core)
+
+### Sintomas
+- Credenciais hardcoded no codigo
+- Dados sensiveis expostos em logs (CPF, email, senhas)
+- Queries vulneraveis a injection
+- Input do usuario usado sem sanitizacao
+
+### Protocolo de Deteccao
+
+```markdown
+## TESTE DE SEGURANCA
+
+- [ ] Alguma string parece uma credencial real (token, key, senha)?
+- [ ] Logs incluem dados sensiveis (emails de admin, tokens de sessao)?
+- [ ] Input do usuario usado em queries MongoDB sem sanitizacao?
+- [ ] req.body/req.params usado diretamente em $where, eval, new RegExp?
+```
+
+### Exemplos Concretos (Super Cartola)
+
+```javascript
+// INSEGURO: Log expoe dado sensivel
+console.log(`Login admin: ${req.session.usuario.email} senha: ${senha}`);
+
+// SEGURO: Log sem dados sensiveis
+logger.info(`Login admin: ${req.session.usuario.email} - sucesso`);
+```
+
+```javascript
+// INSEGURO: RegExp injection via query string
+const regex = new RegExp(req.query.busca);  // busca = ".*" retorna tudo
+const times = await Time.find({ nome_time: regex, liga_id: ligaId });
+
+// SEGURO: Escapar caracteres especiais
+const escaped = req.query.busca.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const regex = new RegExp(escaped, 'i');
+const times = await Time.find({ nome_time: regex, liga_id: ligaId });
+```
+
+### Comandos de Verificacao
+
+```bash
+# Detectar possiveis credenciais hardcoded
+grep -rn "api_key\s*=\s*['\"]" --include="*.js" . | grep -v node_modules | grep -v ".example"
+grep -rn "password\s*=\s*['\"]" --include="*.js" . | grep -v node_modules | grep -v ".example"
+
+# Detectar logs com dados sensiveis
+grep -rn "console\.log.*email\|console\.log.*senha\|console\.log.*token" --include="*.js" controllers/
+
+# Detectar RegExp sem escape
+grep -rn "new RegExp(req\." --include="*.js" controllers/ routes/
+```
+
+---
+
+## CHECKLIST DE REVISAO DE CODIGO GERADO POR IA (Novo - agnostic-core)
+
+Antes de aceitar qualquer bloco de codigo gerado por IA em producao:
+
+```markdown
+□ APIs e metodos verificados na documentacao oficial da versao instalada
+□ Sem abstracoes desnecessarias para o caso de uso atual
+□ Funcionalidade existente no projeto nao foi duplicada
+□ Todo try/catch trata erros de forma adequada (sem catch vazio)
+□ Sem credenciais, tokens ou dados sensiveis hardcoded
+□ Inputs de usuario validados antes de qualquer operacao
+□ Queries MongoDB sanitizadas (sem $where, sem RegExp direto do input)
+□ Toda query inclui liga_id (multi-tenant)
+□ Pontos truncados com truncarPontosNum, nunca arredondados
+□ Material Icons em vez de emojis no HTML
+□ Variaveis CSS em vez de cores hardcoded
+□ Testes executados (nao apenas revisao visual)
+□ Codigo segue convencoes do projeto (nomenclatura PT-BR, .lean() em reads)
+```
+
+---
+
+## CHECKLIST DE NOVO ARQUIVO (Novo - agnostic-core)
+
+Antes de criar qualquer arquivo novo no projeto:
+
+```markdown
+## PRE-CRIACAO
+
+1. NECESSIDADE
+   - [ ] Existe arquivo similar no projeto? (Grep antes de criar)
+   - [ ] A funcionalidade pode ser adicionada a arquivo existente?
+   - [ ] Se for CSS/HTML → rodar anti-frankenstein ANTES
+
+2. CONVENCOES
+   - [ ] Nome em kebab-case? (ex: `saldo-calculator.js`, nao `SaldoCalculator.js`)
+   - [ ] Diretorio correto? (controller em controllers/, util em utils/, etc.)
+   - [ ] Se frontend → seguir pattern de modulo existente (participante-*.js)
+
+3. VALIDACAO
+   - [ ] Arquivo tem menos de 300 linhas?
+   - [ ] Single responsibility (uma preocupacao por arquivo)?
+   - [ ] Todas dependencias existem no projeto?
+```
+
+---
+
+## RED FLAGS DE PRE-IMPLEMENTACAO (Novo - agnostic-core)
+
+Frases que indicam problema iminente — PARAR e reconsiderar:
+
+| Frase | Red Flag | Acao |
+|-------|----------|------|
+| "Vou criar uma classe base generica..." | Overengineering | Precisa mesmo? Quantos filhos tera? |
+| "Vou copiar esse trecho e adaptar..." | Duplicacao | Extrair funcao compartilhada |
+| "Depois a gente testa..." | Risco | Testar ANTES de mergear |
+| "Acho que esse metodo aceita..." | Alucinacao | Verificar docs ANTES de usar |
+| "Vou adicionar nesse arquivo mesmo..." | Monolito | Checar wc -l antes |
+| "Vou criar um utils pra isso..." | Duplicacao | Ja existe utils similar? Grep primeiro |
+
+---
+
 **STATUS:** AI PROBLEMS DETECTION - SELF-DIAGNOSTIC PROTOCOL ACTIVE
 
-**Versao:** 1.0
+**Versao:** 2.0 (Enriquecido com anti-patterns do agnostic-core)
 
 **Principio:** "Codigo que nao precisa existir e o melhor codigo."
