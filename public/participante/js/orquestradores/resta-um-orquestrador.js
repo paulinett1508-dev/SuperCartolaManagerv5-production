@@ -602,6 +602,16 @@ function _injetarCSS() {
     document.head.appendChild(s);
 }
 
+function _escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 function _fmtPts(val) {
     if (val == null) return '-';
     const num = parseFloat(val) || 0;
@@ -611,7 +621,7 @@ function _fmtPts(val) {
 
 function _escudoEl(escudoId, cls, size) {
     if (escudoId) {
-        return `<img src="/escudos/${escudoId}.png" class="${cls}"
+        return `<img src="/escudos/${_escapeHtml(String(escudoId))}.png" class="${cls}"
                      style="width:${size}px;height:${size}px;object-fit:contain;"
                      onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
                      alt="">
@@ -768,8 +778,8 @@ class RestaUmModule {
                             <span class="material-icons" style="color:var(--color-warning,#eab308)">emoji_events</span>
                             CAMPEÃO
                         </div>
-                        <div class="ruv-campeao-time">${campeao.nomeTime || '—'}</div>
-                        <div class="ruv-campeao-cartoleiro">${campeao.nomeCartoleiro || ''}</div>
+                        <div class="ruv-campeao-time">${_escapeHtml(campeao.nomeTime || '—')}</div>
+                        <div class="ruv-campeao-cartoleiro">${_escapeHtml(campeao.nomeCartoleiro || '')}</div>
                     </div>
                 </div>`;
         }
@@ -795,8 +805,8 @@ class RestaUmModule {
                                 <span class="material-icons">emoji_events</span>
                                 ${ed.status === 'em_andamento' ? 'Líder da Rodada' : 'Melhor Colocado'}
                             </div>
-                            <div class="ruv-lider-time">${lider.nomeTime || '—'}</div>
-                            <div class="ruv-lider-cartoleiro">${lider.nomeCartoleiro || ''}</div>
+                            <div class="ruv-lider-time">${_escapeHtml(lider.nomeTime || '—')}</div>
+                            <div class="ruv-lider-cartoleiro">${_escapeHtml(lider.nomeCartoleiro || '')}</div>
                         </div>
                         <div class="ruv-lider-stats">
                             ${temPtsLider
@@ -851,8 +861,8 @@ class RestaUmModule {
                             ${_escudoEl(p.escudoId, 'ruv-escudo', 36)}
                         </div>
                         <div class="ruv-info">
-                            <div class="ruv-time">${p.nomeTime || '—'}</div>
-                            <div class="ruv-cartoleiro">${p.nomeCartoleiro || ''}</div>
+                            <div class="ruv-time">${_escapeHtml(p.nomeTime || '—')}</div>
+                            <div class="ruv-cartoleiro">${_escapeHtml(p.nomeCartoleiro || '')}</div>
                             ${isLanterna ? `<div class="ruv-lanterna-tag"><span class="material-icons">warning</span>Em Perigo</div>` : ''}
                         </div>
                         <div class="ruv-stats">
@@ -878,8 +888,8 @@ class RestaUmModule {
                                 ${_escudoEl(p.escudoId, 'ruv-escudo', 36)}
                             </div>
                             <div class="ruv-info">
-                                <div class="ruv-time">${p.nomeTime || '—'}</div>
-                                <div class="ruv-cartoleiro">${p.nomeCartoleiro || ''}</div>
+                                <div class="ruv-time">${_escapeHtml(p.nomeTime || '—')}</div>
+                                <div class="ruv-cartoleiro">${_escapeHtml(p.nomeCartoleiro || '')}</div>
                                 <div class="ruv-lanterna-tag">
                                     <span class="material-icons">block</span>
                                     Eliminado R${p.rodadaEliminacao || '?'}

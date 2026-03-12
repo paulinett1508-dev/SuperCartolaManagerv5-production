@@ -281,7 +281,7 @@ function _renderizarDisputa(dados, timeId) {
                 </div>
                 <div class="ru-lider-body">
                     <img class="ru-lider-escudo"
-                         src="/escudos/${lider.escudoId || 'default'}.png"
+                         src="/escudos/${escapeHtml(String(lider.escudoId || 'default'))}.png"
                          alt=""
                          onerror="this.src='/escudos/default.png'">
                     <div class="ru-lider-info">
@@ -325,7 +325,7 @@ function _renderizarDisputa(dados, timeId) {
                 <div class="${classes.join(' ')}">
                     <span class="resta-um-pos">${pos}</span>
                     <img class="resta-um-escudo"
-                         src="/escudos/${p.escudoId || 'default'}.png"
+                         src="/escudos/${escapeHtml(String(p.escudoId || 'default'))}.png"
                          alt=""
                          onerror="this.src='/escudos/default.png'">
                     <div class="resta-um-nome">
@@ -359,7 +359,7 @@ function _renderizarDisputa(dados, timeId) {
                         <span class="material-icons" style="font-size: 14px;">close</span>
                     </span>
                     <img class="resta-um-escudo"
-                         src="/escudos/${p.escudoId || 'default'}.png"
+                         src="/escudos/${escapeHtml(String(p.escudoId || 'default'))}.png"
                          alt=""
                          onerror="this.src='/escudos/default.png'">
                     <div class="resta-um-nome">
