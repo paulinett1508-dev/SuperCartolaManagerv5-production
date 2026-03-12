@@ -9,6 +9,16 @@
  * @version 2.0.0
  */
 
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 class AdminLuvaOuro {
     constructor() {
         this.ligaId = null;
@@ -117,7 +127,7 @@ class AdminLuvaOuro {
                     <div class="lo-stat-label">Temporada</div>
                 </div>
                 <div class="lo-stat">
-                    <div class="lo-stat-value" style="font-size:var(--app-font-xs);word-break:break-all;">${configuradoPor}</div>
+                    <div class="lo-stat-value" style="font-size:var(--app-font-xs);word-break:break-all;">${escapeHtml(configuradoPor)}</div>
                     <div class="lo-stat-label">Configurado por</div>
                 </div>
             </div>
