@@ -391,7 +391,7 @@ const CapitaoLuxo = {
             const isPodio2 = posicao === 2;
             const isPodio3 = posicao === 3;
 
-            const escudoSrc = participante.escudo || `/escudos/${participante.clube_id || "default"}.png`;
+            const escudoSrc = escapeHtml(participante.escudo || `/escudos/${participante.clube_id || "default"}.png`);
             const pontos = (Math.trunc((participante.pontuacao_total || 0) * 100) / 100).toFixed(2);
             const media = (Math.trunc((participante.media_capitao || 0) * 100) / 100).toFixed(2);
             const rodadas = participante.rodadas_jogadas || 0;
@@ -407,7 +407,13 @@ const CapitaoLuxo = {
                         ? "podio-3"
                         : "";
 
-            const posicaoIcon = isPrimeiro ? "🥇" : isPodio2 ? "🥈" : isPodio3 ? "🥉" : `${posicao}º`;
+            const posicaoIcon = isPrimeiro
+                ? '<span class="material-icons" style="font-size:20px;color:#ffd700;">looks_one</span>'
+                : isPodio2
+                    ? '<span class="material-icons" style="font-size:20px;color:#c0c0c0;">looks_two</span>'
+                    : isPodio3
+                        ? '<span class="material-icons" style="font-size:20px;color:#cd7f32;">looks_3</span>'
+                        : `${posicao}º`;
 
             // ✅ NOVO LAYOUT: Botão "Ver Histórico" + Barra de progresso
             const historico = participante.historico_rodadas || [];
@@ -505,7 +511,7 @@ const CapitaoLuxo = {
         const liderPts = (Math.trunc((lider?.pontuacao_total || 0) * 100) / 100).toFixed(2);
 
         const liderLabel = temporadaEncerrada
-            ? "🏆 CAPITÃO DE LUXO"
+            ? '<span class="material-icons" style="font-size:16px;vertical-align:middle;color:var(--app-warning);">emoji_events</span> CAPITÃO DE LUXO'
             : "POSSÍVEL CAMPEÃO";
 
         bannerContainer.innerHTML = `
@@ -519,7 +525,7 @@ const CapitaoLuxo = {
                     ${lider ? `
                         <div class="banner-lider ${temporadaEncerrada ? "campeao" : ""}">
                             <span class="lider-label">${liderLabel}</span>
-                            <span class="lider-nome">${liderNome} (${liderPts} pts)</span>
+                            <span class="lider-nome">${escapeHtml(liderNome)} (${liderPts} pts)</span>
                         </div>
                     ` : ""}
                 </div>
@@ -555,7 +561,7 @@ const CapitaoLuxo = {
             <div class="capitao-luxo-error">
                 <span class="material-icons" style="font-size: 48px;">warning</span>
                 <p><strong>${titulo}</strong></p>
-                <p style="font-size: 12px;">${mensagem}</p>
+                <p style="font-size: 12px;">${escapeHtml(mensagem)}</p>
             </div>
         `;
     },

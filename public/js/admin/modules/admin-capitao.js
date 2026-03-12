@@ -10,6 +10,16 @@
  * @version 2.0.0
  */
 
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 class AdminCapitao {
     constructor() {
         this.ligaId = null;
@@ -333,7 +343,7 @@ class AdminCapitao {
     async consolidar() {
         if (this.consolidando) return;
 
-        const rodadaFinal = parseInt(document.getElementById('clRodadaFinal')?.value);
+        const rodadaFinal = parseInt(document.getElementById('clRodadaFinal')?.value, 10);
         if (!rodadaFinal || rodadaFinal < 1 || rodadaFinal > 38) {
             if (window.SuperModal) SuperModal.toast.error('Rodada invalida (1-38)');
             return;
@@ -366,7 +376,7 @@ class AdminCapitao {
                 if (window.SuperModal) SuperModal.toast.success('Ranking consolidado ate R' + rodadaFinal + '!');
                 await this.carregarDashboard();
             } else {
-                if (statusEl) statusEl.innerHTML = '<span style="font-size:var(--app-font-xs);color:var(--app-danger);">' + (data.error || 'Erro desconhecido') + '</span>';
+                if (statusEl) statusEl.innerHTML = '<span style="font-size:var(--app-font-xs);color:var(--app-danger);">' + escapeHtml(data.error || 'Erro desconhecido') + '</span>';
                 if (window.SuperModal) SuperModal.toast.error(data.error || 'Erro ao consolidar');
             }
         } catch (err) {
@@ -396,8 +406,8 @@ class AdminCapitao {
             const escudo = p.escudo || '/escudos/default.png';
             return '<div class="cl-ranking-row">'
                 + '<span class="cl-ranking-pos">' + pos + 'o</span>'
-                + '<img src="' + escudo + '" alt="" onerror="this.style.display=\'none\'">'
-                + '<span class="cl-ranking-nome">' + (p.nome_cartola || '---') + '</span>'
+                + '<img src="' + escapeHtml(escudo) + '" alt="" onerror="this.style.display=\'none\'">'
+                + '<span class="cl-ranking-nome">' + escapeHtml(p.nome_cartola || '---') + '</span>'
                 + '<span style="font-size:var(--app-font-xs);color:var(--app-text-muted);min-width:30px;text-align:center;">' + rodadas + 'R</span>'
                 + '<span style="font-size:var(--app-font-xs);color:var(--app-text-muted);min-width:45px;text-align:right;">' + media + '</span>'
                 + '<span class="cl-ranking-pontos">' + pts + '</span>'
