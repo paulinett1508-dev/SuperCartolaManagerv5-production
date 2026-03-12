@@ -383,12 +383,11 @@
     gap: 2px;
 }
 
-/* Linha Financeira Principal */
+/* Linha Financeira Principal — 2-row Bank Statement layout */
 .tesouraria-module .linha-financeira {
     display: flex;
-    align-items: center;
-    gap: var(--space-4);
-    padding: 14px 20px;
+    flex-direction: column;
+    padding: var(--space-3) var(--space-5);
     background: var(--surface-card);
     border-bottom: 1px solid var(--border-color);
     transition: background var(--transition-fast);
@@ -431,31 +430,38 @@
 }
 
 /* ========================================
-   PERFIL (Esquerda)
+   LINHA-ROW — Sub-rows within each card
+   ======================================== */
+
+.tesouraria-module .linha-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.tesouraria-module .linha-row-2 {
+    margin-top: var(--space-1);
+}
+
+/* ========================================
+   PERFIL (Row 1 — Esquerda)
    ======================================== */
 
 .tesouraria-module .linha-perfil {
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    min-width: 200px;
-    flex-shrink: 0;
+    flex: 1;
+    min-width: 0;
 }
 
 .tesouraria-module .linha-perfil .escudo {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     object-fit: cover;
     background: var(--border-color);
     flex-shrink: 0;
-}
-
-.tesouraria-module .perfil-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
 }
 
 .tesouraria-module .nome-cartola {
@@ -467,6 +473,19 @@
     text-overflow: ellipsis;
 }
 
+/* ========================================
+   PERFIL-SUB (Row 2 — Nome Time + Badge)
+   ======================================== */
+
+.tesouraria-module .linha-perfil-sub {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex: 1;
+    min-width: 0;
+    padding-left: 48px; /* alinha com nome (escudo 36px + gap 12px) */
+}
+
 .tesouraria-module .nome-time {
     font-size: var(--font-size-sm);
     color: var(--text-muted);
@@ -475,98 +494,66 @@
     text-overflow: ellipsis;
 }
 
-/* ========================================
-   EXTRATO / BADGES (Centro)
-   ======================================== */
-
-.tesouraria-module .linha-extrato {
-    flex: 1;
-    min-width: 0;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border-color) transparent;
-}
-
-.tesouraria-module .linha-extrato::-webkit-scrollbar {
-    height: 4px;
-}
-
-.tesouraria-module .linha-extrato::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.tesouraria-module .linha-extrato::-webkit-scrollbar-thumb {
-    background: var(--border-color);
-    border-radius: var(--radius-sm);
-}
-
-.tesouraria-module .badges-container {
-    display: flex;
-    gap: var(--space-2);
-    padding: 4px 0;
-}
-
-/* Badge Financeiro */
-.tesouraria-module .badge-financeiro {
+.tesouraria-module .status-badge {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 4px 10px;
+    padding: 2px var(--space-2);
     border-radius: var(--radius-full);
-    font-size: var(--font-size-sm);
+    font-size: 0.65rem;
     font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
     white-space: nowrap;
-    transition: transform var(--transition-fast);
-    cursor: default;
+    flex-shrink: 0;
 }
 
-.tesouraria-module .badge-financeiro:hover {
-    transform: scale(1.05);
-}
-
-.tesouraria-module .badge-icon {
-    font-size: 14px;
-}
-
-.tesouraria-module .badge-valor {
-    font-family: var(--font-family-mono);
-    font-size: 0.7rem;
-}
-
-/* Badge Colors */
-.tesouraria-module .badge-ganho {
-    background: var(--color-success-muted);
-    color: var(--color-success);
-}
-
-.tesouraria-module .badge-perda {
+.tesouraria-module .status-badge.status-devedor {
     background: var(--color-danger-muted);
     color: var(--color-danger);
 }
 
-.tesouraria-module .badge-neutro {
-    background: var(--color-neutral-bg-strong);
+.tesouraria-module .status-badge.status-credor {
+    background: var(--color-success-muted);
+    color: var(--color-success);
+}
+
+.tesouraria-module .status-badge.status-quitado {
+    background: var(--color-neutral-bg);
     color: var(--text-dim);
 }
 
-.tesouraria-module .no-badges,
-.tesouraria-module .no-data {
-    color: var(--text-muted);
-    font-size: var(--font-size-sm);
-    font-style: italic;
-}
-
 /* ========================================
-   SALDO FINAL + ACOES (Direita)
+   SALDOS INLINE (label + valor pairs)
    ======================================== */
 
-.tesouraria-module .linha-totais {
+.tesouraria-module .linha-saldos {
     display: flex;
-    align-items: center;
-    gap: var(--space-4);
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1px;
+    min-width: 100px;
     flex-shrink: 0;
 }
+
+.tesouraria-module .saldo-label {
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+}
+
+.tesouraria-module .saldo-inline {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+}
+
+.tesouraria-module .saldo-inline.positivo { color: var(--color-success); }
+.tesouraria-module .saldo-inline.negativo { color: var(--color-danger); }
+
+/* ========================================
+   SALDO FINAL BOX + ACOES (Direita)
+   ======================================== */
 
 .tesouraria-module .saldo-final-box {
     display: flex;
@@ -946,13 +933,9 @@
    ======================================== */
 
 @media (max-width: 1024px) {
-    .tesouraria-module .linha-perfil {
-        min-width: 160px;
-    }
-
     .tesouraria-module .saldo-final-box {
         min-width: 120px;
-        padding: 6px 12px;
+        padding: var(--space-2) var(--space-3);
     }
 
     .tesouraria-module .saldo-valor {
@@ -992,27 +975,21 @@
         width: 100%;
     }
 
-    /* Mobile: Stack vertical */
+    /* Mobile: compact padding */
     .tesouraria-module .linha-financeira {
-        flex-wrap: wrap;
-        padding: 12px 16px;
+        padding: var(--space-3) var(--space-4);
+    }
+
+    .tesouraria-module .linha-row {
         gap: var(--space-3);
     }
 
-    .tesouraria-module .linha-perfil {
-        min-width: 100%;
-        order: 1;
+    .tesouraria-module .linha-perfil-sub {
+        padding-left: 48px;
     }
 
-    .tesouraria-module .linha-extrato {
-        order: 3;
-        width: 100%;
-        padding-bottom: 8px;
-    }
-
-    .tesouraria-module .linha-totais {
-        order: 2;
-        margin-left: auto;
+    .tesouraria-module .linha-saldos {
+        min-width: 80px;
     }
 
     .tesouraria-module .saldo-final-box {
@@ -1046,9 +1023,13 @@
         font-size: 1.1rem;
     }
 
-    .tesouraria-module .linha-totais {
-        width: 100%;
-        justify-content: space-between;
+    /* Stack rows vertically on very small screens */
+    .tesouraria-module .linha-row {
+        flex-wrap: wrap;
+    }
+
+    .tesouraria-module .linha-perfil-sub {
+        padding-left: 0;
     }
 
     .tesouraria-module .linha-acoes {
@@ -1188,7 +1169,7 @@
 }
 
 .parcial-impacto {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--font-family-mono);
     font-size: 10px;
     font-weight: 700;
 }

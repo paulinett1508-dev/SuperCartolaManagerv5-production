@@ -638,47 +638,55 @@ class AdminTesouraria {
     }
 
     _renderLinha(participante) {
-        const { timeId, nome, nomeTime, escudo, saldoFinal, breakdown } = participante;
+        const { timeId, nome, nomeTime, escudo, saldoFinal, saldoJogo, saldoAcertos } = participante;
 
-        let statusClass, statusIcon;
+        let statusClass, statusIcon, statusLabel;
         if (saldoFinal < -0.01) {
             statusClass = 'status-devedor';
             statusIcon = 'arrow_downward';
+            statusLabel = 'Devedor';
         } else if (saldoFinal > 0.01) {
             statusClass = 'status-credor';
             statusIcon = 'arrow_upward';
+            statusLabel = 'Credor';
         } else {
             statusClass = 'status-quitado';
             statusIcon = 'check_circle';
+            statusLabel = 'Quitado';
         }
 
         const escudoUrl = escudo || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%232d2d2d"/%3E%3Ctext x="50" y="55" text-anchor="middle" fill="%236b7280" font-size="24"%3E?%3C/text%3E%3C/svg%3E';
-        const badges = this._renderBadgesFinanceiros(breakdown);
         const saldoFormatado = this._formatarSaldo(saldoFinal);
+        const saldoJogoFmt = this._formatarSaldo(saldoJogo || 0);
+        const saldoAcertosFmt = this._formatarSaldo(saldoAcertos || 0);
 
         return `
             <div class="linha-financeira ${statusClass}" data-time-id="${timeId}" onclick="adminTesouraria.toggleExpand(this)">
-                <!-- ESQUERDA: Perfil -->
-                <div class="linha-perfil">
-                    <img src="${escudoUrl}" alt="" class="escudo" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%232d2d2d%22/%3E%3C/svg%3E'">
-                    <div class="perfil-info">
+                <!-- ROW 1: Escudo + Nome + Saldo Jogo + Saldo Final hero -->
+                <div class="linha-row linha-row-1">
+                    <div class="linha-perfil">
+                        <img src="${escudoUrl}" alt="" class="escudo" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%232d2d2d%22/%3E%3C/svg%3E'">
                         <span class="nome-cartola">${this._escapeHtml(nome)}</span>
-                        <span class="nome-time">${this._escapeHtml(nomeTime || '')}</span>
                     </div>
-                </div>
-
-                <!-- CENTRO: Extrato (Badges Financeiros) -->
-                <div class="linha-extrato">
-                    <div class="badges-container">
-                        ${badges}
+                    <div class="linha-saldos">
+                        <span class="saldo-label">Saldo Jogo</span>
+                        <span class="saldo-inline ${(saldoJogo || 0) >= 0 ? 'positivo' : 'negativo'}">${saldoJogoFmt}</span>
                     </div>
-                </div>
-
-                <!-- DIREITA: Saldo Final + Acoes -->
-                <div class="linha-totais">
                     <div class="saldo-final-box ${statusClass}">
                         <span class="material-icons status-icon">${statusIcon}</span>
                         <span class="saldo-valor">${saldoFormatado}</span>
+                    </div>
+                </div>
+
+                <!-- ROW 2: Nome Time + Acertos + Ações -->
+                <div class="linha-row linha-row-2">
+                    <div class="linha-perfil-sub">
+                        <span class="nome-time">${this._escapeHtml(nomeTime || '')}</span>
+                        <span class="status-badge ${statusClass}">${statusLabel}</span>
+                    </div>
+                    <div class="linha-saldos">
+                        <span class="saldo-label">Acertos</span>
+                        <span class="saldo-inline ${(saldoAcertos || 0) >= 0 ? 'positivo' : 'negativo'}">${saldoAcertosFmt}</span>
                     </div>
                     <div class="linha-acoes">
                         <button class="btn-acao" onclick="event.stopPropagation(); adminTesouraria.abrirAcerto('${timeId}', '${this._escapeHtml(nome).replace(/'/g, "\\'")}')" title="Registrar Acerto" aria-label="Registrar acerto financeiro">
@@ -687,8 +695,8 @@ class AdminTesouraria {
                         <button class="btn-acao" onclick="event.stopPropagation(); adminTesouraria.verDetalhes('${timeId}')" title="Ver Detalhes" aria-label="Ver detalhes financeiros">
                             <span class="material-icons" aria-hidden="true">visibility</span>
                         </button>
+                        <span class="material-icons expand-indicator">expand_more</span>
                     </div>
-                    <span class="material-icons expand-indicator">expand_more</span>
                 </div>
             </div>
             <div class="linha-expand" data-expand-for="${timeId}">
