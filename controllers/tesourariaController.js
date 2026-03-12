@@ -257,8 +257,9 @@ export async function getParticipantes(req, res) {
                 let totalPago = 0;
                 let totalRecebido = 0;
                 acertosTemporada.forEach(a => {
+                    // ✅ v8.21.0 FIX: Alinhado com AcertoFinanceiro.calcularSaldoAcertos() (catch-all)
                     if (a.tipo === 'pagamento') totalPago += a.valor || 0;
-                    else if (a.tipo === 'recebimento') totalRecebido += a.valor || 0;
+                    else totalRecebido += a.valor || 0;
                 });
                 const saldoAcertos = totalPago - totalRecebido;
 
@@ -582,8 +583,9 @@ export async function getLiga(req, res) {
             let totalPago = 0;
             let totalRecebido = 0;
             acertosTemporada.forEach(a => {
+                // ✅ v8.21.0 FIX: Alinhado com AcertoFinanceiro.calcularSaldoAcertos() (catch-all)
                 if (a.tipo === 'pagamento') totalPago += a.valor || 0;
-                else if (a.tipo === 'recebimento') totalRecebido += a.valor || 0;
+                else totalRecebido += a.valor || 0;
             });
             const saldoAcertos = totalPago - totalRecebido;
 
@@ -1255,8 +1257,9 @@ export async function getResumo(req, res) {
                 let totalPago = 0;
                 let totalRecebido = 0;
                 acertosTemporada.forEach(a => {
+                    // ✅ v8.21.0 FIX: Alinhado com AcertoFinanceiro.calcularSaldoAcertos() (catch-all)
                     if (a.tipo === 'pagamento') totalPago += a.valor || 0;
-                    else if (a.tipo === 'recebimento') totalRecebido += a.valor || 0;
+                    else totalRecebido += a.valor || 0;
                 });
                 const saldoAcertos = totalPago - totalRecebido;
 

@@ -1002,7 +1002,11 @@ export const getExtratoFinanceiro = async (req, res) => {
             const dividaAnterior = inscricaoData.divida_anterior || 0;
 
             // 1) Taxa de inscrição (débito)
-            if (taxaInscricao > 0 && !pagouInscricao && !inscricaoJaEmCache) {
+            // ✅ v8.21.0 FIX SINCRONIA: SEMPRE deduzir taxa (alinhado com saldo-calculator.js:174)
+            // Antes: só deduzia se !pagouInscricao → divergência de até R$180 vs tesouraria
+            // Agora: sempre deduz. Quando paga via AcertoFinanceiro, o +taxa cancela (net=0).
+            // Quando paga via saldo_transferido, o crédito cobre o débito.
+            if (taxaInscricao > 0 && !inscricaoJaEmCache) {
                 const inscricaoTx = {
                     rodada: 0,
                     tipo: "INSCRICAO_TEMPORADA",
@@ -1033,11 +1037,22 @@ export const getExtratoFinanceiro = async (req, res) => {
                 logger.log(`[FLUXO-CONTROLLER] ✅ Saldo anterior: R$ ${saldoTransferido} (fonte: InscricaoTemporada)`);
             }
 
-            // 3) Dívida anterior (débito adicional — espelhando saldo-calculator.js:309-311)
-            if (dividaAnterior > 0 && !inscricaoJaEmCache) {
-                novoSaldo -= dividaAnterior;
-                cacheModificado = true;
-                logger.log(`[FLUXO-CONTROLLER] ✅ Dívida anterior: R$ ${-dividaAnterior}`);
+            // 3) Dívida anterior (débito adicional — espelhando saldo-calculator.js:204-217)
+            // ✅ v8.21.0 FIX SINCRONIA: Deduzir SEMPRE, mesmo quando inscrição já está no cache.
+            // Antes: guardava com !inscricaoJaEmCache → divida sumia quando cache tinha R0.
+            // saldo-calculator.js sempre busca divida_anterior do InscricaoTemporada.
+            if (dividaAnterior > 0) {
+                // Verificar se divida já foi contabilizada no cache (evitar double-count)
+                const dividaJaNoCache = (cache.historico_transacoes || []).some(
+                    t => t.tipo === 'DIVIDA_ANTERIOR' || (t.descricao && t.descricao.includes('Dívida'))
+                );
+                if (!dividaJaNoCache) {
+                    novoSaldo -= dividaAnterior;
+                    cacheModificado = true;
+                    logger.log(`[FLUXO-CONTROLLER] ✅ Dívida anterior: R$ ${-dividaAnterior}`);
+                } else {
+                    logger.log(`[FLUXO-CONTROLLER] Dívida anterior: já no cache (não duplicar)`);
+                }
             }
         } else if (!inscricaoData && !isOwnerPremium) {
             // Fallback: sem InscricaoTemporada (ligas legacy sem renovação)
@@ -1066,13 +1081,16 @@ export const getExtratoFinanceiro = async (req, res) => {
             cache.historico_transacoes.push(...novasTransacoes);
             cache.saldo_consolidado += novoSaldo;
 
+            // ✅ v8.21.0 FIX SINCRONIA: Usar (t.valor ?? t.saldo) para suportar formato consolidado
+            // Transações consolidadas (tipo=undefined) têm bonusOnus/pontosCorridos mas t.valor pode ser undefined.
+            // O campo t.saldo contém o valor líquido da rodada. Alinhado com extratoFinanceiroCacheController.
             cache.ganhos_consolidados = cache.historico_transacoes
-                .filter((t) => t.valor > 0)
-                .reduce((acc, t) => acc + t.valor, 0);
+                .filter((t) => (t.valor ?? t.saldo ?? 0) > 0)
+                .reduce((acc, t) => acc + (t.valor ?? t.saldo ?? 0), 0);
 
             cache.perdas_consolidadas = cache.historico_transacoes
-                .filter((t) => t.valor < 0)
-                .reduce((acc, t) => acc + t.valor, 0);
+                .filter((t) => (t.valor ?? t.saldo ?? 0) < 0)
+                .reduce((acc, t) => acc + (t.valor ?? t.saldo ?? 0), 0);
 
             cache.ultima_rodada_consolidada = rodadaLimite;
             cache.data_ultima_atualizacao = new Date();
