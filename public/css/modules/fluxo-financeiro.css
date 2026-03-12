@@ -1922,14 +1922,6 @@ body {
     border-radius: 4px;
 }
 
-/* Escudo inline dentro do nome do time (Bank Statement layout) */
-.info-participante .time .escudo-coracao {
-    width: 14px;
-    height: 14px;
-    vertical-align: middle;
-    margin-right: 2px;
-}
-
 /* =============================================================================
    BOTÃO MARCAR PAGO (ação pós-cadastro)
    ============================================================================= */

@@ -864,12 +864,12 @@ export function injetarEstilosTabelaExpandida() {
             width: 18%;
         }
 
-        .tabela-financeira .col-resumo {
-            min-width: 100px;
+        .tabela-financeira .col-modulo {
+            min-width: 90px;
             width: auto;
             text-align: right;
-            font-family: var(--font-family-mono, 'JetBrains Mono'), 'Consolas', monospace;
-            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.75rem;
             padding-right: 12px;
         }
 
@@ -1014,10 +1014,10 @@ export function injetarEstilosTabelaExpandida() {
 
         /* Responsivo */
         @media (max-width: 900px) {
-            .tabela-financeira .col-resumo {
-                min-width: 70px;
+            .tabela-financeira .col-modulo {
+                width: 45px;
                 padding: 6px 4px;
-                font-size: 0.75rem;
+                font-size: 0.7rem;
             }
             .tabela-financeira th {
                 font-size: 0.65rem;
