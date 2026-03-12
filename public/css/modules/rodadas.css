@@ -87,6 +87,7 @@
 /* ✅ FIX: Escopado com #rodadas para evitar conflito com .rodadas-grid de outros módulos
    (participantes.css e pontos-corridos.css definem .rodadas-grid com propriedades diferentes) */
 #rodadas .rodadas-grid {
+  display: block;
   margin-bottom: var(--spacing-md);
 }
 
