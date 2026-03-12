@@ -5,6 +5,16 @@
 
 import { RODADA_FINAL_CAMPEONATO } from '../core/season-config.js';
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 console.log("🎨 [LUVA-UI] Módulo UI v4.2.0 carregando...");
 
 // Cache de elementos DOM
@@ -169,7 +179,7 @@ function renderizarBannerRodadaFinal(rodadaAtual, mercadoAberto, lider) {
             ? `
           <div class="banner-lider">
             <span class="lider-label">POSSÍVEL CAMPEÃO</span>
-            <span class="lider-nome">${liderNome}</span>
+            <span class="lider-nome">${escapeHtml(liderNome)}</span>
           </div>
         `
             : ""
@@ -411,8 +421,8 @@ export function renderizarRanking(dados) {
       return `
       <tr class="${rowClass}">
         <td class="col-pos"><span class="pos-badge ${posClass}">${posIcon}</span></td>
-        <td class="col-escudo"><img src="/escudos/${escudoId}.png" alt="" class="escudo-img" onerror="this.onerror=null;this.src='/escudos/default.png'"></td>
-        <td class="col-nome"><span class="participante-nome">${item.participanteNome}</span></td>
+        <td class="col-escudo"><img src="/escudos/${escapeHtml(String(escudoId))}.png" alt="" class="escudo-img" onerror="this.onerror=null;this.src='/escudos/default.png'"></td>
+        <td class="col-nome"><span class="participante-nome">${escapeHtml(item.participanteNome)}${isRodadaFinalParcial && posicao === 1 ? '<span class="material-icons coroa-icon">workspace_premium</span>' : ''}</span></td>
         <td class="col-total"><span class="pontos-total">${pontosTotais}</span></td>
         ${celulasRodadas}
       </tr>
@@ -481,8 +491,12 @@ function injetarEstilosDestaque() {
       }
     }
 
-    .luva-ranking-row.possivel-campeao .participante-nome::after {
-      content: " ♔";
+    .luva-ranking-row.possivel-campeao .participante-nome .coroa-icon {
+      display: inline-block;
+      font-size: 14px;
+      color: #ffd700;
+      vertical-align: middle;
+      margin-left: 4px;
       animation: coroa 1s infinite;
     }
 
@@ -546,14 +560,14 @@ function renderizarEstatisticas(ranking, rodadasExibir, dados) {
       <div class="stat-card lider">
         <span class="stat-icon"><span class="material-symbols-outlined" style="color: #ffd700;">emoji_events</span></span>
         <span class="stat-label">Líder</span>
-        <span class="stat-value">${lider.participanteNome}</span>
+        <span class="stat-value">${escapeHtml(lider.participanteNome)}</span>
         <span class="stat-detail">${(Math.trunc(parseFloat(lider.pontosTotais || 0) * 100) / 100).toFixed(2)} pts</span>
       </div>
       <div class="stat-card">
         <span class="stat-icon"><span class="material-symbols-outlined" style="color: #ffd700;">star</span></span>
         <span class="stat-label">Melhor Goleiro</span>
         <span class="stat-value">${melhorPontuacao.toFixed(2)} pts</span>
-        <span class="stat-detail">${melhorCartoleiro} (R${melhorRodada})</span>
+        <span class="stat-detail">${escapeHtml(melhorCartoleiro)} (R${melhorRodada})</span>
       </div>
       <div class="stat-card">
         <span class="stat-icon"><span class="material-symbols-outlined">group</span></span>
@@ -577,21 +591,21 @@ function renderizarEstatisticas(ranking, rodadasExibir, dados) {
 export function mostrarLoading(mensagem = "Carregando...") {
   const tbody = getElement("luvaRankingBody");
   if (tbody) {
-    tbody.innerHTML = `<tr><td colspan="12" class="loading-cell">${mensagem}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="12" class="loading-cell">${escapeHtml(mensagem)}</td></tr>`;
   }
 }
 
 export function mostrarErro(mensagem) {
   const tbody = getElement("luvaRankingBody");
   if (tbody) {
-    tbody.innerHTML = `<tr><td colspan="12" class="loading-cell" style="color:#e74c3c;">${mensagem}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="12" class="loading-cell" style="color:#e74c3c;">${escapeHtml(mensagem)}</td></tr>`;
   }
 }
 
 export function atualizarInfoStatus(texto) {
   const infoStatus = getElement("luvaInfoStatus");
   if (infoStatus) {
-    infoStatus.innerHTML = texto;
+    infoStatus.textContent = texto;
   }
 }
 
@@ -672,7 +686,7 @@ export function mostrarModalDetalhes(dados) {
                     (h) => `
                 <div class="historico-item">
                   <span class="hist-rodada">R${h.rodada}</span>
-                  <span class="hist-goleiro">${h.goleiroNome || "Sem goleiro"}</span>
+                  <span class="hist-goleiro">${escapeHtml(h.goleiroNome || "Sem goleiro")}</span>
                   <span class="hist-pontos ${(h.pontos || 0) >= 0 ? "positivo" : "negativo"}">${(Math.trunc((h.pontos || 0) * 100) / 100).toFixed(2)}</span>
                 </div>
               `,
@@ -776,9 +790,9 @@ export function renderizarSecaoInativos(dados, rodadasExibir, rodadaParcial) {
       return `
       <tr class="luva-ranking-row inativo">
         <td class="col-pos"><span class="pos-badge pos-inativo">—</span></td>
-        <td class="col-escudo"><img src="/escudos/${escudoId}.png" alt="" class="escudo-img" onerror="this.onerror=null;this.src='/escudos/default.png'" style="opacity:0.5;filter:grayscale(80%);"></td>
+        <td class="col-escudo"><img src="/escudos/${escapeHtml(String(escudoId))}.png" alt="" class="escudo-img" onerror="this.onerror=null;this.src='/escudos/default.png'" style="opacity:0.5;filter:grayscale(80%);"></td>
         <td class="col-nome">
-          <span class="participante-nome" style="color:#888;">${item.participanteNome}</span>
+          <span class="participante-nome" style="color:#888;">${escapeHtml(item.participanteNome)}</span>
           <span class="desistencia-badge">SAIU R${item.rodada_desistencia || "?"}</span>
         </td>
         <td class="col-total"><span class="pontos-total" style="opacity:0.5;text-decoration:line-through;">${pontosTotais}</span></td>
@@ -793,7 +807,7 @@ export function renderizarSecaoInativos(dados, rodadasExibir, rodadaParcial) {
   secaoInativos.className = "luva-inativos-section";
   secaoInativos.innerHTML = `
     <div class="inativos-header">
-      <span class="inativos-icon">🚫</span>
+      <span class="material-icons inativos-icon" style="font-size:20px;color:#888;">block</span>
       <h4>Participantes Inativos</h4>
       <span class="inativos-badge">${inativos.length}</span>
       <span class="inativos-info">Fora da disputa do ranking</span>
