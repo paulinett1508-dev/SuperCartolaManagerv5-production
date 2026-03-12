@@ -911,7 +911,7 @@ const ArtilheiroCampeao = {
                             const clickClass = temGols ? " clicavel" : "";
                             const gcClass = temGC ? " tem-gc" : "";
                             const dataAttr = temGols
-                                ? `data-time="${timeId}" data-rodada="${r}"`
+                                ? `data-time="${escapeHtml(String(timeId))}" data-rodada="${r}"`
                                 : "";
 
                             if (isParcial && gp === 0 && gc === 0) {
@@ -939,7 +939,7 @@ const ArtilheiroCampeao = {
 
                 // ✅ v4.4: Escudo fallback com Material Icons
                 const escudoHtml = p.escudo
-                    ? `<img src="${p.escudo}" class="escudo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'"><span class="material-icons" style="display: none; font-size: 20px; color: #666;">sports_soccer</span>`
+                    ? `<img src="${escapeHtml(p.escudo)}" class="escudo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'"><span class="material-icons" style="display: none; font-size: 20px; color: #666;">sports_soccer</span>`
                     : '<span class="material-icons" style="font-size: 20px; color: #666;">sports_soccer</span>';
 
                 return `
@@ -1040,7 +1040,7 @@ const ArtilheiroCampeao = {
 
                 // ✅ v4.4: Escudo fallback com Material Icons
                 const escudoHtml = p.escudo
-                    ? `<img src="${p.escudo}" class="escudo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'"><span class="material-icons" style="display: none; font-size: 20px; color: #555;">sports_soccer</span>`
+                    ? `<img src="${escapeHtml(p.escudo)}" class="escudo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'"><span class="material-icons" style="display: none; font-size: 20px; color: #555;">sports_soccer</span>`
                     : '<span class="material-icons" style="font-size: 20px; color: #555;">sports_soccer</span>';
 
                 return `
@@ -1134,7 +1134,7 @@ const ArtilheiroCampeao = {
                         <div class="artilheiro-erro">
                             <span class="material-icons erro-icon" style="font-size: 32px; color: #e74c3c;">cancel</span>
                             <p class="erro-msg">${titulo}</p>
-                            <p class="erro-detalhe">${mensagem}</p>
+                            <p class="erro-detalhe">${escapeHtml(mensagem)}</p>
                             <button class="artilheiro-btn primary" onclick="ArtilheiroCampeao.buscarRanking()">
                                 <span class="material-icons" style="font-size: 16px; margin-right: 5px;">refresh</span>
                                 Tentar Novamente
