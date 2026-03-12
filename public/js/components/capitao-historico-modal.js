@@ -47,16 +47,17 @@ const CapitaoHistoricoModal = {
 
         // Gerar linhas da tabela
         const linhasTabela = historicoOrdenado.map((r, index) => {
-            const pts = (Math.trunc((r.pontuacao || 0) * 100) / 100).toFixed(2);
+            const pontosNum = Math.trunc((r.pontuacao || 0) * 100) / 100;
+            const pts = pontosNum.toFixed(2);
             const isParcial = r.parcial === true;
             const jogou = r.jogou;
 
             // Cores de pontuação
-            let corPontuacao = '#9ca3af'; // Cinza padrão
-            if (pts >= 15) corPontuacao = '#22c55e'; // Verde (ótimo)
-            else if (pts >= 10) corPontuacao = '#10b981'; // Verde claro (bom)
-            else if (pts >= 5) corPontuacao = '#fbbf24'; // Amarelo (regular)
-            else if (pts < 0) corPontuacao = '#ef4444'; // Vermelho (negativo)
+            let corPontuacao = 'var(--app-text-muted)';
+            if (pontosNum >= 15) corPontuacao = 'var(--color-success-light)';
+            else if (pontosNum >= 10) corPontuacao = 'var(--app-success)';
+            else if (pontosNum >= 5) corPontuacao = 'var(--app-warning)';
+            else if (pontosNum < 0) corPontuacao = 'var(--app-danger)';
 
             // Status da rodada
             let statusHtml = '';
