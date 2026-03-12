@@ -294,9 +294,9 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 #### project-reference
 | Tipo | Keywords |
 |------|----------|
-| **Primárias** | `referencia projeto`, `detalhes MCPs`, `collections`, `tipos de ID`, `keyword map`, `slash commands detalhados` |
-| **Frases PT-BR** | "quais MCPs temos?", "detalhes das collections", "tabela de keywords", "como usar Perplexity", "como usar Stitch MCP", "sistema de renovacao", "backlog helper" |
-| **Contexto** | Referencia detalhada do projeto: MCPs, collections MongoDB, keyword→skill map completo, slash commands, sistema de renovacao, versionamento, backlog |
+| **Primárias** | `referencia projeto`, `detalhes MCPs`, `collections`, `tipos de ID`, `keyword map`, `slash commands detalhados`, `github app`, `install-github-app`, `conectar github` |
+| **Frases PT-BR** | "quais MCPs temos?", "detalhes das collections", "tabela de keywords", "como usar Perplexity", "como usar Stitch MCP", "sistema de renovacao", "backlog helper", "instalar github app", "conectar github ao claude" |
+| **Contexto** | Referencia detalhada do projeto: MCPs, collections MongoDB, keyword→skill map completo, slash commands, sistema de renovacao, versionamento, backlog, GitHub App do Claude Code |
 | **NÃO confundir** | Regras de codigo → CLAUDE.md; Skills especificas → skill individual |
 | **Localização** | `docs/skills/03-utilities/project-reference.md` |
 
@@ -479,6 +479,8 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | "quais MCPs temos?" | `project-reference` | Referencia detalhada |
 | "detalhes das collections" | `project-reference` | Tipos de ID, divida tecnica |
 | "tabela de keywords completa" | `project-reference` | Keyword→Skill map |
+| "instalar github app" | `project-reference` | GitHub App do Claude Code |
+| "conectar github ao claude" | `project-reference` | GitHub App vs MCP Server |
 | "validar operação financeira" | `financial-operations` | Idempotência, auditoria |
 | "follow the money" | `financial-operations` | Trilha de auditoria |
 | "transação duplicada?" | `financial-operations` | Checklist idempotência |

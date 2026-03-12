@@ -92,6 +92,31 @@ Gera mockups visuais, variantes e extrai HTML via Google Stitch AI.
 Stitch MCP (gerar) → frontend-design (validar) → stitch-adapter (adaptar) → anti-frankenstein (governar) → frontend-crafter (implementar)
 ```
 
+### GitHub App (Claude Code)
+
+O comando `/install-github-app` do Claude Code conecta a conta GitHub ao assistente, expandindo o contexto disponivel durante conversas — de arquivos locais para o projeto completo no GitHub.
+
+**Funcionalidades apos instalacao:**
+- **Issues:** Leitura de issues abertas, labels, comentarios e historico
+- **Pull Requests:** Visualizacao de PRs, diffs, reviews e comentarios
+- **Branches e commits:** Listagem de branches e evolucao do codigo
+- **Discussoes tecnicas:** Acompanhamento de decisoes registradas no GitHub
+
+**Instalacao:**
+```
+/install-github-app
+```
+Abre navegador para autorizar. Selecionar conta/organizacao e repositorios desejados. Nao requer tokens ou variaveis de ambiente adicionais.
+
+**GitHub App vs GitHub MCP Server:**
+| Aspecto | GitHub App (nativo) | MCP Server |
+|---------|--------------------|-----------|
+| Instalacao | OAuth simplificado | Token pessoal + config |
+| Customizacao | Padrao | Maior controle |
+| Recomendacao | Comecar por aqui | Adicionar se precisar de operacoes especificas |
+
+**Integracao com o projeto:** Apos instalar, o Claude Code consegue acessar issues, PRs e branches do `paulinett1508-dev/SuperCartolaManagerv5` sem precisar do `gh` CLI. Util para `/liste-pr-github` e `/security-review`.
+
 ---
 
 ## Slash Commands Detalhados
