@@ -11,7 +11,7 @@ import "./fluxo-financeiro/fluxo-financeiro-quitacao.js";
 import "./fluxo-financeiro/fluxo-financeiro-ajustes-api.js";
 
 // Cache-buster para forçar reload de módulos (incrementar a cada mudança)
-const CACHE_BUSTER = "v10.2"; // v10.2: FIX inscrição no extrato from-scratch (saldo_lancamentos_iniciais)
+const CACHE_BUSTER = "v10.3"; // v10.3: Rodada parcial AO VIVO no extrato admin
 
 // VARIÁVEIS GLOBAIS
 let rodadaAtual = 0;
@@ -337,6 +337,35 @@ async function calcularEExibirExtrato(timeId) {
             timeId,
             ultimaRodadaCompleta,
         );
+
+        // ✅ v10.2: Injetar rodada parcial (AO VIVO) se mercado fechado
+        if (!mercadoAberto && rodadaAtual > 0 && !extrato.rodada_parcial) {
+            try {
+                const ligaId = obterLigaId();
+                const parcialResp = await fetch(`/api/matchday/parciais/${ligaId}`);
+                if (parcialResp.ok) {
+                    const parcialData = await parcialResp.json();
+                    if (parcialData?.disponivel && parcialData.ranking) {
+                        const meu = parcialData.ranking.find(r => String(r.timeId) === String(timeId));
+                        if (meu) {
+                            extrato.rodada_parcial = {
+                                rodada: parcialData.rodada,
+                                status: 'ao_vivo',
+                                pontos_parciais: meu.pontos_rodada_atual,
+                                posicao_parcial: meu.posicao,
+                                total_times: parcialData.total_times || parcialData.ranking.length,
+                                impacto_projetado: 0,
+                                saldo_projetado: extrato.resumo?.saldo || 0,
+                                atualizado_em: parcialData.atualizado_em || new Date().toISOString(),
+                            };
+                            console.log(`[FLUXO] ⚽ Parcial R${parcialData.rodada}: ${meu.pontos_rodada_atual}pts, ${meu.posicao}º lugar`);
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn('[FLUXO] Parciais indisponíveis:', err.message);
+            }
+        }
 
         await fluxoFinanceiroUI.renderizarExtratoFinanceiro(
             extrato,
