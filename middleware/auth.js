@@ -66,8 +66,6 @@ export const PAGINAS_ADMIN = [
   // Páginas adicionadas (estavam sem proteção)
   "/admin-gestao.html",
   "/historico-acessos.html",
-  "/auditoria-extratos.html",
-  "/fluxo-financeiro.html",
   "/preencher-liga.html",
   // ✅ Notificador - Sistema de avisos in-app
   "/notificador.html",
