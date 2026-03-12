@@ -11,6 +11,16 @@
 import { RODADA_FINAL_CAMPEONATO } from "/js/config/seasons-client.js";
 if (window.Log) Log.info('PARTICIPANTE-CAPITAO', 'Módulo v2.0 carregando...');
 
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 let estadoCapitao = {
     ligaId: null,
     timeId: null,
@@ -289,7 +299,7 @@ function renderizarRanking(ranking) {
         html += `
             <div class="${cardClasses}" onclick="${historico.length > 0 ? `window._abrirHistoricoCapitao(window._capitaoRankingCache[${index}])` : ''}">
                 <div class="capitao-posicao">${posicaoIcon}</div>
-                <img src="${escudoSrc}" class="capitao-escudo" alt=""
+                <img src="${escapeHtml(escudoSrc)}" class="capitao-escudo" alt=""
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'">
                 <span class="material-icons" style="display: none; font-size: 32px; color: #666;">emoji_events</span>
                 <div class="capitao-info">
@@ -501,7 +511,7 @@ function renderizarErro(mensagem) {
     container.innerHTML = `
         <div class="capitao-error">
             <span class="material-icons" style="font-size: 36px;">warning</span>
-            <p>${mensagem}</p>
+            <p>${escapeHtml(mensagem)}</p>
         </div>
     `;
 }
