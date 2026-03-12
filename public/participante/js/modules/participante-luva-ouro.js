@@ -31,6 +31,9 @@ let estadoLuva = {
     _onMatchdayStop: null,
 };
 
+// Guard contra dupla-subscrição MatchdayService em navegação SPA
+let _matchdaySubscribed = false;
+
 // =====================================================================
 // FUNÇÃO PRINCIPAL - EXPORTADA PARA NAVIGATION
 // =====================================================================
@@ -215,7 +218,7 @@ function renderizarBannerRodadaFinal(
     if (rodadaAtual !== RODADA_FINAL) return "";
 
     const liderNome = lider ? getNome(lider) : "---";
-    const liderPontos = lider ? getPontos(lider).toFixed(1) : "0";
+    const liderPontos = lider ? (Math.trunc(getPontos(lider) * 10) / 10).toFixed(1) : "0";
 
     // ✅ v3.8: Detectar se é campeão confirmado
     if (temporadaEncerrada) {
@@ -452,7 +455,7 @@ function _resumoRodadasGoleiro(rodadas) {
         .sort((a, b) => a.rodada - b.rodada)
         .map(r => ({
             rodada: r.rodada,
-            goleiro: _nomeCompacto(r.goleiroNome),
+            goleiro: escapeHtml(_nomeCompacto(r.goleiroNome)),
             pontos: Math.trunc((r.pontos || 0) * 10) / 10,
         }));
 }
@@ -609,7 +612,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                     <div style="font-size: 28px; font-weight: 900; color: var(--app-text-primary);">${minhaColocacao}º</div>
                 </div>
                 <div style="text-align: center;">
-                    <div style="font-size: 26px; font-weight: 800; color: var(--app-gold);">${getPontos(meusDados).toFixed(1)}</div>
+                    <div style="font-size: 26px; font-weight: 800; color: var(--app-gold);">${(Math.trunc(getPontos(meusDados) * 10) / 10).toFixed(1)}</div>
                     <div style="font-size: 9px; color: #888;">pontos</div>
                 </div>
             </div>
@@ -619,7 +622,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                     ? `
             <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
                 <span style="color: #888; font-size: 11px;">Distância p/ ${labelLider.toLowerCase()}</span>
-                <span style="color: var(--app-amber); font-weight: 700; font-size: 13px;">-${distanciaLider.toFixed(1)} pts</span>
+                <span style="color: var(--app-amber); font-weight: 700; font-size: 13px;">-${(Math.trunc(distanciaLider * 10) / 10).toFixed(1)} pts</span>
             </div>
             `
                     : `
@@ -734,7 +737,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                 </div>
             </div>
             <div style="text-align: right;">
-                <div style="font-size: 18px; font-weight: 800; color: var(--app-gold);">${getPontos(campeao).toFixed(1)}</div>
+                <div style="font-size: 18px; font-weight: 800; color: var(--app-gold);">${(Math.trunc(getPontos(campeao) * 10) / 10).toFixed(1)}</div>
                 <div style="font-size: 8px; color: #888;">pontos</div>
             </div>
         </div>
@@ -765,7 +768,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                     const isMeuTime = isMyTime(time, meuTimeId);
                     const pos = idx + 1;
                     const posDisplay = pos === 1 ? '<span class="material-symbols-outlined" style="font-size: 16px; color: var(--app-gold);">emoji_events</span>' : pos + '\u00BA';
-                    const pts = getPontos(time).toFixed(1);
+                    const pts = (Math.trunc(getPontos(time) * 10) / 10).toFixed(1);
                     const tid = time.participanteId || time.timeId || time.time_id || '';
 
                     const rodadas = _resumoRodadasGoleiro(time.rodadas);
@@ -814,7 +817,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                             + '<div style="color:#666;font-weight:400;font-size:12px;">' + escapeHtml(time.participanteNome || time.nomeCartoleiro || time.nome || 'N/D') + '</div>'
                             + '<div style="color:#555;font-size:11px;">' + escapeHtml(time.nomeTime || time.nome_time || '') + '</div>'
                             + '</div></div>'
-                            + '<span style="color:#555;font-weight:500;font-size:13px;">' + getPontos(time).toFixed(1) + '</span>'
+                            + '<span style="color:#555;font-weight:500;font-size:13px;">' + (Math.trunc(getPontos(time) * 10) / 10).toFixed(1) + '</span>'
                             + '</div>';
                     });
                 }
@@ -902,6 +905,8 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
 // =====================================================================
 function _subscribeMatchdayEvents() {
     if (!window.MatchdayService) return;
+    if (_matchdaySubscribed) return;
+    _matchdaySubscribed = true;
 
     // Handler para atualização de parciais
     estadoLuva._onParciais = () => {
@@ -969,23 +974,15 @@ async function _recarregarRanking() {
 export function destruirLuvaOuroParticipante() {
     if (window.Log) Log.info('[PARTICIPANTE-LUVA-OURO]', 'Destruindo módulo (cleanup)');
 
-    // Remover listeners do MatchdayService
-    if (window.MatchdayService) {
-        if (estadoLuva._onParciais) {
-            window.MatchdayService.off('data:parciais', estadoLuva._onParciais);
-        }
-        if (estadoLuva._onMatchdayStop) {
-            window.MatchdayService.off('matchday:stop', estadoLuva._onMatchdayStop);
-        }
-    }
-
-    // Reset estado
+    // Reset estado (MatchdayService não expõe .off(); handlers antigos
+    // short-circuitam via "if (!ligaId) return" após o estado ser limpo)
     estadoLuva.modeLive = false;
     estadoLuva.ligaId = null;
     estadoLuva.timeId = null;
     estadoLuva.rankingAtual = null;
     estadoLuva._onParciais = null;
     estadoLuva._onMatchdayStop = null;
+    _matchdaySubscribed = false;
 }
 window.destruirLuvaOuroParticipante = destruirLuvaOuroParticipante;
 
