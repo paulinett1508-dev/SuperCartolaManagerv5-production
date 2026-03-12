@@ -976,50 +976,57 @@ function renderizarMinhaEscalacao(rodadaData, isParcial) {
         6: { nome: 'TEC', cor: '#6b7280' },
     };
 
+    // Ícones de status (Material Icons) — sem emojis
+    const ICON_UPCOMING  = '<span class="material-icons" style="font-size:14px;color:var(--app-text-muted)">schedule</span>';
+    const ICON_PLAYING   = '<span class="material-icons" style="font-size:14px;color:var(--app-warning)">sports_soccer</span>';
+    const ICON_PLAYED    = '<span class="material-icons" style="font-size:14px;color:var(--app-success)">check_circle</span>';
+    const ICON_FINISHED  = '<span class="material-icons" style="font-size:14px;color:var(--app-info)">check_circle</span>';
+    const ICON_ABSENT    = '<span class="material-icons" style="font-size:14px;color:var(--app-danger)">block</span>';
+
     // Função para determinar status do jogo baseado em data/hora
     function obterStatusJogo(atleta) {
         if (!isParcial) {
-            // Rodada finalizada - todos jogaram
-            return '🔵';
+            // Rodada finalizada
+            return ICON_FINISHED;
         }
 
-        // Verificar se o atleta tem informação de jogo
+        // entrou_em_campo é a fonte mais confiável quando definida
+        if (atleta.entrou_em_campo === true || (atleta.pontos_num != null && atleta.pontos_num !== 0)) {
+            return ICON_PLAYED; // Confirmado: jogou
+        }
+        if (atleta.entrou_em_campo === false) {
+            return ICON_ABSENT; // Confirmado: não jogou (ausente)
+        }
+
+        // entrou_em_campo é null/undefined → fallback por data/hora
         const jogoInfo = atleta.jogo || {};
         const dataJogo = jogoInfo.data_jogo || jogoInfo.data || null;
         const horaJogo = jogoInfo.hora || null;
-        
+
         if (!dataJogo) {
-            // Sem info de jogo, usar fallback baseado em entrou_em_campo
-            if (atleta.entrou_em_campo) {
-                return '🟢'; // Jogando ou já jogou
-            }
-            return '⚪'; // Padrão: ainda não começou
+            return ICON_UPCOMING; // Sem info de jogo → aguardando
         }
 
         try {
-            // Construir data/hora do jogo
-            const [ano, mes, dia] = dataJogo.split('-').map(Number);
-            const [hora, minuto] = (horaJogo || '00:00').split(':').map(Number);
-            const dataHoraJogo = new Date(ano, mes - 1, dia, hora, minuto);
+            // FIX #1: parsear como BRT (UTC-3) com offset explícito
+            // Evita erro de timezone quando browser está fora do Brasil
+            const horaStr = horaJogo ? horaJogo.substring(0, 5) : '00:00';
+            const dataHoraJogo = new Date(`${dataJogo}T${horaStr}:00-03:00`);
             const agora = new Date();
-            
-            // Calcular diferença em minutos
             const diffMinutos = (agora - dataHoraJogo) / (1000 * 60);
-            
+
             if (diffMinutos < -10) {
-                // Jogo ainda não começou (mais de 10min antes)
-                return '⚪';
-            } else if (diffMinutos >= -10 && diffMinutos <= 120) {
-                // Jogo em andamento (10min antes até 2h depois)
-                return atleta.entrou_em_campo ? '🟢' : '⚪';
+                return ICON_UPCOMING; // Jogo ainda não começou
+            } else if (diffMinutos <= 150) {
+                // FIX #2: janela de 150min (90reg + 30prorrog + buffer)
+                // Evita marcar como encerrado em jogos com prorrogação ou atraso
+                return ICON_PLAYING; // Jogo em andamento (status incerto pelo API)
             } else {
-                // Jogo encerrado (mais de 2h depois)
-                return '🔵';
+                return ICON_FINISHED; // Mais de 2h30 → provável encerramento
             }
         } catch (err) {
-            // Erro ao processar data - fallback
             if (window.Log) Log.warn('[RODADAS] Erro ao processar data do jogo:', err);
-            return atleta.entrou_em_campo ? '🟢' : '⚪';
+            return ICON_UPCOMING;
         }
     }
 
