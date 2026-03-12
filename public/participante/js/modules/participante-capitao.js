@@ -541,6 +541,20 @@ window._abrirHistoricoCapitao = function(participante) {
 // =============================================
 window.inicializarCapitaoParticipante = inicializarCapitaoParticipante;
 
+// =============================================
+// DESTRUTOR — Cleanup ao navegar para outro módulo
+// =============================================
+export function destruirCapitaoParticipante() {
+    if (window.Log) Log.info('PARTICIPANTE-CAPITAO', 'Destruindo módulo (cleanup)');
+    estadoCapitao.ligaId = null;
+    estadoCapitao.timeId = null;
+    estadoCapitao.rankingAtual = null;
+    estadoCapitao.modeLive = false;
+    estadoCapitao.inicializado = false;
+    _matchdaySubscribed = false;
+}
+window.destruirCapitaoParticipante = destruirCapitaoParticipante;
+
 if (window.Log) Log.info('PARTICIPANTE-CAPITAO', 'Módulo v2.0 pronto');
 
 // =============================================
