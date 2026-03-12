@@ -4,6 +4,14 @@
 
 NUNCA programe sem ANTES: planejar, listar tarefas (TodoWrite), questionar o usuário, aguardar aprovação.
 Exceções: bypass explícito, tarefa trivial (1 ação), continuação de plano aprovado.
+
+**Sub-passo obrigatório — Cruzamento com Skills:**
+Ao listar tarefas no plano, cruzar CADA tarefa com [`SKILL-KEYWORD-MAP.md`](docs/skills/SKILL-KEYWORD-MAP.md).
+Se QUALQUER tarefa envolve CSS/HTML/visual (mesmo "acessório" de feature backend) → incluir no plano:
+- Ativar `anti-frankenstein` antes de escrever CSS (verificar `config/css-registry.json`, tokens, animações existentes)
+- Ativar `frontend-design` se houver decisão estética (cores, layout, motion)
+- Skills não ativadas no plano = skills que serão esquecidas na execução
+
 Detalhes completos: [`docs/references/protocolo-planejamento.md`](docs/references/protocolo-planejamento.md)
 
 ## Tech Stack
@@ -67,7 +75,7 @@ O usuário NÃO deve guiar passo a passo. Se teste/lint falhar após fix, corrij
 
 Skills ativadas por keywords. Mapeamento: [`docs/skills/SKILL-KEYWORD-MAP.md`](docs/skills/SKILL-KEYWORD-MAP.md)
 Pipeline design: frontend-design → anti-frankenstein → frontend-crafter
-Anti-Frankenstein: verificar `config/css-registry.json` antes de criar/modificar CSS.
+**Anti-Frankenstein é OBRIGATÓRIO antes de qualquer CSS/HTML novo** — mesmo 3 linhas. Verificar `config/css-registry.json`, reutilizar tokens/animações existentes, NUNCA cores hardcoded.
 Commands: `/liste-pr-github` (filtro por período), `/security-review` (diff contra origin/HEAD)
 
 ## MCPs Disponíveis
