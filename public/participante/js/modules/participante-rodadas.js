@@ -1620,9 +1620,9 @@ function renderizarDetalhamentoRodada(rodadaData, isParcial = false, inativos = 
         // Em campo badge for parciais - mostrar escalados + jogando ao vivo
         const titularesTotal = 12;
         const escalados = meuPart.atletas ? meuPart.atletas.filter(a => !a.is_reserva).length : 0;
-        const jogandoAoVivo = meuPart.atletas ? meuPart.atletas.filter(a => !a.is_reserva && a.entrou_em_campo).length : 0;
+        const jogandoAoVivo = meuPart.atletas ? meuPart.atletas.filter(a => !a.is_reserva && (a.entrou_em_campo === true || (a.pontos_num != null && a.pontos_num !== 0))).length : 0;
         const emCampoInfo = isParcial && escalados > 0
-            ? `<span style="margin-left:8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--app-text-muted)">${escalados}/12 <span style="color:var(--app-success-light);font-weight:600;font-size:10px;margin-left:2px">${jogandoAoVivo}</span></span>`
+            ? `<span style="margin-left:8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--app-text-muted)">${jogandoAoVivo}/12</span>`
             : '';
 
         // ✅ v8.1: Meu Resumo colapsivel (default: fechado)
@@ -1712,7 +1712,7 @@ function renderizarDetalhamentoRodada(rodadaData, isParcial = false, inativos = 
 
         // Badge "X/12 em campo" para parciais
         const escalados = participante.atletas ? participante.atletas.filter(a => !a.is_reserva).length : 0;
-        const jogandoAoVivo = participante.atletas ? participante.atletas.filter(a => !a.is_reserva && a.entrou_em_campo).length : 0;
+        const jogandoAoVivo = participante.atletas ? participante.atletas.filter(a => !a.is_reserva && (a.entrou_em_campo === true || (a.pontos_num != null && a.pontos_num !== 0))).length : 0;
         const badgeEmCampo = isParcial && escalados > 0
             ? `<span class="rk-em-campo ${jogandoAoVivo > 0 ? 'ativo' : ''}">${jogandoAoVivo}/${escalados}</span>`
             : "";
@@ -2062,45 +2062,38 @@ function abrirCampinhoModal(targetTimeId, rodada, rodadaData = null) {
         }
     }
 
-    // Função para determinar status do jogo baseado em data/hora
+    // Função para determinar status do jogo baseado em data/hora (contexto modal)
+    const ICON_UPCOMING2  = '<span class="material-icons" style="font-size:14px;color:var(--app-text-muted)">schedule</span>';
+    const ICON_PLAYING2   = '<span class="material-icons" style="font-size:14px;color:var(--app-warning)">sports_soccer</span>';
+    const ICON_PLAYED2    = '<span class="material-icons" style="font-size:14px;color:var(--app-success)">check_circle</span>';
+    const ICON_FINISHED2  = '<span class="material-icons" style="font-size:14px;color:var(--app-info)">check_circle</span>';
+    const ICON_ABSENT2    = '<span class="material-icons" style="font-size:14px;color:var(--app-danger)">block</span>';
+
     function obterStatusJogo(atleta) {
-        // Verificar se o atleta tem informação de jogo
         const jogoInfo = atleta.jogo || {};
         const dataJogo = jogoInfo.data_jogo || jogoInfo.data || null;
         const horaJogo = jogoInfo.hora || null;
-        
-        if (!dataJogo) {
-            // Sem info de jogo, usar fallback baseado em entrou_em_campo
-            if (atleta.entrou_em_campo) {
-                return '🟢'; // Jogando ou já jogou
-            }
-            return '⚪'; // Padrão: ainda não começou
-        }
+
+        // Atleta confirmado ausente
+        if (atleta.entrou_em_campo === false) return ICON_ABSENT2;
+
+        // Atleta confirmado em campo ou com pontos
+        if (atleta.entrou_em_campo === true || (atleta.pontos_num != null && atleta.pontos_num !== 0)) return ICON_PLAYED2;
+
+        if (!dataJogo) return ICON_UPCOMING2;
 
         try {
-            // Construir data/hora do jogo
-            const [ano, mes, dia] = dataJogo.split('-').map(Number);
-            const [hora, minuto] = (horaJogo || '00:00').split(':').map(Number);
-            const dataHoraJogo = new Date(ano, mes - 1, dia, hora, minuto);
+            const horaStr = horaJogo ? horaJogo.substring(0, 5) : '00:00';
+            const dataHoraJogo = new Date(`${dataJogo}T${horaStr}:00-03:00`); // BRT fixo
             const agora = new Date();
-            
-            // Calcular diferença em minutos
             const diffMinutos = (agora - dataHoraJogo) / (1000 * 60);
-            
-            if (diffMinutos < -10) {
-                // Jogo ainda não começou (mais de 10min antes)
-                return '⚪';
-            } else if (diffMinutos >= -10 && diffMinutos <= 120) {
-                // Jogo em andamento (10min antes até 2h depois)
-                return atleta.entrou_em_campo ? '🟢' : '⚪';
-            } else {
-                // Jogo encerrado (mais de 2h depois)
-                return '🔵';
-            }
+
+            if (diffMinutos < -10) return ICON_UPCOMING2;
+            else if (diffMinutos <= 150) return ICON_PLAYING2;
+            else return ICON_FINISHED2;
         } catch (err) {
-            // Erro ao processar data - fallback
             if (window.Log) Log.warn('[RODADAS] Erro ao processar data do jogo:', err);
-            return atleta.entrou_em_campo ? '🟢' : '⚪';
+            return ICON_UPCOMING2;
         }
     }
 
