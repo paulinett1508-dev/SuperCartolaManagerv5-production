@@ -89,14 +89,6 @@ Skill especialista que vasculha e audita **toda a infraestrutura de cache** dos 
 | Ranking Cache Routes | `routes/ranking-geral-cache-routes.js` | Express endpoints |
 | Extrato Cache Routes | `routes/extratoFinanceiroCacheRoutes.js` | Express endpoints |
 
-### CACHE-APP --admin
-
-| Camada | Arquivo | Tecnologia |
-|--------|---------|-----------|
-| Service Worker | `public/admin-mobile/service-worker.js` | Cache API (`scm-admin-v1.0.0` + `scm-admin-runtime`) |
-| Pages JS | `public/admin-mobile/js/pages/*.js` | Direct API calls |
-| App Config | `public/admin-mobile/js/app.js` | App lifecycle |
-
 ### MongoDB Caches (Server-Side — todos os modos)
 
 | Collection | Model | Propósito |
@@ -180,24 +172,6 @@ Skill especialista que vasculha e audita **toda a infraestrutura de cache** dos 
 ---
 
 ### Modo 3: CACHE-APP --admin (12 checks)
-
-#### Service Worker (6 checks)
-1. **SW-01** Extrair `CACHE_NAME` e `RUNTIME_CACHE` e verificar versões
-2. **SW-02** Verificar `STATIC_ASSETS` completo (comparar com `ls /admin-mobile/`)
-3. **SW-03** Verificar CDNs em STATIC_ASSETS ainda são válidos (TailwindCSS, Google Fonts)
-4. **SW-04** Confirmar estratégia: GET-only, Network-first para API, Cache-first para static
-5. **SW-05** Verificar cleanup de caches antigos no `activate`
-6. **SW-06** Confirmar `skipWaiting()` e `clients.claim()` presentes
-
-#### Pages (4 checks)
-7. **PG-01** Scan `admin-mobile/js/pages/*.js` — inventariar uso de cache local
-8. **PG-02** Verificar se alguma page implementa cache (localStorage/sessionStorage)
-9. **PG-03** Verificar que chamadas API usam headers de cache apropriados
-10. **PG-04** Confirmar que operações financeiras NUNCA são cacheadas client-side
-
-#### Version (2 checks)
-11. **VER-01** Verificar que `appVersion.js` detecta corretamente scope admin-mobile
-12. **VER-02** Verificar que `version-scope.json` inclui arquivos do admin-mobile
 
 ---
 

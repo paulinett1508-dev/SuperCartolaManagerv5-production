@@ -1413,13 +1413,6 @@ const ManutencaoScreen = {
                             <div style="font-size:0.7rem;font-weight:400;opacity:0.8;">Ver como participante logado</div>
                         </div>
                     </button>
-                    <button id="devBypassAdmin" style="display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:white;border:none;padding:14px 16px;border-radius:12px;cursor:pointer;font-family:'Inter',sans-serif;font-size:0.85rem;font-weight:600;transition:opacity 0.2s;">
-                        <span class="material-icons" style="font-size:22px;">dashboard</span>
-                        <div style="text-align:left;">
-                            <div>App Admin</div>
-                            <div style="font-size:0.7rem;font-weight:400;opacity:0.8;">Painel de gerenciamento</div>
-                        </div>
-                    </button>
                 </div>
                 <button id="devBypassFechar" style="width:100%;margin-top:12px;background:none;border:1px solid #374151;color:#9ca3af;padding:10px;border-radius:10px;cursor:pointer;font-family:'Inter',sans-serif;font-size:0.8rem;transition:color 0.2s;">
                     Cancelar
@@ -1431,9 +1424,6 @@ const ManutencaoScreen = {
 
         document.getElementById('devBypassParticipante').addEventListener('click', () => {
             window.location.href = '/participante-login.html';
-        });
-        document.getElementById('devBypassAdmin').addEventListener('click', () => {
-            window.location.href = '/api/admin/auth/login?redirect=/gerenciar.html';
         });
         document.getElementById('devBypassFechar').addEventListener('click', () => backdrop.remove());
         backdrop.addEventListener('click', (e) => { if (e.target === backdrop) backdrop.remove(); });

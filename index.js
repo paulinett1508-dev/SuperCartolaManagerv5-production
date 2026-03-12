@@ -205,7 +205,6 @@ import adminAuditoriaRoutes from "./routes/admin-auditoria-routes.js";
 import adminGestaoRoutes from "./routes/admin-gestao-routes.js";
 import systemHealthRoutes from "./routes/system-health-routes.js";
 import adminClienteAuthRoutes from "./routes/admin-cliente-auth.js";
-import adminMobileRoutes from "./routes/admin-mobile-routes.js";
 import * as analyticsController from "./controllers/analyticsController.js";
 import adminMigracaoRoutes from "./routes/admin/migracao.js";
 import adminMigracaoValidacaoRoutes from "./routes/admin/migracao-validacao.js";
@@ -507,10 +506,6 @@ console.log("[SERVER] 🔧 Rota de migração registrada");
 
 app.use("/api/admin/migracao-validacao", adminMigracaoValidacaoRoutes);
 console.log("[SERVER] ✅ Rota de validação de migração registrada");
-
-// 📱 Admin Mobile - App PWA para administradores
-app.use("/api/admin/mobile", adminMobileRoutes);
-console.log("[SERVER] 📱 Rotas de Admin Mobile registradas");
 
 // 🔧 Modo Manutenção do App
 app.use("/api/admin", manutencaoRoutes);

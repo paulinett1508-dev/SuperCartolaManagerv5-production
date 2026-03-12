@@ -109,7 +109,6 @@ cat config/css-registry.json | grep "conceito"
 |----------|-----------|------------|
 | Admin desktop | `public/css/modules/` | `_admin-tokens.css` |
 | App participante | `public/participante/css/` | `_app-tokens.css` |
-| Admin mobile | `public/admin-mobile/css/` | `dark-mode.css` |
 
 ### CHECK 3: Usa Tokens?
 ```

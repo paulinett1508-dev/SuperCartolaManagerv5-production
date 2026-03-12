@@ -252,11 +252,7 @@ export function setupReplitAuthRoutes(app) {
         // Pega o redirect da sessão (se existir) e limpa
         let redirectTo = req.session.redirectAfterLogin;
         if (!redirectTo) {
-          // Detectar dispositivo mobile via User-Agent
-          const ua = req.headers["user-agent"] || "";
-          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-          redirectTo = isMobile ? "/admin-mobile/" : "/painel.html";
-          console.log("[REPLIT-AUTH] 📱 Mobile detectado:", isMobile);
+          redirectTo = "/painel.html";
         }
         console.log("[REPLIT-AUTH] 🎯 Redirect escolhido:", redirectTo);
         console.log("[REPLIT-AUTH] 🎯 Usando fallback?", !req.session.redirectAfterLogin);

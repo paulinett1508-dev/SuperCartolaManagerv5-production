@@ -214,10 +214,7 @@ export function setupGoogleAuthRoutes(app) {
       // Pega o redirect da sessao (se existir) e limpa
       let redirectTo = req.session.redirectAfterLogin;
       if (!redirectTo) {
-        // Detectar dispositivo mobile via User-Agent
-        const ua = req.headers["user-agent"] || "";
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-        redirectTo = isMobile ? "/admin-mobile/" : "/painel.html";
+        redirectTo = "/painel.html";
       }
       delete req.session.redirectAfterLogin;
 

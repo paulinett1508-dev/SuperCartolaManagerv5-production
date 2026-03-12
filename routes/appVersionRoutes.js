@@ -18,7 +18,6 @@ import APP_VERSION, {
 } from "../config/appVersion.js";
 import { CURRENT_SEASON, SEASON_CONFIG } from "../config/seasons.js";
 import marketGate from "../utils/marketGate.js";
-import { getVersionOverride } from "../controllers/adminMobileController.js";
 
 const __filename_ver = fileURLToPath(import.meta.url);
 const __dirname_ver = path.dirname(__filename_ver);
@@ -114,19 +113,6 @@ router.get("/check-version", (req, res) => {
         versionData = { ...ADMIN_VERSION };
     } else {
         versionData = { ...PARTICIPANTE_VERSION };
-    }
-
-    // Apply forced version override if set by admin mobile
-    const override = getVersionOverride();
-    if (override) {
-        const scopeMatch = override.scope === 'all' ||
-            (override.scope === 'app' && clientType !== 'admin') ||
-            (override.scope === 'admin' && clientType === 'admin');
-        if (scopeMatch) {
-            versionData.version = override.version;
-            versionData._forced = true;
-            versionData._forcedBy = override.by;
-        }
     }
 
     // Adicionar metadata de detecção (útil para debug)

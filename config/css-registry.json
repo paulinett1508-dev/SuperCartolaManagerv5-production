@@ -379,24 +379,6 @@
     ]
   },
 
-  "adminMobile": [
-    {
-      "path": "public/admin-mobile/css/dark-mode.css",
-      "loadedBy": ["admin-mobile/index.html"],
-      "description": "Tokens dark mode do admin mobile (slate palette)"
-    },
-    {
-      "path": "public/admin-mobile/css/admin-mobile.css",
-      "loadedBy": ["admin-mobile/index.html"],
-      "description": "Estilos base admin mobile (reset, layout)"
-    },
-    {
-      "path": "public/admin-mobile/css/components.css",
-      "loadedBy": ["admin-mobile/index.html"],
-      "description": "Biblioteca de componentes admin mobile"
-    }
-  ],
-
   "shared": [
     {
       "path": "public/css/app/app-version.css",

@@ -322,11 +322,6 @@
                         <span>App Participante</span>
                         <span class="material-icons" style="font-size: 16px; margin-left: auto; color: #9ca3af;">open_in_new</span>
                     </button>
-                    <button class="sidebar-user-menu-item" data-action="app-admin">
-                        <span class="material-icons">tablet_android</span>
-                        <span>App Admin</span>
-                        <span class="material-icons" style="font-size: 16px; margin-left: auto; color: #9ca3af;">open_in_new</span>
-                    </button>
                     <div class="sidebar-user-menu-divider"></div>
                     <button class="sidebar-user-menu-item logout" data-action="logout">
                         <span class="material-icons">logout</span>
@@ -1687,9 +1682,6 @@
                                 break;
                             case 'app-participante':
                                 window.open('participante/index.html', '_blank');
-                                break;
-                            case 'app-admin':
-                                window.open('admin-mobile/', '_blank');
                                 break;
                             case 'logout':
                                 fazerLogoutAdmin();

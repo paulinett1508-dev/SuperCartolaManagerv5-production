@@ -63,7 +63,6 @@ Grep "componente-similar" public/*.html public/fronts/*.html --recursive
 |----------|----------|---------|
 | E para o admin desktop? | Sim | `public/css/modules/{nome}.css` |
 | E para o app participante? | Sim | `public/participante/css/{nome}.css` |
-| E para o admin mobile? | Sim | `public/admin-mobile/css/{nome}.css` |
 | E um token/variavel nova? | Sim | `_admin-tokens.css` ou `_app-tokens.css` |
 | E um componente do SPA admin? | Sim | Escopar com `.modulo-page .classe` |
 | E uma pagina standalone? | Sim | Pode ter CSS proprio, mas COM tokens |

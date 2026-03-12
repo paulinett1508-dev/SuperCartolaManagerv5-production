@@ -44,13 +44,11 @@
 |------|-----------|----------------------|-------------|
 | `participante/fronts/home.html` | ~1337 linhas | `participante/css/home.css` | NAO |
 | `admin-tiro-certo.html` | ~50 linhas | `css/modules/admin-tiro-certo.css` | NAO |
-| `admin-mobile/login.html` | ~70 linhas | `admin-mobile/css/login.css` | NAO |
 
 ### Atualizacoes Necessarias no Registry
 1. Adicionar `copa-mundo-2026.css` na secao `app.features`
 2. Criar e registrar `home.css` (participante)
 3. Criar e registrar `admin-tiro-certo.css` (admin modules)
-4. Criar e registrar `login.css` (admin-mobile)
 
 ---
 
@@ -66,7 +64,6 @@ Todos os CSS seguem a convencao de diretorios:
 | Tokens app | `public/participante/css/_app-tokens.css` | OK |
 | Modulos admin | `public/css/modules/*.css` | OK (30 arquivos) |
 | Features app | `public/participante/css/*.css` | OK (19 arquivos) |
-| Admin mobile | `public/admin-mobile/css/*.css` | OK (3 arquivos) |
 | Shared | `public/css/app/*.css` | OK (1 arquivo) |
 | Bundle | `public/css/admin-shell.css` | OK |
 
