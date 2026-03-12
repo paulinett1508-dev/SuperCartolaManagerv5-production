@@ -169,11 +169,6 @@
         "description": "Gerenciamento de ligas e modulos com admin-tools-bar"
       },
       {
-        "path": "public/css/modules/admin-tesouraria.css",
-        "loadedBy": ["painel.html"],
-        "description": "Tesouraria admin v3 com search, sort, detail panel e CSV"
-      },
-      {
         "path": "public/css/modules/admin-consolidacao.css",
         "loadedBy": ["admin-consolidacao.html"],
         "description": "Consolidacao de rodadas v2 (SaaS) multi-liga"
