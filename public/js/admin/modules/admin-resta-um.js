@@ -96,7 +96,7 @@ class AdminRestaUm {
         const liga = this.ligas.find(l => l._id === this.ligaId);
         const totalParticipantes = (liga?.participantes || liga?.times || []).filter(t => t.ativo !== false).length;
 
-        const eliminadosPorRodada = parseInt(document.getElementById('ruEliminadosPorRodada')?.value) || 1;
+        const eliminadosPorRodada = parseInt(document.getElementById('ruEliminadosPorRodada')?.value, 10) || 1;
         const protecao = document.getElementById('ruProtecao')?.checked || false;
 
         if (totalParticipantes < 2) {
@@ -199,12 +199,12 @@ class AdminRestaUm {
 
         inputInicial.dataset.editadoManualmente = 'true';
 
-        const rodadaInicial = parseInt(inputInicial.value);
+        const rodadaInicial = parseInt(inputInicial.value, 10);
         if (!rodadaInicial || rodadaInicial < 1 || rodadaInicial > RODADA_FINAL_CAMPEONATO) return;
 
         const liga = this.ligas.find(l => l._id === this.ligaId);
         const totalParticipantes = (liga?.participantes || liga?.times || []).filter(t => t.ativo !== false).length;
-        const eliminadosPorRodada = parseInt(document.getElementById('ruEliminadosPorRodada')?.value) || 1;
+        const eliminadosPorRodada = parseInt(document.getElementById('ruEliminadosPorRodada')?.value, 10) || 1;
         const protecao = document.getElementById('ruProtecao')?.checked || false;
 
         if (totalParticipantes < 2) return;
@@ -642,7 +642,7 @@ class AdminRestaUm {
             } else {
                 partLista.innerHTML = participantes.map(p => `
                     <div class="ru-participante-row">
-                        <img src="/escudos/${p.escudoId || 'default'}.png"
+                        <img src="/escudos/${escapeHtml(p.escudoId || 'default')}.png"
                              onerror="this.src='/escudos/default.png'" alt="">
                         <span class="ru-participante-nome">${escapeHtml(p.nomeTime || p.nomeCartoleiro || 'Time')}</span>
                         <span class="ru-participante-pontos">
@@ -651,7 +651,7 @@ class AdminRestaUm {
                                 : `${(Math.trunc((p.pontosAcumulados || 0) * 100) / 100).toFixed(2)} pts`
                             }
                         </span>
-                        <span class="ru-participante-status ${p.status}">
+                        <span class="ru-participante-status ${escapeHtml(p.status)}">
                             ${p.status === 'vivo' ? 'VIVO' : p.status === 'campeao' ? 'CAMPEAO' : 'ELIMINADO'}
                         </span>
                         ${p.rodadaEliminacao ? `<span style="font-size:var(--app-font-xs);color:var(--app-text-muted);">R${p.rodadaEliminacao}</span>` : ''}
@@ -701,7 +701,7 @@ class AdminRestaUm {
                                 <span class="ru-timeline-pontos">${(Math.trunc((e.pontosRodada || 0) * 100) / 100).toFixed(2)}</span>
                                 <span class="ru-timeline-date">${e.dataEliminacao ? new Date(e.dataEliminacao).toLocaleDateString('pt-BR') : ''}</span>
                             </div>
-                            ${e.criterioDesempate ? `<div class="ru-timeline-desempate">Desempate: ${e.criterioDesempate}</div>` : ''}
+                            ${e.criterioDesempate ? `<div class="ru-timeline-desempate">Desempate: ${escapeHtml(e.criterioDesempate)}</div>` : ''}
                         `).join('')}
                     </div>
                 </div>
@@ -860,8 +860,8 @@ class AdminRestaUm {
         const terceiroHabilitado = document.getElementById('ruTerceiroHabilitado')?.checked !== false;
 
         const body = {
-            rodadaFinal: parseInt(document.getElementById('ruRodadaFinal')?.value) || undefined,
-            eliminadosPorRodada: parseInt(document.getElementById('ruEliminadosPorRodada')?.value) || undefined,
+            rodadaFinal: parseInt(document.getElementById('ruRodadaFinal')?.value, 10) || undefined,
+            eliminadosPorRodada: parseInt(document.getElementById('ruEliminadosPorRodada')?.value, 10) || undefined,
             protecaoPrimeiraRodada: document.getElementById('ruProtecao')?.checked || false,
             premiacao: {
                 campeao: parseFloat(document.getElementById('ruPremiacaoCampeao')?.value) || 100,
@@ -913,10 +913,10 @@ class AdminRestaUm {
     // ==========================================================================
 
     async criarEdicao() {
-        const edicao = parseInt(document.getElementById('ruNovaEdicao')?.value);
-        const rodadaInicial = parseInt(document.getElementById('ruRodadaInicial')?.value);
-        const rodadaFinal = parseInt(document.getElementById('ruRodadaFinal')?.value);
-        const eliminadosPorRodada = parseInt(document.getElementById('ruEliminadosPorRodada')?.value) || 1;
+        const edicao = parseInt(document.getElementById('ruNovaEdicao')?.value, 10);
+        const rodadaInicial = parseInt(document.getElementById('ruRodadaInicial')?.value, 10);
+        const rodadaFinal = parseInt(document.getElementById('ruRodadaFinal')?.value, 10);
+        const eliminadosPorRodada = parseInt(document.getElementById('ruEliminadosPorRodada')?.value, 10) || 1;
         const protecaoPrimeiraRodada = document.getElementById('ruProtecao')?.checked || false;
         const premiacaoCampeao = parseFloat(document.getElementById('ruPremiacaoCampeao')?.value) || 100;
         const viceHabilitado = document.getElementById('ruViceHabilitado')?.checked !== false;
