@@ -1294,9 +1294,12 @@ const ArtilheiroCampeao = {
             }
         });
 
-        document.addEventListener("keydown", (e) => {
-            if (e.key === "Escape") this.fecharModal();
-        });
+        if (!this._keydownRegistered) {
+            this._keydownRegistered = true;
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") this.fecharModal();
+            });
+        }
     },
 
     // ==============================
@@ -1335,7 +1338,7 @@ const ArtilheiroCampeao = {
 
         const msgEl = document.getElementById("artilheiroPremiacaoMsg");
         if (msgEl) {
-            msgEl.innerHTML = '<span style="color: #f59e0b;">⏳ Processando premiação...</span>';
+            msgEl.innerHTML = '<span style="color: #f59e0b;"><span class="material-icons" style="font-size:16px;vertical-align:middle;">hourglass_empty</span> Processando premiação...</span>';
         }
 
         try {
@@ -1351,12 +1354,12 @@ const ArtilheiroCampeao = {
 
             if (msgEl) {
                 const total = json.lancamentos?.length || 0;
-                msgEl.innerHTML = `<span style="color: #22c55e;">✅ Premiação consolidada! ${total} registro(s) lançados no extrato.</span>`;
+                msgEl.innerHTML = `<span style="color: #22c55e;"><span class="material-icons" style="font-size:16px;vertical-align:middle;">check_circle</span> Premiação consolidada! ${total} registro(s) lançados no extrato.</span>`;
             }
         } catch (err) {
             console.error("❌ [ARTILHEIRO] Erro ao consolidar premiação:", err);
             if (msgEl) {
-                msgEl.innerHTML = `<span style="color: #ef4444;">❌ ${err.message}</span>`;
+                msgEl.innerHTML = `<span style="color: #ef4444;"><span class="material-icons" style="font-size:16px;vertical-align:middle;">cancel</span> ${escapeHtml(err.message)}</span>`;
             }
         }
     },
