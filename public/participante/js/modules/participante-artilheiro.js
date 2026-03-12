@@ -35,6 +35,9 @@ let _currentParticipante = null;
 // ✅ v4.2: AbortController para cleanup de event listeners do pull-to-refresh
 let _pullToRefreshAbortController = null;
 
+// ✅ v4.3: Guard contra dupla-subscrição MatchdayService em navegação SPA
+let _matchdaySubscribed = false;
+
 export async function inicializarArtilheiroParticipante({
     participante,
     ligaId,
@@ -446,7 +449,7 @@ function _resumoRodadasCompacto(detalhePorRodada) {
         .map(r => {
             const goleadores = r.jogadores
                 .filter(j => j.gols > 0)
-                .map(j => j.gols > 1 ? _nomeCompacto(j.nome) + '(' + j.gols + ')' : _nomeCompacto(j.nome));
+                .map(j => j.gols > 1 ? escapeHtml(_nomeCompacto(j.nome)) + '(' + j.gols + ')' : escapeHtml(_nomeCompacto(j.nome)));
             const saldo = (r.golsPro || 0) - (r.golsContra || 0);
             return { rodada: r.rodada, goleadores, saldo, gp: r.golsPro || 0 };
         });
@@ -1096,6 +1099,8 @@ let _matchdayStopHandler = null;
 
 function _subscribeMatchdayEvents() {
     if (!window.MatchdayService) return;
+    if (_matchdaySubscribed) return;
+    _matchdaySubscribed = true;
 
     let _parciaisDebounceTimer = null;
 
@@ -1177,6 +1182,7 @@ export function destruirArtilheiroParticipante() {
     estadoArtilheiro.modeLive = false;
     _matchdayParciaisHandler = null;
     _matchdayStopHandler = null;
+    _matchdaySubscribed = false;
 
     // Limpar refs
     _currentLigaId = null;
