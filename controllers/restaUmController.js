@@ -26,12 +26,13 @@ async function _verificarRodadaAoVivo(rodadaEsperada) {
         const state = await OrchestratorState.findOne({ chave: 'round_market_orchestrator' })
             .select('status_mercado rodada_atual')
             .lean();
-        if (!state) return { rodadaLive: null, isLive: false };
-        const isLive = state.status_mercado === 2 && state.rodada_atual === rodadaEsperada;
-        return { rodadaLive: state.rodada_atual, isLive };
+        if (!state) return { rodadaLive: null, isLive: false, isMarketClosed: false };
+        const isMarketClosed = state.status_mercado === 2;
+        const isLive = isMarketClosed && state.rodada_atual === rodadaEsperada;
+        return { rodadaLive: state.rodada_atual, isLive, isMarketClosed };
     } catch (err) {
         logger.warn('[RESTA-UM] Não foi possível verificar estado do mercado:', err.message);
-        return { rodadaLive: null, isLive: false };
+        return { rodadaLive: null, isLive: false, isMarketClosed: false };
     }
 }
 
@@ -167,13 +168,18 @@ export async function obterStatus(req, res) {
         let pontosLiveMap = new Map();
         let isLive = false;
         const rodadaRef = edicao.rodadaAtual || edicao.rodadaInicial;
+        let rodadaEfetiva = rodadaRef; // pode ser sobrescrita pelo round real do orchestrator
 
         if (rodadaRef && (edicao.status === 'em_andamento' || edicao.status === 'pendente')) {
-            const { isLive: mercadoLive } = await _verificarRodadaAoVivo(rodadaRef);
+            const { isLive: mercadoLive, rodadaLive, isMarketClosed } = await _verificarRodadaAoVivo(rodadaRef);
 
-            if (mercadoLive) {
-                // Rodada realmente ao vivo: preferir Rodada collection (já populada pelo orchestrator)
-                const rodadasLive = await Rodada.find({ ligaId, rodada: rodadaRef, temporada }).lean();
+            // Quando mercado fechado mas rodadaAtual no DB está desatualizada (null ou round antigo),
+            // usar rodadaLive do orchestrator como fonte de verdade do round atual
+            if (isMarketClosed && rodadaLive) rodadaEfetiva = rodadaLive;
+
+            if (isMarketClosed && rodadaLive) {
+                // Mercado fechado = rodada em andamento: buscar pelo round real do orchestrator
+                const rodadasLive = await Rodada.find({ ligaId, rodada: rodadaEfetiva, temporada }).lean();
                 if (rodadasLive.length > 0) {
                     isLive = true;
                     rodadasLive.forEach(r => pontosLiveMap.set(String(r.timeId), r.pontos || 0));
@@ -227,11 +233,11 @@ export async function obterStatus(req, res) {
                 status: edicao.status,
                 rodadaInicial: edicao.rodadaInicial,
                 rodadaFinal: edicao.rodadaFinal,
-                rodadaAtual: rodadaRef || null,
+                rodadaAtual: rodadaEfetiva || null,
                 eliminadosPorRodada: edicao.eliminadosPorRodada,
             },
             participantes: [...vivos, ...eliminados],
-            rodadaAtual: rodadaRef || null,
+            rodadaAtual: rodadaEfetiva || null,
             historicoEliminacoes: edicao.historicoEliminacoes || [],
             premiacao: {
                 campeao: edicao.premiacao?.campeao || 0,
@@ -418,20 +424,23 @@ export async function obterParciais(req, res) {
         }
 
         // ✅ Live Experience: detectar ao vivo via orchestrator_states, depois buscar pontos
-        const rodadaParaBuscar = edicao.rodadaAtual || edicao.rodadaInicial;
+        const rodadaRef = edicao.rodadaAtual || edicao.rodadaInicial;
         let pontosLiveMap = new Map();
         let isLive = false;
+        let rodadaEfetiva = rodadaRef;
 
-        if (rodadaParaBuscar) {
-            const { isLive: mercadoLive } = await _verificarRodadaAoVivo(rodadaParaBuscar);
+        if (rodadaRef) {
+            const { rodadaLive, isMarketClosed } = await _verificarRodadaAoVivo(rodadaRef);
 
-            if (mercadoLive) {
-                // Ao vivo: preferir Rodada collection; fallback parciais se ainda sem dados
-                const rodadasLive = await Rodada.find({ ligaId, rodada: rodadaParaBuscar, temporada }).lean();
+            if (isMarketClosed && rodadaLive) rodadaEfetiva = rodadaLive;
+
+            if (isMarketClosed && rodadaLive) {
+                // Ao vivo: buscar pelo round real do orchestrator; fallback parciais se sem dados
+                const rodadasLive = await Rodada.find({ ligaId, rodada: rodadaEfetiva, temporada }).lean();
                 if (rodadasLive.length > 0) {
                     isLive = true;
                     rodadasLive.forEach(r => pontosLiveMap.set(String(r.timeId), r.pontos || 0));
-                } else if (edicao.rodadaAtual) {
+                } else {
                     const fb = await _buscarPontosViaParciais(ligaId);
                     if (fb.isLive) {
                         isLive = true;
@@ -440,7 +449,7 @@ export async function obterParciais(req, res) {
                 }
             } else {
                 // Não ao vivo: carregar pontos históricos para exibição (isLive=false)
-                const rodadasHist = await Rodada.find({ ligaId, rodada: rodadaParaBuscar, temporada }).lean();
+                const rodadasHist = await Rodada.find({ ligaId, rodada: rodadaRef, temporada }).lean();
                 rodadasHist.forEach(r => pontosLiveMap.set(String(r.timeId), r.pontos || 0));
             }
         }
@@ -489,11 +498,11 @@ export async function obterParciais(req, res) {
                 id: edicao.edicao,
                 nome: edicao.nome,
                 status: edicao.status,
-                rodadaAtual: rodadaParaBuscar,
+                rodadaAtual: rodadaEfetiva,
                 eliminadosPorRodada: edicao.eliminadosPorRodada,
             },
             participantes: [...vivos, ...eliminados],
-            rodadaAtual: rodadaParaBuscar,
+            rodadaAtual: rodadaEfetiva,
             ultimaAtualizacao: edicao.ultima_atualizacao,
         });
 
