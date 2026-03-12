@@ -229,10 +229,17 @@ async function carregarRanking() {
 // =============================================
 // RENDER: RANKING
 // =============================================
+
+// Cache de participantes para o modal de histórico — evita JSON.stringify inline (XSS)
+// Atualizado a cada render via window._capitaoRankingCache para acesso em onclick inline
+let _capitaoRankingCache = [];
+
 function renderizarRanking(ranking) {
     const container = document.getElementById('capitaoContent');
     if (!container) return;
 
+    _capitaoRankingCache = ranking;
+    window._capitaoRankingCache = ranking; // sync para handlers onclick inline
     let html = '';
 
     ranking.forEach((participante, index) => {
@@ -241,8 +248,8 @@ function renderizarRanking(ranking) {
         const isPodium1 = posicao === 1;
 
         const escudoSrc = participante.escudo || `/escudos/${participante.clube_id || 'default'}.png`;
-        const pontos = typeof truncarPontos === 'function' ? truncarPontos(participante.pontuacao_total || 0) : (participante.pontuacao_total || 0).toFixed(2);
-        const media = typeof truncarPontos === 'function' ? truncarPontos(participante.media_capitao || 0) : (participante.media_capitao || 0).toFixed(2);
+        const pontos = typeof truncarPontos === 'function' ? truncarPontos(participante.pontuacao_total || 0) : (Math.trunc((participante.pontuacao_total || 0) * 100) / 100).toFixed(2);
+        const media = typeof truncarPontos === 'function' ? truncarPontos(participante.media_capitao || 0) : (Math.trunc((participante.media_capitao || 0) * 100) / 100).toFixed(2);
 
         const cardClasses = [
             'capitao-card',
@@ -267,10 +274,9 @@ function renderizarRanking(ranking) {
         // Botão Ver Histórico (somente se tiver dados)
         let btnHistoricoHtml = '';
         if (historico.length > 0) {
-            const participanteJson = JSON.stringify(participante).replace(/"/g, '&quot;');
             btnHistoricoHtml = `
                 <button class="btn-ver-historico-app"
-                        onclick='window._abrirHistoricoCapitao(${participanteJson})'
+                        onclick="window._abrirHistoricoCapitao(window._capitaoRankingCache[${index}])"
                         aria-label="Ver histórico completo">
                     <span class="material-icons" style="font-size: 14px;">history</span>
                     ${rodadasJogadas}/${totalRodadas} rodadas
@@ -279,7 +285,7 @@ function renderizarRanking(ranking) {
         }
 
         html += `
-            <div class="${cardClasses}" onclick='${historico.length > 0 ? `window._abrirHistoricoCapitao(${JSON.stringify(participante).replace(/"/g, '&quot;')})` : ''}'>
+            <div class="${cardClasses}" onclick="${historico.length > 0 ? `window._abrirHistoricoCapitao(window._capitaoRankingCache[${index}])` : ''}">
                 <div class="capitao-posicao">${posicaoIcon}</div>
                 <img src="${escudoSrc}" class="capitao-escudo" alt=""
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'">
@@ -321,16 +327,16 @@ function renderizarCardDesempenho(ranking) {
     if (!meusDados) return;
 
     const posicao = meusDados.posicao_final || (ranking.indexOf(meusDados) + 1);
-    const pontos = typeof truncarPontos === 'function' ? truncarPontos(meusDados.pontuacao_total || 0) : (meusDados.pontuacao_total || 0).toFixed(2);
-    const media = typeof truncarPontos === 'function' ? truncarPontos(meusDados.media_capitao || 0) : (meusDados.media_capitao || 0).toFixed(2);
+    const pontos = typeof truncarPontos === 'function' ? truncarPontos(meusDados.pontuacao_total || 0) : (Math.trunc((meusDados.pontuacao_total || 0) * 100) / 100).toFixed(2);
+    const media = typeof truncarPontos === 'function' ? truncarPontos(meusDados.media_capitao || 0) : (Math.trunc((meusDados.media_capitao || 0) * 100) / 100).toFixed(2);
     const rodadas = meusDados.rodadas_jogadas || 0;
     const melhor = meusDados.melhor_capitao;
     const pior = meusDados.pior_capitao;
     const distintos = meusDados.capitaes_distintos || 0;
 
     // Extrair HTML nested para evitar backtick nesting (causa SyntaxError)
-    const melhorPts = melhor ? (typeof truncarPontos === 'function' ? truncarPontos(melhor.pontuacao || 0) : (melhor.pontuacao || 0).toFixed(2)) : '';
-    const piorPts = pior ? (typeof truncarPontos === 'function' ? truncarPontos(pior.pontuacao || 0) : (pior.pontuacao || 0).toFixed(2)) : '';
+    const melhorPts = melhor ? (typeof truncarPontos === 'function' ? truncarPontos(melhor.pontuacao || 0) : (Math.trunc((melhor.pontuacao || 0) * 100) / 100).toFixed(2)) : '';
+    const piorPts = pior ? (typeof truncarPontos === 'function' ? truncarPontos(pior.pontuacao || 0) : (Math.trunc((pior.pontuacao || 0) * 100) / 100).toFixed(2)) : '';
 
     let melhorPiorHtml = '';
     if (melhor) {
@@ -391,7 +397,7 @@ function renderizarCardDesempenho(ranking) {
 const MAX_CHIPS_VISIBLE = 5;
 
 function _renderChipHtml(r) {
-    const pts = (r.pontuacao || 0).toFixed(1);
+    const pts = (Math.trunc((r.pontuacao || 0) * 10) / 10).toFixed(1);
     const isParcial = r.parcial === true;
     const corPts = r.pontuacao >= 10 ? 'var(--app-success-light)' : r.pontuacao >= 5 ? '#fbbf24' : r.pontuacao < 0 ? 'var(--app-danger)' : '#9ca3af';
 

@@ -359,6 +359,7 @@ class AdminCapitao {
                 body: JSON.stringify({ rodadaFinal, temporada: new Date().getFullYear() }),
             });
 
+            if (!res.ok) throw new Error(`Erro ${res.status}`);
             const data = await res.json();
 
             if (data.success) {
