@@ -40,6 +40,17 @@ import path from "path";
 dotenv.config();
 
 // =========================================================================
+// 🛡️ HANDLERS GLOBAIS DE ERRO (prevenir crash silencioso)
+// =========================================================================
+process.on('uncaughtException', (err) => {
+    console.error('[FATAL] uncaughtException:', err.message, err.stack);
+});
+
+process.on('unhandledRejection', (reason) => {
+    console.error('[FATAL] unhandledRejection:', reason);
+});
+
+// =========================================================================
 // 🔇 SILENCIAMENTO DE LOGS EM PRODUÇÃO
 // =========================================================================
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';

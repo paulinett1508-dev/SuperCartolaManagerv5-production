@@ -200,7 +200,11 @@ class RoundMarketOrchestrator extends EventEmitter {
 
         if (this._pollInterval) clearInterval(this._pollInterval);
 
-        this._pollInterval = setInterval(() => this._verificarMercado(), intervalo);
+        this._pollInterval = setInterval(() => {
+            this._verificarMercado().catch(err => {
+                console.error('[ORCHESTRATOR] Erro no polling:', err.message);
+            });
+        }, intervalo);
         console.log(`[ORCHESTRATOR] ⏰ Polling configurado: ${intervalo / 1000}s`);
     }
 
@@ -242,10 +246,14 @@ class RoundMarketOrchestrator extends EventEmitter {
 
         } catch (error) {
             console.error('[ORCHESTRATOR] ❌ Erro ao verificar mercado:', error.message);
-            await OrchestratorState.registrarEvento({
-                tipo: 'erro_poll',
-                detalhes: { erro: error.message },
-            });
+            try {
+                await OrchestratorState.registrarEvento({
+                    tipo: 'erro_poll',
+                    detalhes: { erro: error.message },
+                });
+            } catch (dbErr) {
+                console.error('[ORCHESTRATOR] ❌ Falha ao registrar evento de erro:', dbErr.message);
+            }
         }
     }
 
@@ -406,8 +414,10 @@ class RoundMarketOrchestrator extends EventEmitter {
 
         console.log(`[ORCHESTRATOR] 📡 Live updates ativados (cada ${POLL_LIVE_UPDATE / 1000}s)`);
 
-        this._liveInterval = setInterval(async () => {
-            await this._executarLiveUpdate();
+        this._liveInterval = setInterval(() => {
+            this._executarLiveUpdate().catch(err => {
+                console.error('[ORCHESTRATOR] Erro no live update interval:', err.message);
+            });
         }, POLL_LIVE_UPDATE);
     }
 
@@ -420,22 +430,26 @@ class RoundMarketOrchestrator extends EventEmitter {
     }
 
     async _executarLiveUpdate() {
-        if (this._statusMercado !== MARKET_STATUS.FECHADO) return;
+        try {
+            if (this._statusMercado !== MARKET_STATUS.FECHADO) return;
 
-        const contexto = this._criarContexto(this._rodadaAtual);
-        const ligas = await this._getligasAtivas();
+            const contexto = this._criarContexto(this._rodadaAtual);
+            const ligas = await this._getligasAtivas();
 
-        // Buscar resultados do Brasileirao uma vez (compartilhado entre ligas)
-        const resultadosBrasileirao = await this._buscarResultadosBrasileirao(this._rodadaAtual);
+            // Buscar resultados do Brasileirao uma vez (compartilhado entre ligas)
+            const resultadosBrasileirao = await this._buscarResultadosBrasileirao(this._rodadaAtual);
 
-        for (const liga of ligas) {
-            const ctx = { ...contexto, liga, ligaId: liga._id.toString(), resultadosBrasileirao };
+            for (const liga of ligas) {
+                const ctx = { ...contexto, liga, ligaId: liga._id.toString(), resultadosBrasileirao };
 
-            for (const manager of this._managers) {
-                if (manager.isEnabled(liga) && manager.temColeta) {
-                    await manager.executarHook('onLiveUpdate', ctx);
+                for (const manager of this._managers) {
+                    if (manager.isEnabled(liga) && manager.temColeta) {
+                        await manager.executarHook('onLiveUpdate', ctx);
+                    }
                 }
             }
+        } catch (error) {
+            console.error('[ORCHESTRATOR] Erro no live update:', error.message);
         }
     }
 
