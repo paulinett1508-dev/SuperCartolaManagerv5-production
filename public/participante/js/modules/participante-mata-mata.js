@@ -81,7 +81,7 @@ function getFaseAtual(edicaoId) {
 
   let ultimaLiberada = null;
   for (let idx = 0; idx < fasesAtivas.length; idx++) {
-    if (estado.rodadaAtual > config.rodadaInicial + idx) {
+    if (estado.rodadaAtual >= config.rodadaInicial + idx) {
       ultimaLiberada = fasesAtivas[idx];
     }
   }
@@ -792,7 +792,7 @@ function atualizarNavegacaoFases() {
       let isDisabled = false;
       if (edicaoConfig && estado.rodadaAtual > 0) {
         const rodadaDaFase = edicaoConfig.rodadaInicial + idx;
-        isDisabled = estado.rodadaAtual <= rodadaDaFase;
+        isDisabled = estado.rodadaAtual < rodadaDaFase;
       }
       const disabledClass = isDisabled ? ' disabled' : '';
       const lockIcon = isDisabled ? ' 🔒' : '';
@@ -807,7 +807,7 @@ function atualizarNavegacaoFases() {
   // Definir primeira fase como selecionada se não houver ou se está bloqueada
   const fasesLiberadas = fasesAtivas.filter((fase, idx) => {
     if (!edicaoConfig || estado.rodadaAtual <= 0) return true;
-    return estado.rodadaAtual > edicaoConfig.rodadaInicial + idx;
+    return estado.rodadaAtual >= edicaoConfig.rodadaInicial + idx;
   });
 
   if (!estado.faseSelecionada || !fasesLiberadas.includes(estado.faseSelecionada)) {
