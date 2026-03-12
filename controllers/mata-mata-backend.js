@@ -474,10 +474,10 @@ async function calcularResultadosEdicao(ligaId, edicao, rodadaAtual, config) {
         for (const fase of fases) {
             const rodadaPontosNum = rodadasFases[fase];
 
-            // Verificar se rodada já foi concluída
-            if (rodadaPontosNum >= rodadaAtual) {
+            // Verificar se rodada ainda não chegou (fase futura)
+            if (rodadaPontosNum > rodadaAtual) {
                 logger.log(
-                    `[MATA-BACKEND] Fase ${fase} (R${rodadaPontosNum}) ainda não concluída`,
+                    `[MATA-BACKEND] Fase ${fase} (R${rodadaPontosNum}) ainda não chegou`,
                 );
                 break;
             }
