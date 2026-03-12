@@ -635,14 +635,33 @@ async function renderRodada(rodadaNum) {
         jogos,
       );
       pontuacoesMap = resultado.pontuacoesMap;
-    } else if (isRodadaAoVivo && window.ParciaisModule?.obterDados) {
-      // Usar parciais ao vivo quando disponíveis
-      const dadosParciais = window.ParciaisModule.obterDados();
-      if (dadosParciais?.participantes?.length > 0) {
-        dadosParciais.participantes.forEach(p => {
-          pontuacoesMap[String(p.timeId)] = p.pontos || 0;
-        });
-        console.log(`[PONTOS-CORRIDOS-ORQUESTRADOR] 🔴 PARCIAL R${rodadaNum}: usando ${Object.keys(pontuacoesMap).length} times do ParciaisModule`);
+    } else if (isRodadaAoVivo) {
+      // Usar parciais ao vivo — priorizar ParciaisModule (app participante), senão API
+      if (window.ParciaisModule?.obterDados) {
+        const dadosParciais = window.ParciaisModule.obterDados();
+        if (dadosParciais?.participantes?.length > 0) {
+          dadosParciais.participantes.forEach(p => {
+            pontuacoesMap[String(p.timeId)] = p.pontos || 0;
+          });
+          console.log(`[PONTOS-CORRIDOS-ORQUESTRADOR] 🔴 PARCIAL R${rodadaNum}: usando ${Object.keys(pontuacoesMap).length} times do ParciaisModule`);
+        }
+      }
+      // Fallback: buscar parciais via API (painel admin)
+      if (Object.keys(pontuacoesMap).length === 0) {
+        try {
+          const resp = await fetch(`/api/matchday/parciais/${estadoOrquestrador.ligaId}`);
+          if (resp.ok) {
+            const parciais = await resp.json();
+            if (parciais?.disponivel && Array.isArray(parciais.ranking)) {
+              parciais.ranking.forEach(p => {
+                pontuacoesMap[String(p.timeId)] = p.pontos_rodada_atual ?? p.pontos ?? 0;
+              });
+              console.log(`[PONTOS-CORRIDOS-ORQUESTRADOR] 🔴 PARCIAL R${rodadaNum}: usando ${Object.keys(pontuacoesMap).length} times via API matchday`);
+            }
+          }
+        } catch (err) {
+          console.warn(`[PONTOS-CORRIDOS-ORQUESTRADOR] ⚠️ Falha ao buscar parciais via API:`, err.message);
+        }
       }
     }
 
