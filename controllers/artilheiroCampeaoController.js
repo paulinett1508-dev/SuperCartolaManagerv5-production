@@ -265,7 +265,7 @@ class ArtilheiroCampeaoController {
                 logger.warn(`[ARTILHEIRO] Erro ao buscar criterio_ranking:`, e.message);
             }
 
-            const rodadaInicio = inicio ? parseInt(inicio) : 1;
+            const rodadaInicio = inicio ? parseInt(inicio, 10) : 1;
 
             // ✅ v4.4: Detectar status do mercado COM temporada encerrada
             const statusMercado =
@@ -281,7 +281,7 @@ class ArtilheiroCampeaoController {
             // ✅ v4.5: LÓGICA CORRETA DE RODADA FIM
             let rodadaFim;
             if (fim) {
-                rodadaFim = parseInt(fim);
+                rodadaFim = parseInt(fim, 10);
                 if (mercadoAberto && rodadaFim >= rodadaAtual && rodadaAtual < RODADA_FINAL) {
                     rodadaFim = rodadaAtual - 1;
                     logger.log(
@@ -441,7 +441,7 @@ class ArtilheiroCampeaoController {
             }
 
             // 6. Buscar status de participa\u00e7\u00e3o (ativos/inativos)
-            const statusParticipantes = await buscarStatusParticipantes(ligaId, CURRENT_SEASON);
+            const statusParticipantes = await buscarStatusParticipantes(participantes.map(p => p.timeId));
 
             // 7. Para cada participante, combinar hist\u00f3rico consolidado + live da rodada atual
             const RODADA_FINAL = statusMercado.rodadaTotal || SEASON_CONFIG.rodadaFinal || 38;
@@ -483,8 +483,8 @@ class ArtilheiroCampeaoController {
                         const saldoTotal = golsProTotal - golsContraTotal;
 
                         // 7d. Status do participante (ativo/inativo)
-                        const statusP = statusParticipantes.find(s => s.timeId === p.timeId);
-                        const ativo = statusP ? statusP.ativo : (p.ativo !== false);
+                        const statusP = statusParticipantes[String(p.timeId)];
+                        const ativo = statusP ? statusP.ativo !== false : (p.ativo !== false);
                         const rodada_desistencia = statusP?.rodada_desistencia || null;
 
                         return {
@@ -1270,7 +1270,7 @@ class ArtilheiroCampeaoController {
 
             const rodadas = await GolsConsolidados.find({
                 ligaId,
-                timeId: parseInt(timeId),
+                timeId: parseInt(timeId, 10),
                 temporada: CURRENT_SEASON,
             })
                 .sort({ rodada: 1 })
@@ -1287,7 +1287,7 @@ class ArtilheiroCampeaoController {
 
             res.json({
                 success: true,
-                timeId: parseInt(timeId),
+                timeId: parseInt(timeId, 10),
                 totais: {
                     ...totais,
                     saldo: totais.golsPro - totais.golsContra,

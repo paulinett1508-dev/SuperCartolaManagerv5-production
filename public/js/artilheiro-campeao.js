@@ -435,7 +435,7 @@ const ArtilheiroCampeao = {
 
         // ✅ v4.4.1: Se temporada encerrada, mostrar CAMPEÃO ao invés de POSSÍVEL
         const liderLabel = temporadaEncerrada
-            ? "🏆 ARTILHEIRO CAMPEÃO"
+            ? '<span class="material-icons" style="font-size:14px;vertical-align:middle;color:#1a1a2e;">emoji_events</span> ARTILHEIRO CAMPEÃO'
             : "POSSÍVEL ARTILHEIRO";
 
         bannerContainer.innerHTML = `
@@ -451,7 +451,7 @@ const ArtilheiroCampeao = {
                             ? `
                         <div class="banner-lider ${temporadaEncerrada ? "campeao" : ""}">
                             <span class="lider-label">${liderLabel}</span>
-                            <span class="lider-nome">${liderNome} (${liderGols} gols)</span>
+                            <span class="lider-nome">${escapeHtml(liderNome)} (${liderGols} gols)</span>
                         </div>
                     `
                             : ""
@@ -1287,7 +1287,7 @@ const ArtilheiroCampeao = {
             const celula = e.target.closest(".col-rodada-gols.clicavel");
             if (celula) {
                 const timeId = celula.dataset.time;
-                const rodada = parseInt(celula.dataset.rodada);
+                const rodada = parseInt(celula.dataset.rodada, 10);
                 if (timeId && rodada) {
                     this.mostrarModalRodada(timeId, rodada);
                 }
@@ -1318,9 +1318,9 @@ const ArtilheiroCampeao = {
             const elParticipantes = document.getElementById("adminStatParticipantes");
 
             if (elRegistros) elRegistros.textContent = stats.totalRegistros ?? "-";
-            if (elConsolidados) elConsolidados.textContent = stats.rodadasConsolidadas ?? "-";
-            if (elParciais) elParciais.textContent = stats.rodadasParciais ?? "-";
-            if (elParticipantes) elParticipantes.textContent = stats.totalParticipantes ?? "-";
+            if (elConsolidados) elConsolidados.textContent = stats.registrosConsolidados ?? "-";
+            if (elParciais) elParciais.textContent = stats.registrosParciais ?? "-";
+            if (elParticipantes) elParticipantes.textContent = stats.participantes ?? "-";
         } catch (err) {
             console.error("❌ [ARTILHEIRO] Erro ao carregar estatísticas admin:", err);
         }
@@ -1350,7 +1350,7 @@ const ArtilheiroCampeao = {
             }
 
             if (msgEl) {
-                const total = json.data?.totalPremiacoes || 0;
+                const total = json.lancamentos?.length || 0;
                 msgEl.innerHTML = `<span style="color: #22c55e;">✅ Premiação consolidada! ${total} registro(s) lançados no extrato.</span>`;
             }
         } catch (err) {
