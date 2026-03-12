@@ -196,35 +196,32 @@ export async function carregarDadosRodada(rodadaSelecionada) {
     mostrarLoading(true);
     limparExportContainer();
 
-    // ✅ v3.0 FIX: SEMPRE tentar carregar dados históricos primeiro
-    // Dados de temporadas passadas são IMUTÁVEIS e devem sempre ser exibidos
-    // Só mostrar "rodada não aconteceu" se realmente não houver dados
-    const dadosHistoricos = await fetchAndProcessRankingRodada(ligaIdAtual, rodadaSelecionada);
-
-    if (dadosHistoricos && Array.isArray(dadosHistoricos) && dadosHistoricos.length > 0) {
-      // ✅ Dados encontrados - exibir independente do status do mercado
-      console.log(`[RODADAS-ORQUESTRADOR] ✅ Dados históricos encontrados: ${dadosHistoricos.length} participantes`);
-      await exibirRanking(dadosHistoricos, rodadaSelecionada, ligaIdAtual);
-      const btnRefresh = document.getElementById("btnRefreshParciais");
-      if (btnRefresh) btnRefresh.style.display = "none";
-    } else if (rodadaConsolidada) {
-      // Rodada marcada como consolidada mas sem dados - exibir mensagem
-      mostrarMensagemRodada("Nenhum dado encontrado para esta rodada.", "info");
-    } else if (rodadaSelecionada === rodada_atual) {
-      if (mercadoAberto) {
-        mostrarMensagemRodada(
-          "O mercado está aberto. A rodada ainda não começou!",
-          "info",
-        );
-      } else {
-        // Rodada em andamento (jogos acontecendo)
-        await carregarRodadaParciais(rodadaSelecionada);
-      }
-    } else if (rodadaSelecionada > rodada_atual) {
-      mostrarMensagemRodada("Esta rodada ainda não aconteceu.", "aviso");
+    // ✅ v3.1 FIX: Rodada atual com mercado fechado = PARCIAIS (prioridade máxima)
+    // Deve buscar dados ao vivo da API Cartola, não dados históricos do DB
+    if (rodadaSelecionada === rodada_atual && !mercadoAberto) {
+      console.log(`[RODADAS-ORQUESTRADOR] 🔴 Rodada ${rodadaSelecionada} em andamento — carregando parciais`);
+      await carregarRodadaParciais(rodadaSelecionada);
+    } else if (rodadaSelecionada === rodada_atual && mercadoAberto) {
+      mostrarMensagemRodada(
+        "O mercado está aberto. A rodada ainda não começou!",
+        "info",
+      );
     } else {
-      // Fallback: sem dados
-      mostrarMensagemRodada("Nenhum dado disponível.", "aviso");
+      // ✅ v3.0: Dados históricos (rodadas passadas ou temporadas anteriores)
+      const dadosHistoricos = await fetchAndProcessRankingRodada(ligaIdAtual, rodadaSelecionada);
+
+      if (dadosHistoricos && Array.isArray(dadosHistoricos) && dadosHistoricos.length > 0) {
+        console.log(`[RODADAS-ORQUESTRADOR] ✅ Dados históricos encontrados: ${dadosHistoricos.length} participantes`);
+        await exibirRanking(dadosHistoricos, rodadaSelecionada, ligaIdAtual);
+        const btnRefresh = document.getElementById("btnRefreshParciais");
+        if (btnRefresh) btnRefresh.style.display = "none";
+      } else if (rodadaConsolidada) {
+        mostrarMensagemRodada("Nenhum dado encontrado para esta rodada.", "info");
+      } else if (rodadaSelecionada > rodada_atual) {
+        mostrarMensagemRodada("Esta rodada ainda não aconteceu.", "aviso");
+      } else {
+        mostrarMensagemRodada("Nenhum dado disponível.", "aviso");
+      }
     }
   } catch (err) {
     console.error("[RODADAS-ORQUESTRADOR] Erro em carregarDadosRodada:", err);
