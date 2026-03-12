@@ -522,8 +522,8 @@
 .module-loading-overlay {
     position: fixed;
     top: 0;
-    left: 0;
-    width: 100%;
+    left: var(--sidebar-width, 280px);
+    width: calc(100% - var(--sidebar-width, 280px));
     height: 100%;
     background: rgba(0, 0, 0, 0.95);
     backdrop-filter: blur(12px);
@@ -534,6 +534,13 @@
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+/* Sidebar colapsado: overlay ajusta posição */
+.sidebar-collapsed ~ .module-loading-overlay,
+body:has(.sidebar-collapsed) .module-loading-overlay {
+    left: 80px;
+    width: calc(100% - 80px);
 }
 
 .module-loading-overlay.active {
