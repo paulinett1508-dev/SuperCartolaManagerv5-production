@@ -1343,7 +1343,7 @@ function renderCardRanking() {
                 <div class="wh-card-icon">
                     <span class="material-icons">leaderboard</span>
                 </div>
-                <span class="wh-card-title">Ranking</span>
+                <span class="wh-card-title">Ranking da Rodada</span>
                 ${isLive ? '<span class="wh-card-badge wh-card-badge--live"><span class="material-icons" style="font-size:8px">sensors</span> LIVE</span>' : ''}
             </div>
             <div class="wh-card-metric">#${pos} <span style="font-size:var(--app-font-xs);color:var(--app-text-muted)">de ${ranking.length}</span></div>
