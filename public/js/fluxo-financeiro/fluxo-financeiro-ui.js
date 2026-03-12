@@ -181,6 +181,8 @@ export class FluxoFinanceiroUI {
                 await window.forcarRefreshExtrato(timeId);
             }
         };
+        // ✅ v9.1: Alias para botão sync do hero card (extrato-render-v2.js)
+        window.refreshExtratoModal = window.atualizarExtratoModal;
 
         // ✅ v7.3: Removido seletor de temporadas - extrato segue temporada da aba atual
         // A temporada do modal é sempre window.temporadaAtual (definida pela aba selecionada)
