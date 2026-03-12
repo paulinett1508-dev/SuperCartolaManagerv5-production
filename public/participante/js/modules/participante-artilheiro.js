@@ -16,6 +16,16 @@ import { RODADA_FINAL_CAMPEONATO } from "/js/config/seasons-client.js";
 // ✅ v4.0: RODADA_FINAL dinâmico - obtido da API, fallback centralizado
 let RODADA_FINAL = RODADA_FINAL_CAMPEONATO;
 
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 // Estado do módulo
 let estadoArtilheiro = {
     temporadaEncerrada: false,
