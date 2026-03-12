@@ -409,6 +409,64 @@ Audite o cache do participante app usando o Cache Auditor skill
 
 ---
 
-**Última atualização:** 05/02/2026
-**Versão:** 1.0.0
+## Estrategias de Cache — Referencia Teorica (Novo - agnostic-core)
+
+Referencia rapida para decisoes de cache no projeto.
+
+### Quando Usar Cache
+
+| Cenario | Aplicar Cache? | Exemplo no Projeto |
+|---------|---------------|-------------------|
+| Dados lidos com frequencia, mudam raramente | SIM | Config de liga, regras, modulos ativos |
+| Respostas de APIs externas | SIM | API Cartola (rodadas, mercado, atletas) |
+| Computacoes pesadas deterministicas | SIM | Rankings, pontos corridos, extrato |
+| Dados financeiros em operacao | NAO | Saldo durante transacao (usar banco) |
+| Dados com requisito estrito de consistencia | NAO | Contagem de votos, resultados finais |
+
+### Estrategias Aplicadas no Projeto
+
+| Estrategia | Descricao | Uso no SuperCartola |
+|------------|-----------|---------------------|
+| **Cache-Aside** | App busca no cache; se miss, busca no DB e preenche cache | NodeCache backend (rankings, rodadas) |
+| **TTL-Based** | Cache expira apos tempo definido | Rodadas 5min, Rankings 10min, Configs 30min |
+| **Event-Driven Invalidation** | Cache limpo quando evento ocorre | `cache-invalidator.js` — invalida cascata |
+| **Stale-While-Revalidate** | Serve cache stale enquanto atualiza em background | Service Worker (participante PWA) |
+
+### TTLs Padrao (CLAUDE.md)
+
+| Tipo de Dado | TTL | Justificativa |
+|-------------|-----|---------------|
+| Rodadas | 5 min | Dados mudam durante jogos |
+| Rankings | 10 min | Derivado de rodadas |
+| Configs | 30 min | Mudam raramente |
+| Mercado (API Cartola) | 5 min | Status muda periodicamente |
+| Atletas (API Cartola) | 15 min | Escalacoes mudam no dia do jogo |
+
+### Armadilhas Comuns
+
+| Armadilha | Problema | Solucao |
+|-----------|----------|---------|
+| Cache como fonte de verdade | Dado incorreto servido se cache corrompido | Banco SEMPRE prevalece; endpoint de recalculo |
+| Thundering herd | Multiplos requests rebuildam cache ao mesmo tempo | Lock no rebuild; stale-while-revalidate |
+| Cache sem TTL | Nunca expira, dado stale permanente | SEMPRE definir TTL explicito |
+| Invalidacao em cascata falha | Cache de extrato nao atualiza quando ranking muda | Mapear dependencias em cache-invalidator.js |
+| Cache por modulo sem liga_id | Dados de uma liga poluem cache de outra | TODA chave de cache inclui liga_id |
+
+### Comandos Uteis
+
+```bash
+# Verificar TTLs configurados no projeto
+grep -rn "ttl\|TTL\|maxAge\|max_age" --include="*.js" utils/ services/ config/ | grep -v node_modules
+
+# Verificar chaves de cache sem liga_id
+grep -rn "cache\.set\|cache\.get\|cacheKey" --include="*.js" . | grep -v "liga\|ligaId" | grep -v node_modules
+
+# Verificar invalidacao configurada
+grep -rn "invalidat\|clearCache\|flushCache" --include="*.js" utils/ services/
+```
+
+---
+
+**Ultima atualizacao:** 2026-03-12
+**Versao:** 2.0.0 (Enriquecido com estrategias de cache do agnostic-core)
 **Autor:** Sistema Super Cartola Manager

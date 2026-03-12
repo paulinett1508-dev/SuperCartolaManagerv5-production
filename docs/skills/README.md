@@ -75,6 +75,14 @@ Agentes com expertise profunda em áreas específicas:
 | **frontend-crafter** | Frontend Mobile-First, UX, Cache Offline | Criar/ajustar telas, componentes, CSS/JS |
 | **league-architect** | Regras de Negócio, Lógica de Ligas | Criar configs de liga, calcular finanças |
 | **system-scribe** | Documentação Viva do Sistema | "explique módulo X", "como funciona Y?" |
+| **financial-operations** | Operações Financeiras, Idempotência | "validar transação", "follow the money", "saldo" |
+| **express-best-practices** | Padrões Express.js | "ordem de middleware", "controller/service", "CORS" |
+| **api-hardening** | Segurança de Endpoints | "endpoint seguro?", "validar input", "IDOR" |
+| **performance-audit** | Auditoria de Performance | "lento", "N+1", "query lenta", "benchmark" |
+| **ui-ux-quality-gates** | Quality Gates de Interface | "interface pronta?", "5 gates", "checklist UI" |
+| **architecture-reviewer** | Revisão Arquitetural | "decisão técnica", "acoplamento", "trade-off" |
+| **tailwind-patterns** | Padrões TailwindCSS | "pattern tailwind", "responsive", "dark mode" |
+| **error-handling** | Tratamento de Erros Express | "try catch", "AppError", "catch vazio" |
 
 ---
 
@@ -84,7 +92,8 @@ Skills utilitárias para tarefas específicas:
 
 | Skill | Função | Quando Usar |
 |-------|--------|-------------|
-| **ai-problems-detection** | Detecta 5 problemas comuns da IA | Antes de implementar: overengineering, duplicação, etc |
+| **ai-problems-detection** | Detecta 7 problemas comuns da IA | Antes de implementar: overengineering, duplicação, alucinação, etc |
+| **systematic-debugging** | Debugging em 4 fases | "como debugar?", "causa raiz", "reproduzir bug" |
 | **fact-checker** | Protocolo Anti-Alucinação | "verifique se", "confirme que" |
 | **git-commit-push** | Commits e push automatizados | "git push", "commite tudo" |
 | **Refactor-Monolith** | Decomposição de arquivos grandes | "refatorar arquivo grande", "separar em módulos" |
@@ -108,6 +117,7 @@ Skills desenvolvidas especificamente para o Super Cartola Manager:
 | **ux-auditor-app** | Auditoria UX do app participante | "auditar UX do app", "revisar design participante" |
 | **live-experience** | Auditoria de experiência ao vivo | "auditar live", "parciais ao vivo", "pre-flight rodada" |
 | **context7-monthly-audit** | Auditoria mensal preventiva | "auditoria mensal", "verificar mudanças API" |
+| **replit-patterns** | Padrões e limites do Replit | "limites replit", "secrets", "filesystem efêmero" |
 | **analise-branches** | Análise de branches Git | Comparar branches, identificar divergências |
 
 ---

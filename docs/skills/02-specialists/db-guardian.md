@@ -1192,8 +1192,161 @@ async function runIntegrityChecks() {
 
 ---
 
-**STATUS:** 🛡️ DB Guardian - ATIVO & VIGILANTE
+## 10. Query Compliance (Novo - agnostic-core)
 
-**Versão:** 2.0 (Super Cartola Master Edition)
+Checklist obrigatorio para toda query MongoDB no projeto.
 
-**Última atualização:** 2026-01-17
+### 10.1 Seguranca de Queries
+
+```markdown
+□ Sem interpolacao de string em queries (usar operadores MongoDB nativos)
+□ Sem $where (executa JS no servidor — risco de injection)
+□ Sem eval() em contexto de banco
+□ Input do usuario sanitizado antes de usar em queries
+□ RegExp do usuario com caracteres escapados
+□ Usuario do banco com permissoes minimas (least privilege)
+□ Dados sensiveis criptografados em repouso (senhas com bcrypt)
+```
+
+### 10.2 Performance de Queries
+
+```markdown
+□ Indexes criados para campos usados em filtros (liga_id, temporada, time_id)
+□ Projecao usada — buscar apenas campos necessarios (.select() ou segundo arg do find)
+□ .lean() em todas as queries de leitura (retorna POJO, ~3x mais rapido)
+□ Paginacao implementada em listagens (middleware/pagination.js)
+□ N+1 queries identificadas e resolvidas (usar $in para batch)
+□ Queries lentas analisadas com .explain('executionStats')
+□ Arrays retornados com limite maximo (nao retornar 10k+ docs)
+```
+
+### 10.3 Multi-Tenant Compliance
+
+```markdown
+□ TODA query inclui filtro liga_id (REGRA CRITICA — CLAUDE.md)
+□ Queries de admin verificam admin_id (dono da liga)
+□ Dados separados por temporada quando aplicavel
+□ Sem queries cross-tenant (uma liga nao ve dados de outra)
+```
+
+### 10.4 Comandos de Auditoria de Queries
+
+```bash
+# Buscar queries sem liga_id (risco multi-tenant)
+grep -rn "\.find(\|\.findOne(\|\.aggregate(\|\.countDocuments(" --include="*.js" controllers/ services/ | grep -v "liga_id" | grep -v "node_modules"
+
+# Buscar queries sem .lean() (risco performance)
+grep -rn "\.find(\|\.findOne(" --include="*.js" controllers/ services/ | grep -v "\.lean()" | grep -v "\.save\|\.updateOne\|\.deleteOne"
+
+# Buscar N+1 potenciais (query dentro de loop)
+grep -B5 "\.find\|\.findOne" --include="*.js" controllers/ services/ | grep -A1 "forEach\|for.*of\|\.map("
+
+# Buscar RegExp sem escape (injection)
+grep -rn "new RegExp(req\.\|new RegExp(.*body\|new RegExp(.*query" --include="*.js" .
+```
+
+### 10.5 Sinais de Risco Alto
+
+| Sinal | Risco | Acao |
+|-------|-------|------|
+| Query sem `liga_id` | CRITICO (data leakage) | Adicionar filtro imediatamente |
+| Query sem `.lean()` em leitura | ALTO (3x mais lento) | Adicionar .lean() |
+| `$where` ou `eval` em query | CRITICO (injection) | Reescrever com operadores nativos |
+| Query em loop (N+1) | CRITICO (timeout) | Usar $in ou aggregate |
+| Sem paginacao retornando 10k+ docs | CRITICO (OOM) | Adicionar limit/skip |
+| RegExp do input sem escape | ALTO (ReDoS/injection) | Escapar caracteres especiais |
+
+---
+
+## 11. Migration Validator (Novo - agnostic-core)
+
+Checklist para validar scripts de migracao MongoDB antes de executar em producao.
+
+### 11.1 Classificacao de Operacoes
+
+| Tipo | Exemplos | Risco |
+|------|----------|-------|
+| **Aditiva** | createIndex, addFields, insertMany | BAIXO |
+| **Modificacao** | updateMany, renameField, changeType | MEDIO |
+| **Destrutiva** | deleteMany, dropCollection, removeField | ALTO |
+| **Dados** | bulk insert, bulk update, data migration | MEDIO-ALTO |
+
+### 11.2 Checklist de Validacao
+
+```markdown
+## PRE-EXECUCAO
+□ Script usa --dry-run como padrao (CLAUDE.md: "Para scripts destrutivos: sempre --dry-run primeiro")
+□ Backup criado antes de qualquer operacao destrutiva
+□ Filtros testados com .count() antes de executar mutacoes
+□ Batch size adequado (100-500 docs por vez, nao tudo de uma vez)
+
+## DURANTE EXECUCAO
+□ Progresso logado (processed X/Y)
+□ Timeout configurado para queries longas
+□ Conexao resiliente (retry em caso de erro de rede)
+
+## POS-EXECUCAO
+□ Validacao de resultado (.countDocuments() antes e depois)
+□ Indices recriados se necessario
+□ Cache invalidado (cache-invalidator.js)
+□ Rollback documentado e testado
+```
+
+### 11.3 Status de Validacao
+
+| Status | Significado | Acao |
+|--------|-------------|------|
+| APROVADO | Todos os checks passaram | Pode executar |
+| AJUSTAR | Checks menores falharam | Corrigir e re-validar |
+| BLOQUEAR | Checks criticos falharam | NAO executar ate resolver |
+
+### 11.4 Template de Script de Migracao
+
+```javascript
+// scripts/migration-YYYY-MM-DD-descricao.js
+import { MongoClient } from 'mongodb';
+
+const MONGO_URI = process.env.MONGO_URI; // NUNCA MONGO_URI_DEV
+
+async function up(db, isDryRun) {
+  const collection = db.collection('nome_collection');
+
+  // 1. Contar documentos afetados
+  const count = await collection.countDocuments({ /* filtro */ });
+  console.log(`Documentos a migrar: ${count}`);
+
+  if (isDryRun) {
+    console.log('[DRY-RUN] Nenhuma alteracao feita');
+    return;
+  }
+
+  // 2. Executar em batches
+  const batchSize = 100;
+  let processed = 0;
+  // ... batch logic
+
+  // 3. Validar
+  const afterCount = await collection.countDocuments({ /* filtro pos */ });
+  console.log(`Validacao: ${afterCount} documentos migrados`);
+}
+
+async function down(db, isDryRun) {
+  // Rollback documentado
+}
+
+// CLI
+const isDryRun = !process.argv.includes('--force');
+const isDown = process.argv.includes('--down');
+
+if (isDryRun && !isDown) {
+  console.log('Modo DRY-RUN. Use --force para executar.');
+}
+```
+
+---
+
+**STATUS:** DB Guardian - ATIVO & VIGILANTE
+
+**Versao:** 3.0 (Enriquecido com Query Compliance + Migration Validator do agnostic-core)
+
+**Ultima atualizacao:** 2026-03-12

@@ -125,6 +125,78 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 | **Localização** | `docs/skills/02-specialists/anti-frankenstein.md` |
 | **Referências** | `config/css-registry.json`, `docs/rules/audit-frontend.md` |
 
+#### financial-operations
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `operação financeira`, `idempotência`, `auditoria financeira`, `saldo`, `extrato`, `follow the money`, `transação financeira`, `débito`, `crédito` |
+| **Frases PT-BR** | "validar operação financeira", "checar idempotência", "auditoria do extrato", "follow the money", "operação de saldo", "transação duplicada?", "race condition no saldo", "atomic operation" |
+| **Contexto** | Revisão ou criação de código que movimenta saldo, cria transações financeiras (inscricoestemporada, ajustefinanceiros, acertofinanceiros) |
+| **NÃO confundir** | Regras de negócio de premiação → `league-architect`; Auditoria de código → `code-inspector` |
+| **Localização** | `docs/skills/02-specialists/financial-operations.md` |
+
+#### express-best-practices
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `express`, `middleware`, `rotas`, `controller`, `CORS`, `rate limit`, `ordem de middleware`, `service layer` |
+| **Frases PT-BR** | "ordem dos middlewares", "separar controller e service", "configurar CORS", "rate limiting", "error handler middleware", "estrutura Express", "padronizar rotas" |
+| **Contexto** | Criação ou revisão de rotas, controllers, middlewares Express. Estruturação da camada HTTP |
+| **NÃO confundir** | Segurança de endpoint → `api-hardening`; Performance → `performance-audit` |
+| **Localização** | `docs/skills/02-specialists/express-best-practices.md` |
+
+#### api-hardening
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `hardening`, `endpoint seguro`, `validação de input`, `segurança de API`, `proteger endpoint`, `blindar API`, `injection`, `IDOR` |
+| **Frases PT-BR** | "endpoint tá seguro?", "validar input", "proteger contra injection", "blindar endpoint", "verificar autenticação de rota", "prevenir IDOR", "sanitizar input" |
+| **Contexto** | Criação de novos endpoints, revisão de segurança de rotas existentes, hardening pré-deploy |
+| **NÃO confundir** | Auditoria completa SPARC → `code-inspector`; Padrões Express → `express-best-practices` |
+| **Localização** | `docs/skills/02-specialists/api-hardening.md` |
+
+#### performance-audit
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `performance`, `lento`, `otimizar`, `N+1`, `índice`, `benchmark`, `query lenta`, `explain`, `profiling` |
+| **Frases PT-BR** | "tá lento", "otimizar performance", "query lenta", "N+1 queries", "falta índice", "melhorar velocidade", "benchmark do endpoint", "Promise.all", "lean" |
+| **Contexto** | Endpoint lento, query demorada, otimização de cache, paralelismo async, frontend performance |
+| **NÃO confundir** | Cache específico → `cache-auditor`; Cache participante → `cache-sentinel`; DB específico → `db-guardian` |
+| **Localização** | `docs/skills/02-specialists/performance-audit.md` |
+
+#### ui-ux-quality-gates
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `quality gate`, `gate de qualidade`, `validar interface`, `pronto para entregar`, `checklist UI`, `hierarquia visual`, `feedback de interação` |
+| **Frases PT-BR** | "interface tá pronta?", "validar entrega de UI", "checklist de qualidade visual", "passou nos gates?", "interface tá acessível?", "responsivo tá ok?", "empty state?", "hover state?" |
+| **Contexto** | Validação final antes de entregar interface. 5 gates: Visual Hierarchy, Interaction Feedback, Data Presentation, Responsive, Emotional Design |
+| **NÃO confundir** | Criar interface → `frontend-crafter`; Direção estética → `frontend-design`; Auditoria UX app → `ux-auditor-app` |
+| **Localização** | `docs/skills/02-specialists/ui-ux-quality-gates.md` |
+
+#### architecture-reviewer
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `revisão arquitetural`, `decisão técnica`, `acoplamento`, `modelagem`, `arquitetura`, `trade-off`, `review de design` |
+| **Frases PT-BR** | "revisar arquitetura", "decisão técnica", "tá muito acoplado?", "modelagem tá correta?", "review de design do sistema", "avaliar trade-offs", "isso escala?" |
+| **Contexto** | Avaliar decisões arquiteturais, modelagem de domínio, organização de módulos, estratégia de migração |
+| **NÃO confundir** | Code review pontual → `code-inspector`; Regras de negócio → `league-architect` |
+| **Localização** | `docs/skills/02-specialists/architecture-reviewer.md` |
+
+#### tailwind-patterns
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `tailwind`, `utility class`, `responsive`, `sm:`, `md:`, `lg:`, `classes CSS tailwind` |
+| **Frases PT-BR** | "como usar tailwind aqui?", "pattern tailwind", "responsivo com tailwind", "dark mode tailwind", "componente tailwind", "classes de utilidade" |
+| **Contexto** | Criação de componentes com TailwindCSS, patterns responsivos, dark mode utilities |
+| **NÃO confundir** | Governança CSS → `anti-frankenstein`; Criar interface completa → `frontend-crafter` |
+| **Localização** | `docs/skills/02-specialists/tailwind-patterns.md` |
+
+#### error-handling
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `erro`, `error handling`, `try catch`, `AppError`, `middleware de erro`, `tratamento de erros` |
+| **Frases PT-BR** | "como tratar esse erro?", "catch vazio", "error handler", "erro genérico", "apiServerError", "hierarquia de erros", "logging de erros" |
+| **Contexto** | Implementação de tratamento de erros em controllers/services, logging seguro, respostas de erro ao cliente |
+| **NÃO confundir** | Debugging de bug → `systematic-debugging`; Segurança → `api-hardening` |
+| **Localização** | `docs/skills/02-specialists/error-handling.md` |
+
 ---
 
 ### 03 - Utilities (Ferramentas Auxiliares)
@@ -179,6 +251,15 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 | **Contexto** | Antes de escrever código novo, revisão de abordagem, sanity check |
 | **Ativação automática** | Deve rodar ANTES de qualquer implementação significativa |
 | **Localização** | `docs/skills/03-utilities/ai-problems-detection.md` |
+
+#### systematic-debugging
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `debug`, `bug`, `investigar`, `reproduzir`, `causa raiz`, `bisect`, `erro`, `crash`, `não funciona`, `debugging` |
+| **Frases PT-BR** | "como debugar isso?", "investigar esse bug", "encontrar causa raiz", "reproduzir o erro", "git bisect", "por que não funciona?", "erro no sistema", "crash no servidor", "tá quebrando" |
+| **Contexto** | Investigação sistemática de bugs usando metodologia 4 fases: Reproduzir → Isolar → Entender → Corrigir |
+| **NÃO confundir** | Code review → `code-inspector`; Bug de cache → `cache-sentinel`; Bug de regra → `league-architect` |
+| **Localização** | `docs/skills/03-utilities/systematic-debugging.md` |
 
 #### Refactor-Monolith
 | Tipo | Keywords |
@@ -270,6 +351,15 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 | **Contexto** | Auditoria holística de UI/UX/Design de TODAS as telas do app participante (PWA Mobile) |
 | **NÃO confundir** | Criar tela nova → `frontend-crafter`; Auditar 1 módulo (backend+frontend) → `auditor-module`; Auditoria de cache → `cache-auditor` |
 | **Localização** | `docs/skills/04-project-specific/ux-auditor-app.md` |
+
+#### replit-patterns
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `replit`, `deploy`, `limites replit`, `secrets`, `filesystem`, `autoscale`, `produção replit`, `Reserved VM` |
+| **Frases PT-BR** | "limites do replit", "como configurar deploy", "secrets no replit", "filesystem efêmero", "app reiniciando", "502 bad gateway", ".replit config", "replit nix" |
+| **Contexto** | Configuração de deploy, troubleshooting no Replit, limites de plano, secrets management, filesystem efêmero |
+| **NÃO confundir** | Fazer deploy → `replit-pull`; Git push → `git-commit-push` |
+| **Localização** | `docs/skills/04-project-specific/replit-patterns.md` |
 
 #### analise-branches
 | Tipo | Keywords |
@@ -389,6 +479,23 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | "quais MCPs temos?" | `project-reference` | Referencia detalhada |
 | "detalhes das collections" | `project-reference` | Tipos de ID, divida tecnica |
 | "tabela de keywords completa" | `project-reference` | Keyword→Skill map |
+| "validar operação financeira" | `financial-operations` | Idempotência, auditoria |
+| "follow the money" | `financial-operations` | Trilha de auditoria |
+| "transação duplicada?" | `financial-operations` | Checklist idempotência |
+| "ordem dos middlewares" | `express-best-practices` | Padrões Express |
+| "estrutura Express" | `express-best-practices` | Controller/Service |
+| "endpoint tá seguro?" | `api-hardening` | Hardening de API |
+| "validar input" | `api-hardening` | Sanitização |
+| "tá lento" | `performance-audit` | Diagnóstico performance |
+| "query lenta" | `performance-audit` | MongoDB explain |
+| "N+1 queries" | `performance-audit` | Otimização de queries |
+| "interface tá pronta?" | `ui-ux-quality-gates` | 5 quality gates |
+| "revisar arquitetura" | `architecture-reviewer` | Decisões técnicas |
+| "como debugar isso?" | `systematic-debugging` | 4 fases debugging |
+| "causa raiz" | `systematic-debugging` | 5 Porquês |
+| "pattern tailwind" | `tailwind-patterns` | Utility classes |
+| "como tratar esse erro?" | `error-handling` | Try/catch patterns |
+| "limites do replit" | `replit-patterns` | Deploy/config Replit |
 
 ---
 
@@ -414,6 +521,12 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | Variantes com Stitch MCP | Stitch MCP (generate_variants) → `frontend-design` (escolher melhor) → `stitch-adapter` → `anti-frankenstein` → `frontend-crafter` |
 | Redesign com Stitch MCP | Screenshot atual → Stitch MCP (redesign) → `frontend-design` → `stitch-adapter` → `anti-frankenstein` → `frontend-crafter` |
 | Higienização de branches | `analise-branches` → `delete-merged-branches` |
+| Operação financeira | `financial-operations` → `code-inspector` → `git-commit-push` |
+| Performance profunda | `performance-audit` → `cache-auditor` → `db-guardian` |
+| Debugging sistemático | `systematic-debugging` → `code-inspector` (se for bug de segurança) |
+| Endpoint novo seguro | `api-hardening` → `express-best-practices` → `code` → `code-inspector` |
+| Entrega de interface | `frontend-crafter` → `ui-ux-quality-gates` → `ux-auditor-app` |
+| Review arquitetural | `architecture-reviewer` → `code-inspector` → `performance-audit` |
 | Documentação | `system-scribe` |
 | Deploy completo | `git-commit-push` → `replit-pull` |
 | Consulta API Cartola | `cartola-api` → `fact-checker` |
