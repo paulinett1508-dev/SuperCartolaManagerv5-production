@@ -47,7 +47,7 @@ function getStatusIcon(saldo) {
 /**
  * Renderiza o Hero Card (saldo principal)
  */
-function renderHeroCardV2(resumo, temporada) {
+function renderHeroCardV2(resumo, temporada, rodadaParcial) {
     const saldo = resumo.saldo_atual ?? resumo.saldo ?? 0;
     const status = getStatusTexto(saldo);
     const statusIcon = getStatusIcon(saldo);
@@ -60,6 +60,11 @@ function renderHeroCardV2(resumo, temporada) {
     const totalPerdas = Math.abs(resumo.totalPerdas || 0);
     const acertosTotal = resumo.saldo_acertos || 0;
 
+    // Projeção parcial
+    const temParcial = rodadaParcial && rodadaParcial.status === 'ao_vivo';
+    const saldoProjetado = temParcial ? rodadaParcial.saldo_projetado : null;
+    const impactoProjetado = temParcial ? rodadaParcial.impacto_projetado : 0;
+
     return `
         <div class="extrato-hero-v2 ${heroClass} extrato-animate-in">
             <div class="extrato-hero-v2__header">
@@ -68,6 +73,7 @@ function renderHeroCardV2(resumo, temporada) {
                     SALDO FINANCEIRO · ${temporada}
                 </div>
                 <div class="extrato-hero-v2__actions">
+                    ${temParcial ? `<span class="extrato-hero-v2__live-badge"><span class="extrato-hero-v2__live-dot"></span>AO VIVO</span>` : ''}
                     <button class="extrato-hero-v2__action-btn" onclick="window.toggleExtratoValorVisibility()" title="Mostrar/ocultar valor">
                         <span class="material-icons" id="eyeToggleIconAdmin">visibility</span>
                     </button>
@@ -80,6 +86,14 @@ function renderHeroCardV2(resumo, temporada) {
             <div class="extrato-hero-v2__valor ${valorClass}" id="extratoValorAdmin">
                 ${saldo < 0 ? '-' : saldo > 0 ? '+' : ''}${formatarMoeda(saldo)}
             </div>
+
+            ${temParcial ? `
+                <div class="extrato-hero-v2__projecao">
+                    <span class="material-icons" style="font-size: 14px">trending_flat</span>
+                    Projeção R${rodadaParcial.rodada}: <strong style="color: ${saldoProjetado >= 0 ? 'var(--extrato-icon-positive)' : 'var(--extrato-icon-negative)'}">${saldoProjetado < 0 ? '-' : saldoProjetado > 0 ? '+' : ''}${formatarMoeda(saldoProjetado)}</strong>
+                    <span style="opacity: 0.6">(${impactoProjetado >= 0 ? '+' : ''}${formatarMoeda(impactoProjetado)})</span>
+                </div>
+            ` : ''}
 
             <div class="extrato-hero-v2__status extrato-hero-v2__status--${status.classe}">
                 <span class="material-icons">${statusIcon}</span>
@@ -213,7 +227,7 @@ function renderAcertosCardV2(acertos) {
 /**
  * Renderiza Timeline de Rodadas
  */
-function renderTimelineV2(rodadas, resumo, acertos, lancamentosIniciais) {
+function renderTimelineV2(rodadas, resumo, acertos, lancamentosIniciais, rodadaParcial) {
     const groups = [];
 
     // 1. Lançamentos iniciais (inscrição, legado) + Ajustes financeiros (Resta Um, multas)
@@ -418,6 +432,84 @@ function renderTimelineV2(rodadas, resumo, acertos, lancamentosIniciais) {
         });
     });
 
+    // ✅ v8.20.0: Injetar rodada parcial AO VIVO no topo
+    if (rodadaParcial && rodadaParcial.status === 'ao_vivo') {
+        const rp = rodadaParcial;
+        const impacto = rp.impacto_projetado || 0;
+        const hora = rp.atualizado_em
+            ? new Date(rp.atualizado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+            : '--:--';
+
+        const parcialDetails = [];
+        if (rp.banco && rp.banco.valor !== 0) {
+            parcialDetails.push({ icon: 'casino', label: rp.banco.descricao || 'Bônus/Ônus', valor: rp.banco.valor });
+        }
+        if (rp.pontosCorridos && rp.pontosCorridos.valor !== 0) {
+            parcialDetails.push({ icon: 'sports_soccer', label: rp.pontosCorridos.descricao || 'Pontos Corridos', valor: rp.pontosCorridos.valor });
+        }
+
+        const parcialDetailsHtml = parcialDetails.length > 0 ? parcialDetails.map(d => `
+            <div class="extrato-timeline-v2__detail-item">
+                <div class="extrato-timeline-v2__detail-label">
+                    <span class="material-icons">${d.icon}</span>
+                    ${d.label}
+                </div>
+                <div class="extrato-timeline-v2__detail-value extrato-timeline-v2__detail-value--${getStatusClass(d.valor)}">
+                    ${sinalMoeda(d.valor)}
+                </div>
+            </div>
+        `).join('') : `
+            <div class="extrato-timeline-v2__detail-item">
+                <div class="extrato-timeline-v2__detail-label">
+                    <span class="material-icons">hourglass_empty</span>
+                    Aguardando jogos
+                </div>
+                <div class="extrato-timeline-v2__detail-value extrato-timeline-v2__detail-value--neutral">—</div>
+            </div>
+        `;
+
+        groups.push({
+            order: rp.rodada + 0.5, // Acima de todas as rodadas consolidadas
+            html: `
+                <div class="extrato-timeline-v2__group extrato-timeline-v2__group--live">
+                    <div class="extrato-timeline-v2__group-header" onclick="window.toggleTimelineGroupV2(this)">
+                        <div class="extrato-timeline-v2__group-left">
+                            <div class="extrato-timeline-v2__group-icon extrato-timeline-v2__group-icon--live">
+                                <span class="material-icons">sports_soccer</span>
+                            </div>
+                            <div class="extrato-timeline-v2__group-info">
+                                <div class="extrato-timeline-v2__group-title">
+                                    Rodada ${rp.rodada}
+                                    ${rp.posicao_parcial ? ` · ${rp.posicao_parcial}º` : ''}
+                                    <span class="extrato-timeline-v2__live-badge">
+                                        <span class="extrato-timeline-v2__live-dot"></span>
+                                        AO VIVO
+                                    </span>
+                                </div>
+                                <div class="extrato-timeline-v2__group-subtitle">${rp.pontos_parciais ? rp.pontos_parciais.toFixed(2) + ' pts' : ''} · ${hora}</div>
+                            </div>
+                        </div>
+                        <div class="extrato-timeline-v2__group-right">
+                            <div class="extrato-timeline-v2__group-value extrato-timeline-v2__group-value--${getStatusClass(impacto)}">
+                                ${impacto === 0 ? '—' : sinalMoeda(impacto)}
+                            </div>
+                            <span class="material-icons extrato-timeline-v2__expand-icon">expand_more</span>
+                        </div>
+                    </div>
+                    <div class="extrato-timeline-v2__group-details">
+                        ${parcialDetailsHtml}
+                    </div>
+                    <div class="extrato-timeline-v2__accumulated">
+                        <span class="extrato-timeline-v2__accumulated-label">Saldo projetado:</span>
+                        <span class="extrato-timeline-v2__accumulated-value" style="color: ${rp.saldo_projetado >= 0 ? 'var(--extrato-icon-positive)' : 'var(--extrato-icon-negative)'}">
+                            ${sinalMoeda(rp.saldo_projetado)}
+                        </span>
+                    </div>
+                </div>
+            `
+        });
+    }
+
     // Ordenar do mais recente para mais antigo
     groups.sort((a, b) => b.order - a.order);
 
@@ -563,6 +655,7 @@ window.renderExtratoV2 = function(data, temporada) {
     const rodadas = data.rodadas || data.historico || [];
     const acertos = data.acertos || { lista: [], resumo: {} };
     const lancamentosIniciais = data.lancamentosIniciais || [];
+    const rodadaParcial = data.rodada_parcial || null;
 
     // Calcular rodadas jogadas se não existir
     if (!resumo.rodadas_jogadas) {
@@ -575,7 +668,7 @@ window.renderExtratoV2 = function(data, temporada) {
     }
 
     return `
-        ${renderHeroCardV2(resumo, temporada)}
+        ${renderHeroCardV2(resumo, temporada, rodadaParcial)}
 
         <div class="extrato-admin-grid">
             <div class="extrato-admin-grid__sidebar">
@@ -584,7 +677,7 @@ window.renderExtratoV2 = function(data, temporada) {
                 ${renderPerformanceV2(rodadas)}
             </div>
             <div class="extrato-admin-grid__main">
-                ${renderTimelineV2(rodadas, resumo, acertos, lancamentosIniciais)}
+                ${renderTimelineV2(rodadas, resumo, acertos, lancamentosIniciais, rodadaParcial)}
             </div>
         </div>
     `;

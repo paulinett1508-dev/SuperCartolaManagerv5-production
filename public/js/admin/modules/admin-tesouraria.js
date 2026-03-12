@@ -285,10 +285,75 @@ class AdminTesouraria {
 
             this.projecaoData = data;
             this._renderBannerProjecao(data);
+            this._enriquecerComParciais(data);
             this._iniciarAutoRefreshProjecao();
 
         } catch (error) {
             // Projeção indisponível — falha silenciosa, não bloqueia a tela
+        }
+    }
+
+    /**
+     * v3.2: Enriquece participantes com dados parciais (AO VIVO) e atualiza a tabela
+     */
+    _enriquecerComParciais(projecaoData) {
+        if (!projecaoData?.projecoes || !this.participantes) return;
+
+        const projecaoMap = new Map();
+        projecaoData.projecoes.forEach(p => projecaoMap.set(String(p.timeId), p));
+
+        let atualizado = false;
+        for (const participante of this.participantes) {
+            const proj = projecaoMap.get(String(participante.timeId));
+            if (proj) {
+                participante._parcial = {
+                    rodada: projecaoData.rodada,
+                    pontos: proj.pontos_parciais,
+                    posicao: proj.posicao_parcial,
+                    impacto: proj.impactoProjetado,
+                    saldoProjetado: participante.saldoFinal + proj.impactoProjetado,
+                    banco: proj.banco,
+                    pontosCorridos: proj.pontosCorridos,
+                    atualizado_em: projecaoData.atualizado_em,
+                };
+                atualizado = true;
+            }
+        }
+
+        if (atualizado) {
+            this._atualizarLinhasComParcial();
+        }
+    }
+
+    /**
+     * v3.2: Atualiza linhas da tabela com dados parciais inline (sem re-render completo)
+     */
+    _atualizarLinhasComParcial() {
+        for (const participante of this.participantes) {
+            if (!participante._parcial) continue;
+            const linhaEl = document.querySelector(`.linha-financeira[data-time-id="${participante.timeId}"]`);
+            if (!linhaEl) continue;
+
+            // Inserir/atualizar badge AO VIVO no saldo
+            const saldoBox = linhaEl.querySelector('.saldo-final-box');
+            if (!saldoBox) continue;
+
+            let liveTag = saldoBox.querySelector('.parcial-live-tag');
+            if (!liveTag) {
+                liveTag = document.createElement('div');
+                liveTag.className = 'parcial-live-tag';
+                saldoBox.insertBefore(liveTag, saldoBox.firstChild);
+            }
+
+            const impacto = participante._parcial.impacto;
+            const impactoFmt = this._formatarSaldo(impacto);
+            const impactoClass = impacto > 0 ? 'positivo' : impacto < 0 ? 'negativo' : 'zero';
+
+            liveTag.innerHTML = `
+                <span class="parcial-dot"></span>
+                <span class="parcial-label">R${participante._parcial.rodada}</span>
+                <span class="parcial-impacto ${impactoClass}">${impactoFmt}</span>
+            `;
         }
     }
 

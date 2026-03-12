@@ -1,5 +1,10 @@
 /**
- * FLUXO-FINANCEIRO-CONTROLLER v8.19.0 (SaaS DINÂMICO)
+ * FLUXO-FINANCEIRO-CONTROLLER v8.20.0 (SaaS DINÂMICO)
+ * ✅ v8.20.0: FEATURE - Rodada parcial ao vivo no extrato individual
+ *   - Quando mercado fechado (rodada em andamento), injeta rodada_parcial no response
+ *   - Calcula impacto financeiro projetado (banco + pontos corridos) usando mesmas fórmulas
+ *   - Frontend pode renderizar rodada "AO VIVO" na timeline + saldo projetado
+ *   - Dados efêmeros (não cacheados) — substituídos pela consolidação real
  * ✅ v8.19.0: FIX CRÍTICO - Inscrição agora usa InscricaoTemporada (fonte canônica)
  *   - Bug: usava liga.participantes[].pagouInscricao (legacy, dessincronizado com tesourariaController)
  *   - Consequência: extrato individual divergia da tabela admin (ex: +R$66 vs -R$114)
@@ -79,6 +84,8 @@ import AjusteFinanceiro from "../models/AjusteFinanceiro.js";
 import LigaRules from "../models/LigaRules.js";
 import InscricaoTemporada from "../models/InscricaoTemporada.js";
 import { getResultadosMataMataCompleto } from "./mata-mata-backend.js";
+// ✅ v8.20.0: Parciais ao vivo no extrato individual
+import { buscarRankingParcial } from "../services/parciaisRankingService.js";
 // ✅ v8.1.0: Invalidação de cache em cascata
 import { onCamposSaved } from "../utils/cache-invalidator.js";
 // ✅ v8.2.0: FIX CRÍTICO - Temporada obrigatória em todas as queries de cache
@@ -1175,6 +1182,56 @@ export const getExtratoFinanceiro = async (req, res) => {
             return dataB - dataA;
         });
 
+        // ✅ v8.20.0: Injetar dados parciais (rodada em andamento) se mercado fechado
+        let rodadaParcial = null;
+        const mercadoFechado = statusMercado.status_mercado === 2;
+        if (mercadoFechado && !usouFallback && !isInativo) {
+            try {
+                const rankingParcial = await buscarRankingParcial(ligaId);
+                if (rankingParcial?.disponivel) {
+                    const meuRanking = rankingParcial.ranking.find(
+                        r => String(r.timeId) === String(timeId)
+                    );
+                    if (meuRanking) {
+                        // Calcular impacto financeiro projetado
+                        const pontuacoes = rankingParcial.ranking.map(r => ({
+                            timeId: r.timeId,
+                            pontos: r.pontos_rodada_atual,
+                            nome_time: r.nome_time,
+                            nome_cartola: r.nome_cartola,
+                        }));
+                        const resultadoBanco = calcularBanco(liga, timeId, rankingParcial.rodada, pontuacoes);
+                        let resultadoPC = null;
+                        const pcHabilitado = isModuloHabilitado(liga, 'pontos_corridos') || liga.modulos_ativos?.pontosCorridos;
+                        if (pcHabilitado) {
+                            resultadoPC = await calcularConfrontoPontosCorridos(
+                                liga, timeId, rankingParcial.rodada,
+                                meuRanking.pontos_rodada_atual, pontuacoes,
+                            );
+                        }
+                        const impactoBanco = resultadoBanco?.valor || 0;
+                        const impactoPC = resultadoPC?.valor || 0;
+
+                        rodadaParcial = {
+                            rodada: rankingParcial.rodada,
+                            status: 'ao_vivo',
+                            pontos_parciais: meuRanking.pontos_rodada_atual,
+                            posicao_parcial: meuRanking.posicao,
+                            total_times: rankingParcial.total_times,
+                            banco: { valor: impactoBanco, descricao: resultadoBanco?.descricao || '', posicao: resultadoBanco?.posicao },
+                            pontosCorridos: resultadoPC ? { valor: impactoPC, descricao: resultadoPC.descricao || '', oponente: resultadoPC.oponente } : null,
+                            impacto_projetado: impactoBanco + impactoPC,
+                            saldo_projetado: saldoTotal + impactoBanco + impactoPC,
+                            atualizado_em: rankingParcial.atualizado_em,
+                        };
+                        logger.log(`[FLUXO-CONTROLLER] ⚽ Parcial R${rankingParcial.rodada}: ${meuRanking.pontos_rodada_atual}pts, impacto R$ ${(impactoBanco + impactoPC).toFixed(2)}`);
+                    }
+                }
+            } catch (parcialError) {
+                logger.warn(`[FLUXO-CONTROLLER] ⚠️ Parciais indisponíveis: ${parcialError.message}`);
+            }
+        }
+
         res.json({
             success: true,
             saldo_atual: saldoTotal,
@@ -1197,7 +1254,11 @@ export const getExtratoFinanceiro = async (req, res) => {
                 saldo_temporada: saldoTemporada,
                 saldo_acertos: acertosInfo.saldoAcertos,
                 saldo_final: saldoTotal,
+                // ✅ v8.20.0: Saldo projetado incluindo parcial
+                saldo_projetado: rodadaParcial ? rodadaParcial.saldo_projetado : null,
             },
+            // ✅ v8.20.0: Rodada parcial ao vivo
+            rodada_parcial: rodadaParcial,
             metadados: {
                 atualizado_em: cache.data_ultima_atualizacao,
                 rodada_consolidada: cache.ultima_rodada_consolidada,
@@ -1207,6 +1268,8 @@ export const getExtratoFinanceiro = async (req, res) => {
                 // ✅ v8.16.0: Indicadores de fallback para o frontend
                 _fallback: usouFallback,
                 _fallbackSource: statusMercado._fallbackSource || null,
+                // ✅ v8.20.0: Status do mercado para o frontend
+                mercado_fechado: mercadoFechado,
             },
         });
     } catch (error) {

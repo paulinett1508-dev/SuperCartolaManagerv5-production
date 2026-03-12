@@ -1151,3 +1151,51 @@
 .orch-error-state p {
     margin-top: 8px;
 }
+
+/* ========================================
+   PARCIAL AO VIVO - Badge na linha
+   ======================================== */
+
+.parcial-live-tag {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: rgba(34, 197, 94, 0.08);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    margin-bottom: 2px;
+    white-space: nowrap;
+}
+
+.parcial-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-success, #22c55e);
+    animation: parcialPulse 2s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+.parcial-label {
+    color: var(--color-success, #22c55e);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.parcial-impacto {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.parcial-impacto.positivo { color: var(--color-success, #22c55e); }
+.parcial-impacto.negativo { color: var(--color-danger, #ef4444); }
+.parcial-impacto.zero { color: var(--text-dim, #6b7280); }
+
+@keyframes parcialPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.4); }
+}
