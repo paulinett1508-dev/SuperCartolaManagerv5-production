@@ -634,6 +634,7 @@ class AdminRestaUm {
             const res = await fetch(`/api/resta-um/${this.ligaId}/status?edicao=${edicaoNum}`);
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
+            const isLive = data.isLive === true;
 
             const participantes = data.participantes || [];
             if (participantes.length === 0) {
@@ -645,7 +646,10 @@ class AdminRestaUm {
                              onerror="this.src='/escudos/default.png'" alt="">
                         <span class="ru-participante-nome">${escapeHtml(p.nomeTime || p.nomeCartoleiro || 'Time')}</span>
                         <span class="ru-participante-pontos">
-                            ${(Math.trunc((p.pontosAcumulados || 0) * 100) / 100).toFixed(2)} pts
+                            ${isLive && p.pontosRodada != null
+                                ? `${(Math.trunc((p.pontosRodada || 0) * 100) / 100).toFixed(2)} pts <small style="color:var(--app-warning);font-size:10px;opacity:0.85;">PARCIAL</small>`
+                                : `${(Math.trunc((p.pontosAcumulados || 0) * 100) / 100).toFixed(2)} pts`
+                            }
                         </span>
                         <span class="ru-participante-status ${p.status}">
                             ${p.status === 'vivo' ? 'VIVO' : p.status === 'campeao' ? 'CAMPEAO' : 'ELIMINADO'}
