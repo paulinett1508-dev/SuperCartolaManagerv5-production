@@ -297,7 +297,7 @@ export function renderizarRanking(dados) {
       let classe = "col-rodada";
       if (isParcial) classe += " parcial";
       if (isFinal) classe += " rodada-final";
-      return `<th class="${classe}">R${r}${isParcial ? "*" : ""}${isFinal ? "🏁" : ""}</th>`;
+      return `<th class="${classe}">R${r}${isParcial ? "*" : ""}${isFinal ? '<span class="material-icons" style="font-size:12px;vertical-align:middle;">sports_score</span>' : ""}</th>`;
     })
     .join("");
 
