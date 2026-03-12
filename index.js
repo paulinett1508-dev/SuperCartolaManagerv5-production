@@ -207,11 +207,7 @@ import adminMobileRoutes from "./routes/admin-mobile-routes.js";
 import * as analyticsController from "./controllers/analyticsController.js";
 import adminMigracaoRoutes from "./routes/admin/migracao.js";
 import adminMigracaoValidacaoRoutes from "./routes/admin/migracao-validacao.js";
-console.log("[DEBUG] adminAuthRoutes type:", typeof adminAuthRoutes);
-console.log(
-  "[DEBUG] adminAuthRoutes.stack length:",
-  adminAuthRoutes.stack?.length,
-);
+
 
 import { getClubes } from "./controllers/cartolaController.js";
 import {
