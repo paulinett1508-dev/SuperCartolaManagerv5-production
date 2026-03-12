@@ -482,7 +482,6 @@ console.log("[SERVER] Google OAuth ativado");
 
 // 🔐 Rotas de autenticação admin (Google OAuth) - ANTES do protegerRotas
 app.use("/api/admin/auth", adminAuthRoutes);
-console.log("[DEBUG] Rota /api/admin/auth registrada");
 
 // 📊 Rotas de auditoria admin
 app.use("/api/admin/auditoria", adminAuditoriaRoutes);
