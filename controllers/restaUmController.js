@@ -189,6 +189,10 @@ export async function obterStatus(req, res) {
                     if (fb.isLive) {
                         isLive = true;
                         pontosLiveMap = fb.pontosLiveMap;
+                    } else {
+                        // Mercado fechado mas sem dados de pontos ainda — sinalizar live sem scores
+                        isLive = true;
+                        console.log(`[RESTA-UM] Rodada ${rodadaEfetiva} ao vivo mas sem dados de pontos disponíveis ainda`);
                     }
                 }
             } else {
@@ -203,9 +207,9 @@ export async function obterStatus(req, res) {
             const pontosLive = pontosLiveMap.get(String(p.timeId));
             return {
                 ...p,
-                // Se temos pontos live, usar; senão usar o cache
-                pontosRodada: pontosLive != null
-                    ? truncarPontosNum(pontosLive)
+                // Se temos pontos live, usar; se isLive mas sem dados, null (evita stale do cache); senão usar cache
+                pontosRodada: isLive
+                    ? (pontosLive != null ? truncarPontosNum(pontosLive) : null)
                     : (p.pontosRodada != null ? truncarPontosNum(p.pontosRodada) : null),
                 pontosAcumulados: truncarPontosNum(p.pontosAcumulados || 0),
             };
