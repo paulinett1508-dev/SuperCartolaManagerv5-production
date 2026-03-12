@@ -25,15 +25,6 @@ const cronGloboScraper = cron.schedule("0 6 * * *", () => {
   });
 });
 cronJobs.push(cronGloboScraper);
-// Também executa na inicialização para garantir cache atualizado
-exec("node scripts/save-jogos-globo.js", (err, stdout, stderr) => {
-  if (err) {
-    console.error("[INIT] Erro ao rodar save-jogos-globo.js:", err.message);
-    return;
-  }
-  if (stdout) console.log("[INIT] save-jogos-globo.js:", stdout.trim());
-  if (stderr) console.error("[INIT] save-jogos-globo.js (stderr):", stderr.trim());
-});
 // index.js - Super Cartola Manager OTIMIZADO (Sessões Persistentes + Auth Admin + Segurança)
 // v2.0: Hardening de Produção - Logs e Erros por ambiente
 import mongoose from "mongoose";

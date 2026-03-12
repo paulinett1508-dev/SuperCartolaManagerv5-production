@@ -155,8 +155,9 @@ function iniciar() {
 
     console.log('[SYNC-BRASILEIRAO] Iniciando job (sync 06:00 + mini-sync 2h em dias com jogo)');
 
-    // Verificar imediatamente na inicialização
-    verificarEExecutar();
+    // Marcar mini-sync como feito agora para não disparar na inicialização
+    // (evita HTTP call desnecessária no boot — o intervalo regular cobre)
+    ultimoMiniSync = Date.now();
 
     // Verificar a cada hora
     jobTimer = setInterval(verificarEExecutar, CONFIG.INTERVALO_VERIFICACAO * 60 * 1000);
