@@ -379,20 +379,6 @@ function _renderizarDisputa(dados, timeId) {
 }
 
 // =====================================================================
-// DETECÇÃO DE LANTERNA
-// =====================================================================
-
-/**
- * Detecta se o time do usuário é o último entre os sobreviventes
- * (vivos já ordenados por pontosRodada DESC — último = menor pontuação)
- */
-function _detectarLanterna(vivos, timeId) {
-    if (!vivos || vivos.length <= 1 || !timeId) return false;
-    const ultimoVivo = vivos[vivos.length - 1];
-    return String(ultimoVivo.timeId) === String(timeId);
-}
-
-// =====================================================================
 // HELPERS
 // =====================================================================
 
@@ -456,6 +442,7 @@ export function destruirRestaUmParticipante() {
 
     if (window.Log) Log.debug('[PARTICIPANTE-RESTA-UM] Módulo destruído, intervals limpos');
 }
+window.destruirRestaUmParticipante = destruirRestaUmParticipante;
 
 if (window.Log) Log.info('[PARTICIPANTE-RESTA-UM] Módulo v2.0 carregado');
 
