@@ -687,16 +687,14 @@ export const getExtratoFinanceiro = async (req, res) => {
         let saldoR0Preservado = 0;
 
         if (forcarRecalculo && cache) {
-            // Extrair R0 antes de deletar
-            r0Preservadas = (cache.historico_transacoes || []).filter(t =>
-                t.rodada === 0 || t.tipo === "INSCRICAO_TEMPORADA" ||
-                t.tipo === "SALDO_TEMPORADA_ANTERIOR" || t.tipo === "LEGADO_ANTERIOR"
-            );
-            saldoR0Preservado = r0Preservadas.reduce((acc, t) => acc + (t.valor || 0), 0);
-
+            // ✅ v8.19.0: NÃO preservar R0 em refresh forçado — InscricaoTemporada recria corretamente
+            // Bug anterior: R0 preservadas mantinham inscrição calculada com fonte legacy (pagouInscricao)
+            // Fix: limpar cache completamente, deixar o novo código recriar R0 a partir de InscricaoTemporada
             await ExtratoFinanceiroCache.deleteOne({ _id: cache._id });
             cache = null;
-            logger.log(`[FLUXO-CONTROLLER] Cache limpo para recálculo (${r0Preservadas.length} R0 preservadas)`);
+            r0Preservadas = [];
+            saldoR0Preservado = 0;
+            logger.log(`[FLUXO-CONTROLLER] Cache limpo para recálculo completo (R0 será recriado via InscricaoTemporada)`);
         }
 
         // ✅ v8.8.0 FIX: Auto-healing - se cache consolidou além do limite validado,
