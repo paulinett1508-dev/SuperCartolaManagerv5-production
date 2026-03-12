@@ -513,7 +513,7 @@ async function gerarRankingGoleiros(ligaId, rodadaInicio, rodadaFim) {
       ligaId,
       rodada: { $gte: rodadaInicio, $lte: rodadaFim },
       rodadaConcluida: true,
-    }).exec();
+    }).lean();
 
     console.log(`📊 [RANKING] Dados encontrados: ${dados.length} registros`);
 
@@ -661,7 +661,7 @@ export async function obterRankingGoleiros(
       ligaId,
       rodada: { $gte: rodadaInicio, $lte: rodadaFim },
       // ✅ Buscar todos, não só concluídos
-    }).exec();
+    }).lean();
 
     console.log(`📊 [GOLEIROS-SERVICE] Registros no MongoDB:`, {
       total: registrosExistentes.length,
@@ -998,7 +998,7 @@ export async function consolidarRodada(ligaId, rodada) {
 
   try {
     const resultado = await Goleiros.updateMany(
-      { ligaId, rodada: parseInt(rodada), rodadaConcluida: false },
+      { ligaId, rodada: parseInt(rodada, 10), rodadaConcluida: false },
       { $set: { rodadaConcluida: true } },
     );
 
@@ -1006,7 +1006,7 @@ export async function consolidarRodada(ligaId, rodada) {
 
     return {
       success: true,
-      rodada: parseInt(rodada),
+      rodada: parseInt(rodada, 10),
       registrosAtualizados: resultado.modifiedCount,
     };
   } catch (error) {

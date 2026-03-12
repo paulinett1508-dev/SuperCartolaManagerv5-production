@@ -799,7 +799,7 @@ class LuvaDeOuroController {
       };
 
       logger.log(
-        `✅ Detalhes obtidos: ${rodadas.length} rodadas, ${totalPontos.toFixed(1)} pontos totais`,
+        `✅ Detalhes obtidos: ${rodadas.length} rodadas, ${(Math.trunc(totalPontos * 10) / 10).toFixed(1)} pontos totais`,
       );
 
       res.json({

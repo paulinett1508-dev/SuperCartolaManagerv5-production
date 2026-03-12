@@ -80,6 +80,15 @@ const LuvaDeOuroUtils = {
       "align-items: center;" +
       "justify-content: center;";
 
+    // Helper local para escapar strings em innerHTML (evita XSS)
+    function _esc(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // Armazenar dados no window para acesso pelo handler onclick (evita JSON.stringify inline)
+    window._luvaDetalhesCache = dados;
+
     const rodadasHTML = dados.rodadas
       .map(function (rodada) {
         const corPontos = rodada.pontos >= 0 ? "#27ae60" : "#e74c3c";
@@ -89,10 +98,10 @@ const LuvaDeOuroUtils = {
           rodada.rodada +
           "</td>" +
           '<td style="padding: 8px; text-align: left;">' +
-          (rodada.goleiroNome || "Sem goleiro") +
+          _esc(rodada.goleiroNome || "Sem goleiro") +
           "</td>" +
           '<td style="padding: 8px; text-align: left; font-size: 12px; color: #666;">' +
-          (rodada.goleiroClube || "-") +
+          _esc(rodada.goleiroClube || "-") +
           "</td>" +
           '<td style="padding: 8px; text-align: center; font-weight: bold; color: ' +
           corPontos +
@@ -109,7 +118,7 @@ const LuvaDeOuroUtils = {
       '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px;">' +
       "<div>" +
       '<h3 style="margin: 0; color: #2c3e50;">' +
-      dados.participanteNome +
+      _esc(dados.participanteNome) +
       "</h3>" +
       '<p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 14px;">Rodadas ' +
       dados.rodadaInicio +
@@ -146,16 +155,14 @@ const LuvaDeOuroUtils = {
       "</div>" +
       "</div>" +
       '<div style="text-align: center; margin-bottom: 15px;">' +
-      '<button onclick="window.LuvaDeOuroUtils.exportarHistoricoIndividual(' +
-      JSON.stringify(dados).replace(/"/g, "&quot;") +
-      ')" ' +
+      '<button onclick="window.LuvaDeOuroUtils.exportarHistoricoIndividual(window._luvaDetalhesCache)" ' +
       'style="background: linear-gradient(135deg, #2E8B57 0%, #228B22 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font: 600 13px Inter, sans-serif; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(46, 139, 87, 0.3);" ' +
       "onmouseover=\"this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(46, 139, 87, 0.4)'\" " +
       "onmouseout=\"this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(46, 139, 87, 0.3)'\">" +
-      '<span style="font-size: 16px;">📱</span> Exportar Histórico Mobile HD' +
+      '<span class="material-icons" style="font-size: 16px; vertical-align: middle;">share</span> Exportar Histórico Mobile HD' +
       "</button>" +
       "</div>" +
-      '<h4 style="margin: 0 0 15px 0; color: #2c3e50;">📊 Histórico por Rodada</h4>' +
+      '<h4 style="margin: 0 0 15px 0; color: #2c3e50;">Histórico por Rodada</h4>' +
       '<div style="max-height: 300px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px;">' +
       '<table style="width: 100%; border-collapse: collapse; font-size: 13px;">' +
       '<thead style="background: #f8f9fa; position: sticky; top: 0;">' +
