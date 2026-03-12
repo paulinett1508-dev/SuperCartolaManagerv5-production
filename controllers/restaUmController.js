@@ -149,7 +149,6 @@ export async function obterStatus(req, res) {
                     rodadaAtual: rodadaAtualProvisoria,
                     eliminadosDaRodada: [],
                     isLive,
-                    isProvisional: isLive, // prévia, edição ainda não ativada oficialmente
                     premiacao: {
                         campeao: pendente.premiacao?.campeao || 0,
                         vice: pendente.premiacao?.viceHabilitado !== false ? (pendente.premiacao?.vice || 0) : null,

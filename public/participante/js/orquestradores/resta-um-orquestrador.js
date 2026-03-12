@@ -747,13 +747,13 @@ class RestaUmModule {
             regrasChips.push(`<span class="ruv-regra-chip"><span class="material-icons">person_off</span>${ed.eliminadosPorRodada === 1 ? '1 eliminado/rodada' : `${ed.eliminadosPorRodada} eliminados/rodada`}</span>`);
         }
         if (this.premiacao?.campeao > 0) {
-            regrasChips.push(`<span class="ruv-regra-chip destaque"><span class="material-icons" style="color:var(--color-warning,#eab308)">emoji_events</span>Campeão R$ ${this.premiacao.campeao.toFixed(2).replace('.', ',')}</span>`);
+            regrasChips.push(`<span class="ruv-regra-chip destaque"><span class="material-icons" style="color:var(--color-warning,#eab308)">emoji_events</span>Campeão R$ ${(Math.trunc(this.premiacao.campeao * 100) / 100).toFixed(2).replace('.', ',')}</span>`);
         }
         if (this.premiacao?.viceHabilitado && this.premiacao?.vice > 0) {
-            regrasChips.push(`<span class="ruv-regra-chip"><span class="material-icons">workspace_premium</span>Vice R$ ${this.premiacao.vice.toFixed(2).replace('.', ',')}</span>`);
+            regrasChips.push(`<span class="ruv-regra-chip"><span class="material-icons">workspace_premium</span>Vice R$ ${(Math.trunc(this.premiacao.vice * 100) / 100).toFixed(2).replace('.', ',')}</span>`);
         }
         if (this.premiacao?.terceiroHabilitado && this.premiacao?.terceiro > 0) {
-            regrasChips.push(`<span class="ruv-regra-chip"><span class="material-icons">military_tech</span>3º R$ ${this.premiacao.terceiro.toFixed(2).replace('.', ',')}</span>`);
+            regrasChips.push(`<span class="ruv-regra-chip"><span class="material-icons">military_tech</span>3º R$ ${(Math.trunc(this.premiacao.terceiro * 100) / 100).toFixed(2).replace('.', ',')}</span>`);
         }
         if (regrasChips.length) html += `<div class="ruv-regras">${regrasChips.join('')}</div>`;
 
@@ -823,11 +823,12 @@ class RestaUmModule {
 
             // ── Vivos (posição 2 em diante, pois líder já tem hero card) ──
             const vivosRestantes = vivos.slice(1); // pula o líder (já renderizado acima)
-            const idxZonaInicio = vivosRestantes.length - qtdPerigo; // onde começa a zona de perigo
+            // Clamp: nunca marcar todos os vivos como zona de perigo
+            const idxZonaInicio = Math.max(0, vivosRestantes.length - qtdPerigo);
 
             vivosRestantes.forEach((p, idx) => {
                 const posGlobal = idx + 2; // +2 pois pos 1 = líder
-                const isLanterna = this.isLive && idx >= idxZonaInicio && vivosRestantes.length > 0;
+                const isLanterna = this.isLive && vivosRestantes.length > 0 && idx >= idxZonaInicio && idxZonaInicio < vivosRestantes.length;
                 const temPts = p.pontosRodada != null;
                 const animDelay = ((idx + 1) * 40).toFixed(0);
 

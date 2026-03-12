@@ -9,8 +9,6 @@
 //       Quando mercado abre: consolida automaticamente com dados reais.
 // =====================================================================
 
-import * as ParciaisModule from './participante-rodada-parcial.js';
-
 if (window.Log) Log.info('[PARTICIPANTE-RESTA-UM] Carregando módulo v3.0...');
 
 // Estado do módulo
@@ -20,7 +18,6 @@ let _currentParticipante = null;
 let _refreshInterval = null;
 let _wasLanterna = false;
 let _isLiveMode = false;
-let _parciaisIniciados = false;
 const REFRESH_INTERVAL_MS = 60_000;    // 60s normal
 const REFRESH_INTERVAL_LIVE_MS = 30_000; // 30s ao vivo
 
@@ -30,6 +27,9 @@ const REFRESH_INTERVAL_LIVE_MS = 30_000; // 30s ao vivo
 
 export async function inicializarRestaUmParticipante({ participante, ligaId, timeId }) {
     if (window.Log) Log.info('[PARTICIPANTE-RESTA-UM] Inicializando v2.0...', { ligaId, timeId });
+
+    // Prevenir double interval em navegação SPA rápida
+    _pararAutoRefresh();
 
     _currentLigaId = ligaId;
     _currentTimeId = timeId;
@@ -75,18 +75,9 @@ async function _carregarDados() {
         if (!dados?.edicao) { _mostrarEstado('nao-iniciado'); return; }
 
         // Fonte canônica: API via orchestrator_states (status_mercado===2 + rodada bate)
-        // _detectarRodadaAoVivo() removida do fluxo — mercadoFechado=true vaza em transições pós-rodada
+        // Pontos já vêm mesclados pelo backend — sem fetch adicional de parciais
         const isLive = dados.isLive === true;
         dados.isLive = isLive;
-
-        // Modo PROJETADO: edição ativa (ou pendente na R1) + rodada ao vivo → sobrepor com parciais
-        if (isLive && (dados.edicao?.status === 'em_andamento' || dados.edicao?.status === 'pendente')) {
-            const parciais = await _buscarParciais();
-            if (parciais?.length) {
-                _mergeParciaisNaDados(dados, parciais);
-                dados.isProjetado = true;
-            }
-        }
 
         // Ajustar intervalo de refresh se mudou de estado
         if (isLive !== _isLiveMode) {
@@ -105,42 +96,6 @@ async function _carregarDados() {
             _mostrarEstado('error', error.message);
         }
     }
-}
-
-async function _detectarRodadaAoVivo() {
-    // Ground truth: usa game-status real + calendário de janelas
-    // Evita falso-positivo quando status_mercado=2 mas jogos já terminaram
-    if (window.isRodadaRealmenteAoVivo) {
-        return window.isRodadaRealmenteAoVivo();
-    }
-    // Fallback conservador se helper ainda não carregou
-    if (window.cartolaState) {
-        return window.cartolaState.statusMercado === 2 ||
-               window.cartolaState.mercadoFechado === true;
-    }
-    return false;
-}
-
-async function _buscarParciais() {
-    try {
-        if (!_parciaisIniciados) {
-            await ParciaisModule.inicializarParciais(_currentLigaId, _currentTimeId);
-            _parciaisIniciados = true;
-        }
-        const dados = await ParciaisModule.carregarParciais();
-        return dados?.participantes || null;
-    } catch (err) {
-        if (window.Log) Log.warn('[PARTICIPANTE-RESTA-UM] Parciais indisponível:', err?.message);
-        return null;
-    }
-}
-
-function _mergeParciaisNaDados(dados, parciais) {
-    const map = new Map(parciais.map(p => [String(p.timeId), p.pontos || 0]));
-    dados.participantes?.forEach(p => {
-        const pts = map.get(String(p.timeId));
-        if (pts !== undefined) p.pontosRodada = pts;
-    });
 }
 
 // =====================================================================
@@ -175,21 +130,6 @@ function _pararAutoRefresh() {
 function _reiniciarAutoRefresh() {
     _pararAutoRefresh();
     _iniciarAutoRefresh();
-}
-
-/**
- * Detecta se há rodada ao vivo com base no estado global do app
- */
-function _isRodadaAoVivo() {
-    // Verificar estado global do mercado (set by participante-utils.js or similar)
-    if (window.cartolaState) {
-        return window.cartolaState.mercadoFechado === true ||
-               window.cartolaState.statusMercado === 2;
-    }
-
-    // Fallback: verificar se há indicador de live no DOM
-    const liveIndicator = document.querySelector('.live-indicator, .ao-vivo-badge, [data-live="true"]');
-    return !!liveIndicator;
 }
 
 // =====================================================================
@@ -249,11 +189,17 @@ function _renderizarDisputa(dados, timeId) {
     const totalParticipantes = participantes?.length || 0;
     const qtdPerigo = edicao?.eliminadosPorRodada || 1;
 
-    // Ordenar vivos por pontosRodada DESC (líder primeiro), acumulado como desempate
+    // Fonte canônica: API via orchestrator_states
+    const isLive = dados.isLive === true;
+
+    // Ordenar vivos: por pontosRodada durante live, por acumulados fora do live
     const vivos = (participantes?.filter(p => p.status === 'vivo' || p.status === 'campeao') || [])
         .sort((a, b) => {
-            const diff = (b.pontosRodada || 0) - (a.pontosRodada || 0);
-            return diff !== 0 ? diff : (b.pontosAcumulados || 0) - (a.pontosAcumulados || 0);
+            if (isLive && a.pontosRodada != null && b.pontosRodada != null) {
+                const diff = (b.pontosRodada || 0) - (a.pontosRodada || 0);
+                return diff !== 0 ? diff : (b.pontosAcumulados || 0) - (a.pontosAcumulados || 0);
+            }
+            return (b.pontosAcumulados || 0) - (a.pontosAcumulados || 0);
         });
 
     // Ordenar eliminados por rodadaEliminacao DESC (mais recente primeiro)
@@ -261,9 +207,6 @@ function _renderizarDisputa(dados, timeId) {
         .sort((a, b) => (b.rodadaEliminacao || 0) - (a.rodadaEliminacao || 0));
 
     const meuStatus = participantes?.find(p => String(p.timeId) === String(timeId));
-
-    const isLive = dados.isLive === true; // confia na API (orchestrator_states) — _isRodadaAoVivo() pode vazar com mercadoFechado=true fora de jogo
-    const isProjetado = dados.isProjetado === true;
 
     // Zona de perigo: apenas durante rodada ao vivo (sem live = sem zona visual)
     const qtdPerigoDisplay = isLive ? Math.min(qtdPerigo, Math.max(0, vivos.length - 1)) : 0;
@@ -280,13 +223,12 @@ function _renderizarDisputa(dados, timeId) {
     const lider = vivos[0];
     const isCampeao = lider?.status === 'campeao';
 
-    // ── STATUS BADGES (AO VIVO / PROJETADO) ──────────────────────────
+    // ── STATUS BADGES (AO VIVO) ───────────────────────────────────────
     let html = '';
-    if (isLive || isProjetado) {
-        html += `<div class="ru-status-badges" style="display:flex;gap:8px;margin-bottom:12px;">`;
-        if (isLive) html += '<span class="resta-um-live-indicator"><span class="resta-um-live-dot"></span>AO VIVO</span>';
-        if (isProjetado) html += '<span class="ru-badge-projetado">PROJETADO</span>';
-        html += `</div>`;
+    if (isLive) {
+        html += `<div class="ru-status-badges" style="display:flex;gap:8px;margin-bottom:12px;">
+            <span class="resta-um-live-indicator"><span class="resta-um-live-dot"></span>AO VIVO</span>
+        </div>`;
     }
 
     // ── ALERTAS ──────────────────────────────────────────────────────
@@ -328,15 +270,14 @@ function _renderizarDisputa(dados, timeId) {
     if (lider) {
         const isMeuTimeLider = String(lider.timeId) === String(timeId);
         const pontosLider = lider.pontosRodada != null ? _formatPontos(lider.pontosRodada) : '--';
-        const ptsClass = isProjetado ? 'ru-lider-pts ru-pts-projetado' : 'ru-lider-pts';
         html += `
-            <div class="ru-lider-card${isMeuTimeLider ? ' meu-time' : ''}${isProjetado ? ' projetado' : ''}">
+            <div class="ru-lider-card${isMeuTimeLider ? ' meu-time' : ''}">
                 <div class="ru-lider-topo">
-                    <span class="ru-lider-badge${isProjetado ? ' projetado' : ''}">
+                    <span class="ru-lider-badge">
                         <span class="material-icons" style="font-size: 13px; vertical-align: middle; margin-right: 2px;">emoji_events</span>
                         ${isCampeao ? 'Campe&atilde;o' : 'The Best Survivor'}
                     </span>
-                    <span class="ru-lider-pos${isProjetado ? ' projetado' : ''}">1&deg;</span>
+                    <span class="ru-lider-pos">1&deg;</span>
                 </div>
                 <div class="ru-lider-body">
                     <img class="ru-lider-escudo"
@@ -347,7 +288,7 @@ function _renderizarDisputa(dados, timeId) {
                         <div class="ru-lider-cartoleiro">${escapeHtml(lider.nomeCartoleiro || lider.nome_cartola || lider.nome || 'N/D')}</div>
                         <div class="ru-lider-time">${escapeHtml(lider.nomeTime || '')}</div>
                     </div>
-                    <div class="${ptsClass}">${pontosLider}</div>
+                    <div class="ru-lider-pts">${pontosLider}</div>
                 </div>
             </div>
         `;
@@ -368,15 +309,14 @@ function _renderizarDisputa(dados, timeId) {
             // Separador antes da zona de perigo (só quando há vivos fora da zona)
             if (idx === idxZonaInicio && idxZonaInicio > 0) {
                 html += `
-                    <div class="ru-zona-perigo${isProjetado ? ' projetado' : ''}">
+                    <div class="ru-zona-perigo">
                         <span class="material-icons" style="font-size: 13px; margin-right: 4px;">warning</span>
-                        Zona de Elimina&ccedil;&atilde;o${isProjetado ? ' &bull; PROJETADO' : ''}
+                        Zona de Elimina&ccedil;&atilde;o
                     </div>
                 `;
             }
 
             const pontosStr = p.pontosRodada != null ? _formatPontos(p.pontosRodada) : '--';
-            const ptsClass = isProjetado ? 'ru-pts-projetado' : 'ru-pts-sobrevivente';
             const classes = ['resta-um-row'];
             if (isMeuTime) classes.push('meu-time');
             if (isNaZona) classes.push('lanterna');
@@ -392,7 +332,7 @@ function _renderizarDisputa(dados, timeId) {
                         <div>${escapeHtml(p.nomeCartoleiro || p.nome_cartola || p.nome || 'N/D')}</div>
                         <div class="ru-nome-time">${escapeHtml(p.nomeTime || '')}</div>
                     </div>
-                    <span class="resta-um-pontos ${ptsClass}">${pontosStr}</span>
+                    <span class="resta-um-pontos ru-pts-sobrevivente">${pontosStr}</span>
                     ${isNaZona
                         ? `<span class="ru-tag-perigo"><span class="material-icons" style="font-size: 11px; vertical-align: middle;">warning</span>&nbsp;EM PERIGO</span>`
                         : ''
@@ -513,7 +453,6 @@ export function destruirRestaUmParticipante() {
     _currentParticipante = null;
     _wasLanterna = false;
     _isLiveMode = false;
-    _parciaisIniciados = false;
 
     if (window.Log) Log.debug('[PARTICIPANTE-RESTA-UM] Módulo destruído, intervals limpos');
 }

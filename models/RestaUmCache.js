@@ -20,6 +20,7 @@ const ParticipanteRestaUmSchema = new mongoose.Schema({
         enum: ['vivo', 'zona_perigo', 'eliminado', 'campeao'],
         default: 'vivo',
     },
+    pontosRodada: { type: Number, default: null },
     pontosAcumulados: { type: Number, default: 0 },
     rodadaEliminacao: { type: Number, default: null },
     rodadasSobrevividas: { type: Number, default: 0 },
