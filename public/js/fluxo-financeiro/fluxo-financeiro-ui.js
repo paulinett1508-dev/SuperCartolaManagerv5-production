@@ -754,26 +754,15 @@ export class FluxoFinanceiroUI {
                             <th class="col-acoes">Ações</th>
                         </tr>
                         ` : `
-                        <!-- Header com colunas de módulos (temporada com rodadas consolidadas) -->
+                        <!-- Header Bank Statement — colunas condensadas -->
                         <tr>
                             <th class="col-num">#</th>
                             <th class="col-participante sortable" onclick="window.ordenarTabelaFinanceiro('nome')" data-sort="nome">
                                 <span class="th-sort">Participante <span class="material-icons sort-icon">unfold_more</span></span>
                             </th>
-                            <th class="col-time-coracao" title="Time do Coração">
-                                <span class="material-icons" style="font-size: 16px;">favorite</span>
-                            </th>
-                            ${this._modulosAtivos?.banco !== false ? '<th class="col-modulo" data-modulo="banco">Timeline</th>' : ''}
-                            ${this._modulosAtivos?.pontosCorridos ? '<th class="col-modulo" data-modulo="pontosCorridos">P.Corridos</th>' : ''}
-                            ${this._modulosAtivos?.mataMata ? '<th class="col-modulo" data-modulo="mataMata">Mata-Mata</th>' : ''}
-                            ${this._modulosAtivos?.top10 ? '<th class="col-modulo" data-modulo="top10">Top 10</th>' : ''}
-                            ${this._modulosAtivos?.melhorMes ? '<th class="col-modulo" data-modulo="melhorMes">Melhor Mês</th>' : ''}
-                            ${this._modulosAtivos?.artilheiro ? '<th class="col-modulo" data-modulo="artilheiro">Artilheiro</th>' : ''}
-                            ${this._modulosAtivos?.luvaOuro ? '<th class="col-modulo" data-modulo="luvaOuro">Luva Ouro</th>' : ''}
-                            ${this._modulosAtivos?.restaUm ? '<th class="col-modulo" data-modulo="restaUm">Resta Um</th>' : ''}
-                            ${this._modulosAtivos?.capitaoLuxo ? '<th class="col-modulo" data-modulo="capitaoLuxo">Cap. Luxo</th>' : ''}
-                            <th class="col-modulo">Aj. Manuais</th>
-                            <th class="col-modulo">Acertos</th>
+                            <th class="col-resumo" title="Resultado de todos os módulos de jogo (Timeline + Competições)">Resultado</th>
+                            <th class="col-resumo" title="Ajustes manuais do admin">Ajustes</th>
+                            <th class="col-resumo" title="Pagamentos e recebimentos">Acertos</th>
                             <th class="col-saldo sortable" onclick="window.ordenarTabelaFinanceiro('saldo')" data-sort="saldo">
                                 <span class="th-sort">Saldo <span class="material-icons sort-icon">unfold_more</span></span>
                             </th>
@@ -790,7 +779,7 @@ export class FluxoFinanceiroUI {
                                     : this._renderizarLinhaTabela(p, idx, ligaId)
                             ).join('')
                             : `<tr class="linha-vazia">
-                                <td colspan="15" style="text-align: center; padding: 40px; color: var(--texto-secundario);">
+                                <td colspan="8" style="text-align: center; padding: 40px; color: var(--texto-secundario);">
                                     <span class="material-icons" style="font-size: 48px; color: var(--laranja); opacity: 0.5;">group_off</span>
                                     <p style="margin-top: 16px; font-size: 14px;">
                                         ${(window.temporadaAtual || CURRENT_SEASON) >= 2026
@@ -1041,19 +1030,21 @@ export class FluxoFinanceiroUI {
             return `<span class="${cls}">${sinal}R$ ${formatted}</span>`;
         };
 
-        // Colunas de módulos baseadas nos módulos ativos (data-modulo para update dinâmico)
-        let modulosCols = '';
-        if (this._modulosAtivos?.banco !== false) modulosCols += `<td class="col-modulo" data-modulo="banco">${fmtModulo(breakdown.banco)}</td>`;
-        if (this._modulosAtivos?.pontosCorridos) modulosCols += `<td class="col-modulo" data-modulo="pontosCorridos">${fmtModulo(breakdown.pontosCorridos)}</td>`;
-        if (this._modulosAtivos?.mataMata) modulosCols += `<td class="col-modulo" data-modulo="mataMata">${fmtModulo(breakdown.mataMata)}</td>`;
-        if (this._modulosAtivos?.top10) modulosCols += `<td class="col-modulo" data-modulo="top10">${fmtModulo(breakdown.top10)}</td>`;
-        if (this._modulosAtivos?.melhorMes) modulosCols += `<td class="col-modulo" data-modulo="melhorMes">${fmtModulo(breakdown.melhorMes)}</td>`;
-        if (this._modulosAtivos?.artilheiro) modulosCols += `<td class="col-modulo" data-modulo="artilheiro">${fmtModulo(breakdown.artilheiro)}</td>`;
-        if (this._modulosAtivos?.luvaOuro) modulosCols += `<td class="col-modulo" data-modulo="luvaOuro">${fmtModulo(breakdown.luvaOuro)}</td>`;
-        if (this._modulosAtivos?.restaUm) modulosCols += `<td class="col-modulo" data-modulo="restaUm">${fmtModulo(breakdown.restaUm)}</td>`;
-        if (this._modulosAtivos?.capitaoLuxo) modulosCols += `<td class="col-modulo" data-modulo="capitaoLuxo">${fmtModulo(breakdown.capitaoLuxo)}</td>`;
-        modulosCols += `<td class="col-modulo" data-modulo="campos">${fmtModulo(breakdown.campos)}</td>`;
-        modulosCols += `<td class="col-modulo" data-modulo="acertos">${fmtModulo(breakdown.acertos)}</td>`;
+        // Bank Statement: consolidar módulos de jogo em "Resultado"
+        const resultadoJogo = (breakdown.banco || 0)
+            + (breakdown.pontosCorridos || 0)
+            + (breakdown.mataMata || 0)
+            + (breakdown.top10 || 0)
+            + (breakdown.melhorMes || 0)
+            + (breakdown.artilheiro || 0)
+            + (breakdown.luvaOuro || 0)
+            + (breakdown.restaUm || 0)
+            + (breakdown.capitaoLuxo || 0);
+
+        const modulosCols = `
+            <td class="col-resumo">${fmtModulo(resultadoJogo)}</td>
+            <td class="col-resumo">${fmtModulo(breakdown.campos)}</td>
+            <td class="col-resumo">${fmtModulo(breakdown.acertos)}</td>`;
 
         // Formatar saldo final
         const saldoFormatado = Math.abs(saldoFinal).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -1077,11 +1068,10 @@ export class FluxoFinanceiroUI {
                         </div>
                         <div class="info-participante">
                             <span class="nome">${escapeHtml(p.nome_cartola || 'N/D')} ${badgeNovato}</span>
-                            <span class="time">${escapeHtml(p.nome_time || '-')}</span>
+                            <span class="time">${escudoTimeCoracao} ${escapeHtml(p.nome_time || '-')}</span>
                         </div>
                     </div>
                 </td>
-                <td class="col-time-coracao">${escudoTimeCoracao}</td>
                 ${modulosCols}
                 <td class="col-saldo ${isQuitado ? 'quitado' : classeSaldo}">
                     ${isQuitado

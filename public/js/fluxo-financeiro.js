@@ -11,7 +11,7 @@ import "./fluxo-financeiro/fluxo-financeiro-quitacao.js";
 import "./fluxo-financeiro/fluxo-financeiro-ajustes-api.js";
 
 // Cache-buster para forçar reload de módulos (incrementar a cada mudança)
-const CACHE_BUSTER = "v9.1"; // v9.1: Header condensado, stat pills, cleanup CSS morto
+const CACHE_BUSTER = "v10.0"; // v10.0: Bank Statement layout — colunas condensadas (Resultado, Ajustes, Acertos)
 
 // VARIÁVEIS GLOBAIS
 let rodadaAtual = 0;
