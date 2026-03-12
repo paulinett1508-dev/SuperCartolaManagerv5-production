@@ -11,7 +11,7 @@ import "./fluxo-financeiro/fluxo-financeiro-quitacao.js";
 import "./fluxo-financeiro/fluxo-financeiro-ajustes-api.js";
 
 // Cache-buster para forçar reload de módulos (incrementar a cada mudança)
-const CACHE_BUSTER = "v10.1"; // v10.1: Revert Bank Statement — restaurar colunas individuais de módulos
+const CACHE_BUSTER = "v10.2"; // v10.2: FIX inscrição no extrato from-scratch (saldo_lancamentos_iniciais)
 
 // VARIÁVEIS GLOBAIS
 let rodadaAtual = 0;

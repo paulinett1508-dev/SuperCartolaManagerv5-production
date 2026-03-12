@@ -6,7 +6,7 @@
 // v3.1: FIX - Evita re-injeção de scripts do layout + invalida cache ao navegar entre ligas
 
 // 🔖 Versão de cache-busting — atualize ao fazer deploy para forçar reload dos módulos JS
-const ADMIN_JS_VERSION = '20260312.4';
+const ADMIN_JS_VERSION = '20260312.5';
 
 // Wrapper de import dinâmico com cache-busting automático
 const vImport = (path) => {
@@ -1268,7 +1268,7 @@ async function carregarModuloCapitaoLuxo() {
 async function carregarModuloFluxoFinanceiro() {
     if (!window.orquestrador.modules.fluxoFinanceiro) {
         window.orquestrador.modules.fluxoFinanceiro = await vImport(
-            "./fluxo-financeiro.js?v10.0"
+            "./fluxo-financeiro.js?v10.2"
         );
     }
     return window.orquestrador.modules.fluxoFinanceiro;

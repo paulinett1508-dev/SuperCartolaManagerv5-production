@@ -796,6 +796,35 @@ export class FluxoFinanceiroCore {
 
         extrato.rodadas = rodadasProcessadas;
         this._calcularSaldoAcumulado(extrato.rodadas, camposEditaveis);
+
+        // ✅ v6.16 FIX: Incluir lançamentos iniciais (inscrição, legado, dívida) no cálculo from scratch
+        // Sem isso, inscrição (-R$180) não aparecia no saldo do extrato (casamento com tesouraria)
+        let saldoLancamentosIniciais = 0;
+        try {
+            if (this.cache?.carregarInscricoes2026) {
+                await this.cache.carregarInscricoes2026();
+            }
+            const inscricaoDetalhe = this.cache?.inscricoes2026?.get(String(timeId));
+            if (inscricaoDetalhe) {
+                const statusInscricao = this.cache?.getStatusInscricao2026?.(timeId) || {};
+                const pagouInscricao = statusInscricao.pagouInscricao === true || statusInscricao.inscricaoQuitada === true;
+                if (typeof inscricaoDetalhe.saldo_inicial_temporada === 'number') {
+                    saldoLancamentosIniciais = inscricaoDetalhe.saldo_inicial_temporada;
+                } else {
+                    const pagou = pagouInscricao || inscricaoDetalhe.pagou_inscricao === true;
+                    const taxa = Number(inscricaoDetalhe.taxa_inscricao) || 0;
+                    const divida = Number(inscricaoDetalhe.divida_anterior) || 0;
+                    const saldoTransferido = Number(inscricaoDetalhe.saldo_transferido) || 0;
+                    saldoLancamentosIniciais = (pagou ? 0 : taxa) + divida - saldoTransferido;
+                }
+                console.log(`[FLUXO-CORE] 📋 Inscrição incluída no cálculo: R$ ${saldoLancamentosIniciais.toFixed(2)}`);
+            }
+        } catch (err) {
+            console.warn('[FLUXO-CORE] Erro ao buscar inscrição para cálculo:', err);
+        }
+        extrato.resumo.saldo_lancamentos_iniciais = saldoLancamentosIniciais;
+        extrato.resumo.saldoAjustes = 0;
+
         // ✅ v6.6: Calcular AMBOS os saldos separadamente
         extrato.resumo.saldo_temporada = this._calcularSaldoTemporada(extrato.resumo); // Histórico (imutável)
         extrato.resumo.saldo = this._calcularSaldoFinal(extrato.resumo); // Pendente (com acertos)
