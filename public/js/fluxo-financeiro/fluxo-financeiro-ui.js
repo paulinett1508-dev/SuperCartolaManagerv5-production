@@ -4301,7 +4301,7 @@ window.removerAjuste = async function(ajusteId) {
  */
 window.abrirNovoParticipante = function() {
     const urlParams = new URLSearchParams(window.location.search);
-    // Suporte a ?id= (detalhe-liga.html) e ?liga= (fluxo-financeiro.html)
+    // Padrão: ?id= (fallback: ?liga= para retrocompatibilidade)
     const ligaId = urlParams.get('id') || urlParams.get('liga');
     const temporada = window.temporadaAtual || CURRENT_SEASON;
 

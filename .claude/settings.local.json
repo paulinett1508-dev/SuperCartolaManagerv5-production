@@ -205,7 +205,8 @@
       "Read(//tmp/**)",
       "Bash(gh repo view paulinett1508-dev/agnostic-core 2>&1 | head -30)",
       "Bash(git remote:*)",
-      "Bash(find /home/runner/workspace -type f \\\\\\( -name \"*capitao*\" -o -name \"*Capitao*\" \\\\\\) 2>/dev/null | head -20)"
+      "Bash(find /home/runner/workspace -type f \\\\\\( -name \"*capitao*\" -o -name \"*Capitao*\" \\\\\\) 2>/dev/null | head -20)",
+      "Bash(gh auth:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

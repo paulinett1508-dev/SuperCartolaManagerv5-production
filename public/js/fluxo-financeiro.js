@@ -39,9 +39,9 @@ function getTemporadaSelecionada() {
 }
 
 function obterLigaId() {
-    // ✅ MODO ADMIN: Verificar URL (detalhe-liga.html?id=XXX ou fluxo-financeiro.html?liga=XXX)
+    // ✅ MODO ADMIN: Verificar URL (padrão: ?id=XXX)
     const urlParams = new URLSearchParams(window.location.search);
-    const ligaIdFromUrl = urlParams.get("liga") || urlParams.get("id") || urlParams.get("ligaId");
+    const ligaIdFromUrl = urlParams.get("id") || urlParams.get("liga") || urlParams.get("ligaId");
     if (ligaIdFromUrl) {
         return ligaIdFromUrl;
     }

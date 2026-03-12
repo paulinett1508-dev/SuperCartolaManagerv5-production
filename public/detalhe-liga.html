@@ -1477,7 +1477,7 @@
                             e.preventDefault();
                             const id = obterLigaIdCache();
                             if (id) {
-                                window.location.href = `auditoria-extratos.html?liga=${id}`;
+                                window.location.href = `auditoria-extratos.html?id=${id}`;
                             } else {
                                 SuperModal.toast.warning('Liga nao identificada');
                             }

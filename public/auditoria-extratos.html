@@ -402,7 +402,7 @@
         // Obter ligaId da URL
         function obterLigaIdUrl() {
             const params = new URLSearchParams(window.location.search);
-            return params.get('liga') || params.get('id');
+            return params.get('id') || params.get('liga');
         }
 
         // Carregar ligas
