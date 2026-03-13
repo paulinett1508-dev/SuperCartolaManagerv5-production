@@ -202,15 +202,15 @@ export async function obterStatus(req, res) {
             }
         }
 
-        // Separar vivos e eliminados, mesclar pontos live
+        // Separar vivos e eliminados, mesclar pontos
+        // Priorizar pontosLiveMap (Rodada collection = fonte de verdade) sobre cache
         const participantes = (edicao.participantes || []).map(p => {
-            const pontosLive = pontosLiveMap.get(String(p.timeId));
+            const pontosRodada = pontosLiveMap.get(String(p.timeId));
             return {
                 ...p,
-                // Se temos pontos live, usar; se isLive mas sem dados, null (evita stale do cache); senão usar cache
-                pontosRodada: isLive
-                    ? (pontosLive != null ? truncarPontosNum(pontosLive) : null)
-                    : (p.pontosRodada != null ? truncarPontosNum(p.pontosRodada) : null),
+                pontosRodada: pontosRodada != null
+                    ? truncarPontosNum(pontosRodada)
+                    : (isLive ? null : (p.pontosRodada != null ? truncarPontosNum(p.pontosRodada) : null)),
                 pontosAcumulados: truncarPontosNum(p.pontosAcumulados || 0),
             };
         });
@@ -458,14 +458,14 @@ export async function obterParciais(req, res) {
             }
         }
 
-        // Mesclar pontos live com participantes
+        // Mesclar pontos — priorizar pontosLiveMap (Rodada = fonte de verdade)
         const participantes = (edicao.participantes || []).map(p => {
-            const pontosLive = pontosLiveMap.get(String(p.timeId));
+            const pontosRodada = pontosLiveMap.get(String(p.timeId));
             return {
                 ...p,
-                pontosRodada: pontosLive != null
-                    ? truncarPontosNum(pontosLive)
-                    : (p.pontosRodada != null ? truncarPontosNum(p.pontosRodada) : null),
+                pontosRodada: pontosRodada != null
+                    ? truncarPontosNum(pontosRodada)
+                    : (isLive ? null : (p.pontosRodada != null ? truncarPontosNum(p.pontosRodada) : null)),
                 pontosAcumulados: truncarPontosNum(p.pontosAcumulados || 0),
             };
         });
@@ -474,7 +474,7 @@ export async function obterParciais(req, res) {
         const vivos = participantes
             .filter(p => p.status === 'vivo')
             .sort((a, b) => {
-                if (isLive && a.pontosRodada != null && b.pontosRodada != null) {
+                if (a.pontosRodada != null && b.pontosRodada != null) {
                     return (b.pontosRodada || 0) - (a.pontosRodada || 0);
                 }
                 return (b.pontosAcumulados || 0) - (a.pontosAcumulados || 0);
