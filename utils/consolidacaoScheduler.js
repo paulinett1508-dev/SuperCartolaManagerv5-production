@@ -39,16 +39,16 @@ async function getStatusMercado() {
 // Chama o endpoint POST /api/rodadas/:ligaId/rodadas para buscar dados da API Cartola
 // ============================================================================
 
-async function popularRodadaParaLiga(ligaId, ligaNome, rodada) {
+async function popularRodadaParaLiga(ligaId, ligaNome, rodada, repopular = false) {
     try {
         const url = `${BASE_URL}/api/rodadas/${ligaId}/rodadas`;
 
-        console.log(`[SCHEDULER] 📥 Populando R${rodada} para liga ${ligaNome}...`);
+        console.log(`[SCHEDULER] 📥 Populando R${rodada} para liga ${ligaNome}${repopular ? ' (REPOPULAR)' : ''}...`);
 
         const response = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ rodada }),
+            body: JSON.stringify({ rodada, repopular }),
         });
 
         const result = await response.json();
@@ -100,9 +100,23 @@ async function garantirRodadasPopuladas(rodadaFinal) {
                         `[SCHEDULER] ⚠️ Liga ${liga.nome} R${rodada} T${CURRENT_SEASON} sem dados, populando...`,
                     );
                     await popularRodadaParaLiga(liga._id.toString(), liga.nome, rodada);
-
-                    // Delay entre chamadas para não sobrecarregar a API Cartola
                     await new Promise((resolve) => setTimeout(resolve, 2000));
+                } else {
+                    // ✅ v4.1: Verificar se há registros com falha de API que precisam re-popular
+                    const falhas = await Rodada.countDocuments({
+                        ligaId: liga._id,
+                        rodada: rodada,
+                        temporada: CURRENT_SEASON,
+                        populacaoFalhou: true,
+                    });
+
+                    if (falhas > 0) {
+                        console.log(
+                            `[SCHEDULER] 🔄 Liga ${liga.nome} R${rodada} tem ${falhas} registros com falha de API — re-populando...`,
+                        );
+                        await popularRodadaParaLiga(liga._id.toString(), liga.nome, rodada, true);
+                        await new Promise((resolve) => setTimeout(resolve, 2000));
+                    }
                 }
             }
         }
@@ -162,8 +176,12 @@ async function verificarEConsolidar() {
                     `[SCHEDULER] 🔔 TRANSIÇÃO DETECTADA: Mercado abriu! R${rodadaFinalizada} finalizada - populando e consolidando`,
                 );
 
-                // Primeiro popular, depois consolidar
-                await popularRodadaParaTodasLigas(rodadaFinalizada);
+                // Primeiro popular (com repopular=true para garantir dados finais), depois consolidar
+                await popularRodadaParaTodasLigas(rodadaFinalizada, true);
+
+                // ✅ v4.2: Retry automático se houve falhas na população
+                await retryFalhasPopulacao(rodadaFinalizada);
+
                 await consolidarRodadaAutomatica(rodadaFinalizada);
             }
         }
@@ -198,17 +216,68 @@ async function verificarEConsolidar() {
     }
 }
 
+// ✅ v4.2: Retry automático para registros com falha de API
+// Tenta re-popular até 3x com delay crescente (10s, 30s, 60s)
+async function retryFalhasPopulacao(rodada) {
+    const MAX_RETRIES = 3;
+    const DELAYS = [10000, 30000, 60000]; // 10s, 30s, 60s
+
+    for (let tentativa = 1; tentativa <= MAX_RETRIES; tentativa++) {
+        const ligas = await Liga.find({ ativa: { $ne: false } }).select("_id nome").lean();
+        let totalFalhasGlobal = 0;
+
+        for (const liga of ligas) {
+            const falhas = await Rodada.countDocuments({
+                ligaId: liga._id,
+                rodada: rodada,
+                temporada: CURRENT_SEASON,
+                populacaoFalhou: true,
+            });
+
+            if (falhas > 0) {
+                totalFalhasGlobal += falhas;
+            }
+        }
+
+        if (totalFalhasGlobal === 0) {
+            console.log(`[SCHEDULER] ✅ R${rodada}: Nenhuma falha pendente`);
+            return;
+        }
+
+        const delay = DELAYS[tentativa - 1];
+        console.log(
+            `[SCHEDULER] 🔄 R${rodada}: ${totalFalhasGlobal} falhas pendentes — retry ${tentativa}/${MAX_RETRIES} em ${delay / 1000}s...`,
+        );
+
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        await popularRodadaParaTodasLigas(rodada, true);
+    }
+
+    // Verificar se ainda restam falhas após todos os retries
+    const falhasRestantes = await Rodada.countDocuments({
+        rodada: rodada,
+        temporada: CURRENT_SEASON,
+        populacaoFalhou: true,
+    });
+
+    if (falhasRestantes > 0) {
+        console.error(
+            `[SCHEDULER] 🚨 CRÍTICO R${rodada}: ${falhasRestantes} registros com falha após ${MAX_RETRIES} tentativas — dados podem estar incorretos!`,
+        );
+    }
+}
+
 // ✅ v3.0: Popular uma rodada para todas as ligas
-async function popularRodadaParaTodasLigas(rodada) {
+async function popularRodadaParaTodasLigas(rodada, repopular = false) {
     try {
         console.log(
-            `[SCHEDULER] 📥 Populando R${rodada} para todas as ligas...`,
+            `[SCHEDULER] 📥 Populando R${rodada} para todas as ligas${repopular ? ' (REPOPULAR)' : ''}...`,
         );
 
         const ligas = await Liga.find({ ativa: { $ne: false } }).select("_id nome").lean();
 
         for (const liga of ligas) {
-            await popularRodadaParaLiga(liga._id.toString(), liga.nome, rodada);
+            await popularRodadaParaLiga(liga._id.toString(), liga.nome, rodada, repopular);
 
             // Delay entre ligas
             await new Promise((resolve) => setTimeout(resolve, 2000));

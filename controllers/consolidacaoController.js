@@ -266,7 +266,8 @@ export const consolidarRodada = async (req, res) => {
         const dadosRodada = await Rodada.find({
             ligaId: new mongoose.Types.ObjectId(ligaId),
             rodada: rodadaNum,
-            temporada: CURRENT_SEASON
+            temporada: CURRENT_SEASON,
+            populacaoFalhou: { $ne: true }, // ✅ v3.2: Excluir registros com falha de API
         }).lean();
         
         // ✅ v3.3.0: Buscar config de ranking_rodada para enriquecer com valor_financeiro

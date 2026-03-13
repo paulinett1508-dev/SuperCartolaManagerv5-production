@@ -414,42 +414,41 @@ async function processarRodada(
           `[PROCESSAR-RODADA] Time ${time.timeId} rodada ${rodada}: ${dados.pontos} pontos (clube_id: ${clubeIdFinal})`,
         );
       } else {
-        // API falhou - criar registro com clube_id herdado
+        // API falhou - criar registro marcado como FALHA (NÃO como rodadaNaoJogada)
         logger.warn(
-          `[PROCESSAR-RODADA] API falhou para time ${time.timeId} rodada ${rodada} (status: ${response.status})`,
+          `[PROCESSAR-RODADA] ⚠️ API falhou para time ${time.timeId} rodada ${rodada} (status: ${response.status})`,
         );
 
-        // ✅ v8.1: Usar nomes locais como fallback em vez de "N/D"
         const nomesLocalFalha = mapaTimesNomes.get(time.timeId) || {};
         dadosRodada.push({
           timeId: time.timeId,
           nome_cartola: nomesLocalFalha.nome_cartola || "N/D",
           nome_time: nomesLocalFalha.nome_time || "N/D",
           escudo: "",
-          clube_id: mapaClubeId[time.timeId] || null, // ✅ v2.4: Herdar clube_id
+          clube_id: mapaClubeId[time.timeId] || null,
           pontos: 0,
           ativo: time.ativo !== false,
-          rodadaNaoJogada: true,
+          rodadaNaoJogada: false, // ✅ v3.2: NÃO marcar como não-jogou — foi falha de API
+          populacaoFalhou: true, // ✅ v3.2: Flag de falha para retry automático
         });
       }
     } catch (error) {
       logger.error(
-        `[PROCESSAR-RODADA] Erro ao buscar time ${time.timeId}:`,
+        `[PROCESSAR-RODADA] ⚠️ Erro ao buscar time ${time.timeId}:`,
         error.message,
       );
 
-      // Erro na requisição - criar registro com clube_id herdado
-      // ✅ v8.1: Usar nomes locais como fallback em vez de "N/D"
       const nomesLocalErro = mapaTimesNomes.get(time.timeId) || {};
       dadosRodada.push({
         timeId: time.timeId,
         nome_cartola: nomesLocalErro.nome_cartola || "N/D",
         nome_time: nomesLocalErro.nome_time || "N/D",
         escudo: "",
-        clube_id: mapaClubeId[time.timeId] || null, // ✅ v2.4: Herdar clube_id
+        clube_id: mapaClubeId[time.timeId] || null,
         pontos: 0,
         ativo: time.ativo !== false,
-        rodadaNaoJogada: true,
+        rodadaNaoJogada: false, // ✅ v3.2: NÃO marcar como não-jogou — foi erro de rede
+        populacaoFalhou: true, // ✅ v3.2: Flag de falha para retry automático
       });
     }
   }
@@ -495,6 +494,7 @@ async function processarRodada(
           valorFinanceiro: time.valorFinanceiro,
           totalParticipantesAtivos: timesAtivos.length,
           rodadaNaoJogada: time.rodadaNaoJogada || false,
+          populacaoFalhou: time.populacaoFalhou || false, // ✅ v3.2: Flag de falha de API
           // ✅ v3.1: Escalação para fallback offline (Campinho)
           atletas: time.atletas || [],
           capitao_id: time.capitao_id || null,
@@ -514,11 +514,23 @@ async function processarRodada(
     }
   }
 
+  // ✅ v3.2: Validação pós-população — alertar se proporção de falhas é alta
+  const totalTimes = todosTimes.length;
+  const totalFalhas = todosTimes.filter(t => t.populacaoFalhou).length;
+  const percentFalhas = totalTimes > 0 ? Math.round((totalFalhas / totalTimes) * 100) : 0;
+
+  if (totalFalhas > 0) {
+    const nivel = percentFalhas > 50 ? '🚨 CRÍTICO' : '⚠️ ALERTA';
+    logger.warn(
+      `[PROCESSAR-RODADA] ${nivel} Rodada ${rodada}: ${totalFalhas}/${totalTimes} times com falha de API (${percentFalhas}%)`,
+    );
+  }
+
   logger.log(
-    `[PROCESSAR-RODADA] Rodada ${rodada}: ${atualizadas} registros processados (${timesAtivos.length} ativos)`,
+    `[PROCESSAR-RODADA] Rodada ${rodada}: ${atualizadas} registros processados (${timesAtivos.length} ativos, ${totalFalhas} falhas API)`,
   );
 
-  return { inseridas, atualizadas };
+  return { inseridas, atualizadas, falhas: totalFalhas };
 }
 
 // =====================================================================
@@ -545,7 +557,8 @@ export const obterRodadas = async (req, res) => {
 
     logger.log(`[OBTER-RODADAS] Filtro:`, JSON.stringify(filtro));
 
-    // Buscar rodadas do banco
+    // Buscar rodadas do banco (excluir registros com falha de API — dados inválidos)
+    filtro.populacaoFalhou = { $ne: true };
     const rodadas = await Rodada.find(filtro)
       .sort({ rodada: 1, posicao: 1 })
       .lean();
