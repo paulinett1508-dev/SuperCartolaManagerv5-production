@@ -1,0 +1,575 @@
+/**
+ * ESCALAÇÃO IA - Admin Module CSS v1.0
+ * Dark mode estrito. Tokens de _admin-tokens.css.
+ * Fontes: Russo One (titulos), Inter (corpo), JetBrains Mono (numeros).
+ * Material Icons. Sem cores hardcoded.
+ */
+
+/* =============================================
+   CONTAINER
+   ============================================= */
+.eia-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+/* =============================================
+   HEADER
+   ============================================= */
+.eia-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.eia-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.eia-header .back-button {
+    background: none;
+    border: 1px solid var(--border-default, rgba(255,255,255,0.1));
+    color: var(--text-secondary, rgba(255,255,255,0.7));
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    transition: background 0.2s;
+}
+
+.eia-header .back-button:hover {
+    background: var(--surface-white-10);
+}
+
+.eia-title {
+    font-family: 'Russo One', sans-serif;
+    font-size: 20px;
+    color: var(--text-primary, #fff);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.eia-title-icon {
+    color: var(--color-primary);
+    font-size: 24px;
+}
+
+.eia-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--color-primary-muted);
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary-border);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.eia-fontes-badges {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.eia-fonte-badge {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.eia-fonte-badge .material-icons {
+    font-size: 12px;
+}
+
+.eia-fonte-badge--ativo {
+    background: var(--color-success-muted);
+    color: var(--color-success-text);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.eia-fonte-badge--inativo {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted, rgba(255,255,255,0.4));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* =============================================
+   CONTROLES
+   ============================================= */
+.eia-controles {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    margin-bottom: 16px;
+    padding: 16px;
+    background: var(--surface-card);
+    border-radius: 12px;
+    border: 1px solid var(--border-default, rgba(255,255,255,0.08));
+    flex-wrap: wrap;
+}
+
+.eia-controle-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.eia-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted, rgba(255,255,255,0.5));
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.eia-input,
+.eia-select {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    padding: 8px 12px;
+    background: var(--surface-card-elevated, #2a2a2a);
+    border: 1px solid var(--border-default, rgba(255,255,255,0.1));
+    border-radius: 8px;
+    color: var(--text-primary, #fff);
+    outline: none;
+    transition: border-color 0.2s;
+    min-width: 100px;
+}
+
+.eia-input:focus,
+.eia-select:focus {
+    border-color: var(--color-primary);
+}
+
+.eia-botoes {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.eia-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    transition: all 0.2s;
+}
+
+.eia-btn .material-icons {
+    font-size: 18px;
+}
+
+.eia-btn-primary {
+    background: var(--gradient-primary);
+    color: #fff;
+}
+
+.eia-btn-primary:hover {
+    background: var(--gradient-primary-hover);
+    transform: translateY(-1px);
+}
+
+.eia-btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.eia-btn-secondary {
+    background: var(--surface-card-elevated, #2a2a2a);
+    color: var(--text-secondary, rgba(255,255,255,0.7));
+    border: 1px solid var(--border-default, rgba(255,255,255,0.1));
+}
+
+.eia-btn-secondary:hover {
+    background: var(--surface-card-hover, #333);
+}
+
+/* =============================================
+   TABS
+   ============================================= */
+.eia-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    background: var(--surface-card);
+    border-radius: 10px;
+    padding: 4px;
+    border: 1px solid var(--border-default, rgba(255,255,255,0.08));
+}
+
+.eia-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted, rgba(255,255,255,0.5));
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.eia-tab .material-icons {
+    font-size: 18px;
+}
+
+.eia-tab:hover {
+    color: var(--text-secondary, rgba(255,255,255,0.7));
+    background: var(--surface-white-10);
+}
+
+.eia-tab.active {
+    background: var(--color-primary-muted);
+    color: var(--color-primary);
+}
+
+.eia-tab[data-modo="mitar"].active {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.eia-tab[data-modo="equilibrado"].active {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.eia-tab[data-modo="valorizar"].active {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+/* =============================================
+   LOADING
+   ============================================= */
+.eia-loading {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.eia-loading .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--surface-white-10);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: eia-spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+}
+
+@keyframes eia-spin {
+    to { transform: rotate(360deg); }
+}
+
+.eia-loading-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--text-primary, #fff);
+    margin: 0 0 4px;
+}
+
+.eia-loading-sub {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: var(--text-muted, rgba(255,255,255,0.4));
+    margin: 0;
+}
+
+/* =============================================
+   RESUMO
+   ============================================= */
+.eia-resumo {
+    background: var(--surface-card);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border-default, rgba(255,255,255,0.08));
+}
+
+.eia-resumo-stats {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.eia-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.eia-stat-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted, rgba(255,255,255,0.4));
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.eia-stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary, #fff);
+}
+
+.eia-stat-destaque .eia-stat-value {
+    color: var(--color-primary);
+    font-size: 18px;
+}
+
+.eia-resumo-texto {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: var(--text-secondary, rgba(255,255,255,0.7));
+    line-height: 1.5;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-default, rgba(255,255,255,0.08));
+}
+
+/* =============================================
+   ESCALAÇÃO (CARDS DE JOGADORES)
+   ============================================= */
+.eia-escalacao {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.eia-jogador-card {
+    background: var(--surface-card);
+    border-radius: 10px;
+    padding: 12px;
+    border: 1px solid var(--border-default, rgba(255,255,255,0.08));
+    transition: border-color 0.2s;
+    position: relative;
+}
+
+.eia-jogador-card:hover {
+    border-color: var(--color-primary-border);
+}
+
+.eia-jogador-card--capitao {
+    border-color: rgba(245, 158, 11, 0.4);
+    background: linear-gradient(135deg, var(--surface-card) 0%, rgba(245, 158, 11, 0.05) 100%);
+}
+
+.eia-jogador-card--capitao::after {
+    content: 'C';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 20px;
+    height: 20px;
+    background: #f59e0b;
+    color: #000;
+    border-radius: 50%;
+    font-family: 'Russo One', sans-serif;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.eia-jogador-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.eia-jogador-foto {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+    background: var(--surface-card-elevated, #2a2a2a);
+}
+
+.eia-jogador-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.eia-jogador-nome {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary, #fff);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.eia-jogador-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted, rgba(255,255,255,0.5));
+    display: flex;
+    gap: 8px;
+}
+
+.eia-jogador-posicao {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--surface-white-10);
+    color: var(--text-secondary, rgba(255,255,255,0.7));
+}
+
+.eia-jogador-scores {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.eia-jogador-score {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.eia-jogador-score-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    color: var(--text-muted, rgba(255,255,255,0.4));
+    text-transform: uppercase;
+}
+
+.eia-jogador-score-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary, #fff);
+}
+
+.eia-jogador-score-value--preco {
+    color: var(--color-success-text, #86efac);
+}
+
+.eia-jogador-score-value--score {
+    color: var(--color-primary);
+}
+
+.eia-jogador-confianca {
+    width: 100%;
+    height: 3px;
+    background: var(--surface-white-10);
+    border-radius: 2px;
+    margin-bottom: 6px;
+    overflow: hidden;
+}
+
+.eia-jogador-confianca-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.5s ease;
+}
+
+.eia-jogador-justificativa {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: var(--text-muted, rgba(255,255,255,0.5));
+    line-height: 1.4;
+}
+
+/* =============================================
+   EMPTY STATE
+   ============================================= */
+.eia-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted, rgba(255,255,255,0.4));
+}
+
+.eia-empty-icon {
+    font-size: 48px;
+    color: var(--color-primary-muted);
+    margin-bottom: 16px;
+    display: block;
+}
+
+.eia-empty p {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    margin: 0 0 8px;
+    color: var(--text-secondary, rgba(255,255,255,0.6));
+}
+
+.eia-empty-sub {
+    font-size: 12px;
+    color: var(--text-muted, rgba(255,255,255,0.4));
+}
+
+/* =============================================
+   FOOTER INFO
+   ============================================= */
+.eia-footer-info {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: var(--text-muted, rgba(255,255,255,0.3));
+    text-align: center;
+    padding: 12px;
+}
+
+/* =============================================
+   RESPONSIVE
+   ============================================= */
+@media (max-width: 768px) {
+    .eia-controles {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .eia-botoes {
+        margin-left: 0;
+        justify-content: center;
+    }
+
+    .eia-escalacao {
+        grid-template-columns: 1fr;
+    }
+
+    .eia-resumo-stats {
+        justify-content: space-between;
+    }
+
+    .eia-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

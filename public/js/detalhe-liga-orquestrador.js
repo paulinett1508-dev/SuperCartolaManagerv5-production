@@ -6,7 +6,7 @@
 // v3.1: FIX - Evita re-injeção de scripts do layout + invalida cache ao navegar entre ligas
 
 // 🔖 Versão de cache-busting — atualize ao fazer deploy para forçar reload dos módulos JS
-const ADMIN_JS_VERSION = '20260312.6';
+const ADMIN_JS_VERSION = '20260313.1';
 
 // Wrapper de import dinâmico com cache-busting automático
 const vImport = (path) => {
@@ -472,6 +472,38 @@ class DetalheLigaOrquestrador {
                     break;
                 }
 
+                case "admin-escalacao-ia": {
+                    // 🤖 Escalação IA - Módulo admin exclusivo
+                    console.log('[ORQUESTRADOR] Iniciando escalacao-ia...');
+                    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+                    try {
+                        if (!this.modules.escalacaoIA) {
+                            console.log('[ORQUESTRADOR] Importando módulo escalacao-ia...');
+                            const mod = await vImport('./admin/modules/admin-escalacao-ia.js');
+                            this.modules.escalacaoIA = mod;
+                            console.log('[ORQUESTRADOR] Módulo escalacao-ia importado');
+                        }
+
+                        if (typeof window.inicializarEscalacaoIA === 'function') {
+                            await window.inicializarEscalacaoIA();
+                        } else if (window.EscalacaoIA?.inicializar) {
+                            await window.EscalacaoIA.inicializar();
+                        }
+                    } catch (error) {
+                        console.error('[ORQUESTRADOR] Erro escalacao-ia:', error);
+                        const container = document.getElementById('escalacao-ia-container');
+                        if (container) {
+                            container.innerHTML = `
+                                <div style="padding: 20px; text-align: center; color: rgba(255,255,255,0.6);">
+                                    <p><span class="material-icons" style="vertical-align: middle; color: var(--color-primary);">warning</span> Erro ao carregar Escalação IA</p>
+                                    <p style="font-size: 12px;">${error.message}</p>
+                                </div>
+                            `;
+                        }
+                    }
+                    break;
+                }
+
                 case "capitao-luxo": {
                     // ✅ v2.0: JS admin dedicado (capitao-luxo.js)
                     console.log('[ORQUESTRADOR] Iniciando capitao-luxo...');
@@ -536,6 +568,7 @@ class DetalheLigaOrquestrador {
             "capitao-luxo": `<div id="capitao-luxo-content"><div class="capitao-luxo-loading"><div class="spinner"></div><p>Carregando Capitão de Luxo...</p></div></div>`,
             "resta-um": `<div class="ru-admin-container" id="ru-admin-container"><div id="restaUmDados"><div style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);"><div class="spinner"></div><p>Carregando Resta Um...</p></div></div></div>`,
             regras: `<div id="regras-admin-container"><div style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">Carregando regras...</div></div>`,
+            "admin-escalacao-ia": `<div id="escalacao-ia-container"><div style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);"><div class="spinner"></div><p>Carregando Escalação IA...</p></div></div>`,
         };
 
         return (
