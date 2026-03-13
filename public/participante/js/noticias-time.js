@@ -95,7 +95,7 @@ const NoticiasTime = {
                 </div>`;
         }
         return `
-            <section class="noticias-home-section mx-4 mb-6">
+            <section class="noticias-home-section mx-4 mb-2">
                 <div style="text-align:center;padding:24px;background:var(--app-surface);border-radius:12px;border:1px solid var(--app-noticias-border);">
                     <div style="width:32px;height:32px;border:3px solid #374151;border-top-color:#ff6d00;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px;"></div>
                     <p style="font-size:0.8rem;color:#9ca3af;">Buscando notícias do seu time...</p>
@@ -109,7 +109,7 @@ const NoticiasTime = {
     _renderVazio(clube, modo) {
         if (modo === 'compacto') return '';
         return `
-            <section class="noticias-home-section mx-4 mb-6">
+            <section class="noticias-home-section mx-4 mb-2">
                 <div style="background:#1c1c1e;border-radius:12px;padding:20px;text-align:center;border:1px solid var(--app-noticias-border);">
                     <span class="material-icons" style="font-size:32px;color:#4b5563;">newspaper</span>
                     <p style="font-size:0.8rem;color:#6b7280;margin-top:8px;">
@@ -254,7 +254,7 @@ const NoticiasTime = {
         }).join('');
 
         return `
-            <section id="noticias-home-section" class="noticias-home-section mx-4 mb-6">
+            <section id="noticias-home-section" class="noticias-home-section mx-4 mb-2">
                 <!-- Header Colapsável Notícias (Degradê Cores do Time) -->
                 <button class="noticias-home-header" style="background:${gradient};border-color:${borderColor};" onclick="window.toggleNoticiasHome && window.toggleNoticiasHome()">
                     <div class="noticias-home-header-left">
