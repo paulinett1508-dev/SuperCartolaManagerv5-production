@@ -1932,9 +1932,11 @@
                             return false;
                         });
                     }
-                    if (window.self !== window.top) {
-                        window.top.location = window.self.location;
-                    }
+                    try {
+                        if (window.self !== window.top) {
+                            window.top.location = window.self.location;
+                        }
+                    } catch(e) { /* Allow iframe in Replit preview */ }
                 })();
             }
         </script>
