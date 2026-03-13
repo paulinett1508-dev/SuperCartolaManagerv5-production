@@ -476,7 +476,7 @@ function atualizarCardsHomeUI(data) {
     const rodadaNumEl = document.getElementById('home-rodada-num');
 
     if (posicaoBadgeEl) {
-        posicaoBadgeEl.textContent = posicao || '--';
+        posicaoBadgeEl.textContent = posicao ? `${posicao}°` : '--';
     }
 
     const pontosUltimaRodada = ultimaRodada ? parseFloat(ultimaRodada.pontos || 0) : 0;
@@ -946,15 +946,9 @@ function renderizarHome(container, data, ligaId) {
     const rodadaMercadoAtual = mercadoStatus?.rodada_atual || rodadaAtual;
     const rodadaParaExibir = rodadaEmAndamento ? rodadaMercadoAtual : (ultimaRodadaDisputada || Math.max(1, rodadaAtual - 1));
 
-    // Posicao
+    // Posicao (agora inline no secondary row)
     if (posicaoBadgeEl) {
-        posicaoBadgeEl.textContent = posicao || '--';
-        // Hide degree symbol when no data
-        if (!posicao) {
-            posicaoBadgeEl.classList.add('home-hero-loading');
-        } else {
-            posicaoBadgeEl.classList.remove('home-hero-loading');
-        }
+        posicaoBadgeEl.textContent = posicao ? `${posicao}°` : '--';
     }
 
     // === TREND INDICATOR (v5.0) ===
@@ -968,20 +962,20 @@ function renderizarHome(container, data, ligaId) {
         if (diff > 0) {
             trendEl.classList.add('home-hero-trend--up');
             if (trendIconEl) trendIconEl.textContent = 'arrow_upward';
-            if (trendTextEl) trendTextEl.textContent = `${diff} ${diff === 1 ? 'posicao' : 'posicoes'}`;
+            if (trendTextEl) trendTextEl.textContent = `${diff}`;
         } else {
             trendEl.classList.add('home-hero-trend--down');
             if (trendIconEl) trendIconEl.textContent = 'arrow_downward';
-            if (trendTextEl) trendTextEl.textContent = `${Math.abs(diff)} ${Math.abs(diff) === 1 ? 'posicao' : 'posicoes'}`;
+            if (trendTextEl) trendTextEl.textContent = `${Math.abs(diff)}`;
         }
     } else if (trendEl) {
         trendEl.style.display = 'none';
     }
 
-    // === TOTAL PARTICIPANTES (v5.0) ===
+    // === TOTAL PARTICIPANTES (v5.0 — compact) ===
     const totalPartEl = document.getElementById('home-total-participantes');
     if (totalPartEl && totalParticipantes) {
-        totalPartEl.textContent = `de ${totalParticipantes} participantes`;
+        totalPartEl.textContent = `(de ${totalParticipantes})`;
     }
 
     // Label da rodada
@@ -1422,8 +1416,7 @@ function atualizarCardsHomeComParciais() {
     const perfStatusEl = document.getElementById('home-perf-status');
 
     if (posicaoBadgeEl) {
-        posicaoBadgeEl.textContent = minhaPosicao.posicao;
-        posicaoBadgeEl.classList.remove('home-hero-loading');
+        posicaoBadgeEl.textContent = minhaPosicao.posicao ? `${minhaPosicao.posicao}°` : '--';
     }
 
     if (ultimaPontuacaoEl) {
