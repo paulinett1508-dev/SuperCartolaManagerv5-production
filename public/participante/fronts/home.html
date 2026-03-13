@@ -1,9 +1,64 @@
-<!-- PARTICIPANTE HOME - Redesign Clean v4.0 -->
-<!-- Layout compacto estilo app esportivo profissional -->
+<!-- PARTICIPANTE HOME - Redesign v5.0 "Stadium Night" -->
+<!-- Hero-first layout: Performance → Alertas → Quick Actions → Feed -->
 <div id="home-container" class="relative min-h-screen pb-20">
 
     <!-- ========================================
-         QUICK ACTIONS (Chip bar compacta)
+         HERO CARD (Performance + Market Status)
+         ======================================== -->
+    <section class="home-hero-section" onclick="window.participanteNav?.navegarPara('rodadas')">
+        <div class="home-hero-card">
+            <!-- Market Status Pill (topo do hero) -->
+            <div class="home-hero-market" id="home-aviso-mercado">
+                <span class="home-hero-market-dot" id="home-status-dot"></span>
+                <span class="home-hero-market-title" id="home-aviso-titulo">MERCADO ABERTO</span>
+                <span class="home-hero-market-sep">&bull;</span>
+                <span class="home-hero-market-sub" id="home-aviso-subtitulo">Rodada 2 &bull; Fecha em 2d 14h</span>
+                <span class="material-icons home-hero-market-chevron">chevron_right</span>
+            </div>
+
+            <!-- Position Hero -->
+            <div class="home-hero-position-area">
+                <div class="home-hero-position-number" id="home-posicao-badge">--</div>
+                <div class="home-hero-trend" id="home-trend-indicator" style="display:none">
+                    <span class="material-icons" id="home-trend-icon">arrow_upward</span>
+                    <span id="home-trend-text"></span>
+                </div>
+                <div class="home-hero-context" id="home-total-participantes"></div>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="home-hero-stats-row">
+                <div class="home-hero-stat-box">
+                    <div class="home-hero-stat-label" id="home-pontuacao-label"><span id="home-rodada-num">RODADA 1</span></div>
+                    <div class="home-hero-stat-value" id="home-ultima-pontuacao">0,00</div>
+                    <!-- Status badge (parciais / ao vivo) -->
+                    <div class="home-hero-stat-badge" id="home-perf-status"></div>
+                </div>
+                <div class="home-hero-stat-box">
+                    <div class="home-hero-stat-label">TOTAL PTS</div>
+                    <div class="home-hero-stat-value" id="home-pontos-ranking">0,00</div>
+                </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="home-hero-cta">
+                <span>Ver detalhes da rodada</span>
+                <span class="material-icons">chevron_right</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+         AVISOS SECUNDÁRIOS (Alertas financeiros etc)
+         ======================================== -->
+    <section id="home-avisos-section" class="home-alerts-section">
+        <div class="home-avisos-secundarios" id="home-avisos-secundarios">
+            <!-- Populado dinamicamente por atualizarPainelAvisos -->
+        </div>
+    </section>
+
+    <!-- ========================================
+         QUICK ACTIONS (Cards com glass background)
          ======================================== -->
     <section id="home-atalhos-section" class="home-actions-bar">
         <button class="home-action-chip" id="btn-participantes" onclick="window.abrirParticipantes2026 && window.abrirParticipantes2026()">
@@ -24,66 +79,14 @@
         </button>
     </section>
 
-    <!-- ========================================
-         STATUS DO MERCADO (Pill compacta)
-         ======================================== -->
-    <section id="home-avisos-section" class="home-avisos-section">
-        <div class="home-status-pill" id="home-aviso-mercado">
-            <span class="home-status-dot" id="home-status-dot"></span>
-            <span class="home-status-titulo" id="home-aviso-titulo">MERCADO ABERTO</span>
-            <span class="home-status-separador">•</span>
-            <span class="home-status-subtitulo" id="home-aviso-subtitulo">Rodada 2 • Fecha em 2d 14h</span>
-            <span class="material-icons home-status-chevron">chevron_right</span>
-        </div>
-
-        <!-- Avisos Secundários (quando existem) -->
-        <div class="home-avisos-secundarios" id="home-avisos-secundarios">
-            <!-- Populado dinamicamente -->
-        </div>
-    </section>
-
-    <!-- ========================================
-         PERFORMANCE CARD (Hero compacto)
-         ======================================== -->
-    <section class="home-perf-section" onclick="window.participanteNav?.navegarPara('rodadas')">
-        <div class="home-perf-card">
-            <div class="home-perf-stats">
-                <!-- Posição -->
-                <div class="home-perf-stat">
-                    <span id="home-posicao-badge" class="home-perf-value home-perf-value--position">--</span>
-                    <span class="home-perf-label">POSICAO</span>
-                </div>
-                <!-- Divisor -->
-                <div class="home-perf-divider"></div>
-                <!-- Pontuação da Rodada -->
-                <div class="home-perf-stat">
-                    <span id="home-ultima-pontuacao" class="home-perf-value">0.00</span>
-                    <span class="home-perf-label" id="home-pontuacao-label"><span id="home-rodada-num">Rodada 1</span></span>
-                </div>
-                <!-- Divisor -->
-                <div class="home-perf-divider"></div>
-                <!-- Total Acumulado -->
-                <div class="home-perf-stat">
-                    <span id="home-pontos-ranking" class="home-perf-value">0.00</span>
-                    <span class="home-perf-label">TOTAL PTS</span>
-                </div>
-            </div>
-            <!-- Status badge (parciais) -->
-            <div class="home-perf-status" id="home-perf-status"></div>
-            <!-- CTA -->
-            <div class="home-perf-cta">
-                <span>Ver detalhes da rodada</span>
-                <span class="material-icons">chevron_right</span>
-            </div>
-        </div>
-    </section>
-
-    <!-- Placeholders para conteúdo dinâmico -->
-    <div id="home-copa-placeholder"></div>
-    <div id="home-liberta-placeholder"></div>
-    <div id="home-jogos-placeholder"></div>
-    <div id="home-noticias-placeholder"></div>
-    <div id="home-brasileirao-placeholder"></div>
+    <!-- Placeholders para conteúdo dinâmico (Feed) -->
+    <div class="home-feed-section">
+        <div id="home-copa-placeholder"></div>
+        <div id="home-liberta-placeholder"></div>
+        <div id="home-jogos-placeholder"></div>
+        <div id="home-noticias-placeholder"></div>
+        <div id="home-brasileirao-placeholder"></div>
+    </div>
 </div>
 
 <!-- IDs ocultos para compatibilidade JS (elementos removidos da UI mas referenciados) -->
@@ -97,9 +100,9 @@
 
 <style>
 /* =====================================================
-   HOME REDESIGN v4.0 — Clean Sports App
-   Estilo FotMob/Sofascore: compacto, fontes pequenas,
-   chips, pills, zero redundância
+   HOME REDESIGN v5.0 — "Stadium Night"
+   Premium sports app: hero-first, glassmorphism,
+   blob glow, strong visual hierarchy
    ===================================================== */
 
 /* === CONTAINER === */
@@ -108,79 +111,57 @@
     min-height: 100vh;
 }
 
-/* === QUICK ACTIONS BAR === */
-.home-actions-bar {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0;
-    padding: 12px 16px 8px;
-}
-
-.home-action-chip {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    padding: 8px 4px;
-    background: transparent;
-    border: none;
+/* ══════════════════════════════════════════════════════
+   HERO CARD — Performance + Market Status
+   ══════════════════════════════════════════════════════ */
+.home-hero-section {
+    padding: 12px 16px 0;
     cursor: pointer;
-    border-radius: 8px;
-    transition: background 0.15s;
-    min-height: 44px;
 }
 
-.home-action-chip:active {
-    background: rgba(255, 255, 255, 0.06);
+.home-hero-card {
+    background: var(--app-surface);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    transition: transform var(--app-transition-fast, 0.15s ease);
 }
 
-.home-action-chip .material-icons {
-    font-size: 22px;
-    color: var(--app-primary);
+.home-hero-card:active {
+    transform: scale(0.99);
 }
 
-.home-action-chip-label {
-    font-family: 'Inter', sans-serif;
-    font-size: 9px;
-    font-weight: 500;
-    color: var(--app-text-muted);
-    text-align: center;
-    line-height: 1.2;
+/* Blob glow laranja (top-right) */
+.home-hero-card::before {
+    content: '';
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: var(--app-primary);
+    filter: blur(60px);
+    opacity: 0.07;
+    top: -80px;
+    right: -60px;
+    pointer-events: none;
+    z-index: 0;
+    will-change: transform;
 }
 
-.home-action-chip.home-action-disabled {
-    opacity: 0.35;
-}
-
-.home-action-chip.home-action-disabled .material-icons {
-    color: var(--app-text-dim);
-}
-
-/* === STATUS PILL === */
-.home-avisos-section {
-    padding: 0 16px 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.home-status-pill {
+/* ── Market Status (topo do hero) ── */
+.home-hero-market {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 12px;
-    border-radius: 20px;
+    padding: 8px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    position: relative;
+    z-index: 1;
     cursor: pointer;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    transition: background 0.15s;
 }
 
-.home-status-pill:active {
-    background: rgba(255, 255, 255, 0.08);
-}
-
-.home-status-dot {
+.home-hero-market-dot {
     width: 6px;
     height: 6px;
     border-radius: 50%;
@@ -188,7 +169,7 @@
     flex-shrink: 0;
 }
 
-.home-status-titulo {
+.home-hero-market-title {
     font-family: 'Russo One', sans-serif;
     font-size: 9px;
     color: var(--app-text-primary);
@@ -196,12 +177,12 @@
     white-space: nowrap;
 }
 
-.home-status-separador {
-    color: rgba(255, 255, 255, 0.15);
+.home-hero-market-sep {
+    color: rgba(255, 255, 255, 0.12);
     font-size: 8px;
 }
 
-.home-status-subtitulo {
+.home-hero-market-sub {
     font-family: 'Inter', sans-serif;
     font-size: 9px;
     color: var(--app-text-dim);
@@ -212,59 +193,250 @@
     text-overflow: ellipsis;
 }
 
-.home-status-chevron {
+.home-hero-market-chevron {
     font-size: 14px;
     color: rgba(255, 255, 255, 0.2);
     flex-shrink: 0;
 }
 
-/* Status pill — variantes por estado */
-.home-status-pill.mercado-aberto {
-    border-color: rgba(34, 197, 94, 0.2);
-    background: rgba(34, 197, 94, 0.06);
+/* Market variants */
+.home-hero-market.mercado-aberto {
+    border-bottom-color: rgba(34, 197, 94, 0.1);
 }
-.home-status-pill.mercado-aberto .home-status-dot { background: var(--app-success-light); }
-.home-status-pill.mercado-aberto .home-status-titulo { color: var(--app-success-light); }
-
-.home-status-pill.mercado-fechado {
-    border-color: rgba(239, 68, 68, 0.2);
-    background: rgba(239, 68, 68, 0.06);
+.home-hero-market.mercado-aberto .home-hero-market-dot {
+    background: var(--app-success-light);
+    animation: home-hero-pulse 1.5s ease-in-out infinite;
 }
-.home-status-pill.mercado-fechado .home-status-dot { background: var(--app-danger); }
-.home-status-pill.mercado-fechado .home-status-titulo { color: var(--app-danger-light); }
-
-.home-status-pill.fim-rodada {
-    border-color: rgba(255, 255, 255, 0.06);
-    background: rgba(255, 255, 255, 0.02);
+.home-hero-market.mercado-aberto .home-hero-market-title {
+    color: var(--app-success-light);
 }
-.home-status-pill.fim-rodada .home-status-dot { background: rgba(255, 255, 255, 0.25); }
 
-/* Avisos Secundários (mantidos) */
+.home-hero-market.mercado-fechado .home-hero-market-dot {
+    background: var(--app-danger);
+}
+.home-hero-market.mercado-fechado .home-hero-market-title {
+    color: var(--app-danger-light, #f87171);
+}
+
+.home-hero-market.fim-rodada .home-hero-market-dot {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+@keyframes home-hero-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.5; }
+}
+
+/* ── Position Hero ── */
+.home-hero-position-area {
+    text-align: center;
+    padding: 24px 16px 16px;
+    position: relative;
+    z-index: 1;
+}
+
+.home-hero-position-number {
+    font-family: 'Russo One', sans-serif;
+    font-size: 52px;
+    color: var(--app-primary);
+    line-height: 1;
+    letter-spacing: -1px;
+}
+
+/* Degree symbol via CSS for position */
+.home-hero-position-number:not(:empty)::after {
+    content: '\00B0';
+    font-size: 22px;
+    vertical-align: super;
+    margin-left: 2px;
+    color: var(--app-primary-light, #ff6b35);
+}
+
+/* Hide degree when showing placeholder */
+.home-hero-position-number.home-hero-loading::after {
+    display: none;
+}
+
+/* ── Trend Indicator ── */
+.home-hero-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 6px;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.home-hero-trend .material-icons {
+    font-size: 14px;
+}
+
+.home-hero-trend--up {
+    color: var(--app-success-light);
+}
+
+.home-hero-trend--down {
+    color: var(--app-danger);
+}
+
+.home-hero-trend--stable {
+    color: var(--app-text-dim);
+}
+
+/* ── Context ── */
+.home-hero-context {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    color: var(--app-text-dim);
+    margin-top: 2px;
+}
+
+/* ── Stats Row ── */
+.home-hero-stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 0 14px 14px;
+    position: relative;
+    z-index: 1;
+}
+
+.home-hero-stat-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+}
+
+.home-hero-stat-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--app-text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    line-height: 1.2;
+}
+
+.home-hero-stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--app-text-primary);
+    letter-spacing: -0.5px;
+    line-height: 1;
+}
+
+.home-hero-stat-badge {
+    min-height: 0;
+    margin-top: 4px;
+}
+
+.home-hero-stat-badge:empty {
+    display: none;
+}
+
+/* ── CTA ── */
+.home-hero-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 10px 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--app-primary);
+    position: relative;
+    z-index: 1;
+}
+
+.home-hero-cta .material-icons {
+    font-size: 16px;
+}
+
+/* ── Loading State ── */
+.home-hero-card.loading .home-hero-stat-value,
+.home-hero-card.loading .home-hero-position-number {
+    background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.06) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    color: transparent;
+    border-radius: 4px;
+    min-width: 48px;
+    display: inline-block;
+}
+
+.home-hero-card.loading .home-hero-position-number::after {
+    display: none;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ── Responsive ── */
+@media (min-width: 400px) {
+    .home-hero-stat-value {
+        font-size: 26px;
+    }
+    .home-hero-position-number {
+        font-size: 58px;
+    }
+}
+
+/* ══════════════════════════════════════════════════════
+   ALERTS SECTION
+   ══════════════════════════════════════════════════════ */
+.home-alerts-section {
+    padding: 10px 16px 0;
+}
+
+.home-alerts-section:empty,
+.home-alerts-section:has(.home-avisos-secundarios:empty) {
+    padding: 0;
+}
+
 .home-avisos-secundarios {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
+}
+
+.home-avisos-secundarios:empty {
+    display: none;
 }
 
 .home-aviso-secundario {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 8px 12px;
+    padding: 10px 14px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 10px;
     cursor: pointer;
+    transition: background var(--app-transition-fast, 0.15s ease);
+}
+
+.home-aviso-secundario:active {
+    background: rgba(255, 255, 255, 0.06);
 }
 
 .home-aviso-secundario .home-aviso-icon-mini {
     width: 28px;
     height: 28px;
     border-radius: 6px;
-    background: rgba(255, 85, 0, 0.12);
+    background: var(--app-primary-muted);
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .home-aviso-secundario .material-icons {
@@ -276,7 +448,8 @@
     flex: 1;
     font-family: 'Inter', sans-serif;
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.3;
 }
 
 .home-aviso-secundario .home-aviso-badge {
@@ -285,8 +458,9 @@
     font-weight: 600;
     color: var(--app-primary);
     background: var(--app-primary-muted);
-    padding: 2px 6px;
+    padding: 3px 8px;
     border-radius: 4px;
+    flex-shrink: 0;
 }
 
 /* Variantes de avisos por tipo */
@@ -305,122 +479,70 @@
 .home-aviso--warning .material-icons { color: var(--app-warning) !important; }
 .home-aviso-badge--warning { color: var(--app-warning) !important; background: var(--app-warning-muted) !important; }
 
-/* === PERFORMANCE CARD === */
-.home-perf-section {
-    padding: 0 16px 12px;
-    cursor: pointer;
-}
-
-.home-perf-card {
-    background: var(--app-surface);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 12px;
-    overflow: hidden;
-    transition: transform 0.15s;
-}
-
-.home-perf-card:active {
-    transform: scale(0.99);
-}
-
-.home-perf-stats {
+/* ══════════════════════════════════════════════════════
+   QUICK ACTIONS BAR — Glass cards
+   ══════════════════════════════════════════════════════ */
+.home-actions-bar {
     display: grid;
-    grid-template-columns: 1fr auto 1fr auto 1fr;
-    align-items: center;
-    padding: 20px 12px;
-    gap: 0;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding: 12px 16px;
 }
 
-.home-perf-stat {
+.home-action-chip {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
+    padding: 12px 4px;
+    background: var(--app-glass-bg, rgba(255, 255, 255, 0.03));
+    border: 1px solid var(--app-glass-border, rgba(255, 255, 255, 0.06));
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all var(--app-transition-fast, 0.15s ease);
+    min-height: 44px;
 }
 
-.home-perf-value {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--app-text-primary);
-    letter-spacing: -0.5px;
-    line-height: 1;
+.home-action-chip:active {
+    transform: scale(0.96);
+    background: rgba(255, 255, 255, 0.06);
 }
 
-.home-perf-value--position {
+.home-action-chip .material-icons {
+    font-size: 26px;
     color: var(--app-primary);
 }
 
-.home-perf-value--position::after {
-    content: '\00BA';
-    font-size: 14px;
-    vertical-align: super;
-    margin-left: 1px;
-}
-
-.home-perf-label {
+.home-action-chip-label {
     font-family: 'Inter', sans-serif;
-    font-size: 9px;
-    font-weight: 600;
-    color: var(--app-text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--app-text-muted);
     text-align: center;
     line-height: 1.2;
 }
 
-.home-perf-divider {
-    width: 1px;
-    height: 32px;
-    background: rgba(255, 255, 255, 0.06);
+.home-action-chip.home-action-disabled {
+    opacity: 0.35;
 }
 
-/* Status badge (parciais / ao vivo) */
-.home-perf-status {
-    text-align: center;
-    padding: 0 12px;
-    min-height: 0;
+.home-action-chip.home-action-disabled .material-icons {
+    color: var(--app-text-dim);
 }
 
-.home-perf-status:empty {
-    display: none;
-}
-
-/* CTA link */
-.home-perf-cta {
+/* ══════════════════════════════════════════════════════
+   FEED SECTION — Dynamic content cards
+   ══════════════════════════════════════════════════════ */
+.home-feed-section {
+    padding: 0 16px 12px;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    padding: 8px 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
-    font-family: 'Inter', sans-serif;
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--app-primary);
-    transition: color 0.15s;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.home-perf-cta .material-icons {
-    font-size: 16px;
-}
-
-/* === LOADING STATE === */
-.home-perf-card.loading .home-perf-value {
-    background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.06) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-    color: transparent;
-    border-radius: 4px;
-    min-width: 48px;
-}
-
-@keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-}
-
-/* === BADGE AO VIVO (Parciais) === */
+/* ══════════════════════════════════════════════════════
+   BADGE AO VIVO (Parciais)
+   ══════════════════════════════════════════════════════ */
 .live-badge-mini {
     display: inline-flex;
     align-items: center;
@@ -457,7 +579,7 @@
     50% { transform: scale(1.2); opacity: 0.6; }
 }
 
-/* === BADGE RODADA EM ANDAMENTO === */
+/* BADGE RODADA EM ANDAMENTO */
 .andamento-badge-mini {
     display: inline-flex;
     align-items: center;
@@ -473,16 +595,9 @@
     vertical-align: middle;
 }
 
-/* === RESPONSIVE === */
-@media (min-width: 400px) {
-    .home-perf-value {
-        font-size: 26px;
-    }
-}
-
-/* ══════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    COPA 2026 — BROADCAST PANEL
-   ══════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════════ */
 .copa-home-section { padding: 0; position: relative; }
 
 /* ── Header ── */
@@ -491,14 +606,15 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 8px 12px;
+    padding: 10px 14px;
     background: linear-gradient(135deg, #6b1029 0%, #1a2f4a 55%, #162840 100%);
     border: 1px solid rgba(212, 175, 55, 0.28);
-    border-radius: 10px;
+    border-radius: 12px;
     cursor: pointer;
     position: relative;
     overflow: hidden;
     transition: opacity 0.2s;
+    min-height: 44px;
 }
 /* Gold accent bar */
 .copa-home-header::before {
@@ -525,15 +641,15 @@
 .copa-home-header-left {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     position: relative;
     z-index: 1;
 }
 
 .copa-home-icon {
-    width: 26px;
-    height: 26px;
-    border-radius: 7px;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
     background: rgba(212, 175, 55, 0.12);
     border: 1px solid rgba(212, 175, 55, 0.28);
     display: flex;
@@ -542,13 +658,13 @@
     flex-shrink: 0;
 }
 
-.copa-home-icon .material-icons { font-size: 16px !important; }
+.copa-home-icon .material-icons { font-size: 18px !important; }
 
 .copa-home-titles { display: flex; flex-direction: column; gap: 1px; }
 
 .copa-home-title {
     font-family: 'Russo One', sans-serif;
-    font-size: 11px;
+    font-size: 12px;
     color: #fff;
     letter-spacing: 0.2px;
     line-height: 1.2;
@@ -606,9 +722,9 @@
 }
 
 .copa-home-chevron {
-    font-size: 18px;
+    font-size: 20px;
     color: rgba(255, 255, 255, 0.5);
-    transition: transform 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     z-index: 1;
 }
@@ -648,7 +764,6 @@
     border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-/* Label de seção: hairline + texto inline — zero altura extra */
 .copa-fx-section-header {
     display: flex;
     align-items: center;
@@ -771,7 +886,9 @@
 .copa-home-cta-btn:active { opacity: 0.82; transform: scale(0.99); }
 .copa-home-cta-btn .material-icons { font-size: 14px; color: var(--app-copa-secondary, #D4AF37); }
 
-/* === LIBERTADORES 2026 - FAIXA NOTÍCIAS === */
+/* ══════════════════════════════════════════════════════
+   LIBERTADORES 2026 — FAIXA NOTICIAS
+   ══════════════════════════════════════════════════════ */
 .liberta-home-section {
     padding: 0;
 }
@@ -781,12 +898,13 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 8px 12px;
+    padding: 10px 14px;
     background: var(--app-liberta-gradient);
     border: 1px solid var(--app-liberta-border);
-    border-radius: 10px;
+    border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s ease;
+    min-height: 44px;
 }
 
 .liberta-home-header:active {
@@ -797,16 +915,16 @@
 .liberta-home-header-left {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
-.liberta-home-header-left .material-icons { font-size: 16px !important; }
-.liberta-home-header-left h2 { font-size: 11px !important; }
+.liberta-home-header-left .material-icons { font-size: 18px !important; }
+.liberta-home-header-left h2 { font-size: 12px !important; }
 .liberta-home-header-left span[class*="text-"] { font-size: 9px !important; }
 
 .liberta-home-chevron {
-    font-size: 18px;
+    font-size: 20px;
     color: rgba(255,255,255,0.7);
-    transition: transform 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Estado expandido */
@@ -820,7 +938,7 @@
     transform: rotate(180deg);
 }
 
-/* Conteúdo colapsável */
+/* Conteudo colapsavel */
 .liberta-home-content {
     max-height: 800px;
     overflow: hidden;
@@ -840,7 +958,7 @@
     border: none;
 }
 
-/* Card de notícia Libertadores */
+/* Card de noticia Libertadores */
 .liberta-news-card {
     display: flex;
     gap: 12px;
@@ -857,7 +975,6 @@
     background: rgba(255,255,255,0.03);
 }
 
-/* Card clicável (notícias dinâmicas da API) */
 .liberta-news-card--clickable {
     cursor: pointer;
     align-items: center;
@@ -936,7 +1053,9 @@
     margin-right: 6px;
 }
 
-/* === JOGOS / AGENDA DO DIA - COLAPSÁVEL (Padrão Copa) === */
+/* ══════════════════════════════════════════════════════
+   JOGOS / AGENDA DO DIA — COLAPSAVEL
+   ══════════════════════════════════════════════════════ */
 .jogos-home-section {
     padding: 0;
 }
@@ -946,12 +1065,13 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 8px 12px;
+    padding: 10px 14px;
     background: var(--app-agenda-gradient);
     border: 1px solid var(--app-agenda-border);
-    border-radius: 10px;
+    border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s ease;
+    min-height: 44px;
 }
 
 .jogos-home-header:active {
@@ -962,14 +1082,14 @@
 .jogos-home-header-left {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
-.jogos-home-header-left .material-icons { font-size: 16px !important; }
-.jogos-home-header-left h2 { font-size: 11px !important; }
+.jogos-home-header-left .material-icons { font-size: 18px !important; }
+.jogos-home-header-left h2 { font-size: 12px !important; }
 
 .jogos-home-header-title {
     font-family: 'Russo One', sans-serif;
-    font-size: 11px;
+    font-size: 12px;
     color: #ffffff;
     letter-spacing: 0.3px;
 }
@@ -996,9 +1116,9 @@
 }
 
 .jogos-home-chevron {
-    font-size: 18px;
+    font-size: 20px;
     color: rgba(255,255,255,0.7);
-    transition: transform 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Estado expandido */
@@ -1012,7 +1132,7 @@
     transform: rotate(180deg);
 }
 
-/* Conteúdo colapsável */
+/* Conteudo colapsavel */
 .jogos-home-content {
     max-height: 800px;
     overflow-y: auto;
@@ -1032,7 +1152,9 @@
     overflow: hidden;
 }
 
-/* === NOTÍCIAS DO TIME - COLAPSÁVEL (Padrão Copa) === */
+/* ══════════════════════════════════════════════════════
+   NOTICIAS DO TIME — COLAPSAVEL
+   ══════════════════════════════════════════════════════ */
 .noticias-home-section {
     padding: 0;
 }
@@ -1042,12 +1164,13 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 8px 12px;
+    padding: 10px 14px;
     background: var(--app-noticias-fallback-gradient);
     border: 1px solid var(--app-noticias-border);
-    border-radius: 10px;
+    border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s ease;
+    min-height: 44px;
 }
 
 .noticias-home-header:active {
@@ -1058,12 +1181,12 @@
 .noticias-home-header-left {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
 
 .noticias-home-header-escudo {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     object-fit: contain;
     filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
 }
@@ -1075,7 +1198,7 @@
 
 .noticias-home-header-title {
     font-family: 'Russo One', sans-serif;
-    font-size: 11px;
+    font-size: 12px;
     color: #ffffff;
     letter-spacing: 0.3px;
     line-height: 1.2;
@@ -1088,9 +1211,9 @@
 }
 
 .noticias-home-chevron {
-    font-size: 18px;
+    font-size: 20px;
     color: rgba(255,255,255,0.7);
-    transition: transform 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Estado expandido */
@@ -1104,7 +1227,7 @@
     transform: rotate(180deg);
 }
 
-/* Conteúdo colapsável */
+/* Conteudo colapsavel */
 .noticias-home-content {
     max-height: 1200px;
     overflow-y: auto;
@@ -1124,7 +1247,7 @@
     overflow: hidden;
 }
 
-/* === MEU TIME - DESTAQUE === */
+/* MEU TIME — DESTAQUE */
 .meu-time-section {
     animation: meu-time-glow 3s ease-in-out infinite alternate;
 }
