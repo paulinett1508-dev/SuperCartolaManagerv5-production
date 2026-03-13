@@ -949,11 +949,44 @@ function renderizarHome(container, data, ligaId) {
     // Posicao
     if (posicaoBadgeEl) {
         posicaoBadgeEl.textContent = posicao || '--';
+        // Hide degree symbol when no data
+        if (!posicao) {
+            posicaoBadgeEl.classList.add('home-hero-loading');
+        } else {
+            posicaoBadgeEl.classList.remove('home-hero-loading');
+        }
+    }
+
+    // === TREND INDICATOR (v5.0) ===
+    const trendEl = document.getElementById('home-trend-indicator');
+    const trendIconEl = document.getElementById('home-trend-icon');
+    const trendTextEl = document.getElementById('home-trend-text');
+    if (trendEl && posicao && posicaoAnterior && posicao !== posicaoAnterior) {
+        const diff = posicaoAnterior - posicao; // positivo = subiu
+        trendEl.style.display = '';
+        trendEl.classList.remove('home-hero-trend--up', 'home-hero-trend--down', 'home-hero-trend--stable');
+        if (diff > 0) {
+            trendEl.classList.add('home-hero-trend--up');
+            if (trendIconEl) trendIconEl.textContent = 'arrow_upward';
+            if (trendTextEl) trendTextEl.textContent = `${diff} ${diff === 1 ? 'posicao' : 'posicoes'}`;
+        } else {
+            trendEl.classList.add('home-hero-trend--down');
+            if (trendIconEl) trendIconEl.textContent = 'arrow_downward';
+            if (trendTextEl) trendTextEl.textContent = `${Math.abs(diff)} ${Math.abs(diff) === 1 ? 'posicao' : 'posicoes'}`;
+        }
+    } else if (trendEl) {
+        trendEl.style.display = 'none';
+    }
+
+    // === TOTAL PARTICIPANTES (v5.0) ===
+    const totalPartEl = document.getElementById('home-total-participantes');
+    if (totalPartEl && totalParticipantes) {
+        totalPartEl.textContent = `de ${totalParticipantes} participantes`;
     }
 
     // Label da rodada
     if (rodadaNumEl) {
-        rodadaNumEl.textContent = `Rodada ${rodadaParaExibir}`;
+        rodadaNumEl.textContent = `RODADA ${rodadaParaExibir}`;
     }
 
     // Pontos totais
@@ -964,7 +997,7 @@ function renderizarHome(container, data, ligaId) {
     if (rodadaEmAndamento) {
         // Rodada em andamento: placeholder ate parciais carregarem
         if (ultimaPontuacaoEl) ultimaPontuacaoEl.textContent = '--';
-        if (pontuacaoLabelEl) pontuacaoLabelEl.innerHTML = `<span id="home-rodada-num">Rodada ${rodadaParaExibir}</span>`;
+        if (pontuacaoLabelEl) pontuacaoLabelEl.innerHTML = `<span id="home-rodada-num">RODADA ${rodadaParaExibir}</span>`;
         if (perfStatusEl) perfStatusEl.innerHTML = '<span class="andamento-badge-mini">RODADA EM ANDAMENTO</span>';
     } else {
         // Rodada consolidada
@@ -975,7 +1008,7 @@ function renderizarHome(container, data, ligaId) {
         }
 
         if (pontuacaoLabelEl) {
-            pontuacaoLabelEl.innerHTML = `<span id="home-rodada-num">Rodada ${rodadaParaExibir}</span>`;
+            pontuacaoLabelEl.innerHTML = `<span id="home-rodada-num">RODADA ${rodadaParaExibir}</span>`;
         }
 
         if (perfStatusEl) perfStatusEl.innerHTML = '';
@@ -1390,6 +1423,7 @@ function atualizarCardsHomeComParciais() {
 
     if (posicaoBadgeEl) {
         posicaoBadgeEl.textContent = minhaPosicao.posicao;
+        posicaoBadgeEl.classList.remove('home-hero-loading');
     }
 
     if (ultimaPontuacaoEl) {
