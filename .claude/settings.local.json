@@ -210,7 +210,8 @@
       "Bash(git submodule:*)",
       "Bash(echo \"=== Verificando regras críticas no CLAUDE.md ===\" && for rule in \"gemini_audit\" \"Follow the Money\" \"undefined\" \"TRUNCATE\" \"liga_id\" \"lean\\(\\)\" \"LESSONS.md\"; do if grep -q \"$rule\" /home/runner/workspace/CLAUDE.md; then echo \"OK: $rule\"; else echo \"MISSING: $rule\"; fi; done && echo \"\" && echo \"=== Verificando ponteiros para referências ===\" && for ref in \"protocolo-planejamento\" \"ui-ux-guidelines\" \"truncar-pontos\" \"database-strategy\" \"sistema-modulos\"; do if grep -q \"$ref\" /home/runner/workspace/CLAUDE.md; then echo \"OK: $ref\"; else echo \"MISSING: $ref\"; fi; done && echo \"\" && echo \"=== Verificando submodule ===\" && git -C /home/runner/workspace submodule status)",
       "Bash(claude mcp:*)",
-      "Bash(find /home/runner/workspace -maxdepth 3 -type d \\\\\\( -name public -o -name views -o -name client \\\\\\) ! -path '*node_modules*' ! -path '*.config*' ! -path '*/.cache*' 2>/dev/null | head -20)"
+      "Bash(find /home/runner/workspace -maxdepth 3 -type d \\\\\\( -name public -o -name views -o -name client \\\\\\) ! -path '*node_modules*' ! -path '*.config*' ! -path '*/.cache*' 2>/dev/null | head -20)",
+      "Bash(find /home/runner/workspace -type f \\\\\\( -name \"*resta*\" -o -name \"*consolidat*\" \\\\\\) 2>/dev/null | head -20)"
     ]
   },
   "enableAllProjectMcpServers": true,

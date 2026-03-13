@@ -8,6 +8,7 @@
  *
  * Dependências: rodada (pontuações), ranking_geral (desempate)
  */
+import mongoose from 'mongoose';
 import BaseManager from './BaseManager.js';
 import RestaUmCache from '../../../models/RestaUmCache.js';
 import Rodada from '../../../models/Rodada.js';
@@ -218,10 +219,12 @@ export default class RestaUmManager extends BaseManager {
         console.log(`[RESTA-UM] Processando R${rodada} para liga ${ligaId} (onConsolidate)`);
 
         // Buscar pontuações da rodada da collection Rodada (já populada neste ponto)
+        // populacaoFalhou: exclui registros com falha de API (pontos=0 técnico, não de desempenho)
         const rodadasDb = await Rodada.find({
             ligaId,
             rodada,
             temporada: CURRENT_SEASON,
+            populacaoFalhou: { $ne: true },
         }).lean();
 
         const pontuacoes = rodadasDb.map(r => ({
@@ -235,8 +238,14 @@ export default class RestaUmManager extends BaseManager {
         }
 
         // Calcular ranking geral (soma de todas as rodadas até agora) para desempate
+        // ObjectId obrigatório: aggregate() não faz auto-cast de tipos (ao contrário de find())
         const todasRodadas = await Rodada.aggregate([
-            { $match: { ligaId: ligaId.toString ? ligaId : ligaId, temporada: CURRENT_SEASON, rodada: { $lte: rodada } } },
+            { $match: {
+                ligaId: new mongoose.Types.ObjectId(ligaId),
+                temporada: CURRENT_SEASON,
+                rodada: { $lte: rodada },
+                populacaoFalhou: { $ne: true },
+            }},
             { $group: { _id: '$timeId', pontuacaoTotal: { $sum: '$pontos' } } },
             { $sort: { pontuacaoTotal: -1 } },
         ]);
