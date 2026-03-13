@@ -157,6 +157,7 @@ export default class RestaUmManager extends BaseManager {
         }
 
         edicao.ultima_atualizacao = new Date();
+        edicao.markModified('participantes');
         await edicao.save();
 
         // Fluxo financeiro: débitos para eliminados desta rodada
@@ -208,6 +209,7 @@ export default class RestaUmManager extends BaseManager {
 
         edicao.rodadaAtual = rodada;
         edicao.ultima_atualizacao = new Date();
+        edicao.markModified('participantes');
         await edicao.save();
     }
 

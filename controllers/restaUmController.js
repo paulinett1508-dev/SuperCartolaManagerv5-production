@@ -470,11 +470,11 @@ export async function obterParciais(req, res) {
             };
         });
 
-        // Ordenar vivos por pontosRodada (DESC) para lanterna aparecer por último
+        // Ordenar vivos: por pontosRodada durante live, por acumulados fora do live
         const vivos = participantes
             .filter(p => p.status === 'vivo')
             .sort((a, b) => {
-                if (a.pontosRodada != null && b.pontosRodada != null) {
+                if (isLive && a.pontosRodada != null && b.pontosRodada != null) {
                     return (b.pontosRodada || 0) - (a.pontosRodada || 0);
                 }
                 return (b.pontosAcumulados || 0) - (a.pontosAcumulados || 0);

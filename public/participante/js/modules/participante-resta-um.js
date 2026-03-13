@@ -202,6 +202,9 @@ function _renderizarDisputa(dados, timeId) {
             return (b.pontosAcumulados || 0) - (a.pontosAcumulados || 0);
         });
 
+    // Métrica exibida: pontosRodada (live) ou pontosAcumulados (consolidado)
+    const exibirAcumulado = !isLive;
+
     // Ordenar eliminados por rodadaEliminacao DESC (mais recente primeiro)
     const eliminados = (participantes?.filter(p => p.status === 'eliminado') || [])
         .sort((a, b) => (b.rodadaEliminacao || 0) - (a.rodadaEliminacao || 0));
@@ -269,7 +272,9 @@ function _renderizarDisputa(dados, timeId) {
     // ── HERO CARD — LÍDER ────────────────────────────────────────────
     if (lider) {
         const isMeuTimeLider = String(lider.timeId) === String(timeId);
-        const pontosLider = lider.pontosRodada != null ? _formatPontos(lider.pontosRodada) : '--';
+        const pontosLider = exibirAcumulado
+            ? _formatPontos(lider.pontosAcumulados)
+            : (lider.pontosRodada != null ? _formatPontos(lider.pontosRodada) : '--');
         html += `
             <div class="ru-lider-card${isMeuTimeLider ? ' meu-time' : ''}">
                 <div class="ru-lider-topo">
@@ -316,7 +321,9 @@ function _renderizarDisputa(dados, timeId) {
                 `;
             }
 
-            const pontosStr = p.pontosRodada != null ? _formatPontos(p.pontosRodada) : '--';
+            const pontosStr = exibirAcumulado
+                ? _formatPontos(p.pontosAcumulados)
+                : (p.pontosRodada != null ? _formatPontos(p.pontosRodada) : '--');
             const classes = ['resta-um-row'];
             if (isMeuTime) classes.push('meu-time');
             if (isNaZona) classes.push('lanterna');
