@@ -5,6 +5,11 @@ modules = ["nodejs-20", "python-3.11"]
 localPort = 3000
 externalPort = 80
 
+[[ports]]
+localPort = 13292
+externalPort = 3000
+exposeLocalhost = true
+
 [deployment]
 deploymentTarget = "autoscale"
 build = ["sh", "-c", "npm install --include=dev && npm run build"]

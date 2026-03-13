@@ -1,19 +1,19 @@
 /**
- * MATA-MATA MANAGER v1.1.0
+ * MATA-MATA MANAGER v2.0.0
  * Módulo OPCIONAL - Confrontos eliminatórios
  *
- * STATUS: STUBS — Hooks registrados mas NÃO executam cálculos automaticamente.
+ * v2.0: Implementação real dos hooks — calcula bracket e persiste no MataMataCache
+ *   durante consolidação, sem depender do admin abrir a tela manualmente.
  *
- * FLUXO ATUAL (manual via admin):
- *   1. Admin abre tela Mata-Mata → Frontend calcula fases via orquestrador
- *   2. Frontend salva cache → POST /api/mata-mata/cache/:ligaId/:edicao
- *   Controller: mataMataCacheController.js
- *   Frontend: mata-mata-orquestrador.js (coordena módulos)
- *
- * FUTURO: Quando o orchestrator for implementado end-to-end, estes hooks
- * devem delegar ao controller via chamadas internas.
+ * FLUXO:
+ *   1. Orchestrator detecta consolidação → chama onRoundFinalize / onConsolidate
+ *   2. Manager delega ao calcularBracketParaConsolidacao (mata-mata-backend.js)
+ *   3. Bracket é calculado e persistido no MataMataCache automaticamente
+ *   4. Admin pode abrir a tela a qualquer momento e verá dados atualizados
  */
 import BaseManager from './BaseManager.js';
+import { calcularBracketParaConsolidacao } from '../../../controllers/mata-mata-backend.js';
+import logger from '../../../utils/logger.js';
 
 export default class MataMataManager extends BaseManager {
     constructor() {
@@ -25,15 +25,37 @@ export default class MataMataManager extends BaseManager {
             dependencias: ['rodada'],
             prioridade: 45,
             temColeta: false,
-            temFinanceiro: false,
+            temFinanceiro: true,
         });
     }
 
     async onRoundFinalize(ctx) {
-        return { pronto: false, stub: true, rodada: ctx.rodada };
+        try {
+            logger.log(`[MATA-MANAGER] onRoundFinalize: liga ${ctx.ligaId}, R${ctx.rodada}`);
+            const resultados = await calcularBracketParaConsolidacao(ctx.ligaId, ctx.rodada);
+            return {
+                pronto: true,
+                rodada: ctx.rodada,
+                edicoesProcessadas: resultados.length
+            };
+        } catch (error) {
+            logger.error(`[MATA-MANAGER] Erro onRoundFinalize:`, error);
+            return { pronto: false, erro: error.message, rodada: ctx.rodada };
+        }
     }
 
     async onConsolidate(ctx) {
-        return { consolidado: false, stub: true, rodada: ctx.rodada };
+        try {
+            logger.log(`[MATA-MANAGER] onConsolidate: liga ${ctx.ligaId}, R${ctx.rodada}`);
+            const resultados = await calcularBracketParaConsolidacao(ctx.ligaId, ctx.rodada);
+            return {
+                consolidado: true,
+                rodada: ctx.rodada,
+                edicoesProcessadas: resultados.length
+            };
+        } catch (error) {
+            logger.error(`[MATA-MANAGER] Erro onConsolidate:`, error);
+            return { consolidado: false, erro: error.message, rodada: ctx.rodada };
+        }
     }
 }

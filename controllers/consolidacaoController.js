@@ -222,6 +222,7 @@ export const consolidarRodada = async (req, res) => {
             const existente = await RodadaSnapshot.findOne({
                 liga_id: ligaId,
                 rodada: rodadaNum,
+                temporada: CURRENT_SEASON,
                 status: "consolidada"
             }).lean();
             
@@ -423,6 +424,7 @@ export const consolidarRodada = async (req, res) => {
         const snapshot = {
             liga_id: ligaId,
             rodada: rodadaNum,
+            temporada: CURRENT_SEASON,
             status: "consolidada",
             data_consolidacao: new Date(),
             versao_schema: 2,
@@ -450,9 +452,9 @@ export const consolidarRodada = async (req, res) => {
             atualizado_em: new Date()
         };
         
-        // 11. Salvar snapshot (upsert)
+        // 11. Salvar snapshot (upsert) — filtro DEVE incluir temporada (índice único)
         await RodadaSnapshot.findOneAndUpdate(
-            { liga_id: ligaId, rodada: rodadaNum },
+            { liga_id: ligaId, rodada: rodadaNum, temporada: CURRENT_SEASON },
             snapshot,
             { upsert: true, new: true, session }
         );

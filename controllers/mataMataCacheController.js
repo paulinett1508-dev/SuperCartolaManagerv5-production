@@ -1,5 +1,6 @@
 import MataMataCache from "../models/MataMataCache.js";
 import { CURRENT_SEASON } from "../config/seasons.js";
+import { calcularBracketParaConsolidacao } from "./mata-mata-backend.js";
 import logger from '../utils/logger.js';
 
 export const salvarCacheMataMata = async (req, res) => {
@@ -116,29 +117,33 @@ export const obterConfrontosMataMata = async (ligaId, rodadaNumero, temporada = 
     try {
         logger.log(`[MATA-CONSOLIDAÇÃO] Processando liga ${ligaId} até R${rodadaNumero}, temporada ${temporada}`);
 
-        // Buscar caches APENAS da temporada especificada
-        const caches = await MataMataCache.find({
-            liga_id: ligaId,
-            temporada: temporada
-        }).sort({ edicao: 1 });
-        
-        if (caches.length === 0) {
-            logger.log('[MATA-CONSOLIDAÇÃO] Nenhum cache encontrado');
-            return [];
-        }
-        
-        const confrontosConsolidados = caches.map(cache => ({
-            edicao: cache.edicao,
-            rodada_atual: cache.rodada_atual,
-            dados_torneio: cache.dados_torneio,
-            ultima_atualizacao: cache.ultima_atualizacao
-        }));
-        
-        logger.log(`[MATA-CONSOLIDAÇÃO] ✅ ${confrontosConsolidados.length} edições processadas`);
-        return confrontosConsolidados;
-        
+        // ✅ v2.0: CALCULAR confrontos em vez de apenas ler cache
+        // Antes: apenas lia MataMataCache (vazio se admin não abriu a tela)
+        // Agora: calcula bracket via backend e persiste no cache automaticamente
+        const resultados = await calcularBracketParaConsolidacao(ligaId, rodadaNumero);
+
+        logger.log(`[MATA-CONSOLIDAÇÃO] ✅ ${resultados.length} edições processadas (cálculo automático)`);
+        return resultados;
+
     } catch (error) {
-        logger.error('[MATA-CONSOLIDAÇÃO] ❌ Erro:', error);
-        throw error;
+        logger.error('[MATA-CONSOLIDAÇÃO] ❌ Erro no cálculo automático, tentando fallback do cache:', error);
+
+        // Fallback: ler cache existente (comportamento anterior)
+        try {
+            const caches = await MataMataCache.find({
+                liga_id: ligaId,
+                temporada: temporada
+            }).sort({ edicao: 1 });
+
+            return caches.map(cache => ({
+                edicao: cache.edicao,
+                rodada_atual: cache.rodada_atual,
+                dados_torneio: cache.dados_torneio,
+                ultima_atualizacao: cache.ultima_atualizacao
+            }));
+        } catch (fallbackError) {
+            logger.error('[MATA-CONSOLIDAÇÃO] ❌ Fallback também falhou:', fallbackError);
+            throw error;
+        }
     }
 };
