@@ -243,10 +243,18 @@ async function carregarDadosERenderizar(ligaId, timeId, participante) {
                     saldo_atual: cacheData?.resumo?.saldo_final ?? cacheData?.resumo?.saldo ?? 0,
                     resumo: cacheData?.resumo || {}
                 };
+            } else {
+                // FIX: Fallback para endpoint de cálculo quando cache não disponível (404)
+                const resFallback = await fetch(`/api/fluxo-financeiro/${ligaId}/extrato/${timeId}?temporada=${temporadaExtrato}`);
+                if (resFallback.ok) {
+                    extratoFresh = await resFallback.json();
+                }
             }
         } catch (e) {
-            const resFallback = await fetch(`/api/fluxo-financeiro/${ligaId}/extrato/${timeId}`);
-            extratoFresh = resFallback.ok ? await resFallback.json() : null;
+            try {
+                const resFallback = await fetch(`/api/fluxo-financeiro/${ligaId}/extrato/${timeId}?temporada=${temporadaExtrato}`);
+                extratoFresh = resFallback.ok ? await resFallback.json() : null;
+            } catch (_) { /* silenciar erro de rede no fallback */ }
         }
 
         if (cache && extratoFresh) {
@@ -420,10 +428,18 @@ async function buscarDadosHomeFresh(ligaId, timeId) {
                 saldo_atual: cacheData?.resumo?.saldo_final ?? cacheData?.resumo?.saldo ?? 0,
                 resumo: cacheData?.resumo || {}
             };
+        } else {
+            // FIX: Fallback para endpoint de cálculo quando cache não disponível (404)
+            const resFallback = await fetch(`/api/fluxo-financeiro/${ligaId}/extrato/${timeId}?temporada=${temporadaExtrato}`);
+            if (resFallback.ok) {
+                extratoFresh = await resFallback.json();
+            }
         }
     } catch (e) {
-        const resFallback = await fetch(`/api/fluxo-financeiro/${ligaId}/extrato/${timeId}`);
-        extratoFresh = resFallback.ok ? await resFallback.json() : null;
+        try {
+            const resFallback = await fetch(`/api/fluxo-financeiro/${ligaId}/extrato/${timeId}?temporada=${temporadaExtrato}`);
+            extratoFresh = resFallback.ok ? await resFallback.json() : null;
+        } catch (_) { /* silenciar erro de rede no fallback */ }
     }
 
     if (cache && extratoFresh) {
