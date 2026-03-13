@@ -1,6 +1,28 @@
 <!-- PARTICIPANTE HOME - Redesign v5.0 "Stadium Night" -->
-<!-- Hero-first layout: Performance → Alertas → Quick Actions → Feed -->
+<!-- Quick Actions → Hero → Alertas → Feed -->
 <div id="home-container" class="relative min-h-screen pb-20">
+
+    <!-- ========================================
+         QUICK ACTIONS (logo abaixo do header/seletor de ligas)
+         ======================================== -->
+    <section id="home-atalhos-section" class="home-actions-bar">
+        <button class="home-action-chip" id="btn-participantes" onclick="window.abrirParticipantes2026 && window.abrirParticipantes2026()">
+            <span class="material-icons">groups</span>
+            <span class="home-action-chip-label">Participantes</span>
+        </button>
+        <button class="home-action-chip" id="btn-financeiro" onclick="window.participanteNav?.navegarPara('extrato')">
+            <span class="material-icons">account_balance_wallet</span>
+            <span class="home-action-chip-label">Financeiro</span>
+        </button>
+        <button class="home-action-chip" id="btn-cartola-pro" onclick="window.abrirCartolaPro && window.abrirCartolaPro()">
+            <span class="material-icons">workspace_premium</span>
+            <span class="home-action-chip-label">Cartola PRO</span>
+        </button>
+        <button class="home-action-chip" id="btn-joguinhos" style="display:none" onclick="window.abrirJoguinhos ? window.abrirJoguinhos() : (function(b){b.disabled=true;var s=document.createElement('script');s.src='/participante/js/participante-joguinhos.js';s.onload=function(){b.disabled=false;window.abrirJoguinhos&&window.abrirJoguinhos()};s.onerror=function(){b.disabled=false};document.head.appendChild(s)})(this)">
+            <span class="material-icons">sports_esports</span>
+            <span class="home-action-chip-label">Joguinhos</span>
+        </button>
+    </section>
 
     <!-- ========================================
          HERO CARD (Performance + Market Status)
@@ -55,28 +77,6 @@
         <div class="home-avisos-secundarios" id="home-avisos-secundarios">
             <!-- Populado dinamicamente por atualizarPainelAvisos -->
         </div>
-    </section>
-
-    <!-- ========================================
-         QUICK ACTIONS (Cards com glass background)
-         ======================================== -->
-    <section id="home-atalhos-section" class="home-actions-bar">
-        <button class="home-action-chip" id="btn-participantes" onclick="window.abrirParticipantes2026 && window.abrirParticipantes2026()">
-            <span class="material-icons">groups</span>
-            <span class="home-action-chip-label">Participantes</span>
-        </button>
-        <button class="home-action-chip" id="btn-financeiro" onclick="window.participanteNav?.navegarPara('extrato')">
-            <span class="material-icons">account_balance_wallet</span>
-            <span class="home-action-chip-label">Financeiro</span>
-        </button>
-        <button class="home-action-chip" id="btn-cartola-pro" onclick="window.abrirCartolaPro && window.abrirCartolaPro()">
-            <span class="material-icons">workspace_premium</span>
-            <span class="home-action-chip-label">Cartola PRO</span>
-        </button>
-        <button class="home-action-chip" id="btn-joguinhos" style="display:none" onclick="window.abrirJoguinhos ? window.abrirJoguinhos() : (function(b){b.disabled=true;var s=document.createElement('script');s.src='/participante/js/participante-joguinhos.js';s.onload=function(){b.disabled=false;window.abrirJoguinhos&&window.abrirJoguinhos()};s.onerror=function(){b.disabled=false};document.head.appendChild(s)})(this)">
-            <span class="material-icons">sports_esports</span>
-            <span class="home-action-chip-label">Joguinhos</span>
-        </button>
     </section>
 
     <!-- Placeholders para conteúdo dinâmico (Feed) -->
