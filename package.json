@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "webhook": "node webhook-server.js",
-    "predev": "lsof -ti :3000 | xargs -r kill -9 2>/dev/null; true",
+    "predev": "lsof -ti :3000 | xargs -r kill -15 2>/dev/null; sleep 1; true",
     "start": "NODE_ENV=production node index.js",
     "dev": "cross-env NODE_ENV=development node index.js",
     "dev:full": "cross-env NODE_ENV=development node mongo-server.js & cross-env NODE_ENV=development nodemon index.js",
