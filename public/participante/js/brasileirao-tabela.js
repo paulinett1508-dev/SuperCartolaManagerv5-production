@@ -81,7 +81,7 @@ const BrasileiraoTabela = {
 
     _renderLoading() {
         return `
-            <section class="brasileirao-section mx-4 mb-4">
+            <section class="brasileirao-section mx-4 mb-2">
                 <div class="brasileirao-loading">
                     <div class="brasileirao-spinner"></div>
                     <span>Carregando Brasileirão...</span>
@@ -105,7 +105,7 @@ const BrasileiraoTabela = {
         const aoVivo = jogos_rodada_atual?.filter(j => j.status === 'ao_vivo').length || 0;
 
         return `
-            <section id="brasileirao-section" class="brasileirao-section mx-4 mb-4">
+            <section id="brasileirao-section" class="brasileirao-section mx-4 mb-2">
                 <button class="brasileirao-header" id="brasileirao-header">
                     <div class="brasileirao-header-left">
                         <div class="brasileirao-icon">
@@ -294,7 +294,7 @@ const BrasileiraoTabela = {
 
     _renderSemDados() {
         return `
-            <section class="brasileirao-section mx-4 mb-4">
+            <section class="brasileirao-section mx-4 mb-2">
                 <div class="brasileirao-header brasileirao-header-disabled">
                     <div class="brasileirao-header-left">
                         <div class="brasileirao-icon" style="opacity:0.5;">
@@ -312,7 +312,7 @@ const BrasileiraoTabela = {
 
     _renderErro() {
         return `
-            <section class="brasileirao-section mx-4 mb-4">
+            <section class="brasileirao-section mx-4 mb-2">
                 <div class="brasileirao-header brasileirao-header-disabled">
                     <div class="brasileirao-header-left">
                         <div class="brasileirao-icon" style="background:rgba(239,68,68,0.12);">

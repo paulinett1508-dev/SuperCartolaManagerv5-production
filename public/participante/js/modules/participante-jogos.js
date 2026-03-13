@@ -162,7 +162,7 @@ export function renderizarJogosAoVivo(jogos, fonte = 'soccerdata', aoVivo = fals
     const jogosAoVivoCount = jogos.filter(j => isJogoAoVivo(j)).length;
 
     return `
-    <section id="jogos-home-section" class="jogos-home-section mx-4 mb-6">
+    <section id="jogos-home-section" class="jogos-home-section mx-4 mb-2">
         <!-- Header Colapsável Agenda do Dia (Padrão Copa) -->
         <button class="jogos-home-header" onclick="window.toggleJogosHome && window.toggleJogosHome()">
             <div class="jogos-home-header-left">
@@ -512,7 +512,7 @@ export function renderizarSecaoCopa(copa) {
         : 'Copa do Mundo';
 
     return `
-    <section id="copa-home-section" class="copa-home-section" style="margin:0 1rem 1.5rem;">
+    <section id="copa-home-section" class="copa-home-section" style="margin:0 1rem 0.5rem;">
         <!-- Header -->
         <button class="copa-home-header" onclick="window.toggleCopaHome && window.toggleCopaHome()">
             <div class="copa-home-header-left">
@@ -778,7 +778,7 @@ export function renderizarSecaoLibertadores(noticiasApi) {
                 </div>`).join('');
 
     return `
-    <section id="liberta-home-section" class="liberta-home-section mx-4 mb-6">
+    <section id="liberta-home-section" class="liberta-home-section mx-4 mb-2">
         <!-- Header Colaps\u00e1vel Libertadores -->
         <button class="liberta-home-header" onclick="window.toggleLibertaHome && window.toggleLibertaHome()">
             <div class="liberta-home-header-left">
