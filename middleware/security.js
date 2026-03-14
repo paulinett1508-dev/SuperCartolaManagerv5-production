@@ -201,7 +201,7 @@ export function sanitizeInput(req, res, next) {
     /\.\.\//, // Path traversal
     /<script/i, // XSS
     /javascript:/i, // XSS
-    /on\w+\s*=/i, // Event handlers
+    /(?:^|[^a-zA-Z])on[a-z]+\s*=/i, // Event handlers (word boundary to avoid false positives like "patrimonio=")
     /union\s+select/i, // SQL injection
     /exec\s*\(/i, // Command injection
   ];
