@@ -7,6 +7,8 @@
 import express from "express";
 import mongoose from "mongoose";
 import { getDB } from "../config/database.js";
+import { getFinancialSeason } from "../config/seasons.js";
+import { getExtratoFinanceiro } from "../controllers/fluxoFinanceiroController.js";
 
 const { ObjectId } = mongoose.Types;
 
@@ -58,6 +60,7 @@ router.get("/extratos/:ligaId", requireAdmin, async (req, res) => {
 
         const RODADA_FINAL = liga.configuracoes?.rodada_final || 38;
         const modulosAtivos = liga.modulos_ativos || {};
+        const temporada = liga.temporada || getFinancialSeason();
 
         // Estatísticas gerais
         const stats = {
@@ -84,8 +87,9 @@ router.get("/extratos/:ligaId", requireAdmin, async (req, res) => {
 
             // Buscar cache
             const cache = await db.collection("extratofinanceirocaches").findOne({
-                liga_id: ligaObjectId,
-                time_id: timeId
+                liga_id: String(ligaId),
+                time_id: timeId,
+                temporada: temporada
             });
 
             if (!cache) {
@@ -210,6 +214,7 @@ router.get("/extratos/:ligaId", requireAdmin, async (req, res) => {
                 id: ligaId,
                 nome: liga.nome,
                 rodadaFinal: RODADA_FINAL,
+                temporada,
                 modulosAtivos
             },
             stats,
@@ -252,9 +257,14 @@ router.post("/fix-saldo/:ligaId", requireAdmin, async (req, res) => {
 
         const ligaObjectId = new ObjectId(ligaId);
 
+        // Buscar liga para obter temporada
+        const liga = await db.collection("ligas").findOne({ _id: ligaObjectId });
+        const temporada = liga?.temporada || getFinancialSeason();
+
         // Buscar todos os caches da liga
         const caches = await db.collection("extratofinanceirocaches").find({
-            liga_id: ligaObjectId
+            liga_id: String(ligaId),
+            temporada: temporada
         }).toArray();
 
         let totalCorrigidos = 0;
@@ -346,6 +356,148 @@ router.post("/fix-saldo/:ligaId", requireAdmin, async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Erro ao corrigir saldo",
+            error: error.message
+        });
+    }
+});
+
+/**
+ * POST /api/admin/auditoria/regenerar-caches/:ligaId
+ * Regenera caches faltantes para participantes sem extrato financeiro
+ */
+router.post("/regenerar-caches/:ligaId", requireAdmin, async (req, res) => {
+    try {
+        const { ligaId } = req.params;
+        const dryRun = req.query.dryRun !== "false";
+        const db = getDB();
+
+        if (!ObjectId.isValid(ligaId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Liga ID inválido"
+            });
+        }
+
+        const ligaObjectId = new ObjectId(ligaId);
+        const liga = await db.collection("ligas").findOne({ _id: ligaObjectId });
+        if (!liga) {
+            return res.status(404).json({
+                success: false,
+                message: "Liga não encontrada"
+            });
+        }
+
+        const temporada = liga.temporada || getFinancialSeason();
+        const participantes = liga.participantes || [];
+        const semCache = [];
+
+        // Identificar participantes sem cache
+        for (const p of participantes) {
+            const cache = await db.collection("extratofinanceirocaches").findOne({
+                liga_id: String(ligaId),
+                time_id: p.time_id,
+                temporada: temporada
+            });
+            if (!cache) {
+                semCache.push(p);
+            }
+        }
+
+        if (semCache.length === 0) {
+            return res.json({
+                success: true,
+                dryRun,
+                message: "Todos os participantes já possuem cache",
+                regenerados: 0,
+                erros: 0
+            });
+        }
+
+        if (dryRun) {
+            return res.json({
+                success: true,
+                dryRun: true,
+                message: `${semCache.length} participante(s) sem cache seriam regenerados`,
+                regenerados: semCache.length,
+                erros: 0,
+                participantes: semCache.map(p => ({
+                    timeId: p.time_id,
+                    nome: p.nome_cartola
+                }))
+            });
+        }
+
+        // Regenerar caches chamando getExtratoFinanceiro internamente
+        let regenerados = 0;
+        let erros = 0;
+        const detalhes = [];
+
+        for (const p of semCache) {
+            try {
+                // Simular req/res para chamar getExtratoFinanceiro
+                const fakeReq = {
+                    params: { ligaId, timeId: String(p.time_id) },
+                    query: { refresh: "true", temporada: String(temporada) },
+                    session: req.session
+                };
+
+                let responseData = null;
+                const fakeRes = {
+                    status: function(code) {
+                        this._statusCode = code;
+                        return this;
+                    },
+                    json: function(data) {
+                        responseData = data;
+                        this._statusCode = this._statusCode || 200;
+                    }
+                };
+
+                await getExtratoFinanceiro(fakeReq, fakeRes);
+
+                if (fakeRes._statusCode === 200 && responseData) {
+                    regenerados++;
+                    detalhes.push({
+                        timeId: p.time_id,
+                        nome: p.nome_cartola,
+                        status: "OK"
+                    });
+                } else {
+                    erros++;
+                    detalhes.push({
+                        timeId: p.time_id,
+                        nome: p.nome_cartola,
+                        status: "ERRO",
+                        mensagem: responseData?.message || "Resposta inesperada"
+                    });
+                }
+            } catch (err) {
+                erros++;
+                detalhes.push({
+                    timeId: p.time_id,
+                    nome: p.nome_cartola,
+                    status: "ERRO",
+                    mensagem: err.message
+                });
+            }
+        }
+
+        console.log(`[ADMIN-AUDITORIA] Regeneração de caches: ${regenerados} OK, ${erros} erros`);
+
+        res.json({
+            success: true,
+            dryRun: false,
+            regenerados,
+            erros,
+            detalhes,
+            timestamp: new Date().toISOString()
+        });
+
+    } catch (error) {
+        console.error("[ADMIN-AUDITORIA] Erro ao regenerar caches:", error);
+        res.status(500).json({
+            success: false,
+            message: "Erro ao regenerar caches",
             error: error.message
         });
     }
