@@ -192,18 +192,12 @@ function _renderizarDisputa(dados, timeId) {
     // Fonte canônica: API via orchestrator_states
     const isLive = dados.isLive === true;
 
-    // Ordenar vivos: por pontosRodada durante live, por acumulados fora do live
+    // Resta Um = rodada a rodada. SEMPRE ordenar por pontosRodada DESC
     const vivos = (participantes?.filter(p => p.status === 'vivo' || p.status === 'campeao') || [])
         .sort((a, b) => {
-            if (isLive && a.pontosRodada != null && b.pontosRodada != null) {
-                const diff = (b.pontosRodada || 0) - (a.pontosRodada || 0);
-                return diff !== 0 ? diff : (b.pontosAcumulados || 0) - (a.pontosAcumulados || 0);
-            }
-            return (b.pontosAcumulados || 0) - (a.pontosAcumulados || 0);
+            const diff = (b.pontosRodada || 0) - (a.pontosRodada || 0);
+            return diff !== 0 ? diff : (b.pontosAcumulados || 0) - (a.pontosAcumulados || 0);
         });
-
-    // Métrica exibida: pontosRodada (live) ou pontosAcumulados (consolidado)
-    const exibirAcumulado = !isLive;
 
     // Ordenar eliminados por rodadaEliminacao DESC (mais recente primeiro)
     const eliminados = (participantes?.filter(p => p.status === 'eliminado') || [])
@@ -272,9 +266,7 @@ function _renderizarDisputa(dados, timeId) {
     // ── HERO CARD — LÍDER ────────────────────────────────────────────
     if (lider) {
         const isMeuTimeLider = String(lider.timeId) === String(timeId);
-        const pontosLider = exibirAcumulado
-            ? _formatPontos(lider.pontosAcumulados)
-            : (lider.pontosRodada != null ? _formatPontos(lider.pontosRodada) : '--');
+        const pontosLider = lider.pontosRodada != null ? _formatPontos(lider.pontosRodada) : '--';
         html += `
             <div class="ru-lider-card${isMeuTimeLider ? ' meu-time' : ''}">
                 <div class="ru-lider-topo">
@@ -321,9 +313,7 @@ function _renderizarDisputa(dados, timeId) {
                 `;
             }
 
-            const pontosStr = exibirAcumulado
-                ? _formatPontos(p.pontosAcumulados)
-                : (p.pontosRodada != null ? _formatPontos(p.pontosRodada) : '--');
+            const pontosStr = p.pontosRodada != null ? _formatPontos(p.pontosRodada) : '--';
             const classes = ['resta-um-row'];
             if (isMeuTime) classes.push('meu-time');
             if (isNaZona) classes.push('lanterna');
