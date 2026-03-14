@@ -44,7 +44,7 @@ async function gerarAnalise(req, res) {
                     patrimonioFonte = 'conta-admin';
                     console.log(`${LOG_PREFIX} Patrimonio real do admin: C$${patrimonio}`);
                 }
-            } catch (_) { /* token indisponivel - usar fallback */ }
+            } catch (err) { console.warn(`${LOG_PREFIX} Nao foi possivel obter patrimonio real: ${err.message}`); }
         }
 
         patrimonio = patrimonio || 100;

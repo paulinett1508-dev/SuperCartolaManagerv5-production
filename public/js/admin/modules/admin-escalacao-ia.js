@@ -231,6 +231,13 @@
 
             dadosCompletos = data;
 
+            // Atualizar input com patrimônio real retornado pelo backend
+            const patrimonioElR = document.getElementById('eia-patrimonio');
+            if (data.patrimonio && patrimonioElR) {
+                patrimonioElR.value = data.patrimonio;
+                patrimonioAlteradoManualmente = false;
+            }
+
             const modoSugerido = data.modoSugerido?.modo || 'equilibrado';
             selecionarTab(modoSugerido);
 
