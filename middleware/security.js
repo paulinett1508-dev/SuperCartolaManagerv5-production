@@ -133,6 +133,67 @@ export function authRateLimiter(req, res, next) {
 }
 
 // ====================================================================
+// RATE LIMITING - Matchday endpoints (mais restritivo, alta frequência)
+// ====================================================================
+const matchdayAttempts = new Map();
+const MATCHDAY_RATE_LIMIT_WINDOW = 60 * 1000; // 60 segundos
+const MATCHDAY_RATE_LIMIT_MAX = 30; // 30 requests por minuto
+
+// Limpar contadores matchday a cada 5 minutos
+const matchdayCleanupInterval = setInterval(() => {
+  const now = Date.now();
+  for (const [key, data] of matchdayAttempts.entries()) {
+    if (now - data.startTime > MATCHDAY_RATE_LIMIT_WINDOW) {
+      matchdayAttempts.delete(key);
+    }
+  }
+}, 5 * 60 * 1000);
+
+/**
+ * Cria Rate Limiter específico para endpoints matchday
+ */
+export function createMatchdayRateLimiter() {
+  return function matchdayRateLimiter(req, res, next) {
+    const forwardedFor = req.headers['x-forwarded-for'];
+    const realIp = req.headers['x-real-ip'];
+    const ip = forwardedFor ? forwardedFor.split(',')[0].trim() :
+               realIp ? realIp :
+               req.ip || req.connection.remoteAddress || "unknown";
+
+    const now = Date.now();
+
+    if (!matchdayAttempts.has(ip)) {
+      matchdayAttempts.set(ip, { count: 1, startTime: now });
+      return next();
+    }
+
+    const data = matchdayAttempts.get(ip);
+
+    if (now - data.startTime > MATCHDAY_RATE_LIMIT_WINDOW) {
+      matchdayAttempts.set(ip, { count: 1, startTime: now });
+      return next();
+    }
+
+    data.count++;
+
+    if (data.count > MATCHDAY_RATE_LIMIT_MAX) {
+      const retryAfter = Math.ceil(
+        (MATCHDAY_RATE_LIMIT_WINDOW - (now - data.startTime)) / 1000,
+      );
+      console.log(`[SECURITY] Rate limit matchday excedido: ${ip}`);
+      res.setHeader('Retry-After', retryAfter);
+      return res.status(429).json({
+        error: "Muitas requisições matchday",
+        message: "Aguarde um momento antes de tentar novamente",
+        retryAfter,
+      });
+    }
+
+    next();
+  };
+}
+
+// ====================================================================
 // SECURITY HEADERS - Proteção via headers HTTP
 // ====================================================================
 export function securityHeaders(req, res, next) {
@@ -261,6 +322,7 @@ export function setupSecurity(app) {
 export default {
   rateLimiter,
   authRateLimiter,
+  createMatchdayRateLimiter,
   securityHeaders,
   sanitizeInput,
   securityLogger,
