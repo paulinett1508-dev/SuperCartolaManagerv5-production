@@ -43,14 +43,16 @@ async function buscarCartolaAPI() {
     if (cached) return cached;
 
     try {
-        const [mercadoResp, partidasResp] = await Promise.all([
+        const [mercadoResp, partidasResp, statusResp] = await Promise.all([
             axios.get(CARTOLA_API.mercado, { timeout: 15000, headers: { 'User-Agent': 'Super-Cartola-Manager/2.0' } }),
             axios.get(CARTOLA_API.partidas, { timeout: 10000, headers: { 'User-Agent': 'Super-Cartola-Manager/2.0' } }),
+            axios.get(CARTOLA_API.status, { timeout: 10000, headers: { 'User-Agent': 'Super-Cartola-Manager/2.0' } }).catch((e) => { console.warn(`${LOG_PREFIX} /mercado/status indisponivel: ${e.message}`); return null; }),
         ]);
 
         const atletas = mercadoResp.data?.atletas || [];
         const clubes = mercadoResp.data?.clubes || {};
-        const rodada = mercadoResp.data?.rodada_atual;
+        // rodada_atual vem de /mercado/status (fonte confiável), com fallback para /atletas/mercado
+        const rodada = statusResp?.data?.rodada_atual || mercadoResp.data?.rodada_atual;
         const partidas = partidasResp.data?.partidas || [];
 
         // Mapear confrontos

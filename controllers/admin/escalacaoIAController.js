@@ -29,9 +29,25 @@ const LOG_PREFIX = '[ESCALACAO-IA-CTRL]';
 // =====================================================================
 async function gerarAnalise(req, res) {
     try {
-        const patrimonio = parseFloat(req.query.patrimonio) || 100;
         const esquemaId = parseInt(req.query.esquemaId) || 3;
         const modoFiltro = req.query.modo || null; // null = gerar todos
+
+        // Tentar usar patrimonio real da conta do admin (token de sistema)
+        let patrimonio = parseFloat(req.query.patrimonio) || null;
+        let patrimonioFonte = 'manual';
+
+        if (!patrimonio) {
+            try {
+                const authTime = await systemTokenService.fazerRequisicaoAutenticada('/auth/time');
+                if (authTime.success && authTime.data?.time?.patrimonio > 0) {
+                    patrimonio = authTime.data.time.patrimonio;
+                    patrimonioFonte = 'conta-admin';
+                    console.log(`${LOG_PREFIX} Patrimonio real do admin: C$${patrimonio}`);
+                }
+            } catch (err) { console.warn(`${LOG_PREFIX} Nao foi possivel obter patrimonio real: ${err.message}`); }
+        }
+
+        patrimonio = patrimonio || 100;
 
         if (patrimonio <= 0 || patrimonio > 500) {
             return res.status(400).json({
@@ -40,7 +56,7 @@ async function gerarAnalise(req, res) {
             });
         }
 
-        console.log(`${LOG_PREFIX} Gerando analise: C$${patrimonio}, esquema=${esquemaId}`);
+        console.log(`${LOG_PREFIX} Gerando analise: C$${patrimonio} (${patrimonioFonte}), esquema=${esquemaId}`);
 
         // 1. Agregar dados multi-fonte
         const dadosAgregados = await dataAggregator.agregarDados();
@@ -92,6 +108,7 @@ async function gerarAnalise(req, res) {
             fontesAtivas: dadosAgregados.fontesAtivas,
             rodada: dadosAgregados.rodada,
             patrimonio,
+            patrimonioFonte,
             esquemaId,
             totalAtletasAnalisados: dadosAgregados.totalAtletas,
             tempoAgregacaoMs: dadosAgregados.tempoMs,

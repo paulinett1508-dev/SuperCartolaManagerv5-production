@@ -14,6 +14,7 @@
     const API_BASE = '/api/admin/escalacao-ia';
     let cenarioAtual = null;
     let dadosCompletos = null;
+    let patrimonioAlteradoManualmente = false;
 
     // =====================================================================
     // INICIALIZAÇÃO
@@ -22,6 +23,10 @@
     async function inicializar() {
         console.log('[ESCALACAO-IA] Inicializando módulo v2.0...');
         configurarTabs();
+        // Rastrear alteração manual do patrimônio pelo usuário
+        document.getElementById('eia-patrimonio')?.addEventListener('change', () => {
+            patrimonioAlteradoManualmente = true;
+        });
         await carregarStatusFontes();
         await tentarAutoLoad();
     }
@@ -136,7 +141,9 @@
     // =====================================================================
 
     async function gerar() {
-        const patrimonio = document.getElementById('eia-patrimonio')?.value || 100;
+        // Se o usuário não alterou manualmente, envia vazio → backend busca da conta real do admin
+        const patrimonioEl = document.getElementById('eia-patrimonio');
+        const patrimonio = patrimonioAlteradoManualmente ? (patrimonioEl?.value || '') : '';
         const esquemaId = document.getElementById('eia-esquema')?.value || 3;
 
         mostrarLoading(true);
@@ -145,7 +152,10 @@
 
         try {
             atualizarLoadingStep('Coletando dados da API Cartola...');
-            const resp = await fetch(`${API_BASE}/gerar?patrimonio=${patrimonio}&esquemaId=${esquemaId}`);
+            const url = patrimonio
+                ? `${API_BASE}/gerar?patrimonio=${patrimonio}&esquemaId=${esquemaId}`
+                : `${API_BASE}/gerar?esquemaId=${esquemaId}`;
+            const resp = await fetch(url);
 
             if (!resp.ok) {
                 throw new Error(`HTTP ${resp.status}`);
@@ -157,6 +167,12 @@
             }
 
             dadosCompletos = data;
+
+            // Atualizar input com patrimônio real retornado pelo backend
+            if (data.patrimonio && patrimonioEl) {
+                patrimonioEl.value = data.patrimonio;
+                patrimonioAlteradoManualmente = false;
+            }
 
             // Selecionar modo sugerido
             const modoSugerido = data.modoSugerido?.modo || 'equilibrado';
@@ -192,7 +208,8 @@
         );
         if (!confirmar) return;
 
-        const patrimonio = document.getElementById('eia-patrimonio')?.value || 100;
+        const patrimonioEl = document.getElementById('eia-patrimonio');
+        const patrimonio = patrimonioAlteradoManualmente ? (patrimonioEl?.value || '') : '';
         const esquemaId = document.getElementById('eia-esquema')?.value || 3;
 
         mostrarLoading(true);
@@ -200,7 +217,10 @@
 
         try {
             atualizarLoadingStep('Limpando cache e re-analisando...');
-            const resp = await fetch(`${API_BASE}/refresh?patrimonio=${patrimonio}&esquemaId=${esquemaId}`, {
+            const refreshUrl = patrimonio
+                ? `${API_BASE}/refresh?patrimonio=${patrimonio}&esquemaId=${esquemaId}`
+                : `${API_BASE}/refresh?esquemaId=${esquemaId}`;
+            const resp = await fetch(refreshUrl, {
                 method: 'POST',
             });
 
@@ -210,6 +230,13 @@
             if (!data.success) throw new Error(data.message || 'Erro');
 
             dadosCompletos = data;
+
+            // Atualizar input com patrimônio real retornado pelo backend
+            const patrimonioElR = document.getElementById('eia-patrimonio');
+            if (data.patrimonio && patrimonioElR) {
+                patrimonioElR.value = data.patrimonio;
+                patrimonioAlteradoManualmente = false;
+            }
 
             const modoSugerido = data.modoSugerido?.modo || 'equilibrado';
             selecionarTab(modoSugerido);
@@ -567,8 +594,10 @@
         if (!footer) return;
 
         const tempo = data.tempoAgregacaoMs ? `${(data.tempoAgregacaoMs / 1000).toFixed(1)}s` : 'N/D';
+        const fontePatrimonio = data.patrimonioFonte === 'conta-admin' ? ' (conta real)' : '';
+        const patrimonioInfo = data.patrimonio ? ` | C$ ${data.patrimonio.toFixed(2)}${fontePatrimonio}` : '';
         footer.textContent = `Rodada ${data.rodada || '?'} | ${data.totalAtletasAnalisados || 0} atletas analisados | `
-            + `${data.fontesAtivas?.length || 0} fontes ativas | Tempo: ${tempo} | ${data.geradoEm ? new Date(data.geradoEm).toLocaleString('pt-BR') : ''}`;
+            + `${data.fontesAtivas?.length || 0} fontes ativas | Tempo: ${tempo}${patrimonioInfo} | ${data.geradoEm ? new Date(data.geradoEm).toLocaleString('pt-BR') : ''}`;
     }
 
     function renderizarBadgeSalvo(salvoEm) {
