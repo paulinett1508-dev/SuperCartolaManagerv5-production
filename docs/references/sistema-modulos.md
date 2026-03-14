@@ -9,9 +9,9 @@
 
 **Base (sempre ativos):** Extrato, Ranking, Rodadas, Hall da Fama
 
-**Opcionais:** Top 10, Melhor Mês, Pontos Corridos, Mata-Mata, Artilheiro, Luva de Ouro, Campinho, Dicas
+**Opcionais:** Top 10, Melhor Mês, Pontos Corridos, Mata-Mata, Artilheiro, Luva de Ouro, Campinho, Dicas, Resta Um, Capitão de Luxo
 
-**Planejados 2026:** Tiro Certo, Bolão Copa & Liberta, Resta Um, Capitão de Luxo
+**Planejados 2026:** Tiro Certo, Bolão Copa & Liberta
 
 ## Módulos por Rodada vs Módulos de Premiação Final (REGRA CRÍTICA)
 

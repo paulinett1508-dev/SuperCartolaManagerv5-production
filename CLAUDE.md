@@ -83,6 +83,13 @@ Commands: `/liste-pr-github` (filtro por período), `/security-review` (diff con
 Context7 (docs), Perplexity (pesquisa web), Mongo MCP (queries DB), Stitch MCP (design-to-code).
 Detalhes: [`docs/skills/03-utilities/project-reference.md`](docs/skills/03-utilities/project-reference.md)
 
+## Resta Um (REGRA CRÍTICA)
+
+Módulo de eliminação **rodada a rodada** — cada rodada é independente.
+SEMPRE exibir e ordenar por `pontosRodada` DESC (live e consolidado). `pontosAcumulados` é apenas metadado de desempate.
+Eliminados preservam `pontosRodada` da rodada de eliminação.
+Detalhes: [`docs/references/resta-um.md`](docs/references/resta-um.md)
+
 ## Sistemas Auxiliares
 
 - **Jogos do Dia:** API-Football → SoccerDataAPI → Cache Stale → Globo Esporte. Docs: [`docs/JOGOS-DO-DIA-API.md`](docs/JOGOS-DO-DIA-API.md)

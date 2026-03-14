@@ -214,6 +214,26 @@ export default class RestaUmManager extends BaseManager {
         await edicao.save();
     }
 
+    /**
+     * Valida que todos os participantes vivos têm score na Rodada.
+     * Previne eliminações com dados parciais (race condition).
+     */
+    _validarCoberturaScores(vivos, pontuacoes, rodada, ligaId) {
+        const pontuacoesSet = new Set(pontuacoes.map(p => String(p.timeId)));
+        const semScore = vivos.filter(p => !pontuacoesSet.has(String(p.timeId)));
+
+        if (semScore.length > 0) {
+            const nomes = semScore.map(p => p.nomeTime || p.timeId).join(', ');
+            console.warn(`[RESTA-UM] ⚠️ R${rodada} liga ${ligaId} — ${semScore.length} vivo(s) sem score na Rodada: ${nomes}. Abortando para evitar eliminação incorreta.`);
+            return {
+                ok: false,
+                resultado: { consolidado: false, motivo: 'scores_incompletos', semScore: semScore.length },
+            };
+        }
+
+        return { ok: true };
+    }
+
     async onConsolidate(ctx) {
         const { ligaId, rodada } = ctx;
         console.log(`[RESTA-UM] Processando R${rodada} para liga ${ligaId} (onConsolidate)`);
@@ -271,16 +291,20 @@ export default class RestaUmManager extends BaseManager {
                 });
 
                 if (pendente) {
-                    // Idempotência: não processar a mesma rodada duas vezes
-                    const jaProcessadaPendente = pendente.historicoEliminacoes?.some(h => h.rodada === rodada);
-                    if (jaProcessadaPendente) {
-                        console.log(`[RESTA-UM] R${rodada} já foi processada (edição pendente) para liga ${ligaId} — ignorando`);
+                    // Idempotência primária: rodadaAtual já cobre esta rodada
+                    if (pendente.rodadaAtual >= rodada) {
+                        console.log(`[RESTA-UM] R${rodada} já processada (rodadaAtual=${pendente.rodadaAtual}, pendente) para liga ${ligaId} — ignorando`);
                         return { consolidado: true, ignorado: true, motivo: 'rodada_ja_processada' };
                     }
 
+                    // Validar cobertura de scores antes de prosseguir
+                    const vivos = pendente.participantes.filter(p => p.status === 'vivo');
+                    const cobertura = this._validarCoberturaScores(vivos, pontuacoes, rodada, ligaId);
+                    if (!cobertura.ok) return cobertura.resultado;
+
                     pendente.status = 'em_andamento';
                     pendente.rodadaAtual = rodada;
-                    await pendente.save();
+                    await pendente.save(); // Gravar rodadaAtual ANTES do processamento (guard persiste mesmo se falhar)
                     console.log(`[RESTA-UM] Edição ${pendente.edicao} iniciada na R${rodada}`);
 
                     // Proteção da primeira rodada: não eliminar ninguém
@@ -304,14 +328,19 @@ export default class RestaUmManager extends BaseManager {
                 return { consolidado: true, ignorado: true };
             }
 
-            // Idempotência: não processar a mesma rodada duas vezes
-            const jaProcessada = edicao.historicoEliminacoes?.some(h => h.rodada === rodada);
-            if (jaProcessada) {
-                console.log(`[RESTA-UM] R${rodada} já foi processada para liga ${ligaId} — ignorando (idempotência)`);
+            // Idempotência primária: rodadaAtual já cobre esta rodada
+            if (edicao.rodadaAtual >= rodada) {
+                console.log(`[RESTA-UM] R${rodada} já processada (rodadaAtual=${edicao.rodadaAtual}) para liga ${ligaId} — ignorando`);
                 return { consolidado: true, ignorado: true, motivo: 'rodada_ja_processada' };
             }
 
+            // Validar cobertura de scores antes de prosseguir
+            const vivosEdicao = edicao.participantes.filter(p => p.status === 'vivo');
+            const cobertura = this._validarCoberturaScores(vivosEdicao, pontuacoes, rodada, ligaId);
+            if (!cobertura.ok) return cobertura.resultado;
+
             edicao.rodadaAtual = rodada;
+            await edicao.save(); // Gravar rodadaAtual ANTES do processamento (guard persiste mesmo se falhar)
             const result = await this._processarEliminacao(edicao, pontuacoes, rankingGeral, rodada);
             return { consolidado: true, ...result };
 
