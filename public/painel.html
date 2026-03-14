@@ -101,21 +101,6 @@
                             </div>
                         </div>
 
-                        <div class="stat-card-new yellow">
-                            <div class="stat-card-header">
-                                <div class="stat-card-content">
-                                    <p class="stat-label-new">Clube Popular</p>
-                                    <h3 class="stat-number-new text-lg" id="clubeMaisPopular">-</h3>
-                                </div>
-                                <div class="stat-icon-new yellow">
-                                    <span class="material-icons">star</span>
-                                </div>
-                            </div>
-                            <div class="stat-card-footer">
-                                <span class="material-icons">favorite</span>
-                                Mais torcido
-                            </div>
-                        </div>
 
                         <div class="stat-card-new purple">
                             <div class="stat-card-header">
@@ -640,21 +625,13 @@
             // === ATUALIZAR ESTATÍSTICAS GLOBAIS ===
             function atualizarEstatisticasGlobais(stats) {
                 document.getElementById("totalLigas").textContent =
-                    ligasData.length;
+                    ligasData.filter(l => l.ativa !== false).length;
                 document.getElementById("totalParticipantes").textContent =
                     stats.totalParticipantes;
 
                 document.getElementById("clubesUnicos").textContent =
                     stats.clubesUnicos;
 
-                const clubeElement =
-                    document.getElementById("clubeMaisPopular");
-                if (stats.clubeMaisPopular[0] !== "Nenhum") {
-                    clubeElement.textContent = stats.clubeMaisPopular[0];
-                    clubeElement.title = `${stats.clubeMaisPopular[1]} participantes`;
-                } else {
-                    clubeElement.textContent = "-";
-                }
             }
 
             // === ATUALIZAR ESTATÍSTICAS (COMPATIBILIDADE) ===
