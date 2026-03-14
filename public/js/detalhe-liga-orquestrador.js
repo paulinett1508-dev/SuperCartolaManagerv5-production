@@ -6,7 +6,7 @@
 // v3.1: FIX - Evita re-injeção de scripts do layout + invalida cache ao navegar entre ligas
 
 // 🔖 Versão de cache-busting — atualize ao fazer deploy para forçar reload dos módulos JS
-const ADMIN_JS_VERSION = '20260313.1';
+const ADMIN_JS_VERSION = '20260314.1';
 
 // Wrapper de import dinâmico com cache-busting automático
 const vImport = (path) => {
@@ -709,6 +709,7 @@ class DetalheLigaOrquestrador {
             "bolao-copa": "Bolão Copa & Liberta",
             "resta-um": "Resta Um",
             "capitao-luxo": "Capitão Luxo",
+            "admin-escalacao-ia": "Escalação IA",
         };
         return names[module] || module;
     }
