@@ -66,10 +66,11 @@ export const obterContextoRodada = async (req, res) => {
         console.log(`${LOG_PREFIX} Módulos ativos:`, Object.keys(modulosAtivos).filter(k => modulosAtivos[k]));
 
         // 3. Buscar saldo financeiro real da rodada (extrato)
+        // ExtratoFinanceiroCache.liga_id é String (não ObjectId)
         let financeiroRodada = 0;
         try {
             const extrato = await ExtratoFinanceiroCache.findOne({
-                liga_id: ligaIdObj,
+                liga_id: String(ligaId),
                 time_id: numTimeId,
                 temporada: numTemporada,
             }).lean();
