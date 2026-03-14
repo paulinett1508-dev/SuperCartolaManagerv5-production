@@ -1,5 +1,5 @@
 /**
- * LINEUP OPTIMIZER v1.0
+ * LINEUP OPTIMIZER v1.1
  * Otimizador de escalacao por orcamento (Cartoletas).
  *
  * Algoritmo greedy melhorado com reserva de orcamento para posicoes restantes.
@@ -7,6 +7,8 @@
  *   - Max 3 jogadores por clube
  *   - Suporte a 7 esquemas taticos
  *   - Selecao automatica de capitao
+ *   - Trava anti-confronto: posicoes antagonicas de times que se enfrentam
+ *     nao podem coexistir na mesma escalacao (ex: ATA do time A + ZAG do time B)
  *
  * Gera 3 cenarios simultaneos (Mitar, Equilibrado, Valorizar).
  */
@@ -39,6 +41,49 @@ const ESQUEMAS = {
 };
 
 // =====================================================================
+// TRAVA ANTI-CONFRONTO: mapa de posicoes antagonicas
+// =====================================================================
+// Atacante conflita com defesa adversaria (GOL, ZAG, LAT) e vice-versa.
+// Meias (4) e Tecnicos (6) sao neutros — nao se anulam diretamente.
+const POSICOES_DEFESA = new Set([1, 2, 3]); // GOL, LAT, ZAG
+const POSICOES_ATAQUE = new Set([5]);        // ATA
+const POSICOES_NEUTRAS = new Set([4, 6]);    // MEI, TEC
+
+/**
+ * Verifica se a posicao de um candidato conflita com posicoes ja selecionadas
+ * do clube adversario no mesmo confronto.
+ *
+ * Regra: Ataque de um lado anula Defesa do outro (e vice-versa).
+ *   - ATA (5) conflita com GOL (1), ZAG (3), LAT (2) do adversario
+ *   - GOL (1), ZAG (3), LAT (2) conflitam com ATA (5) do adversario
+ *   - MEI (4) e TEC (6) nunca conflitam
+ *
+ * @param {number} posicaoIdCandidato - Posicao do jogador candidato
+ * @param {Set<number>} posicoesAdversarioNaEscalacao - Posicoes ja selecionadas do adversario
+ * @returns {boolean} true se ha conflito
+ */
+function temConflitoConfronto(posicaoIdCandidato, posicoesAdversarioNaEscalacao) {
+    if (!posicoesAdversarioNaEscalacao || posicoesAdversarioNaEscalacao.size === 0) return false;
+    if (POSICOES_NEUTRAS.has(posicaoIdCandidato)) return false;
+
+    if (POSICOES_ATAQUE.has(posicaoIdCandidato)) {
+        // Atacante conflita se adversario ja tem defensores
+        for (const posAdv of posicoesAdversarioNaEscalacao) {
+            if (POSICOES_DEFESA.has(posAdv)) return true;
+        }
+    }
+
+    if (POSICOES_DEFESA.has(posicaoIdCandidato)) {
+        // Defensor conflita se adversario ja tem atacantes
+        for (const posAdv of posicoesAdversarioNaEscalacao) {
+            if (POSICOES_ATAQUE.has(posAdv)) return true;
+        }
+    }
+
+    return false;
+}
+
+// =====================================================================
 // MONTAR ESCALACAO OTIMIZADA (Greedy com reserva de orcamento)
 // =====================================================================
 
@@ -64,11 +109,27 @@ function montarEscalacao(atletasRankeados, esquemaId, patrimonio, modo) {
             .slice(0, 20);
     }
 
-    // Greedy com reserva de orcamento
+    // Greedy com reserva de orcamento + trava anti-confronto
     const escalacao = [];
     const clubesUsados = {};
+    // Trava anti-confronto: rastreia posicoes selecionadas por clube
+    // clubePosicoesMap[clubeId] = Set<posicaoId>
+    const clubePosicoesMap = {};
+    const confrontosEvitados = [];
     let gastoTotal = 0;
     let orcamentoRestante = patrimonio;
+
+    /**
+     * Verifica se candidato viola a trava anti-confronto.
+     * Retorna true se o candidato esta BLOQUEADO (nao pode entrar).
+     */
+    function candidatoBloqueadoPorConfronto(candidato) {
+        const adversarioId = candidato.fontes?.confrontos?.adversarioId;
+        if (!adversarioId) return false; // sem confronto mapeado, liberado
+
+        const posicoesAdversario = clubePosicoesMap[adversarioId];
+        return temConflitoConfronto(candidato.posicaoId, posicoesAdversario);
+    }
 
     for (let pos = 1; pos <= 6; pos++) {
         const qtdNecessaria = formacao[pos] || 0;
@@ -85,6 +146,7 @@ function montarEscalacao(atletasRankeados, esquemaId, patrimonio, modo) {
                 const disponiveis = porPosicao[p]
                     .filter(a => !escalacao.find(e => e.atletaId === a.atletaId))
                     .filter(a => (clubesUsados[a.clubeId] || 0) < 3)
+                    .filter(a => !candidatoBloqueadoPorConfronto(a))
                     .sort((a, b) => a.preco - b.preco);
                 for (let j = 0; j < Math.min(qtdRestante, disponiveis.length); j++) {
                     reserva += disponiveis[j]?.preco || 0;
@@ -97,6 +159,15 @@ function montarEscalacao(atletasRankeados, esquemaId, patrimonio, modo) {
                 if (escalacao.find(e => e.atletaId === a.atletaId)) return false;
                 if ((clubesUsados[a.clubeId] || 0) >= 3) return false;
                 if (a.preco > orcamentoDisponivel) return false;
+                // Trava anti-confronto: posicoes antagonicas do mesmo jogo
+                if (candidatoBloqueadoPorConfronto(a)) {
+                    const advId = a.fontes?.confrontos?.adversarioId;
+                    confrontosEvitados.push({
+                        bloqueado: { nome: a.nome, clubeId: a.clubeId, clubeAbrev: a.clubeAbrev, posicao: POSICOES[a.posicaoId]?.abrev },
+                        motivo: advId ? `Conflito com jogador(es) do adversario (clube ${advId})` : 'Confronto direto',
+                    });
+                    return false;
+                }
                 return true;
             });
 
@@ -108,10 +179,19 @@ function montarEscalacao(atletasRankeados, esquemaId, patrimonio, modo) {
                     capitao: false,
                 });
                 clubesUsados[selecionado.clubeId] = (clubesUsados[selecionado.clubeId] || 0) + 1;
+                // Registrar posicao no mapa de confronto
+                if (!clubePosicoesMap[selecionado.clubeId]) {
+                    clubePosicoesMap[selecionado.clubeId] = new Set();
+                }
+                clubePosicoesMap[selecionado.clubeId].add(selecionado.posicaoId);
                 gastoTotal += selecionado.preco;
                 orcamentoRestante -= selecionado.preco;
             }
         }
+    }
+
+    if (confrontosEvitados.length > 0) {
+        console.log(`${LOG_PREFIX} Trava anti-confronto: ${confrontosEvitados.length} jogadores bloqueados por conflito de posicoes antagonicas`);
     }
 
     // Selecionar capitao: maior score entre jogadores de campo (exceto tecnico)
@@ -144,6 +224,8 @@ function montarEscalacao(atletasRankeados, esquemaId, patrimonio, modo) {
             max: Math.round(pontuacaoBase * 1.3),
             media: Math.round(pontuacaoBase),
         },
+        confrontosEvitados: confrontosEvitados.length > 0 ? confrontosEvitados : null,
+        totalConfrontosEvitados: confrontosEvitados.length,
     };
 }
 

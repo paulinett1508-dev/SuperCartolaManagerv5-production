@@ -195,6 +195,9 @@
         if (elFontes) elFontes.textContent = dadosCompletos?.fontesAtivas?.length || 0;
         if (elResumo) elResumo.textContent = cenario.resumo || '';
 
+        // Badge anti-confronto
+        renderizarBadgeAntiConfronto(cenario);
+
         // Escalação (cards)
         renderizarEscalacao(cenario.escalacao, cenario.justificativas);
     }
@@ -291,6 +294,43 @@
         const tempo = data.tempoAgregacaoMs ? `${(data.tempoAgregacaoMs / 1000).toFixed(1)}s` : 'N/D';
         footer.textContent = `Rodada ${data.rodada || '?'} | ${data.totalAtletasAnalisados || 0} atletas analisados | `
             + `${data.fontesAtivas?.length || 0} fontes ativas | Tempo: ${tempo} | ${data.geradoEm ? new Date(data.geradoEm).toLocaleString('pt-BR') : ''}`;
+    }
+
+    // =====================================================================
+    // TRAVA ANTI-CONFRONTO - INDICADOR VISUAL
+    // =====================================================================
+
+    function renderizarBadgeAntiConfronto(cenario) {
+        // Remover badge anterior se existir
+        const anterior = document.getElementById('eia-anti-confronto');
+        if (anterior) anterior.remove();
+
+        const total = cenario.totalConfrontosEvitados || 0;
+        if (total === 0) return;
+
+        // Container pai dos stats (eia-resumo-stats)
+        const container = document.querySelector('.eia-resumo-stats');
+        if (!container) return;
+
+        const badge = document.createElement('div');
+        badge.id = 'eia-anti-confronto';
+        badge.className = 'eia-stat eia-stat--anti-confronto';
+        badge.innerHTML = `
+            <span class="eia-stat-label" style="display: flex; align-items: center; gap: 4px;">
+                <span class="material-icons" style="color: var(--color-warning, #f59e0b); font-size: 14px;">shield</span>
+                Conflitos Evitados
+            </span>
+            <span class="eia-stat-value" style="color: var(--color-warning, #f59e0b);">${total}</span>
+        `;
+
+        // Tooltip com detalhes
+        const detalhes = (cenario.confrontosEvitados || [])
+            .slice(0, 5)
+            .map(c => `${c.bloqueado.nome} (${c.bloqueado.posicao} - ${c.bloqueado.clubeAbrev})`)
+            .join('\n');
+        badge.title = `Trava Anti-Confronto ativa\nJogadores bloqueados por conflito de posicoes antagonicas:\n${detalhes}${total > 5 ? `\n...e mais ${total - 5}` : ''}`;
+
+        container.appendChild(badge);
     }
 
     // =====================================================================
