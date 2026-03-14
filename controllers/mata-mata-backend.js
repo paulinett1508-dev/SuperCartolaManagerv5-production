@@ -359,6 +359,25 @@ function determinarVencedor(confronto) {
 // ============================================================================
 
 /**
+ * Retorna o campeão da edição anterior (edicaoId - 1) para a liga/temporada informada.
+ * Retorna null se não houver edição anterior ou se o campeão não estiver salvo.
+ */
+async function getCampeaoEdicaoAnterior(ligaId, edicaoId, temporada) {
+    if (edicaoId <= 1) return null;
+    try {
+        const cacheAnterior = await MataMataCache.findOne({
+            liga_id: String(ligaId),
+            edicao: edicaoId - 1,
+            temporada,
+        }).select('dados_torneio').lean();
+        return cacheAnterior?.dados_torneio?.campeao ?? null;
+    } catch (err) {
+        logger.warn(`[MATA-BACKEND] ⚠️ Erro ao buscar campeão da edição anterior:`, err.message);
+        return null;
+    }
+}
+
+/**
  * Calcula resultados financeiros de uma edição do Mata-Mata
  * Retorna array de { timeId, fase, rodadaPontos, valor }
  */
@@ -449,6 +468,30 @@ async function calcularResultadosEdicao(ligaId, edicao, rodadaAtual, config) {
         }
 
         const rankingClassificados = rankingBase.slice(0, tamanhoTorneio);
+
+        // ✅ Regra: Campeão da edição anterior tem vaga garantida na edição seguinte.
+        // Exceção: se todos os participantes já se classificam (rankingBase.length <= tamanhoTorneio),
+        // não há necessidade — o bloco abaixo simplesmente não executa.
+        if (rankingBase.length > tamanhoTorneio) {
+            const campeaoAnterior = await getCampeaoEdicaoAnterior(ligaId, edicao.id, CURRENT_SEASON);
+            if (campeaoAnterior?.timeId) {
+                const jaClassificado = rankingClassificados.some(
+                    (p) => String(p.timeId) === String(campeaoAnterior.timeId)
+                );
+                if (!jaClassificado) {
+                    const campeaoNoRanking = rankingBase.find(
+                        (p) => String(p.timeId) === String(campeaoAnterior.timeId)
+                    );
+                    if (campeaoNoRanking) {
+                        rankingClassificados.pop(); // Remove o último classificado pelo ranking
+                        rankingClassificados.push(campeaoNoRanking);
+                        logger.log(
+                            `[MATA-BACKEND] 🏆 Campeão da edição ${edicao.id - 1} (${campeaoAnterior.timeId}) garantido na edição ${edicao.id} pela regra de campeão`
+                        );
+                    }
+                }
+            }
+        }
 
         // ✅ FIX #3: Usar fases dinâmicas baseadas no tamanho do torneio
         // 32 times → 5 fases, 16 times → 4 fases, 8 times → 3 fases
@@ -805,6 +848,31 @@ export async function calcularBracketParaConsolidacao(ligaId, rodadaAtual) {
             }
 
             const rankingClassificados = rankingBase.slice(0, tamanhoTorneio);
+
+            // ✅ Regra: Campeão da edição anterior tem vaga garantida na edição seguinte.
+            // Exceção: se todos os participantes já se classificam (rankingBase.length <= tamanhoTorneio),
+            // não há necessidade — o bloco abaixo simplesmente não executa.
+            if (rankingBase.length > tamanhoTorneio) {
+                const campeaoAnterior = await getCampeaoEdicaoAnterior(ligaId, edicao.id, CURRENT_SEASON);
+                if (campeaoAnterior?.timeId) {
+                    const jaClassificado = rankingClassificados.some(
+                        (p) => String(p.timeId) === String(campeaoAnterior.timeId)
+                    );
+                    if (!jaClassificado) {
+                        const campeaoNoRanking = rankingBase.find(
+                            (p) => String(p.timeId) === String(campeaoAnterior.timeId)
+                        );
+                        if (campeaoNoRanking) {
+                            rankingClassificados.pop(); // Remove o último classificado pelo ranking
+                            rankingClassificados.push(campeaoNoRanking);
+                            logger.log(
+                                `[MATA-CONSOLIDAÇÃO-CALC] 🏆 Campeão da edição ${edicao.id - 1} (${campeaoAnterior.timeId}) garantido na edição ${edicao.id} pela regra de campeão`
+                            );
+                        }
+                    }
+                }
+            }
+
             const fases = getFasesParaTamanho(tamanhoTorneio);
             const rodadasFases = {};
             fases.forEach((fase, idx) => { rodadasFases[fase] = edicao.rodadaInicial + idx; });
