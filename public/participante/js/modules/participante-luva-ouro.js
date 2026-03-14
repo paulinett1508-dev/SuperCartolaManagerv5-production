@@ -632,6 +632,12 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                     <div style="font-size: 26px; font-weight: 800; color: var(--app-gold);">${(Math.trunc(getPontos(meusDados) * 10) / 10).toFixed(1)}</div>
                     <div style="font-size: 9px; color: #888;">pontos</div>
                 </div>
+                ${tendencia && tendencia.text ? `
+                <div class="${tendencia.cssClass}" style="display:flex;align-items:center;gap:2px;font-size:11px;font-weight:600;">
+                    <span class="material-icons" style="font-size:16px;">${tendencia.icon}</span>
+                    <span>${tendencia.text}</span>
+                </div>
+                ` : ''}
             </div>
 
             ${

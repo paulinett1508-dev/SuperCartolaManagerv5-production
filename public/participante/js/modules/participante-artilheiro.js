@@ -612,6 +612,18 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
         temporadaEncerrada,
     );
 
+    // ✅ v5.1: Calcular tendência (saldo de gols)
+    let tendencia = { icon: 'trending_flat', text: '', cssClass: 'trend-flat' };
+    if (meusDados?.detalhePorRodada && meusDados.detalhePorRodada.length > 1) {
+        const rodadasComSaldo = meusDados.detalhePorRodada.map(r => ({
+            ...r,
+            saldo: (r.golsPro || 0) - (r.golsContra || 0)
+        }));
+        const somaGP = meusDados.detalhePorRodada.reduce((s, r) => s + (r.golsPro || 0), 0);
+        const mediaGP = somaGP / meusDados.detalhePorRodada.length;
+        tendencia = _calcularTendencia(meusDados.detalhePorRodada, mediaGP, 'golsPro');
+    }
+
     // ✅ v3.5: Labels dinâmicos
     const labelLider = temporadaEncerrada ? "Campeão" : "Líder";
     const textoVoceELider = temporadaEncerrada
@@ -667,7 +679,10 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <div>
                     <div style="font-size: 10px; color: var(--app-success-light); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Seu Desempenho</div>
-                    <div style="font-size: 28px; font-weight: 900; color: var(--app-text-primary);">${minhaColocacao}º</div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 28px; font-weight: 900; color: var(--app-text-primary);">${minhaColocacao}º</span>
+                        ${tendencia.text ? `<span class="${tendencia.cssClass}" style="display:inline-flex;align-items:center;gap:2px;font-size:11px;font-weight:600;"><span class="material-icons" style="font-size:16px;">${tendencia.icon}</span>${tendencia.text}</span>` : ''}
+                    </div>
                 </div>
                 <div style="display: flex; gap: 16px; text-align: center;">
                     <div>
