@@ -169,37 +169,30 @@ async function agregarDados(options = {}) {
     console.log(`${LOG_PREFIX} Iniciando agregacao multi-fonte...`);
     const inicio = Date.now();
 
-    // Buscar todas as fontes em paralelo
+    // FASE 1: Buscar Cartola API primeiro (critica + fornece rodada)
+    const cartolaApi = await buscarCartolaAPI();
+    const rodada = options.rodada || cartolaApi.rodada;
+
+    // FASE 2: Buscar demais fontes em paralelo (incluindo Perplexity com rodada conhecida)
     const [
-        cartolaApiResult,
         gatoMestreResult,
         cedidosResult,
         analiticoResult,
         webScraperResult,
         perplexityResult,
     ] = await Promise.allSettled([
-        buscarCartolaAPI(),                                          // CRITICA
         buscarGatoMestrePremium(),                                   // OPCIONAL
         buscarCedidosPorClube(),                                     // OPCIONAL
         cartolaAnaliticoScraper.buscarDadosCompletos(),             // OPCIONAL
         cartolaWebScraper.buscarTodosSites(),                       // OPCIONAL
-        options.rodada ? perplexityService.pesquisaCompleta(options.rodada) : Promise.resolve(null), // OPCIONAL
+        rodada ? perplexityService.pesquisaCompleta(rodada) : Promise.resolve(null), // OPCIONAL
     ]);
 
-    // Cartola API e obrigatoria
-    if (cartolaApiResult.status !== 'fulfilled') {
-        throw new Error('Falha ao buscar dados da Cartola API (fonte critica)');
-    }
-
-    const cartolaApi = cartolaApiResult.value;
     const gatoMestre = gatoMestreResult.status === 'fulfilled' ? gatoMestreResult.value : null;
     const cedidos = cedidosResult.status === 'fulfilled' ? cedidosResult.value : {};
     const analitico = analiticoResult.status === 'fulfilled' ? analiticoResult.value : null;
     const webScraper = webScraperResult.status === 'fulfilled' ? webScraperResult.value : null;
     const perplexity = perplexityResult.status === 'fulfilled' ? perplexityResult.value : null;
-
-    // Determinar rodada
-    const rodada = options.rodada || cartolaApi.rodada;
 
     // Fontes ativas
     const fontesAtivas = ['cartola-api'];
@@ -230,6 +223,21 @@ async function agregarDados(options = {}) {
         }
     }
 
+    // Mapa de disponibilidade real (Perplexity)
+    const mapaDisponibilidadeReal = {};
+    if (perplexity?.disponibilidadeReal?.jogadores) {
+        for (const j of perplexity.disponibilidadeReal.jogadores) {
+            if (j.nome) {
+                mapaDisponibilidadeReal[j.nome.toLowerCase()] = {
+                    status: j.status, // 'confirmado', 'duvida', 'descartado', 'poupado'
+                    motivo: j.motivo || '',
+                    fonte: j.fonte || '',
+                    confianca: j.confianca || 0,
+                };
+            }
+        }
+    }
+
     // Criar mapa de projecoes do CartolaAnalitico
     const projecoesAnalitico = analitico?.projecoes || {};
 
@@ -249,6 +257,9 @@ async function agregarDados(options = {}) {
             const nomeNorm = (a.apelido || a.nome || '').toLowerCase();
             const mencionadoWeb = jogadoresRecomendadosWeb.has(nomeNorm);
             const riscoWeb = jogadoresRiscoWeb.has(nomeNorm);
+
+            // Disponibilidade real (Perplexity)
+            const disponibilidadeReal = mapaDisponibilidadeReal[nomeNorm] || null;
 
             // Projecao do CartolaAnalitico
             const projecaoAnalitico = projecoesAnalitico[a.atleta_id] || null;
@@ -301,6 +312,7 @@ async function agregarDados(options = {}) {
                 },
                 confianca,
                 fontesConfirmam,
+                disponibilidadeReal,
             };
         });
 
