@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Escalação IA - Super Cartola Manager</title>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="css/_admin-tokens.css" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="css/modules/dashboard-redesign.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Russo+One&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="stylesheet" href="css/modules/admin-escalacao-ia.css" />
+</head>
+<body>
+    <div id="sidebar-placeholder"></div>
+    <main class="app-main admin-page">
+    <div class="admin-content">
+        <!-- Header -->
+        <div class="admin-header">
+            <h1>
+                <span class="material-icons">psychology</span>
+                Escalação IA
+            </h1>
+            <p>Sugestão inteligente de escalação baseada em análise multi-fonte</p>
+        </div>
+
+        <!-- Fontes Status -->
+        <div id="eia-fontes-status" class="eia-fontes-badges" style="margin-bottom: 16px;"></div>
+
+        <!-- Controles -->
+        <div class="eia-controles">
+            <div class="eia-controle-grupo">
+                <label class="eia-label">Cartoletas (C$)</label>
+                <input type="number" id="eia-patrimonio" class="eia-input" value="100" min="10" max="500" step="0.5">
+            </div>
+            <div class="eia-controle-grupo">
+                <label class="eia-label">Esquema</label>
+                <select id="eia-esquema" class="eia-select">
+                    <option value="1">3-4-3</option>
+                    <option value="2">3-5-2</option>
+                    <option value="3" selected>4-3-3</option>
+                    <option value="4">4-4-2</option>
+                    <option value="5">4-5-1</option>
+                    <option value="6">5-3-2</option>
+                    <option value="7">5-4-1</option>
+                </select>
+            </div>
+            <div class="eia-controle-grupo eia-botoes">
+                <button id="eia-btn-gerar" class="eia-btn eia-btn-primary" onclick="window.EscalacaoIA?.gerar()">
+                    <span class="material-icons">auto_awesome</span>
+                    Gerar Análise
+                </button>
+                <button id="eia-btn-refresh" class="eia-btn eia-btn-secondary" onclick="window.EscalacaoIA?.refresh()">
+                    <span class="material-icons">refresh</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabs de modo -->
+        <div class="eia-tabs" id="eia-tabs">
+            <button class="eia-tab active" data-modo="mitar">
+                <span class="material-icons">rocket_launch</span>
+                Mitar
+            </button>
+            <button class="eia-tab" data-modo="equilibrado">
+                <span class="material-icons">balance</span>
+                Equilibrado
+            </button>
+            <button class="eia-tab" data-modo="valorizar">
+                <span class="material-icons">trending_up</span>
+                Valorizar
+            </button>
+        </div>
+
+        <!-- Loading -->
+        <div id="eia-loading" class="eia-loading" style="display:none;">
+            <div class="spinner"></div>
+            <p class="eia-loading-text">Analisando dados de múltiplas fontes...</p>
+            <p class="eia-loading-sub" id="eia-loading-step">Coletando dados da API Cartola...</p>
+        </div>
+
+        <!-- Resultado -->
+        <div id="eia-resultado" class="eia-resultado" style="display:none;">
+            <!-- Resumo -->
+            <div class="eia-resumo" id="eia-resumo">
+                <div class="eia-resumo-stats">
+                    <div class="eia-stat">
+                        <span class="eia-stat-label">Gasto</span>
+                        <span class="eia-stat-value" id="eia-gasto">C$ 0.00</span>
+                    </div>
+                    <div class="eia-stat">
+                        <span class="eia-stat-label">Sobra</span>
+                        <span class="eia-stat-value" id="eia-sobra">C$ 0.00</span>
+                    </div>
+                    <div class="eia-stat eia-stat-destaque">
+                        <span class="eia-stat-label">Pontuação Esperada</span>
+                        <span class="eia-stat-value" id="eia-pontuacao">0 - 0 pts</span>
+                    </div>
+                    <div class="eia-stat">
+                        <span class="eia-stat-label">Fontes</span>
+                        <span class="eia-stat-value" id="eia-total-fontes">0</span>
+                    </div>
+                </div>
+                <div class="eia-resumo-texto" id="eia-resumo-texto"></div>
+            </div>
+
+            <!-- Escalação (cards de jogadores) -->
+            <div class="eia-escalacao" id="eia-escalacao"></div>
+
+            <!-- Info rodapé -->
+            <div class="eia-footer-info" id="eia-footer-info"></div>
+        </div>
+
+        <!-- Estado vazio -->
+        <div id="eia-empty" class="eia-empty">
+            <span class="material-icons eia-empty-icon">psychology</span>
+            <p>Clique em <strong>Gerar Análise</strong> para criar uma sugestão de escalação inteligente.</p>
+            <p class="eia-empty-sub">A análise usa dados da API Cartola, GatoMestre, sites especializados e pesquisa web.</p>
+        </div>
+    </div>
+    </main>
+
+    <script src="js/admin-shell.js"></script>
+    <script src="js/admin/modules/admin-escalacao-ia.js"></script>
+    <script>
+        // Auto-inicializar quando página carregar
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                if (window.EscalacaoIA?.inicializar) window.EscalacaoIA.inicializar();
+            });
+        } else {
+            if (window.EscalacaoIA?.inicializar) window.EscalacaoIA.inicializar();
+        }
+    </script>
+</body>
+</html>
