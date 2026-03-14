@@ -199,7 +199,8 @@ router.get("/extratos/:ligaId", requireAdmin, async (req, res) => {
 
         // Verificar acertos financeiros
         const acertos = await db.collection("acertofinanceiros").find({
-            ligaId: ligaId,
+            liga_id: String(ligaId),
+            temporada: temporada,
             ativo: true
         }).toArray();
 
@@ -438,18 +439,20 @@ router.post("/regenerar-caches/:ligaId", requireAdmin, async (req, res) => {
                 const fakeReq = {
                     params: { ligaId, timeId: String(p.time_id) },
                     query: { refresh: "true", temporada: String(temporada) },
-                    session: req.session
+                    session: req.session,
+                    body: {}
                 };
 
                 let responseData = null;
                 const fakeRes = {
+                    _statusCode: undefined,
                     status: function(code) {
                         this._statusCode = code;
                         return this;
                     },
                     json: function(data) {
                         responseData = data;
-                        this._statusCode = this._statusCode || 200;
+                        if (!this._statusCode) this._statusCode = 200;
                     }
                 };
 
