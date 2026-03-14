@@ -1,5 +1,39 @@
 /* matchday.css - Estilos do Modo Matchday */
 
+/* Layout do header injetado pelo MatchdayService */
+#matchday-header-bar {
+  margin: 8px 12px 0;
+  flex-direction: column;
+  gap: 0;
+}
+
+.matchday-header-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.matchday-header-label {
+  font-family: 'Russo One', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--app-danger, #ef4444);
+  letter-spacing: 0.05em;
+}
+
+/* Scout ticker — versão text-based (atualiza a cada 30s) */
+.scout-ticker-content {
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--app-text-muted, #9ca3af);
+  padding: 6px 0 2px;
+}
+
 /* Header Matchday Pulsante */
 .matchday-header {
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%);

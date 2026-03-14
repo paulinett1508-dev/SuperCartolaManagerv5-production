@@ -47,6 +47,7 @@ export async function inicializarCapitaoParticipante(params) {
     estadoCapitao.ligaId = params.ligaId;
     estadoCapitao.timeId = params.timeId;
     estadoCapitao.temporada = window.ParticipanteConfig?.CURRENT_SEASON || new Date().getFullYear();
+    window.MatchdayService?.setContext({ ligaId: params.ligaId });
 
     // ✅ LP: Init acordeons + carregar regras e premiações (non-blocking)
     _initLPAccordions('capitao-lp-wrapper');

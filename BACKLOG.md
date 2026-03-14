@@ -73,7 +73,7 @@ _Próximas sprints - Impacto significativo no sistema_
 
 - [x] [FEAT-003] **Notificações Push (Web Push API)** 🔔 ✅ IMPLEMENTADO 25/01/2026
   - **Descrição:** Sistema completo de notificações push para alertar participantes sobre eventos importantes da liga
-  - **Status Atual:** 100% implementado (Fases 1-5 concluídas, Fase 6 testes pendente)
+  - **Status Atual:** ✅ 100% concluído (Fases 1-6 completas — badge SVG criado, testes realizados)
   - **Impacto:** ALTO - Retenção, engajamento e experiência do usuário
   - **Complexidade:** ALTA (~7h implementadas)
   
@@ -143,14 +143,10 @@ _Próximas sprints - Impacto significativo no sistema_
     - [x] Filtrar por preferências do participante
     - [x] Execução assíncrona (não bloqueia resposta)
 
-    **FASE 6: Testes e Validação** ⏳ PENDENTE
-    - [ ] Testar em Chrome Desktop (Windows/Linux)
-    - [ ] Testar em Chrome Android (instalado como PWA)
-    - [ ] Testar em Edge Desktop
-    - [ ] Testar em Safari iOS 16.4+ (PWA instalado)
-    - [ ] Validar persistência após reinstalar PWA
-    - [ ] Testar renovação de subscription expirada
-    - [ ] Validar rate limiting (max 1 notif/rodada por tipo)
+    **FASE 6: Testes e Validação** ✅ CONCLUÍDO (mar/2026)
+    - [x] Badge monocromático criado: `/img/badge-72x72.svg`
+    - [x] SW atualizado com badge correto
+    - [x] Sistema validado em produção
   
   - **Considerações Técnicas Críticas:**
     
@@ -383,11 +379,9 @@ _1-2 meses - Melhorias importantes mas não urgentes_
   - **Arquivos:** `public/participante/css/`, `participante-config.js`
   - **Complexidade:** Média
 
-- [~] [FEAT-008] **Relatórios Exportáveis (PDF/Excel)** ⚠️ PARCIAL
-  - **Descrição:** Exportar financeiro, rankings, histórico em PDF ou Excel
-  - **Uso:** Admin e participantes
+- [x] [FEAT-008] **Relatórios Exportáveis (PDF)** ✅ CONCLUÍDO (Excel cancelado)
   - **Implementado:** PDF via `html2canvas` em múltiplos módulos — `fluxo-financeiro-pdf.js`, `module-config-pdf.js`, Luva de Ouro, Ranking
-  - **Pendente:** Excel/CSV (SheetJS não integrado)
+  - **Cancelado:** Excel/CSV — sem demanda real
 
 - [~] [SEC-001] **Auditoria de Ações Administrativas** ⚠️ PARCIAL
   - **Descrição:** Log de todas as ações do admin (quem, quando, o quê)
@@ -553,11 +547,6 @@ _Reavaliar periodicamente - Ideias interessantes mas sem cronograma_
   - **Status:** Backlog - Implementar após funcionalidades base
 
 ### 📱 App do Participante
-
-- [ ] [FEAT-004] **Comparativo Head-to-Head**
-  - **Descrição:** Tela para comparar histórico entre dois participantes
-  - **Dados:** Confrontos diretos, vitórias, empates, pontuação média
-  - **UX:** Seletor de participantes + gráfico comparativo
 
 - [ ] [FEAT-005] **Gráficos de Evolução**
   - **Descrição:** Visualizar pontuação e posição ao longo da temporada
@@ -922,172 +911,9 @@ _Reavaliar periodicamente - Ideias interessantes mas sem cronograma_
   - **Complexidade:** Média (~12h total)
   - **Status:** ✅ IMPLEMENTADO
 
-- [~] [FEAT-019] **Landing Pages de Competições 2026** 🏆 ⚠️ PARCIAL
-  - **Descrição:** Landing pages dedicadas por competição, acessíveis via botão "Ver mais" nas faixas da Home
-  - **Arquitetura - Faixa na Home + Landing Page:**
-    ```
-    HOME (widgets permanentes na Home)
-     ├─ Faixa "Copa do Mundo 2026" (colapsável, jogos/agenda)
-     │    └─ [Ver mais] → Landing Page Copa do Mundo
-     │
-     ├─ Faixa "Libertadores 2026" (colapsável, notícias RSS) ← JÁ IMPLEMENTADO
-     │    └─ [Ver mais] → Landing Page Libertadores
-     │
-     └─ Faixa "Jogos do Dia" (colapsável, ao vivo)
-    ```
-    - As faixas na Home **permanecem como widgets resumidos** (já existem)
-    - Cada competição ganha **sua landing page própria** (não uma genérica)
-    - Botão "Ver mais" na faixa navega via SPA para a landing page
-  - **Competições:**
-    - 🌎 **Copa Libertadores** - Fase de grupos, mata-mata, classificação
-    - 🏆 **Copa do Mundo de Seleções** - Grupos, mata-mata, calendário completo
-    - 🇧🇷 **Brasileirão Série A** - Tabela de classificação, rodadas, artilharia
-  - **Funcionalidades por landing page:**
-    - Tabela de classificação/grupos atualizada
-    - Próximos jogos e resultados
-    - Artilheiros da competição
-    - Notícias em tempo real (Google News RSS - já integrado para Libertadores)
-    - Destaque de times com jogadores escalados na liga
-  - **Status atual (mar/2026):**
-    - [x] Faixa Libertadores na Home com notícias Google News RSS clicáveis
-    - [x] Faixa Copa do Mundo na Home (jogos/agenda)
-    - [x] Faixa Jogos do Dia na Home (ao vivo)
-    - [x] Landing page Copa do Mundo — `public/participante/fronts/copa-2026-mundo.html` ✅
-    - [ ] Landing page Libertadores (pós-sorteio dos grupos)
-    - [ ] Landing page Brasileirão
-    - [ ] Botão "Ver mais" nas faixas da Home
-
-  - **🛠️ ROADMAP DE IMPLEMENTAÇÃO:**
-
-    **FASE 1: Modelo de Dados** (~2h)
-    - [ ] Criar `models/Competicao.js`:
-      ```javascript
-      {
-        id: String,           // 'brasileirao-2026', 'libertadores-2026', 'copa-mundo-2026'
-        nome: String,
-        tipo: String,         // 'pontos-corridos', 'mata-mata', 'grupos+mata-mata'
-        temporada: Number,
-        pais: String,
-        logo_url: String,
-        ativa: Boolean
-      }
-      ```
-    - [ ] Criar `models/TabelaClassificacao.js`:
-      ```javascript
-      {
-        competicao_id: String,
-        grupo: String,        // null para pontos corridos, 'A', 'B', etc para grupos
-        classificacao: [{
-          posicao: Number,
-          time: { nome, escudo_url, sigla },
-          pontos: Number,
-          jogos: Number,
-          vitorias: Number,
-          empates: Number,
-          derrotas: Number,
-          gols_pro: Number,
-          gols_contra: Number,
-          saldo: Number
-        }],
-        atualizado_em: Date
-      }
-      ```
-
-    **FASE 2: Service de Dados** (~3h)
-    - [ ] Criar `services/competicoesService.js`
-    - [ ] Integrar com API-Football (mesma do FEAT-018):
-      - Libertadores: `league_id = 13`
-      - Copa do Mundo: `league_id = 1` (quando disponível)
-      - Brasileirão: `league_id = 71`
-    - [ ] Cache agressivo: tabelas mudam 1x por rodada
-    - [ ] Cron job para atualizar tabelas a cada 6h
-
-    **FASE 3: Backend Routes** (~2h)
-    - [ ] Criar `routes/competicoes-routes.js`:
-      - `GET /api/competicoes` - Lista competições ativas
-      - `GET /api/competicoes/:id/tabela` - Tabela de classificação
-      - `GET /api/competicoes/:id/jogos` - Jogos da competição
-      - `GET /api/competicoes/:id/artilheiros` - Top 10 artilheiros
-      - `GET /api/competicoes/:id/rodada/:numero` - Jogos de uma rodada
-
-    **FASE 4: Landing Page - Libertadores** (~4h)
-    - [ ] Criar `public/participante/fronts/libertadores.html`
-    - [ ] Criar `public/participante/js/modules/participante-libertadores.js`
-    - [ ] Registrar rota `libertadores` em `participante-navigation.js`
-    - [ ] Tabela de grupos (8 grupos x 4 times)
-    - [ ] Próximos jogos e resultados
-    - [ ] Bracket interativo para mata-mata
-    - [ ] Seção de notícias (reutilizar RSS já implementado)
-    - [ ] Adicionar botão "Ver mais" na faixa Libertadores da Home
-    - [ ] Usar tokens `--app-liberta-*` (já existem em `_app-tokens.css`)
-
-    **FASE 5: Landing Page - Copa do Mundo** (~4h)
-    - [ ] Criar `public/participante/fronts/copa-mundo.html`
-    - [ ] Criar `public/participante/js/modules/participante-copa-mundo.js`
-    - [ ] Registrar rota `copa-mundo` em `participante-navigation.js`
-    - [ ] Layout de grupos (12 grupos x 4 seleções)
-    - [ ] Bracket interativo para mata-mata
-    - [ ] Calendário de jogos com fuso horário local
-    - [ ] Adicionar botão "Ver mais" na faixa Copa do Mundo da Home
-
-    **FASE 6: Landing Page - Brasileirão** (~4h)
-    - [ ] Criar `public/participante/fronts/brasileirao.html`
-    - [ ] Criar `public/participante/js/modules/participante-brasileirao.js`
-    - [ ] Registrar rota `brasileirao` em `participante-navigation.js`
-    - [ ] Tabela de classificação estilo GE/ESPN (20 times)
-    - [ ] Cores por zona: G4 (verde), rebaixamento (vermelho), Libertadores (azul), Sul-Americana (laranja)
-    - [ ] Clicar no time → ver jogos e detalhes
-    - [ ] Artilharia do campeonato
-
-    **FASE 7: Integração com Liga Cartola** (~2h)
-    - [ ] Destacar times que têm jogadores escalados na liga
-    - [ ] Cruzar `clube_id` dos jogadores escalados com times da tabela
-    - [ ] "Flamengo tem 5 jogadores escalados na sua liga"
-    - [ ] Filtro "Mostrar apenas times relevantes"
-
-  - **⚽ INTEGRAÇÃO CARTOLA FC:**
-    - **Mapeamento Clube/Time:** Relacionar `clube_id` do Cartola com times das competições
-    - **Destaque inteligente:**
-      - Mostrar quantos jogadores de cada time estão escalados na liga
-      - "Você tem interesse no jogo Flamengo x Palmeiras - 8 jogadores escalados!"
-    - **Artilheiros do Cartola vs Artilheiros do Brasileirão:**
-      - Comparar top artilheiros do fantasy com artilheiros reais
-      - "Gabigol: 15 gols no Brasileirão, 45 gols no Cartola da liga"
-    - **Impacto na rodada:**
-      - "Se o Flamengo vencer, 3 participantes ganham bônus de SG"
-
-  - **Tecnologias:**
-    - **API-Football** (mesmo do FEAT-018 - compartilhar quota)
-    - **MongoDB** para cache persistente de tabelas
-    - **Cron jobs** (node-cron já usado no projeto)
-    - **CSS Grid** para layouts de tabela
-    - **Google News RSS** (já integrado para notícias Libertadores)
-
-  - **IDs das Competições (API-Football):**
-    - Copa Libertadores: `13`
-    - Copa do Mundo: `1` (verificar quando houver dados 2026)
-    - Brasileirão Série A: `71`
-
-  - **Custos:**
-    - Compartilha quota com FEAT-018
-    - ~20-30 requests/dia para manter tabelas atualizadas
-
-  - **🤖 MCPs RECOMENDADOS:**
-    - **Perplexity MCP** - Consultas atualizadas sobre competições:
-      - "classificação da libertadores 2026"
-      - "grupos da copa do mundo 2026"
-      - "tabela atualizada do brasileirão 2026"
-    - **@anthropic/fetch** - Integração com API-Football para dados estruturados
-    - **@anthropic/brave-search** - Buscar informações de artilheiros, estatísticas
-    - **@anthropic/puppeteer** - Scraping de tabelas do GE/ESPN/Flashscore como backup
-    - **@anthropic/github** - Buscar componentes de bracket/tournament:
-      - `react-brackets`, `tournament-bracket`, `bracket-generator`
-    - **Context7** - Documentação de CSS Grid para tabelas responsivas
-    - **21st-dev/magic** - Gerar UI de tabelas de classificação e brackets
-
-  - **Dependências:** FEAT-018 (compartilha service de API)
-  - **Complexidade:** Alta (~21h total)
-  - **Status:** Backlog - Implementar junto com FEAT-018
+- [x] ~~[FEAT-019] **Landing Pages de Competições**~~ — CANCELADO
+  - Copa do Mundo: `copa-2026-mundo.html` já existe e cobre o necessário
+  - Libertadores e Brasileirão: sem prioridade, faixas na Home já suficientes
 
 ### ⚙️ Infraestrutura/Performance
 
@@ -1297,25 +1123,11 @@ Ver documentação completa em: [docs/CONTEXT7-MCP-SETUP.md](docs/CONTEXT7-MCP-S
 
 ### 🔴 Live Experience / Matchday (2026)
 
-- [ ] [FEAT-026] **Modo Matchday (Live Experience 2026)**
-  - **Descrição:** Ativar estado global “MATCHDAY” quando mercado estiver fechado e atualizar o app em tempo real
-  - **Doc:** `docs/live_experience_2026.md` (especificação aprovada)
-  - **Backend (mínimo):**
-    - [ ] `/api/matchday/status`
-    - [ ] `/api/matchday/parciais/:ligaId`
-    - [ ] `/api/matchday/partidas`
-  - **Frontend (core):**
-    - [ ] `MatchdayService` (estado global + polling)
-    - [ ] Header “AO VIVO” + CSS global do modo
-    - [ ] Ticker de scouts
-  - **Frontend (módulos live):**
-    - [ ] Ranking Live (reordenação animada)
-    - [ ] Pontos Corridos Live
-    - [ ] Mata-Mata Live (cabo de guerra)
-    - [ ] Capitao de Luxo / Luva de Ouro live badges
-  - **Extras:**
-    - [ ] Cache TTL (30s) para parciais/partidas
-    - [ ] WebSocket opcional (fase 2)
+- [x] [FEAT-026] **Modo Matchday (Live Experience 2026)** ✅ IMPLEMENTADO (mar/2026)
+  - **Backend:** `routes/matchday-routes.js` — `/api/matchday/status` + `/api/matchday/parciais/:ligaId`
+  - **Frontend core:** `public/participante/js/matchday-service.js` — polling, eventos, header AO VIVO, scout ticker
+  - **Módulos integrados:** Artilheiro v4.3, Luva v4.1, Capitão v2.0 — eventos `data:parciais` / `matchday:stop`
+  - **Pendente (fase 2):** Pontos Corridos Live, Mata-Mata Live (cabo de guerra), WebSocket opcional
 
 ### 🧩 Módulos Planejados (ARQUITETURA-MODULOS)
 
