@@ -365,7 +365,7 @@ function renderizarHistorico(escolhas) {
     // Ordenar por rodada decrescente
     const lista = [...escolhas.escolhas].sort((a, b) => b.rodada - a.rodada);
 
-    container.innerHTML = lista.map(e => `
+    const renderEscolhaRow = (e) => `
         <div class="tc-escolha-historico ${e.resultado}">
             <span class="tc-escolha-rodada">R${e.rodada}</span>
             <img src="/escudos/${e.timeEscolhidoId}.png" style="width:20px;height:20px;object-fit:contain;"
@@ -374,7 +374,26 @@ function renderizarHistorico(escolhas) {
             ${e.placarMandante != null ? `<span style="font-family:var(--app-font-mono);font-size:var(--app-font-xs);color:var(--app-text-muted);">${e.placarMandante}-${e.placarVisitante}</span>` : ''}
             <span class="tc-escolha-resultado ${e.resultado}">${traduzirResultado(e.resultado)}</span>
         </div>
-    `).join('');
+    `;
+
+    if (lista.length <= 3) {
+        container.innerHTML = lista.map(renderEscolhaRow).join('');
+    } else {
+        const recentes = lista.slice(0, 3);
+        const antigos = lista.slice(3);
+        const toggleId = 'tc-historico-antigos-' + Date.now();
+        container.innerHTML = recentes.map(renderEscolhaRow).join('') + `
+            <div style="text-align:center;margin:8px 0;">
+                <span onclick="(function(el){var sec=document.getElementById('${toggleId}');if(sec.style.display==='none'){sec.style.display='block';el.innerHTML='<span class=\\'material-icons\\' style=\\'font-size:14px;vertical-align:middle;margin-right:4px;\\'>expand_less</span>Ocultar historico anterior';}else{sec.style.display='none';el.innerHTML='<span class=\\'material-icons\\' style=\\'font-size:14px;vertical-align:middle;margin-right:4px;\\'>expand_more</span>Ver historico completo (${antigos.length} anteriores)';}})(this)"
+                      style="cursor:pointer;font-size:var(--app-font-xs, 0.75rem);color:var(--app-text-muted);display:inline-flex;align-items:center;">
+                    <span class="material-icons" style="font-size:14px;vertical-align:middle;margin-right:4px;">expand_more</span>Ver historico completo (${antigos.length} anteriores)
+                </span>
+            </div>
+            <div id="${toggleId}" style="display:none;">
+                ${antigos.map(renderEscolhaRow).join('')}
+            </div>
+        `;
+    }
 }
 
 function renderizarParticipantes(data) {

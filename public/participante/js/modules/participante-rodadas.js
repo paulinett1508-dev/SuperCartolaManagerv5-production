@@ -270,6 +270,23 @@ function renderizarGridRodadas(rodadas) {
 function renderizarMiniCards(inicio, fim, rodadasMap) {
     let html = '';
 
+    // ✅ v4.0: Pré-calcular posições ANTES do loop (evita 38 sorts O(n log n))
+    const posicoesCache = new Map();
+    for (let i = inicio; i <= fim; i++) {
+        const rodada = rodadasMap.get(i);
+        if (!rodada || !rodada.participantes?.length) continue;
+        const jogou = rodada?.jogou || false;
+        let posicao = rodada?.posicaoFinanceira;
+        if (!posicao && jogou && rodada.participantes.length > 1) {
+            const ordenados = [...rodada.participantes]
+                .filter(p => !p.rodadaNaoJogada)
+                .sort((a, b) => (b.pontos || 0) - (a.pontos || 0));
+            const idx = ordenados.findIndex(p => compararTimeIds(p.timeId || p.time_id, meuTimeId));
+            if (idx >= 0) posicao = idx + 1;
+        }
+        if (posicao) posicoesCache.set(i, posicao);
+    }
+
     for (let i = inicio; i <= fim; i++) {
         const rodada = rodadasMap.get(i);
         const isParcial = parciaisInfo?.disponivel && i === parciaisInfo.rodada;
@@ -278,16 +295,8 @@ function renderizarMiniCards(inicio, fim, rodadasMap) {
         const jogou = rodada?.jogou || false;
         const valorFinanceiro = rodada?.valorFinanceiro;
 
-        // Calcular posição na rodada
-        let posicao = rodada?.posicaoFinanceira;
-        if (!posicao && temDados && jogou && rodada.participantes?.length > 1) {
-            // Calcular posição se não estiver disponível diretamente
-            const ordenados = [...rodada.participantes]
-                .filter(p => !p.rodadaNaoJogada)
-                .sort((a, b) => (b.pontos || 0) - (a.pontos || 0));
-            const idx = ordenados.findIndex(p => compararTimeIds(p.timeId || p.time_id, meuTimeId));
-            if (idx >= 0) posicao = idx + 1;
-        }
+        // ✅ v4.0: Usar cache pré-calculado (sem sort dentro do loop)
+        const posicao = posicoesCache.get(i) || rodada?.posicaoFinanceira;
 
         let classes = ['rodada-mini-card'];
         let tipoDestaque = null;
@@ -786,6 +795,23 @@ function toggleRodadasDestaques() {
 }
 
 window.toggleRodadasDestaques = toggleRodadasDestaques;
+
+// =====================================================================
+// TOGGLE DETALHES TEMPORADA — Progressive Disclosure v4.0
+// =====================================================================
+function toggleTemporadaDetalhes() {
+    const body = document.getElementById('tempDetalhesBody');
+    const toggle = document.getElementById('tempDetalhesToggle');
+    const chevron = document.getElementById('tempDetalhesChevron');
+    if (!body || !toggle) return;
+
+    const isExpanded = body.classList.contains('expanded');
+    body.classList.toggle('expanded');
+    toggle.setAttribute('aria-expanded', !isExpanded);
+    toggle.querySelector('span:first-child').textContent = isExpanded ? 'Ver detalhes' : 'Ocultar detalhes';
+}
+
+window.toggleTemporadaDetalhes = toggleTemporadaDetalhes;
 
 // =====================================================================
 // POSIÇÕES E CORES - Cartola

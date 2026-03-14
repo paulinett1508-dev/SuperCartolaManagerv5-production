@@ -246,6 +246,32 @@ async function carregarRanking() {
 // Atualizado a cada render via window._capitaoRankingCache para acesso em onclick inline
 let _capitaoRankingCache = [];
 
+/**
+ * Calcula indicador de tendência: última rodada vs média pessoal
+ * @returns {{ icon: string, text: string, cssClass: string }}
+ */
+function _calcularTendencia(participante) {
+    const historico = participante.historico_rodadas || [];
+    const media = participante.media_capitao || 0;
+
+    if (historico.length === 0 || media === 0) {
+        return { icon: 'trending_flat', text: '', cssClass: 'trend-flat' };
+    }
+
+    // Pegar última rodada (maior número)
+    const ultimaRodada = historico.reduce((max, r) => r.rodada > max.rodada ? r : max, historico[0]);
+    const ultimaPontuacao = ultimaRodada.pontuacao || 0;
+
+    const variacao = Math.trunc(((ultimaPontuacao - media) / Math.abs(media)) * 100);
+
+    if (variacao > 5) {
+        return { icon: 'trending_up', text: `+${variacao}%`, cssClass: 'trend-up' };
+    } else if (variacao < -5) {
+        return { icon: 'trending_down', text: `${variacao}%`, cssClass: 'trend-down' };
+    }
+    return { icon: 'trending_flat', text: `${variacao}%`, cssClass: 'trend-flat' };
+}
+
 function renderizarRanking(ranking) {
     const container = document.getElementById('capitaoContent');
     if (!container) return;
@@ -258,18 +284,19 @@ function renderizarRanking(ranking) {
         const posicao = participante.posicao_final || index + 1;
         const isMeuTime = String(participante.timeId) === String(estadoCapitao.timeId);
         const isPodium1 = posicao === 1;
+        const isPodium2 = posicao === 2;
+        const isPodium3 = posicao === 3;
 
         const escudoSrc = participante.escudo || `/escudos/${participante.clube_id || 'default'}.png`;
         const pontos = typeof truncarPontos === 'function' ? truncarPontos(participante.pontuacao_total || 0) : (Math.trunc((participante.pontuacao_total || 0) * 100) / 100).toFixed(2);
-        const media = typeof truncarPontos === 'function' ? truncarPontos(participante.media_capitao || 0) : (Math.trunc((participante.media_capitao || 0) * 100) / 100).toFixed(2);
 
         const cardClasses = [
             'capitao-card',
             isMeuTime ? 'meu-time' : '',
             isPodium1 ? 'podium-1' : '',
+            isPodium2 ? 'podium-2' : '',
+            isPodium3 ? 'podium-3' : '',
         ].filter(Boolean).join(' ');
-
-        const posicaoIcon = `${posicao}º`;
 
         // Badge apenas para o campeão (só 1o lugar premia)
         const campeaoBadge = isPodium1
@@ -278,44 +305,33 @@ function renderizarRanking(ranking) {
                 : '<span class="capitao-badge-captain">[C]</span>')
             : '';
 
-        // ✅ NOVO LAYOUT: Botão "Ver Histórico" compacto
         const historico = participante.historico_rodadas || [];
-        const rodadasJogadas = historico.length;
-        const totalRodadas = RODADA_FINAL_CAMPEONATO;
 
-        // Botão Ver Histórico (somente se tiver dados)
-        let btnHistoricoHtml = '';
-        if (historico.length > 0) {
-            btnHistoricoHtml = `
-                <button class="btn-ver-historico-app"
-                        onclick="window._abrirHistoricoCapitao(window._capitaoRankingCache[${index}])"
-                        aria-label="Ver histórico completo">
-                    <span class="material-icons" style="font-size: 14px;">history</span>
-                    ${rodadasJogadas}/${totalRodadas} rodadas
-                </button>
-            `;
-        }
+        // Indicador de tendência (seta + variação %)
+        const tendencia = _calcularTendencia(participante);
+        const trendHtml = tendencia.text
+            ? `<span class="trend-indicator ${tendencia.cssClass}">
+                   <span class="material-icons">${tendencia.icon}</span>
+                   ${tendencia.text}
+               </span>`
+            : '';
 
         html += `
             <div class="${cardClasses}" onclick="${historico.length > 0 ? `window._abrirHistoricoCapitao(window._capitaoRankingCache[${index}])` : ''}">
-                <div class="capitao-posicao">${posicaoIcon}</div>
+                <div class="capitao-posicao">${posicao}º</div>
                 <img src="${escapeHtml(escudoSrc)}" class="capitao-escudo" alt=""
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'">
                 <span class="material-icons" style="display: none; font-size: 32px; color: #666;">emoji_events</span>
                 <div class="capitao-info">
                     <div class="capitao-nome">${escapeHtml(participante.nome_cartola || '---')}</div>
                     <div class="capitao-time-nome">${escapeHtml(participante.nome_time || '')}</div>
-                    ${btnHistoricoHtml}
                 </div>
                 <div class="capitao-stats">
                     <div class="capitao-stat">
                         <span class="capitao-stat-label">PTS</span>
                         <span class="capitao-stat-value">${pontos}</span>
                     </div>
-                    <div class="capitao-stat">
-                        <span class="capitao-stat-label">MED</span>
-                        <span class="capitao-stat-value media">${media}</span>
-                    </div>
+                    ${trendHtml}
                     ${campeaoBadge}
                 </div>
             </div>
@@ -343,61 +359,43 @@ function renderizarCardDesempenho(ranking) {
     const media = typeof truncarPontos === 'function' ? truncarPontos(meusDados.media_capitao || 0) : (Math.trunc((meusDados.media_capitao || 0) * 100) / 100).toFixed(2);
     const rodadas = meusDados.rodadas_jogadas || 0;
     const melhor = meusDados.melhor_capitao;
-    const pior = meusDados.pior_capitao;
-    const distintos = meusDados.capitaes_distintos || 0;
+    const totalRodadas = RODADA_FINAL_CAMPEONATO;
 
-    // Extrair HTML nested para evitar backtick nesting (causa SyntaxError)
-    const melhorPts = melhor ? (typeof truncarPontos === 'function' ? truncarPontos(melhor.pontuacao || 0) : (Math.trunc((melhor.pontuacao || 0) * 100) / 100).toFixed(2)) : '';
-    const piorPts = pior ? (typeof truncarPontos === 'function' ? truncarPontos(pior.pontuacao || 0) : (Math.trunc((pior.pontuacao || 0) * 100) / 100).toFixed(2)) : '';
+    const melhorPts = melhor ? (typeof truncarPontos === 'function' ? truncarPontos(melhor.pontuacao || 0) : (Math.trunc((melhor.pontuacao || 0) * 100) / 100).toFixed(2)) : '---';
 
-    let melhorPiorHtml = '';
-    if (melhor) {
-        const piorHtml = pior
-            ? '<div style="font-size: 11px;">'
-                + '<span style="color: var(--capitao-danger);">Pior:</span> '
-                + '<span style="color: #e5e7eb;">' + escapeHtml(pior.atleta_nome || '---') + ' (R' + pior.rodada + ')</span> '
-                + '<span style="font-family: var(--capitao-font-mono); color: var(--capitao-danger); font-weight: 700;">' + piorPts + '</span>'
-                + '</div>'
-            : '';
-        melhorPiorHtml = '<div style="display: flex; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--capitao-border);">'
-            + '<div style="font-size: 11px;">'
-            + '<span style="color: var(--capitao-success);">Melhor:</span> '
-            + '<span style="color: #e5e7eb;">' + escapeHtml(melhor.atleta_nome || '---') + ' (R' + melhor.rodada + ')</span> '
-            + '<span style="font-family: var(--capitao-font-mono); color: var(--capitao-success); font-weight: 700;">' + melhorPts + '</span>'
-            + '</div>'
-            + piorHtml
-            + '</div>';
-    }
+    // Indicador de tendência
+    const tendencia = _calcularTendencia(meusDados);
+    const trendHtml = tendencia.text
+        ? '<span class="trend-indicator ' + tendencia.cssClass + '">'
+            + '<span class="material-icons">' + tendencia.icon + '</span>'
+            + tendencia.text
+            + '</span>'
+        : '';
 
-    const historicoHtml = _renderHistoricoDesempenho(meusDados.historico_rodadas);
+    // Remover card existente anterior (caso de re-render)
+    const existente = mainContainer.querySelector('.capitao-desempenho-card');
+    if (existente) existente.remove();
 
     mainContainer.insertAdjacentHTML('afterbegin', `
-        <div class="capitao-card" style="border-color: var(--capitao-primary); background: rgba(139, 92, 246, 0.08);">
+        <div class="capitao-card capitao-desempenho-card" style="border-color: var(--capitao-primary); background: rgba(139, 92, 246, 0.08); cursor: pointer;"
+             onclick="window._abrirHistoricoCapitao(window._capitaoRankingCache[${ranking.indexOf(meusDados)}])">
             <div style="width: 100%;">
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-                    <span class="material-icons" style="color: var(--capitao-primary); font-size: 20px;">person</span>
-                    <span style="font-family: var(--capitao-font-brand); color: var(--app-text-primary); font-size: 14px;">Seu Desempenho</span>
-                    <span class="capitao-badge-captain">${posicao}º lugar</span>
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center;">
-                    <div>
-                        <span style="display: block; font-size: 10px; color: var(--capitao-text-muted);">Pontos</span>
-                        <span style="font-family: var(--capitao-font-mono); font-size: 16px; font-weight: 700; color: var(--capitao-primary);">${pontos}</span>
+                <div class="cap-desemp-header">
+                    <div class="cap-desemp-header-left">
+                        <span class="material-icons" style="color: var(--capitao-primary); font-size: 20px;">person</span>
+                        <span class="cap-desemp-title">Seu Desempenho</span>
+                        <span class="capitao-badge-captain">${posicao}º</span>
                     </div>
-                    <div>
-                        <span style="display: block; font-size: 10px; color: var(--capitao-text-muted);">Média</span>
-                        <span style="font-family: var(--capitao-font-mono); font-size: 16px; color: var(--capitao-primary-light);">${media}</span>
-                    </div>
-                    <div>
-                        <span style="display: block; font-size: 10px; color: var(--capitao-text-muted);">Rodadas</span>
-                        <span style="font-family: var(--capitao-font-mono); font-size: 16px; color: #e5e7eb;">${rodadas}</span>
+                    <div class="cap-desemp-pts-wrap">
+                        <span class="cap-desemp-pts">${pontos}</span>
+                        ${trendHtml}
                     </div>
                 </div>
-                ${melhorPiorHtml}
-                <div style="margin-top: 8px; font-size: 11px; color: var(--capitao-text-muted);">
-                    Capitães distintos utilizados: <strong style="color: #e5e7eb;">${distintos}</strong>
+                <div class="cap-desemp-pills">
+                    <span class="cap-desemp-pill">Média <strong>${media}</strong></span>
+                    <span class="cap-desemp-pill cap-desemp-pill-success">Melhor <strong>${melhorPts}</strong></span>
+                    <span class="cap-desemp-pill">${rodadas}/${totalRodadas} rod</span>
                 </div>
-                ${historicoHtml}
             </div>
         </div>
     `);

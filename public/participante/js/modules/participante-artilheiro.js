@@ -439,6 +439,17 @@ function renderizarBannerRodadaFinal(
 // v5.0: HELPERS
 // =====================================================================
 
+/** Calcula tendência comparando última rodada com média */
+function _calcularTendencia(historico, media, campoValor) {
+    if (!historico || historico.length === 0 || !media) return { icon: 'trending_flat', text: '', cssClass: 'trend-flat' };
+    const ultima = historico.reduce((max, r) => r.rodada > max.rodada ? r : max, historico[0]);
+    const val = ultima[campoValor] || 0;
+    const variacao = Math.trunc(((val - media) / Math.abs(media)) * 100);
+    if (variacao > 5) return { icon: 'trending_up', text: `+${variacao}%`, cssClass: 'trend-up' };
+    if (variacao < -5) return { icon: 'trending_down', text: `${variacao}%`, cssClass: 'trend-down' };
+    return { icon: 'trending_flat', text: `${variacao}%`, cssClass: 'trend-flat' };
+}
+
 /** Compacta nome: "Carlos Vinícius" → "C. Vinícius", "Renato Kayzer" → "R. Kayzer" */
 function _nomeCompacto(nome) {
     if (!nome) return '?';
@@ -601,6 +612,18 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
         temporadaEncerrada,
     );
 
+    // ✅ v5.1: Calcular tendência (saldo de gols)
+    let tendencia = { icon: 'trending_flat', text: '', cssClass: 'trend-flat' };
+    if (meusDados?.detalhePorRodada && meusDados.detalhePorRodada.length > 1) {
+        const rodadasComSaldo = meusDados.detalhePorRodada.map(r => ({
+            ...r,
+            saldo: (r.golsPro || 0) - (r.golsContra || 0)
+        }));
+        const somaGP = meusDados.detalhePorRodada.reduce((s, r) => s + (r.golsPro || 0), 0);
+        const mediaGP = somaGP / meusDados.detalhePorRodada.length;
+        tendencia = _calcularTendencia(meusDados.detalhePorRodada, mediaGP, 'golsPro');
+    }
+
     // ✅ v3.5: Labels dinâmicos
     const labelLider = temporadaEncerrada ? "Campeão" : "Líder";
     const textoVoceELider = temporadaEncerrada
@@ -656,7 +679,10 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <div>
                     <div style="font-size: 10px; color: var(--app-success-light); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Seu Desempenho</div>
-                    <div style="font-size: 28px; font-weight: 900; color: var(--app-text-primary);">${minhaColocacao}º</div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 28px; font-weight: 900; color: var(--app-text-primary);">${minhaColocacao}º</span>
+                        ${tendencia.text ? `<span class="${tendencia.cssClass}" style="display:inline-flex;align-items:center;gap:2px;font-size:11px;font-weight:600;"><span class="material-icons" style="font-size:16px;">${tendencia.icon}</span>${tendencia.text}</span>` : ''}
+                    </div>
                 </div>
                 <div style="display: flex; gap: 16px; text-align: center;">
                     <div>
@@ -736,15 +762,12 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
 
         ${
             historicoRecente.length > 0
-                ? `
-        <div class="art-ultimas-rodadas">
-            <div class="art-ultimas-header">
-                <span class="material-icons">bar_chart</span> Últimas Rodadas
-                <span style="margin-left: auto; font: 400 9px 'Inter', sans-serif; color: #555; text-transform: none; letter-spacing: 0;">toque para ver artilheiros</span>
-            </div>
-            <div class="art-rodadas-grid">
-                ${historicoRecente
-                    .map((r) => {
+                ? (() => {
+                    const visiveis = historicoRecente.slice(0, 3);
+                    const ocultas = historicoRecente.slice(3);
+                    const temOcultas = ocultas.length > 0;
+
+                    function _renderRodadaBox(r) {
                         const saldo = (r.golsPro || 0) - (r.golsContra || 0);
                         const bgColor =
                             saldo > 0
@@ -758,17 +781,34 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
                                 : saldo < 0
                                   ? "var(--app-danger)"
                                   : "#666";
-                        return `
-                    <div class="art-rodada-box" style="background: ${bgColor};" data-rodada="${r.rodada}">
-                        <div class="art-rodada-num">R${r.rodada}</div>
-                        <div class="art-rodada-saldo" style="color: ${textColor};">${saldo >= 0 ? "+" : ""}${saldo}</div>
-                    </div>`;
-                    })
-                    .join("")}
+                        return `<div class="art-rodada-box" style="background: ${bgColor};" data-rodada="${r.rodada}">
+                            <div class="art-rodada-num">R${r.rodada}</div>
+                            <div class="art-rodada-saldo" style="color: ${textColor};">${saldo >= 0 ? "+" : ""}${saldo}</div>
+                        </div>`;
+                    }
+
+                    return `
+        <div class="art-ultimas-rodadas">
+            <div class="art-ultimas-header">
+                <span class="material-icons">bar_chart</span> Últimas Rodadas
+                <span style="margin-left: auto; font: 400 9px 'Inter', sans-serif; color: #555; text-transform: none; letter-spacing: 0;">toque para ver artilheiros</span>
             </div>
+            <div class="art-rodadas-grid">
+                ${visiveis.map(_renderRodadaBox).join("")}
+            </div>
+            ${temOcultas ? `
+            <div class="art-rodadas-grid art-rodadas-extras" style="display: none; margin-top: 6px;">
+                ${ocultas.map(_renderRodadaBox).join("")}
+            </div>
+            <button class="art-ver-tudo-btn" style="display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; margin-top: 8px; padding: 6px 0; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: var(--app-text-secondary); font: 500 11px 'Inter', sans-serif; cursor: pointer; transition: background 0.2s;">
+                <span class="material-icons" style="font-size: 14px;">expand_more</span>
+                <span class="art-ver-tudo-label">Ver tudo (${ocultas.length})</span>
+            </button>
+            ` : ''}
             <div class="art-rodada-detalhe" id="art-rodada-detalhe"></div>
         </div>
-        `
+        `;
+                })()
                 : ""
         }
         `
@@ -845,13 +885,44 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
                     htmlR += '<div class="art-collapse-panel" data-panel-timeid="' + tid + '">'
                         + '<div class="art-collapse-inner">';
                     if (rodadas.length > 0) {
-                        rodadas.forEach(r => {
+                        // Summary line
+                        const totalGolsR = rodadas.reduce((s, r) => s + r.gp, 0);
+                        htmlR += '<div class="art-collapse-summary" style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;margin-bottom:4px;background:rgba(255,255,255,0.03);border-radius:6px;font-size:11px;">'
+                            + '<span style="color:var(--app-text-secondary);">'
+                            + '<span class="material-icons" style="font-size:13px;vertical-align:middle;margin-right:4px;">sports_soccer</span>'
+                            + totalGolsR + ' gols em ' + rodadas.length + ' rodada' + (rodadas.length !== 1 ? 's' : '')
+                            + '</span>';
+                        if (rodadas.length > 3) {
+                            htmlR += '<button class="art-collapse-ver-rodadas" style="background:none;border:none;color:var(--app-info);font:500 10px Inter,sans-serif;cursor:pointer;display:flex;align-items:center;gap:2px;">'
+                                + '<span class="material-icons" style="font-size:12px;">expand_more</span>'
+                                + '<span class="art-collapse-ver-label">Ver rodadas</span>'
+                                + '</button>';
+                        }
+                        htmlR += '</div>';
+
+                        // Show first 3 rodadas always
+                        const preview = rodadas.slice(0, 3);
+                        const extras = rodadas.slice(3);
+
+                        preview.forEach(r => {
                             const cor = r.saldo > 0 ? 'var(--module-artilheiro-primary,#22c55e)' : r.saldo < 0 ? 'var(--app-danger,#ef4444)' : '#888';
                             htmlR += '<div class="art-collapse-rodada">'
                                 + '<span class="art-collapse-rodada-badge" style="color:' + cor + ';">R' + r.rodada + '</span>'
                                 + '<span class="art-collapse-rodada-nomes">' + r.goleadores.join(', ') + '</span>'
                                 + '</div>';
                         });
+
+                        if (extras.length > 0) {
+                            htmlR += '<div class="art-collapse-extras" style="display:none;">';
+                            extras.forEach(r => {
+                                const cor = r.saldo > 0 ? 'var(--module-artilheiro-primary,#22c55e)' : r.saldo < 0 ? 'var(--app-danger,#ef4444)' : '#888';
+                                htmlR += '<div class="art-collapse-rodada">'
+                                    + '<span class="art-collapse-rodada-badge" style="color:' + cor + ';">R' + r.rodada + '</span>'
+                                    + '<span class="art-collapse-rodada-nomes">' + r.goleadores.join(', ') + '</span>'
+                                    + '</div>';
+                            });
+                            htmlR += '</div>';
+                        }
                     } else {
                         htmlR += '<div class="art-collapse-vazio">Nenhum gol registrado</div>';
                     }
@@ -912,6 +983,47 @@ async function renderizarArtilheiro(container, response, meuTimeId) {
             }
         });
     });
+
+    // ✅ v5.1: Event listeners — "Ver rodadas" toggle dentro dos painéis do ranking
+    container.querySelectorAll('.art-collapse-ver-rodadas').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const panel = btn.closest('.art-collapse-inner');
+            if (!panel) return;
+            const extras = panel.querySelector('.art-collapse-extras');
+            if (!extras) return;
+            const isHidden = extras.style.display === 'none';
+            extras.style.display = isHidden ? 'block' : 'none';
+            const label = btn.querySelector('.art-collapse-ver-label');
+            const icon = btn.querySelector('.material-icons');
+            if (label) label.textContent = isHidden ? 'Recolher' : 'Ver rodadas';
+            if (icon) icon.textContent = isHidden ? 'expand_less' : 'expand_more';
+            // Recalculate panel maxHeight
+            const collapsePanel = btn.closest('.art-collapse-panel');
+            if (collapsePanel && collapsePanel.classList.contains('open')) {
+                collapsePanel.style.maxHeight = collapsePanel.scrollHeight + 'px';
+            }
+        });
+    });
+
+    // ✅ v5.1: Event listener — "Ver tudo" toggle para rodadas extras
+    const verTudoBtn = container.querySelector('.art-ver-tudo-btn');
+    if (verTudoBtn) {
+        verTudoBtn.addEventListener('click', () => {
+            const extras = container.querySelector('.art-rodadas-extras');
+            const label = verTudoBtn.querySelector('.art-ver-tudo-label');
+            const icon = verTudoBtn.querySelector('.material-icons');
+            if (!extras) return;
+            const isHidden = extras.style.display === 'none';
+            extras.style.display = isHidden ? 'grid' : 'none';
+            if (label) label.textContent = isHidden ? 'Recolher' : label.dataset.originalText || 'Ver tudo';
+            if (icon) icon.textContent = isHidden ? 'expand_less' : 'expand_more';
+            if (!label.dataset.originalText) label.dataset.originalText = label.textContent;
+        });
+        // Store original text
+        const label = verTudoBtn.querySelector('.art-ver-tudo-label');
+        if (label) label.dataset.originalText = label.textContent;
+    }
 
     // ✅ v5.0: Event listeners — Últimas Rodadas interativo
     const rodadaBoxes = container.querySelectorAll('.art-rodada-box');

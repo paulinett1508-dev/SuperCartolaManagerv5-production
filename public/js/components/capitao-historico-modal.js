@@ -1,7 +1,8 @@
 // =============================================
 // COMPONENTE: Modal de Histórico de Capitães
 // Reutilizável em Admin e App
-// v1.0: Layout limpo com tabela scrollável
+// v2.0: Redesign — Turnos agrupados, sem coluna STATUS
+//       Resumo compacto (3 métricas + melhor/pior highlight)
 // =============================================
 
 // Fallback: garante escapeHtml disponível mesmo se escape-html.js não carregou antes
@@ -17,14 +18,7 @@ const _escapeHtml = (typeof window.escapeHtml === 'function')
 const CapitaoHistoricoModal = {
     /**
      * Renderiza modal com histórico completo de um participante
-     * @param {Object} participante - Dados do participante
-     * @param {Array} participante.historico_rodadas - Array de rodadas
-     * @param {string} participante.nome_cartola - Nome do cartoleiro
-     * @param {string} participante.nome_time - Nome do time
-     * @param {number} participante.pontuacao_total - Pontos totais
-     * @param {number} participante.media_capitao - Média de pontos
-     * @param {Object} participante.melhor_capitao - Melhor capitão
-     * @param {Object} participante.pior_capitao - Pior capitão
+     * v2.0: Agrupado por turnos, layout mais sintético
      */
     abrir(participante) {
         // Criar/atualizar container do modal
@@ -42,46 +36,92 @@ const CapitaoHistoricoModal = {
         const mediaCapitao = (Math.trunc((participante.media_capitao || 0) * 100) / 100).toFixed(2);
         const rodadasJogadas = historico.length;
 
-        // Ordenar histórico por rodada
-        const historicoOrdenado = [...historico].sort((a, b) => a.rodada - b.rodada);
+        // Melhor/Pior highlight cards
+        const melhor = participante.melhor_capitao;
+        const pior = participante.pior_capitao;
 
-        // Gerar linhas da tabela
-        const linhasTabela = historicoOrdenado.map((r, index) => {
-            const pontosNum = Math.trunc((r.pontuacao || 0) * 100) / 100;
-            const pts = pontosNum.toFixed(2);
-            const isParcial = r.parcial === true;
-            const jogou = r.jogou;
-
-            // Cores de pontuação
-            let corPontuacao = 'var(--app-text-muted)';
-            if (pontosNum >= 15) corPontuacao = 'var(--color-success-light)';
-            else if (pontosNum >= 10) corPontuacao = 'var(--app-success)';
-            else if (pontosNum >= 5) corPontuacao = 'var(--app-warning)';
-            else if (pontosNum < 0) corPontuacao = 'var(--app-danger)';
-
-            // Status da rodada
-            let statusHtml = '';
-            if (isParcial) {
-                if (jogou === false) {
-                    statusHtml = '<span class="badge-status status-pendente"><span class="material-icons" style="color: var(--app-warning); font-size: 14px; vertical-align: middle;">schedule</span> Pendente</span>';
-                } else {
-                    statusHtml = '<span class="badge-status status-parcial"><span class="material-icons" style="color: var(--app-danger); font-size: 14px; vertical-align: middle;">circle</span> Em andamento</span>';
-                }
-            } else {
-                statusHtml = '<span class="badge-status status-finalizada"><span class="material-icons" style="color: var(--app-success); font-size: 14px; vertical-align: middle;">check_circle</span> Finalizada</span>';
+        let highlightsHtml = '';
+        if (melhor || pior) {
+            highlightsHtml = '<div class="modal-highlights-capitao">';
+            if (melhor) {
+                const melhorPts = (Math.trunc((melhor.pontuacao || 0) * 100) / 100).toFixed(2);
+                highlightsHtml += `
+                    <div class="highlight-card highlight-melhor">
+                        <span class="material-icons" style="font-size: 16px;">arrow_upward</span>
+                        <div class="highlight-info">
+                            <span class="highlight-label">Melhor</span>
+                            <span class="highlight-detail">${_escapeHtml(melhor.atleta_nome || '---')} (R${melhor.rodada})</span>
+                        </div>
+                        <span class="highlight-pts">${melhorPts}</span>
+                    </div>`;
             }
+            if (pior) {
+                const piorPts = (Math.trunc((pior.pontuacao || 0) * 100) / 100).toFixed(2);
+                highlightsHtml += `
+                    <div class="highlight-card highlight-pior">
+                        <span class="material-icons" style="font-size: 16px;">arrow_downward</span>
+                        <div class="highlight-info">
+                            <span class="highlight-label">Pior</span>
+                            <span class="highlight-detail">${_escapeHtml(pior.atleta_nome || '---')} (R${pior.rodada})</span>
+                        </div>
+                        <span class="highlight-pts">${piorPts}</span>
+                    </div>`;
+            }
+            highlightsHtml += '</div>';
+        }
 
-            const rowClass = index % 2 === 0 ? 'row-even' : 'row-odd';
+        // Gerar turnos agrupados via TurnoGroup (se disponível) ou fallback
+        let turnosHtml = '';
+        if (window.TurnoGroup) {
+            turnosHtml = window.TurnoGroup.renderizar(historico, {
+                campoValor: 'pontuacao',
+                idPrefix: 'cap-hist-turno',
+                moduleCssClass: 'capitao',
+                renderRow: function(r, index) {
+                    const pontosNum = Math.trunc((r.pontuacao || 0) * 100) / 100;
+                    const pts = pontosNum.toFixed(2);
+                    const isParcial = r.parcial === true;
 
-            return `
-                <tr class="${rowClass}">
-                    <td class="col-rodada">${r.rodada}</td>
-                    <td class="col-atleta">${_escapeHtml(r.atleta_nome || 'N/A')}</td>
-                    <td class="col-pontos" style="color: ${corPontuacao}; font-weight: 700;">${pts}</td>
-                    <td class="col-status">${statusHtml}</td>
-                </tr>
-            `;
-        }).join('');
+                    // Cor de pontuação
+                    let corPontuacao = 'var(--app-text-muted, #999)';
+                    if (pontosNum >= 15) corPontuacao = 'var(--app-success-light, #22c55e)';
+                    else if (pontosNum >= 10) corPontuacao = 'var(--app-success, #10b981)';
+                    else if (pontosNum >= 5) corPontuacao = 'var(--app-warning, #eab308)';
+                    else if (pontosNum < 0) corPontuacao = 'var(--app-danger, #ef4444)';
+
+                    // Status badge apenas para parciais (rodada atual)
+                    let statusBadge = '';
+                    if (isParcial) {
+                        if (r.jogou === false) {
+                            statusBadge = '<span class="cap-modal-badge cap-modal-badge-pendente"><span class="material-icons" style="font-size: 12px;">schedule</span></span>';
+                        } else {
+                            statusBadge = '<span class="cap-modal-badge cap-modal-badge-live"><span class="material-icons" style="font-size: 12px;">circle</span></span>';
+                        }
+                    }
+
+                    return `
+                        <div class="cap-modal-row ${index % 2 === 0 ? 'cap-modal-row-alt' : ''}">
+                            <span class="cap-modal-rod">R${r.rodada}</span>
+                            <span class="cap-modal-atleta">${_escapeHtml(r.atleta_nome || 'N/A')}</span>
+                            <span class="cap-modal-pts" style="color: ${corPontuacao};">${pts}</span>
+                            ${statusBadge}
+                        </div>`;
+                }
+            });
+        } else {
+            // Fallback: lista simples se TurnoGroup não carregou
+            const sorted = [...historico].sort((a, b) => a.rodada - b.rodada);
+            turnosHtml = '<div style="padding: 12px;">';
+            sorted.forEach(r => {
+                const pts = (Math.trunc((r.pontuacao || 0) * 100) / 100).toFixed(2);
+                turnosHtml += `<div class="cap-modal-row">
+                    <span class="cap-modal-rod">R${r.rodada}</span>
+                    <span class="cap-modal-atleta">${_escapeHtml(r.atleta_nome || 'N/A')}</span>
+                    <span class="cap-modal-pts">${pts}</span>
+                </div>`;
+            });
+            turnosHtml += '</div>';
+        }
 
         // Template do modal
         modalContainer.innerHTML = `
@@ -101,10 +141,10 @@ const CapitaoHistoricoModal = {
                         </button>
                     </div>
 
-                    <!-- Resumo -->
+                    <!-- Resumo compacto (3 métricas) -->
                     <div class="modal-resumo-capitao">
                         <div class="resumo-item">
-                            <span class="resumo-label">Pontos Totais</span>
+                            <span class="resumo-label">Pontos</span>
                             <span class="resumo-valor" style="color: var(--capitao-primary, #8b5cf6);">${pontuacaoTotal}</span>
                         </div>
                         <div class="resumo-item">
@@ -115,35 +155,14 @@ const CapitaoHistoricoModal = {
                             <span class="resumo-label">Rodadas</span>
                             <span class="resumo-valor">${rodadasJogadas}</span>
                         </div>
-                        ${participante.melhor_capitao ? `
-                        <div class="resumo-item">
-                            <span class="resumo-label">Melhor</span>
-                            <span class="resumo-valor" style="color: #22c55e;">${(Math.trunc(participante.melhor_capitao.pontuacao * 100) / 100).toFixed(2)}</span>
-                        </div>
-                        ` : ''}
-                        ${participante.pior_capitao ? `
-                        <div class="resumo-item">
-                            <span class="resumo-label">Pior</span>
-                            <span class="resumo-valor" style="color: #ef4444;">${(Math.trunc(participante.pior_capitao.pontuacao * 100) / 100).toFixed(2)}</span>
-                        </div>
-                        ` : ''}
                     </div>
 
-                    <!-- Tabela de histórico -->
-                    <div class="modal-table-container">
-                        <table class="capitao-historico-table">
-                            <thead>
-                                <tr>
-                                    <th class="col-rodada">RODADA</th>
-                                    <th class="col-atleta">CAPITÃO</th>
-                                    <th class="col-pontos">PONTOS</th>
-                                    <th class="col-status">STATUS</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${linhasTabela || '<tr><td colspan="4" style="text-align: center; padding: 40px; color: #666;">Sem dados disponíveis</td></tr>'}
-                            </tbody>
-                        </table>
+                    <!-- Highlights: Melhor/Pior -->
+                    ${highlightsHtml}
+
+                    <!-- Turnos agrupados -->
+                    <div class="modal-turnos-container">
+                        ${turnosHtml || '<p style="text-align: center; padding: 40px; color: var(--app-text-muted, #666);">Sem dados disponíveis</p>'}
                     </div>
 
                     <!-- Footer -->
@@ -216,7 +235,7 @@ const CapitaoHistoricoModal = {
                 background: var(--app-surface, #1a1a1a);
                 border-radius: 16px;
                 width: 100%;
-                max-width: 800px;
+                max-width: 600px;
                 max-height: 90vh;
                 display: flex;
                 flex-direction: column;
@@ -229,18 +248,16 @@ const CapitaoHistoricoModal = {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                padding: 24px;
+                padding: 20px;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1);
                 background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
             }
 
-            .modal-header-info {
-                flex: 1;
-            }
+            .modal-header-info { flex: 1; }
 
             .modal-title-capitao {
                 font-family: 'Russo One', sans-serif;
-                font-size: 20px;
+                font-size: 18px;
                 color: #fff;
                 margin: 0 0 4px 0;
                 display: flex;
@@ -248,15 +265,15 @@ const CapitaoHistoricoModal = {
             }
 
             .modal-subtitle-capitao {
-                font-size: 14px;
-                color: #9ca3af;
+                font-size: 13px;
+                color: var(--app-text-muted, #9ca3af);
                 margin: 0;
             }
 
             .modal-close-btn {
                 background: transparent;
                 border: none;
-                color: #9ca3af;
+                color: var(--app-text-muted, #9ca3af);
                 cursor: pointer;
                 padding: 8px;
                 border-radius: 8px;
@@ -271,14 +288,13 @@ const CapitaoHistoricoModal = {
                 color: #fff;
             }
 
-            /* Resumo */
+            /* Resumo compacto */
             .modal-resumo-capitao {
                 display: flex;
                 gap: 16px;
-                padding: 20px 24px;
+                padding: 16px 20px;
                 background: rgba(0, 0, 0, 0.2);
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-                flex-wrap: wrap;
                 justify-content: center;
             }
 
@@ -286,12 +302,12 @@ const CapitaoHistoricoModal = {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                gap: 4px;
+                gap: 2px;
             }
 
             .resumo-label {
-                font-size: 11px;
-                color: #9ca3af;
+                font-size: 10px;
+                color: var(--app-text-muted, #9ca3af);
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
                 font-weight: 600;
@@ -299,109 +315,128 @@ const CapitaoHistoricoModal = {
 
             .resumo-valor {
                 font-family: 'JetBrains Mono', monospace;
-                font-size: 18px;
+                font-size: 16px;
                 font-weight: 700;
                 color: #fff;
             }
 
-            /* Tabela */
-            .modal-table-container {
-                flex: 1;
-                overflow-y: auto;
-                padding: 0;
-            }
-
-            .capitao-historico-table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-
-            .capitao-historico-table thead {
-                position: sticky;
-                top: 0;
-                background: rgba(139, 92, 246, 0.15);
-                z-index: 10;
-            }
-
-            .capitao-historico-table th {
-                padding: 12px 16px;
-                text-align: left;
-                font-size: 11px;
-                font-weight: 700;
-                color: #a78bfa;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                border-bottom: 2px solid rgba(139, 92, 246, 0.3);
-            }
-
-            .capitao-historico-table td {
-                padding: 14px 16px;
-                font-size: 14px;
-                color: #e5e7eb;
+            /* Highlights Melhor/Pior */
+            .modal-highlights-capitao {
+                display: flex;
+                gap: 8px;
+                padding: 10px 20px;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             }
 
-            .capitao-historico-table .row-even {
-                background: rgba(0, 0, 0, 0.1);
+            .highlight-card {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 8px 10px;
+                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid rgba(255, 255, 255, 0.08);
             }
 
-            .capitao-historico-table .row-odd {
-                background: transparent;
+            .highlight-melhor {
+                border-color: rgba(34, 197, 94, 0.2);
+                color: var(--app-success-light, #22c55e);
             }
 
-            .capitao-historico-table .col-rodada {
-                width: 80px;
-                font-family: 'JetBrains Mono', monospace;
+            .highlight-pior {
+                border-color: rgba(239, 68, 68, 0.2);
+                color: var(--app-danger, #ef4444);
+            }
+
+            .highlight-info {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .highlight-label {
+                display: block;
+                font-size: 9px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
                 font-weight: 600;
-                color: #8b5cf6;
+                opacity: 0.8;
             }
 
-            .capitao-historico-table .col-atleta {
-                min-width: 200px;
+            .highlight-detail {
+                display: block;
+                font-size: 11px;
+                color: var(--app-text-primary, #e5e7eb);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
-            .capitao-historico-table .col-pontos {
-                width: 100px;
+            .highlight-pts {
                 font-family: 'JetBrains Mono', monospace;
+                font-size: 14px;
                 font-weight: 700;
+                flex-shrink: 0;
+            }
+
+            /* Turnos container */
+            .modal-turnos-container {
+                flex: 1;
+                overflow-y: auto;
+                padding: 12px 20px;
+            }
+
+            /* Rows dentro do turno expandido */
+            .cap-modal-row {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 8px 6px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            }
+
+            .cap-modal-row-alt {
+                background: rgba(0, 0, 0, 0.1);
+                border-radius: 4px;
+            }
+
+            .cap-modal-rod {
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 11px;
+                font-weight: 600;
+                color: var(--app-purple, #8b5cf6);
+                min-width: 30px;
+            }
+
+            .cap-modal-atleta {
+                flex: 1;
+                font-size: 12px;
+                color: var(--app-text-primary, #e5e7eb);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .cap-modal-pts {
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 12px;
+                font-weight: 700;
+                min-width: 50px;
                 text-align: right;
             }
 
-            .capitao-historico-table .col-status {
-                width: 140px;
+            .cap-modal-badge {
+                display: inline-flex;
+                align-items: center;
+                flex-shrink: 0;
             }
 
-            /* Badges de Status */
-            .badge-status {
-                display: inline-block;
-                padding: 4px 10px;
-                border-radius: 12px;
-                font-size: 11px;
-                font-weight: 600;
-                white-space: nowrap;
-            }
-
-            .status-finalizada {
-                background: rgba(34, 197, 94, 0.15);
-                color: #22c55e;
-                border: 1px solid rgba(34, 197, 94, 0.3);
-            }
-
-            .status-parcial {
-                background: rgba(239, 68, 68, 0.15);
-                color: #ef4444;
-                border: 1px solid rgba(239, 68, 68, 0.3);
-            }
-
-            .status-pendente {
-                background: rgba(251, 191, 36, 0.15);
-                color: #fbbf24;
-                border: 1px solid rgba(251, 191, 36, 0.3);
-            }
+            .cap-modal-badge-pendente { color: var(--app-warning, #eab308); }
+            .cap-modal-badge-live { color: var(--app-danger, #ef4444); }
 
             /* Footer */
             .modal-footer-capitao {
-                padding: 20px 24px;
+                padding: 16px 20px;
                 border-top: 1px solid rgba(255, 255, 255, 0.1);
                 display: flex;
                 justify-content: flex-end;
@@ -411,9 +446,9 @@ const CapitaoHistoricoModal = {
                 background: rgba(139, 92, 246, 0.2);
                 color: #a78bfa;
                 border: 1px solid rgba(139, 92, 246, 0.3);
-                padding: 10px 24px;
+                padding: 8px 20px;
                 border-radius: 8px;
-                font-size: 14px;
+                font-size: 13px;
                 font-weight: 600;
                 cursor: pointer;
                 transition: all 0.2s;
@@ -434,32 +469,12 @@ const CapitaoHistoricoModal = {
                     margin: 0 10px;
                 }
 
-                .modal-header-capitao {
-                    padding: 16px;
-                }
-
-                .modal-title-capitao {
-                    font-size: 16px;
-                }
-
-                .modal-resumo-capitao {
-                    padding: 12px 16px;
-                    gap: 12px;
-                }
-
-                .resumo-valor {
-                    font-size: 16px;
-                }
-
-                .capitao-historico-table th,
-                .capitao-historico-table td {
-                    padding: 10px 12px;
-                    font-size: 13px;
-                }
-
-                .capitao-historico-table .col-atleta {
-                    min-width: 150px;
-                }
+                .modal-header-capitao { padding: 14px; }
+                .modal-title-capitao { font-size: 15px; }
+                .modal-resumo-capitao { padding: 10px 14px; gap: 10px; }
+                .resumo-valor { font-size: 14px; }
+                .modal-highlights-capitao { padding: 8px 14px; flex-direction: column; }
+                .modal-turnos-container { padding: 10px 14px; }
             }
         `;
 
@@ -469,5 +484,3 @@ const CapitaoHistoricoModal = {
 
 // Exportar globalmente
 window.CapitaoHistoricoModal = CapitaoHistoricoModal;
-
-console.log('🎖️ [CAPITAO-MODAL] Componente de histórico carregado');

@@ -447,6 +447,17 @@ function _nomeCompacto(nome) {
     return partes[0][0] + '. ' + partes[partes.length - 1].slice(0, 9);
 }
 
+/** Calcula tendência do participante comparando última rodada com a média */
+function _calcularTendenciaLuva(historico, media) {
+    if (!historico || historico.length === 0 || !media) return { icon: 'trending_flat', text: '', cssClass: 'trend-flat' };
+    const ultima = historico.reduce((max, r) => r.rodada > max.rodada ? r : max, historico[0]);
+    const val = ultima.pontuacao || ultima.pontos || 0;
+    const variacao = Math.trunc(((val - media) / Math.abs(media)) * 100);
+    if (variacao > 5) return { icon: 'trending_up', text: `+${variacao}%`, cssClass: 'trend-up' };
+    if (variacao < -5) return { icon: 'trending_down', text: `${variacao}%`, cssClass: 'trend-down' };
+    return { icon: 'trending_flat', text: `${variacao}%`, cssClass: 'trend-flat' };
+}
+
 /** Retorna array de rodadas com goleiro compacto para painel colapsável */
 function _resumoRodadasGoleiro(rodadas) {
     if (!rodadas || !Array.isArray(rodadas)) return [];
@@ -556,7 +567,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
         const rodadasOrdenadas = [...meusDados.rodadas].sort(
             (a, b) => b.rodada - a.rodada,
         );
-        historicoRecente = rodadasOrdenadas.slice(0, 5);
+        historicoRecente = rodadasOrdenadas;
 
         const goleirosMap = {};
         meusDados.rodadas.forEach((r) => {
@@ -587,6 +598,12 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
         ? '<span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">emoji_events</span> Você é o CAMPEÃO!'
         : '<span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">emoji_events</span> Você é o líder!';
 
+    // ✅ v5.1: Trend indicator para Seu Desempenho
+    const mediaPontos = meusDados && meusDados.rodadas?.length > 0
+        ? meusDados.rodadas.reduce((acc, r) => acc + (r.pontos || 0), 0) / meusDados.rodadas.length
+        : 0;
+    const tendencia = meusDados ? _calcularTendenciaLuva(meusDados.rodadas || [], mediaPontos) : null;
+
     const html = `
     <div style="padding: 16px;">
         <div style="text-align: center; margin-bottom: 16px;">
@@ -615,6 +632,12 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                     <div style="font-size: 26px; font-weight: 800; color: var(--app-gold);">${(Math.trunc(getPontos(meusDados) * 10) / 10).toFixed(1)}</div>
                     <div style="font-size: 9px; color: #888;">pontos</div>
                 </div>
+                ${tendencia && tendencia.text ? `
+                <div class="${tendencia.cssClass}" style="display:flex;align-items:center;gap:2px;font-size:11px;font-weight:600;">
+                    <span class="material-icons" style="font-size:16px;">${tendencia.icon}</span>
+                    <span>${tendencia.text}</span>
+                </div>
+                ` : ''}
             </div>
 
             ${
@@ -680,15 +703,10 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
 
         ${
             historicoRecente.length > 0
-                ? `
-        <div class="luva-ultimas-rodadas">
-            <div class="luva-ultimas-header">
-                <span class="material-symbols-outlined">bar_chart</span> Últimas Rodadas
-                <span style="margin-left: auto; font: 400 9px 'Inter', sans-serif; color: #555; text-transform: none; letter-spacing: 0;">toque para ver goleiro</span>
-            </div>
-            <div class="luva-rodadas-grid">
-                ${historicoRecente
-                    .map((r) => {
+                ? (() => {
+                    const visivel = historicoRecente.slice(0, 3);
+                    const oculto = historicoRecente.slice(3);
+                    const _renderBox = (r) => {
                         const pontos = r.pontos || 0;
                         const bgColor =
                             pontos >= 5
@@ -707,12 +725,28 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                         <div class="luva-rodada-num">R${r.rodada}</div>
                         <div class="luva-rodada-pts" style="color: ${textColor};">${(Math.trunc((pontos||0) * 10) / 10).toFixed(1)}</div>
                     </div>`;
-                    })
-                    .join("")}
+                    };
+                    return `
+        <div class="luva-ultimas-rodadas">
+            <div class="luva-ultimas-header">
+                <span class="material-symbols-outlined">bar_chart</span> Últimas Rodadas
+                <span style="margin-left: auto; font: 400 9px 'Inter', sans-serif; color: #555; text-transform: none; letter-spacing: 0;">toque para ver goleiro</span>
             </div>
+            <div class="luva-rodadas-grid">
+                ${visivel.map(_renderBox).join("")}
+            </div>
+            ${oculto.length > 0 ? `
+            <div class="luva-rodadas-grid luva-rodadas-extra" style="display:none;margin-top:6px;">
+                ${oculto.map(_renderBox).join("")}
+            </div>
+            <button type="button" class="luva-ver-tudo-btn" style="display:flex;align-items:center;justify-content:center;gap:4px;width:100%;margin-top:8px;padding:6px 0;background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.2);border-radius:8px;color:var(--app-gold);font-size:11px;font-weight:600;cursor:pointer;transition:background 0.2s;">
+                <span class="material-icons" style="font-size:14px;">expand_more</span> Ver tudo (${historicoRecente.length} rodadas)
+            </button>
+            ` : ''}
             <div class="luva-rodada-detalhe" id="luva-rodada-detalhe"></div>
         </div>
-        `
+        `;
+                })()
                 : ""
         }
         `
@@ -896,6 +930,20 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                 detalheContainer.classList.add('open');
                 detalheContainer.style.maxHeight = detalheContainer.scrollHeight + 'px';
             });
+        });
+    }
+
+    // ✅ v5.1: "Ver tudo" button — expande rodadas ocultas
+    const verTudoBtn = container.querySelector('.luva-ver-tudo-btn');
+    if (verTudoBtn) {
+        verTudoBtn.addEventListener('click', () => {
+            const extraGrid = container.querySelector('.luva-rodadas-extra');
+            if (!extraGrid) return;
+            const isHidden = extraGrid.style.display === 'none';
+            extraGrid.style.display = isHidden ? '' : 'none';
+            verTudoBtn.innerHTML = isHidden
+                ? '<span class="material-icons" style="font-size:14px;">expand_less</span> Recolher'
+                : `<span class="material-icons" style="font-size:14px;">expand_more</span> Ver tudo (${container.querySelectorAll('.luva-rodada-box').length} rodadas)`;
         });
     }
 }
