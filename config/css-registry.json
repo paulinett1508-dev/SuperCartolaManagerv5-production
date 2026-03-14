@@ -345,7 +345,10 @@
       {
         "path": "public/participante/css/matchday.css",
         "loadedBy": ["participante/index.html (module)"],
-        "description": "Modo matchday com pulsing headers e live"
+        "description": "Modo matchday com pulsing headers, live ranking animations, stale detection, skeleton loading e state icons",
+        "classes": [".matchday-header", ".matchday-header-inner", ".matchday-header-label", ".matchday-header-ts", ".matchday-stale", ".matchday-skeleton-row", ".matchday-state-icon", ".scout-ticker", ".scout-ticker-content", ".scout-ticker-track", ".scout-ticker-item", ".ranking-item.live-updating", ".ranking-item.moving-up", ".ranking-item.moving-down", ".ranking-live-badge"],
+        "keyframes": ["matchday-pulse", "live-blink", "ticker-scroll", "live-update-flash", "move-up", "move-down"],
+        "reuses": ["skeleton-box (from _app-tokens.css)", "live-blink (for stale ts indicator)"]
       },
       {
         "path": "public/participante/css/resta-um.css",

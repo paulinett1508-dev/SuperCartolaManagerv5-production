@@ -178,3 +178,49 @@
 .ranking-live-badge.is-off {
   opacity: 0.5;
 }
+
+/* ─── Indicador de tempo relativo (Task 2) ─── */
+.matchday-header-ts {
+  font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+  font-size: var(--app-text-xs, 11px);
+  color: var(--app-text-muted, #9ca3af);
+  margin-left: auto;
+  opacity: 0.7;
+}
+
+/* ─── Estado stale — dados obsoletos (Task 3) ─── */
+.matchday-header.matchday-stale {
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.15) 0%, rgba(234, 179, 8, 0.05) 100%);
+  border-color: var(--app-warning, #eab308);
+  animation: none;
+}
+
+.matchday-header.matchday-stale .matchday-header-ts {
+  color: var(--app-warning, #eab308);
+  opacity: 1;
+  animation: live-blink 2s ease-in-out infinite;
+}
+
+.matchday-header.matchday-stale .material-icons {
+  color: var(--app-warning, #eab308);
+}
+
+/* ─── Skeleton loading para parciais (Task 4) ─── */
+.matchday-skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-sm, 8px);
+  padding: var(--app-space-sm, 8px) var(--app-space-md, 16px);
+}
+
+/* ─── State icons para empty states (Task 6) ─── */
+.matchday-state-icon {
+  font-size: var(--app-text-sm, 13px);
+  margin-right: var(--app-space-xs, 4px);
+}
+
+.matchday-state-icon.state-loading { color: var(--app-info, #3b82f6); }
+.matchday-state-icon.state-waiting { color: var(--app-text-muted, #9ca3af); }
+.matchday-state-icon.state-live { color: var(--app-success-light, #22c55e); }
+.matchday-state-icon.state-stale { color: var(--app-warning, #eab308); }
+.matchday-state-icon.state-error { color: var(--app-danger, #ef4444); }
