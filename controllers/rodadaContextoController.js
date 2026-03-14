@@ -210,11 +210,6 @@ export const obterContextoRodada = async (req, res) => {
             numTemporada
         );
 
-        // 8. Gerar narrativa inteligente
-        const { gerarNarrativa } = await import("../services/narrativaService.js");
-        const narrativas = gerarNarrativa(contexto);
-        contexto.narrativa = narrativas;
-
         console.log(`${LOG_PREFIX} Contexto gerado com sucesso para time ${numTimeId}`);
         res.json(contexto);
 

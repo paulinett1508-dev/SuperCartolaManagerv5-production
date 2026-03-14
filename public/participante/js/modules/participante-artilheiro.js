@@ -62,6 +62,7 @@ export async function inicializarArtilheiroParticipante({
     _currentLigaId = ligaId;
     _currentTimeId = timeId;
     _currentParticipante = participante;
+    window.MatchdayService?.setContext({ ligaId });
 
     // ✅ LP: Init acordeons + carregar regras e premiações (non-blocking)
     _initLPAccordions('artilheiro-lp-wrapper');

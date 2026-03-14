@@ -52,6 +52,7 @@ export async function inicializarLuvaOuroParticipante({
     estadoLuva.timeId = timeId;
     estadoLuva.modeLive = false;
     estadoLuva.rankingAtual = null;
+    window.MatchdayService?.setContext({ ligaId });
 
     // ✅ v4.1: Verificar matchday (parciais) — paridade com Capitão
     if (window.MatchdayService && window.MatchdayService.isActive) {
