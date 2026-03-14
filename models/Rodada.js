@@ -45,4 +45,8 @@ const RodadaSchema = new mongoose.Schema({
 // ✅ Índice composto único COM temporada (multi-temporada)
 RodadaSchema.index({ ligaId: 1, rodada: 1, timeId: 1, temporada: 1 }, { unique: true });
 
+// ✅ v4.0: Índice para obterRodadas() — query {ligaId, temporada} com sort {rodada, posicao}
+// Evita full collection scan no endpoint mais chamado
+RodadaSchema.index({ ligaId: 1, temporada: 1, rodada: 1 });
+
 export default mongoose.model("Rodada", RodadaSchema);

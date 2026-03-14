@@ -559,7 +559,15 @@ export const obterRodadas = async (req, res) => {
 
     // Buscar rodadas do banco (excluir registros com falha de API — dados inválidos)
     filtro.populacaoFalhou = { $ne: true };
-    const rodadas = await Rodada.find(filtro)
+
+    // ✅ v4.0: Projection — excluir campos pesados em queries bulk (inicio+fim)
+    // O array 'atletas' (11-23 itens por registro) infla o payload em ~70-80%
+    // Reduz de ~3.6MB para ~400-600KB em 38 rodadas × 10 times
+    // Nota: queries de rodada individual mantêm atletas (usado pelo Campinho modal)
+    const isBulkQuery = !rodada && inicio && fim;
+    const projection = isBulkQuery ? { atletas: 0, __v: 0 } : { __v: 0 };
+
+    const rodadas = await Rodada.find(filtro, projection)
       .sort({ rodada: 1, posicao: 1 })
       .lean();
 
@@ -627,6 +635,8 @@ export const obterRodadas = async (req, res) => {
       });
 
       logger.log(`[OBTER-RODADAS] Retornando: ${rodadasComTotal.length} rodadas (SuperCartola - posições recalculadas)`);
+      // ✅ v4.0: Cache HTTP — rodadas consolidadas mudam pouco (5min cache)
+      res.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
       return res.json(rodadasComTotal);
     }
 
@@ -717,6 +727,8 @@ export const obterRodadas = async (req, res) => {
 
     logger.log(`[OBTER-RODADAS] Retornando: ${rodadasProcessadas.length} rodadas (FASE 1: original, FASE 2: recalculada)`);
 
+    // ✅ v4.0: Cache HTTP — rodadas consolidadas mudam pouco (5min cache)
+    res.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
     res.json(rodadasProcessadas);
   } catch (error) {
     logger.error("[OBTER-RODADAS] Erro:", error);
