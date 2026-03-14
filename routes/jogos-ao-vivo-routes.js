@@ -311,6 +311,33 @@ function mesclarJogos(jogosAoVivo, jogosAgenda) {
 }
 
 /**
+ * Filtra jogos de categorias de base (Sub-20, Sub-17, etc.) e campeonatos femininos.
+ * Remove qualquer jogo cuja liga contenha padrões como Sub-20, U17, Feminino, Women, etc.
+ *
+ * @param {Array} jogos - Array de jogos no formato padrão
+ * @returns {Array} Jogos filtrados (sem categorias de base e feminino)
+ */
+function filtrarCategoriasIndesejadas(jogos) {
+  if (!jogos || jogos.length === 0) return jogos;
+
+  // Padrões: Sub-17, Sub-20, Sub 17, Sub20, U17, U-20, U 17, Feminino, Women, Female
+  const PADROES_EXCLUIR = /\b(sub[\s-]?1[2-9]|sub[\s-]?2[0-3]|u[\s-]?1[2-9]|u[\s-]?2[0-3]|feminino|women|female|fem\b)/i;
+
+  const antes = jogos.length;
+  const filtrados = jogos.filter(jogo => {
+    const textoLiga = `${jogo.liga || ''} ${jogo.ligaOriginal || ''}`;
+    return !PADROES_EXCLUIR.test(textoLiga);
+  });
+
+  const removidos = antes - filtrados.length;
+  if (removidos > 0) {
+    console.log(`[JOGOS-DIA] 🚫 Filtro categorias: ${removidos} jogos removidos (sub-20/sub-17/feminino)`);
+  }
+
+  return filtrados;
+}
+
+/**
  * Retorna a data atual no formato YYYY-MM-DD (timezone São Paulo)
  */
 function getDataHoje() {
@@ -768,7 +795,8 @@ router.get('/', async (req, res) => {
     const livescoreFonte = livescoresResult.fonte || 'nenhuma';
 
     // 3º Mesclar livescores com agenda (livescores têm prioridade)
-    const jogosMesclados = mesclarJogos(soccerData.jogos, jogosAgenda);
+    const jogosMescladosRaw = mesclarJogos(soccerData.jogos, jogosAgenda);
+    const jogosMesclados = filtrarCategoriasIndesejadas(jogosMescladosRaw);
 
     if (jogosMesclados.length > 0) {
       const temAoVivo = jogosMesclados.some(j => STATUS_AO_VIVO.includes(j.statusRaw));
@@ -825,7 +853,8 @@ router.get('/', async (req, res) => {
 
     // 5º Fallback final: arquivo JSON estático (legado)
     console.warn('[JOGOS-DIA] ⚠️ Cache stale expirado/vazio. Tentando fallback final: arquivo globo JSON...');
-    const jogosGlobo = await buscarJogosGlobo();
+    const jogosGloboRaw = await buscarJogosGlobo();
+    const jogosGlobo = filtrarCategoriasIndesejadas(jogosGloboRaw);
 
     if (jogosGlobo.length > 0) {
       console.log(`[JOGOS-DIA] ✅ Globo arquivo JSON retornou ${jogosGlobo.length} jogos`);
