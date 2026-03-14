@@ -194,6 +194,9 @@ function montarEscalacao(atletasRankeados, esquemaId, patrimonio, modo) {
         console.log(`${LOG_PREFIX} Trava anti-confronto: ${confrontosEvitados.length} jogadores bloqueados por conflito de posicoes antagonicas`);
     }
 
+    // Gerar sugestoes de reservas (banco)
+    const reservas = gerarReservas(atletasRankeados, escalacao, patrimonio, gastoTotal);
+
     // Selecionar capitao: maior score entre jogadores de campo (exceto tecnico)
     const jogadoresSemTec = escalacao.filter(a => a.posicaoId !== 6);
     if (jogadoresSemTec.length > 0) {
@@ -226,7 +229,62 @@ function montarEscalacao(atletasRankeados, esquemaId, patrimonio, modo) {
         },
         confrontosEvitados: confrontosEvitados.length > 0 ? confrontosEvitados : null,
         totalConfrontosEvitados: confrontosEvitados.length,
+        reservas,
     };
+}
+
+// =====================================================================
+// GERAR BANCO DE RESERVAS
+// =====================================================================
+
+/**
+ * Sugere reservas baseadas no elenco rankeado e na sobra de cartoletas.
+ *
+ * - reservaLuxo: melhor jogador fora do 11 titular (score mais alto, independe do preco).
+ *   Representa o "reserva premium" que o admin pode considerar independente do orçamento.
+ * - reservasBanca: até 3 jogadores com melhor custo-benefício dentro da sobra disponível.
+ *
+ * @param {Array} atletasRankeados - Atletas ordenados por scoreFinal DESC
+ * @param {Array} escalacao - 11 titulares já selecionados
+ * @param {number} patrimonio - Cartoletas totais disponíveis
+ * @param {number} gastoTotal - Gasto com os 11 titulares
+ * @returns {{ reservaLuxo: Object|null, reservasBanca: Array }}
+ */
+function gerarReservas(atletasRankeados, escalacao, patrimonio, gastoTotal) {
+    const idsEscalados = new Set(escalacao.map(a => a.atletaId));
+    const sobra = patrimonio - gastoTotal;
+
+    // Todos os atletas fora do 11 titular, não descartados
+    const disponiveis = atletasRankeados
+        .filter(a => !idsEscalados.has(a.atletaId))
+        .filter(a => a.disponibilidadeReal?.status !== 'descartado')
+        .sort((a, b) => b.scoreFinal - a.scoreFinal);
+
+    if (disponiveis.length === 0) {
+        return { reservaLuxo: null, reservasBanca: [] };
+    }
+
+    // Reserva de Luxo: maior score geral fora do 11 (sem restrição de preço)
+    const reservaLuxo = {
+        ...disponiveis[0],
+        posicaoNome: POSICOES[disponiveis[0].posicaoId]?.nome || 'N/D',
+        posicaoAbrev: POSICOES[disponiveis[0].posicaoId]?.abrev || 'N/D',
+    };
+
+    // Banco: próximos melhores que cabem na sobra disponível (máx 3)
+    const reservasBanca = disponiveis
+        .slice(1)
+        .filter(a => a.preco <= sobra)
+        .slice(0, 3)
+        .map(a => ({
+            ...a,
+            posicaoNome: POSICOES[a.posicaoId]?.nome || 'N/D',
+            posicaoAbrev: POSICOES[a.posicaoId]?.abrev || 'N/D',
+        }));
+
+    console.log(`${LOG_PREFIX} Reservas: luxo=${reservaLuxo.nome} (C$${reservaLuxo.preco}), banca=${reservasBanca.length} jogadores (sobra=C$${sobra.toFixed(2)})`);
+
+    return { reservaLuxo, reservasBanca };
 }
 
 // =====================================================================

@@ -17,12 +17,13 @@
     <main class="app-main admin-page">
     <div class="admin-content">
         <!-- Header -->
-        <div class="admin-header">
+        <div class="admin-header eia-page-header">
             <h1>
                 <span class="material-icons">psychology</span>
                 Escalação IA
+                <span class="eia-badge-ia">IA</span>
             </h1>
-            <p>Sugestão inteligente de escalação baseada em análise multi-fonte</p>
+            <p>Sugestão inteligente de escalação baseada em análise multi-fonte com banco de reservas</p>
         </div>
 
         <!-- Fontes Status -->
@@ -66,14 +67,17 @@
             <button class="eia-tab active" data-modo="mitar">
                 <span class="material-icons">rocket_launch</span>
                 Mitar
+                <span class="eia-tab-desc">máxima pontuação</span>
             </button>
             <button class="eia-tab" data-modo="equilibrado">
                 <span class="material-icons">balance</span>
                 Equilibrado
+                <span class="eia-tab-desc">pontos + valorização</span>
             </button>
             <button class="eia-tab" data-modo="valorizar">
                 <span class="material-icons">trending_up</span>
                 Valorizar
+                <span class="eia-tab-desc">crescimento de patrimônio</span>
             </button>
         </div>
 
@@ -110,7 +114,22 @@
             </div>
 
             <!-- Escalação (cards de jogadores) -->
+            <div class="eia-secao-titulo">
+                <span class="material-icons">groups</span>
+                Escalação Titular
+            </div>
             <div class="eia-escalacao" id="eia-escalacao"></div>
+
+            <!-- Banco de Reservas -->
+            <div id="eia-reservas" class="eia-reservas" style="display:none;">
+                <div class="eia-secao-titulo eia-secao-titulo--reservas">
+                    <span class="material-icons">sports_bench</span>
+                    Banco de Reservas
+                    <span class="eia-secao-sub">baseado nas suas cartoletas disponíveis</span>
+                </div>
+                <div id="eia-reserva-luxo-container"></div>
+                <div class="eia-banca-grid" id="eia-banca-grid"></div>
+            </div>
 
             <!-- Info rodapé -->
             <div class="eia-footer-info" id="eia-footer-info"></div>
