@@ -122,11 +122,18 @@ async function buscarMelhoresJogadores(rodada) {
 
 /**
  * Busca jogadores que sao duvida para a rodada.
+ * Prompt enriquecido para capturar disponibilidade real baseada em noticias.
  */
 async function buscarJogadoresDuvida(rodada) {
-    const pergunta = `Quais jogadores do Brasileirao 2026 sao duvida ou desfalque para a rodada ${rodada}? `
-        + `Liste jogadores lesionados, suspensos ou com duvida medica. `
-        + `Inclua o clube e o motivo da duvida.`;
+    const pergunta = `Quais jogadores do Brasileirao 2026 sao duvida, desfalque ou podem ser poupados para a rodada ${rodada}? `
+        + `Busque noticias das ULTIMAS 48 HORAS sobre:\n`
+        + `- Jogadores que NAO treinaram com o grupo\n`
+        + `- Declaracoes do tecnico sobre escalacao provavel\n`
+        + `- Jogadores em rodizio ou que podem ser poupados\n`
+        + `- Jogadores convocados para selecao\n`
+        + `- Jogadores que voltaram de lesao mas podem ficar no banco\n`
+        + `- Jogadores suspensos por cartoes\n`
+        + `Para cada jogador, indique: Nome, Clube, Motivo e nivel de risco (alto/medio/baixo).`;
 
     const resultado = await perguntarPerplexity(pergunta);
     if (!resultado) return null;
@@ -175,6 +182,127 @@ async function buscarConsensoEscalacao(rodada) {
     };
 }
 
+/**
+ * Busca disponibilidade REAL dos atletas baseada em noticias recentes.
+ * Foco em treinos, coletivas e informacoes de bastidores dos ultimos 2 dias.
+ */
+async function buscarDisponibilidadeReal(rodada) {
+    const pergunta = `Para a rodada ${rodada} do Brasileirao 2026, busque nas noticias mais recentes (ultimas 48h) a situacao REAL de disponibilidade dos jogadores.\n\n`
+        + `Foque em:\n`
+        + `1. Jogadores CONFIRMADOS pelo tecnico em coletiva ou treino\n`
+        + `2. Jogadores DESCARTADOS (lesao confirmada, suspensao, nao relacionados)\n`
+        + `3. Jogadores DUVIDA (treinou separado, sentiu dores, recem-voltou de lesao)\n`
+        + `4. Jogadores que podem ser POUPADOS (rodizio, copa, competicoes paralelas)\n\n`
+        + `Para cada jogador encontrado, responda EXATAMENTE neste formato (um por linha):\n`
+        + `JOGADOR|Nome do Jogador|Clube|STATUS|Motivo breve\n`
+        + `Onde STATUS e: CONFIRMADO, DESCARTADO, DUVIDA ou POUPADO\n\n`
+        + `Exemplo: JOGADOR|Raphael Veiga|Palmeiras|DUVIDA|Treinou separado com dores no joelho\n`
+        + `Liste pelo menos 10-15 jogadores se possivel.`;
+
+    const resultado = await perguntarPerplexity(pergunta, { maxTokens: 3000 });
+    if (!resultado) return null;
+
+    // Parsear resposta estruturada
+    const jogadores = parsearDisponibilidadeReal(resultado.resposta);
+
+    return {
+        tipo: 'disponibilidade_real',
+        rodada,
+        ...resultado,
+        jogadores,
+    };
+}
+
+/**
+ * Parseia resposta estruturada de disponibilidade real.
+ * Formato esperado: JOGADOR|Nome|Clube|STATUS|Motivo
+ */
+function parsearDisponibilidadeReal(texto) {
+    if (!texto) return [];
+
+    const jogadores = [];
+    const linhas = texto.split('\n');
+
+    for (const linha of linhas) {
+        // Tentar formato estruturado: JOGADOR|Nome|Clube|STATUS|Motivo
+        const partes = linha.split('|');
+        if (partes.length >= 4 && partes[0].trim().toUpperCase() === 'JOGADOR') {
+            const nome = partes[1]?.trim();
+            const clube = partes[2]?.trim();
+            const statusRaw = partes[3]?.trim().toUpperCase();
+            const motivo = partes[4]?.trim() || '';
+
+            if (!nome || nome.length < 2) continue;
+
+            const statusMap = {
+                'CONFIRMADO': 'confirmado',
+                'DESCARTADO': 'descartado',
+                'DUVIDA': 'duvida',
+                'POUPADO': 'poupado',
+            };
+
+            const status = statusMap[statusRaw] || 'duvida';
+
+            jogadores.push({
+                nome,
+                clube,
+                status,
+                motivo,
+                fonte: 'perplexity',
+                confianca: status === 'descartado' ? 85 : status === 'confirmado' ? 75 : 60,
+            });
+        }
+    }
+
+    // Se formato estruturado nao funcionou, tentar heuristica
+    if (jogadores.length === 0) {
+        return parsearDisponibilidadeHeuristica(texto);
+    }
+
+    return jogadores;
+}
+
+/**
+ * Fallback: parsear disponibilidade por heuristica quando formato estruturado falha.
+ */
+function parsearDisponibilidadeHeuristica(texto) {
+    const jogadores = [];
+    const linhas = texto.split('\n');
+
+    const padraoDescartado = /([A-Z][a-záéíóúãõâêô]+(?:\s+[A-Z]?[a-záéíóúãõâêô]+)*)\s*.*?(fora|descartado|ausente|nao joga|vetado|cortado)/gi;
+    const padraoDuvida = /([A-Z][a-záéíóúãõâêô]+(?:\s+[A-Z]?[a-záéíóúãõâêô]+)*)\s*.*?(d[uú]vida|incerto|pode ser poupado|treinou separado)/gi;
+    const padraoPoupado = /([A-Z][a-záéíóúãõâêô]+(?:\s+[A-Z]?[a-záéíóúãõâêô]+)*)\s*.*?(poupado|rod[ií]zio|preservado|banco)/gi;
+
+    const vistos = new Set();
+
+    for (const linha of linhas) {
+        let match;
+
+        while ((match = padraoDescartado.exec(linha)) !== null) {
+            const nome = match[1].trim();
+            if (nome.length < 3 || nome.length > 30 || vistos.has(nome)) continue;
+            vistos.add(nome);
+            jogadores.push({ nome, status: 'descartado', motivo: match[2], fonte: 'perplexity', confianca: 70 });
+        }
+
+        while ((match = padraoDuvida.exec(linha)) !== null) {
+            const nome = match[1].trim();
+            if (nome.length < 3 || nome.length > 30 || vistos.has(nome)) continue;
+            vistos.add(nome);
+            jogadores.push({ nome, status: 'duvida', motivo: match[2], fonte: 'perplexity', confianca: 55 });
+        }
+
+        while ((match = padraoPoupado.exec(linha)) !== null) {
+            const nome = match[1].trim();
+            if (nome.length < 3 || nome.length > 30 || vistos.has(nome)) continue;
+            vistos.add(nome);
+            jogadores.push({ nome, status: 'poupado', motivo: match[2], fonte: 'perplexity', confianca: 50 });
+        }
+    }
+
+    return jogadores;
+}
+
 // =====================================================================
 // PESQUISA COMPLETA (todas as analises em paralelo)
 // =====================================================================
@@ -192,11 +320,12 @@ async function pesquisaCompleta(rodada) {
 
     console.log(`${LOG_PREFIX} Iniciando pesquisa completa para rodada ${rodada}...`);
 
-    const [melhores, duvida, confrontos, consenso] = await Promise.allSettled([
+    const [melhores, duvida, confrontos, consenso, disponibilidade] = await Promise.allSettled([
         buscarMelhoresJogadores(rodada),
         buscarJogadoresDuvida(rodada),
         buscarAnaliseConfrontos(rodada),
         buscarConsensoEscalacao(rodada),
+        buscarDisponibilidadeReal(rodada),
     ]);
 
     const resultado = {
@@ -206,12 +335,13 @@ async function pesquisaCompleta(rodada) {
         jogadoresDuvida: duvida.status === 'fulfilled' ? duvida.value : null,
         analiseConfrontos: confrontos.status === 'fulfilled' ? confrontos.value : null,
         consensoEscalacao: consenso.status === 'fulfilled' ? consenso.value : null,
+        disponibilidadeReal: disponibilidade.status === 'fulfilled' ? disponibilidade.value : null,
         pesquisadoEm: new Date().toISOString(),
         fontesUsadas: [],
     };
 
     // Coletar citations de todas as fontes
-    for (const r of [melhores, duvida, confrontos, consenso]) {
+    for (const r of [melhores, duvida, confrontos, consenso, disponibilidade]) {
         if (r.status === 'fulfilled' && r.value?.citations) {
             resultado.fontesUsadas.push(...r.value.citations);
         }
@@ -322,6 +452,7 @@ export default {
     perguntarPerplexity,
     buscarMelhoresJogadores,
     buscarJogadoresDuvida,
+    buscarDisponibilidadeReal,
     buscarAnaliseConfrontos,
     buscarConsensoEscalacao,
     pesquisaCompleta,

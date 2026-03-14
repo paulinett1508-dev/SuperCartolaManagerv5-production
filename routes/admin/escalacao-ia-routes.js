@@ -49,4 +49,12 @@ router.get('/status', requireAdmin, escalacaoIAController.statusFontes);
 // POST /api/admin/escalacao-ia/refresh?patrimonio=100&esquemaId=3
 router.post('/refresh', requireAdmin, escalacaoIAController.refresh);
 
+// Salvar escalacao gerada
+// POST /api/admin/escalacao-ia/salvar
+router.post('/salvar', requireAdmin, escalacaoIAController.salvarEscalacao);
+
+// Buscar escalacao salva
+// GET /api/admin/escalacao-ia/salva?rodada=10
+router.get('/salva', requireAdmin, escalacaoIAController.buscarSalva);
+
 export default router;

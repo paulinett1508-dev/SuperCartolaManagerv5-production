@@ -214,10 +214,26 @@ function calcularScoreFinal(atleta, modo = MODOS.EQUILIBRADO) {
     // Penalidades
     const penalidades = [];
 
-    // -20% se em risco/duvida
+    // -20% se em risco/duvida (fontes web genericas)
     if (atleta.fontes?.webResearch?.emRisco) {
         scorePonderado *= 0.8;
         penalidades.push({ tipo: 'duvida_web', fator: 0.8, motivo: 'Jogador em duvida segundo fontes web' });
+    }
+
+    // Penalidades/bonus de disponibilidade REAL (Perplexity noticias recentes)
+    const dispReal = atleta.disponibilidadeReal;
+    if (dispReal?.status) {
+        if (dispReal.status === 'descartado') {
+            scorePonderado *= 0.50;
+            penalidades.push({ tipo: 'descartado_real', fator: 0.50, motivo: dispReal.motivo || 'Descartado por noticias recentes' });
+        } else if (dispReal.status === 'duvida') {
+            scorePonderado *= 0.80;
+            penalidades.push({ tipo: 'duvida_real', fator: 0.80, motivo: dispReal.motivo || 'Duvida segundo noticias recentes' });
+        } else if (dispReal.status === 'poupado') {
+            scorePonderado *= 0.85;
+            penalidades.push({ tipo: 'poupado_real', fator: 0.85, motivo: dispReal.motivo || 'Pode ser poupado' });
+        }
+        // 'confirmado' = sem penalidade
     }
 
     // Bonus por consenso (multiplas fontes confirmam)

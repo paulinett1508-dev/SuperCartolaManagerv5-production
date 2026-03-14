@@ -1,9 +1,11 @@
 /**
- * ADMIN ESCALAÇÃO IA - Frontend Module v1.0
+ * ADMIN ESCALAÇÃO IA - Frontend Module v2.0
  * Módulo admin para sugestão inteligente de escalação multi-fonte.
  *
  * Carregado via vImport() pelo detalhe-liga-orquestrador.js.
  * API: /api/admin/escalacao-ia/*
+ *
+ * v2.0: Salvar/Refresh separados, auto-load, badge disponibilidade real
  */
 
 (function () {
@@ -18,9 +20,50 @@
     // =====================================================================
 
     async function inicializar() {
-        console.log('[ESCALACAO-IA] Inicializando módulo...');
+        console.log('[ESCALACAO-IA] Inicializando módulo v2.0...');
         configurarTabs();
         await carregarStatusFontes();
+        await tentarAutoLoad();
+    }
+
+    // =====================================================================
+    // AUTO-LOAD: Carregar escalação salva ao abrir
+    // =====================================================================
+
+    async function tentarAutoLoad() {
+        try {
+            const resp = await fetch(`${API_BASE}/salva`);
+            if (!resp.ok) return;
+
+            const data = await resp.json();
+            if (!data.success || !data.encontrada) return;
+
+            const dados = data.dados;
+            dadosCompletos = dados;
+
+            const modoSugerido = dados.modoSugerido?.modo || 'equilibrado';
+            selecionarTab(modoSugerido);
+
+            const cenario = dados.cenarios.find(c => c.modo === modoSugerido) || dados.cenarios[0];
+            renderizarCenario(cenario);
+            renderizarFontesAtivas(dados.fontesAtivas);
+            renderizarFooter(dados);
+            renderizarBadgeSalvo(dados.salvoEm);
+
+            esconderElemento('eia-empty');
+            mostrarElemento('eia-resultado');
+            mostrarBtnSalvar(true);
+
+            // Atualizar inputs com valores salvos
+            const elPatrimonio = document.getElementById('eia-patrimonio');
+            const elEsquema = document.getElementById('eia-esquema');
+            if (elPatrimonio && dados.patrimonio) elPatrimonio.value = dados.patrimonio;
+            if (elEsquema && dados.esquemaId) elEsquema.value = dados.esquemaId;
+
+            console.log(`[ESCALACAO-IA] Auto-load: escalacao salva da rodada ${dados.rodada} (${dados.salvoEm})`);
+        } catch (error) {
+            console.warn('[ESCALACAO-IA] Auto-load falhou (normal se nenhuma salva):', error.message);
+        }
     }
 
     // =====================================================================
@@ -126,6 +169,7 @@
             renderizarFooter(data);
 
             mostrarElemento('eia-resultado');
+            mostrarBtnSalvar(true);
         } catch (error) {
             console.error('[ESCALACAO-IA] Erro ao gerar:', error);
             mostrarErro(error.message);
@@ -135,10 +179,19 @@
     }
 
     // =====================================================================
-    // REFRESH
+    // REFRESH (Atualizar Dados)
     // =====================================================================
 
     async function refresh() {
+        // Confirmação antes de limpar cache
+        const confirmar = confirm(
+            'Atualizar Dados\n\n'
+            + 'Isso vai limpar o cache e buscar dados novos de todas as fontes '
+            + '(API Cartola, GatoMestre, Perplexity, etc).\n\n'
+            + 'Pode levar alguns segundos. Continuar?'
+        );
+        if (!confirmar) return;
+
         const patrimonio = document.getElementById('eia-patrimonio')?.value || 100;
         const esquemaId = document.getElementById('eia-esquema')?.value || 3;
 
@@ -167,11 +220,47 @@
             renderizarFooter(data);
 
             mostrarElemento('eia-resultado');
+            mostrarBtnSalvar(true);
         } catch (error) {
             console.error('[ESCALACAO-IA] Erro ao refresh:', error);
             mostrarErro(error.message);
         } finally {
             mostrarLoading(false);
+        }
+    }
+
+    // =====================================================================
+    // SALVAR ESCALAÇÃO
+    // =====================================================================
+
+    async function salvar() {
+        if (!dadosCompletos) {
+            mostrarToast('Nenhuma escalação para salvar. Gere uma análise primeiro.', 'warning');
+            return;
+        }
+
+        const btnSalvar = document.getElementById('eia-btn-salvar');
+        if (btnSalvar) btnSalvar.disabled = true;
+
+        try {
+            const resp = await fetch(`${API_BASE}/salvar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dadosCompletos),
+            });
+
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+            const data = await resp.json();
+            if (!data.success) throw new Error(data.message || 'Erro ao salvar');
+
+            mostrarToast('Escalação salva com sucesso!', 'success');
+            renderizarBadgeSalvo(data.salvoEm);
+        } catch (error) {
+            console.error('[ESCALACAO-IA] Erro ao salvar:', error);
+            mostrarToast(`Erro ao salvar: ${error.message}`, 'error');
+        } finally {
+            if (btnSalvar) btnSalvar.disabled = false;
         }
     }
 
@@ -220,6 +309,9 @@
                 ? `vs ${jogador.fontes.confrontos.adversarioNome}${jogador.fontes?.confrontos?.mandante ? ' (casa)' : ' (fora)'}`
                 : '';
 
+            // Badge de disponibilidade real
+            const disponibilidadeBadge = renderizarBadgeDisponibilidade(jogador);
+
             return `
                 <div class="eia-jogador-card ${isCapitao ? 'eia-jogador-card--capitao' : ''}">
                     <div class="eia-jogador-top">
@@ -228,7 +320,7 @@
                              alt="${jogador.nome}"
                              onerror="this.src='/img/avatar-default.png'">
                         <div class="eia-jogador-info">
-                            <div class="eia-jogador-nome">${jogador.nome}</div>
+                            <div class="eia-jogador-nome">${jogador.nome}${disponibilidadeBadge}</div>
                             <div class="eia-jogador-meta">
                                 <span>${jogador.clubeAbrev}</span>
                                 <span>${adversarioInfo}</span>
@@ -264,6 +356,46 @@
         }).join('');
     }
 
+    // =====================================================================
+    // BADGE DE DISPONIBILIDADE REAL
+    // =====================================================================
+
+    function renderizarBadgeDisponibilidade(jogador) {
+        const disponibilidade = jogador.disponibilidadeReal;
+        if (!disponibilidade || !disponibilidade.status) return '';
+
+        const configs = {
+            confirmado: {
+                icon: 'check_circle',
+                label: 'Confirmado',
+                cls: 'eia-disp-badge--confirmado',
+            },
+            duvida: {
+                icon: 'help',
+                label: 'Dúvida',
+                cls: 'eia-disp-badge--duvida',
+            },
+            descartado: {
+                icon: 'cancel',
+                label: 'Fora',
+                cls: 'eia-disp-badge--descartado',
+            },
+            poupado: {
+                icon: 'airline_seat_recline_normal',
+                label: 'Poupado',
+                cls: 'eia-disp-badge--poupado',
+            },
+        };
+
+        const config = configs[disponibilidade.status];
+        if (!config) return '';
+
+        const tooltip = disponibilidade.motivo || config.label;
+        return ` <span class="eia-disp-badge ${config.cls}" title="${tooltip}">
+            <span class="material-icons">${config.icon}</span>${config.label}
+        </span>`;
+    }
+
     function renderizarFontesAtivas(fontes) {
         // Atualizar badges com fontes que realmente retornaram dados
         const container = document.getElementById('eia-fontes-status');
@@ -294,6 +426,24 @@
         const tempo = data.tempoAgregacaoMs ? `${(data.tempoAgregacaoMs / 1000).toFixed(1)}s` : 'N/D';
         footer.textContent = `Rodada ${data.rodada || '?'} | ${data.totalAtletasAnalisados || 0} atletas analisados | `
             + `${data.fontesAtivas?.length || 0} fontes ativas | Tempo: ${tempo} | ${data.geradoEm ? new Date(data.geradoEm).toLocaleString('pt-BR') : ''}`;
+    }
+
+    function renderizarBadgeSalvo(salvoEm) {
+        // Remover badge anterior
+        const anterior = document.getElementById('eia-badge-salvo');
+        if (anterior) anterior.remove();
+
+        if (!salvoEm) return;
+
+        const footer = document.getElementById('eia-footer-info');
+        if (!footer) return;
+
+        const dataFormatada = new Date(salvoEm).toLocaleString('pt-BR');
+        const badge = document.createElement('div');
+        badge.id = 'eia-badge-salvo';
+        badge.className = 'eia-badge-salvo';
+        badge.innerHTML = `<span class="material-icons">cloud_done</span> Salvo em ${dataFormatada}`;
+        footer.parentElement.insertBefore(badge, footer);
     }
 
     // =====================================================================
@@ -334,6 +484,48 @@
     }
 
     // =====================================================================
+    // TOAST NOTIFICATION
+    // =====================================================================
+
+    function mostrarToast(mensagem, tipo = 'info') {
+        // Remover toast anterior
+        const anterior = document.querySelector('.eia-toast');
+        if (anterior) anterior.remove();
+
+        const cores = {
+            success: 'var(--color-success)',
+            error: 'var(--color-danger)',
+            warning: 'var(--color-warning)',
+            info: 'var(--color-info)',
+        };
+
+        const icons = {
+            success: 'check_circle',
+            error: 'error',
+            warning: 'warning',
+            info: 'info',
+        };
+
+        const toast = document.createElement('div');
+        toast.className = 'eia-toast';
+        toast.style.cssText = `
+            position: fixed; bottom: 24px; right: 24px; z-index: var(--z-toast, 700);
+            background: var(--surface-card-elevated, #2a2a2a);
+            border: 1px solid ${cores[tipo] || cores.info};
+            border-radius: 10px; padding: 12px 20px;
+            display: flex; align-items: center; gap: 8px;
+            font-family: 'Inter', sans-serif; font-size: 13px;
+            color: var(--text-primary, #fff);
+            box-shadow: var(--shadow-lg);
+            animation: admin-fade-in-up 0.3s ease-out;
+        `;
+        toast.innerHTML = `<span class="material-icons" style="color: ${cores[tipo]}; font-size: 20px;">${icons[tipo]}</span>${mensagem}`;
+
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+    }
+
+    // =====================================================================
     // HELPERS UI
     // =====================================================================
 
@@ -350,6 +542,12 @@
 
         const btn = document.getElementById('eia-btn-gerar');
         if (btn) btn.disabled = show;
+
+        const btnRefresh = document.getElementById('eia-btn-refresh');
+        if (btnRefresh) btnRefresh.disabled = show;
+
+        const btnSalvar = document.getElementById('eia-btn-salvar');
+        if (btnSalvar) btnSalvar.disabled = show;
     }
 
     function atualizarLoadingStep(texto) {
@@ -365,6 +563,11 @@
     function esconderElemento(id) {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
+    }
+
+    function mostrarBtnSalvar(show) {
+        const btn = document.getElementById('eia-btn-salvar');
+        if (btn) btn.style.display = show ? 'flex' : 'none';
     }
 
     function mostrarErro(mensagem) {
@@ -390,6 +593,7 @@
         inicializar,
         gerar,
         refresh,
+        salvar,
     };
 
     window.inicializarEscalacaoIA = inicializar;

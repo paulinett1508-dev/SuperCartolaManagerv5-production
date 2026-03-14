@@ -11,6 +11,7 @@
  *   POST /api/admin/escalacao-ia/refresh  - Forcar re-analise (limpa cache)
  */
 
+import mongoose from 'mongoose';
 import dataAggregator from '../../services/escalacaoIA/dataAggregator.js';
 import lineupOptimizer from '../../services/escalacaoIA/lineupOptimizer.js';
 import aiSynthesizer from '../../services/escalacaoIA/aiSynthesizer.js';
@@ -258,10 +259,131 @@ async function preComputar(patrimonioDefault = 100) {
     }
 }
 
+// =====================================================================
+// SALVAR ESCALACAO GERADA
+// =====================================================================
+async function salvarEscalacao(req, res) {
+    try {
+        const { cenarios, modoSugerido, fontesAtivas, rodada, patrimonio, esquemaId, totalAtletasAnalisados, tempoAgregacaoMs, geradoEm } = req.body;
+
+        if (!cenarios || !Array.isArray(cenarios) || cenarios.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Dados de escalacao invalidos (cenarios ausentes)',
+            });
+        }
+
+        if (!rodada) {
+            return res.status(400).json({
+                success: false,
+                message: 'Rodada nao informada',
+            });
+        }
+
+        const db = mongoose.connection.db;
+        if (!db) {
+            return res.status(500).json({
+                success: false,
+                message: 'Conexao com banco indisponivel',
+            });
+        }
+
+        const documento = {
+            rodada: parseInt(rodada),
+            patrimonio: parseFloat(patrimonio) || 100,
+            esquemaId: parseInt(esquemaId) || 3,
+            cenarios,
+            modoSugerido,
+            fontesAtivas,
+            totalAtletasAnalisados,
+            tempoAgregacaoMs,
+            geradoEm,
+            salvoPor: req.session.admin?.email || req.session.admin?.nome || 'admin',
+            salvoEm: new Date().toISOString(),
+        };
+
+        await db.collection('escalacao_ia_salvas').updateOne(
+            { rodada: documento.rodada },
+            { $set: documento },
+            { upsert: true }
+        );
+
+        console.log(`${LOG_PREFIX} Escalacao salva: rodada ${documento.rodada} por ${documento.salvoPor}`);
+
+        return res.json({
+            success: true,
+            message: 'Escalacao salva com sucesso',
+            rodada: documento.rodada,
+            salvoEm: documento.salvoEm,
+        });
+    } catch (error) {
+        console.error(`${LOG_PREFIX} Erro ao salvar escalacao:`, error);
+        return res.status(500).json({
+            success: false,
+            message: 'Erro ao salvar escalacao',
+            error: error.message,
+        });
+    }
+}
+
+// =====================================================================
+// BUSCAR ESCALACAO SALVA
+// =====================================================================
+async function buscarSalva(req, res) {
+    try {
+        const rodada = parseInt(req.query.rodada) || null;
+
+        const db = mongoose.connection.db;
+        if (!db) {
+            return res.json({ success: true, encontrada: false });
+        }
+
+        const filtro = rodada ? { rodada } : {};
+        const escalacao = await db.collection('escalacao_ia_salvas').findOne(
+            filtro,
+            { sort: { salvoEm: -1 } }
+        );
+
+        if (!escalacao) {
+            return res.json({
+                success: true,
+                encontrada: false,
+                message: 'Nenhuma escalacao salva encontrada',
+            });
+        }
+
+        return res.json({
+            success: true,
+            encontrada: true,
+            dados: {
+                cenarios: escalacao.cenarios,
+                modoSugerido: escalacao.modoSugerido,
+                fontesAtivas: escalacao.fontesAtivas,
+                rodada: escalacao.rodada,
+                patrimonio: escalacao.patrimonio,
+                esquemaId: escalacao.esquemaId,
+                totalAtletasAnalisados: escalacao.totalAtletasAnalisados,
+                tempoAgregacaoMs: escalacao.tempoAgregacaoMs,
+                geradoEm: escalacao.geradoEm,
+                salvoEm: escalacao.salvoEm,
+                salvoPor: escalacao.salvoPor,
+            },
+        });
+    } catch (error) {
+        console.error(`${LOG_PREFIX} Erro ao buscar escalacao salva:`, error);
+        return res.status(500).json({
+            success: false,
+            message: 'Erro ao buscar escalacao salva',
+        });
+    }
+}
+
 export default {
     gerarAnalise,
     buscarCached,
     statusFontes,
     refresh,
     preComputar,
+    salvarEscalacao,
+    buscarSalva,
 };

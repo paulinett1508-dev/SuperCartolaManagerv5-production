@@ -51,7 +51,11 @@
                     <span class="material-icons">auto_awesome</span>
                     Gerar Análise
                 </button>
-                <button id="eia-btn-refresh" class="eia-btn eia-btn-secondary" onclick="window.EscalacaoIA?.refresh()">
+                <button id="eia-btn-salvar" class="eia-btn eia-btn-success" onclick="window.EscalacaoIA?.salvar()" style="display:none;" title="Salvar escalação gerada">
+                    <span class="material-icons">save</span>
+                    Salvar
+                </button>
+                <button id="eia-btn-refresh" class="eia-btn eia-btn-secondary" onclick="window.EscalacaoIA?.refresh()" title="Limpar cache e buscar dados novos de todas as fontes">
                     <span class="material-icons">refresh</span>
                 </button>
             </div>
