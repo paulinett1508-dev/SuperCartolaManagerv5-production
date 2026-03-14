@@ -1,8 +1,10 @@
 /**
- * ESCALAÇÃO IA - Admin Module CSS v1.0
+ * ESCALAÇÃO IA - Admin Module CSS v2.0
  * Dark mode estrito. Tokens de _admin-tokens.css.
  * Fontes: Russo One (titulos), Inter (corpo), JetBrains Mono (numeros).
  * Material Icons. Sem cores hardcoded.
+ *
+ * v2.0: Redesign visual + Banco de Reservas + Reserva de Luxo
  */
 
 /* =============================================
@@ -15,7 +17,32 @@
 }
 
 /* =============================================
-   HEADER
+   HEADER DA PÁGINA
+   ============================================= */
+.eia-page-header h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.eia-badge-ia {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: var(--color-primary-muted);
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary-border);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    animation: admin-pulse 2.5s ease-in-out infinite;
+    vertical-align: middle;
+}
+
+/* =============================================
+   HEADER (controles superiores)
    ============================================= */
 .eia-header {
     display: flex;
@@ -41,7 +68,7 @@
     border-radius: 8px;
     display: flex;
     align-items: center;
-    transition: background 0.2s;
+    transition: background var(--transition-fast);
 }
 
 .eia-header .back-button:hover {
@@ -76,6 +103,9 @@
     letter-spacing: 1px;
 }
 
+/* =============================================
+   FONTE BADGES
+   ============================================= */
 .eia-fontes-badges {
     display: flex;
     gap: 6px;
@@ -116,9 +146,9 @@
     gap: 12px;
     align-items: flex-end;
     margin-bottom: 16px;
-    padding: 16px;
+    padding: 16px 20px;
     background: var(--surface-card);
-    border-radius: 12px;
+    border-radius: 14px;
     border: 1px solid var(--border-default, rgba(255,255,255,0.08));
     flex-wrap: wrap;
 }
@@ -148,13 +178,14 @@
     border-radius: 8px;
     color: var(--text-primary, #fff);
     outline: none;
-    transition: border-color 0.2s;
+    transition: border-color var(--transition-fast);
     min-width: 100px;
 }
 
 .eia-input:focus,
 .eia-select:focus {
     border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-muted);
 }
 
 .eia-botoes {
@@ -168,14 +199,15 @@
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     font-weight: 600;
-    padding: 8px 16px;
-    border-radius: 8px;
+    padding: 9px 18px;
+    border-radius: 9px;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 6px;
     border: none;
-    transition: all 0.2s;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
 }
 
 .eia-btn .material-icons {
@@ -185,17 +217,20 @@
 .eia-btn-primary {
     background: var(--gradient-primary);
     color: #fff;
+    box-shadow: 0 2px 8px var(--color-primary-muted);
 }
 
 .eia-btn-primary:hover {
     background: var(--gradient-primary-hover);
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--color-primary-muted);
 }
 
 .eia-btn-primary:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
 }
 
 .eia-btn-secondary {
@@ -206,11 +241,13 @@
 
 .eia-btn-secondary:hover {
     background: var(--surface-card-hover, #333);
+    border-color: var(--border-strong, rgba(255,255,255,0.2));
 }
 
 .eia-btn-success {
     background: var(--color-success);
     color: #fff;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
 }
 
 .eia-btn-success:hover {
@@ -232,7 +269,7 @@
     gap: 4px;
     margin-bottom: 16px;
     background: var(--surface-card);
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 4px;
     border: 1px solid var(--border-default, rgba(255,255,255,0.08));
 }
@@ -240,28 +277,44 @@
 .eia-tab {
     flex: 1;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 2px;
     padding: 10px 16px;
     border: none;
-    border-radius: 8px;
+    border-radius: 9px;
     background: transparent;
     color: var(--text-muted, rgba(255,255,255,0.5));
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all var(--transition-fast);
+    line-height: 1.2;
 }
 
 .eia-tab .material-icons {
-    font-size: 18px;
+    font-size: 20px;
+}
+
+.eia-tab .eia-tab-desc {
+    font-size: 10px;
+    font-weight: 400;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: all var(--transition-fast);
 }
 
 .eia-tab:hover {
     color: var(--text-secondary, rgba(255,255,255,0.7));
     background: var(--surface-white-10);
+}
+
+.eia-tab.active .eia-tab-desc {
+    opacity: 0.8;
+    max-height: 20px;
 }
 
 .eia-tab.active {
@@ -270,18 +323,21 @@
 }
 
 .eia-tab[data-modo="mitar"].active {
-    background: rgba(239, 68, 68, 0.1);
+    background: rgba(239, 68, 68, 0.12);
     color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
 .eia-tab[data-modo="equilibrado"].active {
-    background: rgba(245, 158, 11, 0.1);
+    background: rgba(245, 158, 11, 0.12);
     color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.2);
 }
 
 .eia-tab[data-modo="valorizar"].active {
-    background: rgba(34, 197, 94, 0.1);
+    background: rgba(34, 197, 94, 0.12);
     color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.2);
 }
 
 /* =============================================
@@ -293,24 +349,21 @@
 }
 
 .eia-loading .spinner {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border: 3px solid var(--surface-white-10);
     border-top-color: var(--color-primary);
     border-radius: 50%;
-    animation: eia-spin 0.8s linear infinite;
-    margin: 0 auto 16px;
-}
-
-@keyframes eia-spin {
-    to { transform: rotate(360deg); }
+    animation: admin-spin 0.8s linear infinite;
+    margin: 0 auto 20px;
 }
 
 .eia-loading-text {
     font-family: 'Inter', sans-serif;
-    font-size: 14px;
+    font-size: 15px;
+    font-weight: 600;
     color: var(--text-primary, #fff);
-    margin: 0 0 4px;
+    margin: 0 0 6px;
 }
 
 .eia-loading-sub {
@@ -318,30 +371,45 @@
     font-size: 12px;
     color: var(--text-muted, rgba(255,255,255,0.4));
     margin: 0;
+    animation: admin-pulse 2s ease-in-out infinite;
 }
 
 /* =============================================
-   RESUMO
+   RESUMO / STATS
    ============================================= */
 .eia-resumo {
     background: var(--surface-card);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 16px;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 20px;
     border: 1px solid var(--border-default, rgba(255,255,255,0.08));
+    position: relative;
+    overflow: hidden;
+}
+
+.eia-resumo::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--gradient-primary);
+    opacity: 0.5;
 }
 
 .eia-resumo-stats {
     display: flex;
-    gap: 16px;
+    gap: 24px;
     flex-wrap: wrap;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
+    align-items: flex-end;
 }
 
 .eia-stat {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 3px;
 }
 
 .eia-stat-label {
@@ -350,28 +418,68 @@
     font-weight: 600;
     color: var(--text-muted, rgba(255,255,255,0.4));
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .eia-stat-value {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
     color: var(--text-primary, #fff);
+    line-height: 1;
 }
 
 .eia-stat-destaque .eia-stat-value {
     color: var(--color-primary);
-    font-size: 18px;
+    font-size: 20px;
 }
 
 .eia-resumo-texto {
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     color: var(--text-secondary, rgba(255,255,255,0.7));
-    line-height: 1.5;
-    padding-top: 12px;
+    line-height: 1.6;
+    padding-top: 14px;
     border-top: 1px solid var(--border-default, rgba(255,255,255,0.08));
+}
+
+/* =============================================
+   SEÇÃO TÍTULO (titulares / reservas)
+   ============================================= */
+.eia-secao-titulo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Russo One', sans-serif;
+    font-size: 13px;
+    color: var(--text-secondary, rgba(255,255,255,0.6));
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-default, rgba(255,255,255,0.07));
+}
+
+.eia-secao-titulo .material-icons {
+    font-size: 18px;
+    color: var(--color-primary);
+}
+
+.eia-secao-titulo--reservas .material-icons {
+    color: var(--module-luva-primary, #f59e0b);
+}
+
+.eia-secao-sub {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--text-muted, rgba(255,255,255,0.35));
+    text-transform: none;
+    letter-spacing: 0;
+    margin-left: 4px;
 }
 
 /* =============================================
@@ -381,34 +489,36 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 10px;
-    margin-bottom: 16px;
+    margin-bottom: 28px;
 }
 
 .eia-jogador-card {
     background: var(--surface-card);
-    border-radius: 10px;
-    padding: 12px;
+    border-radius: 12px;
+    padding: 14px;
     border: 1px solid var(--border-default, rgba(255,255,255,0.08));
-    transition: border-color 0.2s;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
     position: relative;
+    overflow: hidden;
 }
 
 .eia-jogador-card:hover {
     border-color: var(--color-primary-border);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
 }
 
 .eia-jogador-card--capitao {
     border-color: rgba(245, 158, 11, 0.4);
-    background: linear-gradient(135deg, var(--surface-card) 0%, rgba(245, 158, 11, 0.05) 100%);
+    background: linear-gradient(135deg, var(--surface-card) 0%, rgba(245, 158, 11, 0.06) 100%);
 }
 
 .eia-jogador-card--capitao::after {
     content: 'C';
     position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 20px;
-    height: 20px;
+    top: 10px;
+    right: 10px;
+    width: 22px;
+    height: 22px;
     background: #f59e0b;
     color: #000;
     border-radius: 50%;
@@ -419,19 +529,48 @@
     justify-content: center;
 }
 
+.eia-jogador-card--reserva {
+    border-color: rgba(99, 102, 241, 0.2);
+    background: linear-gradient(135deg, var(--surface-card) 0%, rgba(99, 102, 241, 0.04) 100%);
+    opacity: 0.9;
+}
+
+.eia-reserva-tag {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(99, 102, 241, 0.15);
+    color: rgba(99, 102, 241, 0.9);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
 .eia-jogador-top {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 .eia-jogador-foto {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
     object-fit: cover;
     background: var(--surface-card-elevated, #2a2a2a);
+    flex-shrink: 0;
+}
+
+.eia-jogador-foto--lg {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
 }
 
 .eia-jogador-info {
@@ -447,43 +586,63 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
 }
 
 .eia-jogador-meta {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
-    color: var(--text-muted, rgba(255,255,255,0.5));
+    color: var(--text-muted, rgba(255,255,255,0.45));
     display: flex;
     gap: 8px;
+    flex-wrap: wrap;
 }
 
 .eia-jogador-posicao {
     font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
     font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 4px;
+    padding: 3px 7px;
+    border-radius: 5px;
     background: var(--surface-white-10);
     color: var(--text-secondary, rgba(255,255,255,0.7));
+    flex-shrink: 0;
+    align-self: flex-start;
+}
+
+.eia-jogador-posicao--luxo {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 .eia-jogador-scores {
     display: flex;
-    gap: 8px;
-    margin-bottom: 6px;
+    gap: 6px;
+    margin-bottom: 8px;
+    padding: 8px;
+    background: var(--surface-card-elevated, rgba(255,255,255,0.03));
+    border-radius: 8px;
 }
 
 .eia-jogador-score {
     display: flex;
     flex-direction: column;
     align-items: center;
+    flex: 1;
 }
 
 .eia-jogador-score-label {
     font-family: 'Inter', sans-serif;
     font-size: 9px;
-    color: var(--text-muted, rgba(255,255,255,0.4));
+    color: var(--text-muted, rgba(255,255,255,0.35));
     text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 2px;
 }
 
 .eia-jogador-score-value {
@@ -501,26 +660,121 @@
     color: var(--color-primary);
 }
 
+.eia-jogador-score-value--luxo {
+    color: #f59e0b;
+}
+
 .eia-jogador-confianca {
     width: 100%;
-    height: 3px;
+    height: 4px;
     background: var(--surface-white-10);
     border-radius: 2px;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
     overflow: hidden;
 }
 
 .eia-jogador-confianca-bar {
     height: 100%;
     border-radius: 2px;
-    transition: width 0.5s ease;
+    transition: width 0.6s ease;
+}
+
+.eia-jogador-confianca-bar--luxo {
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
 }
 
 .eia-jogador-justificativa {
     font-family: 'Inter', sans-serif;
     font-size: 11px;
-    color: var(--text-muted, rgba(255,255,255,0.5));
-    line-height: 1.4;
+    color: var(--text-muted, rgba(255,255,255,0.45));
+    line-height: 1.5;
+    padding-top: 6px;
+    border-top: 1px solid var(--border-default, rgba(255,255,255,0.06));
+}
+
+/* =============================================
+   BANCO DE RESERVAS
+   ============================================= */
+.eia-reservas {
+    margin-top: 8px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-default, rgba(255,255,255,0.07));
+}
+
+/* Card Reserva de Luxo */
+.eia-reserva-luxo-card {
+    background: linear-gradient(135deg,
+        var(--surface-card) 0%,
+        rgba(245, 158, 11, 0.07) 50%,
+        rgba(251, 191, 36, 0.04) 100%
+    );
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 24px rgba(245, 158, 11, 0.06);
+}
+
+.eia-reserva-luxo-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #f59e0b, transparent);
+}
+
+.eia-reserva-luxo-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.eia-reserva-luxo-icon {
+    font-size: 22px !important;
+    color: #f59e0b;
+}
+
+.eia-reserva-luxo-titulo {
+    font-family: 'Russo One', sans-serif;
+    font-size: 14px;
+    color: #f59e0b;
+    letter-spacing: 0.5px;
+}
+
+.eia-reserva-luxo-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-left: auto;
+}
+
+/* Grid do banco */
+.eia-banca-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px;
+}
+
+.eia-reservas-empty {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: var(--text-muted, rgba(255,255,255,0.35));
+    text-align: center;
+    padding: 20px;
+    border: 1px dashed var(--border-default, rgba(255,255,255,0.1));
+    border-radius: 10px;
 }
 
 /* =============================================
@@ -528,15 +782,16 @@
    ============================================= */
 .eia-empty {
     text-align: center;
-    padding: 60px 20px;
+    padding: 64px 20px;
     color: var(--text-muted, rgba(255,255,255,0.4));
 }
 
 .eia-empty-icon {
-    font-size: 48px;
+    font-size: 52px;
     color: var(--color-primary-muted);
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     display: block;
+    animation: admin-pulse 3s ease-in-out infinite;
 }
 
 .eia-empty p {
@@ -548,7 +803,7 @@
 
 .eia-empty-sub {
     font-size: 12px;
-    color: var(--text-muted, rgba(255,255,255,0.4));
+    color: var(--text-muted, rgba(255,255,255,0.35));
 }
 
 /* =============================================
@@ -559,7 +814,9 @@
     font-size: 11px;
     color: var(--text-muted, rgba(255,255,255,0.3));
     text-align: center;
-    padding: 12px;
+    padding: 16px 12px 8px;
+    border-top: 1px solid var(--border-default, rgba(255,255,255,0.06));
+    margin-top: 20px;
 }
 
 /* =============================================
@@ -578,6 +835,7 @@
     vertical-align: middle;
     text-transform: uppercase;
     letter-spacing: 0.3px;
+    flex-shrink: 0;
 }
 
 .eia-disp-badge .material-icons {
@@ -625,6 +883,16 @@
 }
 
 /* =============================================
+   STAT — ANTI-CONFRONTO
+   ============================================= */
+.eia-stat--anti-confronto {
+    padding: 4px 10px;
+    background: rgba(245, 158, 11, 0.07);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: 8px;
+}
+
+/* =============================================
    RESPONSIVE
    ============================================= */
 @media (max-width: 768px) {
@@ -638,16 +906,27 @@
         justify-content: center;
     }
 
-    .eia-escalacao {
+    .eia-escalacao,
+    .eia-banca-grid {
         grid-template-columns: 1fr;
     }
 
     .eia-resumo-stats {
         justify-content: space-between;
+        gap: 16px;
     }
 
     .eia-header {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .eia-tabs {
+        flex-direction: row;
+    }
+
+    .eia-tab {
+        padding: 8px 10px;
+        font-size: 12px;
     }
 }

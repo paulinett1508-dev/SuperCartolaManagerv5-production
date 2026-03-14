@@ -289,6 +289,9 @@
 
         // Escalação (cards)
         renderizarEscalacao(cenario.escalacao, cenario.justificativas);
+
+        // Banco de reservas
+        renderizarReservas(cenario.reservas, cenario.justificativas);
     }
 
     function renderizarEscalacao(escalacao, justificativas) {
@@ -354,6 +357,146 @@
                 </div>
             `;
         }).join('');
+    }
+
+    // =====================================================================
+    // BANCO DE RESERVAS
+    // =====================================================================
+
+    function renderizarReservas(reservas, justificativas) {
+        const container = document.getElementById('eia-reservas');
+        if (!container) return;
+
+        if (!reservas || (!reservas.reservaLuxo && (!reservas.reservasBanca || reservas.reservasBanca.length === 0))) {
+            container.style.display = 'none';
+            return;
+        }
+
+        container.style.display = 'block';
+
+        // Reserva de Luxo
+        const luxoContainer = document.getElementById('eia-reserva-luxo-container');
+        if (luxoContainer) {
+            if (reservas.reservaLuxo) {
+                luxoContainer.innerHTML = renderizarCardReservaLuxo(reservas.reservaLuxo, justificativas);
+            } else {
+                luxoContainer.innerHTML = '';
+            }
+        }
+
+        // Banco
+        const bancaGrid = document.getElementById('eia-banca-grid');
+        if (bancaGrid) {
+            if (reservas.reservasBanca && reservas.reservasBanca.length > 0) {
+                bancaGrid.innerHTML = reservas.reservasBanca.map(j =>
+                    renderizarCardReservaBanca(j, justificativas)
+                ).join('');
+            } else {
+                bancaGrid.innerHTML = `<p class="eia-reservas-empty">Sem reservas adicionais dentro do orçamento disponível.</p>`;
+            }
+        }
+    }
+
+    function renderizarCardReservaLuxo(jogador, justificativas) {
+        const justificativa = justificativas?.[jogador.atletaId] || '';
+        const confianca = jogador.confianca || 0;
+        const adversarioInfo = jogador.fontes?.confrontos?.adversarioNome
+            ? `vs ${jogador.fontes.confrontos.adversarioNome}${jogador.fontes?.confrontos?.mandante ? ' (casa)' : ' (fora)'}`
+            : '';
+        const disponibilidadeBadge = renderizarBadgeDisponibilidade(jogador);
+
+        return `
+            <div class="eia-reserva-luxo-card">
+                <div class="eia-reserva-luxo-header">
+                    <span class="material-icons eia-reserva-luxo-icon">workspace_premium</span>
+                    <span class="eia-reserva-luxo-titulo">Reserva de Luxo</span>
+                    <span class="eia-reserva-luxo-badge">MELHOR FORA DO 11</span>
+                </div>
+                <div class="eia-jogador-top">
+                    <img class="eia-jogador-foto eia-jogador-foto--lg"
+                         src="${jogador.foto || '/img/avatar-default.png'}"
+                         alt="${jogador.nome}"
+                         onerror="this.src='/img/avatar-default.png'">
+                    <div class="eia-jogador-info">
+                        <div class="eia-jogador-nome">${jogador.nome}${disponibilidadeBadge}</div>
+                        <div class="eia-jogador-meta">
+                            <span>${jogador.clubeAbrev || ''}</span>
+                            ${adversarioInfo ? `<span>${adversarioInfo}</span>` : ''}
+                        </div>
+                    </div>
+                    <span class="eia-jogador-posicao eia-jogador-posicao--luxo">${jogador.posicaoAbrev || ''}</span>
+                </div>
+                <div class="eia-jogador-scores">
+                    <div class="eia-jogador-score">
+                        <span class="eia-jogador-score-label">Preço</span>
+                        <span class="eia-jogador-score-value eia-jogador-score-value--preco">C$ ${jogador.preco.toFixed(2)}</span>
+                    </div>
+                    <div class="eia-jogador-score">
+                        <span class="eia-jogador-score-label">Média</span>
+                        <span class="eia-jogador-score-value">${jogador.media.toFixed(1)}</span>
+                    </div>
+                    <div class="eia-jogador-score">
+                        <span class="eia-jogador-score-label">Score IA</span>
+                        <span class="eia-jogador-score-value eia-jogador-score-value--luxo">${jogador.scoreFinal.toFixed(1)}</span>
+                    </div>
+                    <div class="eia-jogador-score">
+                        <span class="eia-jogador-score-label">Confiança</span>
+                        <span class="eia-jogador-score-value">${confianca}%</span>
+                    </div>
+                </div>
+                <div class="eia-jogador-confianca">
+                    <div class="eia-jogador-confianca-bar eia-jogador-confianca-bar--luxo"
+                         style="width: ${confianca}%;"></div>
+                </div>
+                ${justificativa ? `<div class="eia-jogador-justificativa">${justificativa}</div>` : ''}
+            </div>
+        `;
+    }
+
+    function renderizarCardReservaBanca(jogador, justificativas) {
+        const justificativa = justificativas?.[jogador.atletaId] || '';
+        const confianca = jogador.confianca || 0;
+        const corConfianca = confianca >= 70 ? 'var(--color-success)' :
+            confianca >= 40 ? 'var(--color-warning, #f59e0b)' : 'var(--color-danger)';
+        const disponibilidadeBadge = renderizarBadgeDisponibilidade(jogador);
+
+        return `
+            <div class="eia-jogador-card eia-jogador-card--reserva">
+                <div class="eia-reserva-tag">RESERVA</div>
+                <div class="eia-jogador-top">
+                    <img class="eia-jogador-foto"
+                         src="${jogador.foto || '/img/avatar-default.png'}"
+                         alt="${jogador.nome}"
+                         onerror="this.src='/img/avatar-default.png'">
+                    <div class="eia-jogador-info">
+                        <div class="eia-jogador-nome">${jogador.nome}${disponibilidadeBadge}</div>
+                        <div class="eia-jogador-meta">
+                            <span>${jogador.clubeAbrev || ''}</span>
+                        </div>
+                    </div>
+                    <span class="eia-jogador-posicao">${jogador.posicaoAbrev || ''}</span>
+                </div>
+                <div class="eia-jogador-scores">
+                    <div class="eia-jogador-score">
+                        <span class="eia-jogador-score-label">Preço</span>
+                        <span class="eia-jogador-score-value eia-jogador-score-value--preco">C$ ${jogador.preco.toFixed(2)}</span>
+                    </div>
+                    <div class="eia-jogador-score">
+                        <span class="eia-jogador-score-label">Média</span>
+                        <span class="eia-jogador-score-value">${jogador.media.toFixed(1)}</span>
+                    </div>
+                    <div class="eia-jogador-score">
+                        <span class="eia-jogador-score-label">Score IA</span>
+                        <span class="eia-jogador-score-value eia-jogador-score-value--score">${jogador.scoreFinal.toFixed(1)}</span>
+                    </div>
+                </div>
+                <div class="eia-jogador-confianca">
+                    <div class="eia-jogador-confianca-bar"
+                         style="width: ${confianca}%; background: ${corConfianca};"></div>
+                </div>
+                ${justificativa ? `<div class="eia-jogador-justificativa">${justificativa}</div>` : ''}
+            </div>
+        `;
     }
 
     // =====================================================================
