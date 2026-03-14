@@ -1487,51 +1487,60 @@
                 const container = document.getElementById('healthComponentsContainer');
                 if (!container) return;
 
-                // ✅ C-EMOJI FIX: Material Icons — nunca emojis no código
+                const mg = data.components?.market_gate;
+                const ac = data.components?.api_cartola;
+                const aj = data.components?.api_jogos;
+                const db = data.components?.database;
+                const co = data.components?.consolidacao_automatica;
+                const si = data.components?.sistema;
+
                 const components = [
                     {
                         name: 'MarketGate',
                         icon: 'sports_score',
-                        status: data.components?.marketGate?.status || 'unknown',
+                        status: mg?.status || 'unknown',
                         details: [
-                            { label: 'Status', value: data.components?.marketGate?.status || '--' },
-                            { label: 'Última Consulta', value: data.components?.marketGate?.lastCheck || '--' }
+                            { label: 'Mercado', value: mg?.mercado_aberto ? 'Aberto' : 'Fechado' },
+                            { label: 'Rodada', value: mg?.rodada_atual ?? '--' },
+                            { label: 'Cache', value: mg?.stale ? 'Stale' : (mg?.cache?.ativo ? 'Ativo' : '--') }
                         ]
                     },
                     {
                         name: 'API Cartola FC',
                         icon: 'sports_soccer',
-                        status: data.components?.cartolaApi?.status || 'unknown',
+                        status: ac?.status || 'unknown',
                         details: [
-                            { label: 'Status', value: data.components?.cartolaApi?.status || '--' },
-                            { label: 'Rodada', value: data.components?.cartolaApi?.rodada_atual || '--' }
+                            { label: 'Latência', value: ac?.latency_ms ? `${ac.latency_ms}ms` : '--' },
+                            { label: 'HTTP', value: ac?.http_status ?? '--' }
                         ]
                     },
                     {
                         name: 'API Jogos',
                         icon: 'stadium',
-                        status: data.components?.jogosApi?.status || 'unknown',
+                        status: aj?.status || 'unknown',
                         details: [
-                            { label: 'Status', value: data.components?.jogosApi?.status || '--' },
-                            { label: 'Requests', value: data.components?.jogosApi?.requests || '--' }
+                            { label: 'Fonte', value: aj?.fonte_ativa || '--' },
+                            { label: 'Latência', value: aj?.latency_ms ? `${aj.latency_ms}ms` : '--' }
                         ]
                     },
                     {
                         name: 'Banco de Dados',
                         icon: 'storage',
-                        status: data.components?.database?.status || 'unknown',
+                        status: db?.connected ? 'online' : 'offline',
                         details: [
-                            { label: 'Status', value: data.components?.database?.status || '--' },
-                            { label: 'Collections', value: data.components?.database?.collections || '--' }
+                            { label: 'Ligas Ativas', value: db?.collections?.ligas_ativas ?? '--' },
+                            { label: 'Snapshots', value: db?.collections?.rodadas_consolidadas ?? '--' }
                         ]
                     },
                     {
                         name: 'Consolidação',
                         icon: 'settings',
-                        status: data.components?.consolidacao?.status || 'unknown',
+                        status: co?.status || 'unknown',
                         details: [
-                            { label: 'Última', value: data.components?.consolidacao?.lastRun || '--' },
-                            { label: 'Próxima', value: data.components?.consolidacao?.nextRun || '--' }
+                            { label: 'Snapshots', value: co?.total_snapshots ?? '--' },
+                            { label: 'Última', value: co?.ultimas_consolidacoes?.[0]?.timestamp
+                                ? new Date(co.ultimas_consolidacoes[0].timestamp).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+                                : '--' }
                         ]
                     },
                     {
@@ -1539,8 +1548,8 @@
                         icon: 'computer',
                         status: 'online',
                         details: [
-                            { label: 'Uptime', value: data.components?.system?.uptime || '--' },
-                            { label: 'Memória', value: data.components?.system?.memory || '--' }
+                            { label: 'Uptime', value: si?.uptime_formatted || '--' },
+                            { label: 'Memória', value: si?.memory_usage ? `${si.memory_usage.rss_mb}MB` : '--' }
                         ]
                     }
                 ];
