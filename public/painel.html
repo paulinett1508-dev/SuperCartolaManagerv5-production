@@ -102,21 +102,6 @@
                         </div>
 
 
-                        <div class="stat-card-new purple">
-                            <div class="stat-card-header">
-                                <div class="stat-card-content">
-                                    <p class="stat-label-new">Times Diferentes</p>
-                                    <h3 class="stat-number-new" id="clubesUnicos">0</h3>
-                                </div>
-                                <div class="stat-icon-new purple">
-                                    <span class="material-icons">category</span>
-                                </div>
-                            </div>
-                            <div class="stat-card-footer">
-                                Diversidade de clubes
-                            </div>
-                        </div>
-
                         <!-- Card Usuários Online - Clicável para abrir histórico -->
                         <div class="stat-card-new usuarios-online clicavel" id="cardUsuariosOnline" onclick="abrirModalHistoricoAcessos()" title="Clique para ver historico de acessos">
                             <div class="stat-card-header">
@@ -628,9 +613,6 @@
                     ligasData.filter(l => l.ativa !== false).length;
                 document.getElementById("totalParticipantes").textContent =
                     stats.totalParticipantes;
-
-                document.getElementById("clubesUnicos").textContent =
-                    stats.clubesUnicos;
 
             }
 
