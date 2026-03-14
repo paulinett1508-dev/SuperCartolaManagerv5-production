@@ -79,6 +79,30 @@ router.get("/extratos/:ligaId", requireAdmin, async (req, res) => {
         const problemas = [];
         const participantesOk = [];
 
+        // Buscar rodadas já consolidadas (evitar flagar rodadas futuras)
+        const rodadasConsolidadas = await db.collection("rodadasnapshots")
+            .find({
+                liga_id: String(ligaId),
+                temporada: temporada,
+                status: "consolidada"
+            })
+            .project({ rodada: 1 })
+            .toArray();
+        const rodadasJogadas = rodadasConsolidadas.map(r => r.rodada).sort((a, b) => a - b);
+
+        // Buscar participantes que realmente apareceram no Top10 (Mito/Mico)
+        let top10TimeIds = new Set();
+        if (modulosAtivos.top10 === true) {
+            const top10Caches = await db.collection("top10caches")
+                .find({ liga_id: String(ligaId), temporada: temporada })
+                .project({ "mitos.time_id": 1, "micos.time_id": 1 })
+                .toArray();
+            for (const cache of top10Caches) {
+                (cache.mitos || []).forEach(m => top10TimeIds.add(m.time_id));
+                (cache.micos || []).forEach(m => top10TimeIds.add(m.time_id));
+            }
+        }
+
         // Verificar cada participante
         for (const participante of (liga.participantes || [])) {
             const timeId = participante.time_id;
@@ -107,12 +131,9 @@ router.get("/extratos/:ligaId", requireAdmin, async (req, res) => {
             const rodadasNoCache = [...new Set(transacoes.map(t => t.rodada))].sort((a, b) => a - b);
             const errosParticipante = [];
 
-            // 1. Verificar se tem todas as rodadas
-            if (rodadasNoCache.length < RODADA_FINAL) {
-                const faltando = [];
-                for (let r = 1; r <= RODADA_FINAL; r++) {
-                    if (!rodadasNoCache.includes(r)) faltando.push(r);
-                }
+            // 1. Verificar se tem todas as rodadas já consolidadas
+            const faltando = rodadasJogadas.filter(r => !rodadasNoCache.includes(r));
+            if (faltando.length > 0) {
                 stats.rodadasIncompletas++;
                 errosParticipante.push(`Faltam rodadas: ${faltando.join(", ")}`);
             }
@@ -146,8 +167,8 @@ router.get("/extratos/:ligaId", requireAdmin, async (req, res) => {
                 errosParticipante.push("SaldoAcumulado progressivo incorreto");
             }
 
-            // 4. Verificar Top10 (se módulo ativo) - OPCIONAL, só se === true
-            if (modulosAtivos.top10 === true) {
+            // 4. Verificar Top10 (se módulo ativo) - só para quem apareceu no ranking
+            if (modulosAtivos.top10 === true && top10TimeIds.has(timeId)) {
                 const temTop10 = transacoes.some(t => (t.top10 || 0) !== 0 || t.isMito || t.isMico);
                 if (!temTop10) {
                     stats.semTop10++;
@@ -215,6 +236,7 @@ router.get("/extratos/:ligaId", requireAdmin, async (req, res) => {
                 id: ligaId,
                 nome: liga.nome,
                 rodadaFinal: RODADA_FINAL,
+                rodadasConsolidadas: rodadasJogadas.length,
                 temporada,
                 modulosAtivos
             },
