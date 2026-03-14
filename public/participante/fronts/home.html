@@ -78,9 +78,11 @@
 
     <!-- Placeholders para conteúdo dinâmico (Feed) -->
     <div class="home-feed-section">
+        <div class="home-feed-label">Agenda & Ao Vivo</div>
         <div id="home-copa-placeholder"></div>
         <div id="home-liberta-placeholder"></div>
         <div id="home-jogos-placeholder"></div>
+        <div class="home-feed-label">Notícias & Tabelas</div>
         <div id="home-noticias-placeholder"></div>
         <div id="home-brasileirao-placeholder"></div>
     </div>
@@ -380,7 +382,7 @@
    ALERTS SECTION
    ══════════════════════════════════════════════════════ */
 .home-alerts-section {
-    padding: 10px 16px 0;
+    padding: 14px 16px 0;
 }
 
 .home-alerts-section:empty,
@@ -391,7 +393,7 @@
 .home-avisos-secundarios {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 .home-avisos-secundarios:empty {
@@ -402,10 +404,10 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 14px;
+    padding: 12px 14px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 10px;
+    border-radius: 12px;
     cursor: pointer;
     transition: background var(--app-transition-fast, 0.15s ease);
 }
@@ -520,10 +522,21 @@
    FEED SECTION — Dynamic content cards
    ══════════════════════════════════════════════════════ */
 .home-feed-section {
-    padding: 0 16px 12px;
+    padding: 8px 16px 20px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
+}
+
+.home-feed-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.22);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    padding: 4px 0 0;
+    margin-bottom: -4px;
 }
 
 /* ══════════════════════════════════════════════════════
@@ -592,10 +605,10 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 10px 14px;
+    padding: 14px 16px;
     background: linear-gradient(135deg, #6b1029 0%, #1a2f4a 55%, #162840 100%);
     border: 1px solid rgba(212, 175, 55, 0.28);
-    border-radius: 12px;
+    border-radius: 14px;
     cursor: pointer;
     position: relative;
     overflow: hidden;
@@ -884,10 +897,10 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 10px 14px;
+    padding: 14px 16px;
     background: var(--app-liberta-gradient);
     border: 1px solid var(--app-liberta-border);
-    border-radius: 12px;
+    border-radius: 14px;
     cursor: pointer;
     transition: all 0.2s ease;
     min-height: 44px;
@@ -1051,10 +1064,10 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 10px 14px;
+    padding: 14px 16px;
     background: var(--app-agenda-gradient);
     border: 1px solid var(--app-agenda-border);
-    border-radius: 12px;
+    border-radius: 14px;
     cursor: pointer;
     transition: all 0.2s ease;
     min-height: 44px;
@@ -1150,10 +1163,10 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 10px 14px;
+    padding: 14px 16px;
     background: var(--app-noticias-fallback-gradient);
     border: 1px solid var(--app-noticias-border);
-    border-radius: 12px;
+    border-radius: 14px;
     cursor: pointer;
     transition: all 0.2s ease;
     min-height: 44px;
