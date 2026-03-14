@@ -78,7 +78,9 @@ export const obterContextoRodada = async (req, res) => {
             if (extrato?.historico_transacoes) {
                 const entrada = extrato.historico_transacoes.find(t => t.rodada === numRodada);
                 if (entrada != null) {
-                    financeiroRodada = entrada.saldo ?? 0;
+                    // entrada.valor = bônus/ônus da rodada (ex: -12)
+                    // entrada.saldo = soma de módulos (PC, MM, top10) — não usar
+                    financeiroRodada = entrada.valor ?? 0;
                 }
             }
         } catch (errExtrato) {

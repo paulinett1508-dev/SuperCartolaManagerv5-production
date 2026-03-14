@@ -599,9 +599,9 @@ function formatarPontos(valor) {
 }
 
 function formatarDinheiro(valor) {
-    if (!valor || valor === 0) return 'R$ 0';
-    const prefix = valor > 0 ? '+R$ ' : '-R$ ';
-    return prefix + Math.abs(valor).toFixed(0);
+    if (!valor || valor === 0) return 'Neutro';
+    if (valor > 0) return `Ganhou R$${valor}`;
+    return `Perdeu R$${Math.abs(valor)}`;
 }
 
 function setTextById(id, text) {
