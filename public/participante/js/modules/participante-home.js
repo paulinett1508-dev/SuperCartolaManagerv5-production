@@ -1296,19 +1296,6 @@ function atualizarPainelAvisos(rodadaAtual, totalParticipantes, extras = {}) {
             }
         }
 
-        // Aviso de posição no Top 10
-        if (posicao && posicao <= 10) {
-            avisosHTML += `
-                <div class="home-aviso-secundario" onclick="window.participanteNav?.navegarPara('ranking')">
-                    <div class="home-aviso-icon-mini" style="background:rgba(255,215,0,0.15);">
-                        <span class="material-icons" style="color:var(--app-gold);">workspace_premium</span>
-                    </div>
-                    <span class="home-aviso-texto">Você está no Top 10! Posição ${posicao}º no ranking</span>
-                    <span class="home-aviso-badge" style="color:var(--app-gold);background:rgba(255,215,0,0.15);">TOP 10</span>
-                </div>
-            `;
-        }
-
         avisosSecundarios.innerHTML = avisosHTML;
     }
 }
