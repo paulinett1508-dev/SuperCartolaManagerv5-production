@@ -85,6 +85,11 @@ export const obterContextoRodada = async (req, res) => {
             console.warn(`${LOG_PREFIX} Não foi possível buscar extrato financeiro:`, errExtrato.message);
         }
 
+        // Fallback: se extrato não tem entrada para esta rodada, usar valorFinanceiro da Rodada
+        if (financeiroRodada === 0 && meuTime.valorFinanceiro) {
+            financeiroRodada = meuTime.valorFinanceiro;
+        }
+
         // 4. Construir contexto baseado em módulos ativos
         const contexto = {
             // Metadados
