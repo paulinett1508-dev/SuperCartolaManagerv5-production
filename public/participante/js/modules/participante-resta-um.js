@@ -348,9 +348,16 @@ function _renderizarDisputa(dados, timeId) {
                 <span class="ru-elim-divider-line"></span>
             </div>
         `;
-        eliminados.forEach((p) => {
+
+        // Separar eliminados: ultimas 3 rodadas vs anteriores
+        const rodadasEliminacao = [...new Set(eliminados.map(p => p.rodadaEliminacao || 0))].sort((a, b) => b - a);
+        const ultimas3Rodadas = rodadasEliminacao.slice(0, 3);
+        const recentes = eliminados.filter(p => ultimas3Rodadas.includes(p.rodadaEliminacao || 0));
+        const antigos = eliminados.filter(p => !ultimas3Rodadas.includes(p.rodadaEliminacao || 0));
+
+        const _renderEliminadoRow = (p) => {
             const isMeuTime = String(p.timeId) === String(timeId);
-            html += `
+            return `
                 <div class="resta-um-row eliminado${isMeuTime ? ' meu-time' : ''}">
                     <span class="resta-um-pos resta-um-pos-elim">
                         <span class="material-icons" style="font-size: 14px;">close</span>
@@ -366,7 +373,24 @@ function _renderizarDisputa(dados, timeId) {
                     <span class="resta-um-eliminado-rodada">R${p.rodadaEliminacao || '?'}</span>
                 </div>
             `;
-        });
+        };
+
+        recentes.forEach(p => { html += _renderEliminadoRow(p); });
+
+        if (antigos.length > 0) {
+            const toggleId = 'ru-elim-antigos-' + Date.now();
+            html += `
+                <div style="text-align:center;margin:8px 0;">
+                    <span onclick="(function(el){var sec=document.getElementById('${toggleId}');if(sec.style.display==='none'){sec.style.display='block';el.innerHTML='<span class=\\'material-icons\\' style=\\'font-size:14px;vertical-align:middle;margin-right:4px;\\'>expand_less</span>Ocultar eliminados anteriores';}else{sec.style.display='none';el.innerHTML='<span class=\\'material-icons\\' style=\\'font-size:14px;vertical-align:middle;margin-right:4px;\\'>expand_more</span>Ver '+${antigos.length}+' eliminados anteriores';}})(this)"
+                          style="cursor:pointer;font-size:var(--app-font-xs, 0.75rem);color:var(--app-text-muted);display:inline-flex;align-items:center;">
+                        <span class="material-icons" style="font-size:14px;vertical-align:middle;margin-right:4px;">expand_more</span>Ver ${antigos.length} eliminados anteriores
+                    </span>
+                </div>
+                <div id="${toggleId}" style="display:none;">
+                    ${antigos.map(p => _renderEliminadoRow(p)).join('')}
+                </div>
+            `;
+        }
     }
 
     html += `</div>`; // .resta-um-lista
