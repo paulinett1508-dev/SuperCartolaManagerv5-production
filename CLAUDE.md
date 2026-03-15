@@ -78,6 +78,7 @@ O usuário NÃO deve guiar passo a passo. Se teste/lint falhar após fix, corrij
 Skills ativadas por keywords. Mapeamento: [`docs/skills/SKILL-KEYWORD-MAP.md`](docs/skills/SKILL-KEYWORD-MAP.md)
 Pipeline design: frontend-design → anti-frankenstein → frontend-crafter
 **Anti-Frankenstein é OBRIGATÓRIO antes de qualquer CSS/HTML novo** — mesmo 3 linhas. Verificar `config/css-registry.json`, reutilizar tokens/animações existentes, NUNCA cores hardcoded.
+**Skill antes de ação — SEMPRE:** Bug report → `systematic-debugging`. CSS/HTML → `anti-frankenstein`. Decisão visual → `frontend-design`. NUNCA racionalizar "é simples" ou "deixa investigar primeiro" para pular skill. (3 ocorrências de skill ignorada levaram a bugs em PROD)
 Commands: `/liste-pr-github` (filtro por período), `/security-review` (diff contra origin/HEAD), `/github-profile` (busca perfil GitHub por username)
 
 ## MCPs Disponíveis

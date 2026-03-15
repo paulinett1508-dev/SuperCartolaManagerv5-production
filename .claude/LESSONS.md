@@ -29,6 +29,7 @@
 | 2026-03-15 | PROCESSO | Ao adicionar live ranking card (CSS novo em matchday.css), não adicionei `?v=` para cache busting no `<link>` do index.html. Browser serviu CSS antigo sem os estilos novos → card renderizou como texto puro, escudos gigantes, layout totalmente quebrado em PROD. | **Todo CSS novo ou modificado significativamente DEVE ter cache busting atualizado (`?v=X`) no `<link>` correspondente em index.html.** Especialmente crítico para arquivos que já estão em PROD sem versão. Checklist pós-deploy: (1) arquivo CSS salvo, (2) `?v=` incrementado, (3) verificar no browser se estilos aplicam. | Sim — regra "Cache busting obrigatório" em Coding Standards |
 | 2026-03-15 | PROCESSO | Seletor CSS `.home-live-active #matchday-header-bar { display:none }` nunca funcionou porque `#matchday-header-bar` é injetado FORA de `#home-container` (antes de `#moduleContainer`). Ao escrever seletor CSS descendente, não verifiquei a árvore DOM real onde o elemento é injetado. | **Antes de escrever seletor CSS descendente (`.parent .child`), verificar a árvore DOM real** — elementos injetados via JS podem estar fora do container esperado. Preferir toggle via JS direto quando o parentesco DOM não é garantido. | Sim — regra "Seletores CSS descendentes + DOM injetado" em Coding Standards |
 | 2026-03-15 | PROCESSO | Skills `anti-frankenstein` e `frontend-design` deveriam ter sido ativadas ao implementar live ranking card (envolve CSS/HTML novo), mas não foram. 2ª ocorrência deste padrão (1ª em 2026-03-12). Skills de CSS/design precisam ser ativadas AUTOMATICAMENTE, não depender de lembrança manual. | **2ª ocorrência de skills CSS não ativadas.** O protocolo de planejamento JÁ exige cruzamento com SKILL-KEYWORD-MAP.md mas continua sendo ignorado na prática. Reforço: ao criar TODO com qualquer arquivo `.css` ou HTML com `class=`, a skill anti-frankenstein DEVE ser listada como sub-tarefa obrigatória. | Não |
+| 2026-03-15 | PROCESSO | Ao receber bug report "renderização quebrada", não ativei `superpowers:systematic-debugging` antes de investigar. Fiz 3 rodadas de perguntas manuais ao usuário em vez de seguir protocolo estruturado de debug. A skill teria guiado a investigação e evitado perguntas desnecessárias (cache busting é causa óbvia para CSS novo não aplicando). **3ª ocorrência de skill não ativada** (1ª: anti-frank 2026-03-12, 2ª: anti-frank/frontend-design 2026-03-15). | **Bug report = ativar `superpowers:systematic-debugging` ANTES de qualquer pergunta ou investigação.** Skills determinam COMO investigar. Perguntas ao usuário vêm DEPOIS do protocolo de debug, não antes. Red flag do `using-superpowers`: "Let me explore the codebase first" → errado, skill primeiro. | Não |
 
 ### Categorias Validas
 - **DADOS** — Queries erradas, tipos de ID, collections incorretas
@@ -41,6 +42,17 @@
 ## Padroes Recorrentes
 
 > Quando 3+ licoes da mesma categoria aparecerem, documentar o padrao aqui e propor regra no CLAUDE.md.
+
+### PROCESSO — Skills não ativadas antes de agir (3 ocorrências)
+- `anti-frankenstein` não ativada ao criar CSS do live card (2026-03-12)
+- `anti-frankenstein` + `frontend-design` não ativadas ao implementar live ranking card (2026-03-15)
+- `systematic-debugging` não ativada ao receber bug report de renderização (2026-03-15)
+
+**Padrão:** Skills existem e são pertinentes, mas são ignoradas por racionalização ("é simples", "deixa eu investigar primeiro", "já sei o que fazer"). O protocolo `using-superpowers` lista isso como red flag explícito, mas continua acontecendo.
+
+**Regra:** Antes de QUALQUER ação (incluindo perguntas ao usuário), verificar se alguma skill se aplica. Bug = `systematic-debugging`. CSS/HTML = `anti-frankenstein`. Decisão visual = `frontend-design`. Skill primeiro, ação depois.
+
+---
 
 ### FRONTEND — `escapeHtml` não definida localmente (3 ocorrências)
 - `top10.js` (2026-02-28)
@@ -69,3 +81,4 @@ function escapeHtml(str) {
 | 2026-03-12 | Planejamento DEVE cruzar tarefas com SKILL-KEYWORD-MAP; anti-frankenstein obrigatório antes de qualquer CSS | Seções "Protocolo de Planejamento" + "Skills & Commands" | CSS hardcoded sem anti-frank no feature parciais AO VIVO |
 | 2026-03-15 | Cache busting obrigatório ao criar/modificar CSS — incrementar `?v=X` no `<link>` | Seção "Coding Standards" | matchday.css sem ?v= quebrou live card em PROD |
 | 2026-03-15 | Seletores CSS descendentes: verificar árvore DOM real antes de usar `.parent .child` | Seção "Coding Standards" | Header bar injetado fora do container esperado |
+| 2026-03-15 | Skill antes de ação — SEMPRE. Bug→systematic-debugging, CSS→anti-frank, Visual→frontend-design | Seção "Skills & Commands" | 3 ocorrências de skill ignorada (padrão recorrente PROCESSO) |
