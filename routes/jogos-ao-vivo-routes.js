@@ -1066,19 +1066,6 @@ function filtrarJogosPorTime(dadosMultiDatas, nomeTime) {
 // Usado pela máquina de estados do foguinho para sincronismo total
 // =====================================================================
 router.get('/game-status', async (req, res) => {
-  // ⚠️ SIMULAÇÃO TEMPORÁRIA — forçar aoVivo > 0 para teste visual
-  // REMOVER APÓS TESTE
-  if (req.query.simulate !== 'off') {
-    return res.json({
-      fabState: 'live',
-      pollInterval: 30,
-      stats: { total: 10, aoVivo: 3, agendados: 4, encerrados: 3 },
-      proximoJogo: null,
-      calendarioAberto: false,
-      atualizadoEm: new Date().toISOString(),
-      fonte: 'simulacao-teste'
-    });
-  }
   try {
     const agora = Date.now();
     const dataHoje = getDataHoje();
