@@ -121,11 +121,13 @@ async function buscarEscalacaoTime(timeId, rodada) {
  */
 function calcularPontuacaoTime(escalacao, atletasPontuados) {
     if (!escalacao || !escalacao.atletas || escalacao.atletas.length === 0) {
-        return { pontos: 0, calculado: false };
+        return { pontos: 0, calculado: false, atletasEmCampo: 0, totalAtletas: 0 };
     }
 
     let pontosTotais = 0;
+    let atletasEmCampo = 0;
     const capitaoId = escalacao.capitao_id;
+    const totalAtletas = escalacao.atletas.length;
 
     // Processar atletas titulares (status != 2 = reserva)
     for (const atleta of escalacao.atletas) {
@@ -133,6 +135,7 @@ function calcularPontuacaoTime(escalacao, atletasPontuados) {
         const atletaPontuado = atletasPontuados[atletaId];
 
         if (atletaPontuado && atletaPontuado.entrou_em_campo) {
+            atletasEmCampo++;
             let pontosAtleta = atletaPontuado.pontuacao || 0;
 
             // Capitão 1.5x (regra Cartola FC 2026)
@@ -144,7 +147,7 @@ function calcularPontuacaoTime(escalacao, atletasPontuados) {
         }
     }
 
-    return { pontos: pontosTotais, calculado: true };
+    return { pontos: pontosTotais, calculado: true, atletasEmCampo, totalAtletas };
 }
 
 /**
@@ -292,11 +295,11 @@ export async function buscarRankingParcial(ligaId) {
 
             const promessas = batch.map(async (participante) => {
                 const escalacao = await buscarEscalacaoTime(participante.time_id, rodadaAtual);
-                let pontos, calculado;
+                let pontos, calculado, atletasEmCampo, totalAtletas;
 
                 if (escalacao) {
                     // API respondeu: calcular pontos via atletas pontuados
-                    ({ pontos, calculado } = calcularPontuacaoTime(escalacao, atletasPontuados));
+                    ({ pontos, calculado, atletasEmCampo, totalAtletas } = calcularPontuacaoTime(escalacao, atletasPontuados));
                 } else {
                     // ✅ v1.4: API falhou — usar fallback do banco de dados
                     const fallback = fallbackRodadaMap.get(participante.time_id);
@@ -308,6 +311,9 @@ export async function buscarRankingParcial(ligaId) {
                         pontos = 0;
                         calculado = false;
                     }
+                    // Sem dados da API — frontend esconde indicador "X/12"
+                    atletasEmCampo = null;
+                    totalAtletas = null;
                 }
 
                 // ✅ v1.1: Somar com pontos acumulados das rodadas anteriores
@@ -331,6 +337,8 @@ export async function buscarRankingParcial(ligaId) {
                     pontos_acumulados: truncarPontosNum(pontosAnteriores), // Pontos das rodadas anteriores
                     escalou: calculado,
                     ativo: participante.ativo !== false,
+                    atletasEmCampo: atletasEmCampo ?? null,
+                    totalAtletas: totalAtletas ?? null,
                 };
             });
 
