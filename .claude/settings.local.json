@@ -218,7 +218,8 @@
       "Bash(git -C /home/runner/workspace log --oneline -5 -- public/participante/js/widgets/whats-happening-widget.js 2>/dev/null)",
       "Bash(git -C /home/runner/workspace show ac20594 --stat 2>/dev/null | head -20)",
       "Bash(git -C /home/runner/workspace show 41b609a --stat 2>/dev/null | head -10 && git -C /home/runner/workspace show 41b609a -- routes/jogos-ao-vivo-routes.js 2>/dev/null | head -60)",
-      "Skill(anti-frankenstein)"
+      "Skill(anti-frankenstein)",
+      "Bash(for i:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
