@@ -416,4 +416,120 @@
             font-size: 12px;
         }
     }
+
+    /* ============================================
+       RANKING COLAPSÁVEL (padrão Luva de Ouro)
+       ============================================ */
+    .capitao-ranking-row {
+        background: var(--participante-card, var(--app-surface));
+        border: 1px solid var(--participante-border, #333);
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s;
+    }
+
+    .capitao-ranking-row:hover {
+        background: rgba(139, 92, 246, 0.08);
+    }
+
+    .capitao-ranking-row.expanded {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        border-bottom-color: transparent;
+        background: rgba(139, 92, 246, 0.12);
+    }
+
+    .capitao-ranking-row.podium-1 {
+        border-color: var(--capitao-gold);
+    }
+
+    .capitao-ranking-row.podium-2 {
+        border-color: var(--app-silver, #c0c0c0);
+    }
+
+    .capitao-ranking-row.podium-3 {
+        border-color: var(--app-bronze, #cd7f32);
+    }
+
+    .capitao-ranking-row.meu-time {
+        background: rgba(139, 92, 246, 0.15);
+        border-color: var(--capitao-primary);
+    }
+
+    .capitao-expand-icon {
+        font-size: 20px;
+        color: #666;
+        transition: transform 0.2s;
+    }
+
+    .capitao-ranking-row.expanded .capitao-expand-icon {
+        transform: rotate(180deg);
+        color: var(--capitao-primary);
+    }
+
+    /* Painel colapsável */
+    .capitao-collapse-panel {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+        background: rgba(0, 0, 0, 0.25);
+        border: 1px solid var(--participante-border, #333);
+        border-top: none;
+        border-radius: 0 0 12px 12px;
+        margin-bottom: 10px;
+    }
+
+    .capitao-collapse-panel.open {
+        /* max-height set via JS */
+    }
+
+    .capitao-collapse-inner {
+        padding: 10px 14px;
+    }
+
+    .capitao-collapse-rodada {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .capitao-collapse-rodada:last-child {
+        border-bottom: none;
+    }
+
+    .capitao-collapse-rodada-badge {
+        font-family: var(--capitao-font-mono);
+        font-size: 11px;
+        font-weight: 700;
+        min-width: 32px;
+    }
+
+    .capitao-collapse-rodada-info {
+        flex: 1;
+        font-size: 12px;
+        color: var(--app-text-primary, #fff);
+        padding: 0 10px;
+    }
+
+    .capitao-collapse-rodada-pts {
+        font-family: var(--capitao-font-mono);
+        font-size: 12px;
+        font-weight: 700;
+        min-width: 50px;
+        text-align: right;
+    }
+
+    .capitao-collapse-vazio {
+        text-align: center;
+        color: #666;
+        font-size: 12px;
+        padding: 12px;
+    }
 </style>
