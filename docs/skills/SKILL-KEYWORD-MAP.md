@@ -255,8 +255,8 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 #### systematic-debugging
 | Tipo | Keywords |
 |------|----------|
-| **Primárias** | `debug`, `bug`, `investigar`, `reproduzir`, `causa raiz`, `bisect`, `erro`, `crash`, `não funciona`, `debugging` |
-| **Frases PT-BR** | "como debugar isso?", "investigar esse bug", "encontrar causa raiz", "reproduzir o erro", "git bisect", "por que não funciona?", "erro no sistema", "crash no servidor", "tá quebrando" |
+| **Primárias** | `debug`, `bug`, `investigar`, `reproduzir`, `causa raiz`, `bisect`, `erro`, `crash`, `não funciona`, `debugging`, `quebrado`, `quebrou` |
+| **Frases PT-BR** | "como debugar isso?", "investigar esse bug", "encontrar causa raiz", "reproduzir o erro", "git bisect", "por que não funciona?", "erro no sistema", "crash no servidor", "tá quebrando", "renderização quebrada", "não renderiza", "tela quebrada", "layout quebrado", "CSS quebrado", "tá errado", "não aparece", "sumiu", "parou de funcionar" |
 | **Contexto** | Investigação sistemática de bugs usando metodologia 4 fases: Reproduzir → Isolar → Entender → Corrigir |
 | **NÃO confundir** | Code review → `code-inspector`; Bug de cache → `cache-sentinel`; Bug de regra → `league-architect` |
 | **Localização** | `docs/skills/03-utilities/systematic-debugging.md` |
@@ -495,6 +495,10 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | "revisar arquitetura" | `architecture-reviewer` | Decisões técnicas |
 | "como debugar isso?" | `systematic-debugging` | 4 fases debugging |
 | "causa raiz" | `systematic-debugging` | 5 Porquês |
+| "renderização quebrada" | `systematic-debugging` | Bug visual = debugging |
+| "tá quebrado" | `systematic-debugging` | Bug report |
+| "não aparece" / "sumiu" | `systematic-debugging` | Elemento ausente = bug |
+| "parou de funcionar" | `systematic-debugging` | Regressão |
 | "pattern tailwind" | `tailwind-patterns` | Utility classes |
 | "como tratar esse erro?" | `error-handling` | Try/catch patterns |
 | "limites do replit" | `replit-patterns` | Deploy/config Replit |
@@ -507,7 +511,7 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 |---------|---------------------|
 | Feature nova completa | `workflow` → `pesquisa` → `spec` → `ai-problems-detection` → `code` → `git-commit-push` |
 | Feature com frontend | `workflow` → `pesquisa` → `spec` → `anti-frankenstein` → `frontend-crafter` → `code` → `git-commit-push` |
-| Bug report | `fact-checker` → `code-inspector` → `code` → `git-commit-push` |
+| Bug report | `systematic-debugging` → `code` → `git-commit-push` |
 | Refatoração | `Refactor-Monolith` → `code-inspector` → `git-commit-push` |
 | Deploy completo | `git-commit-push` → `replit-pull` → `restart-server` |
 | Auditoria de módulo | `auditor-module` → `code-inspector` → `cache-auditor` |
