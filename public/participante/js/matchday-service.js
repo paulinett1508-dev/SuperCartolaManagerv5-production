@@ -355,7 +355,7 @@
         header.innerHTML = `
             <div class="matchday-header-inner">
                 <span class="material-icons">radio_button_checked</span>
-                <span class="matchday-header-label">RODADA AO VIVO</span>
+                <span class="matchday-header-label">RODADA EM ANDAMENTO</span>
                 <span class="matchday-header-ts" id="matchday-update-ts"></span>
             </div>
             <div class="scout-ticker">
@@ -385,8 +385,9 @@
         if (!labelEl) return;
         const data = window.getAoVivoData?.();
         const aoVivoCount = data?.stats?.aoVivo || 0;
-        const fabState = (data?.fabState || '').toLowerCase();
-        const isLive = aoVivoCount > 0 || fabState === 'live';
+        // Fonte única: stats.aoVivo validado pelo backend
+        // Removido || fabState === 'live' — condição circular idêntica ao bug corrigido no WHWidget
+        const isLive = aoVivoCount > 0;
         if (isLive) {
             const rodada = _currentRodada ? ` ${_currentRodada}` : '';
             labelEl.textContent = `RODADA${rodada} AO VIVO`;
