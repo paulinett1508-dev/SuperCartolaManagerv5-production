@@ -120,15 +120,22 @@ export async function inicializarHomeParticipante(params) {
     await carregarDadosERenderizar(ligaId, timeId, participante);
     iniciarAutoRefreshHome(ligaId, timeId, participante);
 
-    // Live ranking card: ativar se matchday já está ao vivo
-    if (window.MatchdayService?.isActive) {
-        ativarLiveRankingCard();
-    }
-    // Escutar mudanças de estado do matchday
-    if (window.MatchdayService) {
-        window.MatchdayService.on('matchday:state', () => {
-            const state = window.MatchdayService.currentState;
-            const STATES = window.MatchdayService.STATES;
+    // Live ranking card: garantir que MatchdayService tem o ligaId para polling
+    const MS = window.MatchdayService;
+    if (MS) {
+        MS.setContext({ ligaId });
+
+        if (window.Log) Log.info("PARTICIPANTE-HOME", `Live card check: isActive=${MS.isActive}, state=${MS.currentState}, ligaId=${ligaId}`);
+
+        if (MS.isActive) {
+            ativarLiveRankingCard();
+        }
+
+        // Escutar mudanças de estado do matchday
+        MS.on('matchday:state', () => {
+            const state = MS.currentState;
+            const STATES = MS.STATES;
+            if (window.Log) Log.info("PARTICIPANTE-HOME", `Matchday state changed: ${state}`);
             if ((state === STATES.LIVE || state === STATES.LOADING) && !_liveCardActive) {
                 ativarLiveRankingCard();
             }
@@ -1592,13 +1599,20 @@ function _sortAndDiffRanking(ranking) {
 }
 
 function ativarLiveRankingCard() {
-    if (_liveCardActive) return;
+    if (_liveCardActive) {
+        if (window.Log) Log.debug("PARTICIPANTE-HOME", "Live card: já ativo, skip");
+        return;
+    }
 
     const heroSection = document.querySelector('.home-hero-section');
-    if (!heroSection) return;
+    if (!heroSection) {
+        if (window.Log) Log.warn("PARTICIPANTE-HOME", "Live card: .home-hero-section NÃO encontrado");
+        return;
+    }
 
     const meuTimeId = window.participanteAuth?.timeId;
     const MS = window.MatchdayService;
+    if (window.Log) Log.info("PARTICIPANTE-HOME", `Live card: ativando. ranking.length=${MS?.lastRanking?.length}, meuTimeId=${meuTimeId}`);
 
     heroSection.style.display = 'none';
     document.getElementById('home-container')?.classList.add('home-live-active');
