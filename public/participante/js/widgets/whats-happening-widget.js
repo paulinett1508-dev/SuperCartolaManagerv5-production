@@ -1222,7 +1222,7 @@ function renderTimestamp() {
         <div class="wh-timestamp">
             ${isLive
                 ? `<span class="wh-live-indicator"><span class="wh-live-dot"></span> AO VIVO</span> <span class="wh-timestamp-time">Rodada ${rodada} · ${time}</span>`
-                : `<span class="material-icons">schedule</span> Rodada ${rodada} · ${time}`
+                : `<span class="material-icons">sports_soccer</span> Rodada ${rodada} · EM ANDAMENTO`
             }
         </div>
     `;

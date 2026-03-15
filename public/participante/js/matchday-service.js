@@ -183,6 +183,10 @@
                 }
             } else if (!matchdayPotencial && _isActive) {
                 _onMatchdayStop();
+            } else if (matchdayPotencial && _isActive) {
+                // Já ativo: refrescar stats e atualizar label do header
+                if (window.isRodadaRealmenteAoVivo) await window.isRodadaRealmenteAoVivo();
+                _updateHeaderLabel();
             }
 
             // Ajustar intervalo de polling de status
@@ -208,6 +212,7 @@
         _isStale = false;
         _setState(MATCHDAY_STATES.LOADING);
         _injectHeader();
+        _updateHeaderLabel();
         _startParciaisPolling();
         _startTimestampUpdater();
         _emit('matchday:loading');
@@ -329,6 +334,7 @@
 
                 _setState(MATCHDAY_STATES.LIVE);
                 _emit('data:parciais');
+                _updateHeaderLabel();
             }
         } catch (e) {
             _consecutiveFailures++;
@@ -371,6 +377,19 @@
         const el = document.getElementById('matchday-header-bar');
         if (el) el.remove();
         _headerInjected = false;
+    }
+
+    // ─── Atualiza label do header conforme jogos ao vivo ────────────
+    function _updateHeaderLabel() {
+        const labelEl = document.querySelector('#matchday-header-bar .matchday-header-label');
+        if (!labelEl) return;
+        const aoVivo = window.getAoVivoStats?.()?.aoVivo || 0;
+        if (aoVivo > 0) {
+            const rodada = _currentRodada ? ` ${_currentRodada}` : '';
+            labelEl.textContent = `RODADA${rodada} AO VIVO`;
+        } else {
+            labelEl.textContent = 'RODADA EM ANDAMENTO';
+        }
     }
 
     // ─── Scout Ticker ───────────────────────────────────────────────
