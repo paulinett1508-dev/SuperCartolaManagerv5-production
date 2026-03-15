@@ -1104,7 +1104,17 @@ router.get('/game-status', async (req, res) => {
     }
 
     // Estatísticas granulares
-    const stats = jogos ? calcularEstatisticas(jogos) : { total: 0, aoVivo: 0, agendados: 0, encerrados: 0 };
+    let stats = jogos ? calcularEstatisticas(jogos) : { total: 0, aoVivo: 0, agendados: 0, encerrados: 0 };
+
+    // Invalidar "ao vivo" de cache stale desatualizado (outro dia ou > CACHE_STALE_MAX)
+    // Previne foguinho LIVE quando API externa está fora e cache tem jogos antigos como "1H"/"2H"
+    const staleAgeMs = cacheTimestamp ? agora - cacheTimestamp : Infinity;
+    if (fonte === 'cache-stale' && stats.aoVivo > 0 && (
+      (cacheDataReferencia && cacheDataReferencia !== dataHoje) ||
+      staleAgeMs > CACHE_STALE_MAX
+    )) {
+      stats = { ...stats, aoVivo: 0 };
+    }
 
     // Próximo jogo agendado (para WAITING/INTERVAL)
     let proximoJogo = null;

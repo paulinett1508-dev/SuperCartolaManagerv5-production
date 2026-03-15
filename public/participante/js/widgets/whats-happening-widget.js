@@ -49,12 +49,12 @@ const FAB_GAME_STATE = {
 };
 
 /**
- * v2.1: Helper centralizado para verificar se jogos estão REALMENTE ao vivo
- * Usa gameStatusData.stats.aoVivo (fonte confiável) ao invés de bola_rolando
+ * v2.2: Helper centralizado para verificar se jogos estão REALMENTE ao vivo
+ * Usa SOMENTE gameStatusData.stats.aoVivo (fonte confiável e validada pelo backend)
+ * Removida condição circular "|| fabState === LIVE" que mantinha o estado preso
  */
 function isJogosAoVivo() {
-    return WHState.gameStatusData?.stats?.aoVivo > 0
-        || WHState.fabState === FAB_GAME_STATE.LIVE;
+    return WHState.gameStatusData?.stats?.aoVivo > 0;
 }
 
 // ============================================
