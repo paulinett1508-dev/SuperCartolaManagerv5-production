@@ -1646,7 +1646,7 @@ function renderizarDetalhamentoRodada(rodadaData, isParcial = false, inativos = 
         // Em campo badge for parciais - mostrar escalados + jogando ao vivo
         const titularesTotal = 12;
         const escalados = meuPart.atletas ? meuPart.atletas.filter(a => !a.is_reserva).length : 0;
-        const jogandoAoVivo = meuPart.atletas ? meuPart.atletas.filter(a => !a.is_reserva && a.entrou_em_campo === true).length : 0;
+        const jogandoAoVivo = meuPart.atletas ? meuPart.atletas.filter(a => !a.is_reserva && a.entrou_em_campo_real === true).length : 0;
         const emCampoInfo = isParcial && escalados > 0
             ? `<span style="margin-left:8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--app-text-muted)">${jogandoAoVivo}/12</span>`
             : '';
@@ -1738,7 +1738,7 @@ function renderizarDetalhamentoRodada(rodadaData, isParcial = false, inativos = 
 
         // Badge "X/12 em campo" para parciais
         const escalados = participante.atletas ? participante.atletas.filter(a => !a.is_reserva).length : 0;
-        const jogandoAoVivo = participante.atletas ? participante.atletas.filter(a => !a.is_reserva && a.entrou_em_campo === true).length : 0;
+        const jogandoAoVivo = participante.atletas ? participante.atletas.filter(a => !a.is_reserva && a.entrou_em_campo_real === true).length : 0;
         const badgeEmCampo = isParcial && escalados > 0
             ? `<span class="rk-em-campo ${jogandoAoVivo > 0 ? 'ativo' : ''}">${jogandoAoVivo}/${escalados}</span>`
             : "";
