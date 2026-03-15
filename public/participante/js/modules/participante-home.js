@@ -1513,7 +1513,7 @@ function _buildLiveRankingHTML(ranking, rodada, meuTimeId) {
         <div class="live-ranking-header">
             <div class="live-ranking-header-left">
                 <span class="live-ranking-dot"></span>
-                <span class="live-ranking-title">Rodada ${rodada || ''} ao vivo</span>
+                <span class="live-ranking-title">Rodada ${rodada || ''} ${(typeof isJogosAoVivo === 'function' && isJogosAoVivo()) ? 'ao vivo' : 'em andamento'}</span>
             </div>
             <span class="live-ranking-ts" id="live-ranking-ts"></span>
         </div>
@@ -1540,7 +1540,7 @@ function _buildLiveRankingSkeleton() {
         <div class="live-ranking-header">
             <div class="live-ranking-header-left">
                 <span class="live-ranking-dot"></span>
-                <span class="live-ranking-title">Rodada ao vivo</span>
+                <span class="live-ranking-title">Rodada em andamento</span>
             </div>
             <span class="live-ranking-ts">carregando...</span>
         </div>
@@ -1553,7 +1553,7 @@ function _buildLiveRankingError() {
         <div class="live-ranking-header">
             <div class="live-ranking-header-left">
                 <span class="live-ranking-dot" style="background:var(--app-danger);animation:none"></span>
-                <span class="live-ranking-title">Rodada ao vivo</span>
+                <span class="live-ranking-title">Rodada em andamento</span>
             </div>
         </div>
         <div class="live-ranking-error">

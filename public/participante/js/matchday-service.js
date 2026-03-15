@@ -172,20 +172,19 @@
 
             const matchdayPotencial = data.matchday_ativo === true;
 
-            if (matchdayPotencial && !_isActive) {
-                // Confirmar com ground-truth (jogos realmente ao vivo)
-                const aoVivo = window.isRodadaRealmenteAoVivo
-                    ? await window.isRodadaRealmenteAoVivo()
-                    : matchdayPotencial;
+            // Refrescar stats de jogos ao vivo (para labels AO VIVO / EM ANDAMENTO)
+            if (matchdayPotencial && window.isRodadaRealmenteAoVivo) {
+                await window.isRodadaRealmenteAoVivo();
+            }
 
-                if (aoVivo) {
-                    _onMatchdayStart();
-                }
+            if (matchdayPotencial && !_isActive) {
+                // Rodada em andamento (mercado fechado) → ativar matchday
+                // Label AO VIVO vs EM ANDAMENTO é controlado por _updateHeaderLabel()
+                _onMatchdayStart();
             } else if (!matchdayPotencial && _isActive) {
                 _onMatchdayStop();
             } else if (matchdayPotencial && _isActive) {
-                // Já ativo: refrescar stats e atualizar label do header
-                if (window.isRodadaRealmenteAoVivo) await window.isRodadaRealmenteAoVivo();
+                // Já ativo: atualizar label do header
                 _updateHeaderLabel();
             }
 
