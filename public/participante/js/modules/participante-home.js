@@ -120,14 +120,18 @@ export async function inicializarHomeParticipante(params) {
     await carregarDadosERenderizar(ligaId, timeId, participante);
     iniciarAutoRefreshHome(ligaId, timeId, participante);
 
-    // Live ranking card: ativar se matchday já está ao vivo
+    // Live ranking card: garantir que MatchdayService tem o ligaId para polling
     const MS = window.MatchdayService;
-    if (window.Log) Log.info("PARTICIPANTE-HOME", `Live card check: MS exists=${!!MS}, isActive=${MS?.isActive}, state=${MS?.currentState}`);
-    if (MS?.isActive) {
-        ativarLiveRankingCard();
-    }
-    // Escutar mudanças de estado do matchday
     if (MS) {
+        MS.setContext({ ligaId });
+
+        if (window.Log) Log.info("PARTICIPANTE-HOME", `Live card check: isActive=${MS.isActive}, state=${MS.currentState}, ligaId=${ligaId}`);
+
+        if (MS.isActive) {
+            ativarLiveRankingCard();
+        }
+
+        // Escutar mudanças de estado do matchday
         MS.on('matchday:state', () => {
             const state = MS.currentState;
             const STATES = MS.STATES;
