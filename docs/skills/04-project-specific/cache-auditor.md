@@ -1,3 +1,8 @@
+---
+name: cache-auditor
+description: Auditoria completa da infraestrutura de cache dos 3 ambientes — detecta stale, valida coerência, otimiza TTLs
+---
+
 # SKILL: Cache Auditor (Auditor de Cache)
 
 ## Visão Geral

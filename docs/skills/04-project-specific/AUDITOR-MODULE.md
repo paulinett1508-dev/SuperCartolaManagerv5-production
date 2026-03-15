@@ -1,3 +1,8 @@
+---
+name: auditor-module
+description: Auditoria automatizada de módulos — segurança, UI/UX, performance, financeiro e regras de negócio
+---
+
 # SKILL: Auditor Module (Auditor de Módulos)
 
 ## Visão Geral

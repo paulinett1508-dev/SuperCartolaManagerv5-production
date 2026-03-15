@@ -1,0 +1,1 @@
+../../../docs/skills/02-specialists/frontend-crafter.md

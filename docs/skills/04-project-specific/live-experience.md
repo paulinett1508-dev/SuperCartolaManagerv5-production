@@ -1,3 +1,8 @@
+---
+name: live-experience
+description: Auditoria da experiência do participante durante rodadas ao vivo — parciais, rankings, cache, orquestrador
+---
+
 # SKILL: Live Experience Audit (Auditoria de Experiencia ao Vivo)
 
 ## Visao Geral

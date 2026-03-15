@@ -1,3 +1,8 @@
+---
+name: cache-sentinel
+description: Monitoramento proativo e prevenção de caches stale no app do participante (PWA Mobile)
+---
+
 # SKILL: Cache Sentinel (Sentinela de Cache do Participante)
 
 ## Visao Geral

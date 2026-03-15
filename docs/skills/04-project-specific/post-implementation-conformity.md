@@ -1,3 +1,8 @@
+---
+name: post-implementation-conformity
+description: Auditoria de consistência cruzada entre código implementado, documentação e regras do projeto
+---
+
 # Conformidade Pós-Implementação — Super Cartola
 
 Auditoria de consistência cruzada entre código implementado, documentação e regras do projeto.
