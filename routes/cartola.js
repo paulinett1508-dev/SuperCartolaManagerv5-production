@@ -1,5 +1,6 @@
 import express from "express";
 import fetch from "node-fetch";
+import { buildCacheHint } from '../utils/cache-hint.js';
 import {
   listarClubes,
   obterTimePorId,
@@ -69,7 +70,14 @@ router.get('/status', async (req, res) => {
     try {
         const response = await fetch('https://api.cartola.globo.com/mercado/status');
         const data = await response.json();
-        res.json(data);
+        const cacheHint = buildCacheHint({
+            rodadaAtual: data.rodada_atual,
+            statusMercado: data.status_mercado,
+            temporada: data.temporada,
+            temporadaAtual: data.temporada,
+            tipo: 'mercado'
+        });
+        res.json({ ...data, cacheHint });
     } catch (error) {
         console.error('[CARTOLA-ROUTES] Erro ao buscar mercado-status:', error);
         res.status(500).json({

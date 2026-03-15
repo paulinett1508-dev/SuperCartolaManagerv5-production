@@ -1,6 +1,7 @@
 import express from "express";
 import axios from "axios";
 import { isSeasonFinished, SEASON_CONFIG, logBlockedOperation } from "../utils/seasonGuard.js";
+import { buildCacheHint } from '../utils/cache-hint.js';
 import cartolaApiService from "../services/cartolaApiService.js";
 
 const router = express.Router();
@@ -96,7 +97,14 @@ router.get("/mercado/status", async (req, res) => {
             "✅ [CARTOLA-PROXY] Status do mercado obtido:",
             response.data,
         );
-        res.json(response.data);
+        const cacheHint = buildCacheHint({
+            rodadaAtual: response.data.rodada_atual,
+            statusMercado: response.data.status_mercado,
+            temporada: response.data.temporada,
+            temporadaAtual: response.data.temporada,
+            tipo: 'mercado'
+        });
+        res.json({ ...response.data, cacheHint });
     } catch (error) {
         console.error(
             "❌ [CARTOLA-PROXY] Erro ao buscar status do mercado:",

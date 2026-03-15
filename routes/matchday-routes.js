@@ -73,8 +73,13 @@ router.get('/parciais/:ligaId', async (req, res) => {
       return res.json({ disponivel: false, motivo: 'sem_dados', ranking: [] });
     }
 
+    // cacheHint para o frontend
+    const { buildCacheHint, getMercadoContext } = await import('../utils/cache-hint.js');
+    const ctx = await getMercadoContext();
+    const cacheHint = buildCacheHint({ rodada: ctx.rodadaAtual, ...ctx, tipo: 'ranking' });
+
     res.setHeader('Cache-Control', 'private, max-age=15');
-    res.json(parciais);
+    res.json({ ...parciais, cacheHint });
   } catch (error) {
     console.error('[MATCHDAY] Erro parciais:', error);
     res.status(500).json({ success: false, error: error.message, ranking: [] });

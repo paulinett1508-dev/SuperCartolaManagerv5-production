@@ -304,7 +304,12 @@ router.get("/:id/ranking", async (req, res) => {
             : "0.00",
       }));
 
-    res.json(ranking);
+    // cacheHint para o frontend
+    const { buildCacheHint, getMercadoContext } = await import('../utils/cache-hint.js');
+    const ctx = await getMercadoContext();
+    const cacheHint = buildCacheHint({ rodada: ctx.rodadaAtual, ...ctx, temporada: temporadaFiltro, tipo: 'ranking' });
+
+    res.json({ ranking, cacheHint });
   } catch (error) {
     console.error(`[LIGAS] Erro ao buscar ranking:`, error);
     res.status(500).json({ erro: "Erro ao buscar ranking" });
