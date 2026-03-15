@@ -187,7 +187,9 @@ export async function getRankingsEmLote(
       );
     }
 
-    const todosRankings = await rankingsResponse.json();
+    const rankingsRaw = await rankingsResponse.json();
+    // Normalizar formato (array direto ou { rodadas: [], cacheHint: {} } do backend v4.0)
+    const todosRankings = Array.isArray(rankingsRaw) ? rankingsRaw : (rankingsRaw?.rodadas || []);
 
     console.log(
       `[RODADAS-CORE] ✅ ${todosRankings.length} registros carregados em 1 requisição`,
@@ -328,20 +330,20 @@ export async function fetchAndProcessRankingRodada(ligaId, rodadaNum, temporadaO
 
         const data = await resRodadas.json();
 
-        // Array vazio é válido (rodada sem dados ainda)
+        // Normalizar formato da resposta (array, { data: [] } ou { rodadas: [] })
+        let dataArray = null;
         if (data && Array.isArray(data)) {
-          rankingsDataFromApi = data;
-          console.log(
-            `[RODADAS-CORE] Dados encontrados no endpoint: ${endpoint} (${data.length} registros)`,
-          );
-          break;
+          dataArray = data;
+        } else if (data && typeof data === "object" && Array.isArray(data.rodadas)) {
+          dataArray = data.rodadas; // formato v4.0 backend (cacheHint)
+        } else if (data && typeof data === "object" && Array.isArray(data.data)) {
+          dataArray = data.data;
         }
 
-        // Objeto com propriedade data
-        if (data && typeof data === "object" && data.data) {
-          rankingsDataFromApi = data.data;
+        if (dataArray !== null) {
+          rankingsDataFromApi = dataArray;
           console.log(
-            `[RODADAS-CORE] Dados encontrados no endpoint: ${endpoint} (${data.data.length} registros)`,
+            `[RODADAS-CORE] Dados encontrados no endpoint: ${endpoint} (${dataArray.length} registros)`,
           );
           break;
         }
@@ -623,7 +625,9 @@ export async function buscarRodadas() {
       throw new Error(`Erro HTTP: ${response.status}`);
     }
 
-    const rodadas = await response.json();
+    const rodadasRaw = await response.json();
+    // Normalizar formato (array direto ou { rodadas: [], cacheHint: {} } do backend v4.0)
+    const rodadas = Array.isArray(rodadasRaw) ? rodadasRaw : (rodadasRaw?.rodadas || []);
     console.log(
       `[RODADAS-CORE] Rodadas recebidas: ${rodadas.length} registros`,
     );
