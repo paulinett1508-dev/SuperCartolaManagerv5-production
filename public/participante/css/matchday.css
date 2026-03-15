@@ -1,120 +1,8 @@
 /* matchday.css - Estilos do Modo Matchday */
 
-/* Layout do header injetado pelo MatchdayService */
-#matchday-header-bar {
-  margin: 8px 12px 0;
-  flex-direction: column;
-  gap: 0;
-}
-
-.matchday-header-inner {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 0;
-}
-
-.matchday-header-label {
-  font-family: 'Russo One', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--app-danger, #ef4444);
-  letter-spacing: 0.05em;
-}
-
-/* Scout ticker — versão text-based (atualiza a cada 30s) */
-.scout-ticker-content {
-  width: 100%;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--app-text-muted, #9ca3af);
-  padding: 6px 0 2px;
-}
-
-/* Header Matchday Pulsante */
-.matchday-header {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 12px;
-  padding: 12px 16px;
-  margin: 12px 0;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  animation: matchday-pulse 2s ease-in-out infinite;
-}
-
-@keyframes matchday-pulse {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
-  }
-}
-
-.matchday-header .material-icons {
-  font-size: 24px;
-  color: var(--app-danger);
-  animation: live-blink 1.5s ease-in-out infinite;
-}
-
 @keyframes live-blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
-}
-
-.matchday-header-text {
-  flex: 1;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--app-text-white);
-}
-
-.matchday-header-subtitle {
-  font-size: 11px;
-  color: var(--app-text-muted);
-  margin-top: 2px;
-}
-
-/* Ticker de Scouts */
-.scout-ticker {
-  background: rgba(0, 0, 0, 0.5);
-  border-top: 1px solid var(--participante-border);
-  border-bottom: 1px solid var(--participante-border);
-  padding: 8px 0;
-  overflow: hidden;
-  position: relative;
-  margin: 12px 0;
-}
-
-.scout-ticker-track {
-  display: flex;
-  gap: 20px;
-  animation: ticker-scroll 30s linear infinite;
-  white-space: nowrap;
-}
-
-@keyframes ticker-scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-.scout-ticker-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--app-text-white);
-}
-
-.scout-ticker-item .material-icons {
-  font-size: 16px;
-  color: var(--app-success-light);
 }
 
 /* Animações de Ranking Live */
@@ -177,32 +65,6 @@
 
 .ranking-live-badge.is-off {
   opacity: 0.5;
-}
-
-/* ─── Indicador de tempo relativo (Task 2) ─── */
-.matchday-header-ts {
-  font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
-  font-size: var(--app-text-xs, 11px);
-  color: var(--app-text-muted, #9ca3af);
-  margin-left: auto;
-  opacity: 0.7;
-}
-
-/* ─── Estado stale — dados obsoletos (Task 3) ─── */
-.matchday-header.matchday-stale {
-  background: linear-gradient(135deg, rgba(234, 179, 8, 0.15) 0%, rgba(234, 179, 8, 0.05) 100%);
-  border-color: var(--app-warning, #eab308);
-  animation: none;
-}
-
-.matchday-header.matchday-stale .matchday-header-ts {
-  color: var(--app-warning, #eab308);
-  opacity: 1;
-  animation: live-blink 2s ease-in-out infinite;
-}
-
-.matchday-header.matchday-stale .material-icons {
-  color: var(--app-warning, #eab308);
 }
 
 /* ─── Skeleton loading para parciais (Task 4) ─── */
@@ -472,7 +334,3 @@
     cursor: pointer;
 }
 
-/* Hide matchday header bar when live card is active on home */
-.home-live-active #matchday-header-bar {
-    display: none;
-}
