@@ -119,6 +119,21 @@ export async function inicializarHomeParticipante(params) {
     pararAutoRefreshHome();
     await carregarDadosERenderizar(ligaId, timeId, participante);
     iniciarAutoRefreshHome(ligaId, timeId, participante);
+
+    // Live ranking card: ativar se matchday já está ao vivo
+    if (window.MatchdayService?.isActive) {
+        ativarLiveRankingCard();
+    }
+    // Escutar mudanças de estado do matchday
+    if (window.MatchdayService) {
+        window.MatchdayService.on('matchday:state', () => {
+            const state = window.MatchdayService.currentState;
+            const STATES = window.MatchdayService.STATES;
+            if ((state === STATES.LIVE || state === STATES.LOADING) && !_liveCardActive) {
+                ativarLiveRankingCard();
+            }
+        });
+    }
 }
 
 window.inicializarHomeParticipante = inicializarHomeParticipante;
@@ -1433,6 +1448,245 @@ function atualizarCardsHomeComParciais() {
 
     // Atualizar saldo projetado (hidden element, mantido para consistencia de dados)
     atualizarSaldoProjetado(minhaPosicao.posicao);
+}
+
+// ============================================
+// LIVE RANKING CARD — Substitui hero card na home durante rodada ao vivo
+// ============================================
+
+let _liveCardActive = false;
+let _liveCardUnsubscribers = [];
+let _prevLiveRanking = null;
+
+function _buildLiveRankingHTML(ranking, rodada, meuTimeId) {
+    const rows = ranking.map((p, idx) => {
+        const isMe = p.timeId === meuTimeId;
+        const meClass = isMe ? ' live-rank-row--me' : '';
+        const pos = p._livePos || (idx + 1);
+
+        const brasaoImg = p.clube_id
+            ? `<img src="https://s.sde.globo.com/media/escudo/time/${p.clube_id}.png" alt="" onerror="this.style.display='none'" loading="lazy">`
+            : '';
+        const escudoImg = p.escudo
+            ? `<img src="${p.escudo}" alt="" onerror="this.style.display='none'" loading="lazy">`
+            : '';
+
+        // TRUNCAR pontos — nunca arredondar
+        const ptsRaw = p.pontos_rodada_atual ?? p.pontos ?? 0;
+        const pts = typeof window.truncarPontos === 'function'
+            ? window.truncarPontos(ptsRaw)
+            : String(Math.trunc(ptsRaw * 100) / 100);
+
+        const campoText = (p.atletasEmCampo != null && p.totalAtletas != null)
+            ? `${p.atletasEmCampo}/${p.totalAtletas}`
+            : '';
+
+        const nome = p.nome_cartola || 'N/D';
+        const nomeTime = p.nome_time || '';
+
+        return `<div class="live-rank-row${meClass}" data-time-id="${p.timeId}">
+            <span class="live-rank-pos">${pos}</span>
+            <span class="live-rank-shields">${brasaoImg}${escudoImg}</span>
+            <span class="live-rank-info">
+                <span class="live-rank-nome">${nome}</span>
+                <span class="live-rank-sep">·</span>
+                <span class="live-rank-time">${nomeTime}</span>
+            </span>
+            <span class="live-rank-stats">
+                <span class="live-rank-pts">${pts}</span>
+                <span class="live-rank-campo">${campoText}</span>
+            </span>
+        </div>`;
+    }).join('');
+
+    return `<div class="live-ranking-card" id="live-ranking-card">
+        <div class="live-ranking-header">
+            <div class="live-ranking-header-left">
+                <span class="live-ranking-dot"></span>
+                <span class="live-ranking-title">Rodada ${rodada || ''} ao vivo</span>
+            </div>
+            <span class="live-ranking-ts" id="live-ranking-ts"></span>
+        </div>
+        <div class="live-ranking-list" id="live-ranking-list">
+            ${rows}
+        </div>
+        <div class="live-ranking-footer">
+            <a href="#" onclick="event.preventDefault(); window.participanteNav?.navegarPara('rodadas'); return false;">
+                Ver detalhes da rodada
+                <span class="material-icons">chevron_right</span>
+            </a>
+        </div>
+    </div>`;
+}
+
+function _buildLiveRankingSkeleton() {
+    const row = `<div class="live-rank-skeleton">
+        <div class="skel-block skel-pos skeleton-box"></div>
+        <div class="skel-block skel-shield skeleton-box"></div>
+        <div class="skel-block skel-name skeleton-box"></div>
+        <div class="skel-block skel-pts skeleton-box"></div>
+    </div>`;
+    return `<div class="live-ranking-card" id="live-ranking-card">
+        <div class="live-ranking-header">
+            <div class="live-ranking-header-left">
+                <span class="live-ranking-dot"></span>
+                <span class="live-ranking-title">Rodada ao vivo</span>
+            </div>
+            <span class="live-ranking-ts">carregando...</span>
+        </div>
+        <div class="live-ranking-list">${row.repeat(5)}</div>
+    </div>`;
+}
+
+function _buildLiveRankingError() {
+    return `<div class="live-ranking-card" id="live-ranking-card">
+        <div class="live-ranking-header">
+            <div class="live-ranking-header-left">
+                <span class="live-ranking-dot" style="background:var(--app-danger);animation:none"></span>
+                <span class="live-ranking-title">Rodada ao vivo</span>
+            </div>
+        </div>
+        <div class="live-ranking-error">
+            Parciais indisponíveis
+            <br>
+            <button onclick="window.MatchdayService?._fetchParciais?.()">Tentar novamente</button>
+        </div>
+    </div>`;
+}
+
+function _updateLiveTimestamp() {
+    const el = document.getElementById('live-ranking-ts');
+    if (!el || !window.MatchdayService) return;
+    const ts = window.MatchdayService.lastUpdateTs;
+    if (!ts) { el.textContent = ''; return; }
+    const diff = Math.floor((Date.now() - ts) / 1000);
+    if (diff < 5) el.textContent = 'agora';
+    else if (diff < 60) el.textContent = `há ${diff}s`;
+    else el.textContent = `há ${Math.floor(diff / 60)}min`;
+}
+
+/**
+ * Ordena ranking por pontos_rodada_atual DESC e calcula diff de posição próprio
+ * (não usa MS.lastDiff pois o backend ordena por pontos acumulados)
+ */
+function _sortAndDiffRanking(ranking) {
+    const sorted = [...ranking].sort((a, b) =>
+        (b.pontos_rodada_atual ?? b.pontos ?? 0) - (a.pontos_rodada_atual ?? a.pontos ?? 0)
+    );
+    sorted.forEach((p, i) => { p._livePos = i + 1; });
+
+    const diffs = [];
+    if (_prevLiveRanking) {
+        const prevMap = {};
+        _prevLiveRanking.forEach((p, i) => { prevMap[p.timeId] = i + 1; });
+        for (const p of sorted) {
+            const prev = prevMap[p.timeId];
+            const cur = p._livePos;
+            if (prev != null && prev !== cur) {
+                diffs.push({ timeId: p.timeId, direction: prev > cur ? 'up' : 'down' });
+            }
+        }
+    }
+    _prevLiveRanking = sorted;
+    return { sorted, diffs };
+}
+
+function ativarLiveRankingCard() {
+    if (_liveCardActive) return;
+
+    const heroSection = document.querySelector('.home-hero-section');
+    if (!heroSection) return;
+
+    const meuTimeId = window.participanteAuth?.timeId;
+    const MS = window.MatchdayService;
+
+    heroSection.style.display = 'none';
+    document.getElementById('home-container')?.classList.add('home-live-active');
+
+    let container = document.getElementById('live-ranking-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'live-ranking-container';
+        heroSection.parentNode.insertBefore(container, heroSection);
+    }
+
+    // Render inicial
+    const ranking = MS?.lastRanking;
+    if (ranking && ranking.length > 0) {
+        const { sorted } = _sortAndDiffRanking(ranking);
+        const rodada = MS.currentRodada || mercadoStatus?.rodada_atual || '';
+        container.innerHTML = _buildLiveRankingHTML(sorted, rodada, meuTimeId);
+        _updateLiveTimestamp();
+    } else {
+        container.innerHTML = _buildLiveRankingSkeleton();
+    }
+
+    // Evento: novos dados parciais
+    const onParciais = () => {
+        const r = MS.lastRanking;
+        if (!r || r.length === 0) return;
+
+        const { sorted, diffs } = _sortAndDiffRanking(r);
+        const rodada = MS.currentRodada || mercadoStatus?.rodada_atual || '';
+        container.innerHTML = _buildLiveRankingHTML(sorted, rodada, meuTimeId);
+
+        // Animações de mudança de posição
+        for (const d of diffs) {
+            const row = container.querySelector(`[data-time-id="${d.timeId}"]`);
+            if (!row || row.classList.contains('live-rank-row--me')) continue;
+            const cls = d.direction === 'up' ? 'live-rank-row--up' : 'live-rank-row--down';
+            row.classList.add(cls);
+            setTimeout(() => row.classList.remove(cls), 700);
+        }
+
+        _updateLiveTimestamp();
+    };
+
+    const onStop = () => desativarLiveRankingCard();
+
+    // Capturar ERROR state
+    const onState = () => {
+        const state = MS.currentState;
+        if (state === MS.STATES.ERROR) {
+            container.innerHTML = _buildLiveRankingError();
+        } else if (state === MS.STATES.ENDED) {
+            desativarLiveRankingCard();
+        }
+    };
+
+    MS?.on('data:parciais', onParciais);
+    MS?.on('matchday:stop', onStop);
+    MS?.on('matchday:state', onState);
+    _liveCardUnsubscribers.push(
+        () => MS?.off('data:parciais', onParciais),
+        () => MS?.off('matchday:stop', onStop),
+        () => MS?.off('matchday:state', onState)
+    );
+
+    const tsTimer = setInterval(_updateLiveTimestamp, 10000);
+    _liveCardUnsubscribers.push(() => clearInterval(tsTimer));
+
+    _liveCardActive = true;
+    if (window.Log) Log.info("PARTICIPANTE-HOME", "Live ranking card ativado");
+}
+
+function desativarLiveRankingCard() {
+    if (!_liveCardActive) return;
+
+    _liveCardUnsubscribers.forEach(fn => fn());
+    _liveCardUnsubscribers = [];
+    _prevLiveRanking = null;
+
+    const container = document.getElementById('live-ranking-container');
+    if (container) container.remove();
+
+    const heroSection = document.querySelector('.home-hero-section');
+    if (heroSection) heroSection.style.display = '';
+
+    document.getElementById('home-container')?.classList.remove('home-live-active');
+
+    _liveCardActive = false;
+    if (window.Log) Log.info("PARTICIPANTE-HOME", "Live ranking card desativado");
 }
 
 function getValorRankingPosicao(config, posicao) {
