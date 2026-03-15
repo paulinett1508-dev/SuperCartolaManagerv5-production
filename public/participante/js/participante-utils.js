@@ -174,6 +174,10 @@ function getAoVivoStats() {
     return _lastAoVivoStatsData?.stats || null;
 }
 
+function getAoVivoData() {
+    return _lastAoVivoStatsData || null;
+}
+
 // Disponibilizar globalmente
 window.formatarMoedaBR = formatarMoedaBR;
 window.parseMoedaBR = parseMoedaBR;
@@ -184,3 +188,4 @@ window.isMercadoAberto = isMercadoAberto;
 window.isJogosEmAndamento = isJogosEmAndamento;
 window.isRodadaRealmenteAoVivo = isRodadaRealmenteAoVivo;
 window.getAoVivoStats = getAoVivoStats;
+window.getAoVivoData = getAoVivoData;

@@ -326,32 +326,31 @@
     }
 }
 
-/* --- WAITING: Fogo dim/cinza, sem animação forte --- */
+/* --- WAITING: Fogo apagado — estático, totalmente cinza, sem movimento --- */
 .wh-fab--waiting {
-    background: linear-gradient(135deg, var(--wh-gray-500) 0%, var(--wh-gray-400) 50%, var(--wh-gray-500) 100%) !important;
-    background-size: 200% 200% !important;
-    border-color: rgba(156, 163, 175, 0.4) !important;
+    background: linear-gradient(135deg, var(--wh-gray-600) 0%, var(--wh-gray-500) 50%, var(--wh-gray-600) 100%) !important;
+    background-size: 100% 100% !important;
+    border-color: rgba(107, 114, 128, 0.3) !important;
     box-shadow:
-        0 4px 12px rgba(107, 114, 128, 0.3),
-        0 0 20px rgba(107, 114, 128, 0.15) !important;
-    animation: wh-gradient-shift 6s ease infinite !important;
+        0 2px 8px rgba(75, 85, 99, 0.3) !important;
+    animation: none !important;
 }
 
 .wh-fab--waiting::before {
-    background: linear-gradient(135deg, var(--wh-gray-500), var(--wh-gray-400), var(--wh-gray-300), var(--wh-gray-500)) !important;
-    opacity: 0.3 !important;
-    animation: wh-ring-rotate 6s linear infinite !important;
+    background: linear-gradient(135deg, var(--wh-gray-600), var(--wh-gray-500), var(--wh-gray-400), var(--wh-gray-600)) !important;
+    opacity: 0.15 !important;
+    animation: none !important;
 }
 
 .wh-fab--waiting::after {
-    background: radial-gradient(circle, rgba(107, 114, 128, 0.2) 0%, transparent 70%) !important;
-    animation: wh-glow-pulse 4s ease-in-out infinite !important;
+    background: none !important;
+    animation: none !important;
 }
 
 .wh-fab--waiting .wh-fab-icon {
     color: var(--app-text-muted) !important;
     animation: none !important;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2)) grayscale(80%) !important;
+    filter: grayscale(100%) opacity(0.55) !important;
 }
 
 /* --- LIVE: Fogo vibrante máximo, todas animações ativas --- */

@@ -379,12 +379,15 @@
         _headerInjected = false;
     }
 
-    // ─── Atualiza label do header conforme jogos ao vivo ────────────
+    // ─── Atualiza label do header conforme agenda de jogos da rodada ───
     function _updateHeaderLabel() {
         const labelEl = document.querySelector('#matchday-header-bar .matchday-header-label');
         if (!labelEl) return;
-        const aoVivo = window.getAoVivoStats?.()?.aoVivo || 0;
-        if (aoVivo > 0) {
+        const data = window.getAoVivoData?.();
+        const aoVivoCount = data?.stats?.aoVivo || 0;
+        const fabState = (data?.fabState || '').toLowerCase();
+        const isLive = aoVivoCount > 0 || fabState === 'live';
+        if (isLive) {
             const rodada = _currentRodada ? ` ${_currentRodada}` : '';
             labelEl.textContent = `RODADA${rodada} AO VIVO`;
         } else {
