@@ -442,11 +442,19 @@ async function buscarDadosHomeFresh(ligaId, timeId) {
     const cache = window.ParticipanteCache;
     const temporada = window.ParticipanteConfig?.CURRENT_SEASON || new Date().getFullYear();
 
-    const [ligaFresh, rankingFresh, rodadasFresh] = await Promise.all([
+    let [ligaFresh, rankingFresh, rodadasFresh] = await Promise.all([
         fetch(`/api/ligas/${ligaId}`).then(r => r.ok ? r.json() : null).catch(() => null),
         fetch(`/api/ligas/${ligaId}/ranking?temporada=${temporada}`).then(r => r.ok ? r.json() : null).catch(() => null),
         fetch(`/api/rodadas/${ligaId}/rodadas?inicio=1&fim=${RODADA_FINAL_CAMPEONATO}&temporada=${temporada}`).then(r => r.ok ? r.json() : null).catch(() => null)
     ]);
+
+    // Unwrap wrappers {ranking: [...]} e {rodadas: [...]} se necessário
+    if (rankingFresh && !Array.isArray(rankingFresh) && Array.isArray(rankingFresh.ranking)) {
+        rankingFresh = rankingFresh.ranking;
+    }
+    if (rodadasFresh && !Array.isArray(rodadasFresh) && Array.isArray(rodadasFresh.rodadas)) {
+        rodadasFresh = rodadasFresh.rodadas;
+    }
 
     if (!Array.isArray(rankingFresh) || !Array.isArray(rodadasFresh)) return null;
 
@@ -548,6 +556,10 @@ function atualizarCardsHomeUI(data) {
 // PROCESSAR DADOS
 // =====================================================================
 function processarDadosParaRender(liga, ranking, rodadas, extratoData, meuTimeIdNum, participante) {
+    // Unwrap wrapper {rodadas: [...], cacheHint} se necessário (API retorna objeto, cache pode preservar)
+    if (rodadas && !Array.isArray(rodadas) && Array.isArray(rodadas.rodadas)) {
+        rodadas = rodadas.rodadas;
+    }
     const meuTime = ranking?.find((t) => Number(t.timeId) === meuTimeIdNum);
     const posicao = meuTime ? meuTime.posicao : null;
     // ✅ v1.2: Fallback para liga.participantes em pré-temporada (consistente com boas-vindas)
