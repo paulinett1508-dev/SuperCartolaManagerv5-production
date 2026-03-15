@@ -340,6 +340,15 @@
                 }
 
                 _setState(MATCHDAY_STATES.LIVE);
+
+                // ✅ Super Cache v2: salvar parciais para SWR
+                if (window.Cache && _ligaId) {
+                    const _temp = window.ParticipanteConfig?.CURRENT_SEASON || new Date().getFullYear();
+                    window.Cache.set(`ranking:${_ligaId}:${_temp}`, ranking, {
+                        ttl: 30, imutavel: false, motivo: 'rodada_ativa'
+                    });
+                }
+
                 _emit('data:parciais');
                 _updateHeaderLabel();
             }
