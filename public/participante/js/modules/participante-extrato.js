@@ -1,5 +1,5 @@
 // =====================================================================
-// PARTICIPANTE-EXTRATO.JS - v5.1 (FIX PROJEÇÃO RODADA ATUAL)
+// PARTICIPANTE-EXTRATO.JS - v6.0 (PROJEÇÃO FINANCEIRA SEM EXTRATO HISTÓRICO)
 // Destino: /participante/js/modules/participante-extrato.js
 // =====================================================================
 // ✅ v5.1: FIX CRÍTICO - Projeção financeira não enxergava rodada em andamento
@@ -715,6 +715,35 @@ async function carregarExtrato(ligaId, timeId) {
                                (extratoData?.temporada >= 2026 && extratoData?.rodadas?.length === 0);
 
         if (!extratoData && !eNovaTemporada) {
+            // ✅ v6.0: Se rodada em andamento (status 2), mostrar projeção ao invés de "vazio"
+            if (ultimoStatusMercado === 2) {
+                if (!usouCache && !timeoutFired) {
+                    const container = document.getElementById("fluxoFinanceiroContent");
+                    if (container) {
+                        container.innerHTML = `
+                            <div style="text-align: center; padding: 32px 20px;">
+                                <div style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%);
+                                            border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 16px; padding: 24px;">
+                                    <span class="material-icons" style="font-size: 40px; color: var(--app-success); display: block; margin-bottom: 12px; animation: pulse 2s infinite;">sports_soccer</span>
+                                    <h3 style="color: #22c55e; margin: 0 0 8px 0; font-size: 18px; font-weight: 700;">
+                                        Rodada em Andamento
+                                    </h3>
+                                    <p style="color: #9ca3af; font-size: 13px; margin: 0 0 16px 0; line-height: 1.5;">
+                                        O extrato financeiro sera consolidado quando a rodada finalizar.
+                                        Acompanhe a projecao ao vivo abaixo.
+                                    </p>
+                                    <div id="projecaoFinanceiraCard"></div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                // Ativar projeção ao vivo mesmo sem extratoData
+                buscarEExibirProjecao(ligaId, timeId);
+                iniciarAutoRefreshProjecao(ligaId, timeId);
+                iniciarStatusCheck(ligaId, timeId);
+                return;
+            }
             // ✅ v5.2: Não sobrescrever tela de timeout com "sem dados"
             if (!usouCache && !timeoutFired) mostrarVazio();
             return;
@@ -829,8 +858,8 @@ async function carregarExtrato(ligaId, timeId) {
         // ✅ v4.6: Limpar timeout de segurança
         if (timeoutId) clearTimeout(timeoutId);
 
-        // ✅ v5.1: PROJEÇÃO FINANCEIRA - buscar se rodada em andamento
-        if (ultimoStatusMercado === 2 && extratoData) {
+        // ✅ v6.0: PROJEÇÃO FINANCEIRA - buscar se rodada em andamento (não depende de extratoData)
+        if (ultimoStatusMercado === 2) {
             buscarEExibirProjecao(ligaId, timeId);
         } else {
             pararAutoRefreshProjecao();
@@ -1530,6 +1559,12 @@ async function verificarStatusEAtivarProjecao(ligaId, timeId) {
             pararAutoRefreshProjecao();
             const cardExistente = document.getElementById("projecaoFinanceiraCard");
             if (cardExistente) cardExistente.remove();
+            // ✅ v6.0: Restaurar hero label original ao sair de projeção
+            const heroLabelEl = document.querySelector('.extrato-hero__label');
+            if (heroLabelEl?.dataset?.originalLabel) {
+                heroLabelEl.textContent = heroLabelEl.dataset.originalLabel;
+                delete heroLabelEl.dataset.originalLabel;
+            }
         }
 
         // Sempre manter ultimoStatusMercado atualizado
@@ -1572,6 +1607,12 @@ async function buscarEExibirProjecao(ligaId, timeId) {
             // Remover card se existia
             const cardExistente = document.getElementById("projecaoFinanceiraCard");
             if (cardExistente) cardExistente.remove();
+            // ✅ v6.0: Restaurar hero label original
+            const heroLabelEl = document.querySelector('.extrato-hero__label');
+            if (heroLabelEl?.dataset?.originalLabel) {
+                heroLabelEl.textContent = heroLabelEl.dataset.originalLabel;
+                delete heroLabelEl.dataset.originalLabel;
+            }
             return;
         }
 

@@ -1,5 +1,5 @@
 // =====================================================
-// MÓDULO: UI DO EXTRATO PARTICIPANTE - v11.2 FIX ZONA ICONS ROBUSTEZ
+// MÓDULO: UI DO EXTRATO PARTICIPANTE - v11.3 HERO CARD SALDO PROJETADO
 // =====================================================
 // ✅ v11.2: FIX REFORÇADO - Múltiplas correções na classificação de zona
 //   - getFaixasParaRodada agora verifica se faixas explícitas existem antes de usar
@@ -1685,6 +1685,35 @@ export function renderizarProjecaoFinanceira(projecaoData) {
             }
         </style>
     `;
+
+    // ✅ v11.3: Atualizar hero card com saldo projetado (se hero existe)
+    const heroValorEl = document.querySelector('.extrato-hero__valor');
+    const heroLabelEl = document.querySelector('.extrato-hero__label');
+    if (heroValorEl && saldo?.projetado !== undefined) {
+        const sp = saldo.projetado;
+        const spPositivo = sp > 0;
+        const spNegativo = sp < 0;
+
+        // Atualizar valor no hero
+        heroValorEl.textContent = `${spNegativo ? '-' : spPositivo ? '+' : ''}R$ ${Math.abs(sp).toFixed(2).replace('.', ',')}`;
+
+        // Atualizar classes de cor
+        heroValorEl.classList.remove('extrato-hero__valor--positive', 'extrato-hero__valor--negative', 'extrato-hero__valor--zero');
+        heroValorEl.classList.add(spPositivo ? 'extrato-hero__valor--positive' : spNegativo ? 'extrato-hero__valor--negative' : 'extrato-hero__valor--zero');
+
+        // Atualizar hero container classes
+        const heroEl = document.querySelector('.extrato-hero');
+        if (heroEl) {
+            heroEl.classList.remove('extrato-hero--positive', 'extrato-hero--negative', 'extrato-hero--zero');
+            heroEl.classList.add(spPositivo ? 'extrato-hero--positive' : spNegativo ? 'extrato-hero--negative' : 'extrato-hero--zero');
+        }
+
+        // Indicar que é projeção no label
+        if (heroLabelEl && !heroLabelEl.dataset.originalLabel) {
+            heroLabelEl.dataset.originalLabel = heroLabelEl.textContent;
+            heroLabelEl.innerHTML = `Saldo Projetado <span style="display:inline-block;width:6px;height:6px;background:#22c55e;border-radius:50%;margin-left:4px;animation:projecaoPulse 2s ease-in-out infinite;vertical-align:middle;"></span>`;
+        }
+    }
 }
 
 if (window.Log) Log.info("[EXTRATO-UI] ✅ Módulo v11.1 carregado (BANK DIGITAL + PROJEÇÃO AO VIVO)");
