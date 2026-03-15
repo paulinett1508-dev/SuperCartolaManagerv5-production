@@ -109,7 +109,9 @@ export async function inicializarRodadasParticipante({
             return;
         }
 
-        const rodadas = await response.json();
+        const rodadasRaw = await response.json();
+        // Normalizar formato: backend retorna { rodadas: [], cacheHint: {} } desde ba496f8
+        const rodadas = Array.isArray(rodadasRaw) ? rodadasRaw : (rodadasRaw?.rodadas || []);
         if (window.Log)
             Log.info(
                 `[PARTICIPANTE-RODADAS] 📊 ${rodadas.length} registros recebidos`,
@@ -1380,7 +1382,9 @@ async function selecionarRodada(numeroRodada, isParcial = false) {
                 try {
                     const res = await fetch(`/api/rodadas/${ligaId}/rodadas?rodada=${numeroRodada}&temporada=${TEMPORADA_ATUAL}`);
                     if (res.ok) {
-                        const rodadas = await res.json();
+                        const rodadasRaw = await res.json();
+                        // Normalizar formato: backend retorna { rodadas: [], cacheHint: {} } desde ba496f8
+                        const rodadas = Array.isArray(rodadasRaw) ? rodadasRaw : (rodadasRaw?.rodadas || []);
                         if (rodadas.length > 0) {
                             const agrupadas = agruparRodadasPorNumero(rodadas);
                             const dadosFresh = agrupadas.find(r => r.numero === numeroRodada);
