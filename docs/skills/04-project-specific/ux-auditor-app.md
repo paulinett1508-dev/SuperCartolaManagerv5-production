@@ -1,3 +1,8 @@
+---
+name: ux-auditor-app
+description: Auditoria completa de UI/UX, CSS, HTML e experiência do app participante (PWA Mobile)
+---
+
 # SKILL: UX Auditor App (Auditor de Experiencia do App Participante)
 
 ## Visao Geral

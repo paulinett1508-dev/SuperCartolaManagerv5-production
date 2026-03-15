@@ -1,3 +1,8 @@
+---
+name: project-reference
+description: Referência detalhada do projeto — MCPs, collections, keyword map, renovação de temporada, slash commands
+---
+
 # Skill: Project Reference (Referencia Detalhada do Projeto)
 
 > Conteudo de referencia detalhado do Super Cartola Manager. Consulte esta skill quando precisar de detalhes sobre MCPs, collections, keyword map, renovacao de temporada, ou slash commands.

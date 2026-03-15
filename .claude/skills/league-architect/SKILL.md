@@ -1,0 +1,1 @@
+../../../docs/skills/02-specialists/league-architect.md
