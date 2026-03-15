@@ -576,7 +576,8 @@ export async function calcularPontosParciais(liga, rodada) {
         clube_id: clubeId,
         escudo_url:
           escalacaoData.url_escudo_png || escalacaoData.url_escudo_svg || "",
-        totalPontos: totalPontos,
+        pontos: totalPontos,       // lido por renderizarCardApp como score principal
+        totalPontos: totalPontos,  // compatibilidade: sort e outros consumidores
         ativo: status ? status.ativo : true,
         rodada_desistencia: status ? status.rodada_desistencia : null,
       });
