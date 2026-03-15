@@ -1,8 +1,12 @@
 import express from "express";
 import axios from "axios";
+import NodeCache from "node-cache";
 import { isSeasonFinished, SEASON_CONFIG, logBlockedOperation } from "../utils/seasonGuard.js";
 import { buildCacheHint } from '../utils/cache-hint.js';
 import cartolaApiService from "../services/cartolaApiService.js";
+
+// Cache de escalações — não mudam durante a rodada (TTL 5min, max 500 entries)
+const escalacaoProxyCache = new NodeCache({ stdTTL: 300, maxKeys: 500 });
 
 const router = express.Router();
 const CARTOLA_API_BASE = "https://api.cartola.globo.com";
@@ -190,9 +194,18 @@ router.get("/atletas/pontuados", async (req, res) => {
 });
 
 // Endpoint: Escalação de um time em uma rodada específica
+// ✅ PERF-FIX: Cache de 5min — escalações não mudam durante a rodada
 router.get("/time/id/:timeId/:rodada", async (req, res) => {
     try {
         const { timeId, rodada } = req.params;
+
+        // Verificar cache antes de chamar API Cartola
+        const cacheKey = `esc_${timeId}_${rodada}`;
+        const cached = escalacaoProxyCache.get(cacheKey);
+        if (cached) {
+            return res.json(cached);
+        }
+
         console.log(
             `🔄 [CARTOLA-PROXY] Buscando escalação do time ${timeId} na rodada ${rodada}...`,
         );
@@ -209,6 +222,7 @@ router.get("/time/id/:timeId/:rodada", async (req, res) => {
         );
 
         console.log(`✅ [CARTOLA-PROXY] Escalação obtida para time ${timeId}`);
+        escalacaoProxyCache.set(cacheKey, response.data);
         res.json(response.data);
     } catch (error) {
         console.error(
