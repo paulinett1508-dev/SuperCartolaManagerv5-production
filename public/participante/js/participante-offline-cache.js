@@ -472,6 +472,13 @@ OfflineCache.init().then(() => {
 // Expor globalmente
 window.OfflineCache = OfflineCache;
 
+// ✅ Super Cache v2 shim: clearAll também limpa Cache v2
+const _origClearAll = OfflineCache.clearAll?.bind(OfflineCache);
+OfflineCache.clearAll = async function() {
+    if (_origClearAll) await _origClearAll();
+    if (window.Cache) await window.Cache.invalidatePrefix('*');
+};
+
 if (window.Log) {
     if (OfflineCache.TEMPORADA_ENCERRADA) {
         Log.info('OFFLINE-CACHE', '✅ Sistema pronto (MODO ARQUIVO - Cache permanente)');

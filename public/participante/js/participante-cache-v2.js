@@ -427,6 +427,19 @@
         localStorage.setItem('scm_cache_v2_migrated', 'true');
     }
 
+    // ─── Logging periódico de métricas ─────────────────────────
+    function _logMetrics() {
+        if (!window.Log) return;
+        const s = getStats();
+        const m = s.metrics;
+        const total = m.l1Hits + m.l2Hits + m.l2Immutable + m.swr + m.networkFetches + m.misses;
+        if (total === 0) return;
+        const hitRate = total > 0 ? Math.round(((m.l1Hits + m.l2Hits + m.l2Immutable + m.swr) / total) * 100) : 0;
+        Log.info('[CACHE-V2]',
+            `L1:${m.l1Hits} L2:${m.l2Hits} Immutable:${m.l2Immutable} SWR:${m.swr} Net:${m.networkFetches} Miss:${m.misses} | HitRate:${hitRate}% | L1Size:${s.l1Size} Pending:${s.pending}`
+        );
+    }
+
     // ─── Bootstrap ───────────────────────────────────────────────
     async function _init() {
         await _openDB();
@@ -434,6 +447,9 @@
 
         // Limpeza periódica
         setInterval(cleanExpired, CLEAN_INTERVAL_MS);
+
+        // Log de métricas a cada 60s
+        setInterval(_logMetrics, 60000);
 
         if (window.Log) Log.info('[CACHE-V2] Super Cache Inteligente v2 inicializado');
     }
