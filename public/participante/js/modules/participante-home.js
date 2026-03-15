@@ -1459,10 +1459,12 @@ function atualizarCardsHomeComParciais() {
 
     // Status badge
     if (perfStatusEl) {
-        const aoVivo = typeof isJogosAoVivo === 'function' && isJogosAoVivo();
-        perfStatusEl.innerHTML = aoVivo
+        const statusRodada = _statusRodadaAtual();
+        perfStatusEl.innerHTML = statusRodada === 'ao_vivo'
             ? '<span class="live-badge-mini">AO VIVO</span>'
-            : '<span class="andamento-badge-mini">RODADA EM ANDAMENTO</span>';
+            : statusRodada === 'encerrada'
+                ? '<span class="andamento-badge-mini">RODADA ENCERRADA</span>'
+                : '<span class="andamento-badge-mini">RODADA EM ANDAMENTO</span>';
     }
 
     // Atualizar painel de avisos para modo AO VIVO
@@ -1470,10 +1472,12 @@ function atualizarCardsHomeComParciais() {
     const avisoSubtitulo = document.getElementById('home-aviso-subtitulo');
     const rodadaMercadoLive = mercadoStatus?.rodada_atual || '';
     if (avisoTitulo) {
-        const jogosAoVivo = typeof isJogosAoVivo === 'function' && isJogosAoVivo();
-        avisoTitulo.innerHTML = jogosAoVivo
+        const statusRodada2 = _statusRodadaAtual();
+        avisoTitulo.innerHTML = statusRodada2 === 'ao_vivo'
             ? 'RODADA AO VIVO <span class="live-badge-mini">LIVE</span>'
-            : 'RODADA EM ANDAMENTO';
+            : statusRodada2 === 'encerrada'
+                ? 'RODADA ENCERRADA'
+                : 'RODADA EM ANDAMENTO';
     }
     if (avisoSubtitulo) {
         const pontsParciais = minhaPosicao.pontos ? (Math.trunc(minhaPosicao.pontos * 10) / 10).toFixed(1) : '0';
@@ -1482,6 +1486,18 @@ function atualizarCardsHomeComParciais() {
 
     // Atualizar saldo projetado (hidden element, mantido para consistencia de dados)
     atualizarSaldoProjetado(minhaPosicao.posicao);
+}
+
+// ============================================
+// Helper: status da rodada usando dados globais de jogos ao vivo
+// Usa window.getAoVivoData() (participante-utils.js) — fonte única
+// ============================================
+function _statusRodadaAtual() {
+    const d = window.getAoVivoData?.();
+    if (!d) return 'em_andamento';
+    if (d.stats?.aoVivo > 0 || d.calendarioAberto === true) return 'ao_vivo';
+    if (d.fabState === 'cooling') return 'encerrada';
+    return 'em_andamento';
 }
 
 // ============================================
@@ -1537,7 +1553,7 @@ function _buildLiveRankingHTML(ranking, rodada, meuTimeId) {
         <div class="live-ranking-header">
             <div class="live-ranking-header-left">
                 <span class="live-ranking-dot"></span>
-                <span class="live-ranking-title">Rodada ${rodada || ''} ${(typeof isJogosAoVivo === 'function' && isJogosAoVivo()) ? 'ao vivo' : 'em andamento'}</span>
+                <span class="live-ranking-title">Rodada ${rodada || ''} ${(() => { const s = _statusRodadaAtual(); return s === 'ao_vivo' ? 'ao vivo' : s === 'encerrada' ? 'encerrada' : 'em andamento'; })()}</span>
             </div>
             <span class="live-ranking-ts" id="live-ranking-ts"></span>
         </div>

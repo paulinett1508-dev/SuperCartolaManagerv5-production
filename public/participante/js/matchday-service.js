@@ -404,9 +404,11 @@
         // Fonte única: stats.aoVivo validado pelo backend
         // Removido || fabState === 'live' — condição circular idêntica ao bug corrigido no WHWidget
         const isLive = aoVivoCount > 0;
+        const rodada = _currentRodada ? ` ${_currentRodada}` : '';
         if (isLive) {
-            const rodada = _currentRodada ? ` ${_currentRodada}` : '';
             labelEl.textContent = `RODADA${rodada} AO VIVO`;
+        } else if (data?.fabState === 'cooling') {
+            labelEl.textContent = `RODADA${rodada} ENCERRADA`;
         } else {
             labelEl.textContent = 'RODADA EM ANDAMENTO';
         }
