@@ -62,6 +62,7 @@
     let _isStale             = false;
     let _currentState        = null;
     let _consecutiveFailures = 0;
+    let _currentRodada       = null;
 
     // ─── EventEmitter ───────────────────────────────────────────────
     function _on(event, fn) {
@@ -277,6 +278,7 @@
 
             const data = await res.json();
             const ranking = data?.data?.ranking || data?.ranking || [];
+            _currentRodada = data?.data?.rodada || data?.rodada || _currentRodada;
             const hash = _hashRanking(ranking);
 
             // Sem atletas pontuados ainda
@@ -295,12 +297,12 @@
                 // Calcular diff de posições
                 const prevMap = {};
                 (prevRanking || []).forEach((r, i) => {
-                    const key = r.participante_id || r.nome;
+                    const key = r.timeId || r.participante_id || r.nome;
                     if (key) prevMap[key] = i + 1;
                 });
 
                 _lastDiff = ranking.map((r, i) => {
-                    const key = r.participante_id || r.nome;
+                    const key = r.timeId || r.participante_id || r.nome;
                     const prevPos = prevMap[key];
                     const curPos = i + 1;
                     return {
@@ -385,11 +387,11 @@
 
         const items = ranking.slice(0, 8).map((r, i) => {
             const pos = i + 1;
-            const nome = r.nome || r.participante_nome || '—';
+            const nome = r.nome_cartola || r.nome || r.participante_nome || '—';
             const pts = typeof r.pontos === 'number'
-                ? r.pontos.toFixed(1)
+                ? String(Math.trunc(r.pontos * 10) / 10)
                 : (r.pontuacao || '—');
-            const key = r.participante_id || nome;
+            const key = r.timeId || r.participante_id || nome;
             const prevPos = prevMap[key];
             const seta = prevPos && prevPos > pos ? ' ↑' : '';
             return `${pos}º ${nome} ${pts}pts${seta}`;
@@ -425,6 +427,7 @@
         get lastUpdateTs() { return _lastUpdateTs; },
         get lastDiff() { return _lastDiff; },
         get lastRanking() { return _lastRanking; },
+        get currentRodada() { return _currentRodada; },
 
         // Constantes para consumidores
         STATES: MATCHDAY_STATES,
