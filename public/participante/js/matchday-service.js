@@ -217,8 +217,16 @@
         _startTimestampUpdater();
         _emit('matchday:loading');
 
-        // Toast de ativação
-        _toast('Rodada ao vivo! Acompanhe as parciais em tempo real.', 'info', 4000);
+        // Toast de ativação — contextual conforme jogos ao vivo
+        const aoVivoData = window.getAoVivoData?.();
+        const temJogosAgora = (aoVivoData?.stats?.aoVivo || 0) > 0;
+        _toast(
+            temJogosAgora
+                ? 'Rodada ao vivo! Acompanhe as parciais em tempo real.'
+                : 'Rodada em andamento! Parciais serão atualizadas quando os jogos começarem.',
+            'info',
+            4000
+        );
 
         if (window.Log) Log.info('[MatchdayService] MATCHDAY ATIVO — modo live iniciado');
     }

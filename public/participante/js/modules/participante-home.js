@@ -1446,7 +1446,10 @@ function atualizarCardsHomeComParciais() {
     const avisoSubtitulo = document.getElementById('home-aviso-subtitulo');
     const rodadaMercadoLive = mercadoStatus?.rodada_atual || '';
     if (avisoTitulo) {
-        avisoTitulo.innerHTML = 'RODADA EM ANDAMENTO <span class="live-badge-mini">LIVE</span>';
+        const jogosAoVivo = typeof isJogosAoVivo === 'function' && isJogosAoVivo();
+        avisoTitulo.innerHTML = jogosAoVivo
+            ? 'RODADA AO VIVO <span class="live-badge-mini">LIVE</span>'
+            : 'RODADA EM ANDAMENTO';
     }
     if (avisoSubtitulo) {
         const pontsParciais = minhaPosicao.pontos ? (Math.trunc(minhaPosicao.pontos * 10) / 10).toFixed(1) : '0';

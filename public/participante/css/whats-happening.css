@@ -258,6 +258,42 @@
     }
 }
 
+/* Label de estado (abaixo do FAB) */
+.wh-fab-state-label {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: 9px;
+    font-weight: 700;
+    font-family: var(--app-font-brand);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--app-text-secondary);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.wh-fab--live .wh-fab-state-label {
+    color: var(--wh-fire-hot);
+    opacity: 1;
+}
+
+.wh-fab--interval .wh-fab-state-label,
+.wh-fab--waiting .wh-fab-state-label,
+.wh-fab--cooling .wh-fab-state-label {
+    color: var(--app-text-muted);
+    opacity: 1;
+}
+
+.wh-fab--hidden .wh-fab-state-label,
+.wh-fab--finished .wh-fab-state-label {
+    opacity: 0;
+}
+
 /* Badge de notificação */
 .wh-fab-badge {
     position: absolute;
