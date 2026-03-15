@@ -1556,7 +1556,7 @@ function _buildLiveRankingError() {
         <div class="live-ranking-error">
             Parciais indisponíveis
             <br>
-            <button onclick="window.MatchdayService?._fetchParciais?.()">Tentar novamente</button>
+            <button onclick="window.MatchdayService && window.MatchdayService._fetchParciais && window.MatchdayService._fetchParciais()">Tentar novamente</button>
         </div>
     </div>`;
 }
@@ -1616,6 +1616,10 @@ function ativarLiveRankingCard() {
 
     heroSection.style.display = 'none';
     document.getElementById('home-container')?.classList.add('home-live-active');
+
+    // Esconder matchday header bar (injetado fora de #home-container — seletor CSS descendente não alcança)
+    const headerBar = document.getElementById('matchday-header-bar');
+    if (headerBar) headerBar.style.display = 'none';
 
     let container = document.getElementById('live-ranking-container');
     if (!container) {
@@ -1698,6 +1702,10 @@ function desativarLiveRankingCard() {
     if (heroSection) heroSection.style.display = '';
 
     document.getElementById('home-container')?.classList.remove('home-live-active');
+
+    // Restaurar matchday header bar
+    const headerBar = document.getElementById('matchday-header-bar');
+    if (headerBar) headerBar.style.display = '';
 
     _liveCardActive = false;
     if (window.Log) Log.info("PARTICIPANTE-HOME", "Live ranking card desativado");
