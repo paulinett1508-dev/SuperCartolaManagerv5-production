@@ -1185,7 +1185,27 @@ function setupCleanup() {
   });
 }
 
+// ✅ v1.9: Escutar evento de consolidação para invalidar caches e recalcular
+window.addEventListener('consolidacao-detectada', (event) => {
+  const rodadaConsolidada = event.detail?.rodada;
+  console.log(`[MATA-ORQUESTRADOR] 🔄 Consolidação detectada: R${rodadaConsolidada} — invalidando caches`);
+
+  // Limpar todos os caches locais para forçar recálculo
+  pontosRodadaCache.clear();
+  rankingBaseCache.clear();
+  tamanhoTorneioCache.clear();
+  mercadoStatusCache = null;
+  mercadoStatusTimestamp = 0;
+
+  // Recarregar mata-mata se a tela estiver visível
+  const container = document.getElementById("mata-mata");
+  if (container && container.offsetParent !== null) {
+    console.log(`[MATA-ORQUESTRADOR] 🔄 Tela visível — recarregando mata-mata`);
+    carregarMataMata();
+  }
+});
+
 // Inicialização do módulo
 setupCleanup();
 
-console.log("[MATA-ORQUESTRADOR] Módulo v1.7 carregado - Bloqueio de fases futuras (rodada não rolou)");
+console.log("[MATA-ORQUESTRADOR] Módulo v1.9 carregado - Consolidação automática + bloqueio de fases futuras");

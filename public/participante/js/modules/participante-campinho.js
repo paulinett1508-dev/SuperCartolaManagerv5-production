@@ -91,10 +91,7 @@ export async function inicializarCampinhoParticipante(params) {
             ? window.obterUltimaRodadaDisputada(rodadaMercado, statusMercadoNum)
             : (isAoVivo ? rodadaMercado : Math.max(1, rodadaMercado - 1));
 
-        const [escalacao, confrontos] = await Promise.all([
-            buscarEscalacaoCompleta(ligaId, timeId, rodadaConsolidada),
-            buscarConfrontos(ligaId, timeId)
-        ]);
+        const escalacao = await buscarEscalacaoCompleta(ligaId, timeId, rodadaConsolidada);
 
         // Fallback: se rodada sem dados, tentar rodada anterior consolidada
         // Durante jogos ao vivo (status=2), NÃO fazer fallback para evitar mostrar R-1
@@ -105,20 +102,14 @@ export async function inicializarCampinhoParticipante(params) {
         }
 
         dadosEscalacao = escalacaoFinal;
-        confrontoAtual = confrontos;
 
         if (!escalacaoFinal || (!escalacaoFinal.atletas?.length && !escalacaoFinal.titulares?.length)) {
             container.innerHTML = renderizarSemEscalacao();
             return;
         }
 
-        // Buscar dados do adversario se tiver confronto
-        if (confrontos?.adversario?.timeId) {
-            dadosAdversario = await buscarEscalacaoCompleta(ligaId, confrontos.adversario.timeId, rodadaConsolidada);
-        }
-
         // Renderizar campinho completo
-        container.innerHTML = renderizarCampinhoCompleto(escalacaoFinal, dadosAdversario, confrontos, ligaId, timeId, statusMercado);
+        container.innerHTML = renderizarCampinhoCompleto(escalacaoFinal, dadosAdversario, null, ligaId, timeId, statusMercado);
 
         // Buscar extrato financeiro da rodada (assíncrono)
         buscarExtratoRodada(ligaId, timeId, rodadaConsolidada);
@@ -137,7 +128,7 @@ export async function inicializarCampinhoParticipante(params) {
                     if (escalacaoAtualizada?.atletas?.length || escalacaoAtualizada?.titulares?.length) {
                         dadosEscalacao = escalacaoAtualizada;
                         document.getElementById('campinho-container').innerHTML =
-                            renderizarCampinhoCompleto(escalacaoAtualizada, dadosAdversario, confrontos, ligaId, timeId, statusMercado);
+                            renderizarCampinhoCompleto(escalacaoAtualizada, dadosAdversario, null, ligaId, timeId, statusMercado);
                     }
                 } catch (e) {
                     if (window.Log) Log.warn("PARTICIPANTE-CAMPINHO", "Erro no auto-refresh:", e);
@@ -392,13 +383,6 @@ function calcularPontosTotais(data) {
     }
 
     return total;
-}
-
-async function buscarConfrontos(ligaId, timeId) {
-    // TODO-MEDIUM: Implementar quando endpoints de confronto individual existirem no backend
-    // Endpoints /api/pontos-corridos/:ligaId/confronto/:timeId e
-    // /api/mata-mata/:ligaId/confronto/:timeId ainda não foram implementados
-    return null;
 }
 
 async function tentarBuscarAtletasPontuados() {

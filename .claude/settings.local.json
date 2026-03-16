@@ -209,7 +209,19 @@
       "Bash(gh auth:*)",
       "Bash(git submodule:*)",
       "Bash(echo \"=== Verificando regras críticas no CLAUDE.md ===\" && for rule in \"gemini_audit\" \"Follow the Money\" \"undefined\" \"TRUNCATE\" \"liga_id\" \"lean\\(\\)\" \"LESSONS.md\"; do if grep -q \"$rule\" /home/runner/workspace/CLAUDE.md; then echo \"OK: $rule\"; else echo \"MISSING: $rule\"; fi; done && echo \"\" && echo \"=== Verificando ponteiros para referências ===\" && for ref in \"protocolo-planejamento\" \"ui-ux-guidelines\" \"truncar-pontos\" \"database-strategy\" \"sistema-modulos\"; do if grep -q \"$ref\" /home/runner/workspace/CLAUDE.md; then echo \"OK: $ref\"; else echo \"MISSING: $ref\"; fi; done && echo \"\" && echo \"=== Verificando submodule ===\" && git -C /home/runner/workspace submodule status)",
-      "Bash(claude mcp:*)"
+      "Bash(claude mcp:*)",
+      "Bash(find /home/runner/workspace -maxdepth 3 -type d \\\\\\( -name public -o -name views -o -name client \\\\\\) ! -path '*node_modules*' ! -path '*.config*' ! -path '*/.cache*' 2>/dev/null | head -20)",
+      "Bash(find /home/runner/workspace -type f \\\\\\( -name \"*resta*\" -o -name \"*consolidat*\" \\\\\\) 2>/dev/null | head -20)",
+      "Bash(git -C /home/runner/workspace show fe0394d --stat 2>/dev/null | head -40)",
+      "Bash(git -C /home/runner/workspace show fe0394d -- public/participante/js/matchday-service.js 2>/dev/null | head -80)",
+      "Bash(git -C /home/runner/workspace log --oneline -5 -- public/participante/js/matchday-service.js 2>/dev/null)",
+      "Bash(git -C /home/runner/workspace log --oneline -5 -- public/participante/js/widgets/whats-happening-widget.js 2>/dev/null)",
+      "Bash(git -C /home/runner/workspace show ac20594 --stat 2>/dev/null | head -20)",
+      "Bash(git -C /home/runner/workspace show 41b609a --stat 2>/dev/null | head -10 && git -C /home/runner/workspace show 41b609a -- routes/jogos-ao-vivo-routes.js 2>/dev/null | head -60)",
+      "Skill(anti-frankenstein)",
+      "Bash(for i:*)",
+      "Skill(ai-problems-detection)",
+      "Bash(echo \"=== 4. rodadas ===\" && curl -s \"http://127.0.0.1:3000/api/rodadas/684cb1c8af923da7c7df51de/rodadas?inicio=1&fim=38&temporada=2026\" | python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('cacheHint:', d.get\\('cacheHint', 'MISSING'\\)\\); print\\('type:', type\\(d.get\\('rodadas', d\\)\\).__name__\\)\" 2>&1\necho \"=== 5. extrato-cache ===\" && curl -s \"http://127.0.0.1:3000/api/extrato-cache/684cb1c8af923da7c7df51de/times/13935277/cache?rodadaAtual=6&temporada=2026\" | python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('cacheHint:', d.get\\('cacheHint', 'MISSING'\\)\\)\" 2>&1)"
     ]
   },
   "enableAllProjectMcpServers": true,

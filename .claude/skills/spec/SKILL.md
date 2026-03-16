@@ -1,0 +1,1 @@
+../../../docs/skills/01-core-workflow/spec.md

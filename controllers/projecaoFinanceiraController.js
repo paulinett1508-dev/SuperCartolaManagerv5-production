@@ -26,32 +26,11 @@ import {
     isModuloHabilitado,
 } from "./fluxoFinanceiroController.js";
 import { getFinancialSeason } from "../config/seasons.js";
-import NodeCache from "node-cache";
 import logger from "../utils/logger.js"; // ✅ E4 FIX
 
 const LOG_PREFIX = "[PROJECAO-FINANCEIRA]";
 
-// Cache de 2 minutos para projeções (evita sobrecarga na API Cartola)
-const projecaoCache = new NodeCache({ stdTTL: 120 });
-
-/**
- * Busca ranking parcial com cache de 2 minutos
- * @param {string} ligaId
- * @returns {object|null}
- */
-async function buscarRankingParcialComCache(ligaId) {
-    const cacheKey = `projecao_liga_${ligaId}`;
-    let ranking = projecaoCache.get(cacheKey);
-
-    if (!ranking) {
-        ranking = await buscarRankingParcial(ligaId);
-        if (ranking?.disponivel) {
-            projecaoCache.set(cacheKey, ranking);
-        }
-    }
-
-    return ranking;
-}
+// ✅ PERF-FIX: Cache removido — agora centralizado em parciaisRankingService.js (TTL 60s)
 
 /**
  * Converte ranking parcial para formato de pontuações por rodada
@@ -78,7 +57,7 @@ export const getProjecaoTime = async (req, res) => {
         logger.log(`${LOG_PREFIX} Projeção time ${timeId} liga ${ligaId}`);
 
         // 1. Buscar ranking parcial (já valida status_mercado === 2)
-        const rankingParcial = await buscarRankingParcialComCache(ligaId);
+        const rankingParcial = await buscarRankingParcial(ligaId);
 
         if (!rankingParcial || !rankingParcial.disponivel) {
             return res.json({
@@ -198,7 +177,7 @@ export const getProjecaoLiga = async (req, res) => {
         logger.log(`${LOG_PREFIX} Projeção liga ${ligaId} (todos participantes)`);
 
         // 1. Buscar ranking parcial
-        const rankingParcial = await buscarRankingParcialComCache(ligaId);
+        const rankingParcial = await buscarRankingParcial(ligaId);
 
         if (!rankingParcial || !rankingParcial.disponivel) {
             return res.json({

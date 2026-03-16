@@ -21,6 +21,8 @@ const RodadaSchema = new mongoose.Schema({
   escudo_time_do_coracao: { type: String }, // URL do escudo 30x30
   pontos: { type: Number, default: 0 },
   rodadaNaoJogada: { type: Boolean, default: false },
+  // ✅ v3.2: Distinguir falha de API vs time que realmente não escalou
+  populacaoFalhou: { type: Boolean, default: false },
 
   // ✅ NOVOS CAMPOS - Calculados pelo backend
   posicao: { type: Number }, // Posição no ranking (considerando ativos)
@@ -42,5 +44,9 @@ const RodadaSchema = new mongoose.Schema({
 
 // ✅ Índice composto único COM temporada (multi-temporada)
 RodadaSchema.index({ ligaId: 1, rodada: 1, timeId: 1, temporada: 1 }, { unique: true });
+
+// ✅ v4.0: Índice para obterRodadas() — query {ligaId, temporada} com sort {rodada, posicao}
+// Evita full collection scan no endpoint mais chamado
+RodadaSchema.index({ ligaId: 1, temporada: 1, rodada: 1 });
 
 export default mongoose.model("Rodada", RodadaSchema);

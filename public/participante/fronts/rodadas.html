@@ -511,6 +511,49 @@
     transition: width 0.6s ease;
 }
 
+/* v4.0: Toggle detalhes — progressive disclosure */
+.temp-detalhes-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+    padding: 8px;
+    margin-top: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    color: var(--rodadas-text-muted);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.temp-detalhes-toggle:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--rodadas-primary);
+}
+
+.temp-detalhes-chevron {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+}
+
+.temp-detalhes-toggle[aria-expanded="true"] .temp-detalhes-chevron {
+    transform: rotate(180deg);
+}
+
+.temp-detalhes-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+}
+
+.temp-detalhes-body.expanded {
+    max-height: 500px;
+}
+
 .aproveitamento-hint {
     display: block;
     font-size: 9px;
@@ -2747,55 +2790,62 @@
             </div>
         </div>
 
-        <!-- Linha 2: Destaques -->
-        <div class="temporada-row destaques-row">
-            <div class="temp-destaque melhor">
-                <div class="destaque-icon"><span class="material-symbols-outlined">trending_up</span></div>
-                <div class="destaque-info">
-                    <span class="destaque-label">Melhor Rodada</span>
-                    <span class="destaque-valor" id="tempMelhorRodada">R00</span>
-                    <span class="destaque-pontos" id="tempMelhorPontos">0 pts</span>
+        <!-- v4.0: Seção colapsável — progressive disclosure -->
+        <button class="temp-detalhes-toggle" id="tempDetalhesToggle" onclick="window.toggleTemporadaDetalhes && window.toggleTemporadaDetalhes()">
+            <span>Ver detalhes</span>
+            <span class="material-symbols-outlined temp-detalhes-chevron" id="tempDetalhesChevron">expand_more</span>
+        </button>
+        <div class="temp-detalhes-body" id="tempDetalhesBody">
+            <!-- Linha 2: Destaques -->
+            <div class="temporada-row destaques-row">
+                <div class="temp-destaque melhor">
+                    <div class="destaque-icon"><span class="material-symbols-outlined">trending_up</span></div>
+                    <div class="destaque-info">
+                        <span class="destaque-label">Melhor Rodada</span>
+                        <span class="destaque-valor" id="tempMelhorRodada">R00</span>
+                        <span class="destaque-pontos" id="tempMelhorPontos">0 pts</span>
+                    </div>
+                </div>
+                <div class="temp-destaque pior">
+                    <div class="destaque-icon"><span class="material-symbols-outlined">trending_down</span></div>
+                    <div class="destaque-info">
+                        <span class="destaque-label">Pior Rodada</span>
+                        <span class="destaque-valor" id="tempPiorRodada">R00</span>
+                        <span class="destaque-pontos" id="tempPiorPontos">0 pts</span>
+                    </div>
                 </div>
             </div>
-            <div class="temp-destaque pior">
-                <div class="destaque-icon"><span class="material-symbols-outlined">trending_down</span></div>
-                <div class="destaque-info">
-                    <span class="destaque-label">Pior Rodada</span>
-                    <span class="destaque-valor" id="tempPiorRodada">R00</span>
-                    <span class="destaque-pontos" id="tempPiorPontos">0 pts</span>
+
+            <!-- Linha 3: Conquistas -->
+            <div class="temporada-row conquistas-row">
+                <div class="temp-conquista">
+                    <span class="conquista-icon top3"><span class="material-symbols-outlined">military_tech</span></span>
+                    <span class="conquista-valor" id="tempVezesTop3">0</span>
+                    <span class="conquista-label">Top 3</span>
+                </div>
+                <div class="temp-conquista">
+                    <span class="conquista-icon acima"><span class="material-symbols-outlined">trending_up</span></span>
+                    <span class="conquista-valor" id="tempVezesAcimaMedia">0</span>
+                    <span class="conquista-label">Acima da Média</span>
+                </div>
+                <div class="temp-conquista">
+                    <span class="conquista-icon ultimo"><span class="material-symbols-outlined">sentiment_dissatisfied</span></span>
+                    <span class="conquista-valor" id="tempVezesUltimo">0</span>
+                    <span class="conquista-label">Último</span>
                 </div>
             </div>
-        </div>
 
-        <!-- Linha 3: Conquistas -->
-        <div class="temporada-row conquistas-row">
-            <div class="temp-conquista">
-                <span class="conquista-icon top3"><span class="material-symbols-outlined">military_tech</span></span>
-                <span class="conquista-valor" id="tempVezesTop3">0</span>
-                <span class="conquista-label">Top 3</span>
+            <!-- Barra de aproveitamento -->
+            <div class="temporada-aproveitamento">
+                <div class="aproveitamento-header">
+                    <span>Aproveitamento</span>
+                    <span id="tempAproveitamento">0%</span>
+                </div>
+                <div class="aproveitamento-bar">
+                    <div class="aproveitamento-fill" id="tempAproveitamentoBar" style="width: 0%"></div>
+                </div>
+                <span class="aproveitamento-hint" id="tempAproveitamentoHint">Rodadas acima da média da liga</span>
             </div>
-            <div class="temp-conquista">
-                <span class="conquista-icon acima"><span class="material-symbols-outlined">trending_up</span></span>
-                <span class="conquista-valor" id="tempVezesAcimaMedia">0</span>
-                <span class="conquista-label">Acima da Média</span>
-            </div>
-            <div class="temp-conquista">
-                <span class="conquista-icon ultimo"><span class="material-symbols-outlined">sentiment_dissatisfied</span></span>
-                <span class="conquista-valor" id="tempVezesUltimo">0</span>
-                <span class="conquista-label">Último</span>
-            </div>
-        </div>
-
-        <!-- Barra de aproveitamento -->
-        <div class="temporada-aproveitamento">
-            <div class="aproveitamento-header">
-                <span>Aproveitamento</span>
-                <span id="tempAproveitamento">0%</span>
-            </div>
-            <div class="aproveitamento-bar">
-                <div class="aproveitamento-fill" id="tempAproveitamentoBar" style="width: 0%"></div>
-            </div>
-            <span class="aproveitamento-hint" id="tempAproveitamentoHint">Rodadas acima da média da liga</span>
         </div>
     </div>
 

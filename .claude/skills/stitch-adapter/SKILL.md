@@ -1,0 +1,1 @@
+../../../docs/skills/03-utilities/stitch-adapter.md

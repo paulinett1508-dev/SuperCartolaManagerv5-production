@@ -8,6 +8,7 @@
  *
  * Dependências: rodada (pontuações), ranking_geral (desempate)
  */
+import mongoose from 'mongoose';
 import BaseManager from './BaseManager.js';
 import RestaUmCache from '../../../models/RestaUmCache.js';
 import Rodada from '../../../models/Rodada.js';
@@ -37,94 +38,9 @@ export default class RestaUmManager extends BaseManager {
      */
     async onRoundFinalize(ctx) {
         const { ligaId, rodada } = ctx;
-        console.log(`[RESTA-UM] Processando R${rodada} para liga ${ligaId}`);
-
-        // Buscar pontuações da rodada da collection Rodada
-        const rodadasDb = await Rodada.find({
-            ligaId,
-            rodada,
-            temporada: CURRENT_SEASON,
-        }).lean();
-
-        const pontuacoes = rodadasDb.map(r => ({
-            timeId: r.timeId,
-            pontos: r.pontos || 0,
-        }));
-
-        // Calcular ranking geral (soma de todas as rodadas até agora) para desempate
-        const todasRodadas = await Rodada.aggregate([
-            { $match: { ligaId: ligaId.toString ? ligaId : ligaId, temporada: CURRENT_SEASON, rodada: { $lte: rodada } } },
-            { $group: { _id: '$timeId', pontuacaoTotal: { $sum: '$pontos' } } },
-            { $sort: { pontuacaoTotal: -1 } },
-        ]);
-        const rankingGeral = todasRodadas.map(r => ({ timeId: r._id, pontuacaoTotal: r.pontuacaoTotal }));
-
-        console.log(`[RESTA-UM] Dados: ${pontuacoes.length} pontuações, ${rankingGeral.length} no ranking`);
-
-        try {
-            // Buscar edição em andamento
-            const edicao = await RestaUmCache.findOne({
-                liga_id: ligaId,
-                temporada: CURRENT_SEASON,
-                status: 'em_andamento',
-            });
-
-            if (!edicao) {
-                // Verificar se existe edição pendente que deve iniciar nesta rodada
-                const pendente = await RestaUmCache.findOne({
-                    liga_id: ligaId,
-                    temporada: CURRENT_SEASON,
-                    status: 'pendente',
-                    rodadaInicial: { $lte: rodada },
-                });
-
-                if (pendente) {
-                    // Idempotência: não processar a mesma rodada duas vezes
-                    const jaProcessadaPendente = pendente.historicoEliminacoes?.some(h => h.rodada === rodada);
-                    if (jaProcessadaPendente) {
-                        console.log(`[RESTA-UM] R${rodada} já foi processada (edição pendente) para liga ${ligaId} — ignorando`);
-                        return { pronto: true, ignorado: true, motivo: 'rodada_ja_processada' };
-                    }
-
-                    pendente.status = 'em_andamento';
-                    pendente.rodadaAtual = rodada;
-                    await pendente.save();
-                    console.log(`[RESTA-UM] Edição ${pendente.edicao} iniciada na R${rodada}`);
-
-                    // Proteção da primeira rodada: não eliminar ninguém
-                    if (pendente.protecaoPrimeiraRodada) {
-                        console.log(`[RESTA-UM] Proteção da 1ª rodada ativa - sem eliminações`);
-                        await this._atualizarPontosParticipantes(pendente, pontuacoes, rodada);
-                        return { pronto: true, eliminados: [], protecao: true };
-                    }
-
-                    return await this._processarEliminacao(pendente, pontuacoes, rankingGeral, rodada);
-                }
-
-                console.log(`[RESTA-UM] Nenhuma edição ativa/pendente para liga ${ligaId}`);
-                return { pronto: true, ignorado: true };
-            }
-
-            // Verificar se rodada está dentro do range da edição
-            if (edicao.rodadaFinal && rodada > edicao.rodadaFinal) {
-                console.log(`[RESTA-UM] Rodada ${rodada} fora do range da edição (até R${edicao.rodadaFinal})`);
-                return { pronto: true, ignorado: true };
-            }
-
-            // Idempotência: não processar a mesma rodada duas vezes
-            const jaProcessada = edicao.historicoEliminacoes?.some(h => h.rodada === rodada);
-            if (jaProcessada) {
-                console.log(`[RESTA-UM] R${rodada} já foi processada para liga ${ligaId} — ignorando (idempotência)`);
-                return { pronto: true, ignorado: true, motivo: 'rodada_ja_processada' };
-            }
-
-            edicao.rodadaAtual = rodada;
-            return await this._processarEliminacao(edicao, pontuacoes, rankingGeral, rodada);
-
-        } catch (error) {
-            console.error(`[RESTA-UM] Erro no onRoundFinalize R${rodada}:`, error);
-            return { pronto: false, error: error.message };
-        }
+        // Lógica real movida para onConsolidate — Rodada ainda não foi populada aqui
+        console.log(`[RESTA-UM] onRoundFinalize R${rodada} liga ${ligaId} — aguardando consolidação`);
+        return { pronto: true, aguardandoConsolidacao: true };
     }
 
     /**
@@ -242,6 +158,7 @@ export default class RestaUmManager extends BaseManager {
         }
 
         edicao.ultima_atualizacao = new Date();
+        edicao.markModified('participantes');
         await edicao.save();
 
         // Fluxo financeiro: débitos para eliminados desta rodada
@@ -293,13 +210,144 @@ export default class RestaUmManager extends BaseManager {
 
         edicao.rodadaAtual = rodada;
         edicao.ultima_atualizacao = new Date();
+        edicao.markModified('participantes');
         await edicao.save();
     }
 
+    /**
+     * Valida que todos os participantes vivos têm score na Rodada.
+     * Previne eliminações com dados parciais (race condition).
+     */
+    _validarCoberturaScores(vivos, pontuacoes, rodada, ligaId) {
+        const pontuacoesSet = new Set(pontuacoes.map(p => String(p.timeId)));
+        const semScore = vivos.filter(p => !pontuacoesSet.has(String(p.timeId)));
+
+        if (semScore.length > 0) {
+            const nomes = semScore.map(p => p.nomeTime || p.timeId).join(', ');
+            console.warn(`[RESTA-UM] ⚠️ R${rodada} liga ${ligaId} — ${semScore.length} vivo(s) sem score na Rodada: ${nomes}. Abortando para evitar eliminação incorreta.`);
+            return {
+                ok: false,
+                resultado: { consolidado: false, motivo: 'scores_incompletos', semScore: semScore.length },
+            };
+        }
+
+        return { ok: true };
+    }
+
     async onConsolidate(ctx) {
-        console.log(`[RESTA-UM] Consolidando eliminação R${ctx.rodada}`);
-        // Consolidação já é feita no onRoundFinalize
-        return { consolidado: true };
+        const { ligaId, rodada } = ctx;
+        console.log(`[RESTA-UM] Processando R${rodada} para liga ${ligaId} (onConsolidate)`);
+
+        // Buscar pontuações da rodada da collection Rodada (já populada neste ponto)
+        // populacaoFalhou: exclui registros com falha de API (pontos=0 técnico, não de desempenho)
+        const rodadasDb = await Rodada.find({
+            ligaId,
+            rodada,
+            temporada: CURRENT_SEASON,
+            populacaoFalhou: { $ne: true },
+        }).lean();
+
+        const pontuacoes = rodadasDb.map(r => ({
+            timeId: r.timeId,
+            pontos: r.pontos || 0,
+        }));
+
+        if (pontuacoes.length === 0) {
+            console.warn(`[RESTA-UM] ⚠️ Nenhuma pontuação encontrada na Rodada para R${rodada} liga ${ligaId} — abortando`);
+            return { consolidado: false, motivo: 'sem_pontuacoes' };
+        }
+
+        // Calcular ranking geral (soma de todas as rodadas até agora) para desempate
+        // ObjectId obrigatório: aggregate() não faz auto-cast de tipos (ao contrário de find())
+        const todasRodadas = await Rodada.aggregate([
+            { $match: {
+                ligaId: new mongoose.Types.ObjectId(ligaId),
+                temporada: CURRENT_SEASON,
+                rodada: { $lte: rodada },
+                populacaoFalhou: { $ne: true },
+            }},
+            { $group: { _id: '$timeId', pontuacaoTotal: { $sum: '$pontos' } } },
+            { $sort: { pontuacaoTotal: -1 } },
+        ]);
+        const rankingGeral = todasRodadas.map(r => ({ timeId: r._id, pontuacaoTotal: r.pontuacaoTotal }));
+
+        console.log(`[RESTA-UM] Dados: ${pontuacoes.length} pontuações, ${rankingGeral.length} no ranking`);
+
+        try {
+            // Buscar edição em andamento
+            const edicao = await RestaUmCache.findOne({
+                liga_id: ligaId,
+                temporada: CURRENT_SEASON,
+                status: 'em_andamento',
+            });
+
+            if (!edicao) {
+                // Verificar se existe edição pendente que deve iniciar nesta rodada
+                const pendente = await RestaUmCache.findOne({
+                    liga_id: ligaId,
+                    temporada: CURRENT_SEASON,
+                    status: 'pendente',
+                    rodadaInicial: { $lte: rodada },
+                });
+
+                if (pendente) {
+                    // Idempotência primária: rodadaAtual já cobre esta rodada
+                    if (pendente.rodadaAtual >= rodada) {
+                        console.log(`[RESTA-UM] R${rodada} já processada (rodadaAtual=${pendente.rodadaAtual}, pendente) para liga ${ligaId} — ignorando`);
+                        return { consolidado: true, ignorado: true, motivo: 'rodada_ja_processada' };
+                    }
+
+                    // Validar cobertura de scores antes de prosseguir
+                    const vivos = pendente.participantes.filter(p => p.status === 'vivo');
+                    const cobertura = this._validarCoberturaScores(vivos, pontuacoes, rodada, ligaId);
+                    if (!cobertura.ok) return cobertura.resultado;
+
+                    pendente.status = 'em_andamento';
+                    pendente.rodadaAtual = rodada;
+                    await pendente.save(); // Gravar rodadaAtual ANTES do processamento (guard persiste mesmo se falhar)
+                    console.log(`[RESTA-UM] Edição ${pendente.edicao} iniciada na R${rodada}`);
+
+                    // Proteção da primeira rodada: não eliminar ninguém
+                    if (pendente.protecaoPrimeiraRodada) {
+                        console.log(`[RESTA-UM] Proteção da 1ª rodada ativa - sem eliminações`);
+                        await this._atualizarPontosParticipantes(pendente, pontuacoes, rodada);
+                        return { consolidado: true, eliminados: [], protecao: true };
+                    }
+
+                    const result = await this._processarEliminacao(pendente, pontuacoes, rankingGeral, rodada);
+                    return { consolidado: true, ...result };
+                }
+
+                console.log(`[RESTA-UM] Nenhuma edição ativa/pendente para liga ${ligaId}`);
+                return { consolidado: true, ignorado: true };
+            }
+
+            // Verificar se rodada está dentro do range da edição
+            if (edicao.rodadaFinal && rodada > edicao.rodadaFinal) {
+                console.log(`[RESTA-UM] Rodada ${rodada} fora do range da edição (até R${edicao.rodadaFinal})`);
+                return { consolidado: true, ignorado: true };
+            }
+
+            // Idempotência primária: rodadaAtual já cobre esta rodada
+            if (edicao.rodadaAtual >= rodada) {
+                console.log(`[RESTA-UM] R${rodada} já processada (rodadaAtual=${edicao.rodadaAtual}) para liga ${ligaId} — ignorando`);
+                return { consolidado: true, ignorado: true, motivo: 'rodada_ja_processada' };
+            }
+
+            // Validar cobertura de scores antes de prosseguir
+            const vivosEdicao = edicao.participantes.filter(p => p.status === 'vivo');
+            const cobertura = this._validarCoberturaScores(vivosEdicao, pontuacoes, rodada, ligaId);
+            if (!cobertura.ok) return cobertura.resultado;
+
+            edicao.rodadaAtual = rodada;
+            await edicao.save(); // Gravar rodadaAtual ANTES do processamento (guard persiste mesmo se falhar)
+            const result = await this._processarEliminacao(edicao, pontuacoes, rankingGeral, rodada);
+            return { consolidado: true, ...result };
+
+        } catch (error) {
+            console.error(`[RESTA-UM] Erro no onConsolidate R${rodada}:`, error);
+            return { consolidado: false, error: error.message };
+        }
     }
 
     /**

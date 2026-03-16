@@ -208,6 +208,8 @@ import adminClienteAuthRoutes from "./routes/admin-cliente-auth.js";
 import * as analyticsController from "./controllers/analyticsController.js";
 import adminMigracaoRoutes from "./routes/admin/migracao.js";
 import adminMigracaoValidacaoRoutes from "./routes/admin/migracao-validacao.js";
+import escalacaoIARoutes from "./routes/admin/escalacao-ia-routes.js";
+import escalacaoIAController from "./controllers/admin/escalacaoIAController.js";
 
 
 import { getClubes } from "./controllers/cartolaController.js";
@@ -635,6 +637,9 @@ console.log("[SERVER] 📢 Rotas de avisos participante registradas em /api/avis
 
 // 📊 Raio-X Analytics (análises internas)
 app.use("/api/admin/raio-x", raioXAnalyticsRoutes);
+
+// 🤖 Escalação IA (sugestão inteligente admin)
+app.use("/api/admin/escalacao-ia", escalacaoIARoutes);
 console.log("[SERVER] 📊 Rotas de Raio-X Analytics registradas em /api/admin/raio-x");
 
 // 🎯 Dicas Premium
@@ -1019,6 +1024,17 @@ initAsyncPromise = (async () => {
   });
   cronJobs.push(cronEscalacaoInteligente);
   console.log("[SERVER] 🔔 Cron de escalação INTELIGENTE agendado (a cada 15min, notifica 2h/1h/30min antes)");
+
+  // 🤖 CRON: Pre-computar escalação IA (a cada 30min quando mercado aberto)
+  const cronEscalacaoIA = cron.schedule("*/30 * * * *", async () => {
+    try {
+      await escalacaoIAController.preComputar(100);
+    } catch (erro) {
+      console.error("[CRON] Erro na pre-computacao escalacao IA:", erro.message);
+    }
+  });
+  cronJobs.push(cronEscalacaoIA);
+  console.log("[SERVER] 🤖 Cron de escalação IA agendado (a cada 30min)");
 
   // 🔔 CRON: Limpeza de cache de notificações (diário às 4h)
   const cronLimpezaCache = cron.schedule("0 4 * * *", async () => {

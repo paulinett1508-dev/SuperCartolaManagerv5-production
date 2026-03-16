@@ -263,12 +263,11 @@ self.addEventListener("push", (event) => {
     console.log("[SW] Push recebido:", event);
 
     // Payload padrão caso não tenha dados
-    // Badge: usa default.png como fallback (TODO: criar badge-72x72.png monocromático)
     let payload = {
         title: "Super Cartola",
         body: "Você tem uma nova notificação",
         icon: "/img/newlogo-supercartola.png",
-        badge: "/img/newlogo-supercartola.png",
+        badge: "/img/badge-72x72.svg",
         url: "/participante/",
         tag: "default",
     };

@@ -1,0 +1,1 @@
+../../../docs/skills/05-meta/skill-installer.md

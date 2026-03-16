@@ -29,6 +29,8 @@ Node.js (Replit) · MongoDB (Native Driver) · HTML5/CSS3/Vanilla JS (ES6 Module
 - **Toda query MongoDB DEVE incluir `liga_id`** (multi-tenant)
 - SPA Init: nunca `DOMContentLoaded` sozinho — usar pattern `readyState === 'loading'` check
 - Frontend admin: se arquivo carregado via `vImport()` → incrementar `ADMIN_JS_VERSION` em `detalhe-liga-orquestrador.js`
+- **Cache busting obrigatório:** ao criar ou modificar CSS significativamente, incrementar `?v=X` no `<link>` correspondente em `index.html`. CSS sem `?v=` em PROD = bug invisível (browser serve versão antiga)
+- **Seletores CSS descendentes + DOM injetado:** antes de usar `.parent .child {}`, verificar se o child está realmente dentro do parent na árvore DOM. Elementos injetados via JS (`insertBefore`, `prepend`) podem estar fora do container esperado — preferir toggle via JS direto
 
 ## UI/UX (resumo)
 
@@ -76,12 +78,20 @@ O usuário NÃO deve guiar passo a passo. Se teste/lint falhar após fix, corrij
 Skills ativadas por keywords. Mapeamento: [`docs/skills/SKILL-KEYWORD-MAP.md`](docs/skills/SKILL-KEYWORD-MAP.md)
 Pipeline design: frontend-design → anti-frankenstein → frontend-crafter
 **Anti-Frankenstein é OBRIGATÓRIO antes de qualquer CSS/HTML novo** — mesmo 3 linhas. Verificar `config/css-registry.json`, reutilizar tokens/animações existentes, NUNCA cores hardcoded.
-Commands: `/liste-pr-github` (filtro por período), `/security-review` (diff contra origin/HEAD)
+**Skill antes de ação — SEMPRE:** Bug report → `systematic-debugging`. CSS/HTML → `anti-frankenstein`. Decisão visual → `frontend-design`. NUNCA racionalizar "é simples" ou "deixa investigar primeiro" para pular skill. (3 ocorrências de skill ignorada levaram a bugs em PROD)
+Commands: `/liste-pr-github` (filtro por período), `/security-review` (diff contra origin/HEAD), `/github-profile` (busca perfil GitHub por username)
 
 ## MCPs Disponíveis
 
 Context7 (docs), Perplexity (pesquisa web), Mongo MCP (queries DB), Stitch MCP (design-to-code).
 Detalhes: [`docs/skills/03-utilities/project-reference.md`](docs/skills/03-utilities/project-reference.md)
+
+## Resta Um (REGRA CRÍTICA)
+
+Módulo de eliminação **rodada a rodada** — cada rodada é independente.
+SEMPRE exibir e ordenar por `pontosRodada` DESC (live e consolidado). `pontosAcumulados` é apenas metadado de desempate.
+Eliminados preservam `pontosRodada` da rodada de eliminação.
+Detalhes: [`docs/references/resta-um.md`](docs/references/resta-um.md)
 
 ## Sistemas Auxiliares
 

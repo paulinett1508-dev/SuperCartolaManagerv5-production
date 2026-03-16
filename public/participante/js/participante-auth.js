@@ -584,8 +584,10 @@ class ParticipanteAuth {
         if (escudoCoracao) {
             if (clubeId) {
                 escudoCoracao.src = `/escudos/${clubeId}.png`;
-                escudoCoracao.onerror = () =>
-                    (escudoCoracao.src = "/escudos/placeholder.png");
+                escudoCoracao.onerror = () => {
+                    escudoCoracao.onerror = null;
+                    escudoCoracao.src = "/escudos/placeholder.png";
+                };
             } else {
                 escudoCoracao.src = "/escudos/placeholder.png";
             }
@@ -597,16 +599,21 @@ class ParticipanteAuth {
                 escudoTimeEl.onerror = () => {
                     if (clubeId) {
                         escudoTimeEl.src = `/escudos/${clubeId}.png`;
-                        escudoTimeEl.onerror = () =>
-                            (escudoTimeEl.src = "/escudos/placeholder.png");
+                        escudoTimeEl.onerror = () => {
+                            escudoTimeEl.onerror = null;
+                            escudoTimeEl.src = "/escudos/placeholder.png";
+                        };
                     } else {
+                        escudoTimeEl.onerror = null;
                         escudoTimeEl.src = "/escudos/placeholder.png";
                     }
                 };
             } else if (clubeId) {
                 escudoTimeEl.src = `/escudos/${clubeId}.png`;
-                escudoTimeEl.onerror = () =>
-                    (escudoTimeEl.src = "/escudos/placeholder.png");
+                escudoTimeEl.onerror = () => {
+                    escudoTimeEl.onerror = null;
+                    escudoTimeEl.src = "/escudos/placeholder.png";
+                };
             } else {
                 escudoTimeEl.src = "/escudos/placeholder.png";
             }

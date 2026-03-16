@@ -1,7 +1,7 @@
 {
   "_meta": {
     "version": "1.0.0",
-    "lastUpdated": "2026-02-20",
+    "lastUpdated": "2026-03-14",
     "description": "Manifesto centralizado de todos os CSS do projeto. Fonte da verdade para a skill anti-frankenstein. Atualizar ao criar/remover/renomear CSS.",
     "maintainedBy": "anti-frankenstein skill"
   },
@@ -345,7 +345,10 @@
       {
         "path": "public/participante/css/matchday.css",
         "loadedBy": ["participante/index.html (module)"],
-        "description": "Modo matchday com pulsing headers e live"
+        "description": "Modo matchday com pulsing headers, live ranking card, live ranking animations, stale detection, skeleton loading e state icons",
+        "classes": [".matchday-header", ".matchday-header-inner", ".matchday-header-label", ".matchday-header-ts", ".matchday-stale", ".matchday-skeleton-row", ".matchday-state-icon", ".scout-ticker", ".scout-ticker-content", ".scout-ticker-track", ".scout-ticker-item", ".ranking-item.live-updating", ".ranking-item.moving-up", ".ranking-item.moving-down", ".ranking-live-badge", ".live-ranking-card", ".live-ranking-header", ".live-ranking-header-left", ".live-ranking-dot", ".live-ranking-title", ".live-ranking-ts", ".live-ranking-list", ".live-rank-row", ".live-rank-row--me", ".live-rank-pos", ".live-rank-shields", ".live-rank-info", ".live-rank-nome", ".live-rank-sep", ".live-rank-time", ".live-rank-stats", ".live-rank-pts", ".live-rank-campo", ".live-rank-row--up", ".live-rank-row--down", ".live-ranking-footer", ".live-rank-skeleton", ".live-ranking-error", ".home-live-active"],
+        "keyframes": ["matchday-pulse", "live-blink", "ticker-scroll", "live-update-flash", "move-up", "move-down", "live-dot-pulse", "live-rank-up", "live-rank-down"],
+        "reuses": ["skeleton-box (from _app-tokens.css)", "live-blink (for stale ts indicator)", "var(--participante-card)", "var(--participante-border)", "var(--app-primary-muted)", "var(--app-font-brand/base/mono)"]
       },
       {
         "path": "public/participante/css/resta-um.css",
@@ -375,6 +378,13 @@
         "loadedBy": ["participante/index.html"],
         "description": "Faixa Tabela do Brasileirão colapsável (Landing Page style). Namespace .brasileirao-*",
         "moduleColor": "--app-success (verde-campo)"
+      },
+      {
+        "path": "public/participante/css/components/turno-group.css",
+        "loadedBy": ["participante/index.html (component)"],
+        "description": "Componente TurnoGroup colapsável — agrupa rodadas em 1º/2º Turno com subtotais. Inclui trend-indicator (.trend-up/down/flat). Reutilizável por todos os módulos premium.",
+        "features": ["turno-collapse", "module-color-overrides", "trend-indicator"],
+        "moduleColor": "Per-module via .capitao/.artilheiro/.luva/.restaum/.tirocerto overrides"
       }
     ]
   },

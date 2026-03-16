@@ -440,7 +440,7 @@ async function buscarECalcularPontuacao(time, rodada, atletasPontuados) {
                 // null/undefined = jogo não iniciado/desconhecido → não substituir prematuramente
                 const jogou = entrouEmCampo !== false || pontuacao !== 0;
 
-                if (jogou) atletasEmCampo++;
+                if (entrouEmCampo === true) atletasEmCampo++;
 
                 const isCapitao = atleta.atleta_id === dadosEscalacao.capitao_id;
                 const pontosEfetivos = isCapitao ? pontuacao * 1.5 : pontuacao;
@@ -454,6 +454,7 @@ async function buscarECalcularPontuacao(time, rodada, atletasPontuados) {
                     pontos: pontuacao,
                     pontos_efetivos: pontosEfetivos,
                     entrou_em_campo: jogou,
+                    entrou_em_campo_real: entrouEmCampo === true,
                     is_capitao: isCapitao,
                     is_reserva: false,
                     foto: atleta.foto || atletaPontuado?.foto || null,
@@ -512,6 +513,7 @@ async function buscarECalcularPontuacao(time, rodada, atletasPontuados) {
                     pontos: pontuacao,
                     pontos_efetivos: pontosEfetivos,
                     entrou_em_campo: jogou,
+                    entrou_em_campo_real: entrouEmCampo === true,
                     is_capitao: false,
                     is_reserva: true,
                     is_reserva_luxo: false,
@@ -592,6 +594,7 @@ async function buscarECalcularPontuacao(time, rodada, atletasPontuados) {
                     pontos: pontuacao,
                     pontos_efetivos: pontosEfetivos,
                     entrou_em_campo: jogou,
+                    entrou_em_campo_real: entrouEmCampo === true,
                     is_capitao: luxoHerdouCapitao,
                     is_reserva: true,
                     is_reserva_luxo: true,

@@ -202,28 +202,27 @@ export async function obterStatus(req, res) {
             }
         }
 
-        // Separar vivos e eliminados, mesclar pontos live
+        // Separar vivos e eliminados, mesclar pontos
+        // Priorizar pontosLiveMap (Rodada collection = fonte de verdade) sobre cache
+        // REGRA: eliminados mantêm pontosRodada do cache (score da rodada de eliminação)
         const participantes = (edicao.participantes || []).map(p => {
-            const pontosLive = pontosLiveMap.get(String(p.timeId));
+            const isEliminado = p.status === 'eliminado';
+            const pontosRodada = isEliminado ? null : pontosLiveMap.get(String(p.timeId));
             return {
                 ...p,
-                // Se temos pontos live, usar; se isLive mas sem dados, null (evita stale do cache); senão usar cache
-                pontosRodada: isLive
-                    ? (pontosLive != null ? truncarPontosNum(pontosLive) : null)
+                pontosRodada: pontosRodada != null
+                    ? truncarPontosNum(pontosRodada)
                     : (p.pontosRodada != null ? truncarPontosNum(p.pontosRodada) : null),
                 pontosAcumulados: truncarPontosNum(p.pontosAcumulados || 0),
             };
         });
 
-        // Ordenar vivos por pontos da rodada (DESC) para lanterna aparecer por último
+        // Resta Um = rodada a rodada. SEMPRE ordenar por pontosRodada DESC
         const vivos = participantes
             .filter(p => p.status === 'vivo' || p.status === 'campeao')
             .sort((a, b) => {
-                // Durante live, ordenar por pontosRodada; senão por acumulados
-                if (isLive && a.pontosRodada != null && b.pontosRodada != null) {
-                    return (b.pontosRodada || 0) - (a.pontosRodada || 0);
-                }
-                return (b.pontosAcumulados || 0) - (a.pontosAcumulados || 0);
+                const diff = (b.pontosRodada || 0) - (a.pontosRodada || 0);
+                return diff !== 0 ? diff : (b.pontosAcumulados || 0) - (a.pontosAcumulados || 0);
             });
 
         const eliminados = participantes
@@ -458,19 +457,19 @@ export async function obterParciais(req, res) {
             }
         }
 
-        // Mesclar pontos live com participantes
+        // Mesclar pontos — priorizar pontosLiveMap (Rodada = fonte de verdade)
         const participantes = (edicao.participantes || []).map(p => {
-            const pontosLive = pontosLiveMap.get(String(p.timeId));
+            const pontosRodada = pontosLiveMap.get(String(p.timeId));
             return {
                 ...p,
-                pontosRodada: pontosLive != null
-                    ? truncarPontosNum(pontosLive)
-                    : (p.pontosRodada != null ? truncarPontosNum(p.pontosRodada) : null),
+                pontosRodada: pontosRodada != null
+                    ? truncarPontosNum(pontosRodada)
+                    : (isLive ? null : (p.pontosRodada != null ? truncarPontosNum(p.pontosRodada) : null)),
                 pontosAcumulados: truncarPontosNum(p.pontosAcumulados || 0),
             };
         });
 
-        // Ordenar vivos por pontosRodada (DESC) para lanterna aparecer por último
+        // Ordenar vivos: por pontosRodada durante live, por acumulados fora do live
         const vivos = participantes
             .filter(p => p.status === 'vivo')
             .sort((a, b) => {

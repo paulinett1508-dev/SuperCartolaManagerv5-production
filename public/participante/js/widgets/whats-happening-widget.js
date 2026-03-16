@@ -49,12 +49,12 @@ const FAB_GAME_STATE = {
 };
 
 /**
- * v2.1: Helper centralizado para verificar se jogos estão REALMENTE ao vivo
- * Usa gameStatusData.stats.aoVivo (fonte confiável) ao invés de bola_rolando
+ * v2.2: Helper centralizado para verificar se jogos estão REALMENTE ao vivo
+ * Usa SOMENTE gameStatusData.stats.aoVivo (fonte confiável e validada pelo backend)
+ * Removida condição circular "|| fabState === LIVE" que mantinha o estado preso
  */
 function isJogosAoVivo() {
-    return WHState.gameStatusData?.stats?.aoVivo > 0
-        || WHState.fabState === FAB_GAME_STATE.LIVE;
+    return WHState.gameStatusData?.stats?.aoVivo > 0;
 }
 
 // ============================================
@@ -350,6 +350,16 @@ function transicionarFabState(novoEstado) {
     // Aplicar novo estado
     fab.classList.add(`wh-fab--${novoEstado}`);
 
+    // Atualizar label textual do FAB
+    const stateLabel = fab.querySelector('.wh-fab-state-label');
+    if (stateLabel) {
+        stateLabel.textContent = novoEstado === FAB_GAME_STATE.LIVE
+            ? 'AO VIVO'
+            : (novoEstado === FAB_GAME_STATE.HIDDEN || novoEstado === FAB_GAME_STATE.FINISHED)
+                ? ''
+                : 'EM ANDAMENTO';
+    }
+
     // Visibilidade: HIDDEN = esconder com fade
     if (novoEstado === FAB_GAME_STATE.HIDDEN) {
         fab.classList.add('wh-fab--hiding');
@@ -459,9 +469,12 @@ async function syncFabGameState() {
     transicionarFabState(novoEstado);
 
     // 4. Se está em estado ativo, buscar dados dos módulos
-    if (novoEstado === FAB_GAME_STATE.LIVE ||
+    // Guard: só busca se startPolling não estiver ativo — evita double-fetch
+    // (gameStatusPollTimer 30s + pollingInterval 60s chamando fetchAllData → 429 luva-de-ouro)
+    if (!WHState.pollingInterval && (
+        novoEstado === FAB_GAME_STATE.LIVE ||
         novoEstado === FAB_GAME_STATE.INTERVAL ||
-        novoEstado === FAB_GAME_STATE.COOLING) {
+        novoEstado === FAB_GAME_STATE.COOLING)) {
         await fetchAllData();
     }
 }
@@ -553,6 +566,7 @@ function createWidgetElements() {
     fab.className = "wh-fab";
     fab.innerHTML = `
         <span class="material-icons wh-fab-icon">local_fire_department</span>
+        <span class="wh-fab-state-label" id="wh-fab-state-label"></span>
     `;
 
     // Aplicar posição salva
@@ -1222,7 +1236,7 @@ function renderTimestamp() {
         <div class="wh-timestamp">
             ${isLive
                 ? `<span class="wh-live-indicator"><span class="wh-live-dot"></span> AO VIVO</span> <span class="wh-timestamp-time">Rodada ${rodada} · ${time}</span>`
-                : `<span class="material-icons">schedule</span> Rodada ${rodada} · ${time}`
+                : `<span class="material-icons">sports_soccer</span> Rodada ${rodada} · EM ANDAMENTO`
             }
         </div>
     `;

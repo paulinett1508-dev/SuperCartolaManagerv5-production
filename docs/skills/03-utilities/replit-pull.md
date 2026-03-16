@@ -1,4 +1,9 @@
-# 🔄 REPLIT PULL - Sincronizar GitHub → Replit
+---
+name: replit-pull
+description: Gerar comandos para sincronizar código do GitHub com o ambiente Replit (produção)
+---
+
+# REPLIT PULL - Sincronizar GitHub → Replit
 
 ## 🎯 Objetivo
 Gerar os comandos prontos para o usuário colar no Shell do Replit, sincronizando o código do GitHub com o ambiente de produção.

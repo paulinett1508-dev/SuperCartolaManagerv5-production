@@ -701,7 +701,7 @@ function renderizarPerformance(performance) {
             <div class="rxray-stat-icon"><span class="material-icons">account_balance_wallet</span></div>
             <div class="rxray-stat-info">
                 <div class="rxray-stat-label">Financeiro</div>
-                <div class="rxray-stat-value">${performance.financeiro >= 0 ? "+" : ""}R$ ${Math.abs(performance.financeiro)}</div>
+                <div class="rxray-stat-value">${formatarFinanceiroFrase(performance.financeiro)}</div>
             </div>
         </div>
     `;
@@ -784,6 +784,12 @@ function escapeHtml(str) {
     const div = document.createElement("div");
     div.textContent = str;
     return div.innerHTML;
+}
+
+function formatarFinanceiroFrase(valor) {
+    if (valor > 0) return `Ganhou R$${valor}`;
+    if (valor < 0) return `Perdeu R$${Math.abs(valor)}`;
+    return "Neutro";
 }
 
 // ============================================

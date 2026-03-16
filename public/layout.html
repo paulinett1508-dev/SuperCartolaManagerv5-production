@@ -212,9 +212,9 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="admin-orchestrator.html" class="sidebar-accordion-item" data-page="admin-orchestrator.html">
-                                    <span class="material-icons">hub</span>
-                                    <span>Orchestrator</span>
+                                <a href="escalacao-ia.html" class="sidebar-accordion-item" data-page="escalacao-ia.html">
+                                    <span class="material-icons">psychology</span>
+                                    <span>Escalação IA</span>
                                 </a>
                             </li>
                         </ul>
@@ -664,7 +664,6 @@
                         'gerenciar-modulos.html': 'operacoes',
                         'modo-manutencao-avancado.html': 'operacoes',
                         'notificador.html': 'operacoes',
-                        'admin-orchestrator.html': 'operacoes',
                         // Analytics
                         'github-analytics-unified.html': 'analytics',
                         'dashboard-saude.html': 'analytics',
@@ -910,7 +909,6 @@
                         "admin-gestao.html": { title: "Administradores", subtitle: "Gerenciar Usuarios Admin" },
                         "historico-acessos.html": { title: "Historico de Acessos", subtitle: "Monitorar Acessos ao App" },
                         "analisar-participantes.html": { title: "Analisar Participantes", subtitle: "Gestao Unificada de Participantes" },
-                        "admin-orchestrator.html": { title: "Orchestrator", subtitle: "Round-Market Orchestrator" },
                         // Fase 1 - Páginas integradas ao orquestrador
                         "github-analytics-unified.html": { title: "Repositório", subtitle: "Analytics do GitHub" },
                         "notificador.html": { title: "Notificador", subtitle: "Sistema de Avisos In-App" },
@@ -987,7 +985,6 @@
                     'api-football-analytics.html',
                     'dashboard-analytics.html',
                     'dashboard-saude.html',
-                    'admin-orchestrator.html',
                     // Fase 1 - Páginas integradas ao orquestrador
                     'github-analytics-unified.html',
                     'notificador.html',
@@ -2044,9 +2041,11 @@
                         return false;
                     });
                 }
-                if (window.self !== window.top) {
-                    window.top.location = window.self.location;
-                }
+                try {
+                    if (window.self !== window.top) {
+                        window.top.location = window.self.location;
+                    }
+                } catch(e) { /* Allow iframe in Replit preview */ }
             })();
         </script>
 

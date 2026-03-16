@@ -359,6 +359,25 @@ function determinarVencedor(confronto) {
 // ============================================================================
 
 /**
+ * Retorna o campeão da edição anterior (edicaoId - 1) para a liga/temporada informada.
+ * Retorna null se não houver edição anterior ou se o campeão não estiver salvo.
+ */
+async function getCampeaoEdicaoAnterior(ligaId, edicaoId, temporada) {
+    if (edicaoId <= 1) return null;
+    try {
+        const cacheAnterior = await MataMataCache.findOne({
+            liga_id: String(ligaId),
+            edicao: edicaoId - 1,
+            temporada,
+        }).select('dados_torneio').lean();
+        return cacheAnterior?.dados_torneio?.campeao ?? null;
+    } catch (err) {
+        logger.warn(`[MATA-BACKEND] ⚠️ Erro ao buscar campeão da edição anterior:`, err.message);
+        return null;
+    }
+}
+
+/**
  * Calcula resultados financeiros de uma edição do Mata-Mata
  * Retorna array de { timeId, fase, rodadaPontos, valor }
  */
@@ -449,6 +468,30 @@ async function calcularResultadosEdicao(ligaId, edicao, rodadaAtual, config) {
         }
 
         const rankingClassificados = rankingBase.slice(0, tamanhoTorneio);
+
+        // ✅ Regra: Campeão da edição anterior tem vaga garantida na edição seguinte.
+        // Exceção: se todos os participantes já se classificam (rankingBase.length <= tamanhoTorneio),
+        // não há necessidade — o bloco abaixo simplesmente não executa.
+        if (rankingBase.length > tamanhoTorneio) {
+            const campeaoAnterior = await getCampeaoEdicaoAnterior(ligaId, edicao.id, CURRENT_SEASON);
+            if (campeaoAnterior?.timeId) {
+                const jaClassificado = rankingClassificados.some(
+                    (p) => String(p.timeId) === String(campeaoAnterior.timeId)
+                );
+                if (!jaClassificado) {
+                    const campeaoNoRanking = rankingBase.find(
+                        (p) => String(p.timeId) === String(campeaoAnterior.timeId)
+                    );
+                    if (campeaoNoRanking) {
+                        rankingClassificados.pop(); // Remove o último classificado pelo ranking
+                        rankingClassificados.push(campeaoNoRanking);
+                        logger.log(
+                            `[MATA-BACKEND] 🏆 Campeão da edição ${edicao.id - 1} (${campeaoAnterior.timeId}) garantido na edição ${edicao.id} pela regra de campeão`
+                        );
+                    }
+                }
+            }
+        }
 
         // ✅ FIX #3: Usar fases dinâmicas baseadas no tamanho do torneio
         // 32 times → 5 fases, 16 times → 4 fases, 8 times → 3 fases
@@ -721,4 +764,219 @@ export async function criarMapaMataMata(ligaId, rodadaAtual) {
     return mapa;
 }
 
-logger.log("[MATA-BACKEND] ✅ Módulo v1.2 carregado (fix tamanhoTorneio do cache)");
+// ============================================================================
+// CÁLCULO DE BRACKET PARA CONSOLIDAÇÃO AUTOMÁTICA
+// ============================================================================
+
+/**
+ * Calcula os confrontos (bracket) de TODAS as edições ativas e persiste no MataMataCache.
+ * Chamada durante a consolidação para garantir que o cache está atualizado
+ * ANTES de ser lido para o RodadaSnapshot.
+ *
+ * Se o cache já possui dados atualizados para a edição (admin abriu a tela),
+ * respeita os dados existentes e não sobrescreve.
+ *
+ * @returns Array de { edicao, rodada_atual, dados_torneio, ultima_atualizacao }
+ */
+export async function calcularBracketParaConsolidacao(ligaId, rodadaAtual) {
+    logger.log(`[MATA-CONSOLIDAÇÃO-CALC] Calculando bracket para liga ${ligaId}, rodada ${rodadaAtual}`);
+
+    const config = await getMataMataConfig(ligaId);
+    const qtdEdicoes = Number(config.wizard_respostas?.qtd_edicoes) || config.calendario.edicoes.length;
+    const edicoesAtivas = config.calendario.edicoes.slice(0, qtdEdicoes);
+    const resultados = [];
+
+    for (const edicao of edicoesAtivas) {
+        // Edição ainda não começou
+        if (rodadaAtual < edicao.rodadaInicial) continue;
+
+        try {
+            // 1. Ler cache existente
+            const cacheExistente = await MataMataCache.findOne({
+                liga_id: String(ligaId),
+                edicao: edicao.id,
+                temporada: CURRENT_SEASON
+            }).lean();
+
+            // 2. Verificar se cache está atualizado para esta rodada
+            // Checar se a fase correspondente à rodada já existe no bracket
+            const fasesDaEdicao = getFasesParaTamanho(
+                cacheExistente?.tamanhoTorneio || Number(config.wizard_respostas?.total_times) || 8
+            );
+            const indiceFaseAtual = rodadaAtual - edicao.rodadaInicial;
+            const faseEsperada = fasesDaEdicao[Math.min(indiceFaseAtual, fasesDaEdicao.length - 1)];
+
+            if (cacheExistente?.dados_torneio?.[faseEsperada]?.length > 0) {
+                // Cache já tem dados para a fase esperada — admin já calculou
+                logger.log(`[MATA-CONSOLIDAÇÃO-CALC] ✅ Edição ${edicao.id}: cache já atualizado (fase ${faseEsperada} presente)`);
+                resultados.push({
+                    edicao: edicao.id,
+                    rodada_atual: cacheExistente.rodada_atual,
+                    dados_torneio: cacheExistente.dados_torneio,
+                    ultima_atualizacao: cacheExistente.ultima_atualizacao
+                });
+                continue;
+            }
+
+            // 3. Cache stale ou inexistente — calcular bracket
+            logger.log(`[MATA-CONSOLIDAÇÃO-CALC] ⚠️ Edição ${edicao.id}: cache stale/vazio, calculando...`);
+
+            const rankingBase = await getRankingRodada(ligaId, edicao.rodadaDefinicao);
+            if (!rankingBase || rankingBase.length === 0) {
+                logger.warn(`[MATA-CONSOLIDAÇÃO-CALC] Sem ranking para R${edicao.rodadaDefinicao}, pulando edição ${edicao.id}`);
+                continue;
+            }
+
+            // Determinar tamanho do torneio
+            const totalTimesConfig = Number(config.wizard_respostas?.total_times);
+            const tetoWizard = (totalTimesConfig && [8, 16, 32].includes(totalTimesConfig))
+                ? totalTimesConfig : null;
+
+            let tamanhoTorneio;
+            if (cacheExistente?.tamanhoTorneio && [8, 16, 32].includes(cacheExistente.tamanhoTorneio)) {
+                tamanhoTorneio = cacheExistente.tamanhoTorneio;
+                if (tetoWizard && tamanhoTorneio > tetoWizard) tamanhoTorneio = tetoWizard;
+            } else if (tetoWizard) {
+                tamanhoTorneio = tetoWizard;
+            } else {
+                tamanhoTorneio = calcularTamanhoIdealMataMata(rankingBase.length);
+            }
+
+            if (tamanhoTorneio === 0 || rankingBase.length < tamanhoTorneio) {
+                logger.warn(`[MATA-CONSOLIDAÇÃO-CALC] Participantes insuficientes para edição ${edicao.id}`);
+                continue;
+            }
+
+            const rankingClassificados = rankingBase.slice(0, tamanhoTorneio);
+
+            // ✅ Regra: Campeão da edição anterior tem vaga garantida na edição seguinte.
+            // Exceção: se todos os participantes já se classificam (rankingBase.length <= tamanhoTorneio),
+            // não há necessidade — o bloco abaixo simplesmente não executa.
+            if (rankingBase.length > tamanhoTorneio) {
+                const campeaoAnterior = await getCampeaoEdicaoAnterior(ligaId, edicao.id, CURRENT_SEASON);
+                if (campeaoAnterior?.timeId) {
+                    const jaClassificado = rankingClassificados.some(
+                        (p) => String(p.timeId) === String(campeaoAnterior.timeId)
+                    );
+                    if (!jaClassificado) {
+                        const campeaoNoRanking = rankingBase.find(
+                            (p) => String(p.timeId) === String(campeaoAnterior.timeId)
+                        );
+                        if (campeaoNoRanking) {
+                            rankingClassificados.pop(); // Remove o último classificado pelo ranking
+                            rankingClassificados.push(campeaoNoRanking);
+                            logger.log(
+                                `[MATA-CONSOLIDAÇÃO-CALC] 🏆 Campeão da edição ${edicao.id - 1} (${campeaoAnterior.timeId}) garantido na edição ${edicao.id} pela regra de campeão`
+                            );
+                        }
+                    }
+                }
+            }
+
+            const fases = getFasesParaTamanho(tamanhoTorneio);
+            const rodadasFases = {};
+            fases.forEach((fase, idx) => { rodadasFases[fase] = edicao.rodadaInicial + idx; });
+
+            // Iniciar com dados existentes do cache (preservar fases já calculadas)
+            const dadosTorneio = cacheExistente?.dados_torneio
+                ? { ...cacheExistente.dados_torneio }
+                : {};
+
+            let vencedoresAnteriores = rankingClassificados.map((r, idx) => ({
+                ...r, rankR2: idx + 1
+            }));
+            const primeiraFase = fases[0];
+
+            for (const fase of fases) {
+                const rodadaPontosNum = rodadasFases[fase];
+
+                // Fase futura — parar
+                if (rodadaPontosNum > rodadaAtual) {
+                    logger.log(`[MATA-CONSOLIDAÇÃO-CALC] Fase ${fase} (R${rodadaPontosNum}) futura, parando`);
+                    break;
+                }
+
+                // Se fase já existe no cache, usar dados existentes para avançar vencedores
+                if (dadosTorneio[fase]?.length > 0) {
+                    const proximosVencedores = [];
+                    dadosTorneio[fase].forEach(confronto => {
+                        const { vencedor } = determinarVencedor(confronto);
+                        if (vencedor) {
+                            vencedor.jogoAnterior = confronto.jogo;
+                            proximosVencedores.push(vencedor);
+                        }
+                    });
+                    vencedoresAnteriores = proximosVencedores;
+                    continue;
+                }
+
+                // Calcular fase
+                const numJogos = Math.ceil(vencedoresAnteriores.length / 2);
+                const rankingRodada = await getRankingRodada(ligaId, rodadaPontosNum);
+                const pontosRodada = criarMapaPontos(rankingRodada);
+
+                const confrontos = fase === primeiraFase
+                    ? montarConfrontosPrimeiraFase(rankingClassificados, pontosRodada, tamanhoTorneio)
+                    : montarConfrontosFase(vencedoresAnteriores, pontosRodada, numJogos, tamanhoTorneio);
+
+                dadosTorneio[fase] = confrontos;
+
+                // Determinar vencedores para próxima fase
+                const proximosVencedores = [];
+                confrontos.forEach(confronto => {
+                    const { vencedor } = determinarVencedor(confronto);
+                    if (vencedor) {
+                        vencedor.jogoAnterior = confronto.jogo;
+                        proximosVencedores.push(vencedor);
+                    }
+                });
+                vencedoresAnteriores = proximosVencedores;
+
+                // Se final, salvar campeão
+                if (fase === 'final' && confrontos.length > 0) {
+                    const { vencedor } = determinarVencedor(confrontos[0]);
+                    if (vencedor) dadosTorneio.campeao = vencedor;
+                }
+
+                logger.log(`[MATA-CONSOLIDAÇÃO-CALC] Edição ${edicao.id} - ${fase}: ${confrontos.length} confrontos calculados`);
+            }
+
+            // Metadata
+            dadosTorneio.metadata = {
+                tamanhoTorneio,
+                participantesAtivos: rankingBase.length,
+                calculadoEm: new Date().toISOString(),
+                fonte: 'consolidacao-automatica'
+            };
+
+            // 4. Persistir no MataMataCache
+            await MataMataCache.findOneAndUpdate(
+                { liga_id: String(ligaId), edicao: edicao.id, temporada: CURRENT_SEASON },
+                {
+                    rodada_atual: rodadaAtual,
+                    dados_torneio: dadosTorneio,
+                    tamanhoTorneio: tamanhoTorneio,
+                    participantesAtivos: rankingBase.length,
+                    ultima_atualizacao: new Date()
+                },
+                { upsert: true, new: true }
+            );
+
+            logger.log(`[MATA-CONSOLIDAÇÃO-CALC] ✅ Edição ${edicao.id}: bracket calculado e persistido`);
+
+            resultados.push({
+                edicao: edicao.id,
+                rodada_atual: rodadaAtual,
+                dados_torneio: dadosTorneio,
+                ultima_atualizacao: new Date()
+            });
+        } catch (error) {
+            logger.error(`[MATA-CONSOLIDAÇÃO-CALC] ❌ Erro na edição ${edicao.id}:`, error);
+        }
+    }
+
+    logger.log(`[MATA-CONSOLIDAÇÃO-CALC] ✅ ${resultados.length} edições processadas`);
+    return resultados;
+}
+
+logger.log("[MATA-BACKEND] ✅ Módulo v1.3 carregado (consolidação automática de bracket)");

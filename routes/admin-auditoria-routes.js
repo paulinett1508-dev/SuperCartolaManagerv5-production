@@ -7,6 +7,8 @@
 import express from "express";
 import mongoose from "mongoose";
 import { getDB } from "../config/database.js";
+import { getFinancialSeason } from "../config/seasons.js";
+import { getExtratoFinanceiro } from "../controllers/fluxoFinanceiroController.js";
 
 const { ObjectId } = mongoose.Types;
 
@@ -58,6 +60,7 @@ router.get("/extratos/:ligaId", requireAdmin, async (req, res) => {
 
         const RODADA_FINAL = liga.configuracoes?.rodada_final || 38;
         const modulosAtivos = liga.modulos_ativos || {};
+        const temporada = liga.temporada || getFinancialSeason();
 
         // Estatísticas gerais
         const stats = {
@@ -76,6 +79,30 @@ router.get("/extratos/:ligaId", requireAdmin, async (req, res) => {
         const problemas = [];
         const participantesOk = [];
 
+        // Buscar rodadas já consolidadas (evitar flagar rodadas futuras)
+        const rodadasConsolidadas = await db.collection("rodadasnapshots")
+            .find({
+                liga_id: String(ligaId),
+                temporada: temporada,
+                status: "consolidada"
+            })
+            .project({ rodada: 1 })
+            .toArray();
+        const rodadasJogadas = rodadasConsolidadas.map(r => r.rodada).sort((a, b) => a - b);
+
+        // Buscar participantes que realmente apareceram no Top10 (Mito/Mico)
+        let top10TimeIds = new Set();
+        if (modulosAtivos.top10 === true) {
+            const top10Caches = await db.collection("top10caches")
+                .find({ liga_id: String(ligaId), temporada: temporada })
+                .project({ "mitos.time_id": 1, "micos.time_id": 1 })
+                .toArray();
+            for (const cache of top10Caches) {
+                (cache.mitos || []).forEach(m => top10TimeIds.add(m.time_id));
+                (cache.micos || []).forEach(m => top10TimeIds.add(m.time_id));
+            }
+        }
+
         // Verificar cada participante
         for (const participante of (liga.participantes || [])) {
             const timeId = participante.time_id;
@@ -84,8 +111,9 @@ router.get("/extratos/:ligaId", requireAdmin, async (req, res) => {
 
             // Buscar cache
             const cache = await db.collection("extratofinanceirocaches").findOne({
-                liga_id: ligaObjectId,
-                time_id: timeId
+                liga_id: String(ligaId),
+                time_id: timeId,
+                temporada: temporada
             });
 
             if (!cache) {
@@ -103,12 +131,9 @@ router.get("/extratos/:ligaId", requireAdmin, async (req, res) => {
             const rodadasNoCache = [...new Set(transacoes.map(t => t.rodada))].sort((a, b) => a - b);
             const errosParticipante = [];
 
-            // 1. Verificar se tem todas as rodadas
-            if (rodadasNoCache.length < RODADA_FINAL) {
-                const faltando = [];
-                for (let r = 1; r <= RODADA_FINAL; r++) {
-                    if (!rodadasNoCache.includes(r)) faltando.push(r);
-                }
+            // 1. Verificar se tem todas as rodadas já consolidadas
+            const faltando = rodadasJogadas.filter(r => !rodadasNoCache.includes(r));
+            if (faltando.length > 0) {
                 stats.rodadasIncompletas++;
                 errosParticipante.push(`Faltam rodadas: ${faltando.join(", ")}`);
             }
@@ -142,8 +167,8 @@ router.get("/extratos/:ligaId", requireAdmin, async (req, res) => {
                 errosParticipante.push("SaldoAcumulado progressivo incorreto");
             }
 
-            // 4. Verificar Top10 (se módulo ativo) - OPCIONAL, só se === true
-            if (modulosAtivos.top10 === true) {
+            // 4. Verificar Top10 (se módulo ativo) - só para quem apareceu no ranking
+            if (modulosAtivos.top10 === true && top10TimeIds.has(timeId)) {
                 const temTop10 = transacoes.some(t => (t.top10 || 0) !== 0 || t.isMito || t.isMico);
                 if (!temTop10) {
                     stats.semTop10++;
@@ -195,7 +220,8 @@ router.get("/extratos/:ligaId", requireAdmin, async (req, res) => {
 
         // Verificar acertos financeiros
         const acertos = await db.collection("acertofinanceiros").find({
-            ligaId: ligaId,
+            liga_id: String(ligaId),
+            temporada: temporada,
             ativo: true
         }).toArray();
 
@@ -210,6 +236,8 @@ router.get("/extratos/:ligaId", requireAdmin, async (req, res) => {
                 id: ligaId,
                 nome: liga.nome,
                 rodadaFinal: RODADA_FINAL,
+                rodadasConsolidadas: rodadasJogadas.length,
+                temporada,
                 modulosAtivos
             },
             stats,
@@ -252,9 +280,14 @@ router.post("/fix-saldo/:ligaId", requireAdmin, async (req, res) => {
 
         const ligaObjectId = new ObjectId(ligaId);
 
+        // Buscar liga para obter temporada
+        const liga = await db.collection("ligas").findOne({ _id: ligaObjectId });
+        const temporada = liga?.temporada || getFinancialSeason();
+
         // Buscar todos os caches da liga
         const caches = await db.collection("extratofinanceirocaches").find({
-            liga_id: ligaObjectId
+            liga_id: String(ligaId),
+            temporada: temporada
         }).toArray();
 
         let totalCorrigidos = 0;
@@ -346,6 +379,150 @@ router.post("/fix-saldo/:ligaId", requireAdmin, async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Erro ao corrigir saldo",
+            error: error.message
+        });
+    }
+});
+
+/**
+ * POST /api/admin/auditoria/regenerar-caches/:ligaId
+ * Regenera caches faltantes para participantes sem extrato financeiro
+ */
+router.post("/regenerar-caches/:ligaId", requireAdmin, async (req, res) => {
+    try {
+        const { ligaId } = req.params;
+        const dryRun = req.query.dryRun !== "false";
+        const db = getDB();
+
+        if (!ObjectId.isValid(ligaId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Liga ID inválido"
+            });
+        }
+
+        const ligaObjectId = new ObjectId(ligaId);
+        const liga = await db.collection("ligas").findOne({ _id: ligaObjectId });
+        if (!liga) {
+            return res.status(404).json({
+                success: false,
+                message: "Liga não encontrada"
+            });
+        }
+
+        const temporada = liga.temporada || getFinancialSeason();
+        const participantes = liga.participantes || [];
+        const semCache = [];
+
+        // Identificar participantes sem cache
+        for (const p of participantes) {
+            const cache = await db.collection("extratofinanceirocaches").findOne({
+                liga_id: String(ligaId),
+                time_id: p.time_id,
+                temporada: temporada
+            });
+            if (!cache) {
+                semCache.push(p);
+            }
+        }
+
+        if (semCache.length === 0) {
+            return res.json({
+                success: true,
+                dryRun,
+                message: "Todos os participantes já possuem cache",
+                regenerados: 0,
+                erros: 0
+            });
+        }
+
+        if (dryRun) {
+            return res.json({
+                success: true,
+                dryRun: true,
+                message: `${semCache.length} participante(s) sem cache seriam regenerados`,
+                regenerados: semCache.length,
+                erros: 0,
+                participantes: semCache.map(p => ({
+                    timeId: p.time_id,
+                    nome: p.nome_cartola
+                }))
+            });
+        }
+
+        // Regenerar caches chamando getExtratoFinanceiro internamente
+        let regenerados = 0;
+        let erros = 0;
+        const detalhes = [];
+
+        for (const p of semCache) {
+            try {
+                // Simular req/res para chamar getExtratoFinanceiro
+                const fakeReq = {
+                    params: { ligaId, timeId: String(p.time_id) },
+                    query: { refresh: "true", temporada: String(temporada) },
+                    session: req.session,
+                    body: {}
+                };
+
+                let responseData = null;
+                const fakeRes = {
+                    _statusCode: undefined,
+                    status: function(code) {
+                        this._statusCode = code;
+                        return this;
+                    },
+                    json: function(data) {
+                        responseData = data;
+                        if (!this._statusCode) this._statusCode = 200;
+                    }
+                };
+
+                await getExtratoFinanceiro(fakeReq, fakeRes);
+
+                if (fakeRes._statusCode === 200 && responseData) {
+                    regenerados++;
+                    detalhes.push({
+                        timeId: p.time_id,
+                        nome: p.nome_cartola,
+                        status: "OK"
+                    });
+                } else {
+                    erros++;
+                    detalhes.push({
+                        timeId: p.time_id,
+                        nome: p.nome_cartola,
+                        status: "ERRO",
+                        mensagem: responseData?.message || "Resposta inesperada"
+                    });
+                }
+            } catch (err) {
+                erros++;
+                detalhes.push({
+                    timeId: p.time_id,
+                    nome: p.nome_cartola,
+                    status: "ERRO",
+                    mensagem: err.message
+                });
+            }
+        }
+
+        console.log(`[ADMIN-AUDITORIA] Regeneração de caches: ${regenerados} OK, ${erros} erros`);
+
+        res.json({
+            success: true,
+            dryRun: false,
+            regenerados,
+            erros,
+            detalhes,
+            timestamp: new Date().toISOString()
+        });
+
+    } catch (error) {
+        console.error("[ADMIN-AUDITORIA] Erro ao regenerar caches:", error);
+        res.status(500).json({
+            success: false,
+            message: "Erro ao regenerar caches",
             error: error.message
         });
     }

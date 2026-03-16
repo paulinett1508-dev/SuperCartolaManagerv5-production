@@ -3,6 +3,7 @@
 // ✅ v1.2: Calcula ranking parcial em tempo real (rodada em andamento)
 // v1.2: Usa CURRENT_SEASON + fallback liga.times quando liga.participantes ausente
 import axios from "axios";
+import NodeCache from "node-cache";
 import Liga from "../models/Liga.js";
 import Time from "../models/Time.js";
 import mongoose from "mongoose";
@@ -12,6 +13,9 @@ import { truncarPontosNum } from "../utils/type-helpers.js";
 const LOG_PREFIX = "[PARCIAIS-RANKING-SERVICE]";
 const CARTOLA_API_BASE = "https://api.cartola.globo.com";
 const REQUEST_TIMEOUT = 10000;
+
+// ✅ PERF-FIX: Cache centralizado — compartilhado por todos os consumidores (TTL 60s)
+const parciaisCache = new NodeCache({ stdTTL: 60 });
 
 // Config de retry para 429 (PERF-004)
 const RETRY_CONFIG = {
@@ -121,11 +125,13 @@ async function buscarEscalacaoTime(timeId, rodada) {
  */
 function calcularPontuacaoTime(escalacao, atletasPontuados) {
     if (!escalacao || !escalacao.atletas || escalacao.atletas.length === 0) {
-        return { pontos: 0, calculado: false };
+        return { pontos: 0, calculado: false, atletasEmCampo: 0, totalAtletas: 0 };
     }
 
     let pontosTotais = 0;
+    let atletasEmCampo = 0;
     const capitaoId = escalacao.capitao_id;
+    const totalAtletas = escalacao.atletas.length;
 
     // Processar atletas titulares (status != 2 = reserva)
     for (const atleta of escalacao.atletas) {
@@ -133,6 +139,7 @@ function calcularPontuacaoTime(escalacao, atletasPontuados) {
         const atletaPontuado = atletasPontuados[atletaId];
 
         if (atletaPontuado && atletaPontuado.entrou_em_campo) {
+            atletasEmCampo++;
             let pontosAtleta = atletaPontuado.pontuacao || 0;
 
             // Capitão 1.5x (regra Cartola FC 2026)
@@ -144,7 +151,7 @@ function calcularPontuacaoTime(escalacao, atletasPontuados) {
         }
     }
 
-    return { pontos: pontosTotais, calculado: true };
+    return { pontos: pontosTotais, calculado: true, atletasEmCampo, totalAtletas };
 }
 
 /**
@@ -153,6 +160,14 @@ function calcularPontuacaoTime(escalacao, atletasPontuados) {
  * @returns {object|null} - Ranking parcial ou null se não disponível
  */
 export async function buscarRankingParcial(ligaId) {
+    // ✅ PERF-FIX: Cache centralizado — evita recalcular para cada consumidor
+    const cacheKey = `parciais_${ligaId}`;
+    const cached = parciaisCache.get(cacheKey);
+    if (cached) {
+        console.log(`${LOG_PREFIX} ✅ Cache hit para liga ${ligaId}`);
+        return cached;
+    }
+
     console.log(`${LOG_PREFIX} Buscando ranking parcial para liga ${ligaId}`);
 
     try {
@@ -286,17 +301,18 @@ export async function buscarRankingParcial(ligaId) {
         }
 
         // Processar em lotes para não sobrecarregar a API
-        const BATCH_SIZE = 5;
+        // ✅ PERF-FIX: 5→10 paralelos (retry com backoff protege contra 429)
+        const BATCH_SIZE = 10;
         for (let i = 0; i < participantesAtivos.length; i += BATCH_SIZE) {
             const batch = participantesAtivos.slice(i, i + BATCH_SIZE);
 
             const promessas = batch.map(async (participante) => {
                 const escalacao = await buscarEscalacaoTime(participante.time_id, rodadaAtual);
-                let pontos, calculado;
+                let pontos, calculado, atletasEmCampo, totalAtletas;
 
                 if (escalacao) {
                     // API respondeu: calcular pontos via atletas pontuados
-                    ({ pontos, calculado } = calcularPontuacaoTime(escalacao, atletasPontuados));
+                    ({ pontos, calculado, atletasEmCampo, totalAtletas } = calcularPontuacaoTime(escalacao, atletasPontuados));
                 } else {
                     // ✅ v1.4: API falhou — usar fallback do banco de dados
                     const fallback = fallbackRodadaMap.get(participante.time_id);
@@ -308,6 +324,9 @@ export async function buscarRankingParcial(ligaId) {
                         pontos = 0;
                         calculado = false;
                     }
+                    // Sem dados da API — frontend esconde indicador "X/12"
+                    atletasEmCampo = null;
+                    totalAtletas = null;
                 }
 
                 // ✅ v1.1: Somar com pontos acumulados das rodadas anteriores
@@ -331,6 +350,8 @@ export async function buscarRankingParcial(ligaId) {
                     pontos_acumulados: truncarPontosNum(pontosAnteriores), // Pontos das rodadas anteriores
                     escalou: calculado,
                     ativo: participante.ativo !== false,
+                    atletasEmCampo: atletasEmCampo ?? null,
+                    totalAtletas: totalAtletas ?? null,
                 };
             });
 
@@ -339,7 +360,7 @@ export async function buscarRankingParcial(ligaId) {
 
             // Pequeno delay entre batches
             if (i + BATCH_SIZE < participantesAtivos.length) {
-                await new Promise(resolve => setTimeout(resolve, 200));
+                await new Promise(resolve => setTimeout(resolve, 100));
             }
         }
 
@@ -351,7 +372,7 @@ export async function buscarRankingParcial(ligaId) {
 
         console.log(`${LOG_PREFIX} ✅ Ranking parcial calculado: ${resultados.length} times`);
 
-        return {
+        const resultado = {
             disponivel: true,
             rodada: rodadaAtual,
             status: "em_andamento",
@@ -362,13 +383,30 @@ export async function buscarRankingParcial(ligaId) {
             message: `Parciais da Rodada ${rodadaAtual} (atualizado às ${new Date().toLocaleTimeString('pt-BR')})`,
         };
 
+        // ✅ PERF-FIX: Cachear resultado para próximos consumidores
+        parciaisCache.set(cacheKey, resultado);
+        return resultado;
+
     } catch (error) {
         console.error(`${LOG_PREFIX} ❌ Erro ao buscar ranking parcial:`, error);
         return null;
     }
 }
 
+/**
+ * Invalida cache de parciais para uma liga (ou todas).
+ * @param {string|null} ligaId - Se null, limpa todo o cache
+ */
+export function invalidarCacheParciais(ligaId) {
+    if (ligaId) {
+        parciaisCache.del(`parciais_${ligaId}`);
+    } else {
+        parciaisCache.flushAll();
+    }
+}
+
 export default {
     buscarRankingParcial,
     buscarStatusMercado,
+    invalidarCacheParciais,
 };

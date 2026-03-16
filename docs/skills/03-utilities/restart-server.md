@@ -1,3 +1,8 @@
+---
+name: restart-server
+description: Reiniciar servidor Node.js no ambiente Replit usando npm run dev
+---
+
 # /restart-server - Reiniciar Servidor de Desenvolvimento
 
 Skill para reiniciar o servidor Node.js no ambiente Replit usando `npm run dev`.

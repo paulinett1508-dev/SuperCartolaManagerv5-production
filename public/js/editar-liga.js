@@ -695,7 +695,7 @@ class EditarLigaManager {
             if (escudoUrl) {
                 escudoImg.src = escudoUrl;
                 escudoImg.style.display = "block";
-                escudoImg.onerror = () => { escudoImg.src = "/escudos/placeholder.png"; };
+                escudoImg.onerror = () => { escudoImg.onerror = null; escudoImg.src = "/escudos/placeholder.png"; };
             } else {
                 escudoImg.style.display = "none";
             }
@@ -711,7 +711,7 @@ class EditarLigaManager {
             if (escudoUrl) {
                 escudoImg.src = escudoUrl;
                 escudoImg.style.display = "block";
-                escudoImg.onerror = () => { escudoImg.src = "/escudos/placeholder.png"; };
+                escudoImg.onerror = () => { escudoImg.onerror = null; escudoImg.src = "/escudos/placeholder.png"; };
             } else {
                 escudoImg.style.display = "none";
             }

@@ -184,6 +184,7 @@ export async function consolidarRankingTurno(ligaId, turno, rodadaAtualGeral, te
         ligaId,
         temporada,
         rodada: { $gte: inicio, $lte: fim },
+        populacaoFalhou: { $ne: true }, // ✅ v3.2: Excluir registros com falha de API
     }).lean();
 
     if (!rodadas || rodadas.length === 0) {

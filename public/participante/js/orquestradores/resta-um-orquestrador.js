@@ -725,7 +725,16 @@ class RestaUmModule {
         }
 
         const ed = this.edicaoAtual;
-        const vivos     = this.participantes.filter(p => p.status === 'vivo');
+        const isLive = this.isLive;
+        const exibirAcumulado = !isLive;
+        const vivos     = this.participantes.filter(p => p.status === 'vivo')
+            .sort((a, b) => {
+                if (isLive && a.pontosRodada != null && b.pontosRodada != null) {
+                    const diff = (b.pontosRodada || 0) - (a.pontosRodada || 0);
+                    return diff !== 0 ? diff : (b.pontosAcumulados || 0) - (a.pontosAcumulados || 0);
+                }
+                return (b.pontosAcumulados || 0) - (a.pontosAcumulados || 0);
+            });
         const campeao   = this.participantes.find(p => p.status === 'campeao');
         const eliminados = this.participantes
             .filter(p => p.status === 'eliminado')
@@ -794,6 +803,7 @@ class RestaUmModule {
             if (vivos.length > 0 && !campeao) {
                 const lider = vivos[0];
                 const temPtsLider = lider.pontosRodada != null;
+                const liderLabel = isLive ? 'Líder da Rodada' : 'Melhor Acumulado';
                 html += `
                     <div class="ruv-lider-card">
                         <div class="ruv-lider-pos">#1</div>
@@ -803,17 +813,20 @@ class RestaUmModule {
                         <div class="ruv-lider-info">
                             <div class="ruv-lider-label">
                                 <span class="material-icons">emoji_events</span>
-                                ${ed.status === 'em_andamento' ? 'Líder da Rodada' : 'Melhor Colocado'}
+                                ${liderLabel}
                             </div>
                             <div class="ruv-lider-time">${_escapeHtml(lider.nomeTime || '—')}</div>
                             <div class="ruv-lider-cartoleiro">${_escapeHtml(lider.nomeCartoleiro || '')}</div>
                         </div>
                         <div class="ruv-lider-stats">
-                            ${temPtsLider
-                                ? `<div class="ruv-lider-pts">${_fmtPts(lider.pontosRodada)}</div>
-                                   <div class="ruv-lider-acum">${_fmtPts(lider.pontosAcumulados)} acum.</div>`
-                                : `<div class="ruv-lider-no-pts">—</div>
-                                   <div class="ruv-lider-acum">${_fmtPts(lider.pontosAcumulados)} acum.</div>`
+                            ${exibirAcumulado
+                                ? `<div class="ruv-lider-pts">${_fmtPts(lider.pontosAcumulados)}</div>
+                                   ${temPtsLider ? `<div class="ruv-lider-acum">R: ${_fmtPts(lider.pontosRodada)}</div>` : ''}`
+                                : temPtsLider
+                                    ? `<div class="ruv-lider-pts">${_fmtPts(lider.pontosRodada)}</div>
+                                       <div class="ruv-lider-acum">${_fmtPts(lider.pontosAcumulados)} acum.</div>`
+                                    : `<div class="ruv-lider-no-pts">—</div>
+                                       <div class="ruv-lider-acum">${_fmtPts(lider.pontosAcumulados)} acum.</div>`
                             }
                         </div>
                     </div>`;
@@ -866,8 +879,12 @@ class RestaUmModule {
                             ${isLanterna ? `<div class="ruv-lanterna-tag"><span class="material-icons">warning</span>Em Perigo</div>` : ''}
                         </div>
                         <div class="ruv-stats">
-                            <div class="ruv-pts-rodada${temPts ? '' : ' no-data'}">${temPts ? _fmtPts(p.pontosRodada) : '—'}</div>
-                            <div class="ruv-pts-acumulado">${_fmtPts(p.pontosAcumulados)} acum.</div>
+                            ${exibirAcumulado
+                                ? `<div class="ruv-pts-rodada">${_fmtPts(p.pontosAcumulados)}</div>
+                                   ${temPts ? `<div class="ruv-pts-acumulado">R: ${_fmtPts(p.pontosRodada)}</div>` : ''}`
+                                : `<div class="ruv-pts-rodada${temPts ? '' : ' no-data'}">${temPts ? _fmtPts(p.pontosRodada) : '—'}</div>
+                                   <div class="ruv-pts-acumulado">${_fmtPts(p.pontosAcumulados)} acum.</div>`
+                            }
                         </div>
                     </div>`;
             });

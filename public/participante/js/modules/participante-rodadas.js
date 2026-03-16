@@ -109,7 +109,9 @@ export async function inicializarRodadasParticipante({
             return;
         }
 
-        const rodadas = await response.json();
+        const rodadasRaw = await response.json();
+        // Normalizar formato: backend retorna { rodadas: [], cacheHint: {} } desde ba496f8
+        const rodadas = Array.isArray(rodadasRaw) ? rodadasRaw : (rodadasRaw?.rodadas || []);
         if (window.Log)
             Log.info(
                 `[PARTICIPANTE-RODADAS] 📊 ${rodadas.length} registros recebidos`,
@@ -270,6 +272,23 @@ function renderizarGridRodadas(rodadas) {
 function renderizarMiniCards(inicio, fim, rodadasMap) {
     let html = '';
 
+    // ✅ v4.0: Pré-calcular posições ANTES do loop (evita 38 sorts O(n log n))
+    const posicoesCache = new Map();
+    for (let i = inicio; i <= fim; i++) {
+        const rodada = rodadasMap.get(i);
+        if (!rodada || !rodada.participantes?.length) continue;
+        const jogou = rodada?.jogou || false;
+        let posicao = rodada?.posicaoFinanceira;
+        if (!posicao && jogou && rodada.participantes.length > 1) {
+            const ordenados = [...rodada.participantes]
+                .filter(p => !p.rodadaNaoJogada)
+                .sort((a, b) => (b.pontos || 0) - (a.pontos || 0));
+            const idx = ordenados.findIndex(p => compararTimeIds(p.timeId || p.time_id, meuTimeId));
+            if (idx >= 0) posicao = idx + 1;
+        }
+        if (posicao) posicoesCache.set(i, posicao);
+    }
+
     for (let i = inicio; i <= fim; i++) {
         const rodada = rodadasMap.get(i);
         const isParcial = parciaisInfo?.disponivel && i === parciaisInfo.rodada;
@@ -278,16 +297,8 @@ function renderizarMiniCards(inicio, fim, rodadasMap) {
         const jogou = rodada?.jogou || false;
         const valorFinanceiro = rodada?.valorFinanceiro;
 
-        // Calcular posição na rodada
-        let posicao = rodada?.posicaoFinanceira;
-        if (!posicao && temDados && jogou && rodada.participantes?.length > 1) {
-            // Calcular posição se não estiver disponível diretamente
-            const ordenados = [...rodada.participantes]
-                .filter(p => !p.rodadaNaoJogada)
-                .sort((a, b) => (b.pontos || 0) - (a.pontos || 0));
-            const idx = ordenados.findIndex(p => compararTimeIds(p.timeId || p.time_id, meuTimeId));
-            if (idx >= 0) posicao = idx + 1;
-        }
+        // ✅ v4.0: Usar cache pré-calculado (sem sort dentro do loop)
+        const posicao = posicoesCache.get(i) || rodada?.posicaoFinanceira;
 
         let classes = ['rodada-mini-card'];
         let tipoDestaque = null;
@@ -786,6 +797,23 @@ function toggleRodadasDestaques() {
 }
 
 window.toggleRodadasDestaques = toggleRodadasDestaques;
+
+// =====================================================================
+// TOGGLE DETALHES TEMPORADA — Progressive Disclosure v4.0
+// =====================================================================
+function toggleTemporadaDetalhes() {
+    const body = document.getElementById('tempDetalhesBody');
+    const toggle = document.getElementById('tempDetalhesToggle');
+    const chevron = document.getElementById('tempDetalhesChevron');
+    if (!body || !toggle) return;
+
+    const isExpanded = body.classList.contains('expanded');
+    body.classList.toggle('expanded');
+    toggle.setAttribute('aria-expanded', !isExpanded);
+    toggle.querySelector('span:first-child').textContent = isExpanded ? 'Ver detalhes' : 'Ocultar detalhes';
+}
+
+window.toggleTemporadaDetalhes = toggleTemporadaDetalhes;
 
 // =====================================================================
 // POSIÇÕES E CORES - Cartola
@@ -1354,7 +1382,9 @@ async function selecionarRodada(numeroRodada, isParcial = false) {
                 try {
                     const res = await fetch(`/api/rodadas/${ligaId}/rodadas?rodada=${numeroRodada}&temporada=${TEMPORADA_ATUAL}`);
                     if (res.ok) {
-                        const rodadas = await res.json();
+                        const rodadasRaw = await res.json();
+                        // Normalizar formato: backend retorna { rodadas: [], cacheHint: {} } desde ba496f8
+                        const rodadas = Array.isArray(rodadasRaw) ? rodadasRaw : (rodadasRaw?.rodadas || []);
                         if (rodadas.length > 0) {
                             const agrupadas = agruparRodadasPorNumero(rodadas);
                             const dadosFresh = agrupadas.find(r => r.numero === numeroRodada);
@@ -1620,7 +1650,7 @@ function renderizarDetalhamentoRodada(rodadaData, isParcial = false, inativos = 
         // Em campo badge for parciais - mostrar escalados + jogando ao vivo
         const titularesTotal = 12;
         const escalados = meuPart.atletas ? meuPart.atletas.filter(a => !a.is_reserva).length : 0;
-        const jogandoAoVivo = meuPart.atletas ? meuPart.atletas.filter(a => !a.is_reserva && a.entrou_em_campo === true).length : 0;
+        const jogandoAoVivo = meuPart.atletas ? meuPart.atletas.filter(a => !a.is_reserva && a.entrou_em_campo_real === true).length : 0;
         const emCampoInfo = isParcial && escalados > 0
             ? `<span style="margin-left:8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--app-text-muted)">${jogandoAoVivo}/12</span>`
             : '';
@@ -1712,7 +1742,7 @@ function renderizarDetalhamentoRodada(rodadaData, isParcial = false, inativos = 
 
         // Badge "X/12 em campo" para parciais
         const escalados = participante.atletas ? participante.atletas.filter(a => !a.is_reserva).length : 0;
-        const jogandoAoVivo = participante.atletas ? participante.atletas.filter(a => !a.is_reserva && a.entrou_em_campo === true).length : 0;
+        const jogandoAoVivo = participante.atletas ? participante.atletas.filter(a => !a.is_reserva && a.entrou_em_campo_real === true).length : 0;
         const badgeEmCampo = isParcial && escalados > 0
             ? `<span class="rk-em-campo ${jogandoAoVivo > 0 ? 'ativo' : ''}">${jogandoAoVivo}/${escalados}</span>`
             : "";

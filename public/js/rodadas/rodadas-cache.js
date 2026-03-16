@@ -317,20 +317,26 @@ export function throttle(func, limit) {
 }
 
 // CACHE PARA IMAGENS DE ESCUDOS
+const ESCUDO_DEFAULT = '/escudos/default.png';
+
 class ImageCache {
   constructor() {
     this.cache = new Map();
     this.loading = new Set();
+    this.failed = new Set();
   }
 
   async preloadImage(src) {
-    if (this.cache.has(src) || this.loading.has(src)) {
+    if (this.cache.has(src) || this.failed.has(src)) {
       return this.cache.get(src) || Promise.resolve();
+    }
+    if (this.loading.has(src)) {
+      return Promise.resolve();
     }
 
     this.loading.add(src);
 
-    const promise = new Promise((resolve, reject) => {
+    const promise = new Promise((resolve) => {
       const img = new Image();
       img.onload = () => {
         this.cache.set(src, img);
@@ -339,7 +345,8 @@ class ImageCache {
       };
       img.onerror = () => {
         this.loading.delete(src);
-        reject(new Error(`Falha ao carregar imagem: ${src}`));
+        this.failed.add(src);
+        resolve(null);
       };
       img.src = src;
     });

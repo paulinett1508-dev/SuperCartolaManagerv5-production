@@ -1,3 +1,8 @@
+---
+name: newsession
+description: Handover para nova sessão — carrega contexto do trabalho em andamento e instrui próximos passos
+---
+
 # Skill: newsession
 
 Handover para nova sessão — carrega contexto do trabalho em andamento e instrui próximos passos.

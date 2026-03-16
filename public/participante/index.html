@@ -28,10 +28,6 @@
         <link rel="manifest" href="manifest.json" />
         <link rel="apple-touch-icon" href="/img/newlogo-supercartola.png" />
 
-        <!-- Preload CSS critico (browser descobre antes de parsear o HTML completo) -->
-        <link rel="preload" href="css/tailwind.css" as="style" />
-        <link rel="preload" href="css/_app-tokens.css" as="style" />
-
         <!-- TAILWIND CSS (build estático via npm run build:css) -->
         <link rel="stylesheet" href="css/tailwind.css" />
 
@@ -53,22 +49,10 @@
 
         <!-- FONTS (non-blocking: carregam em background, display=swap ja garante texto visivel) -->
         <link
-            href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;500;600;700;800&family=Russo+One&display=swap"
             rel="stylesheet"
             media="print" onload="this.media='all'"
         />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Russo+One&display=swap"
-            rel="stylesheet"
-            media="print" onload="this.media='all'"
-        />
-        <!-- Fallback noscript para browsers sem JS -->
-        <noscript>
-            <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" />
-            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Russo+One&display=swap" />
-        </noscript>
 
         <!-- TEASER 2026: Phosphor Icons (defer: evita parser-blocking no mobile) -->
         <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/index.js" defer></script>
@@ -101,6 +85,9 @@
         <!-- ✅ Tabela do Brasileirão -->
         <link rel="stylesheet" href="css/brasileirao-tabela.css" />
 
+        <!-- ✅ TurnoGroup: colapsável por turno (componente reutilizável) -->
+        <link rel="stylesheet" href="css/components/turno-group.css" />
+
         <!-- ✅ Campinho Virtual -->
         <link rel="stylesheet" href="css/campinho.css" />
 
@@ -119,6 +106,9 @@
         <!-- ✅ Loading Overlay (navegação entre módulos) -->
         <link rel="stylesheet" href="css/pull-refresh.css" />
 
+        <!-- ✅ Live Experience / Matchday (FEAT-026) -->
+        <link rel="stylesheet" href="css/matchday.css?v=2.0" />
+
         <!-- ✅ Resta Um (eliminação progressiva) -->
         <link rel="stylesheet" href="css/resta-um.css?v=3.0" />
 
@@ -126,7 +116,7 @@
         <link rel="stylesheet" href="css/module-lp.css" />
 
         <!-- ✅ Widget "O que tá rolando?" -->
-        <link rel="stylesheet" href="css/whats-happening.css" />
+        <link rel="stylesheet" href="css/whats-happening.css?v=2" />
 
         <!-- ✅ Widget "Raio-X da Rodada" -->
         <link rel="stylesheet" href="css/round-xray-widget.css" />
@@ -1108,7 +1098,10 @@
         <!-- ✅ Sistema de Logos por Liga -->
         <script src="js/liga-logos.js" defer></script>
 
-        <!-- ✅ Sistema de Cache Offline (IndexedDB) - ANTES do cache-manager -->
+        <!-- ✅ Super Cache Inteligente v2 (L1 Memória + L2 IndexedDB) -->
+        <script src="js/participante-cache-v2.js"></script>
+
+        <!-- ✅ Sistema de Cache Offline (IndexedDB) - LEGADO (mantido para compatibilidade) -->
         <script src="js/participante-config.js"></script>
         <script src="js/participante-offline-cache.js"></script>
 
@@ -1124,6 +1117,9 @@
 
         <!-- Utils (formatação de moeda) -->
         <script src="js/participante-utils.js" defer></script>
+
+        <!-- ✅ Live Experience — MatchdayService (FEAT-026) -->
+        <script src="js/matchday-service.js" defer></script>
 
         <!-- Scripts participante -->
         <script src="js/participante-auth.js"></script>
@@ -3012,6 +3008,9 @@
 
             console.log('[REGRAS] Modal Regras 2026 carregado');
         </script>
+
+        <!-- COMPONENTE: TurnoGroup (agrupador de rodadas por turno) -->
+        <script src="js/components/turno-group.js"></script>
 
         <!-- COMPONENTE: MODAL DE HISTÓRICO CAPITÃO DE LUXO -->
         <script src="../js/components/capitao-historico-modal.js"></script>

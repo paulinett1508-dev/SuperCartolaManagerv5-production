@@ -996,6 +996,11 @@ export const getExtratoCache = async (req, res) => {
 
         // ✅ v5.1: Adicionar acertos ao retorno
         // ✅ v7.0: Incluir config da liga (módulos + zonas)
+        // ✅ cacheHint para Super Cache Inteligente
+        const { buildCacheHint: buildHintExtrato, getMercadoContext: getCtxExtrato } = await import('../utils/cache-hint.js');
+        const ctxExtrato = await getCtxExtrato();
+        const cacheHintExtrato = buildHintExtrato({ ...ctxExtrato, temporada: temporadaNum, tipo: 'extrato' });
+
         res.json({
             cached: true,
             fonte: 'cache',
@@ -1024,6 +1029,7 @@ export const getExtratoCache = async (req, res) => {
             rodadaTravada: rodadaDesistencia ? rodadaDesistencia - 1 : null,
             // ✅ v6.0: Dados de quitação para exibir badge no frontend
             quitacao: cache.quitacao || null,
+            cacheHint: cacheHintExtrato,
         });
     } catch (error) {
         logger.error("[CACHE-CONTROLLER] Erro:", error);

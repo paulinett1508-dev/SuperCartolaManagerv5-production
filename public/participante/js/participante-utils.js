@@ -148,6 +148,7 @@ function isJogosEmAndamento(statusMercado) {
 let _isAoVivoCache = null;
 let _isAoVivoCacheAt = 0;
 const _IS_AO_VIVO_TTL = 30_000; // 30s
+let _lastAoVivoStatsData = null;
 
 async function isRodadaRealmenteAoVivo() {
     const agora = Date.now();
@@ -158,6 +159,7 @@ async function isRodadaRealmenteAoVivo() {
         const res = await fetch('/api/jogos-ao-vivo/game-status');
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
+        _lastAoVivoStatsData = data;
         // Tem jogo LIVE na API OU está dentro da janela do calendário
         _isAoVivoCache = (data?.stats?.aoVivo > 0) || (data?.calendarioAberto === true);
     } catch {
@@ -166,6 +168,14 @@ async function isRodadaRealmenteAoVivo() {
     }
     _isAoVivoCacheAt = Date.now();
     return _isAoVivoCache;
+}
+
+function getAoVivoStats() {
+    return _lastAoVivoStatsData?.stats || null;
+}
+
+function getAoVivoData() {
+    return _lastAoVivoStatsData || null;
 }
 
 // Disponibilizar globalmente
@@ -177,3 +187,5 @@ window.obterUltimaRodadaDisputada = obterUltimaRodadaDisputada;
 window.isMercadoAberto = isMercadoAberto;
 window.isJogosEmAndamento = isJogosEmAndamento;
 window.isRodadaRealmenteAoVivo = isRodadaRealmenteAoVivo;
+window.getAoVivoStats = getAoVivoStats;
+window.getAoVivoData = getAoVivoData;

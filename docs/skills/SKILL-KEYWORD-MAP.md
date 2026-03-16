@@ -255,8 +255,8 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 #### systematic-debugging
 | Tipo | Keywords |
 |------|----------|
-| **Primárias** | `debug`, `bug`, `investigar`, `reproduzir`, `causa raiz`, `bisect`, `erro`, `crash`, `não funciona`, `debugging` |
-| **Frases PT-BR** | "como debugar isso?", "investigar esse bug", "encontrar causa raiz", "reproduzir o erro", "git bisect", "por que não funciona?", "erro no sistema", "crash no servidor", "tá quebrando" |
+| **Primárias** | `debug`, `bug`, `investigar`, `reproduzir`, `causa raiz`, `bisect`, `erro`, `crash`, `não funciona`, `debugging`, `quebrado`, `quebrou` |
+| **Frases PT-BR** | "como debugar isso?", "investigar esse bug", "encontrar causa raiz", "reproduzir o erro", "git bisect", "por que não funciona?", "erro no sistema", "crash no servidor", "tá quebrando", "renderização quebrada", "não renderiza", "tela quebrada", "layout quebrado", "CSS quebrado", "tá errado", "não aparece", "sumiu", "parou de funcionar" |
 | **Contexto** | Investigação sistemática de bugs usando metodologia 4 fases: Reproduzir → Isolar → Entender → Corrigir |
 | **NÃO confundir** | Code review → `code-inspector`; Bug de cache → `cache-sentinel`; Bug de regra → `league-architect` |
 | **Localização** | `docs/skills/03-utilities/systematic-debugging.md` |
@@ -390,6 +390,16 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 | **NÃO confundir** | Auditoria de módulo individual → `auditor-module`; Auditoria de cache geral → `cache-auditor`; Auditoria UX geral → `ux-auditor-app` |
 | **Localização** | `docs/skills/04-project-specific/live-experience.md` |
 
+#### post-implementation-conformity
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `conformidade`, `auditoria pós-implementação`, `verificar conformidade`, `checar consistência`, `validar documentação`, `cross-reference`, `tudo consistente?` |
+| **Frases PT-BR** | "tá tudo consistente?", "verificar se nada ficou pra trás", "auditar conformidade", "checar cross-references", "LESSONS gerou regra?", "keyword map atualizado?", "cache busting tá ok?", "validar que tudo bate", "conferir documentação", "auditoria pós-implementação", "antes de fechar a tarefa" |
+| **Contexto** | Auditoria de consistência cruzada APÓS implementar e documentar. Verifica CLAUDE.md ↔ LESSONS.md ↔ SKILL-KEYWORD-MAP ↔ css-registry ↔ cache busting |
+| **NÃO confundir** | Auditoria de código → `code-inspector`; Auditoria de módulo → `auditor-module`; Checklist pré-deploy → agnostic-core; Auditoria UX → `ux-auditor-app` |
+| **Localização** | `docs/skills/04-project-specific/post-implementation-conformity.md` |
+| **Base agnóstica** | `.agnostic-core/skills/audit/post-implementation-conformity.md` |
+
 ---
 
 ### 05 - Meta (Skills sobre Skills)
@@ -495,9 +505,17 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | "revisar arquitetura" | `architecture-reviewer` | Decisões técnicas |
 | "como debugar isso?" | `systematic-debugging` | 4 fases debugging |
 | "causa raiz" | `systematic-debugging` | 5 Porquês |
+| "renderização quebrada" | `systematic-debugging` | Bug visual = debugging |
+| "tá quebrado" | `systematic-debugging` | Bug report |
+| "não aparece" / "sumiu" | `systematic-debugging` | Elemento ausente = bug |
+| "parou de funcionar" | `systematic-debugging` | Regressão |
 | "pattern tailwind" | `tailwind-patterns` | Utility classes |
 | "como tratar esse erro?" | `error-handling` | Try/catch patterns |
 | "limites do replit" | `replit-patterns` | Deploy/config Replit |
+| "tá tudo consistente?" | `post-implementation-conformity` | Auditoria pós-implementação |
+| "nada ficou pra trás?" | `post-implementation-conformity` | Conformidade cruzada |
+| "auditar conformidade" | `post-implementation-conformity` | Cross-references + docs |
+| "antes de fechar a tarefa" | `post-implementation-conformity` | Validação final |
 
 ---
 
@@ -505,9 +523,12 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 
 | Cenário | Sequência de Skills |
 |---------|---------------------|
-| Feature nova completa | `workflow` → `pesquisa` → `spec` → `ai-problems-detection` → `code` → `git-commit-push` |
-| Feature com frontend | `workflow` → `pesquisa` → `spec` → `anti-frankenstein` → `frontend-crafter` → `code` → `git-commit-push` |
-| Bug report | `fact-checker` → `code-inspector` → `code` → `git-commit-push` |
+| Feature nova completa | `workflow` → `pesquisa` → `spec` → `ai-problems-detection` → `code` → `post-implementation-conformity` → `git-commit-push` |
+| Feature com frontend | `workflow` → `pesquisa` → `spec` → `anti-frankenstein` → `frontend-crafter` → `code` → `post-implementation-conformity` → `git-commit-push` |
+| Bug report | `systematic-debugging` → `code` → `git-commit-push` |
+| Bug fix com lição | `systematic-debugging` → `code` → LESSONS.md → `post-implementation-conformity` → `git-commit-push` |
+| Nova skill | `skill-creator` → `post-implementation-conformity` → `git-commit-push` |
+| CSS novo (pipeline completo) | `frontend-design` → `anti-frankenstein` → `frontend-crafter` → `post-implementation-conformity` → `git-commit-push` |
 | Refatoração | `Refactor-Monolith` → `code-inspector` → `git-commit-push` |
 | Deploy completo | `git-commit-push` → `replit-pull` → `restart-server` |
 | Auditoria de módulo | `auditor-module` → `code-inspector` → `cache-auditor` |

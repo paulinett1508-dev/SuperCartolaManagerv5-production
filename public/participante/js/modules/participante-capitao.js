@@ -47,6 +47,7 @@ export async function inicializarCapitaoParticipante(params) {
     estadoCapitao.ligaId = params.ligaId;
     estadoCapitao.timeId = params.timeId;
     estadoCapitao.temporada = window.ParticipanteConfig?.CURRENT_SEASON || new Date().getFullYear();
+    window.MatchdayService?.setContext({ ligaId: params.ligaId });
 
     // ✅ LP: Init acordeons + carregar regras e premiações (non-blocking)
     _initLPAccordions('capitao-lp-wrapper');
@@ -246,30 +247,86 @@ async function carregarRanking() {
 // Atualizado a cada render via window._capitaoRankingCache para acesso em onclick inline
 let _capitaoRankingCache = [];
 
+/** Compacta nome: "Neymar Junior" → "N. Junior" */
+function _nomeCompacto(nome) {
+    if (!nome) return '?';
+    const partes = nome.trim().split(/\s+/);
+    if (partes.length === 1) return partes[0].slice(0, 10);
+    return partes[0][0] + '. ' + partes[partes.length - 1].slice(0, 9);
+}
+
+/** Retorna array de rodadas com capitão compacto para painel colapsável */
+function _resumoRodadasCapitao(historico) {
+    if (!historico || !Array.isArray(historico)) return [];
+    return historico
+        .filter(r => r.atleta_nome && r.atleta_nome !== 'Sem capitão')
+        .sort((a, b) => a.rodada - b.rodada)
+        .map(r => ({
+            rodada: r.rodada,
+            capitao: escapeHtml(_nomeCompacto(r.atleta_nome)),
+            pontos: typeof truncarPontos === 'function'
+                ? parseFloat(truncarPontos(r.pontuacao || 0))
+                : Math.trunc((r.pontuacao || 0) * 100) / 100,
+        }));
+}
+
+/**
+ * Calcula indicador de tendência: última rodada vs média pessoal
+ * @returns {{ icon: string, text: string, cssClass: string }}
+ */
+function _calcularTendencia(participante) {
+    const historico = participante.historico_rodadas || [];
+    const media = participante.media_capitao || 0;
+
+    if (historico.length === 0 || media === 0) {
+        return { icon: 'trending_flat', text: '', cssClass: 'trend-flat' };
+    }
+
+    // Pegar última rodada (maior número)
+    const ultimaRodada = historico.reduce((max, r) => r.rodada > max.rodada ? r : max, historico[0]);
+    const ultimaPontuacao = ultimaRodada.pontuacao || 0;
+
+    const variacao = Math.trunc(((ultimaPontuacao - media) / Math.abs(media)) * 100);
+
+    if (variacao > 5) {
+        return { icon: 'trending_up', text: `+${variacao}%`, cssClass: 'trend-up' };
+    } else if (variacao < -5) {
+        return { icon: 'trending_down', text: `${variacao}%`, cssClass: 'trend-down' };
+    }
+    return { icon: 'trending_flat', text: `${variacao}%`, cssClass: 'trend-flat' };
+}
+
 function renderizarRanking(ranking) {
     const container = document.getElementById('capitaoContent');
     if (!container) return;
 
     _capitaoRankingCache = ranking;
     window._capitaoRankingCache = ranking; // sync para handlers onclick inline
-    let html = '';
+
+    // Hint para o usuário
+    let html = `
+        <div style="font: 400 9px 'Inter', sans-serif; color: #555; text-align: center; padding: 6px 0 10px; border-bottom: 1px solid rgba(255,255,255,0.03); margin-bottom: 8px;">
+            <span class="material-icons" style="font-size: 11px; vertical-align: middle;">touch_app</span> toque no participante para ver capitães
+        </div>
+    `;
 
     ranking.forEach((participante, index) => {
         const posicao = participante.posicao_final || index + 1;
         const isMeuTime = String(participante.timeId) === String(estadoCapitao.timeId);
         const isPodium1 = posicao === 1;
+        const isPodium2 = posicao === 2;
+        const isPodium3 = posicao === 3;
 
         const escudoSrc = participante.escudo || `/escudos/${participante.clube_id || 'default'}.png`;
         const pontos = typeof truncarPontos === 'function' ? truncarPontos(participante.pontuacao_total || 0) : (Math.trunc((participante.pontuacao_total || 0) * 100) / 100).toFixed(2);
-        const media = typeof truncarPontos === 'function' ? truncarPontos(participante.media_capitao || 0) : (Math.trunc((participante.media_capitao || 0) * 100) / 100).toFixed(2);
 
         const cardClasses = [
-            'capitao-card',
+            'capitao-ranking-row',
             isMeuTime ? 'meu-time' : '',
             isPodium1 ? 'podium-1' : '',
+            isPodium2 ? 'podium-2' : '',
+            isPodium3 ? 'podium-3' : '',
         ].filter(Boolean).join(' ');
-
-        const posicaoIcon = `${posicao}º`;
 
         // Badge apenas para o campeão (só 1o lugar premia)
         const campeaoBadge = isPodium1
@@ -278,51 +335,91 @@ function renderizarRanking(ranking) {
                 : '<span class="capitao-badge-captain">[C]</span>')
             : '';
 
-        // ✅ NOVO LAYOUT: Botão "Ver Histórico" compacto
         const historico = participante.historico_rodadas || [];
-        const rodadasJogadas = historico.length;
-        const totalRodadas = RODADA_FINAL_CAMPEONATO;
+        const rodadas = _resumoRodadasCapitao(historico);
+        const tid = participante.timeId || index;
 
-        // Botão Ver Histórico (somente se tiver dados)
-        let btnHistoricoHtml = '';
-        if (historico.length > 0) {
-            btnHistoricoHtml = `
-                <button class="btn-ver-historico-app"
-                        onclick="window._abrirHistoricoCapitao(window._capitaoRankingCache[${index}])"
-                        aria-label="Ver histórico completo">
-                    <span class="material-icons" style="font-size: 14px;">history</span>
-                    ${rodadasJogadas}/${totalRodadas} rodadas
-                </button>
-            `;
-        }
+        // Indicador de tendência (seta + variação %)
+        const tendencia = _calcularTendencia(participante);
+        const trendHtml = tendencia.text
+            ? `<span class="trend-indicator ${tendencia.cssClass}">
+                   <span class="material-icons">${tendencia.icon}</span>
+                   ${tendencia.text}
+               </span>`
+            : '';
 
+        // Card/row do ranking
         html += `
-            <div class="${cardClasses}" onclick="${historico.length > 0 ? `window._abrirHistoricoCapitao(window._capitaoRankingCache[${index}])` : ''}">
-                <div class="capitao-posicao">${posicaoIcon}</div>
+            <div class="${cardClasses}" data-timeid="${tid}">
+                <div class="capitao-posicao">${posicao}º</div>
                 <img src="${escapeHtml(escudoSrc)}" class="capitao-escudo" alt=""
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'">
                 <span class="material-icons" style="display: none; font-size: 32px; color: #666;">emoji_events</span>
                 <div class="capitao-info">
                     <div class="capitao-nome">${escapeHtml(participante.nome_cartola || '---')}</div>
                     <div class="capitao-time-nome">${escapeHtml(participante.nome_time || '')}</div>
-                    ${btnHistoricoHtml}
                 </div>
                 <div class="capitao-stats">
                     <div class="capitao-stat">
                         <span class="capitao-stat-label">PTS</span>
                         <span class="capitao-stat-value">${pontos}</span>
                     </div>
-                    <div class="capitao-stat">
-                        <span class="capitao-stat-label">MED</span>
-                        <span class="capitao-stat-value media">${media}</span>
-                    </div>
+                    ${trendHtml}
                     ${campeaoBadge}
+                    <span class="material-icons capitao-expand-icon">expand_more</span>
                 </div>
             </div>
         `;
+
+        // Painel colapsável com histórico de rodadas
+        html += `<div class="capitao-collapse-panel" data-panel-timeid="${tid}">`;
+        html += '<div class="capitao-collapse-inner">';
+        if (rodadas.length > 0) {
+            rodadas.forEach(r => {
+                const cor = r.pontos >= 10 ? 'var(--capitao-success)' : r.pontos >= 5 ? 'var(--capitao-primary-light)' : r.pontos < 0 ? 'var(--capitao-danger)' : '#888';
+                const corPts = r.pontos >= 10 ? 'var(--capitao-success)' : r.pontos >= 5 ? 'var(--capitao-primary-light)' : r.pontos < 0 ? 'var(--capitao-danger)' : '#666';
+                html += `<div class="capitao-collapse-rodada">
+                    <span class="capitao-collapse-rodada-badge" style="color:${cor};">R${r.rodada}</span>
+                    <span class="capitao-collapse-rodada-info">${r.capitao}</span>
+                    <span class="capitao-collapse-rodada-pts" style="color:${corPts};">${r.pontos.toFixed(2)}</span>
+                </div>`;
+            });
+        } else {
+            html += '<div class="capitao-collapse-vazio">Nenhum capitão registrado</div>';
+        }
+        html += '</div></div>';
     });
 
     container.innerHTML = html;
+
+    // Event listeners para toggle dos painéis colapsáveis
+    _setupCollapseListeners(container);
+}
+
+/** Configura event listeners para os painéis colapsáveis */
+function _setupCollapseListeners(container) {
+    container.querySelectorAll('.capitao-ranking-row').forEach(row => {
+        row.addEventListener('click', () => {
+            const tid = row.dataset.timeid;
+            const panel = container.querySelector(`.capitao-collapse-panel[data-panel-timeid="${tid}"]`);
+            if (!panel) return;
+
+            const isOpen = panel.classList.contains('open');
+
+            // Fechar todos os outros painéis
+            container.querySelectorAll('.capitao-collapse-panel.open').forEach(p => {
+                p.classList.remove('open');
+                p.style.maxHeight = '0';
+            });
+            container.querySelectorAll('.capitao-ranking-row.expanded').forEach(r => r.classList.remove('expanded'));
+
+            if (!isOpen) {
+                row.classList.add('expanded');
+                panel.classList.add('open');
+                panel.style.maxHeight = panel.scrollHeight + 'px';
+            }
+        });
+    });
 }
 
 // =============================================
@@ -343,61 +440,43 @@ function renderizarCardDesempenho(ranking) {
     const media = typeof truncarPontos === 'function' ? truncarPontos(meusDados.media_capitao || 0) : (Math.trunc((meusDados.media_capitao || 0) * 100) / 100).toFixed(2);
     const rodadas = meusDados.rodadas_jogadas || 0;
     const melhor = meusDados.melhor_capitao;
-    const pior = meusDados.pior_capitao;
-    const distintos = meusDados.capitaes_distintos || 0;
+    const totalRodadas = RODADA_FINAL_CAMPEONATO;
 
-    // Extrair HTML nested para evitar backtick nesting (causa SyntaxError)
-    const melhorPts = melhor ? (typeof truncarPontos === 'function' ? truncarPontos(melhor.pontuacao || 0) : (Math.trunc((melhor.pontuacao || 0) * 100) / 100).toFixed(2)) : '';
-    const piorPts = pior ? (typeof truncarPontos === 'function' ? truncarPontos(pior.pontuacao || 0) : (Math.trunc((pior.pontuacao || 0) * 100) / 100).toFixed(2)) : '';
+    const melhorPts = melhor ? (typeof truncarPontos === 'function' ? truncarPontos(melhor.pontuacao || 0) : (Math.trunc((melhor.pontuacao || 0) * 100) / 100).toFixed(2)) : '---';
 
-    let melhorPiorHtml = '';
-    if (melhor) {
-        const piorHtml = pior
-            ? '<div style="font-size: 11px;">'
-                + '<span style="color: var(--capitao-danger);">Pior:</span> '
-                + '<span style="color: #e5e7eb;">' + escapeHtml(pior.atleta_nome || '---') + ' (R' + pior.rodada + ')</span> '
-                + '<span style="font-family: var(--capitao-font-mono); color: var(--capitao-danger); font-weight: 700;">' + piorPts + '</span>'
-                + '</div>'
-            : '';
-        melhorPiorHtml = '<div style="display: flex; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--capitao-border);">'
-            + '<div style="font-size: 11px;">'
-            + '<span style="color: var(--capitao-success);">Melhor:</span> '
-            + '<span style="color: #e5e7eb;">' + escapeHtml(melhor.atleta_nome || '---') + ' (R' + melhor.rodada + ')</span> '
-            + '<span style="font-family: var(--capitao-font-mono); color: var(--capitao-success); font-weight: 700;">' + melhorPts + '</span>'
-            + '</div>'
-            + piorHtml
-            + '</div>';
-    }
+    // Indicador de tendência
+    const tendencia = _calcularTendencia(meusDados);
+    const trendHtml = tendencia.text
+        ? '<span class="trend-indicator ' + tendencia.cssClass + '">'
+            + '<span class="material-icons">' + tendencia.icon + '</span>'
+            + tendencia.text
+            + '</span>'
+        : '';
 
-    const historicoHtml = _renderHistoricoDesempenho(meusDados.historico_rodadas);
+    // Remover card existente anterior (caso de re-render)
+    const existente = mainContainer.querySelector('.capitao-desempenho-card');
+    if (existente) existente.remove();
 
     mainContainer.insertAdjacentHTML('afterbegin', `
-        <div class="capitao-card" style="border-color: var(--capitao-primary); background: rgba(139, 92, 246, 0.08);">
+        <div class="capitao-card capitao-desempenho-card" style="border-color: var(--capitao-primary); background: rgba(139, 92, 246, 0.08); cursor: pointer;"
+             onclick="window._abrirHistoricoCapitao(window._capitaoRankingCache[${ranking.indexOf(meusDados)}])">
             <div style="width: 100%;">
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-                    <span class="material-icons" style="color: var(--capitao-primary); font-size: 20px;">person</span>
-                    <span style="font-family: var(--capitao-font-brand); color: var(--app-text-primary); font-size: 14px;">Seu Desempenho</span>
-                    <span class="capitao-badge-captain">${posicao}º lugar</span>
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center;">
-                    <div>
-                        <span style="display: block; font-size: 10px; color: var(--capitao-text-muted);">Pontos</span>
-                        <span style="font-family: var(--capitao-font-mono); font-size: 16px; font-weight: 700; color: var(--capitao-primary);">${pontos}</span>
+                <div class="cap-desemp-header">
+                    <div class="cap-desemp-header-left">
+                        <span class="material-icons" style="color: var(--capitao-primary); font-size: 20px;">person</span>
+                        <span class="cap-desemp-title">Seu Desempenho</span>
+                        <span class="capitao-badge-captain">${posicao}º</span>
                     </div>
-                    <div>
-                        <span style="display: block; font-size: 10px; color: var(--capitao-text-muted);">Média</span>
-                        <span style="font-family: var(--capitao-font-mono); font-size: 16px; color: var(--capitao-primary-light);">${media}</span>
-                    </div>
-                    <div>
-                        <span style="display: block; font-size: 10px; color: var(--capitao-text-muted);">Rodadas</span>
-                        <span style="font-family: var(--capitao-font-mono); font-size: 16px; color: #e5e7eb;">${rodadas}</span>
+                    <div class="cap-desemp-pts-wrap">
+                        <span class="cap-desemp-pts">${pontos}</span>
+                        ${trendHtml}
                     </div>
                 </div>
-                ${melhorPiorHtml}
-                <div style="margin-top: 8px; font-size: 11px; color: var(--capitao-text-muted);">
-                    Capitães distintos utilizados: <strong style="color: #e5e7eb;">${distintos}</strong>
+                <div class="cap-desemp-pills">
+                    <span class="cap-desemp-pill">Média <strong>${media}</strong></span>
+                    <span class="cap-desemp-pill cap-desemp-pill-success">Melhor <strong>${melhorPts}</strong></span>
+                    <span class="cap-desemp-pill">${rodadas}/${totalRodadas} rod</span>
                 </div>
-                ${historicoHtml}
             </div>
         </div>
     `);

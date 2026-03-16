@@ -66,10 +66,11 @@ export const obterContextoRodada = async (req, res) => {
         console.log(`${LOG_PREFIX} Módulos ativos:`, Object.keys(modulosAtivos).filter(k => modulosAtivos[k]));
 
         // 3. Buscar saldo financeiro real da rodada (extrato)
+        // ExtratoFinanceiroCache.liga_id é String (não ObjectId)
         let financeiroRodada = 0;
         try {
             const extrato = await ExtratoFinanceiroCache.findOne({
-                liga_id: ligaIdObj,
+                liga_id: String(ligaId),
                 time_id: numTimeId,
                 temporada: numTemporada,
             }).lean();
@@ -77,11 +78,18 @@ export const obterContextoRodada = async (req, res) => {
             if (extrato?.historico_transacoes) {
                 const entrada = extrato.historico_transacoes.find(t => t.rodada === numRodada);
                 if (entrada != null) {
-                    financeiroRodada = entrada.saldo ?? 0;
+                    // entrada.valor = bônus/ônus da rodada (ex: -12)
+                    // entrada.saldo = soma de módulos (PC, MM, top10) — não usar
+                    financeiroRodada = entrada.valor ?? 0;
                 }
             }
         } catch (errExtrato) {
             console.warn(`${LOG_PREFIX} Não foi possível buscar extrato financeiro:`, errExtrato.message);
+        }
+
+        // Fallback: se extrato não tem entrada para esta rodada, usar valorFinanceiro da Rodada
+        if (financeiroRodada === 0 && meuTime.valorFinanceiro) {
+            financeiroRodada = meuTime.valorFinanceiro;
         }
 
         // 4. Construir contexto baseado em módulos ativos
@@ -201,11 +209,6 @@ export const obterContextoRodada = async (req, res) => {
             numTimeId,
             numTemporada
         );
-
-        // 8. Gerar narrativa inteligente
-        const { gerarNarrativa } = await import("../services/narrativaService.js");
-        const narrativas = gerarNarrativa(contexto);
-        contexto.narrativa = narrativas;
 
         console.log(`${LOG_PREFIX} Contexto gerado com sucesso para time ${numTimeId}`);
         res.json(contexto);

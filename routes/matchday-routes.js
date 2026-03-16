@@ -3,8 +3,13 @@ import express from 'express';
 import cartolaApiService from '../services/cartolaApiService.js';
 import { buscarRankingParcial } from '../services/parciaisRankingService.js';
 import brasileiraoService from '../services/brasileirao-tabela-service.js';
+import { createMatchdayRateLimiter } from '../middleware/security.js';
 
 const router = express.Router();
+
+// Rate limiter para endpoints matchday (30 req/min por IP)
+const matchdayLimiter = createMatchdayRateLimiter();
+router.use(matchdayLimiter);
 
 /**
  * GET /api/matchday/status
@@ -35,6 +40,7 @@ router.get('/status', async (req, res) => {
       console.warn('[MATCHDAY] Calendário não disponível:', err.message);
     }
 
+    res.setHeader('Cache-Control', 'no-cache, must-revalidate');
     res.json({
       success: true,
       matchday_ativo: matchdayAtivo,
@@ -57,16 +63,26 @@ router.get('/parciais/:ligaId', async (req, res) => {
   try {
     const { ligaId } = req.params;
 
-    if (!ligaId) {
-      return res.status(400).json({ success: false, error: 'ligaId obrigatório' });
+    if (!ligaId || ligaId.length < 10) {
+      return res.status(400).json({ success: false, error: 'ligaId obrigatório', ranking: [] });
     }
 
     const parciais = await buscarRankingParcial(ligaId);
 
-    res.json(parciais);
+    if (!parciais) {
+      return res.json({ disponivel: false, motivo: 'sem_dados', ranking: [] });
+    }
+
+    // cacheHint para o frontend
+    const { buildCacheHint, getMercadoContext } = await import('../utils/cache-hint.js');
+    const ctx = await getMercadoContext();
+    const cacheHint = buildCacheHint({ rodada: ctx.rodadaAtual, ...ctx, tipo: 'ranking' });
+
+    res.setHeader('Cache-Control', 'private, max-age=15');
+    res.json({ ...parciais, cacheHint });
   } catch (error) {
     console.error('[MATCHDAY] Erro parciais:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: error.message, ranking: [] });
   }
 });
 
