@@ -365,7 +365,7 @@
       {
         "path": "public/participante/css/copa-mundo-2026.css",
         "loadedBy": ["participante/index.html"],
-        "description": "Tema Copa do Mundo 2026 com identidade visual do mundial"
+        "description": "Tema Copa do Mundo 2026 com identidade visual do mundial. Inclui: landing page (hero, countdown grid, calendário, grupos, timeline, sedes, notícias, classificação), faixa home strip (copa-home-*), jogos inline (copa-fx-*) e countdown inline (copa-home-countdown)"
       },
       {
         "path": "public/participante/css/campeao-widget.css",
