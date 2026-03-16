@@ -1371,6 +1371,9 @@ function renderCardMataMataUnified() {
     const data = WHState.data.mataMata;
     if (!data?.dados) return null;
 
+    // Torneio encerrado (campeão definido) — não exibir no widget live
+    if (data.dados.campeao) return null;
+
     const fases = ["final", "semis", "quartas", "oitavas", "primeira"];
     let faseAtual = data.faseAtual || null;
     let confrontosFase = [];
@@ -1389,17 +1392,8 @@ function renderCardMataMataUnified() {
     }
 
     if (!faseAtual || confrontosFase.length === 0) {
-        for (const fase of fases) {
-            const cf = data.dados[fase];
-            if (Array.isArray(cf) && cf.length > 0) {
-                faseAtual = fase;
-                confrontosFase = cf;
-                break;
-            }
-        }
+        return null; // Sem fase ativa — torneio finalizado ou sem dados
     }
-
-    if (confrontosFase.length === 0) return null;
 
     const faseLabel = { primeira: "1a Fase", oitavas: "Oitavas", quartas: "Quartas", semis: "Semi", final: "FINAL" }[faseAtual] || faseAtual;
     const isLive = isJogosAoVivo();
