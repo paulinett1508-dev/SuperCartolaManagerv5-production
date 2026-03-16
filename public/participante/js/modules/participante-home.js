@@ -1502,13 +1502,20 @@ function atualizarCardsHomeComParciais() {
 
 // ============================================
 // Helper: status da rodada usando dados globais de jogos ao vivo
-// Usa window.getAoVivoData() (participante-utils.js) — fonte única
+// + mercadoStatus (fonte oficial do Cartola FC) para encerramento
 // ============================================
 function _statusRodadaAtual() {
     const d = window.getAoVivoData?.();
-    if (!d) return 'em_andamento';
-    if (d.stats?.aoVivo > 0 || d.calendarioAberto === true) return 'ao_vivo';
-    if (d.fabState === 'cooling') return 'encerrada';
+    const sm = mercadoStatus?.status_mercado;
+
+    // Jogos ao vivo confirmados por API externa ou calendário
+    if (d?.stats?.aoVivo > 0 || d?.calendarioAberto === true) return 'ao_vivo';
+
+    // Rodada encerrada SOMENTE quando status oficial do Cartola confirma
+    // (status 4=encerrado, 6=temporada encerrada)
+    // fabState 'cooling' significa apenas "jogos do dia acabaram", NÃO rodada encerrada
+    if (sm === 4 || sm === 6) return 'encerrada';
+
     return 'em_andamento';
 }
 
