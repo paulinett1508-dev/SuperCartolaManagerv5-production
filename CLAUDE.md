@@ -2,7 +2,7 @@
 
 ## Protocolo de Planejamento Obrigatório
 
-NUNCA programe sem ANTES: planejar, listar tarefas (TodoWrite), questionar o usuário, aguardar aprovação.
+NUNCA programe sem ANTES: planejar, listar tarefas (TaskCreate), questionar o usuário, aguardar aprovação.
 Exceções: bypass explícito, tarefa trivial (1 ação), continuação de plano aprovado.
 
 **Sub-passo obrigatório — Cruzamento com Skills:**
@@ -76,10 +76,72 @@ O usuário NÃO deve guiar passo a passo. Se teste/lint falhar após fix, corrij
 ## Skills & Commands
 
 Skills ativadas por keywords. Mapeamento: [`docs/skills/SKILL-KEYWORD-MAP.md`](docs/skills/SKILL-KEYWORD-MAP.md)
-Pipeline design: frontend-design → anti-frankenstein → frontend-crafter
+Pipeline design: `frontend-design` → `anti-frankenstein` → `frontend-crafter`
 **Anti-Frankenstein é OBRIGATÓRIO antes de qualquer CSS/HTML novo** — mesmo 3 linhas. Verificar `config/css-registry.json`, reutilizar tokens/animações existentes, NUNCA cores hardcoded.
 **Skill antes de ação — SEMPRE:** Bug report → `systematic-debugging`. CSS/HTML → `anti-frankenstein`. Decisão visual → `frontend-design`. NUNCA racionalizar "é simples" ou "deixa investigar primeiro" para pular skill. (3 ocorrências de skill ignorada levaram a bugs em PROD)
 Commands: `/liste-pr-github` (filtro por período), `/security-review` (diff contra origin/HEAD), `/github-profile` (busca perfil GitHub por username)
+
+### Catálogo de Skills Instaladas
+
+**Workflow / Processo**
+- `workflow` — Maestro do protocolo Pesquisa → Spec → Code; detecta fase automaticamente
+- `pesquisa` — Fase 1: busca autônoma no codebase, gera PRD.md
+- `spec` — Fase 2: lê PRD.md, mapeia dependências, gera Spec.md
+- `code` — Fase 3: lê Spec.md, aplica mudanças cirúrgicas linha por linha
+- `newsession` — Handover entre sessões; carrega contexto do trabalho em andamento
+- `fact-checker` — Anti-alucinação: valida afirmações antes de responder
+- `ai-problems-detection` — Detecta overengineering, duplicação, reinvenção da roda
+- `post-implementation-conformity` — Auditoria cruzada entre código implementado e plano
+
+**Frontend / UI**
+- `frontend-design` — Autoridade estética máxima; cria interfaces de alta qualidade
+- `anti-frankenstein` — Guardião de CSS/HTML; previne duplicação e cores hardcoded
+- `frontend-crafter` — Especialista mobile-first, SPA, cache offline, navegação
+- `stitch-adapter` — Adapta HTML externo (Stitch/outro) ao design system do projeto
+- `tailwind-patterns` — Padrões e boas práticas de TailwindCSS no projeto
+- `ui-ux-quality-gates` — 5 Quality Gates de validação de interface
+- `ux-auditor-app` — Auditoria completa UI/UX/CSS do app participante (PWA)
+- `theme-factory` — Toolkit de temas para artefatos (slides, docs, landing pages)
+- `webapp-testing` — Testa app local com Playwright; captura screenshots e logs
+
+**Backend / API / Segurança**
+- `express-best-practices` — Padrões Express: middleware, CORS, rate limit, controllers
+- `api-hardening` — Hardening de APIs: auth, validação, headers, injection, sessions
+- `error-handling` — Hierarquia de erros, middleware centralizado, logging seguro
+- `financial-operations` — Operações financeiras seguras: idempotência, audit trail, atomicidade
+- `cartola-api` — Base de conhecimento de todas as APIs públicas do Cartola FC
+
+**Banco de Dados**
+- `db-guardian` — Operações seguras MongoDB: migrations, backup, indexes, integridade
+
+**Performance / Cache**
+- `performance-audit` — Auditoria de queries, N+1, cache, payload, benchmarks
+- `cache-auditor` — Auditoria completa da infraestrutura de cache dos 3 ambientes
+- `cache-sentinel` — Monitoramento proativo de caches stale no app participante
+
+**Arquitetura / Qualidade**
+- `architecture-reviewer` — Revisão de decisões arquiteturais: multi-tenant, módulos, API
+- `system-scribe` — Documentador oficial; explica como o sistema funciona baseado no código
+- `refactor-monolith` — Decomposição segura de arquivos monolíticos com zero quebra
+- `code-inspector` — Auditoria senior: arquitetura, segurança, performance, observabilidade
+- `auditor-module` — Auditoria automatizada de módulos: segurança, UI, performance, financeiro
+
+**Módulos de Negócio**
+- `league-architect` — Regras de liga, formatos SaaS, lógica financeira, premiações
+- `live-experience` — Auditoria da experiência durante rodadas ao vivo
+- `systematic-debugging` — Debugging em 4 fases: reproduzir, isolar, entender, corrigir
+- `context7-monthly-audit` — Auditoria mensal via Context7: mudanças de API, deprecations
+
+**Utilitários / DevOps**
+- `git-commit-push` — Commits e pushes automatizados com mensagens descritivas
+- `replit-patterns` — Padrões, limites e boas práticas para deploy no Replit
+- `replit-pull` — Sincroniza código do GitHub com o ambiente Replit (produção)
+- `restart-server` — Reinicia servidor Node.js no Replit via npm run dev
+- `delete-merged-branches` — Higienização de branches remotas já mergeadas
+- `skill-analise-branches` — Análise de branches do GitHub
+- `skill-creator` — Cria, edita e avalia skills
+- `skill-installer` — Instala skills de lista curada ou repositório GitHub
+- `project-reference` — Referência do projeto: MCPs, collections, keyword map
 
 ## MCPs Disponíveis
 
