@@ -623,21 +623,27 @@ function obterMitoMicoDaRodada(rodada) {
 // =====================================================================
 let _rodadasDestaquesTimer = null;
 
-async function _carregarDestaquesRodada() {
+async function _carregarDestaquesRodada(rodadaAlvo) {
     const card = document.getElementById('rodadas-destaques-card');
     if (!card) return;
 
-    const isAoVivo = statusMercadoAtual === 2;
-
-    // Determinar rodada a exibir: ao vivo usa rodada atual, senão a anterior
-    const rodada = isAoVivo ? rodadaAtualCartola : Math.max(1, rodadaAtualCartola - 1);
+    // Se rodadaAlvo é fornecido, usar diretamente; senão, lógica original
+    let rodada;
+    let isAoVivo;
+    if (rodadaAlvo != null) {
+        rodada = rodadaAlvo;
+        isAoVivo = statusMercadoAtual === 2 && rodada === rodadaAtualCartola;
+    } else {
+        isAoVivo = statusMercadoAtual === 2;
+        rodada = isAoVivo ? rodadaAtualCartola : Math.max(1, rodadaAtualCartola - 1);
+    }
     if (!rodada || rodada < 1) return;
 
     const rodadaBadgeEl = document.getElementById('rod-destaques-rodada');
     const liveBadgeEl = document.getElementById('rod-destaques-live-badge');
 
     try {
-        // ── FONTE PRIMÁRIA (ao vivo): ParciaisModule já tem tudo calculado ──
+        // ── FONTE 1 (ao vivo): ParciaisModule já tem tudo calculado ──
         if (isAoVivo && ParciaisModule?.obterDados) {
             const dadosParciais = ParciaisModule.obterDados();
             const meuTime = dadosParciais?.participantes?.find(
@@ -652,7 +658,7 @@ async function _carregarDestaquesRodada() {
                 };
                 const todosZerados = meuTime.atletas.every(a => !a.pontos && !a.pontos_efetivos);
 
-                _renderizarDestaquesRodadas(escalacaoLive, rodada);
+                _renderizarDestaquesRodadas(escalacaoLive, rodada, todosZerados);
                 if (rodadaBadgeEl) rodadaBadgeEl.textContent = `Rodada ${rodada}`;
                 if (liveBadgeEl) {
                     liveBadgeEl.textContent = todosZerados ? 'ESCALADO' : 'AO VIVO';
@@ -666,15 +672,37 @@ async function _carregarDestaquesRodada() {
             }
         }
 
-        // ── FONTE SECUNDÁRIA: Fetch direto da API ──
+        // ── FONTE 2 (consolidada): Dados do banco local via API interna ──
+        if (!isAoVivo && ligaId) {
+            const dbResp = await fetch(`/api/rodadas/${ligaId}/rodadas?rodada=${rodada}&temporada=${TEMPORADA_ATUAL}`);
+            if (dbResp.ok) {
+                const dbRaw = await dbResp.json();
+                const dbRodadas = Array.isArray(dbRaw) ? dbRaw : (dbRaw?.rodadas || []);
+                const meuRegistro = dbRodadas.find(r => String(r.timeId) === String(meuTimeId));
+                if (meuRegistro?.atletas?.length > 0) {
+                    const escalacaoDB = {
+                        atletas: meuRegistro.atletas.filter(a => a.status_id !== 2),
+                        reservas: meuRegistro.atletas.filter(a => a.status_id === 2),
+                        capitao_id: meuRegistro.capitao_id,
+                    };
+                    _renderizarDestaquesRodadas(escalacaoDB, rodada, false);
+                    if (rodadaBadgeEl) rodadaBadgeEl.textContent = `Rodada ${rodada}`;
+                    if (liveBadgeEl) liveBadgeEl.style.display = 'none';
+                    card.style.display = 'block';
+                    return;
+                }
+            }
+        }
+
+        // ── FONTE 3 (fallback): Fetch direto da API Cartola ──
         const response = await fetch(`/api/cartola/time/id/${meuTimeId}/${rodada}`);
         if (!response.ok) {
-            if (response.status === 404 && rodada > 1) {
+            if (response.status === 404 && rodada > 1 && !rodadaAlvo) {
                 const fallbackResp = await fetch(`/api/cartola/time/id/${meuTimeId}/${rodada - 1}`);
                 if (fallbackResp.ok) {
                     const fallbackData = await fallbackResp.json();
                     if (fallbackData?.atletas?.length) {
-                        _renderizarDestaquesRodadas(fallbackData, rodada - 1);
+                        _renderizarDestaquesRodadas(fallbackData, rodada - 1, false);
                         if (rodadaBadgeEl) rodadaBadgeEl.textContent = `Rodada ${rodada - 1}`;
                         if (liveBadgeEl) liveBadgeEl.style.display = 'none';
                         card.style.display = 'block';
@@ -688,7 +716,7 @@ async function _carregarDestaquesRodada() {
         const escalacao = await response.json();
         if (!escalacao?.atletas?.length) return;
 
-        _renderizarDestaquesRodadas(escalacao, rodada);
+        _renderizarDestaquesRodadas(escalacao, rodada, false);
         if (rodadaBadgeEl) rodadaBadgeEl.textContent = `Rodada ${rodada}`;
         if (liveBadgeEl) liveBadgeEl.style.display = 'none';
         card.style.display = 'block';
@@ -718,7 +746,8 @@ function _setupDestaquesRodadasAutoRefresh(rodada) {
     }, 60000);
 }
 
-function _renderizarDestaquesRodadas(escalacao, rodada) {
+function _renderizarDestaquesRodadas(escalacao, rodada, todosZerados = false) {
+    const card = document.getElementById('rodadas-destaques-card');
     const atletas = [
         ...(escalacao.atletas || []),
         ...(escalacao.reservas || [])
@@ -730,10 +759,22 @@ function _renderizarDestaquesRodadas(escalacao, rodada) {
         if (a.pontos_num === undefined && a.pontos !== undefined) a.pontos_num = a.pontos;
     });
 
+    // Verificar se todos os atletas têm 0 pontos
     const _pts = a => parseFloat(a?.pontos_num ?? 0);
+    const allZero = todosZerados || atletas.every(a => _pts(a) === 0);
+
+    // Se todos zerados e não é rodada ao vivo: esconder card (dados indisponíveis)
+    if (allZero && statusMercadoAtual !== 2) {
+        if (card) card.style.display = 'none';
+        return;
+    }
+
     const capitao = atletas.find(a => a.atleta_id === capitaoId) || atletas[0];
-    const maior = atletas.reduce((max, a) => (_pts(a) > _pts(max) ? a : max), atletas[0]);
-    const menor = atletas.reduce((min, a) => (_pts(a) < _pts(min) ? a : min), atletas[0]);
+
+    // Para maior/menor, usar pontos_efetivos quando disponível (inclui 1.5x do capitão)
+    const _ptsEfetivos = a => parseFloat(a?.pontos_efetivos ?? a?.pontos_num ?? 0);
+    const maior = atletas.reduce((max, a) => (_ptsEfetivos(a) > _ptsEfetivos(max) ? a : max), atletas[0]);
+    const menor = atletas.reduce((min, a) => (_ptsEfetivos(a) < _ptsEfetivos(min) ? a : min), atletas[0]);
 
     _popularDestaquesCard('capitao', capitao, true);
     _popularDestaquesCard('maior', maior, false);
@@ -1423,6 +1464,9 @@ async function selecionarRodada(numeroRodada, isParcial = false) {
             `;
         }
     }
+
+    // ✅ FIX: Atualizar destaques da rodada para a rodada selecionada
+    _carregarDestaquesRodada(numeroRodada);
 
     setTimeout(() => {
         detalhamento?.scrollIntoView({ behavior: "smooth", block: "start" });
