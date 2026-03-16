@@ -493,6 +493,66 @@ function getStatusBadgeText(jogo) {
 // COPA DO MUNDO 2026 - Seção separada
 // =====================================================================
 
+/** Data de abertura da Copa do Mundo 2026 (11 Jun 2026 às 17:00 UTC-3) */
+const COPA_2026_ABERTURA = new Date('2026-06-11T20:00:00Z');
+
+/** Interval ID do countdown da Copa (para cleanup) */
+let _copaCountdownInterval = null;
+
+/**
+ * Calcula countdown até a abertura da Copa
+ * @returns {{ dias: number, horas: number, minutos: number, expirado: boolean }}
+ */
+function calcularCountdownCopa() {
+    const agora = Date.now();
+    const diff = COPA_2026_ABERTURA.getTime() - agora;
+    if (diff <= 0) return { dias: 0, horas: 0, minutos: 0, expirado: true };
+    const dias = Math.floor(diff / 86400000);
+    const horas = Math.floor((diff % 86400000) / 3600000);
+    const minutos = Math.floor((diff % 3600000) / 60000);
+    return { dias, horas, minutos, expirado: false };
+}
+
+/**
+ * Atualiza o elemento de countdown inline na faixa Copa (home)
+ */
+function atualizarCountdownCopaHome() {
+    const el = document.getElementById('copa-home-countdown');
+    if (!el) {
+        pararCountdownCopa();
+        return;
+    }
+    const { dias, horas, minutos, expirado } = calcularCountdownCopa();
+    if (expirado) {
+        el.textContent = '';
+        pararCountdownCopa();
+        return;
+    }
+    el.innerHTML =
+        `${dias}<span class="copa-home-countdown-sep">d</span> ` +
+        `${String(horas).padStart(2, '0')}<span class="copa-home-countdown-sep">h</span> ` +
+        `${String(minutos).padStart(2, '0')}<span class="copa-home-countdown-sep">m</span>`;
+}
+
+/**
+ * Inicia o interval do countdown Copa (60s). Idempotente.
+ */
+function iniciarCountdownCopa() {
+    pararCountdownCopa();
+    atualizarCountdownCopaHome();
+    _copaCountdownInterval = setInterval(atualizarCountdownCopaHome, 60000);
+}
+
+/**
+ * Para o interval do countdown Copa. Idempotente.
+ */
+function pararCountdownCopa() {
+    if (_copaCountdownInterval) {
+        clearInterval(_copaCountdownInterval);
+        _copaCountdownInterval = null;
+    }
+}
+
 /**
  * Renderiza seção completa da Copa do Mundo (separada dos jogos brasileiros)
  * @param {Object} copa - Dados da Copa retornados pela API { fase, jogosDoDia, proximosJogos, jogosBrasil, grupos }
@@ -511,7 +571,17 @@ export function renderizarSecaoCopa(copa) {
         : copa.fase === 'mata-mata' ? 'Fase Eliminatória'
         : 'Copa do Mundo';
 
-    return `
+    // Meta badge: AO VIVO > Countdown (pre-torneio) > fase badge
+    let metaBadgeHtml;
+    if (copa.temAoVivo) {
+        metaBadgeHtml = `<span class="copa-home-live-badge"><span class="copa-home-live-dot"></span>AO VIVO</span>`;
+    } else if (isPreTorneio) {
+        metaBadgeHtml = `<span id="copa-home-countdown" class="copa-home-countdown"></span>`;
+    } else {
+        metaBadgeHtml = `<span class="copa-home-phase-badge">${faseTitulo}</span>`;
+    }
+
+    const html = `
     <section id="copa-home-section" class="copa-home-section" style="margin:0 1rem 0.5rem;">
         <!-- Header -->
         <button class="copa-home-header" onclick="window.toggleCopaHome && window.toggleCopaHome()">
@@ -525,10 +595,7 @@ export function renderizarSecaoCopa(copa) {
                 </div>
             </div>
             <div class="copa-home-meta">
-                ${copa.temAoVivo
-                    ? `<span class="copa-home-live-badge"><span class="copa-home-live-dot"></span>AO VIVO</span>`
-                    : `<span class="copa-home-phase-badge">${faseTitulo}</span>`
-                }
+                ${metaBadgeHtml}
                 <span class="material-icons copa-home-chevron">expand_more</span>
             </div>
         </button>
@@ -555,6 +622,15 @@ export function renderizarSecaoCopa(copa) {
         </div>
     </section>
     `;
+
+    // Iniciar countdown após render (próximo tick para garantir DOM pronto)
+    if (isPreTorneio && !copa.temAoVivo) {
+        setTimeout(iniciarCountdownCopa, 0);
+    } else {
+        pararCountdownCopa();
+    }
+
+    return html;
 }
 
 /**
