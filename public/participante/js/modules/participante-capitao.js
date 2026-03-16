@@ -247,6 +247,29 @@ async function carregarRanking() {
 // Atualizado a cada render via window._capitaoRankingCache para acesso em onclick inline
 let _capitaoRankingCache = [];
 
+/** Compacta nome: "Neymar Junior" → "N. Junior" */
+function _nomeCompacto(nome) {
+    if (!nome) return '?';
+    const partes = nome.trim().split(/\s+/);
+    if (partes.length === 1) return partes[0].slice(0, 10);
+    return partes[0][0] + '. ' + partes[partes.length - 1].slice(0, 9);
+}
+
+/** Retorna array de rodadas com capitão compacto para painel colapsável */
+function _resumoRodadasCapitao(historico) {
+    if (!historico || !Array.isArray(historico)) return [];
+    return historico
+        .filter(r => r.atleta_nome && r.atleta_nome !== 'Sem capitão')
+        .sort((a, b) => a.rodada - b.rodada)
+        .map(r => ({
+            rodada: r.rodada,
+            capitao: escapeHtml(_nomeCompacto(r.atleta_nome)),
+            pontos: typeof truncarPontos === 'function'
+                ? parseFloat(truncarPontos(r.pontuacao || 0))
+                : Math.trunc((r.pontuacao || 0) * 100) / 100,
+        }));
+}
+
 /**
  * Calcula indicador de tendência: última rodada vs média pessoal
  * @returns {{ icon: string, text: string, cssClass: string }}
@@ -279,7 +302,13 @@ function renderizarRanking(ranking) {
 
     _capitaoRankingCache = ranking;
     window._capitaoRankingCache = ranking; // sync para handlers onclick inline
-    let html = '';
+
+    // Hint para o usuário
+    let html = `
+        <div style="font: 400 9px 'Inter', sans-serif; color: #555; text-align: center; padding: 6px 0 10px; border-bottom: 1px solid rgba(255,255,255,0.03); margin-bottom: 8px;">
+            <span class="material-icons" style="font-size: 11px; vertical-align: middle;">touch_app</span> toque no participante para ver capitães
+        </div>
+    `;
 
     ranking.forEach((participante, index) => {
         const posicao = participante.posicao_final || index + 1;
@@ -292,7 +321,7 @@ function renderizarRanking(ranking) {
         const pontos = typeof truncarPontos === 'function' ? truncarPontos(participante.pontuacao_total || 0) : (Math.trunc((participante.pontuacao_total || 0) * 100) / 100).toFixed(2);
 
         const cardClasses = [
-            'capitao-card',
+            'capitao-ranking-row',
             isMeuTime ? 'meu-time' : '',
             isPodium1 ? 'podium-1' : '',
             isPodium2 ? 'podium-2' : '',
@@ -307,6 +336,8 @@ function renderizarRanking(ranking) {
             : '';
 
         const historico = participante.historico_rodadas || [];
+        const rodadas = _resumoRodadasCapitao(historico);
+        const tid = participante.timeId || index;
 
         // Indicador de tendência (seta + variação %)
         const tendencia = _calcularTendencia(participante);
@@ -317,8 +348,9 @@ function renderizarRanking(ranking) {
                </span>`
             : '';
 
+        // Card/row do ranking
         html += `
-            <div class="${cardClasses}" onclick="${historico.length > 0 ? `window._abrirHistoricoCapitao(window._capitaoRankingCache[${index}])` : ''}">
+            <div class="${cardClasses}" data-timeid="${tid}">
                 <div class="capitao-posicao">${posicao}º</div>
                 <img src="${escapeHtml(escudoSrc)}" class="capitao-escudo" alt=""
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'">
@@ -334,12 +366,60 @@ function renderizarRanking(ranking) {
                     </div>
                     ${trendHtml}
                     ${campeaoBadge}
+                    <span class="material-icons capitao-expand-icon">expand_more</span>
                 </div>
             </div>
         `;
+
+        // Painel colapsável com histórico de rodadas
+        html += `<div class="capitao-collapse-panel" data-panel-timeid="${tid}">`;
+        html += '<div class="capitao-collapse-inner">';
+        if (rodadas.length > 0) {
+            rodadas.forEach(r => {
+                const cor = r.pontos >= 10 ? 'var(--capitao-success)' : r.pontos >= 5 ? 'var(--capitao-primary-light)' : r.pontos < 0 ? 'var(--capitao-danger)' : '#888';
+                const corPts = r.pontos >= 10 ? 'var(--capitao-success)' : r.pontos >= 5 ? 'var(--capitao-primary-light)' : r.pontos < 0 ? 'var(--capitao-danger)' : '#666';
+                html += `<div class="capitao-collapse-rodada">
+                    <span class="capitao-collapse-rodada-badge" style="color:${cor};">R${r.rodada}</span>
+                    <span class="capitao-collapse-rodada-info">${r.capitao}</span>
+                    <span class="capitao-collapse-rodada-pts" style="color:${corPts};">${r.pontos.toFixed(2)}</span>
+                </div>`;
+            });
+        } else {
+            html += '<div class="capitao-collapse-vazio">Nenhum capitão registrado</div>';
+        }
+        html += '</div></div>';
     });
 
     container.innerHTML = html;
+
+    // Event listeners para toggle dos painéis colapsáveis
+    _setupCollapseListeners(container);
+}
+
+/** Configura event listeners para os painéis colapsáveis */
+function _setupCollapseListeners(container) {
+    container.querySelectorAll('.capitao-ranking-row').forEach(row => {
+        row.addEventListener('click', () => {
+            const tid = row.dataset.timeid;
+            const panel = container.querySelector(`.capitao-collapse-panel[data-panel-timeid="${tid}"]`);
+            if (!panel) return;
+
+            const isOpen = panel.classList.contains('open');
+
+            // Fechar todos os outros painéis
+            container.querySelectorAll('.capitao-collapse-panel.open').forEach(p => {
+                p.classList.remove('open');
+                p.style.maxHeight = '0';
+            });
+            container.querySelectorAll('.capitao-ranking-row.expanded').forEach(r => r.classList.remove('expanded'));
+
+            if (!isOpen) {
+                row.classList.add('expanded');
+                panel.classList.add('open');
+                panel.style.maxHeight = panel.scrollHeight + 'px';
+            }
+        });
+    });
 }
 
 // =============================================

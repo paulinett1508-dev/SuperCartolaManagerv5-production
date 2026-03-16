@@ -89,14 +89,33 @@ async function obterJogosGloboEsporte(data) {
       if (!mandante || !visitante) continue;
 
       // Mapear moment para statusRaw
+      // NOTA: Globo moment:'NOW' é bucket de agenda (não real-time livescore).
+      // Para 'NOW', usamos horário de kickoff + janela de 150min para inferir
+      // se o jogo PODE estar ao vivo. Fora da janela → 'FT' (provavelmente acabou).
       let statusRaw = 'NS';
-      if (m.moment === 'NOW') statusRaw = 'LIVE';
-      else if (m.moment === 'PAST') statusRaw = 'FT';
-
-      // Mapear status para texto
       let status = 'Agendado';
-      if (m.moment === 'NOW') status = 'Ao vivo';
-      else if (m.moment === 'PAST') status = 'Encerrado';
+      if (m.moment === 'PAST') {
+        statusRaw = 'FT';
+        status = 'Encerrado';
+      } else if (m.moment === 'NOW') {
+        // Inferir pelo horário: kickoff até kickoff+150min = possível ao vivo
+        const kickoffTs = (m.startDate && m.startHour)
+          ? new Date(`${m.startDate}T${m.startHour}-03:00`).getTime()
+          : 0;
+        const agora = Date.now();
+        const JANELA_JOGO_MS = 150 * 60 * 1000; // 2h30 cobre jogo + acréscimos
+        if (kickoffTs && agora >= kickoffTs && agora <= kickoffTs + JANELA_JOGO_MS) {
+          statusRaw = 'LIVE';
+          status = 'Ao vivo';
+        } else if (kickoffTs && agora > kickoffTs + JANELA_JOGO_MS) {
+          statusRaw = 'FT';
+          status = 'Encerrado';
+        } else {
+          // Sem horário confiável ou antes do kickoff → agendado
+          statusRaw = 'NS';
+          status = 'Agendado';
+        }
+      }
 
       const golsMandante = m.scoreboard?.home ?? 0;
       const golsVisitante = m.scoreboard?.away ?? 0;

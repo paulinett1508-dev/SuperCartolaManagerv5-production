@@ -388,6 +388,29 @@ class ParticipanteCacheManager {
 }
 
 // Singleton global
-window.ParticipanteCache = new ParticipanteCacheManager();
+const _legacyCacheManager = new ParticipanteCacheManager();
+window.ParticipanteCache = _legacyCacheManager;
 
-if (window.Log) Log.info('CACHE-MANAGER', '✅ Sistema v2.0 inicializado');
+// ✅ Super Cache v2 shim: redirecionar métodos-chave para Cache v2 quando disponível
+if (window.Cache) {
+    const _v2 = window.Cache;
+    const _orig = window.ParticipanteCache;
+
+    // Sobrescrever métodos que devem usar Cache v2
+    _orig.setParticipanteBasico = function(ligaId, timeId, data) {
+        _v2.set(`participante:${ligaId}:${timeId}`, data, { ttl: 86400, motivo: 'auth' });
+    };
+
+    _orig.preloadEssentials = async function(ligaId, timeId) {
+        const temp = window.ParticipanteConfig?.CURRENT_SEASON || new Date().getFullYear();
+        return _v2.preload(ligaId, timeId, temp);
+    };
+
+    _orig.clear = function() {
+        _v2.invalidatePrefix('*');
+    };
+
+    if (window.Log) Log.info('CACHE-MANAGER', '✅ Shim v2 ativo — redirecionando para Super Cache');
+} else {
+    if (window.Log) Log.info('CACHE-MANAGER', '✅ Sistema legado v2.0 inicializado');
+}

@@ -5,8 +5,7 @@
 //   1. Detectar quando o mercado está fechado + jogos ao vivo
 //   2. Emitir eventos 'data:parciais', 'matchday:stop', 'matchday:state',
 //      'matchday:loading' para os módulos
-//   3. Injetar header "RODADA AO VIVO" com scout ticker animado
-//   4. Feedback visual: toasts de transição, indicador de tempo relativo,
+//   3. Feedback visual: toasts de transição, indicador de tempo relativo,
 //      alerta de dados obsoletos, empty states diferenciados
 //   5. Resiliência: tracking de falhas consecutivas, 429 backoff,
 //      recovery toast
@@ -56,7 +55,6 @@
     let _parciaisTimer       = null;
     let _tsTimer             = null;
     let _listeners           = {};       // { eventName: Set<fn> }
-    let _headerInjected      = false;
     let _destroyed           = false;
     let _lastUpdateTs        = null;
     let _isStale             = false;
@@ -98,32 +96,13 @@
         }
     }
 
-    // ─── Tempo relativo ─────────────────────────────────────────────
-    function _formatTempoRelativo(ts) {
-        if (!ts) return '';
-        const diff = Math.floor((Date.now() - ts) / 1000);
-        if (diff < 10) return 'agora';
-        if (diff < 60) return `há ${diff}s`;
-        const min = Math.floor(diff / 60);
-        if (min < 60) return `há ${min} min`;
-        return `há ${Math.floor(min / 60)}h`;
-    }
-
+    // ─── Stale detection ────────────────────────────────────────────
     function _updateTimestamp() {
-        const el = document.getElementById('matchday-update-ts');
-        if (!el || !_lastUpdateTs) return;
+        if (!_lastUpdateTs) return;
 
         const diff = Date.now() - _lastUpdateTs;
         const wasStale = _isStale;
         _isStale = diff > STALE_THRESHOLD_MS;
-
-        el.textContent = _formatTempoRelativo(_lastUpdateTs);
-
-        // Toggle classe stale no header
-        const header = document.getElementById('matchday-header-bar');
-        if (header) {
-            header.classList.toggle('matchday-stale', _isStale);
-        }
 
         // Toast apenas na transição para stale
         if (_isStale && !wasStale) {
@@ -172,21 +151,17 @@
 
             const matchdayPotencial = data.matchday_ativo === true;
 
-            if (matchdayPotencial && !_isActive) {
-                // Confirmar com ground-truth (jogos realmente ao vivo)
-                const aoVivo = window.isRodadaRealmenteAoVivo
-                    ? await window.isRodadaRealmenteAoVivo()
-                    : matchdayPotencial;
+            // Refrescar stats de jogos ao vivo (para labels AO VIVO / EM ANDAMENTO)
+            if (matchdayPotencial && window.isRodadaRealmenteAoVivo) {
+                await window.isRodadaRealmenteAoVivo();
+            }
 
-                if (aoVivo) {
-                    _onMatchdayStart();
-                }
+            if (matchdayPotencial && !_isActive) {
+                // Rodada em andamento (mercado fechado) → ativar matchday
+                // Mercado fechado → ativar matchday
+                _onMatchdayStart();
             } else if (!matchdayPotencial && _isActive) {
                 _onMatchdayStop();
-            } else if (matchdayPotencial && _isActive) {
-                // Já ativo: refrescar stats e atualizar label do header
-                if (window.isRodadaRealmenteAoVivo) await window.isRodadaRealmenteAoVivo();
-                _updateHeaderLabel();
             }
 
             // Ajustar intervalo de polling de status
@@ -211,14 +186,20 @@
         _consecutiveFailures = 0;
         _isStale = false;
         _setState(MATCHDAY_STATES.LOADING);
-        _injectHeader();
-        _updateHeaderLabel();
         _startParciaisPolling();
         _startTimestampUpdater();
         _emit('matchday:loading');
 
-        // Toast de ativação
-        _toast('Rodada ao vivo! Acompanhe as parciais em tempo real.', 'info', 4000);
+        // Toast de ativação — contextual conforme jogos ao vivo
+        const aoVivoData = window.getAoVivoData?.();
+        const temJogosAgora = (aoVivoData?.stats?.aoVivo || 0) > 0;
+        _toast(
+            temJogosAgora
+                ? 'Rodada ao vivo! Acompanhe as parciais em tempo real.'
+                : 'Rodada em andamento! Parciais serão atualizadas quando os jogos começarem.',
+            'info',
+            4000
+        );
 
         if (window.Log) Log.info('[MatchdayService] MATCHDAY ATIVO — modo live iniciado');
     }
@@ -231,7 +212,6 @@
         clearInterval(_parciaisTimer);
         _parciaisTimer = null;
         _stopTimestampUpdater();
-        _removeHeader();
         _setState(MATCHDAY_STATES.ENDED);
 
         // Toast de encerramento
@@ -321,20 +301,24 @@
                     };
                 });
 
-                _updateTicker(ranking, prevRanking);
-
                 // Atualizar timestamp e resetar stale
                 _lastUpdateTs = Date.now();
                 if (_isStale) {
                     _isStale = false;
-                    const header = document.getElementById('matchday-header-bar');
-                    if (header) header.classList.remove('matchday-stale');
                     _toast('Conexão restabelecida! Dados atualizados.', 'success', 3000);
                 }
 
                 _setState(MATCHDAY_STATES.LIVE);
+
+                // ✅ Super Cache v2: salvar parciais para SWR
+                if (window.Cache && _ligaId) {
+                    const _temp = window.ParticipanteConfig?.CURRENT_SEASON || new Date().getFullYear();
+                    window.Cache.set(`ranking:${_ligaId}:${_temp}`, ranking, {
+                        ttl: 30, imutavel: false, motivo: 'rodada_ativa'
+                    });
+                }
+
                 _emit('data:parciais');
-                _updateHeaderLabel();
             }
         } catch (e) {
             _consecutiveFailures++;
@@ -343,84 +327,6 @@
                 _toast('Erro ao buscar parciais. Tentando reconectar...', 'error', 5000);
             }
         }
-    }
-
-    // ─── Header AO VIVO ────────────────────────────────────────────
-    function _injectHeader() {
-        if (_headerInjected || document.getElementById('matchday-header-bar')) return;
-
-        const header = document.createElement('div');
-        header.id = 'matchday-header-bar';
-        header.className = 'matchday-header';
-        header.innerHTML = `
-            <div class="matchday-header-inner">
-                <span class="material-icons">radio_button_checked</span>
-                <span class="matchday-header-label">RODADA EM ANDAMENTO</span>
-                <span class="matchday-header-ts" id="matchday-update-ts"></span>
-            </div>
-            <div class="scout-ticker">
-                <div class="scout-ticker-content" id="matchday-ticker-content">
-                    Carregando parciais...
-                </div>
-            </div>`;
-
-        const container = document.getElementById('moduleContainer');
-        if (container) {
-            container.parentNode.insertBefore(header, container);
-        } else {
-            document.body.prepend(header);
-        }
-        _headerInjected = true;
-    }
-
-    function _removeHeader() {
-        const el = document.getElementById('matchday-header-bar');
-        if (el) el.remove();
-        _headerInjected = false;
-    }
-
-    // ─── Atualiza label do header conforme agenda de jogos da rodada ───
-    function _updateHeaderLabel() {
-        const labelEl = document.querySelector('#matchday-header-bar .matchday-header-label');
-        if (!labelEl) return;
-        const data = window.getAoVivoData?.();
-        const aoVivoCount = data?.stats?.aoVivo || 0;
-        // Fonte única: stats.aoVivo validado pelo backend
-        // Removido || fabState === 'live' — condição circular idêntica ao bug corrigido no WHWidget
-        const isLive = aoVivoCount > 0;
-        if (isLive) {
-            const rodada = _currentRodada ? ` ${_currentRodada}` : '';
-            labelEl.textContent = `RODADA${rodada} AO VIVO`;
-        } else {
-            labelEl.textContent = 'RODADA EM ANDAMENTO';
-        }
-    }
-
-    // ─── Scout Ticker ───────────────────────────────────────────────
-    function _updateTicker(ranking, prevRanking) {
-        const ticker = document.getElementById('matchday-ticker-content');
-        if (!ticker || !ranking.length) return;
-
-        // Construir mapa de posições anteriores
-        const prevMap = {};
-        (prevRanking || []).forEach((r, i) => {
-            const key = r.participante_id || r.nome || i;
-            prevMap[key] = i + 1;
-        });
-
-        const items = ranking.slice(0, 8).map((r, i) => {
-            const pos = i + 1;
-            const nome = r.nome_cartola || r.nome || r.participante_nome || '—';
-            const pts = typeof r.pontos === 'number'
-                ? String(Math.trunc(r.pontos * 10) / 10)
-                : (r.pontuacao || '—');
-            const key = r.timeId || r.participante_id || nome;
-            const prevPos = prevMap[key];
-            const seta = prevPos && prevPos > pos ? ' ↑' : '';
-            return `${pos}º ${nome} ${pts}pts${seta}`;
-        });
-
-        ticker.textContent = items.join('   •   ');
     }
 
     // ─── Position Animation Helper ──────────────────────────────────

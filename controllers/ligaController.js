@@ -377,7 +377,12 @@ const buscarLigaPorId = async (req, res) => {
       );
     }
 
-    res.status(200).json(liga);
+    // cacheHint para o frontend
+    const { buildCacheHint, getMercadoContext } = await import('../utils/cache-hint.js');
+    const ctx = await getMercadoContext();
+    const cacheHint = buildCacheHint({ ...ctx, tipo: 'config' });
+
+    res.status(200).json({ ...liga, cacheHint });
   } catch (err) {
     logger.error(`Erro ao buscar liga ${id}:`, err.message);
     if (err.name === "CastError") {

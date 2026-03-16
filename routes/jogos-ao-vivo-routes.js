@@ -1116,6 +1116,13 @@ router.get('/game-status', async (req, res) => {
       stats = { ...stats, aoVivo: 0 };
     }
 
+    // Globo é fonte de AGENDA, não livescore real-time.
+    // moment:'NOW' do Globo não significa "jogo rolando" — apenas bucket de horário.
+    // Sem API real-time (SoccerData/API-Football), não há como confirmar jogos ao vivo.
+    if (fonte === 'globo' && stats.aoVivo > 0) {
+      stats = { ...stats, aoVivo: 0 };
+    }
+
     // Próximo jogo agendado (para WAITING/INTERVAL)
     let proximoJogo = null;
     if (jogos && jogos.length > 0) {

@@ -350,6 +350,16 @@ function transicionarFabState(novoEstado) {
     // Aplicar novo estado
     fab.classList.add(`wh-fab--${novoEstado}`);
 
+    // Atualizar label textual do FAB
+    const stateLabel = fab.querySelector('.wh-fab-state-label');
+    if (stateLabel) {
+        stateLabel.textContent = novoEstado === FAB_GAME_STATE.LIVE
+            ? 'AO VIVO'
+            : (novoEstado === FAB_GAME_STATE.HIDDEN || novoEstado === FAB_GAME_STATE.FINISHED)
+                ? ''
+                : 'EM ANDAMENTO';
+    }
+
     // Visibilidade: HIDDEN = esconder com fade
     if (novoEstado === FAB_GAME_STATE.HIDDEN) {
         fab.classList.add('wh-fab--hiding');
@@ -556,6 +566,7 @@ function createWidgetElements() {
     fab.className = "wh-fab";
     fab.innerHTML = `
         <span class="material-icons wh-fab-icon">local_fire_department</span>
+        <span class="wh-fab-state-label" id="wh-fab-state-label"></span>
     `;
 
     // Aplicar posição salva

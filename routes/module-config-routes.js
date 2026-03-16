@@ -238,13 +238,19 @@ router.get('/liga/:ligaId/modulos', async (req, res) => {
             };
         });
 
+        // cacheHint para o frontend
+        const { buildCacheHint, getMercadoContext } = await import('../utils/cache-hint.js');
+        const ctx = await getMercadoContext();
+        const cacheHint = buildCacheHint({ ...ctx, temporada, tipo: 'config' });
+
         res.json({
             sucesso: true,
             liga_id: ligaId,
             temporada,
             total: modulos.length,
             ativos: modulos.filter(m => m.ativo).length,
-            modulos
+            modulos,
+            cacheHint
         });
 
     } catch (error) {
