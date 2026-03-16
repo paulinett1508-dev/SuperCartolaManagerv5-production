@@ -216,15 +216,23 @@ export function securityHeaders(req, res, next) {
   );
 
   // Content Security Policy (produção)
+  // ⚠️ BLINDAGEM CSP: ao adicionar dependência externa (CDN, font, icon lib),
+  //    ATUALIZAR TODAS as diretivas relevantes abaixo (script/style/font/connect).
+  //    Domínio faltante = fontes/scripts bloqueados silenciosamente = lentidão extrema em PROD.
+  //    Histórico: Phosphor Icons bloqueado em font-src (2026-03-16) — 18 requests falhando por page load.
   if (process.env.NODE_ENV === "production") {
     res.setHeader(
       "Content-Security-Policy",
       [
         "default-src 'self'",
+        // Google Fonts (script loader), jsdelivr (Phosphor, libs), Tailwind, cdnjs, Quill
         "script-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://cdn.quilljs.com",
+        // Google Fonts CSS, Tailwind, jsdelivr, cdnjs, Quill, unpkg (Phosphor CSS)
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://cdn.quilljs.com https://cdnjs.cloudflare.com https://unpkg.com",
-        "font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com https://cdn.jsdelivr.net https://db.onlinewebfonts.com data:",
+        // Google Fonts (woff2), jsdelivr (icon fonts), onlinewebfonts (Russo One), unpkg (Phosphor woff/ttf)
+        "font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com https://cdn.jsdelivr.net https://db.onlinewebfonts.com https://unpkg.com data:",
         "img-src 'self' data: https: blob:",
+        // API Cartola, CDNs para fetch dinâmico, unpkg (Phosphor runtime)
         "connect-src 'self' https://api.cartolafc.globo.com https://*.globo.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.tailwindcss.com https://unpkg.com",
         "worker-src 'self'",
         "frame-ancestors 'self'",
