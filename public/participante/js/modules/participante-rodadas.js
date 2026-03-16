@@ -644,8 +644,8 @@ async function _carregarDestaquesRodada(rodadaAlvo) {
 
     try {
         // ── FONTE 1 (ao vivo): ParciaisModule já tem tudo calculado ──
-        if (isAoVivo && ParciaisModule?.obterDados) {
-            const dadosParciais = ParciaisModule.obterDados();
+        if (isAoVivo && ParciaisModule?.obterDadosParciais) {
+            const dadosParciais = ParciaisModule.obterDadosParciais();
             const meuTime = dadosParciais?.participantes?.find(
                 p => String(p.timeId) === String(meuTimeId)
             );
@@ -1934,7 +1934,7 @@ function abrirCampinhoModal(targetTimeId, rodada, rodadaData = null) {
     if (window.Log) Log.info("[RODADAS] 👀 Curiosar time:", targetTimeId);
 
     // ── Fonte 1: Dados enriquecidos do parciais (ao vivo) ──
-    const dadosParciais = ParciaisModule.obterDados?.();
+    const dadosParciais = ParciaisModule.obterDadosParciais?.();
     const timeDados = dadosParciais?.participantes?.find(
         (p) => String(p.timeId) === String(targetTimeId)
     );
