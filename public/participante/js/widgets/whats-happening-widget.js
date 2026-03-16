@@ -469,9 +469,12 @@ async function syncFabGameState() {
     transicionarFabState(novoEstado);
 
     // 4. Se está em estado ativo, buscar dados dos módulos
-    if (novoEstado === FAB_GAME_STATE.LIVE ||
+    // Guard: só busca se startPolling não estiver ativo — evita double-fetch
+    // (gameStatusPollTimer 30s + pollingInterval 60s chamando fetchAllData → 429 luva-de-ouro)
+    if (!WHState.pollingInterval && (
+        novoEstado === FAB_GAME_STATE.LIVE ||
         novoEstado === FAB_GAME_STATE.INTERVAL ||
-        novoEstado === FAB_GAME_STATE.COOLING) {
+        novoEstado === FAB_GAME_STATE.COOLING)) {
         await fetchAllData();
     }
 }
