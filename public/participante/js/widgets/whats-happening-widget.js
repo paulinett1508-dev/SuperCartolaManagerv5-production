@@ -855,13 +855,13 @@ async function fetchMataMata() {
             WHState.data.mataMata = {
                 edicao: ultimaEdicao.edicao,
                 confrontos: data.confrontos || [],
-                faseAtual: data.fase_atual || "quartas",
+                faseAtual: data.fase_atual || null,
                 dados: data.dados
             };
 
             // Encontrar MEU confronto no Mata-Mata
             const meuId = String(WHState.timeId);
-            const fases = ["primeira", "oitavas", "quartas", "semis", "final"]; // ✅ FIX: "semi" → "semis"
+            const fases = ["final", "semis", "quartas", "oitavas", "primeira"]; // ✅ Reverse: encontrar fase mais avançada primeiro
 
             for (const fase of fases) {
                 const confrontosFase = data.dados?.[fase];
