@@ -323,9 +323,11 @@ export class FluxoFinanceiroCache {
             `[FLUXO-CACHE] 📊 Rodada atual: ${rodadaAtual}, Mercado: ${mercadoAberto ? "aberto" : "fechado"}, Última completa: ${this.ultimaRodadaCompleta}`,
         );
 
-        // ✅ FASE 2: Carregar participantes + inscrições 2026 (essencial para listagem)
-        await this.carregarParticipantes();
-        await this.carregarInscricoes2026();
+        // ✅ FASE 2: Carregar participantes + inscrições 2026 em paralelo (essencial para listagem)
+        await Promise.all([
+            this.carregarParticipantes(),
+            this.carregarInscricoes2026(),
+        ]);
 
         // ✅ LAZY: Rankings e dados externos serão carregados sob demanda
         // quando o usuário clicar em um participante para ver extrato

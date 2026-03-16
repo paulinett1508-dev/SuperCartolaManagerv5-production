@@ -434,6 +434,16 @@ app.use((req, res, next) => {
   });
 });
 
+// ✅ FIX 503: Servir HTML fragments ANTES do session middleware
+// Sem isso, cada request a .html passava pelo MongoStore session lookup
+// → latência + 503 sob carga (Replit proxy timeout).
+app.use('/fronts', express.static('public/fronts', {
+  setHeaders: (res) => res.setHeader('Cache-Control', 'no-cache'),
+}));
+app.use('/participante/fronts', express.static('public/participante/fronts', {
+  setHeaders: (res) => res.setHeader('Cache-Control', 'no-cache'),
+}));
+
 // Configuração de Sessão com MongoDB Store (Persistência Real)
 app.use(
   session({
