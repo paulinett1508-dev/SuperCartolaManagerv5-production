@@ -1116,17 +1116,9 @@ function updateFabBadge() {
     const fab = document.getElementById("wh-fab");
     if (!fab) return;
 
-    // Remover badge existente
-    const existingBadge = fab.querySelector(".wh-fab-badge");
-    if (existingBadge) existingBadge.remove();
-
-    // Adicionar classe de pulsação e badge numérico se há updates
+    // Adicionar classe de pulsação sutil se há updates (sem badge numérico)
     if (WHState.hasUpdates) {
         fab.classList.add("has-updates");
-        const badge = document.createElement("span");
-        badge.className = "wh-fab-badge";
-        badge.textContent = WHState.hotCount > 0 ? String(WHState.hotCount) : "!";
-        fab.appendChild(badge);
     } else {
         fab.classList.remove("has-updates");
     }

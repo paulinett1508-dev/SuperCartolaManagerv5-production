@@ -209,38 +209,38 @@
     100% { transform: translateY(-2px) rotate(3deg); }
 }
 
-/* Pulso quando há novidades - SUPER CHAMATIVO */
+/* Pulso sutil quando há novidades */
 .wh-fab.has-updates {
-    animation: wh-fab-entrance 0.6s ease-out, wh-gradient-shift 2s ease infinite, wh-attention 0.6s ease-in-out infinite;
+    animation: wh-fab-entrance 0.6s ease-out, wh-gentle-pulse 3s ease-in-out infinite;
 }
 
 .wh-fab.has-updates::before {
-    animation: wh-ring-rotate 1s linear infinite;
-    opacity: 1;
+    opacity: 0.6;
 }
 
 .wh-fab.has-updates::after {
-    animation: wh-glow-pulse 0.8s ease-in-out infinite;
+    animation: wh-glow-pulse 3s ease-in-out infinite;
 }
 
-@keyframes wh-attention {
+/* Pulso sutil — escala mínima, sem rotação */
+@keyframes wh-gentle-pulse {
     0%, 100% {
-        transform: scale(1) rotate(0deg);
-        box-shadow:
-            0 4px 20px var(--wh-glow-medium),
-            0 0 40px var(--wh-glow-subtle);
-    }
-    25% {
-        transform: scale(1.1) rotate(-5deg);
+        transform: scale(1);
     }
     50% {
-        transform: scale(1.15) rotate(0deg);
-        box-shadow:
-            0 8px 40px rgba(255, 85, 0, 0.8),
-            0 0 80px var(--wh-glow-medium);
+        transform: scale(1.06);
     }
-    75% {
-        transform: scale(1.1) rotate(5deg);
+}
+
+/* Pulso quase imperceptível para estados cinza (waiting/finished) */
+@keyframes wh-gentle-pulse-muted {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.03);
+        opacity: 0.85;
     }
 }
 
@@ -294,31 +294,6 @@
     opacity: 0;
 }
 
-/* Badge de notificação */
-.wh-fab-badge {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 6px;
-    background: var(--app-danger);
-    color: var(--app-text-primary);
-    font-size: 11px;
-    font-weight: 700;
-    font-family: var(--app-font-mono);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: wh-badge-pop 0.3s ease-out;
-}
-
-@keyframes wh-badge-pop {
-    0% { transform: scale(0); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
-}
 
 /* ========================================
    FAB GAME STATES - Máquina de Estados
@@ -369,6 +344,16 @@
     border-color: rgba(107, 114, 128, 0.3) !important;
     box-shadow:
         0 2px 8px rgba(75, 85, 99, 0.3) !important;
+    animation: none !important;
+}
+
+/* Waiting + novidades: pulso quase imperceptível */
+.wh-fab--waiting.has-updates {
+    animation: wh-gentle-pulse-muted 4s ease-in-out infinite !important;
+}
+
+.wh-fab--waiting.has-updates::before,
+.wh-fab--waiting.has-updates::after {
     animation: none !important;
 }
 
@@ -493,6 +478,16 @@
     border-color: rgba(75, 85, 99, 0.3) !important;
     box-shadow:
         0 2px 8px rgba(55, 65, 81, 0.3) !important;
+    animation: none !important;
+}
+
+/* Finished + novidades: pulso quase imperceptível */
+.wh-fab--finished.has-updates {
+    animation: wh-gentle-pulse-muted 4s ease-in-out infinite !important;
+}
+
+.wh-fab--finished.has-updates::before,
+.wh-fab--finished.has-updates::after {
     animation: none !important;
 }
 
