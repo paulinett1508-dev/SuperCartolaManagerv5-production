@@ -752,8 +752,9 @@ async function fetchAllData() {
     // Ranking da Rodada (sempre ativo)
     promises.push(fetchRanking());
 
-    // Parciais (para confrontos em tempo real) - v2.1: usa game-status ao invés de bola_rolando
-    if (isJogosAoVivo()) {
+    // Parciais (pontos da rodada em andamento) - v2.2: buscar sempre que mercado fechado, não só quando ao vivo
+    // O endpoint retorna disponivel:false quando não há dados — safe to always call
+    if (WHState.mercadoStatus?.status_mercado === 2) {
         promises.push(fetchParciais());
     }
 
@@ -2346,8 +2347,8 @@ function renderRankingSection() {
  * Retorna a pontuação parcial se disponível, senão o fallback
  */
 function getPontosAoVivo(timeId, fallback = 0) {
-    if (!isJogosAoVivo()) return fallback;
     const parciais = WHState.data.parciais?.ranking || [];
+    if (parciais.length === 0) return fallback;
     const found = parciais.find(p => String(p.timeId || p.time_id) === String(timeId));
     return found?.pontos_rodada_atual ?? found?.pontos ?? fallback;
 }
