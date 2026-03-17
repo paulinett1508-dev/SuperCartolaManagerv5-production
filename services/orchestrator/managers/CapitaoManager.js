@@ -1,18 +1,24 @@
 /**
- * CAPITAO MANAGER v1.1.0
+ * CAPITAO MANAGER v2.0.0
  * Módulo OPCIONAL - Capitão de Luxo (ranking de pontuação dos capitães)
  *
- * STATUS: STUBS — Hooks registrados mas NÃO executam coleta automaticamente.
+ * STATUS: IMPLEMENTADO — Hooks de consolidação automáticos.
  *
- * FLUXO ATUAL (manual via admin):
+ * FLUXO AUTOMÁTICO (orchestrator):
+ *   1. onRoundFinalize → consolidarRankingCapitao(ligaId, temporada, rodada) [await]
+ *   2. onConsolidate   → consolidarRankingCapitao(ligaId, temporada, rodada) [await]
+ *
+ * FLUXO MANUAL (ainda disponível via admin):
  *   1. Admin clica "Consolidar" → POST /api/capitao/:ligaId/consolidar
- *   Controller: capitaoController.js (v1.1.0)
- *   Service: capitaoService.js (busca dados da API Cartola por rodada)
+ *   Controller: capitaoController.js
+ *   Service: capitaoService.js
  *
- * FUTURO: Quando o orchestrator for implementado end-to-end, estes hooks
- * devem delegar ao controller via chamadas internas (fetch localhost).
+ * NOTA: consolidarRankingCapitao faz a coleta via API Cartola internamente
+ * (calcularEstatisticasCapitao por participante). Não precisa de onMarketClose separado.
  */
 import BaseManager from './BaseManager.js';
+import { consolidarRankingCapitao } from '../../capitaoService.js';
+import { CURRENT_SEASON } from '../../../config/seasons.js';
 
 export default class CapitaoManager extends BaseManager {
     constructor() {
@@ -26,36 +32,47 @@ export default class CapitaoManager extends BaseManager {
             temColeta: true,
             temFinanceiro: true,
         });
-
-        this._coletaAtiva = false;
     }
 
-    // STUB: Coleta real é feita manualmente pelo admin via POST /:ligaId/consolidar
+    // Não há ação automática ao fechar mercado (consolidarRankingCapitao faz tudo)
     async onMarketClose(ctx) {
-        this._coletaAtiva = true;
-        return { coletaIniciada: false, stub: true, rodada: ctx.rodada };
+        return { aguardando: true, rodada: ctx.rodada };
     }
 
-    // STUB: Parciais são calculadas pelo controller via ranking-live endpoint
-    async onLiveUpdate(ctx) {
-        if (!this._coletaAtiva) return null;
-        return { coletando: false, stub: true };
-    }
-
-    // STUB: Não há ação automática ao abrir mercado
+    // Não há ação automática ao abrir mercado
     async onMarketOpen(ctx) {
-        this._coletaAtiva = false;
-        return { coletaEncerrada: true, stub: true };
+        return { pronto: true };
     }
 
-    // STUB: Consolidação é feita pelo admin via POST /:ligaId/consolidar
+    // Rodada finalizou: consolida ranking acumulado até esta rodada
     async onRoundFinalize(ctx) {
-        this._coletaAtiva = false;
-        return { pronto: false, stub: true };
+        const { ligaId, rodada } = ctx;
+
+        console.log(`[CAPITAO-MANAGER] onRoundFinalize: consolidando ranking até R${rodada} liga ${ligaId}`);
+
+        try {
+            await consolidarRankingCapitao(ligaId, CURRENT_SEASON, rodada);
+            console.log(`[CAPITAO-MANAGER] Ranking R${rodada} consolidado com sucesso`);
+            return { pronto: true, rodada };
+        } catch (err) {
+            console.error(`[CAPITAO-MANAGER] Erro na consolidação R${rodada}:`, err.message);
+            return { pronto: false, erro: err.message };
+        }
     }
 
-    // STUB: Premiação é aplicada durante consolidação manual
+    // Consolida ranking definitivo da rodada
     async onConsolidate(ctx) {
-        return { consolidado: false, stub: true };
+        const { ligaId, rodada } = ctx;
+
+        console.log(`[CAPITAO-MANAGER] onConsolidate: consolidando ranking definitivo R${rodada} liga ${ligaId}`);
+
+        try {
+            await consolidarRankingCapitao(ligaId, CURRENT_SEASON, rodada);
+            console.log(`[CAPITAO-MANAGER] Consolidação definitiva R${rodada} concluída`);
+            return { consolidado: true, rodada };
+        } catch (err) {
+            console.error(`[CAPITAO-MANAGER] Erro na consolidação definitiva R${rodada}:`, err.message);
+            return { consolidado: false, erro: err.message };
+        }
     }
 }
