@@ -235,8 +235,8 @@ async function auditarLiga(db, liga, temporada) {
 async function buscarConfig(db, ligaId, temporada) {
     try {
         const mc = await db.collection('moduleconfigs').findOne({
-            liga_id: ligaId,
-            modulo_id: 'pontos_corridos',
+            liga_id: new mongoose.Types.ObjectId(ligaId),
+            modulo: 'pontos_corridos',
             temporada,
         });
 
