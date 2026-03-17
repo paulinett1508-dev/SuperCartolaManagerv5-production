@@ -1,19 +1,29 @@
 /**
- * ARTILHEIRO MANAGER v1.1.0
+ * ARTILHEIRO MANAGER v2.0.0
  * Módulo OPCIONAL - Artilheiro Campeão (coleta gols da API Cartola)
  *
- * STATUS: STUBS — Hooks registrados mas NÃO executam coleta automaticamente.
+ * STATUS: IMPLEMENTADO — Hooks de coleta e consolidação automáticos.
  *
- * FLUXO ATUAL (manual via admin):
- *   1. Admin clica "Coletar" → POST /api/artilheiro-campeao/:ligaId/coletar/:rodada
- *   2. Admin clica "Consolidar" → POST /api/artilheiro-campeao/:ligaId/consolidar/:rodada
- *   3. Admin clica "Premiar" → POST /api/artilheiro-campeao/:ligaId/premiar
- *   Controller: artilheiroCampeaoController.js (v5.2.0)
+ * FLUXO AUTOMÁTICO (orchestrator):
+ *   1. onMarketClose  → coleta gols de todos participantes [background]
+ *   2. onLiveUpdate   → recoleta parciais a cada ciclo [background]
+ *   3. onRoundFinalize→ coleta final aguardada antes de consolidar [await]
+ *   4. onConsolidate  → marca GolsConsolidados.parcial = false [rápido]
  *
- * FUTURO: Quando o orchestrator for implementado end-to-end, estes hooks
- * devem delegar ao controller via chamadas internas (fetch localhost).
+ * FLUXO MANUAL (ainda disponível via admin):
+ *   1. Admin clica "Coletar"     → POST /api/artilheiro-campeao/:ligaId/coletar/:rodada
+ *   2. Admin clica "Consolidar"  → POST /api/artilheiro-campeao/:ligaId/consolidar/:rodada
+ *   3. Admin clica "Premiar"     → POST /api/artilheiro-campeao/:ligaId/premiar
+ *   Controller: artilheiroCampeaoController.js
+ *
+ * NOTA: coletarDadosRodada é chamado por participante (com rate limit via fetchCartolaComRateLimit).
+ * onMarketClose e onLiveUpdate rodam em background para não bloquear o orchestrator.
  */
+import mongoose from 'mongoose';
 import BaseManager from './BaseManager.js';
+import ArtilheiroCampeaoController from '../../../controllers/artilheiroCampeaoController.js';
+import Liga from '../../../models/Liga.js';
+import { CURRENT_SEASON } from '../../../config/seasons.js';
 
 export default class ArtilheiroManager extends BaseManager {
     constructor() {
@@ -29,34 +39,113 @@ export default class ArtilheiroManager extends BaseManager {
         });
 
         this._coletaAtiva = false;
+        this._coletaPromise = null;
     }
 
-    // STUB: Coleta real é feita manualmente pelo admin via POST /:ligaId/coletar/:rodada
+    // Busca participantes ativos da liga (para iteração de coleta)
+    async _getParticipantes(ligaId) {
+        const liga = await Liga.findById(ligaId).lean();
+        if (!liga || !liga.participantes) return [];
+        return liga.participantes.filter(p => p.ativo !== false);
+    }
+
+    // Dispara coleta de gols para todos os participantes em background
+    _dispararColeta(ligaId, rodada) {
+        return this._getParticipantes(ligaId)
+            .then(async participantes => {
+                console.log(`[ARTILHEIRO-MANAGER] Coletando R${rodada}: ${participantes.length} participantes`);
+                for (const p of participantes) {
+                    try {
+                        await ArtilheiroCampeaoController.coletarDadosRodada(ligaId, p.time_id, rodada);
+                    } catch (err) {
+                        console.error(`[ARTILHEIRO-MANAGER] Erro coleta ${p.nome || p.time_id} R${rodada}:`, err.message);
+                    }
+                }
+                console.log(`[ARTILHEIRO-MANAGER] Coleta R${rodada} concluída`);
+                this._coletaPromise = null;
+            })
+            .catch(err => {
+                console.error(`[ARTILHEIRO-MANAGER] Erro na coleta R${rodada}:`, err.message);
+                this._coletaPromise = null;
+            });
+    }
+
+    // Mercado fechou: inicia coleta em background
     async onMarketClose(ctx) {
         this._coletaAtiva = true;
-        return { coletaIniciada: false, stub: true, rodada: ctx.rodada };
+        const { ligaId, rodada } = ctx;
+
+        console.log(`[ARTILHEIRO-MANAGER] onMarketClose: iniciando coleta R${rodada} liga ${ligaId}`);
+
+        this._coletaPromise = this._dispararColeta(ligaId, rodada);
+
+        return { coletaIniciada: true, rodada };
     }
 
-    // STUB: Parciais são calculadas pelo controller quando admin acessa o ranking
+    // Live update: recoleta parciais se coleta anterior concluiu
     async onLiveUpdate(ctx) {
         if (!this._coletaAtiva) return null;
-        return { coletando: false, stub: true };
+
+        if (this._coletaPromise) {
+            console.log(`[ARTILHEIRO-MANAGER] onLiveUpdate: coleta em andamento, pulando ciclo`);
+            return { coletando: true, aguardando: true };
+        }
+
+        const { ligaId, rodada } = ctx;
+        console.log(`[ARTILHEIRO-MANAGER] onLiveUpdate: atualizando parciais R${rodada}`);
+
+        this._coletaPromise = this._dispararColeta(ligaId, rodada);
+
+        return { coletando: true, rodada };
     }
 
-    // STUB: Não há ação automática ao abrir mercado
+    // Reset ao abrir mercado
     async onMarketOpen(ctx) {
         this._coletaAtiva = false;
-        return { coletaEncerrada: true, stub: true };
+        this._coletaPromise = null;
+        return { coletaEncerrada: true };
     }
 
-    // STUB: Consolidação é feita pelo admin via POST /:ligaId/consolidar/:rodada
+    // Rodada finalizou: aguarda coleta em andamento e faz coleta final
     async onRoundFinalize(ctx) {
         this._coletaAtiva = false;
-        return { pronto: false, stub: true };
+        const { ligaId, rodada } = ctx;
+
+        if (this._coletaPromise) {
+            console.log(`[ARTILHEIRO-MANAGER] onRoundFinalize: aguardando coleta em andamento...`);
+            await this._coletaPromise;
+        }
+
+        console.log(`[ARTILHEIRO-MANAGER] onRoundFinalize: coleta final R${rodada}`);
+        try {
+            await this._dispararColeta(ligaId, rodada);
+            return { pronto: true, rodada };
+        } catch (err) {
+            console.error(`[ARTILHEIRO-MANAGER] Erro coleta final R${rodada}:`, err.message);
+            return { pronto: false, erro: err.message };
+        }
     }
 
-    // STUB: Premiação é feita pelo admin via POST /:ligaId/premiar
+    // Consolida rodada: marca registros parciais como definitivos
     async onConsolidate(ctx) {
-        return { consolidado: false, stub: true };
+        const { ligaId, rodada } = ctx;
+
+        console.log(`[ARTILHEIRO-MANAGER] onConsolidate: consolidando R${rodada} liga ${ligaId}`);
+
+        try {
+            // GolsConsolidados é definido no controller — acessar via mongoose.models após import
+            const GolsConsolidados = mongoose.models.GolsConsolidados;
+            if (!GolsConsolidados) throw new Error('GolsConsolidados model não registrado');
+
+            const resultado = await GolsConsolidados.updateMany(
+                { ligaId, rodada: parseInt(rodada, 10), temporada: CURRENT_SEASON, parcial: true },
+                { $set: { parcial: false } },
+            );
+            console.log(`[ARTILHEIRO-MANAGER] Consolidação R${rodada}: ${resultado.modifiedCount} registros atualizados`);
+            return { consolidado: true, rodada, registrosAtualizados: resultado.modifiedCount };
+        } catch (err) {
+            console.error(`[ARTILHEIRO-MANAGER] Erro na consolidação R${rodada}:`, err.message);
+            return { consolidado: false, erro: err.message };
+        }
     }
 }

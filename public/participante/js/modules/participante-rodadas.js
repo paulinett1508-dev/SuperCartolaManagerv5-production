@@ -1930,7 +1930,7 @@ function renderizarDetalhamentoRodada(rodadaData, isParcial = false, inativos = 
 // =====================================================================
 // MODAL "CURIOSAR" - VER ESCALAÇÃO DE OUTRO TIME
 // =====================================================================
-function abrirCampinhoModal(targetTimeId, rodada, rodadaData = null) {
+async function abrirCampinhoModal(targetTimeId, rodada, rodadaData = null) {
     if (window.Log) Log.info("[RODADAS] 👀 Curiosar time:", targetTimeId);
 
     // ── Fonte 1: Dados enriquecidos do parciais (ao vivo) ──
@@ -1987,12 +1987,46 @@ function abrirCampinhoModal(targetTimeId, rodada, rodadaData = null) {
         ];
         capitaoId = escalacaoCacheada.capitao_id;
     } else {
-        nomeTime = "Time";
-        nomeCartola = "";
-        pontos = 0;
+        // Preservar dados básicos do consolidado quando disponíveis (nome, pontos)
+        // atletas será buscado via API logo abaixo (bulk query exclui atletas por performance)
+        nomeTime = partConsolidado?.nome || partConsolidado?.nome_time || "Time";
+        nomeCartola = partConsolidado?.nome_cartola || "";
+        pontos = partConsolidado?.pontos || 0;
         emCampo = 0;
         atletas = [];
-        capitaoId = null;
+        capitaoId = partConsolidado?.capitao_id || null;
+    }
+
+    // ── Fonte 4: API de escalação (fallback para rodadas consolidadas sem atletas) ──
+    // Rodadas são carregadas em bulk com { atletas: 0 } por performance.
+    // Para o modal, buscamos individualmente quando atletas não estão disponíveis.
+    if (atletas.length === 0 && rodada) {
+        try {
+            const resp = await fetch(
+                `/api/cartola/time/${targetTimeId}/${rodada}/escalacao`,
+                { signal: AbortSignal.timeout(8000) }
+            );
+            if (resp.ok) {
+                const apiData = await resp.json();
+                const atletasApi = [
+                    ...(apiData.titulares || []).map(a => ({ ...a, is_reserva: false })),
+                    ...(apiData.reservas || []).map(a => ({ ...a, is_reserva: true })),
+                ];
+                if (atletasApi.length > 0) {
+                    fonte = 'api-escalacao';
+                    atletas = atletasApi;
+                    capitaoId = capitaoId || apiData.capitao_id;
+                    // Preservar pontos do consolidado (mais preciso — aplica regras da liga)
+                    if (!pontos) pontos = apiData.pontos || 0;
+                    if (nomeTime === 'Time') {
+                        nomeTime = apiData.nome || "Time";
+                        nomeCartola = apiData.nome_cartoleiro || "";
+                    }
+                }
+            }
+        } catch (err) {
+            if (window.Log) Log.warn('[RODADAS] ⚠️ Escalação API fallback falhou:', err?.message);
+        }
     }
 
     // Calcular emCampo quando não veio dos parciais processados

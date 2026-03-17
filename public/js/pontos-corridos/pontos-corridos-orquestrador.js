@@ -601,6 +601,7 @@ async function renderRodada(rodadaNum) {
         rodadaNum,
         pontuacoesMap,
         estadoOrquestrador.rodadaAtualBrasileirao,
+        estadoOrquestrador.times || null,
       );
       atualizarContainer(containerId, tabelaHtml);
 
@@ -671,6 +672,7 @@ async function renderRodada(rodadaNum) {
       rodadaNum, // CORREÇÃO: passar o número da rodada da liga (1-31)
       pontuacoesMap,
       estadoOrquestrador.rodadaAtualBrasileirao,
+      estadoOrquestrador.times || null,
     );
     const parcialBanner = isRodadaAoVivo
       ? `<div style="display:flex;align-items:center;gap:8px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:10px 14px;margin-bottom:12px;">

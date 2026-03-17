@@ -1,4 +1,5 @@
-// PARTICIPANTE PONTOS CORRIDOS - v5.6
+// PARTICIPANTE PONTOS CORRIDOS - v5.7
+// ✅ v5.7: BYE notice — aviso ao participante quando está de folga na rodada
 // ✅ v5.6: Rodadas futuras navegáveis (bracket a partir da ordem canônica do admin)
 // ✅ v5.5: Auto-refresh 60s para parciais ao vivo (mercado fechado)
 // ✅ v5.3: FIX - totalRodadas calculado a partir do número de times (N-1), não dados.length
@@ -987,7 +988,31 @@ function renderizarConfrontos() {
         }
     }
 
-    container.innerHTML = confrontos
+    // ✅ v5.7: BYE notice — aviso quando o participante logado está de folga nesta rodada
+    let byeNoticeHTML = '';
+    if (timeId) {
+        const teamsInRound = new Set();
+        confrontos.forEach(c => {
+            if (c.time1?.id) teamsInRound.add(String(c.time1.id));
+            if (c.time2?.id) teamsInRound.add(String(c.time2.id));
+        });
+        const totalTimes = rodadaData.classificacao?.length || 0;
+        const isOddLeague = totalTimes > 0 && totalTimes % 2 !== 0;
+        const isUserBye = isOddLeague && !teamsInRound.has(String(timeId));
+        if (isUserBye) {
+            byeNoticeHTML = `
+                <div class="flex items-start gap-3 bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-4" style="border-left: 4px solid #3b82f6;">
+                    <span class="material-symbols-outlined text-blue-400" style="font-size: 22px; flex-shrink: 0; margin-top: 1px;">event_busy</span>
+                    <div>
+                        <p class="font-semibold text-sm text-white mb-1">Você está de folga nessa rodada!</p>
+                        <p class="text-xs text-gray-400">Para entender melhor o motivo, procure o admin do sistema.</p>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    container.innerHTML = byeNoticeHTML + confrontos
         .map((c) => buildLinhaConfronto(c, timeId))
         .join("");
 }

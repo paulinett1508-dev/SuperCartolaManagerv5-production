@@ -163,7 +163,7 @@ export async function calcularPontosEncerradas(
   return times;
 }
 export async function calcularPontosParciais(liga, rodadaAtual, ligaId) {
-  const resPartials = await fetch("/api/partials", {
+  const resPartials = await fetch("/api/cartola/atletas/pontuados", {
     headers: {
       "Cache-Control": "no-cache",
       Pragma: "no-cache",

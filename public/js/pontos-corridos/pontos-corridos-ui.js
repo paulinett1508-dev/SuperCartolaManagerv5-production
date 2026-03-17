@@ -1,4 +1,4 @@
-// PONTOS CORRIDOS UI - v2.9 Interface Otimizada
+// PONTOS CORRIDOS UI - v3.0 Interface Otimizada
 // ✅ v2.1: Celebração do campeão quando liga encerra
 // ✅ v2.2: Banner compacto e elegante com nome do cartoleiro
 // ✅ v2.3: CORREÇÃO - Suporta time1/time2 (cache) e timeA/timeB (gerador)
@@ -8,6 +8,7 @@
 // ✅ v2.7: Correção busca container (suporta ambos IDs) + fix null check
 // ✅ v2.8: Fallbacks robustos para campos undefined - fix classificação
 // ✅ v2.9: Material Icons + estrutura HTML original dos confrontos restaurada
+// ✅ v3.0: BYE aviso — banner quando um time folga na rodada (liga ímpar)
 // Responsável por: renderização, manipulação DOM, estados visuais
 
 import {
@@ -399,12 +400,13 @@ export function renderErrorState(containerId, error) {
   `;
 }
 
-// ✅ v2.9: Layout usando estrutura original (table) + fallbacks robustos + Material Icons
+// ✅ v3.0: Layout usando estrutura original (table) + fallbacks robustos + Material Icons + BYE aviso
 export function renderTabelaRodada(
   jogos,
   idxRodada,
   pontuacoesMap,
   rodadaAtualBrasileirao,
+  allTeams = null,
 ) {
   // Validação de entrada
   if (!Array.isArray(jogos) || jogos.length === 0) {
@@ -429,6 +431,31 @@ export function renderTabelaRodada(
     statusTexto = "RODADA EM ANDAMENTO";
   } else {
     statusTexto = "RODADA AINDA NÃO ACONTECEU";
+  }
+
+  // ✅ v3.0: Detectar BYE (time em folga) — liga com número ímpar de times
+  let byeBannerHTML = '';
+  if (allTeams && Array.isArray(allTeams) && allTeams.length % 2 !== 0) {
+    const teamsInJogos = new Set();
+    jogos.forEach(j => {
+      const idA = (j.time1 || j.timeA)?.id;
+      const idB = (j.time2 || j.timeB)?.id;
+      if (idA != null) teamsInJogos.add(String(idA));
+      if (idB != null) teamsInJogos.add(String(idB));
+    });
+    const byeTeam = allTeams.find(t => !teamsInJogos.has(String(t.id)));
+    if (byeTeam) {
+      const nomeExibido = escapeHtml(byeTeam.nome_cartola || byeTeam.nome || `Time ${byeTeam.id}`);
+      byeBannerHTML = `
+        <div class="bye-aviso">
+          <span class="material-icons">event_busy</span>
+          <div class="bye-aviso-content">
+            <strong>Time em Folga nesta Rodada</strong>
+            <span><strong>${nomeExibido}</strong> está de folga (BYE) — jogo não disputado, sem alteração em pontos ou financeiro.</span>
+          </div>
+        </div>
+      `;
+    }
   }
 
   let confrontosHTML = "";
@@ -570,6 +597,8 @@ export function renderTabelaRodada(
         ${statusTexto}
       </div>
     </div>
+
+    ${byeBannerHTML}
 
     <div class="confrontos-container">
       <table class="confrontos-table">
@@ -981,7 +1010,7 @@ export function limparCacheUI() {
 }
 
 console.log(
-  "[PONTOS-CORRIDOS-UI] Módulo v2.8 carregado (fallbacks robustos para undefined)",
+  "[PONTOS-CORRIDOS-UI] Módulo v3.0 carregado (BYE aviso + fallbacks robustos)",
 );
 
 // ========================================

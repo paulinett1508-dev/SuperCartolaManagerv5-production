@@ -377,6 +377,41 @@
   background: var(--text-muted);
 }
 
+/* === BYE AVISO (Folga da Rodada) === */
+.bye-aviso {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-left: 4px solid var(--color-info);
+  border-radius: var(--border-radius-md);
+  padding: 14px 16px;
+  margin-bottom: var(--spacing-md);
+}
+
+.bye-aviso .material-icons {
+  color: var(--color-info);
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.bye-aviso-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bye-aviso-content strong {
+  color: var(--text-primary);
+  font: 600 13px "Inter", -apple-system, sans-serif;
+}
+
+.bye-aviso-content span {
+  font: 400 12px "Inter", -apple-system, sans-serif;
+  color: var(--text-muted);
+}
+
 /* === TABELAS DE CONFRONTOS === */
 .confrontos-container {
   margin-bottom: var(--spacing-lg);

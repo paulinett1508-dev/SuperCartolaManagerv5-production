@@ -77,7 +77,7 @@
         <script type="module">
             // ===== ESTADO GLOBAL =====
             const urlParams = new URLSearchParams(window.location.search);
-            const ligaId = urlParams.get('liga');
+            const ligaId = urlParams.get('id') || urlParams.get('liga');
             const modoLigaEspecifica = !!ligaId;
 
             // ===== CARREGAR SIDEBAR =====

@@ -1,0 +1,2145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Auditoria Financeira 2025 — Super Cartola</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #0f0f0f; color: #e0e0e0; padding: 20px 30px; font-size: 11px; line-height: 1.4; }
+
+  @media print {
+    body { background: #fff; color: #111; padding: 10px; font-size: 9px; }
+    .ficha { break-inside: avoid; border-color: #ccc !important; background: #fff !important; }
+    .ficha-header { background: #222 !important; color: #fff !important; }
+    .page-break { page-break-before: always; }
+    .no-print { display: none !important; }
+    .saldo-box { border-color: #333 !important; }
+    .resumo-table th { background: #333 !important; color: #fff !important; }
+    .positivo { color: #0a0 !important; } .negativo { color: #c00 !important; }
+  }
+
+  h1 { font-size: 22px; text-align: center; color: #ff6a00; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: #888; font-size: 12px; margin-bottom: 20px; }
+  .stats-bar { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 24px; }
+  .stat { background: #1a1a1a; border: 1px solid #333; border-radius: 6px; padding: 8px 14px; text-align: center; }
+  .stat-num { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: #ff6a00; }
+  .stat-label { font-size: 10px; color: #888; }
+
+  /* Ficha individual */
+  .ficha { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; margin-bottom: 14px; overflow: hidden; }
+  .ficha-header { background: #222; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ff6a00; }
+  .ficha-nome { font-size: 14px; font-weight: 700; color: #fff; }
+  .ficha-id { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #888; }
+  .ficha-tag { font-size: 9px; padding: 2px 6px; border-radius: 3px; font-weight: 600; }
+  .tag-liga { background: #1b3a1b; color: #4ade80; }
+  .tag-fora { background: #3a1b1b; color: #f87171; }
+  .ficha-body { padding: 10px 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .ficha-section { }
+  .ficha-section-title { font-size: 10px; font-weight: 700; color: #ff6a00; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; border-bottom: 1px solid #333; padding-bottom: 2px; }
+  .ficha-row { display: flex; justify-content: space-between; padding: 1px 0; }
+  .ficha-row-label { color: #999; }
+  .ficha-row-value { font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+  .positivo { color: #4ade80; } .negativo { color: #f87171; } .zero { color: #888; }
+
+  .saldo-box { margin: 0 14px 10px; padding: 8px 14px; border: 2px solid #ff6a00; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
+  .saldo-label { font-size: 11px; font-weight: 700; color: #ff6a00; }
+  .saldo-value { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; }
+  .saldo-formula { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #666; margin: 0 14px 10px; }
+
+  .acerto-item { font-size: 10px; color: #bbb; padding: 1px 0; }
+  .acerto-tipo { font-weight: 600; text-transform: uppercase; font-size: 9px; }
+  .acerto-tipo.pagamento { color: #4ade80; } .acerto-tipo.recebimento { color: #f87171; }
+
+  /* Tabela resumo */
+  .resumo-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 10px; }
+  .resumo-table th { background: #ff6a00; color: #000; padding: 6px 8px; font-weight: 700; text-align: right; white-space: nowrap; }
+  .resumo-table th:first-child { text-align: left; }
+  .resumo-table td { padding: 4px 8px; border-bottom: 1px solid #2a2a2a; font-family: 'JetBrains Mono', monospace; text-align: right; white-space: nowrap; }
+  .resumo-table td:first-child { font-family: 'Inter', sans-serif; text-align: left; font-weight: 500; }
+  .resumo-table tr:hover { background: #222; }
+  .resumo-table .total-row td { border-top: 2px solid #ff6a00; font-weight: 700; background: #1a1a1a; }
+
+  .section-title { font-size: 16px; font-weight: 700; color: #ff6a00; margin: 30px 0 10px; padding-bottom: 6px; border-bottom: 2px solid #333; }
+  .footer { text-align: center; color: #555; font-size: 9px; margin-top: 30px; padding-top: 10px; border-top: 1px solid #333; }
+</style>
+</head>
+<body>
+
+<h1>AUDITORIA FINANCEIRA 2025</h1>
+<div class="subtitle">Liga Super Cartola &mdash; 16/03/2026, 20:22:47</div>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-num">38</div><div class="stat-label">Participantes</div></div>
+  <div class="stat"><div class="stat-num">4</div><div class="stat-label">Com Extrato Cache</div></div>
+  <div class="stat"><div class="stat-num">24</div><div class="stat-label">Com Campos Manuais</div></div>
+  <div class="stat"><div class="stat-num">13</div><div class="stat-label">Com Acertos</div></div>
+  <div class="stat"><div class="stat-num">3</div><div class="stat-label">Fora da Liga</div></div>
+</div>
+
+<!-- ═══════════════ TABELA RESUMO ═══════════════ -->
+<div class="section-title">Tabela Resumo</div>
+<table class="resumo-table">
+<thead>
+  <tr>
+    <th style="text-align:left">Participante</th>
+    <th>Extrato</th>
+    <th>Campos</th>
+    <th>Acertos</th>
+    <th>Ajustes</th>
+    <th style="border-left:2px solid #000">SALDO 2025</th>
+    <th style="border-left:2px solid #000">Inscr. 2026</th>
+    <th>Div. 2026</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>Antonio Luis </td>
+    <td class="zero">0.00</td>
+    <td class="positivo">20.00</td>
+    <td class="positivo">133.00</td>
+    <td class="zero">0.00</td>
+    <td class="positivo" style="border-left:2px solid #333;font-weight:700">153.00</td>
+    <td class="zero" style="border-left:2px solid #333">0.00</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>Bruno Barros</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero" style="border-left:2px solid #333;font-weight:700">0.00</td>
+    <td class="zero" style="border-left:2px solid #333">0.00</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>Cássio Marques</td>
+    <td class="zero">0.00</td>
+    <td class="positivo">344.38</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="positivo" style="border-left:2px solid #333;font-weight:700">344.38</td>
+    <td class="positivo" style="border-left:2px solid #333">343.38</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>China Guardiola</td>
+    <td class="zero">0.00</td>
+    <td class="positivo">255.54</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="positivo" style="border-left:2px solid #333;font-weight:700">255.54</td>
+    <td class="positivo" style="border-left:2px solid #333">421.54</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>Diego Barbosa</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="positivo">197.00</td>
+    <td class="zero">0.00</td>
+    <td class="positivo" style="border-left:2px solid #333;font-weight:700">197.00</td>
+    <td class="positivo" style="border-left:2px solid #333">244.00</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>Diogo Monte</td>
+    <td class="negativo">-50.00</td>
+    <td class="positivo">200.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="positivo" style="border-left:2px solid #333;font-weight:700">150.00</td>
+    <td class="positivo" style="border-left:2px solid #333">354.00</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>Eudes Pereira</td>
+    <td class="negativo">-36.00</td>
+    <td class="positivo">0.54</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="negativo" style="border-left:2px solid #333;font-weight:700">-35.46</td>
+    <td class="positivo" style="border-left:2px solid #333">111.54</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>Felipe Barbosa</td>
+    <td class="positivo">62.00</td>
+    <td class="zero">0.00</td>
+    <td class="positivo">148.00</td>
+    <td class="zero">0.00</td>
+    <td class="positivo" style="border-left:2px solid #333;font-weight:700">210.00</td>
+    <td class="zero" style="border-left:2px solid #333">0.00</td>
+    <td class="negativo">39.00</td>
+  </tr>
+  <tr>
+    <td>Felipe Jokstay</td>
+    <td class="zero">0.00</td>
+    <td class="negativo">-140.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="negativo" style="border-left:2px solid #333;font-weight:700">-140.00</td>
+    <td class="zero" style="border-left:2px solid #333">0.00</td>
+    <td class="negativo">372.00</td>
+  </tr>
+  <tr>
+    <td>Felipe Santos</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="positivo">141.00</td>
+    <td class="zero">0.00</td>
+    <td class="positivo" style="border-left:2px solid #333;font-weight:700">141.00</td>
+    <td class="zero" style="border-left:2px solid #333">0.00</td>
+    <td class="negativo">5.00</td>
+  </tr>
+  <tr>
+    <td>Flavio André</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero" style="border-left:2px solid #333;font-weight:700">0.00</td>
+    <td class="positivo" style="border-left:2px solid #333">79.00</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>fucim </td>
+    <td class="zero">0.00</td>
+    <td class="positivo">350.00</td>
+    <td class="negativo">-661.00</td>
+    <td class="zero">0.00</td>
+    <td class="negativo" style="border-left:2px solid #333;font-weight:700">-311.00</td>
+    <td class="zero" style="border-left:2px solid #333">0.00</td>
+    <td class="negativo">14.00</td>
+  </tr>
+  <tr>
+    <td>Geones Vaz</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero" style="border-left:2px solid #333;font-weight:700">0.00</td>
+    <td class="zero" style="border-left:2px solid #333">0.00</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>ID:1233737 <span style="color:#f87171;font-size:9px">[FORA]</span></td>
+    <td class="zero">0.00</td>
+    <td class="negativo">-142.00</td>
+    <td class="positivo">229.00</td>
+    <td class="zero">0.00</td>
+    <td class="positivo" style="border-left:2px solid #333;font-weight:700">87.00</td>
+    <td class="zero" style="border-left:2px solid #333">0.00</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>ID:164131 <span style="color:#f87171;font-size:9px">[FORA]</span></td>
+    <td class="zero">0.00</td>
+    <td class="positivo">77.00</td>
+    <td class="positivo">401.00</td>
+    <td class="zero">0.00</td>
+    <td class="positivo" style="border-left:2px solid #333;font-weight:700">478.00</td>
+    <td class="zero" style="border-left:2px solid #333">0.00</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>ID:22623329 <span style="color:#f87171;font-size:9px">[FORA]</span></td>
+    <td class="zero">0.00</td>
+    <td class="positivo">50.00</td>
+    <td class="negativo">-221.00</td>
+    <td class="zero">0.00</td>
+    <td class="negativo" style="border-left:2px solid #333;font-weight:700">-171.00</td>
+    <td class="zero" style="border-left:2px solid #333">0.00</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>Jonney Vojvoda</td>
+    <td class="zero">0.00</td>
+    <td class="negativo">-142.46</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="negativo" style="border-left:2px solid #333;font-weight:700">-142.46</td>
+    <td class="zero" style="border-left:2px solid #333">0.00</td>
+    <td class="negativo">240.46</td>
+  </tr>
+  <tr>
+    <td>juniel henrique</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero" style="border-left:2px solid #333;font-weight:700">0.00</td>
+    <td class="positivo" style="border-left:2px solid #333">178.00</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>Leilson Bezerra</td>
+    <td class="zero">0.00</td>
+    <td class="positivo">0.54</td>
+    <td class="positivo">204.00</td>
+    <td class="zero">0.00</td>
+    <td class="positivo" style="border-left:2px solid #333;font-weight:700">204.54</td>
+    <td class="positivo" style="border-left:2px solid #333">1.08</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>Lucas Sousa</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero" style="border-left:2px solid #333;font-weight:700">0.00</td>
+    <td class="zero" style="border-left:2px solid #333">0.00</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>Lúcio de Souza</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero" style="border-left:2px solid #333;font-weight:700">0.00</td>
+    <td class="zero" style="border-left:2px solid #333">0.00</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>Marconi Araújo</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero" style="border-left:2px solid #333;font-weight:700">0.00</td>
+    <td class="zero" style="border-left:2px solid #333">0.00</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>Mauricio Wendel</td>
+    <td class="zero">0.00</td>
+    <td class="positivo">1036.38</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="positivo" style="border-left:2px solid #333;font-weight:700">1036.38</td>
+    <td class="positivo" style="border-left:2px solid #333">1298.38</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>Mr. Carmilton</td>
+    <td class="zero">0.00</td>
+    <td class="negativo">-167.82</td>
+    <td class="positivo">12.82</td>
+    <td class="zero">0.00</td>
+    <td class="negativo" style="border-left:2px solid #333;font-weight:700">-155.00</td>
+    <td class="positivo" style="border-left:2px solid #333">59.00</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>Neto Waquim</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero" style="border-left:2px solid #333;font-weight:700">0.00</td>
+    <td class="positivo" style="border-left:2px solid #333">110.00</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>Paulinett Miranda</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero" style="border-left:2px solid #333;font-weight:700">0.00</td>
+    <td class="zero" style="border-left:2px solid #333">0.00</td>
+    <td class="negativo">141.00</td>
+  </tr>
+  <tr>
+    <td>Pedro Antônio</td>
+    <td class="zero">0.00</td>
+    <td class="positivo">55.59</td>
+    <td class="negativo">-8.59</td>
+    <td class="zero">0.00</td>
+    <td class="positivo" style="border-left:2px solid #333;font-weight:700">47.00</td>
+    <td class="zero" style="border-left:2px solid #333">0.00</td>
+    <td class="negativo">47.00</td>
+  </tr>
+  <tr>
+    <td>Rafael Janderson</td>
+    <td class="zero">0.00</td>
+    <td class="negativo">-140.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="negativo" style="border-left:2px solid #333;font-weight:700">-140.00</td>
+    <td class="zero" style="border-left:2px solid #333">0.00</td>
+    <td class="negativo">254.00</td>
+  </tr>
+  <tr>
+    <td>Raimundo Pinheiro </td>
+    <td class="zero">0.00</td>
+    <td class="negativo">-465.46</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="negativo" style="border-left:2px solid #333;font-weight:700">-465.46</td>
+    <td class="zero" style="border-left:2px solid #333">0.00</td>
+    <td class="negativo">425.46</td>
+  </tr>
+  <tr>
+    <td>Randerson Rodrigues</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero" style="border-left:2px solid #333;font-weight:700">0.00</td>
+    <td class="zero" style="border-left:2px solid #333">0.00</td>
+    <td class="negativo">135.00</td>
+  </tr>
+  <tr>
+    <td>Raylson Fernandes</td>
+    <td class="zero">0.00</td>
+    <td class="negativo">-70.00</td>
+    <td class="positivo">200.00</td>
+    <td class="zero">0.00</td>
+    <td class="positivo" style="border-left:2px solid #333;font-weight:700">130.00</td>
+    <td class="zero" style="border-left:2px solid #333">0.00</td>
+    <td class="negativo">165.00</td>
+  </tr>
+  <tr>
+    <td>RODRIGO PAES LANDIM </td>
+    <td class="zero">0.00</td>
+    <td class="negativo">-140.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="negativo" style="border-left:2px solid #333;font-weight:700">-140.00</td>
+    <td class="zero" style="border-left:2px solid #333">0.00</td>
+    <td class="negativo">99.00</td>
+  </tr>
+  <tr>
+    <td>Rony Morais</td>
+    <td class="zero">0.00</td>
+    <td class="positivo">51.54</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="positivo" style="border-left:2px solid #333;font-weight:700">51.54</td>
+    <td class="positivo" style="border-left:2px solid #333">171.54</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>Sávio C Cavalcante </td>
+    <td class="zero">0.00</td>
+    <td class="negativo">-70.00</td>
+    <td class="positivo">33.00</td>
+    <td class="zero">0.00</td>
+    <td class="negativo" style="border-left:2px solid #333;font-weight:700">-37.00</td>
+    <td class="zero" style="border-left:2px solid #333">0.00</td>
+    <td class="negativo">71.00</td>
+  </tr>
+  <tr>
+    <td>Sir Gegé   </td>
+    <td class="zero">0.00</td>
+    <td class="positivo">405.07</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="positivo" style="border-left:2px solid #333;font-weight:700">405.07</td>
+    <td class="positivo" style="border-left:2px solid #333">548.07</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>Vitim</td>
+    <td class="zero">0.00</td>
+    <td class="positivo">1523.67</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="positivo" style="border-left:2px solid #333;font-weight:700">1523.67</td>
+    <td class="positivo" style="border-left:2px solid #333">1848.67</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>Wesley Oliveira</td>
+    <td class="zero">0.00</td>
+    <td class="positivo">836.54</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="positivo" style="border-left:2px solid #333;font-weight:700">836.54</td>
+    <td class="positivo" style="border-left:2px solid #333">1084.54</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr>
+    <td>Yuri Jivago</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero">0.00</td>
+    <td class="zero" style="border-left:2px solid #333;font-weight:700">0.00</td>
+    <td class="zero" style="border-left:2px solid #333">0.00</td>
+    <td class="zero">0.00</td>
+  </tr>
+  <tr class="total-row">
+    <td>TOTAIS</td>
+    <td>-24.00</td>
+    <td>3729.05</td>
+    <td>808.23</td>
+    <td>0.00</td>
+    <td style="border-left:2px solid #333">4513.28</td>
+    <td style="border-left:2px solid #333">6852.74</td>
+    <td>2007.92</td>
+  </tr>
+</tbody>
+</table>
+
+<!-- ═══════════════ FICHAS INDIVIDUAIS ═══════════════ -->
+<div class="section-title page-break">Fichas Individuais</div>
+
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Antonio Luis </span>
+      <span class="ficha-id">time_id: 645089</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo consolidado</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Ganhos / Perdas</span><span class="ficha-row-value"><span class="positivo">+0.00</span> / <span class="negativo">0.00</span></span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Ranking</span><span class="ficha-row-value zero">0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Pontos Corridos</span><span class="ficha-row-value zero">0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Mata-Mata</span><span class="ficha-row-value zero">0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Top 10</span><span class="ficha-row-value zero">0.00</span></div>
+        
+        <div class="ficha-row"><span class="ficha-row-label">Transacoes / Ult. rodada</span><span class="ficha-row-value">0 / R0</span></div>
+      
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">Ajuste/Limbo</span><span class="ficha-row-value positivo">R$ 20.00</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Pago</span><span class="ficha-row-value positivo">+163.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Recebido</span><span class="ficha-row-value negativo">-30.00</span></div>
+        <div class="acerto-item"><span class="acerto-tipo recebimento">recebimento</span> R$ 30.00 &mdash; Quitação automática (saldo < R$50) <span style="color:#555">(14/01/2026, quitacao)</span></div><div class="acerto-item"><span class="acerto-tipo pagamento">pagamento</span> R$ 25.00 &mdash; Ajuste de saldo 2025 <span style="color:#555">(10/01/2026, pix)</span></div><div class="acerto-item"><span class="acerto-tipo pagamento">pagamento</span> R$ 138.00 &mdash; Quitação de dívida Cartola 2025 <span style="color:#555">(03/01/2026, pix)</span></div>
+      
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value positivo">R$ 33.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">quitado</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value positivo">R$ 153.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(20.00) + acertos(133.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Bruno Barros</span>
+      <span class="ficha-id">time_id: 1113367</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">quitado</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value zero">R$ 0.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(0.00) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Cássio Marques</span>
+      <span class="ficha-id">time_id: 39786</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">Saldo 2024</span><span class="ficha-row-value positivo">R$ 344.38</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value positivo">R$ 343.38</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value positivo">R$ 343.38</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">credor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value positivo">R$ 344.38</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(344.38) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">China Guardiola</span>
+      <span class="ficha-id">time_id: 1097804</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">Saldo 2024</span><span class="ficha-row-value positivo">R$ 5.54</span></div><div class="ficha-row"><span class="ficha-row-label">Melhor do Mês - Edição 03</span><span class="ficha-row-value positivo">R$ 100.00</span></div><div class="ficha-row"><span class="ficha-row-label">2º COLOCADO PONTOS CORRIDOS</span><span class="ficha-row-value positivo">R$ 150.00</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value positivo">R$ 421.54</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value positivo">R$ 421.54</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">credor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value positivo">R$ 255.54</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(255.54) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Diego Barbosa</span>
+      <span class="ficha-id">time_id: 1323370</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Pago</span><span class="ficha-row-value positivo">+197.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Recebido</span><span class="ficha-row-value negativo">-0.00</span></div>
+        <div class="acerto-item"><span class="acerto-tipo pagamento">pagamento</span> R$ 197.00 &mdash; Quitação de dívida cartola 2025 <span style="color:#555">(20/12/2025, pix)</span></div>
+      
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value positivo">R$ 244.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value positivo">R$ 244.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">credor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value positivo">R$ 197.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(0.00) + acertos(197.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Diogo Monte</span>
+      <span class="ficha-id">time_id: 25371297</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo consolidado</span><span class="ficha-row-value negativo">R$ - 50.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Ganhos / Perdas</span><span class="ficha-row-value"><span class="positivo">+0.00</span> / <span class="negativo">-50.00</span></span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Ranking</span><span class="ficha-row-value negativo">-35.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Pontos Corridos</span><span class="ficha-row-value negativo">-5.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Mata-Mata</span><span class="ficha-row-value negativo">-10.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Top 10</span><span class="ficha-row-value zero">0.00</span></div>
+        
+        <div class="ficha-row"><span class="ficha-row-label">Transacoes / Ult. rodada</span><span class="ficha-row-value">5 / R5</span></div>
+      
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">Melhor do Mês - Edição 04</span><span class="ficha-row-value positivo">R$ 100.00</span></div><div class="ficha-row"><span class="ficha-row-label">MELHOR DO MÊS - EDIÇÃO 06</span><span class="ficha-row-value positivo">R$ 100.00</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value positivo">R$ 354.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value positivo">R$ 354.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">credor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value positivo">R$ 150.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(-50.00) + campos(200.00) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Eudes Pereira</span>
+      <span class="ficha-id">time_id: 621609</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo consolidado</span><span class="ficha-row-value negativo">R$ - 36.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Ganhos / Perdas</span><span class="ficha-row-value"><span class="positivo">+0.00</span> / <span class="negativo">-36.00</span></span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Ranking</span><span class="ficha-row-value negativo">-19.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Pontos Corridos</span><span class="ficha-row-value negativo">-7.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Mata-Mata</span><span class="ficha-row-value negativo">-10.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Top 10</span><span class="ficha-row-value zero">0.00</span></div>
+        
+        <div class="ficha-row"><span class="ficha-row-label">Transacoes / Ult. rodada</span><span class="ficha-row-value">5 / R5</span></div>
+      
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">Saldo 2024</span><span class="ficha-row-value positivo">R$ 0.54</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value positivo">R$ 111.54</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value positivo">R$ 111.54</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">credor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value negativo">R$ - 35.46</span>
+  </div>
+  <div class="saldo-formula">= extrato(-36.00) + campos(0.54) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Felipe Barbosa</span>
+      <span class="ficha-id">time_id: 8098497</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo consolidado</span><span class="ficha-row-value positivo">R$ 62.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Ganhos / Perdas</span><span class="ficha-row-value"><span class="positivo">+67.00</span> / <span class="negativo">-5.00</span></span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Ranking</span><span class="ficha-row-value positivo">37.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Pontos Corridos</span><span class="ficha-row-value negativo">-5.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Mata-Mata</span><span class="ficha-row-value positivo">30.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Top 10</span><span class="ficha-row-value zero">0.00</span></div>
+        
+        <div class="ficha-row"><span class="ficha-row-label">Transacoes / Ult. rodada</span><span class="ficha-row-value">5 / R5</span></div>
+      
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Pago</span><span class="ficha-row-value positivo">+190.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Recebido</span><span class="ficha-row-value negativo">-42.00</span></div>
+        <div class="acerto-item"><span class="acerto-tipo recebimento">recebimento</span> R$ 42.00 &mdash; Quitação automática (saldo < R$50) <span style="color:#555">(14/01/2026, quitacao)</span></div><div class="acerto-item"><span class="acerto-tipo observacao">observacao</span> R$ 0.00 &mdash; PENDÊNCIA: R$28 de diferença devido a bug de cache duplicado (pagou R$162, devia R$190) <span style="color:#555">(05/01/2026, pendente)</span></div><div class="acerto-item"><span class="acerto-tipo pagamento">pagamento</span> R$ 28.00 &mdash; Vale-prêmio de ajuste de cobrança incorreta <span style="color:#555">(05/01/2026, pix)</span></div><div class="acerto-item"><span class="acerto-tipo pagamento">pagamento</span> R$ 162.00 &mdash; Quitação dívida Cartola2025 <span style="color:#555">(04/01/2026, pix)</span></div>
+      
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value negativo">R$ 39.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value negativo">R$ - 39.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">devedor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value positivo">R$ 210.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(62.00) + campos(0.00) + acertos(148.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Felipe Jokstay</span>
+      <span class="ficha-id">time_id: 575856</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">Inscrição 2025</span><span class="ficha-row-value negativo">R$ - 140.00</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value negativo">R$ 372.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value negativo">R$ - 372.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">devedor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value negativo">R$ - 140.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(-140.00) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Felipe Santos</span>
+      <span class="ficha-id">time_id: 8188312</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Pago</span><span class="ficha-row-value positivo">+146.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Recebido</span><span class="ficha-row-value negativo">-5.00</span></div>
+        <div class="acerto-item"><span class="acerto-tipo recebimento">recebimento</span> R$ 5.00 &mdash; Quitação automática (saldo < R$50) <span style="color:#555">(14/01/2026, quitacao)</span></div><div class="acerto-item"><span class="acerto-tipo pagamento">pagamento</span> R$ 146.00 &mdash; Quitação de dívida <span style="color:#555">(21/12/2025, pix)</span></div>
+      
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value negativo">R$ 5.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value negativo">R$ - 5.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">devedor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value positivo">R$ 141.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(0.00) + acertos(141.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Flavio André</span>
+      <span class="ficha-id">time_id: 2718174</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value positivo">R$ 79.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value positivo">R$ 79.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">credor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value zero">R$ 0.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(0.00) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">fucim </span>
+      <span class="ficha-id">time_id: 45004009</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">Melhor do Mês - Edição 02</span><span class="ficha-row-value positivo">R$ 100.00</span></div><div class="ficha-row"><span class="ficha-row-label">LIGA PONTOS CORRIDOS</span><span class="ficha-row-value positivo">R$ 250.00</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Pago</span><span class="ficha-row-value positivo">+0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Recebido</span><span class="ficha-row-value negativo">-661.00</span></div>
+        <div class="acerto-item"><span class="acerto-tipo recebimento">recebimento</span> R$ 261.00 &mdash; Ajuste premiação 2025 <span style="color:#555">(13/01/2026, pix)</span></div><div class="acerto-item"><span class="acerto-tipo recebimento">recebimento</span> R$ 400.00 &mdash; Pagamento de crédito ao participante <span style="color:#555">(03/01/2026, pix)</span></div>
+      
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value negativo">R$ 14.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value negativo">R$ - 14.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">devedor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value negativo">R$ - 311.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(350.00) + acertos(-661.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Geones Vaz</span>
+      <span class="ficha-id">time_id: 1649056</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">quitado</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value zero">R$ 0.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(0.00) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">ID:1233737</span>
+      <span class="ficha-id">time_id: 1233737</span>
+    </div>
+    <span class="ficha-tag tag-fora">FORA DA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">Inscrição 2025</span><span class="ficha-row-value negativo">R$ - 142.00</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Pago</span><span class="ficha-row-value positivo">+229.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Recebido</span><span class="ficha-row-value negativo">-0.00</span></div>
+        <div class="acerto-item"><span class="acerto-tipo pagamento">pagamento</span> R$ 229.00 &mdash; Ajuste dívida Cartola 2025 <span style="color:#555">(24/01/2026, pix)</span></div>
+      
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">quitado</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value positivo">R$ 87.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(-142.00) + acertos(229.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">ID:164131</span>
+      <span class="ficha-id">time_id: 164131</span>
+    </div>
+    <span class="ficha-tag tag-fora">FORA DA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">Limbo (Ajuste Quitacao)</span><span class="ficha-row-value positivo">R$ 77.00</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Pago</span><span class="ficha-row-value positivo">+401.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Recebido</span><span class="ficha-row-value negativo">-0.00</span></div>
+        <div class="acerto-item"><span class="acerto-tipo pagamento">pagamento</span> R$ 401.00 &mdash; Quitação de dívida 2025 <span style="color:#555">(03/01/2026, pix)</span></div>
+      
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">quitado</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value positivo">R$ 478.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(77.00) + acertos(401.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">ID:22623329</span>
+      <span class="ficha-id">time_id: 22623329</span>
+    </div>
+    <span class="ficha-tag tag-fora">FORA DA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">3º colocado liga pontos corridos</span><span class="ficha-row-value positivo">R$ 50.00</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Pago</span><span class="ficha-row-value positivo">+0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Recebido</span><span class="ficha-row-value negativo">-221.00</span></div>
+        <div class="acerto-item"><span class="acerto-tipo recebimento">recebimento</span> R$ 71.00 &mdash; Ajuste do saldo 2025 <span style="color:#555">(14/01/2026, pix)</span></div><div class="acerto-item"><span class="acerto-tipo recebimento">recebimento</span> R$ 150.00 &mdash; Pagamento parcial de premiação Cartola 2025 <span style="color:#555">(03/01/2026, pix)</span></div>
+      
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value positivo">R$ 21.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">credor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value negativo">R$ - 171.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(50.00) + acertos(-221.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Jonney Vojvoda</span>
+      <span class="ficha-id">time_id: 715731</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">Saldo 2024 + Inscrição 2025</span><span class="ficha-row-value negativo">R$ - 142.46</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value negativo">R$ 240.46</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value negativo">R$ - 240.46</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">devedor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value negativo">R$ - 142.46</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(-142.46) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">juniel henrique</span>
+      <span class="ficha-id">time_id: 5902324</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value positivo">R$ 178.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value positivo">R$ 178.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">credor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value zero">R$ 0.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(0.00) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Leilson Bezerra</span>
+      <span class="ficha-id">time_id: 3300583</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">Saldo 2024</span><span class="ficha-row-value positivo">R$ 0.54</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Pago</span><span class="ficha-row-value positivo">+204.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Recebido</span><span class="ficha-row-value negativo">-0.00</span></div>
+        <div class="acerto-item"><span class="acerto-tipo pagamento">pagamento</span> R$ 204.00 &mdash; Pagamento total da dívida via PIX <span style="color:#555">(16/12/2025, pix)</span></div>
+      
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value positivo">R$ 1.08</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value positivo">R$ 1.08</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">credor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value positivo">R$ 204.54</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(0.54) + acertos(204.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Lucas Sousa</span>
+      <span class="ficha-id">time_id: 476869</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        
+        
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value zero">R$ 0.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(0.00) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Lúcio de Souza</span>
+      <span class="ficha-id">time_id: 19615809</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">quitado</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value zero">R$ 0.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(0.00) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Marconi Araújo</span>
+      <span class="ficha-id">time_id: 14003233</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        
+        
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value zero">R$ 0.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(0.00) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Mauricio Wendel</span>
+      <span class="ficha-id">time_id: 5254799</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">Saldo 2024</span><span class="ficha-row-value positivo">R$ 336.38</span></div><div class="ficha-row"><span class="ficha-row-label">2º colocado geral</span><span class="ficha-row-value positivo">R$ 700.00</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value positivo">R$ 1298.38</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value positivo">R$ 1298.38</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">credor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value positivo">R$ 1036.38</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(1036.38) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Mr. Carmilton</span>
+      <span class="ficha-id">time_id: 1173066</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">Saldo 2024 + Inscrição 2025</span><span class="ficha-row-value negativo">R$ - 167.82</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Pago</span><span class="ficha-row-value positivo">+12.82</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Recebido</span><span class="ficha-row-value negativo">-0.00</span></div>
+        <div class="acerto-item"><span class="acerto-tipo pagamento">pagamento</span> R$ 12.82 &mdash; Quitação automática (saldo < R$50) <span style="color:#555">(14/01/2026, quitacao)</span></div>
+      
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value positivo">R$ 59.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value positivo">R$ 59.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">credor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value negativo">R$ - 155.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(-167.82) + acertos(12.82) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Neto Waquim</span>
+      <span class="ficha-id">time_id: 8183683</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value positivo">R$ 110.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value positivo">R$ 110.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">credor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value zero">R$ 0.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(0.00) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Paulinett Miranda</span>
+      <span class="ficha-id">time_id: 13935277</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value negativo">R$ 141.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value negativo">R$ - 141.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">devedor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value zero">R$ 0.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(0.00) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Pedro Antônio</span>
+      <span class="ficha-id">time_id: 25324292</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">Saldo 2024</span><span class="ficha-row-value positivo">R$ 55.59</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Pago</span><span class="ficha-row-value positivo">+0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Recebido</span><span class="ficha-row-value negativo">-8.59</span></div>
+        <div class="acerto-item"><span class="acerto-tipo recebimento">recebimento</span> R$ 8.59 &mdash; Quitação automática (saldo < R$50) <span style="color:#555">(14/01/2026, quitacao)</span></div>
+      
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value negativo">R$ 47.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value negativo">R$ - 47.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">devedor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value positivo">R$ 47.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(55.59) + acertos(-8.59) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Rafael Janderson</span>
+      <span class="ficha-id">time_id: 14569704</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">Inscrição 2025</span><span class="ficha-row-value negativo">R$ - 140.00</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value negativo">R$ 254.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value negativo">R$ - 254.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">devedor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value negativo">R$ - 140.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(-140.00) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Raimundo Pinheiro </span>
+      <span class="ficha-id">time_id: 14916330</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">Saldo 2024 + Inscrição 2025</span><span class="ficha-row-value negativo">R$ - 465.46</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value negativo">R$ 425.46</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value negativo">R$ - 425.46</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">devedor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value negativo">R$ - 465.46</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(-465.46) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Randerson Rodrigues</span>
+      <span class="ficha-id">time_id: 1039496</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value negativo">R$ 135.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value negativo">R$ - 135.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">devedor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value zero">R$ 0.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(0.00) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Raylson Fernandes</span>
+      <span class="ficha-id">time_id: 20165417</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">Inscrição 2025</span><span class="ficha-row-value negativo">R$ - 70.00</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Pago</span><span class="ficha-row-value positivo">+200.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Recebido</span><span class="ficha-row-value negativo">-0.00</span></div>
+        <div class="acerto-item"><span class="acerto-tipo pagamento">pagamento</span> R$ 200.00 &mdash; Pagamento parcial de dívida 2025 <span style="color:#555">(03/01/2026, pix)</span></div>
+      
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value negativo">R$ 165.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value negativo">R$ - 165.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">devedor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value positivo">R$ 130.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(-70.00) + acertos(200.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">RODRIGO PAES LANDIM </span>
+      <span class="ficha-id">time_id: 1932235</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">Inscrição 2025</span><span class="ficha-row-value negativo">R$ - 140.00</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value negativo">R$ 99.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value negativo">R$ - 99.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">devedor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value negativo">R$ - 140.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(-140.00) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Rony Morais</span>
+      <span class="ficha-id">time_id: 4966295</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">Saldo 2024</span><span class="ficha-row-value positivo">R$ 51.54</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value positivo">R$ 171.54</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value positivo">R$ 171.54</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">credor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value positivo">R$ 51.54</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(51.54) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Sávio C Cavalcante </span>
+      <span class="ficha-id">time_id: 1459952</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">Inscrição 2025</span><span class="ficha-row-value negativo">R$ - 70.00</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Pago</span><span class="ficha-row-value positivo">+33.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Recebido</span><span class="ficha-row-value negativo">-0.00</span></div>
+        <div class="acerto-item"><span class="acerto-tipo pagamento">pagamento</span> R$ 33.00 &mdash; Quitação automática (saldo < R$50) <span style="color:#555">(14/01/2026, quitacao)</span></div>
+      
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value negativo">R$ 71.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value negativo">R$ - 71.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">devedor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value negativo">R$ - 37.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(-70.00) + acertos(33.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Sir Gegé   </span>
+      <span class="ficha-id">time_id: 1568358</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">Saldo 2024</span><span class="ficha-row-value positivo">R$ 405.07</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value positivo">R$ 548.07</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value positivo">R$ 548.07</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">credor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value positivo">R$ 405.07</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(405.07) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Vitim</span>
+      <span class="ficha-id">time_id: 3027272</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">Saldo 2024</span><span class="ficha-row-value positivo">R$ 223.67</span></div><div class="ficha-row"><span class="ficha-row-label">Melhor do Mês - Edição 01 e 05</span><span class="ficha-row-value positivo">R$ 200.00</span></div><div class="ficha-row"><span class="ficha-row-label">campeão super cartola</span><span class="ficha-row-value positivo">R$ 1000.00</span></div><div class="ficha-row"><span class="ficha-row-label">CAMPEÃO 1º TURNO</span><span class="ficha-row-value positivo">R$ 100.00</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value positivo">R$ 1848.67</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value positivo">R$ 1848.67</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">credor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value positivo">R$ 1523.67</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(1523.67) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Wesley Oliveira</span>
+      <span class="ficha-id">time_id: 7698677</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div class="ficha-row"><span class="ficha-row-label">Saldo 2024</span><span class="ficha-row-value positivo">R$ 336.54</span></div><div class="ficha-row"><span class="ficha-row-label">Campo 2</span><span class="ficha-row-value positivo">R$ 100.00</span></div><div class="ficha-row"><span class="ficha-row-label">3º colocado geral</span><span class="ficha-row-value positivo">R$ 400.00</span></div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value positivo">R$ 1084.54</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value positivo">R$ 1084.54</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">credor</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value positivo">R$ 836.54</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(836.54) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="ficha">
+  <div class="ficha-header">
+    <div>
+      <span class="ficha-nome">Yuri Jivago</span>
+      <span class="ficha-id">time_id: 752847</span>
+    </div>
+    <span class="ficha-tag tag-liga">NA LIGA</span>
+  </div>
+
+  <div class="ficha-body">
+    <!-- Coluna esquerda: dados 2025 -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Extrato Cache 2025</div>
+      <div style="color:#666;font-style:italic">Nao existe</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Campos Manuais 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+    </div>
+
+    <!-- Coluna direita: acertos + migracao -->
+    <div class="ficha-section">
+      <div class="ficha-section-title">Acertos 2025</div>
+      <div style="color:#666;font-style:italic">Nenhum</div>
+
+      <div class="ficha-section-title" style="margin-top:8px">Migracao 2026</div>
+      
+        <div class="ficha-row"><span class="ficha-row-label">Saldo transferido</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Divida anterior</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Saldo final registrado</span><span class="ficha-row-value zero">R$ 0.00</span></div>
+        <div class="ficha-row"><span class="ficha-row-label">Status</span><span class="ficha-row-value">quitado</span></div>
+      
+    </div>
+  </div>
+
+  <div class="saldo-box">
+    <span class="saldo-label">SALDO CALCULADO 2025</span>
+    <span class="saldo-value zero">R$ 0.00</span>
+  </div>
+  <div class="saldo-formula">= extrato(0.00) + campos(0.00) + acertos(0.00) + ajustes(0.00)</div>
+</div>
+
+<div class="footer">
+  Super Cartola Manager &mdash; Auditoria Financeira 2025 &mdash; 16/03/2026, 20:22:47 &mdash; 38 participantes
+</div>
+
+</body>
+</html>
