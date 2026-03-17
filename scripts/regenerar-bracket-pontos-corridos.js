@@ -290,6 +290,10 @@ async function regenerarLiga(db, liga, temporada, dryRun) {
     }
 
     const config = await buscarConfig(db, ligaId, temporada);
+    // liga.configuracoes é mais confiável que moduleconfigs (sem dependência de tipo de ID)
+    const rodadaInicialLiga = liga.configuracoes?.pontos_corridos?.rodadaInicial
+        || liga.configuracoes?.temporada_2026?.rodada_inicial;
+    if (rodadaInicialLiga) config.rodadaInicial = rodadaInicialLiga;
     const { rodadaInicial } = config;
 
     // Gerar bracket canônico com todos os participantes ativos
