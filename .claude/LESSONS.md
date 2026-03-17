@@ -44,6 +44,8 @@
 
 ---
 
+| 2026-03-17 | LOGICA | Participante (Bruno Barros) adicionado após bracket PC gerado. Caches com `cache_permanente:true` e 34 times nunca regenerados. Admin JS interpretava participante ausente como "time com BYE em toda rodada" → confrontos fictícios exibidos com scores reais mas pairings errados. | **Liga ímpar usa sistema de BYE:** um time folga por rodada, rotacionando. Time com BYE não conta `jogos`. `rodadaInicial` DEVE ser lido de `liga.configuracoes` (não raw moduleconfigs). Ao adicionar participante com PC ativo: verificar divergência n_participantes vs n_times_no_cache e forçar regeneração. | Sim — seção "Pontos Corridos" no CLAUDE.md |
+
 ### Categorias Validas
 - **DADOS** — Queries erradas, tipos de ID, collections incorretas
 - **FRONTEND** — CSS duplicado, emoji no codigo, cores hardcoded, SPA init

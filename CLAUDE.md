@@ -148,6 +148,13 @@ Commands: `/liste-pr-github` (filtro por período), `/security-review` (diff con
 Context7 (docs), Perplexity (pesquisa web), Mongo MCP (queries DB), Stitch MCP (design-to-code).
 Detalhes: [`docs/skills/03-utilities/project-reference.md`](docs/skills/03-utilities/project-reference.md)
 
+## Pontos Corridos (REGRA CRÍTICA)
+
+Liga com número **ímpar** de times usa sistema de BYE: um time folga por rodada, rotacionando deterministicamente. Time com BYE: `jogos` NÃO é incrementado, pontos/financeiro não alteram.
+`rodadaInicial` SEMPRE lido de `liga.configuracoes.pontos_corridos.rodadaInicial` (não de raw `db.collection('moduleconfigs')`).
+Participante adicionado após bracket gerado → caches com N-1 times, NUNCA regenerados automaticamente → bracket errado para todos. Detectar divergência e forçar regeneração.
+Detalhes: [`docs/references/pontos-corridos.md`](docs/references/pontos-corridos.md)
+
 ## Resta Um (REGRA CRÍTICA)
 
 Módulo de eliminação **rodada a rodada** — cada rodada é independente.
