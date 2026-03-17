@@ -19,9 +19,9 @@
  * NOTA: coletarDadosRodada é chamado por participante (com rate limit via fetchCartolaComRateLimit).
  * onMarketClose e onLiveUpdate rodam em background para não bloquear o orchestrator.
  */
+import mongoose from 'mongoose';
 import BaseManager from './BaseManager.js';
 import ArtilheiroCampeaoController from '../../../controllers/artilheiroCampeaoController.js';
-import GolsConsolidados from '../../../models/GolsConsolidados.js';
 import Liga from '../../../models/Liga.js';
 import { CURRENT_SEASON } from '../../../config/seasons.js';
 
@@ -133,6 +133,10 @@ export default class ArtilheiroManager extends BaseManager {
         console.log(`[ARTILHEIRO-MANAGER] onConsolidate: consolidando R${rodada} liga ${ligaId}`);
 
         try {
+            // GolsConsolidados é definido no controller — acessar via mongoose.models após import
+            const GolsConsolidados = mongoose.models.GolsConsolidados;
+            if (!GolsConsolidados) throw new Error('GolsConsolidados model não registrado');
+
             const resultado = await GolsConsolidados.updateMany(
                 { ligaId, rodada: parseInt(rodada, 10), temporada: CURRENT_SEASON, parcial: true },
                 { $set: { parcial: false } },
