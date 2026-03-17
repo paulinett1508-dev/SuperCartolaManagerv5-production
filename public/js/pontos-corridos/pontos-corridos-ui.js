@@ -1010,7 +1010,7 @@ export function limparCacheUI() {
 }
 
 console.log(
-  "[PONTOS-CORRIDOS-UI] Módulo v2.8 carregado (fallbacks robustos para undefined)",
+  "[PONTOS-CORRIDOS-UI] Módulo v3.0 carregado (BYE aviso + fallbacks robustos)",
 );
 
 // ========================================
