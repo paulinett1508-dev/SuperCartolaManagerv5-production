@@ -435,6 +435,32 @@ async function calcularTop10Historico(liga, timeId, temporada) {
 // ⚽ PONTOS CORRIDOS
 // ============================================================================
 
+/**
+ * Algoritmo round-robin canônico (rotação).
+ * IDÊNTICO ao gerarBracketFromIds de pontosCorridosCacheController.js e
+ * ao gerarBracket de scripts/regenerar-bracket-pontos-corridos.js.
+ * NÃO alterar sem alinhar todos os outros locais onde esta função existe.
+ * @param {string[]} ids - IDs ordenados (mesma ordem usada pelo admin)
+ * @returns {Array<Array<{a: string|null, b: string|null}>>} bracket por rodada
+ */
+function _gerarBracketPC(ids) {
+    const lista = [...ids];
+    if (lista.length % 2 !== 0) lista.push(null); // BYE para número ímpar
+    const total = lista.length - 1;
+    const rodadas = [];
+    for (let r = 0; r < total; r++) {
+        const jogos = [];
+        for (let i = 0; i < lista.length / 2; i++) {
+            const a = lista[i];
+            const b = lista[lista.length - 1 - i];
+            jogos.push({ a, b }); // null = BYE
+        }
+        rodadas.push(jogos);
+        lista.splice(1, 0, lista.pop()); // rotação: último → posição 1
+    }
+    return rodadas;
+}
+
 export async function calcularConfrontoPontosCorridos(
     liga,
     timeId,
@@ -456,17 +482,33 @@ export async function calcularConfrontoPontosCorridos(
         .slice()
         .sort((a, b) => a.nome_cartola.localeCompare(b.nome_cartola));
 
-    const totalTimes = participantesOrdenados.length;
-    const meuIndex = participantesOrdenados.findIndex(
-        (p) => String(p.time_id) === String(timeId),
+    const meuTimeId = String(timeId);
+    const meuParticipante = participantesOrdenados.find(
+        (p) => String(p.time_id) === meuTimeId,
     );
+    if (!meuParticipante) return null;
 
-    if (meuIndex === -1) return null;
+    // Usa o algoritmo canônico de rotação — idêntico ao admin e ao cache controller.
+    // NÃO usar fórmula de offset: (meuIndex + rodadaLiga) % totalTimes produz
+    // confrontos errados e pode gerar empates fictícios.
+    const ids = participantesOrdenados.map((p) => String(p.time_id));
+    const bracket = _gerarBracketPC(ids);
+    const rodadaIndex = rodadaLiga - 1; // rodadaLiga é 1-indexed
+    if (rodadaIndex >= bracket.length) return null;
 
-    const oponenteIndex = (meuIndex + rodadaLiga) % totalTimes;
-    if (oponenteIndex === meuIndex) return null;
+    const confronto = bracket[rodadaIndex].find(
+        (j) => j.a === meuTimeId || j.b === meuTimeId,
+    );
+    if (!confronto) return null;
 
-    const oponente = participantesOrdenados[oponenteIndex];
+    const oponenteId = confronto.a === meuTimeId ? confronto.b : confronto.a;
+    if (oponenteId === null) return null; // BYE — time folga nesta rodada
+
+    const oponente = participantesOrdenados.find(
+        (p) => String(p.time_id) === oponenteId,
+    );
+    if (!oponente) return null;
+
     const pontuacaoOponenteObj = todasPontuacoes.find(
         (p) => String(p.timeId) === String(oponente.time_id),
     );

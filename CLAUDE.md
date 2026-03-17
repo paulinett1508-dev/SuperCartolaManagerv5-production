@@ -179,6 +179,7 @@ Detalhes: [`docs/references/resta-um.md`](docs/references/resta-um.md)
 5. EVERY MongoDB query MUST include `liga_id` filter (multi-tenant)
 6. EVERY read query SHOULD use `.lean()` unless document methods are needed
 7. After ANY user correction → update `.claude/LESSONS.md` with the lesson learned
+8. **PC módulo — algoritmo canônico é `gerarBracket` (rotação), NUNCA fórmula de offset.** O algoritmo existe em 4 locais que DEVEM permanecer sincronizados: `pontosCorridosCacheController.js` (gerarBracketFromIds), `fluxoFinanceiroController.js` (_gerarBracketPC), `scripts/regenerar-bracket-pontos-corridos.js` (gerarBracket), `public/js/pontos-corridos/pontos-corridos-orquestrador.js` (gerarBracketDeIDs). Usar fórmula de offset `(meuIndex + rodadaLiga) % totalTimes` produz confrontos errados e pode causar empates fictícios (+3) em ligas sem empate.
 
 ## Auto-Aprendizado
 
