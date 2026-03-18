@@ -152,10 +152,15 @@
 .tj-badge-concluida { background: var(--color-success-muted); color: var(--color-success-text); }
 .tj-badge-futura { background: var(--surface-overlay-subtle); color: var(--app-text-muted); }
 .tj-badge-pendente { background: var(--color-warning-muted); color: var(--color-warning); }
+.tj-badge-pendente-count { background: var(--color-warning-muted); color: var(--color-warning); opacity: 0.8; }
 
 /* Rodada atual destaque */
 .tj-rodada-atual .tj-rodada-header { background: var(--color-danger-muted); }
 .tj-rodada-atual .tj-rodada-num { color: var(--color-danger); }
+
+/* Rodada pendente (adiados, passada mas incompleta) */
+.tj-rodada-pendente .tj-rodada-header { background: var(--color-warning-muted); }
+.tj-rodada-pendente .tj-rodada-num { color: var(--color-warning); }
 
 /* === Jogos dentro da rodada === */
 .tj-jogos { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }

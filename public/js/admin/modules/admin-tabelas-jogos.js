@@ -61,19 +61,22 @@
             const isPassada = r < rodadaAtual;
             const expanded = isAtual;
 
-            const statusClass = isAtual ? 'tj-rodada-atual' : isPassada ? 'tj-rodada-passada' : 'tj-rodada-futura';
+            // Detectar rodadas com jogos adiados (passadas mas com pendências)
+            const temAdiados = (rodada.partidas || []).some(p => p.status === 'adiado');
+
+            const statusClass = isAtual ? 'tj-rodada-atual' : isPassada ? (temAdiados ? 'tj-rodada-pendente' : 'tj-rodada-passada') : 'tj-rodada-futura';
             const expandedClass = expanded ? 'tj-expanded' : '';
 
             let badge = '';
             if (isAtual) {
                 badge = '<span class="tj-badge tj-badge-atual">EM ANDAMENTO</span>';
             } else if (isPassada) {
-                const enc = rodada.jogos_encerrados || 0;
-                const total = rodada.total_jogos || 10;
-                const pendentes = total - enc;
-                badge = '<span class="tj-badge tj-badge-concluida">ENCERRADA</span>';
-                if (pendentes > 0) {
-                    badge += ' <span class="tj-badge tj-badge-pendente">' + pendentes + ' jogo' + (pendentes > 1 ? 's' : '') + ' pendente' + (pendentes > 1 ? 's' : '') + '</span>';
+                if (temAdiados) {
+                    const nAdiados = (rodada.partidas || []).filter(p => p.status === 'adiado').length;
+                    badge = '<span class="tj-badge tj-badge-pendente">PENDENTE</span>';
+                    badge += ' <span class="tj-badge tj-badge-pendente-count">' + nAdiados + ' jogo' + (nAdiados > 1 ? 's' : '') + ' adiado' + (nAdiados > 1 ? 's' : '') + '</span>';
+                } else {
+                    badge = '<span class="tj-badge tj-badge-concluida">ENCERRADA</span>';
                 }
             } else {
                 badge = '<span class="tj-badge tj-badge-futura">A JOGAR</span>';

@@ -470,7 +470,9 @@ async function obterTodasRodadas(temporada) {
     const rodadas = calendario.agruparPorRodada();
 
     // Recalcular rodada_atual dinamicamente (stats do MongoDB podem estar stale)
+    // NOTA: ...calendario.stats não funciona em subdocumento Mongoose — extrair explicitamente
     const rodadaAtualDinamica = calendario.obterRodadaAtual();
+    const s = calendario.stats;
 
     return {
         success: true,
@@ -478,8 +480,11 @@ async function obterTodasRodadas(temporada) {
         total_rodadas: Object.keys(rodadas).length,
         rodadas,
         stats: {
-            ...calendario.stats,
-            rodada_atual: rodadaAtualDinamica,
+            total_jogos:           s.total_jogos,
+            jogos_realizados:      s.jogos_realizados,
+            jogos_restantes:       s.jogos_restantes,
+            ultima_rodada_completa: s.ultima_rodada_completa,
+            rodada_atual:          rodadaAtualDinamica, // sempre recalculado
         },
         ultima_atualizacao: calendario.ultima_atualizacao,
     };
