@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="css/modules/dashboard-redesign.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Russo+One&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-    <link rel="stylesheet" href="css/modules/admin-escalacao-ia.css" />
+    <link rel="stylesheet" href="css/modules/admin-escalacao-ia.css?v=2" />
 </head>
 <body>
     <div id="sidebar-placeholder"></div>
@@ -54,23 +54,23 @@
                 <!-- Estado: desconectado -->
                 <div id="eia-gm-form">
                     <div class="eia-gatomestre-form">
-                        <p class="eia-gatomestre-hint">Cole o token GLBID do seu browser após fazer login no Cartola FC.</p>
+                        <p class="eia-gatomestre-hint">Adicione o favorito abaixo uma vez — depois é só 1 clique para copiar o GLBID.</p>
                         <div class="eia-gm-steps">
                             <div class="eia-gm-step">
                                 <span class="eia-gm-step-num">1</span>
-                                <span>Abra <a href="https://cartola.globo.com" target="_blank">cartola.globo.com</a> e faça login normalmente</span>
+                                <span>Arraste o botão abaixo para sua <strong>barra de favoritos</strong></span>
+                            </div>
+                            <div class="eia-gm-bookmarklet-row">
+                                <a class="eia-gm-bookmarklet" href="javascript:(function(){var g=document.cookie.split(';').find(function(c){return c.trim().startsWith('GLBID=');});if(g){var v=g.split('=').slice(1).join('=').trim();navigator.clipboard.writeText(v).then(function(){alert('\u2705 GLBID copiado! Cole no Super Cartola Manager.');}).catch(function(){prompt('Copie o GLBID:',v);});}else{alert('GLBID n\u00e3o encontrado. Fa\u00e7a login no Cartola FC primeiro.');}})()">⚡ Copiar GLBID</a>
+                                <span class="eia-gm-bookmarklet-hint">← arraste para favoritos</span>
                             </div>
                             <div class="eia-gm-step">
                                 <span class="eia-gm-step-num">2</span>
-                                <span>Pressione <strong>F12</strong> → aba <strong>Application</strong> → <strong>Cookies</strong> → <code>cartola.globo.com</code></span>
+                                <span>Faça login em <a href="https://cartola.globo.com" target="_blank">cartola.globo.com</a> e clique no favorito</span>
                             </div>
                             <div class="eia-gm-step">
                                 <span class="eia-gm-step-num">3</span>
-                                <span>Localize o cookie <code>GLBID</code> e copie seu valor</span>
-                            </div>
-                            <div class="eia-gm-step">
-                                <span class="eia-gm-step-num">4</span>
-                                <span>Cole abaixo e clique <strong>Conectar</strong></span>
+                                <span>Cole o valor copiado abaixo e clique <strong>Conectar</strong></span>
                             </div>
                         </div>
                         <div class="eia-gatomestre-form-row">

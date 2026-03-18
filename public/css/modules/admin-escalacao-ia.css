@@ -1200,3 +1200,35 @@
     font-size: 10px;
     color: rgba(255,255,255,0.75);
 }
+/* Bookmarklet drag button */
+.eia-gm-bookmarklet {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    background: var(--color-primary, #f97316);
+    color: #fff !important;
+    border-radius: var(--radius-md, 6px);
+    font-family: var(--font-family-base, 'Inter', sans-serif);
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none !important;
+    cursor: grab;
+    user-select: none;
+    border: 1px solid rgba(255,255,255,0.15);
+    transition: filter var(--transition-fast, 0.15s ease);
+    white-space: nowrap;
+}
+.eia-gm-bookmarklet:hover { filter: brightness(1.15); }
+.eia-gm-bookmarklet:active { cursor: grabbing; }
+.eia-gm-bookmarklet-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0 2px;
+}
+.eia-gm-bookmarklet-hint {
+    font-size: 10px;
+    color: var(--text-muted, rgba(255,255,255,0.4));
+    font-style: italic;
+}
