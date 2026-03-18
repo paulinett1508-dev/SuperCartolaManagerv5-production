@@ -371,6 +371,43 @@
                 document.head.appendChild(mobileCSS);
             }
 
+            // === INJETAR BOTÃO MOBILE TOGGLE (se ainda não existe) ===
+            // Páginas com loadLayout() próprio só extraem .app-sidebar,
+            // deixando o botão hamburger e overlay de fora. Criamos via JS.
+            if (!document.getElementById('mobileSidebarToggle')) {
+                var mobileBtn = document.createElement('button');
+                mobileBtn.className = 'mobile-sidebar-toggle';
+                mobileBtn.id = 'mobileSidebarToggle';
+                mobileBtn.setAttribute('onclick', 'toggleMobileSidebar()');
+                mobileBtn.setAttribute('aria-label', 'Menu');
+                mobileBtn.innerHTML = '<span class="material-icons">menu</span>';
+                document.body.insertBefore(mobileBtn, document.body.firstChild);
+            }
+
+            // === INJETAR OVERLAY SIDEBAR (se ainda não existe) ===
+            if (!document.getElementById('sidebarOverlay')) {
+                var overlayEl = document.createElement('div');
+                overlayEl.className = 'sidebar-overlay';
+                overlayEl.id = 'sidebarOverlay';
+                var sidebarEl = document.getElementById('appSidebar');
+                if (sidebarEl && sidebarEl.parentNode) {
+                    sidebarEl.parentNode.insertBefore(overlayEl, sidebarEl);
+                } else {
+                    document.body.insertBefore(overlayEl, document.body.firstChild);
+                }
+            }
+
+            // === INJETAR DESKTOP TOGGLE (se ainda não existe) ===
+            if (!document.getElementById('sidebarToggleBtn')) {
+                var desktopBtn = document.createElement('button');
+                desktopBtn.className = 'sidebar-toggle-btn';
+                desktopBtn.id = 'sidebarToggleBtn';
+                desktopBtn.setAttribute('onclick', 'toggleSidebar()');
+                desktopBtn.setAttribute('title', 'Recolher/Expandir menu');
+                desktopBtn.innerHTML = '<span class="material-icons">chevron_left</span>';
+                document.body.insertBefore(desktopBtn, document.body.firstChild);
+            }
+
             // === MOBILE SIDEBAR TOGGLE (Centralizado) ===
             if (typeof window.toggleMobileSidebar === 'undefined') {
                 window.toggleMobileSidebar = function() {
