@@ -155,7 +155,7 @@
       },
       {
         "path": "public/css/modules/ferramentas-page.css",
-        "loadedBy": ["ferramentas.html", "ferramentas-rodadas.html"],
+        "loadedBy": ["ferramentas-rodadas.html"],
         "description": "Pagina de ferramentas v2 standalone"
       },
       {
