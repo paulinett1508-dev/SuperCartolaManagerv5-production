@@ -20,6 +20,7 @@ const router = Router();
 // MIDDLEWARE: Verificar admin autenticado
 // =====================================================================
 function requireAdmin(req, res, next) {
+    console.log(`[EIA-AUTH] ${req.method} ${req.path} | sessionID: ${req.sessionID} | admin: ${JSON.stringify(req.session?.admin ? { email: req.session.admin.email, provider: req.session.admin.provider } : null)}`);
     if (!req.session?.admin) {
         return res.status(401).json({
             success: false,
