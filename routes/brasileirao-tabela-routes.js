@@ -6,6 +6,7 @@
 
 import express from 'express';
 import brasileiraoService from '../services/brasileirao-tabela-service.js';
+import syncBrasileirao from '../jobs/sync-brasileirao.js';
 
 const router = express.Router();
 
@@ -181,10 +182,9 @@ router.get('/ao-vivo/:temporada', async (req, res) => {
  */
 router.post('/sync/:temporada', async (req, res) => {
     try {
-        // TODO: Verificar autenticação admin
-        // if (!req.session?.usuario?.isAdmin) {
-        //     return res.status(403).json({ success: false, erro: 'Acesso negado' });
-        // }
+        if (!req.session?.admin) {
+            return res.status(403).json({ success: false, erro: 'Acesso negado. Faça login como administrador.' });
+        }
 
         const temporada = parseInt(req.params.temporada, 10);
 
@@ -217,9 +217,11 @@ router.post('/sync/:temporada', async (req, res) => {
 router.get('/status', async (req, res) => {
     try {
         const status = brasileiraoService.obterStatus();
+        const jobStatus = syncBrasileirao.getStatus();
         res.json({
             success: true,
             ...status,
+            job: jobStatus,
         });
 
     } catch (error) {

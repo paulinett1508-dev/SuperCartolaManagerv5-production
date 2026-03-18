@@ -177,9 +177,109 @@
         return data;
     }
 
+    async function carregarStatusSync() {
+        try {
+            const res = await fetch('/api/brasileirao/status');
+            if (!res.ok) return;
+            const data = await res.json();
+
+            const infoEl = document.getElementById('tjSyncInfo');
+            const textEl = document.getElementById('tjSyncInfoText');
+            if (!infoEl || !textEl) return;
+
+            const job = data.job || {};
+            const service = data.stats || {};
+
+            const partes = [];
+
+            if (job.ultimoSync) {
+                partes.push('Sync completo: ' + formatarDataHora(job.ultimoSync));
+            }
+            if (job.ultimoMiniSync) {
+                partes.push('Mini-sync: ' + formatarDataHora(job.ultimoMiniSync));
+            }
+            if (job.horaSyncProgramado) {
+                partes.push('Próximo: ' + job.horaSyncProgramado);
+            }
+            if (data.fonteAtual) {
+                partes.push('Fonte: ' + data.fonteAtual);
+            }
+
+            if (partes.length > 0) {
+                textEl.textContent = partes.join(' · ');
+                infoEl.style.display = 'flex';
+            }
+        } catch (e) {
+            // silencioso
+        }
+    }
+
+    async function sincronizar() {
+        const btn = document.getElementById('tjBtnSync');
+        if (!btn) return;
+
+        const iconEl = btn.querySelector('.material-icons');
+        btn.disabled = true;
+        if (iconEl) iconEl.style.animation = 'spin 1s linear infinite';
+        btn.style.opacity = '0.7';
+
+        try {
+            const res = await fetch(`/api/brasileirao/sync/${TEMPORADA}`, { method: 'POST' });
+            const data = await res.json();
+
+            if (data.success) {
+                btn.style.background = 'var(--color-success, #22c55e)';
+                if (iconEl) iconEl.textContent = 'check';
+                setTimeout(() => {
+                    btn.style.background = '';
+                    if (iconEl) iconEl.textContent = 'sync';
+                }, 2000);
+                // Recarregar dados e status
+                await Promise.all([carregarDados(), carregarStatusSync()]);
+            } else {
+                btn.style.background = 'var(--color-danger, #ef4444)';
+                if (iconEl) iconEl.textContent = 'error';
+                console.error('[TABELAS-JOGOS] Sync falhou:', data.erro);
+                setTimeout(() => {
+                    btn.style.background = '';
+                    if (iconEl) iconEl.textContent = 'sync';
+                }, 3000);
+            }
+        } catch (err) {
+            console.error('[TABELAS-JOGOS] Erro no sync:', err);
+            btn.style.background = 'var(--color-danger, #ef4444)';
+            if (iconEl) iconEl.textContent = 'error';
+            setTimeout(() => {
+                btn.style.background = '';
+                if (iconEl) iconEl.textContent = 'sync';
+            }, 3000);
+        } finally {
+            btn.disabled = false;
+            if (iconEl) iconEl.style.animation = '';
+            btn.style.opacity = '';
+        }
+    }
+
+    function formatarDataHora(isoStr) {
+        if (!isoStr) return '';
+        try {
+            return new Date(isoStr).toLocaleString('pt-BR', {
+                timeZone: 'America/Sao_Paulo',
+                day: '2-digit', month: '2-digit',
+                hour: '2-digit', minute: '2-digit'
+            });
+        } catch {
+            return isoStr;
+        }
+    }
+
+    // Expor para o botão inline do HTML
+    window.tjSincronizar = sincronizar;
+
     function init() {
         console.log('[TABELAS-JOGOS] Inicializando...');
         carregarDados();
+        carregarStatusSync();
     }
 
     if (document.readyState === 'loading') {
