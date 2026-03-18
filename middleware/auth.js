@@ -66,7 +66,6 @@ export const PAGINAS_ADMIN = [
   "/dashboard-analytics.html",
   "/admin-analises-ia.html",
   "/modo-manutencao-avancado.html",
-  "/wizard-primeira-liga.html",
 ];
 
 /**
