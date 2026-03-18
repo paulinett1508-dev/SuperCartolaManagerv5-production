@@ -207,7 +207,7 @@
 
             if (partes.length > 0) {
                 textEl.textContent = partes.join(' · ');
-                infoEl.style.display = 'flex';
+                infoEl.classList.add('visible');
             }
         } catch (e) {
             // silencioso

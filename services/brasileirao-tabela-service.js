@@ -469,12 +469,18 @@ async function obterTodasRodadas(temporada) {
 
     const rodadas = calendario.agruparPorRodada();
 
+    // Recalcular rodada_atual dinamicamente (stats do MongoDB podem estar stale)
+    const rodadaAtualDinamica = calendario.obterRodadaAtual();
+
     return {
         success: true,
         temporada,
         total_rodadas: Object.keys(rodadas).length,
         rodadas,
-        stats: calendario.stats,
+        stats: {
+            ...calendario.stats,
+            rodada_atual: rodadaAtualDinamica,
+        },
         ultima_atualizacao: calendario.ultima_atualizacao,
     };
 }

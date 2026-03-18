@@ -1,50 +1,82 @@
-/* ADMIN TABELAS DE JOGOS CSS - Modulo Especifico (Web/Desktop)
-   Arquivo: public/css/modules/tabelas-jogos.css
-   Baseado em admin-capitao.css (prefixo tj-)
-*/
+/**
+ * ADMIN TABELAS DE JOGOS CSS - Módulo Específico
+ * Arquivo: public/css/modules/tabelas-jogos.css
+ * Dependência: _admin-tokens.css
+ * Padrão: admin-capitao.css / admin-artilheiro.css (prefixo tj-)
+ */
 
 /* === Layout === */
 .tj-admin-container { max-width: 900px; margin: 0 auto; padding: var(--app-space-4); }
+
 .tj-admin-header {
     display: flex; align-items: center; justify-content: space-between;
     gap: var(--app-space-3); margin-bottom: var(--app-space-6);
-    background: var(--app-surface); border: 1px solid var(--app-border);
+    background: var(--app-surface); border: 1px solid var(--color-primary-border);
     border-radius: var(--app-radius-lg); padding: var(--app-space-4) var(--app-space-6);
     position: relative; overflow: hidden;
 }
 .tj-admin-header::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-    background: linear-gradient(90deg, var(--laranja), var(--laranja-hover));
+    background: var(--gradient-primary);
 }
-.tj-admin-header h1 { font-family: var(--app-font-brand); font-size: 1.5rem; color: white; margin: 0; display: flex; align-items: center; gap: var(--app-space-2); }
-.tj-admin-header p { font-size: var(--app-font-sm); color: var(--app-text-muted); margin: 0.25rem 0 0; }
+/* Blob glow decoration */
+.tj-admin-header::after {
+    content: ''; position: absolute; width: 300px; height: 300px;
+    border-radius: 50%; background: var(--color-primary);
+    filter: blur(60px); opacity: 0.12; top: -80px; right: -80px;
+    pointer-events: none; z-index: 0;
+}
+.tj-admin-header h1 {
+    font-family: var(--app-font-brand); font-size: 1.5rem; color: white;
+    margin: 0; display: flex; align-items: center; gap: var(--app-space-2);
+    position: relative; z-index: 1;
+}
+.tj-admin-header p {
+    font-size: var(--app-font-sm); color: var(--app-text-muted);
+    margin: 0.25rem 0 0; position: relative; z-index: 1;
+}
+.tj-header-actions {
+    display: flex; gap: var(--app-space-2); align-items: center;
+    position: relative; z-index: 1;
+}
 
-/* === Botao Sincronizar === */
+/* === Botão Sincronizar === */
 .tj-btn-sync {
     display: inline-flex; align-items: center; gap: 4px;
     padding: var(--app-space-2) var(--app-space-3);
-    background: var(--laranja); color: white;
+    background: var(--color-primary); color: white;
     border: none; border-radius: var(--app-radius-sm);
     font-size: var(--app-font-xs); font-weight: 600; cursor: pointer;
-    transition: 0.15s ease; white-space: nowrap;
+    transition: var(--transition-fast); white-space: nowrap;
 }
-.tj-btn-sync:hover:not(:disabled) { background: var(--laranja-hover, #e04a00); }
-.tj-btn-sync:disabled { cursor: not-allowed; }
+.tj-btn-sync:hover:not(:disabled) { background: var(--color-primary-dark); }
+.tj-btn-sync:disabled { cursor: not-allowed; opacity: 0.7; }
 .tj-btn-sync .material-icons { font-size: 16px; }
 
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-/* === Botao Voltar === */
+/* === Botão Voltar === */
 .tj-btn-voltar {
     display: inline-flex; align-items: center; gap: 4px;
     padding: var(--app-space-2) var(--app-space-3);
     background: transparent; color: var(--app-text-muted);
     border: 1px solid var(--app-border); border-radius: var(--app-radius-sm);
     font-size: var(--app-font-xs); font-weight: 500; text-decoration: none;
-    transition: 0.15s ease; white-space: nowrap;
+    transition: var(--transition-fast); white-space: nowrap;
 }
-.tj-btn-voltar:hover { color: var(--laranja); border-color: var(--laranja); }
+.tj-btn-voltar:hover { color: var(--color-primary); border-color: var(--color-primary-border); }
 .tj-btn-voltar .material-icons { font-size: 16px; }
+
+/* === Sync Info Bar === */
+.tj-sync-info {
+    display: none;
+    align-items: center; gap: var(--app-space-2);
+    margin-bottom: var(--app-space-3);
+    padding: var(--app-space-2) var(--app-space-3);
+    background: var(--app-surface); border: 1px solid var(--app-border);
+    border-radius: var(--app-radius-md);
+    font-size: var(--app-font-xs); color: var(--app-text-muted);
+}
+.tj-sync-info.visible { display: flex; }
+.tj-sync-info .material-icons { font-size: 1rem; }
 
 /* === Stats Grid === */
 .tj-stats-grid {
@@ -87,18 +119,16 @@
 .tj-card-body { padding: 0; }
 
 /* === Rodadas Accordion === */
-.tj-rodada {
-    border-bottom: 1px solid var(--app-border);
-}
+.tj-rodada { border-bottom: 1px solid var(--app-border); }
 .tj-rodada:last-child { border-bottom: none; }
 
 .tj-rodada-header {
     display: flex; align-items: center; gap: var(--app-space-3);
     padding: var(--app-space-3) var(--app-space-4);
-    cursor: pointer; transition: background 0.15s ease;
+    cursor: pointer; transition: var(--transition-fast);
     user-select: none;
 }
-.tj-rodada-header:hover { background: rgba(255,255,255,0.02); }
+.tj-rodada-header:hover { background: var(--color-primary-hover-bg); }
 
 .tj-rodada-num {
     font-family: var(--app-font-mono); font-size: var(--app-font-sm);
@@ -118,44 +148,22 @@
     font-family: var(--app-font-mono); font-size: 0.65rem; font-weight: 700;
     padding: 2px 8px; border-radius: 10px; letter-spacing: 0.03em;
 }
-.tj-badge-atual {
-    background: var(--color-danger-muted, rgba(239,68,68,0.15));
-    color: var(--color-danger, #ef4444);
-}
-.tj-badge-concluida {
-    background: var(--color-success-muted);
-    color: var(--color-success-text);
-}
-.tj-badge-futura {
-    background: rgba(255,255,255,0.05);
-    color: var(--app-text-muted);
-}
-.tj-badge-pendente {
-    background: var(--color-warning-muted, rgba(245,158,11,0.15));
-    color: var(--color-warning, #f59e0b);
-}
+.tj-badge-atual { background: var(--color-danger-muted); color: var(--color-danger); }
+.tj-badge-concluida { background: var(--color-success-muted); color: var(--color-success-text); }
+.tj-badge-futura { background: var(--surface-overlay-subtle); color: var(--app-text-muted); }
+.tj-badge-pendente { background: var(--color-warning-muted); color: var(--color-warning); }
 
 /* Rodada atual destaque */
-.tj-rodada-atual .tj-rodada-header {
-    background: rgba(239,68,68,0.03);
-}
-.tj-rodada-atual .tj-rodada-num {
-    color: var(--color-danger, #ef4444);
-}
+.tj-rodada-atual .tj-rodada-header { background: var(--color-danger-muted); }
+.tj-rodada-atual .tj-rodada-num { color: var(--color-danger); }
 
 /* === Jogos dentro da rodada === */
-.tj-jogos {
-    max-height: 0; overflow: hidden;
-    transition: max-height 0.3s ease;
-}
-.tj-rodada.tj-expanded .tj-jogos {
-    max-height: 2000px;
-}
+.tj-jogos { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+.tj-rodada.tj-expanded .tj-jogos { max-height: 2000px; }
 
 .tj-jogos-grid {
     display: grid; grid-template-columns: 1fr 1fr;
     gap: 1px; padding: 0 var(--app-space-4) var(--app-space-3);
-    background: transparent;
 }
 
 .tj-jogo {
@@ -173,11 +181,11 @@
 }
 .tj-jogo-placar { color: white; font-size: var(--app-font-sm); }
 .tj-jogo-horario { color: var(--app-text-muted); font-size: 0.7rem; }
-.tj-jogo-adiado { color: var(--color-warning, #f59e0b); font-size: 0.65rem; font-weight: 600; }
+.tj-jogo-adiado { color: var(--color-warning); font-size: 0.65rem; font-weight: 600; }
 
 /* Status do jogo */
-.tj-jogo-live { border-left: 2px solid var(--color-danger, #ef4444); }
-.tj-jogo-live .tj-jogo-placar { color: var(--color-danger, #ef4444); }
+.tj-jogo-live { border-left: 2px solid var(--color-danger); }
+.tj-jogo-live .tj-jogo-placar { color: var(--color-danger); }
 .tj-jogo-encerrado .tj-jogo-placar { color: var(--color-success-text); }
 
 .tj-jogo-meta {
@@ -194,9 +202,8 @@
 }
 .tj-loading .material-icons {
     font-size: 32px; display: block; margin: 0 auto var(--app-space-2);
-    animation: tj-spin 1s linear infinite;
+    animation: spin 1s linear infinite;
 }
-@keyframes tj-spin { to { transform: rotate(360deg); } }
 
 /* === Empty State === */
 .tj-empty {
@@ -207,4 +214,6 @@
 @media (max-width: 768px) {
     .tj-stats-grid { grid-template-columns: repeat(2, 1fr); }
     .tj-jogos-grid { grid-template-columns: 1fr; }
+    .tj-admin-header { flex-wrap: wrap; }
+    .tj-header-actions { width: 100%; justify-content: flex-end; }
 }

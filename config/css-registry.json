@@ -241,6 +241,12 @@
         "loadedBy": ["modo-manutencao-avancado.html"],
         "description": "Pagina de Modo Manutencao Avancado — namespace .mav-*. Layout, header, cards, formulario, botoes e status badge. Sem Tailwind.",
         "namespace": ".mav-"
+      },
+      {
+        "path": "public/css/modules/tabelas-jogos.css",
+        "loadedBy": ["tabelas-jogos.html"],
+        "description": "Calendário completo do Brasileirão — namespace .tj-*. Header com blob glow, stats grid, accordion de rodadas, cards de jogos, sync info bar. Padrão admin-capitao.",
+        "namespace": ".tj-"
       }
     ]
   },
