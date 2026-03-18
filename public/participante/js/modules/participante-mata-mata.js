@@ -1342,22 +1342,27 @@ function renderMeuConfrontoCard(confronto, meuTimeId, aoVivo = false) {
   const eu = souTimeA ? confronto.timeA : confronto.timeB;
   const adv = souTimeA ? confronto.timeB : confronto.timeA;
 
-  const meusPts = parseFloat(eu?.pontos) || 0;
-  const advPts = parseFloat(adv?.pontos) || 0;
+  const meusPts = (eu?.pontos != null) ? parseFloat(eu.pontos) : null;
+  const advPts = (adv?.pontos != null) ? parseFloat(adv.pontos) : null;
+  const pontosDisponiveis = meusPts != null && advPts != null;
 
-  const ganhando = meusPts > advPts;
-  const perdendo = meusPts < advPts;
+  const ganhando = pontosDisponiveis && meusPts > advPts;
+  const perdendo = pontosDisponiveis && meusPts < advPts;
 
-  const statusClass = ganhando
-    ? "passando"
-    : perdendo
-      ? "sendo-eliminado"
-      : "empatando";
-  const statusText = ganhando
-    ? "Você está passando!"
-    : perdendo
-      ? (aoVivo ? "Você está sendo eliminado" : "Você foi eliminado")
-      : "Empate técnico";
+  const statusClass = !pontosDisponiveis
+    ? "empatando"
+    : ganhando
+      ? "passando"
+      : perdendo
+        ? "sendo-eliminado"
+        : "empatando";
+  const statusText = !pontosDisponiveis
+    ? "Aguardando pontos da rodada"
+    : ganhando
+      ? "Você está passando!"
+      : perdendo
+        ? (aoVivo ? "Você está sendo eliminado" : "Você foi eliminado")
+        : "Empate técnico";
   const statusIcon = ganhando
     ? "check_circle"
     : perdendo
@@ -1380,7 +1385,7 @@ function renderMeuConfrontoCard(confronto, meuTimeId, aoVivo = false) {
             <span class="mm-mc-nome-cartoleiro">${escapeHtml(truncate(eu?.nome_cartola || eu?.nome_cartoleiro || "", 14))}</span>
             <span class="mm-mc-nome">${escapeHtml(truncate(eu?.nome_time || "Meu Time", 16))}</span>
           </div>
-          <span class="mm-mc-pts ${ganhando ? "vencedor" : perdendo ? "perdedor" : "empate"}">${typeof truncarPontos === 'function' ? truncarPontos(meusPts) : meusPts.toFixed(2)}</span>
+          <span class="mm-mc-pts ${ganhando ? "vencedor" : perdendo ? "perdedor" : "empate"}">${meusPts != null ? (typeof truncarPontos === 'function' ? truncarPontos(meusPts) : meusPts.toFixed(2)) : '\u2014'}</span>
         </div>
 
         <div class="mm-mc-x">VS</div>
@@ -1393,7 +1398,7 @@ function renderMeuConfrontoCard(confronto, meuTimeId, aoVivo = false) {
             <span class="mm-mc-nome-cartoleiro">${escapeHtml(truncate(adv?.nome_cartola || adv?.nome_cartoleiro || "", 14))}</span>
             <span class="mm-mc-nome">${escapeHtml(truncate(adv?.nome_time || "Adversário", 16))}</span>
           </div>
-          <span class="mm-mc-pts ${perdendo ? "vencedor" : ganhando ? "perdedor" : "empate"}">${typeof truncarPontos === 'function' ? truncarPontos(advPts) : advPts.toFixed(2)}</span>
+          <span class="mm-mc-pts ${perdendo ? "vencedor" : ganhando ? "perdedor" : "empate"}">${advPts != null ? (typeof truncarPontos === 'function' ? truncarPontos(advPts) : advPts.toFixed(2)) : '\u2014'}</span>
         </div>
       </div>
 
@@ -1415,10 +1420,10 @@ function renderConfrontosListaCards(confrontos, meuTimeId, fase) {
     const finalConfronto = confrontos[0];
     const timeA = finalConfronto.timeA || {};
     const timeB = finalConfronto.timeB || {};
-    const ptsA = parseFloat(timeA.pontos) || 0;
-    const ptsB = parseFloat(timeB.pontos) || 0;
+    const ptsA = (timeA.pontos != null) ? parseFloat(timeA.pontos) : null;
+    const ptsB = (timeB.pontos != null) ? parseFloat(timeB.pontos) : null;
 
-    if (ptsA > 0 || ptsB > 0) {
+    if (ptsA != null && ptsB != null && (ptsA > 0 || ptsB > 0)) {
       const campeao = ptsA >= ptsB ? timeA : timeB;
       const ptsCampeao = ptsA >= ptsB ? ptsA : ptsB;
       const campeaoId = extrairTimeId(campeao);
@@ -1455,12 +1460,15 @@ function renderConfrontosListaCards(confrontos, meuTimeId, fase) {
   confrontos.forEach((c, idx) => {
     const timeA = c.timeA || {};
     const timeB = c.timeB || {};
-    const ptsA = parseFloat(timeA.pontos) || 0;
-    const ptsB = parseFloat(timeB.pontos) || 0;
-    const diff = typeof truncarPontos === 'function' ? truncarPontos(Math.abs(ptsA - ptsB)) : Math.abs(ptsA - ptsB).toFixed(2);
+    const ptsA = (timeA.pontos != null) ? parseFloat(timeA.pontos) : null;
+    const ptsB = (timeB.pontos != null) ? parseFloat(timeB.pontos) : null;
+    const ptsDispo = ptsA != null && ptsB != null;
+    const diff = ptsDispo
+      ? (typeof truncarPontos === 'function' ? truncarPontos(Math.abs(ptsA - ptsB)) : Math.abs(ptsA - ptsB).toFixed(2))
+      : '\u2014';
 
-    const vencedorA = ptsA > ptsB;
-    const vencedorB = ptsB > ptsA;
+    const vencedorA = ptsDispo && ptsA > ptsB;
+    const vencedorB = ptsDispo && ptsB > ptsA;
     const isMinha =
       extrairTimeId(timeA) === meuTimeId || extrairTimeId(timeB) === meuTimeId;
 
@@ -1476,7 +1484,7 @@ function renderConfrontosListaCards(confrontos, meuTimeId, fase) {
               <span class="mm-conf-nome">${escapeHtml(truncate(timeA.nome_time || "A definir", 14))}</span>
               <span class="mm-conf-cartola">${escapeHtml(truncate(timeA.nome_cartola || timeA.nome_cartoleiro || "", 16))}</span>
             </div>
-            <span class="mm-conf-pts ${vencedorA ? "vencedor" : vencedorB ? "perdedor" : "empate"}">${typeof truncarPontos === 'function' ? truncarPontos(ptsA) : ptsA.toFixed(2)}</span>
+            <span class="mm-conf-pts ${vencedorA ? "vencedor" : vencedorB ? "perdedor" : "empate"}">${ptsA != null ? (typeof truncarPontos === 'function' ? truncarPontos(ptsA) : ptsA.toFixed(2)) : '\u2014'}</span>
           </div>
 
           <div class="mm-conf-vs">×</div>
@@ -1488,7 +1496,7 @@ function renderConfrontosListaCards(confrontos, meuTimeId, fase) {
               <span class="mm-conf-nome">${escapeHtml(truncate(timeB.nome_time || "A definir", 14))}</span>
               <span class="mm-conf-cartola">${escapeHtml(truncate(timeB.nome_cartola || timeB.nome_cartoleiro || "", 16))}</span>
             </div>
-            <span class="mm-conf-pts ${vencedorB ? "vencedor" : vencedorA ? "perdedor" : "empate"}">${typeof truncarPontos === 'function' ? truncarPontos(ptsB) : ptsB.toFixed(2)}</span>
+            <span class="mm-conf-pts ${vencedorB ? "vencedor" : vencedorA ? "perdedor" : "empate"}">${ptsB != null ? (typeof truncarPontos === 'function' ? truncarPontos(ptsB) : ptsB.toFixed(2)) : '\u2014'}</span>
           </div>
         </div>
 

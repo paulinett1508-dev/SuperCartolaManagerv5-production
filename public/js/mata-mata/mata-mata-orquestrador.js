@@ -1016,7 +1016,7 @@ async function carregarFase(fase, ligaId) {
       prevFaseRodada,
     } = currentFaseInfo;
 
-    let isPending = rodada_atual <= rodadaPontosNum;
+    let isPending = rodada_atual < rodadaPontosNum;
     console.log(
       `[MATA-ORQUESTRADOR] Rodada ${rodadaPontosNum} - Status: ${isPending ? "Pendente" : "Concluída"}`,
     );
