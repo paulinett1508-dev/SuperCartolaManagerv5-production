@@ -18,6 +18,7 @@ import aiSynthesizer from '../../services/escalacaoIA/aiSynthesizer.js';
 import { MODOS } from '../../services/estrategia-sugestao.js';
 import marketGate from '../../utils/marketGate.js';
 import systemTokenService from '../../services/systemTokenService.js';
+import cartolaProService from '../../services/cartolaProService.js';
 import perplexityService from '../../services/perplexityAnalysisService.js';
 import cartolaAnaliticoScraper from '../../services/scrapers/cartolaAnaliticoScraper.js';
 import cartolaWebScraper from '../../services/scrapers/cartolaWebScraper.js';
@@ -395,6 +396,74 @@ async function buscarSalva(req, res) {
     }
 }
 
+// =====================================================================
+// GATOMESTRE: STATUS DO TOKEN DE SISTEMA
+// =====================================================================
+async function gatoMestreStatus(req, res) {
+    try {
+        const status = await systemTokenService.statusToken();
+        res.json({ success: true, ...status });
+    } catch (error) {
+        console.error(`${LOG_PREFIX} Erro ao obter status GatoMestre:`, error.message);
+        res.status(500).json({ success: false, message: 'Erro ao verificar status' });
+    }
+}
+
+// =====================================================================
+// GATOMESTRE: CONECTAR (autentica na Globo e salva token de sistema)
+// =====================================================================
+async function gatoMestreConectar(req, res) {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ success: false, message: 'Email e senha obrigatórios' });
+        }
+
+        const resultado = await cartolaProService.autenticar(email, password);
+
+        if (!resultado.success) {
+            return res.status(401).json({ success: false, message: resultado.error });
+        }
+
+        const auth = {
+            glbid: resultado.glbId,
+            email,
+            nome: email.split('@')[0],
+            expires_at: Math.floor(Date.now() / 1000) + (resultado.expiresIn || 7200),
+        };
+
+        const salvo = await systemTokenService.salvarTokenSistema(auth);
+        if (!salvo) {
+            return res.status(500).json({ success: false, message: 'Erro ao salvar token' });
+        }
+
+        console.log(`${LOG_PREFIX} Token GatoMestre salvo para: ${email}`);
+        res.json({ success: true, message: 'Conectado com sucesso', email });
+
+    } catch (error) {
+        console.error(`${LOG_PREFIX} Erro ao conectar GatoMestre:`, error.message);
+        res.status(500).json({ success: false, message: 'Erro interno ao conectar' });
+    }
+}
+
+// =====================================================================
+// GATOMESTRE: DESCONECTAR (revoga token de sistema)
+// =====================================================================
+async function gatoMestreDesconectar(req, res) {
+    try {
+        const revogado = await systemTokenService.revogarTokenSistema();
+        if (!revogado) {
+            return res.status(500).json({ success: false, message: 'Erro ao revogar token' });
+        }
+        console.log(`${LOG_PREFIX} Token GatoMestre revogado por: ${req.session.admin?.email}`);
+        res.json({ success: true, message: 'Desconectado com sucesso' });
+    } catch (error) {
+        console.error(`${LOG_PREFIX} Erro ao desconectar GatoMestre:`, error.message);
+        res.status(500).json({ success: false, message: 'Erro interno ao desconectar' });
+    }
+}
+
 export default {
     gerarAnalise,
     buscarCached,
@@ -403,4 +472,7 @@ export default {
     preComputar,
     salvarEscalacao,
     buscarSalva,
+    gatoMestreStatus,
+    gatoMestreConectar,
+    gatoMestreDesconectar,
 };

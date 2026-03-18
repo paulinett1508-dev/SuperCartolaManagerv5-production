@@ -26,6 +26,51 @@
             <p>Sugestão inteligente de escalação baseada em análise multi-fonte com banco de reservas</p>
         </div>
 
+        <!-- Card GatoMestre PRO -->
+        <div id="eia-gm-card" class="eia-gatomestre-card">
+            <div class="eia-gatomestre-header" onclick="window.GatoMestreCard?.toggleAbrir()">
+                <span class="material-icons eia-gatomestre-icon" id="eia-gm-icon">psychology</span>
+                <span class="eia-gatomestre-title">Conexão GatoMestre PRO</span>
+                <span class="eia-gatomestre-status-badge desconectado" id="eia-gm-badge">Desconectado</span>
+                <span class="material-icons eia-gatomestre-chevron">expand_more</span>
+            </div>
+            <div class="eia-gatomestre-body">
+                <!-- Estado: conectado -->
+                <div id="eia-gm-conectado" style="display:none;">
+                    <div class="eia-gatomestre-info">
+                        <span class="material-icons" style="font-size:28px;color:var(--color-success,#22c55e)">verified_user</span>
+                        <div class="eia-gatomestre-info-text">
+                            <div class="eia-gatomestre-email" id="eia-gm-email"></div>
+                            <div class="eia-gatomestre-meta" id="eia-gm-meta"></div>
+                        </div>
+                    </div>
+                    <div class="eia-gatomestre-actions">
+                        <button class="eia-gm-btn eia-gm-btn-danger" onclick="window.GatoMestreCard?.desconectar()">
+                            <span class="material-icons">link_off</span>
+                            Desconectar
+                        </button>
+                    </div>
+                </div>
+                <!-- Estado: desconectado -->
+                <div id="eia-gm-form">
+                    <div class="eia-gatomestre-form">
+                        <p class="eia-gatomestre-hint">Entre com sua conta Globo (mesma do Cartola FC) para ativar as sugestões premium do GatoMestre.</p>
+                        <div class="eia-gatomestre-form-row">
+                            <input type="email" id="eia-gm-input-email" class="eia-gatomestre-input" placeholder="Email da conta Globo" autocomplete="username">
+                            <input type="password" id="eia-gm-input-senha" class="eia-gatomestre-input" placeholder="Senha" autocomplete="current-password">
+                        </div>
+                        <div class="eia-gatomestre-actions">
+                            <button class="eia-gm-btn eia-gm-btn-primary" id="eia-gm-btn-conectar" onclick="window.GatoMestreCard?.conectar()">
+                                <span class="material-icons">link</span>
+                                Conectar
+                            </button>
+                        </div>
+                        <div class="eia-gatomestre-msg" id="eia-gm-msg"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Fontes Status -->
         <div id="eia-fontes-status" class="eia-fontes-badges" style="margin-bottom: 16px;"></div>
 
@@ -151,10 +196,131 @@
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
                 if (window.EscalacaoIA?.inicializar) window.EscalacaoIA.inicializar();
+                window.GatoMestreCard?.carregar();
             });
         } else {
             if (window.EscalacaoIA?.inicializar) window.EscalacaoIA.inicializar();
+            window.GatoMestreCard?.carregar();
         }
+    </script>
+    <script>
+    // === CARD GATOMESTRE PRO ===
+    (function() {
+        const BASE = '/api/admin/escalacao-ia/gatomestre';
+
+        function el(id) { return document.getElementById(id); }
+
+        function mostrarMsg(texto, tipo) {
+            var msg = el('eia-gm-msg');
+            if (!msg) return;
+            msg.textContent = texto;
+            msg.className = 'eia-gatomestre-msg ' + tipo;
+        }
+
+        function limparMsg() {
+            var msg = el('eia-gm-msg');
+            if (msg) msg.className = 'eia-gatomestre-msg';
+        }
+
+        function atualizarUI(status) {
+            var card = el('eia-gm-card');
+            var badge = el('eia-gm-badge');
+            var icon = el('eia-gm-icon');
+            var divConectado = el('eia-gm-conectado');
+            var divForm = el('eia-gm-form');
+
+            if (!card) return;
+
+            if (status && status.disponivel && !status.expirado) {
+                card.classList.add('conectado');
+                badge.textContent = 'Conectado';
+                badge.className = 'eia-gatomestre-status-badge conectado';
+                icon.classList.add('conectado');
+                divConectado.style.display = 'block';
+                divForm.style.display = 'none';
+
+                el('eia-gm-email').textContent = status.email || status.doadoPor || '—';
+                var meta = 'Token ativo';
+                if (status.doadoEm) {
+                    var d = new Date(status.doadoEm);
+                    meta = 'Conectado em ' + d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+                }
+                if (status.expiraEm) {
+                    var exp = new Date(status.expiraEm);
+                    meta += ' · Expira ' + exp.toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+                }
+                el('eia-gm-meta').textContent = meta;
+            } else {
+                card.classList.remove('conectado');
+                badge.textContent = status?.expirado ? 'Expirado' : 'Desconectado';
+                badge.className = 'eia-gatomestre-status-badge desconectado';
+                icon.classList.remove('conectado');
+                divConectado.style.display = 'none';
+                divForm.style.display = 'block';
+            }
+        }
+
+        async function carregar() {
+            try {
+                var r = await fetch(BASE + '/status', { credentials: 'include' });
+                if (!r.ok) return;
+                var data = await r.json();
+                atualizarUI(data);
+            } catch(e) { /* silencioso */ }
+        }
+
+        async function conectar() {
+            var emailEl = el('eia-gm-input-email');
+            var senhaEl = el('eia-gm-input-senha');
+            var btnEl   = el('eia-gm-btn-conectar');
+            if (!emailEl || !senhaEl) return;
+
+            var email = emailEl.value.trim();
+            var senha = senhaEl.value;
+            if (!email || !senha) { mostrarMsg('Preencha email e senha.', 'erro'); return; }
+
+            limparMsg();
+            btnEl.disabled = true;
+            btnEl.innerHTML = '<span class="material-icons" style="font-size:15px;animation:spin 1s linear infinite">sync</span> Conectando...';
+
+            try {
+                var r = await fetch(BASE + '/conectar', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password: senha })
+                });
+                var data = await r.json();
+                if (data.success) {
+                    mostrarMsg('Conectado com sucesso!', 'sucesso');
+                    senhaEl.value = '';
+                    setTimeout(carregar, 500);
+                } else {
+                    mostrarMsg(data.message || 'Erro ao conectar.', 'erro');
+                }
+            } catch(e) {
+                mostrarMsg('Erro de rede. Tente novamente.', 'erro');
+            } finally {
+                btnEl.disabled = false;
+                btnEl.innerHTML = '<span class="material-icons">link</span> Conectar';
+            }
+        }
+
+        async function desconectar() {
+            try {
+                var r = await fetch(BASE + '/desconectar', { method: 'DELETE', credentials: 'include' });
+                var data = await r.json();
+                if (data.success) atualizarUI(null);
+            } catch(e) { /* silencioso */ }
+        }
+
+        function toggleAbrir() {
+            var card = el('eia-gm-card');
+            if (card) card.classList.toggle('aberto');
+        }
+
+        window.GatoMestreCard = { carregar, conectar, desconectar, toggleAbrir };
+    })();
     </script>
 </body>
 </html>

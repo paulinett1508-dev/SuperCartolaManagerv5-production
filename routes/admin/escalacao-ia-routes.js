@@ -57,4 +57,20 @@ router.post('/salvar', requireAdmin, escalacaoIAController.salvarEscalacao);
 // GET /api/admin/escalacao-ia/salva?rodada=10
 router.get('/salva', requireAdmin, escalacaoIAController.buscarSalva);
 
+// =====================================================================
+// GATOMESTRE: Conexao do token de sistema
+// =====================================================================
+
+// Status do token de sistema
+// GET /api/admin/escalacao-ia/gatomestre/status
+router.get('/gatomestre/status', requireAdmin, escalacaoIAController.gatoMestreStatus);
+
+// Conectar: autentica na Globo e salva token de sistema
+// POST /api/admin/escalacao-ia/gatomestre/conectar
+router.post('/gatomestre/conectar', requireAdmin, escalacaoIAController.gatoMestreConectar);
+
+// Desconectar: revoga token de sistema
+// DELETE /api/admin/escalacao-ia/gatomestre/desconectar
+router.delete('/gatomestre/desconectar', requireAdmin, escalacaoIAController.gatoMestreDesconectar);
+
 export default router;
