@@ -227,11 +227,14 @@ class QuickAccessBar {
      */
     renderizarMenuContent() {
         return `
-            <div class="menu-handle"></div>
-
-            <div class="especial-sheet-title">
-                <span class="material-icons">star</span>
-                Especial
+            <div class="especial-sheet-header">
+                <div class="especial-sheet-title">
+                    <span class="material-icons">star</span>
+                    Especial
+                </div>
+                <button class="especial-sheet-close" type="button" aria-label="Fechar">
+                    <span class="material-icons">close</span>
+                </button>
             </div>
 
             <div class="especial-card especial-card-copa" data-module="copa-2026-mundo">
@@ -407,9 +410,9 @@ class QuickAccessBar {
             // Click delegation for Especial sheet cards
             menuSheet.addEventListener('click', (e) => {
                 const card = e.target.closest('.especial-card');
-                const handle = e.target.closest('.menu-handle');
+                const closeBtn = e.target.closest('.especial-sheet-close');
 
-                if (handle) {
+                if (closeBtn) {
                     this.fecharMenu();
                     return;
                 }
