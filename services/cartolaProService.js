@@ -94,6 +94,12 @@ class CartolaProService {
                     password: password,
                     serviceId: 4728 // ID do Cartola FC
                 }
+            }, {
+                headers: {
+                    'Origin': 'https://login.globo.com',
+                    'Referer': 'https://login.globo.com/',
+                    'Accept': 'application/json, text/plain, */*',
+                }
             });
 
             if (response.status === 200 && response.data.glbId) {
