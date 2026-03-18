@@ -37,7 +37,7 @@
     .admin-content {
         margin-left: 0 !important;
         width: 100% !important;
-        max-width: 100vw !important;
+        max-width: 100% !important;
     }
 
     /* --- Page header com espaço para hamburger --- */
@@ -52,7 +52,7 @@
     .table-wrapper {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
-        max-width: 100vw;
+        max-width: 100%;
     }
 
     table:not(.no-mobile-scroll) {
@@ -244,8 +244,8 @@
     .modal-content,
     .modal-box,
     .super-modal {
-        width: 100vw !important;
-        max-width: 100vw !important;
+        width: 100% !important;
+        max-width: 100% !important;
         border-radius: 0 !important;
         margin: 0 !important;
         max-height: 100vh !important;
