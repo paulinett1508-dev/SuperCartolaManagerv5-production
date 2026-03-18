@@ -332,14 +332,8 @@ async function carregarDadosERenderizar(ligaId, timeId, participante) {
         }
     }
 
-    // Carregar jogos ao vivo + Copa do Mundo + Meu Time em background
-    carregarJogosECopa(participante);
-
-    // Carregar notícias do time do coração em background
-    carregarNoticiasDoMeuTime(participante);
-
-    // Carregar tabela do Brasileirão em background
-    carregarTabelaBrasileirao();
+    // ✅ v2.0: Renderizar grid de módulos inline na home (movido do Menu sheet)
+    renderizarModulosInline();
 }
 
 // =====================================================================
@@ -371,10 +365,7 @@ function pararAutoRefreshHome() {
         ParciaisModule.pararAutoRefresh();
     }
 
-    // Parar auto-refresh de jogos ao vivo
-    import('./participante-jogos.js').then(mod => {
-        mod.pararAutoRefresh();
-    }).catch(() => {});
+    // v2.0: Jogos ao vivo não carregam mais na home (movidos para Agenda e Tabelas)
 
     // Limpar estado de parciais
     dadosParciais = null;
@@ -2038,5 +2029,59 @@ async function carregarTabelaBrasileirao() {
     }
 }
 
+// =====================================================================
+// RENDERIZAR MÓDULOS INLINE (v2.0 - movido do Menu sheet para Home)
+// =====================================================================
+function renderizarModulosInline() {
+    const section = document.getElementById('home-modules-section');
+    if (!section) return;
+
+    // Usar QuickAccessBar para gerar o HTML (reutiliza lógica de modulosAtivos)
+    const qb = window.quickAccessBar || window.QuickBar;
+    if (qb && typeof qb.gerarModulosInlineHTML === 'function') {
+        section.innerHTML = qb.gerarModulosInlineHTML();
+        configurarClicksModulosInline(section);
+    } else {
+        if (window.Log) Log.warn("PARTICIPANTE-HOME", "QuickAccessBar não disponível para módulos inline");
+    }
+}
+
+/**
+ * Configura click handlers para os cards de módulos inline na home
+ */
+function configurarClicksModulosInline(section) {
+    section.addEventListener('click', (e) => {
+        const card = e.target.closest('.home-module-card');
+        if (!card) return;
+
+        const moduleId = card.dataset.module;
+        const action = card.dataset.action;
+
+        // Módulo em manutenção
+        if (card.dataset.disabled === 'true') {
+            const msg = card.dataset.disabledMessage || 'Módulo em manutenção';
+            if (window.quickAccessBar) window.quickAccessBar.mostrarToast(msg, 'info');
+            return;
+        }
+
+        // Em breve
+        if (action === 'em-breve') {
+            if (window.quickAccessBar) window.quickAccessBar.mostrarToast('Em breve!');
+            return;
+        }
+
+        // Aguarde configuração
+        if (action === 'aguarde-config') {
+            if (window.quickAccessBar) window.quickAccessBar.mostrarModalAguardeConfig(moduleId);
+            return;
+        }
+
+        // Navegar para o módulo
+        if (moduleId && window.participanteNav) {
+            window.participanteNav.navegarPara(moduleId);
+        }
+    }, { passive: true });
+}
+
 if (window.Log)
-    Log.info("PARTICIPANTE-HOME", "Modulo v1.5 carregado");
+    Log.info("PARTICIPANTE-HOME", "Modulo v2.0 carregado (módulos inline + home limpa)");

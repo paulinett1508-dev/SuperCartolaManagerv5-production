@@ -61,6 +61,9 @@ class ParticipanteNavigation {
             "rodada-xray": "/participante/fronts/rodada-xray.html",
             "tiro-certo": "/participante/fronts/tiro-certo.html",
             "resta-um": "/participante/fronts/resta-um.html",
+            "info-meu-time": "/participante/fronts/info-meu-time.html",
+            "agenda-tabelas": "/participante/fronts/agenda-tabelas.html",
+            "libertadores": "/participante/fronts/libertadores.html",
         };
 
         // ✅ v3.0: Controles simplificados (apenas debounce por tempo)

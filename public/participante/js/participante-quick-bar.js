@@ -13,7 +13,7 @@
 // v2.2: Aguarda splash fechar antes de renderizar (evita conflito)
 // =====================================================================
 
-if (window.Log) Log.info('QUICK-BAR', '🚀 Carregando Quick Access Bar v2.7...');
+if (window.Log) Log.info('QUICK-BAR', '🚀 Carregando Quick Access Bar v4.0...');
 
 class QuickAccessBar {
     constructor() {
@@ -707,4 +707,4 @@ if (document.readyState === 'loading') {
     quickAccessBar.inicializar();
 }
 
-if (window.Log) Log.info('QUICK-BAR', '✅ v2.8 carregado (Ao Vivo robusto)');
+if (window.Log) Log.info('QUICK-BAR', '✅ v4.0 carregado (Especial + Módulos Inline)');
