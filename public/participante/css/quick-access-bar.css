@@ -151,16 +151,16 @@
    ===================================================================== */
 .menu-sheet {
     position: fixed;
+    top: 0;
     bottom: 0;
     left: 0;
     right: 0;
+    height: 100%;
     background: var(--app-surface);
-    border-top-left-radius: 24px;
-    border-top-right-radius: 24px;
     z-index: var(--app-z-modal);
-    max-height: 75vh;
     overflow-y: auto;
     overflow-x: hidden;
+    padding-top: max(16px, var(--app-safe-top, 0px));
     padding-bottom: max(20px, env(safe-area-inset-bottom));
     /* GPU-only animation */
     transform: translateY(100%) translateZ(0);
@@ -410,16 +410,43 @@
 /* =====================================================================
    SHEET "ESPECIAL" — Cards Copa + Libertadores (v4.0)
    ===================================================================== */
+.especial-sheet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px 16px;
+}
+
 .especial-sheet-title {
     font-family: 'Russo One', sans-serif;
     font-size: 13px;
     color: var(--app-text-white, #fff);
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    padding: 0 22px 16px;
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.especial-sheet-close {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: var(--app-glass-elevated);
+    color: var(--app-text-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.15s ease;
+}
+.especial-sheet-close:active {
+    background: var(--app-glass-hover);
+}
+.especial-sheet-close .material-icons {
+    font-size: 20px;
 }
 .especial-sheet-title .material-icons {
     font-size: 18px;
