@@ -3,7 +3,7 @@
 <div id="home-container" class="relative min-h-screen pb-20">
 
     <!-- ========================================
-         QUICK ACTIONS (logo abaixo do header/seletor de ligas)
+         QUICK ACTIONS (4 chips: Participantes, Cartola PRO, Info Meu Time, Agenda e Tabelas)
          ======================================== -->
     <section id="home-atalhos-section" class="home-actions-bar">
         <button class="home-action-chip" id="btn-participantes" onclick="window.abrirParticipantes2026 && window.abrirParticipantes2026()">
@@ -14,9 +14,13 @@
             <span class="material-icons">workspace_premium</span>
             <span class="home-action-chip-label">Cartola PRO</span>
         </button>
-        <button class="home-action-chip" id="btn-joguinhos" style="display:none" onclick="window.abrirJoguinhos ? window.abrirJoguinhos() : (function(b){b.disabled=true;var s=document.createElement('script');s.src='/participante/js/participante-joguinhos.js';s.onload=function(){b.disabled=false;window.abrirJoguinhos&&window.abrirJoguinhos()};s.onerror=function(){b.disabled=false};document.head.appendChild(s)})(this)">
-            <span class="material-icons">sports_esports</span>
-            <span class="home-action-chip-label">Joguinhos</span>
+        <button class="home-action-chip" onclick="window.participanteNav && window.participanteNav.navegarPara('info-meu-time')">
+            <span class="material-icons" style="color: var(--app-teal)">newspaper</span>
+            <span class="home-action-chip-label">Info do Meu Time</span>
+        </button>
+        <button class="home-action-chip" onclick="window.participanteNav && window.participanteNav.navegarPara('agenda-tabelas')">
+            <span class="material-icons" style="color: var(--app-success-light)">calendar_month</span>
+            <span class="home-action-chip-label">Agenda e Tabelas</span>
         </button>
     </section>
 
@@ -76,16 +80,13 @@
         </div>
     </section>
 
-    <!-- Placeholders para conteúdo dinâmico (Feed) -->
-    <div class="home-feed-section">
-        <div class="home-feed-label">Agenda & Ao Vivo</div>
-        <div id="home-copa-placeholder"></div>
-        <div id="home-liberta-placeholder"></div>
-        <div id="home-jogos-placeholder"></div>
-        <div class="home-feed-label">Notícias & Tabelas</div>
-        <div id="home-noticias-placeholder"></div>
-        <div id="home-brasileirao-placeholder"></div>
-    </div>
+    <!-- ========================================
+         MÓDULOS INLINE (grid movido do Menu sheet)
+         Renderizado dinamicamente por participante-home.js
+         ======================================== -->
+    <section id="home-modules-section" class="home-modules-section">
+        <!-- Populado por renderizarModulosInline() -->
+    </section>
 </div>
 
 <!-- IDs ocultos para compatibilidade JS (elementos removidos da UI mas referenciados) -->
@@ -472,7 +473,7 @@
    ══════════════════════════════════════════════════════ */
 .home-actions-bar {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 8px;
     padding: 12px 16px;
 }
@@ -519,24 +520,127 @@
 }
 
 /* ══════════════════════════════════════════════════════
-   FEED SECTION — Dynamic content cards
+   MÓDULOS INLINE — Grid movido do Menu sheet para Home
    ══════════════════════════════════════════════════════ */
-.home-feed-section {
+.home-modules-section {
     padding: 8px 16px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
 }
 
-.home-feed-label {
-    font-family: 'Inter', sans-serif;
+.home-module-category {
+    margin-bottom: 20px;
+}
+
+.home-module-category-title {
     font-size: 10px;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.22);
+    color: var(--app-text-dim, rgba(255, 255, 255, 0.35));
     text-transform: uppercase;
-    letter-spacing: 1.2px;
-    padding: 4px 0 0;
-    margin-bottom: -4px;
+    letter-spacing: 1px;
+    font-weight: 600;
+    padding: 0 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.home-module-category-title .material-icons {
+    font-size: 14px;
+    color: var(--app-primary);
+}
+
+.home-module-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.home-module-card {
+    background: var(--app-glass-elevated, rgba(255, 255, 255, 0.04));
+    border: 1px solid var(--app-glass-hover, rgba(255, 255, 255, 0.08));
+    border-radius: 14px;
+    padding: 14px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.home-module-card:active {
+    transform: scale(0.94);
+}
+
+.home-module-card:hover {
+    background: var(--app-primary-muted);
+}
+
+.home-module-card .material-icons {
+    font-size: 26px;
+    color: var(--app-primary);
+}
+
+.home-module-card-label {
+    font-size: 10px;
+    text-align: center;
+    line-height: 1.2;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Estado "Aguarde" — módulo não configurado */
+.home-module-card.aguarde {
+    opacity: 0.45;
+}
+.home-module-card.aguarde .material-icons {
+    color: var(--app-text-dim, rgba(255, 255, 255, 0.35)) !important;
+}
+.home-module-card .home-badge-aguarde {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: 7px;
+    font-weight: 600;
+    background: var(--app-glass-hover, rgba(255, 255, 255, 0.08));
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.55));
+    padding: 2px 5px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Estado "Em manutenção" */
+.home-module-card.manutencao {
+    opacity: 0.45;
+    filter: grayscale(0.5);
+}
+
+/* Ícones coloridos por módulo (reutiliza padrão do menu) */
+.home-module-card[data-module="rodadas"] .material-icons { color: var(--app-pos-tec, #8b5cf6); }
+.home-module-card[data-module="pontos-corridos"] .material-icons { color: var(--app-indigo, #6366f1); }
+.home-module-card[data-module="mata-mata"] .material-icons { color: var(--app-danger, #ef4444); }
+.home-module-card[data-module="top10"] .material-icons { color: var(--app-warning, #eab308); }
+.home-module-card[data-module="campinho"] .material-icons { color: var(--app-primary); }
+.home-module-card[data-module="resta-um"] .material-icons { color: var(--app-primary); }
+.home-module-card[data-module="artilheiro"] .material-icons { color: var(--app-success, #10b981); }
+.home-module-card[data-module="luva-ouro"] .material-icons { color: var(--app-teal, #14b8a6); }
+.home-module-card[data-module="capitao"] .material-icons { color: var(--app-primary); }
+.home-module-card[data-module="melhor-mes"] .material-icons { color: var(--app-pink, #ec4899); }
+.home-module-card[data-module="historico"] .material-icons { color: var(--app-amber, #f59e0b); }
+
+/* "Em Breve" badges */
+.home-badge-em-breve {
+    font-size: 7px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+@media (max-width: 400px) {
+    .home-module-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
 /* ══════════════════════════════════════════════════════
