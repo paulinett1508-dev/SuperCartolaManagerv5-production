@@ -50,6 +50,11 @@ localPort = 64211
 externalPort = 4200
 exposeLocalhost = true
 
+[[ports]]
+localPort = 64410
+externalPort = 8000
+exposeLocalhost = true
+
 [deployment]
 deploymentTarget = "autoscale"
 build = ["sh", "-c", "npm install --include=dev && npm run build"]
