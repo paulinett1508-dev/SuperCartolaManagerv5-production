@@ -1,77 +1,93 @@
 # Tarefas Pendentes
 
+> Última atualização: 2026-03-18 — Sessão de auditoria financeira (discrepâncias de saldo)
+
 ---
 
-## 🚨 CRÍTICO — Bug Pontos Corridos: Bruno Barros ausente do bracket (2026-03-17)
+## 🚨 TAREFA ATIVA — AUDITORIA FINANCEIRA: 3 SALDOS DIFERENTES
 
 ### Contexto
-Liga Super Cartola 2026 (`684cb1c8af923da7c7df51de`) tem **35 participantes**, mas os
-4 caches do módulo Pontos Corridos foram gerados com **34 participantes** (Bruno Barros ausente).
+Branch: `claude/reset-2026-finances-Hne9m`
+Último commit: `dfa41e0 feat: reset financeiro 2026 + auditoria radical 2025`
 
-**time_id Bruno Barros:** `1113367`
+O participante **Antonio Luis (time_id: 645089, liga: 684cb1c8af923da7c7df51de)** mostra
+3 saldos completamente divergentes no sistema:
 
-### Causa Raiz (confirmada)
-- Bruno Barros foi inscrito via **InscricaoTemporada** (fluxo 2026), mas nunca sincronizado para `liga.participantes`
-- O bracket foi gerado quando a liga tinha 34 times → caches salvos com `cache_permanente: true` → jamais regenerados
-- O frontend detecta 35 times (lê InscricaoTemporada), o backend usa 34 (lê liga.participantes) → bracket completamente diferente entre admin e DB
-- Consequência visual: Antonio Luis some da R4 no admin, Bruno Barros aparece jogando contra times errados
+| Tela | Endpoint | Controller | Valor |
+|------|----------|-----------|-------|
+| Admin — coluna "Saldo" na tabela | `/api/tesouraria/liga/:id` | `tesourariaController` | **-120,00** |
+| Admin — card "Ver Extrato" (modal) | `/api/extrato-cache/.../cache/valido` | `verificarCacheValido` | **+89,00** |
+| App participante | `/api/extrato-cache/.../cache` | `getExtratoCache` | **-91,00** |
 
-### Impacto
-- R1–R4: 4 caches com 34 times, Bruno ausente de todos os 17 confrontos de cada rodada
-- Classificação exibe Bruno com 0V/0D/0E/0pts — nunca jogou
-- 0 extratos financeiros para Bruno no módulo PC
-- R5 ainda não salva → se consolidada sem fix, herda o bracket errado para sempre
-- Antonio Luis e outros times têm pairings errados no admin
+### Hipótese Confirmada por Análise de Código (falta confirmar no DB)
 
-### Decisão aprovada pelo usuário
-**Opção A — Regeneração total:** Deletar os 4 caches, gerar novo bracket com 35 times, repopular R1–R4 com scores reais da collection `rodadas`. Bruno tem pontos confirmados na collection `rodadas` desde R1.
+**Bug 1 (+89 vs -91 = diferença de 180 = taxa de inscrição)**
+- O cache do Antonio Luis provavelmente NÃO tem transação `INSCRICAO_TEMPORADA` no `historico_transacoes`
+- `getExtratoCache` (app) tem o **v7.2 FIX** que detecta inscrição ausente no cache e aplica via `InscricaoTemporada` doc → aplica -180
+- `verificarCacheValido` (admin extrato) usa `adicionarLancamentosIniciaisAoResumo()` que só soma o que JÁ está no cache → se ausente, saldo fica sem a taxa → +89
 
-### Script criado
-`scripts/regenerar-bracket-pontos-corridos.js` — commit `3cb9f38`
+**Bug 2 (-120 vs -91 = diferença de -29)**
+- `tesourariaController` aplica `aplicarAjusteInscricaoBulk()` que considera `divida_anterior`
+- Diferença provavelmente vem de `divida_anterior` ou acertos calculados de forma diferente
 
-### PROBLEMA ATUAL DO SCRIPT
-O script foi executado no Replit mas FALHOU:
+**Causa Raiz Fundamental:**
+`utils/saldo-calculator.js` existe como "fonte única de verdade" mas é usado APENAS por `tesourariaController`.
+`verificarCacheValido` e `getExtratoCache` têm implementações divergentes da mesma lógica.
+
+---
+
+## PLANO DE EXECUÇÃO (precisa de .env / MongoDB — usar VS Code + SSH Replit)
+
+### Fase 1 — CONFIRMAR HIPÓTESE (precisa do .env)
+```bash
+bun run scripts/applied-fixes/audit-antonio-luis-2026.js
 ```
-Bracket gerado: 35 times → 35 rodadas | rodadaInicial BR: 7
-Nenhuma rodada BR >= 7 com dados — nada a regenerar.
-4 anomalias detectadas (auditoria correta), mas 0 caches regenerados
-```
-
-### Diagnóstico do bug no script (investigação incompleta)
-Causa suspeita — uma das seguintes:
-1. rodadaInicial lido como 7 mas caches foram criados com valor diferente
-2. Query em `rodadas` com `ligaId: ObjectId` quando está salvo como String (ou vice-versa)
-3. Temporada ausente nos docs da collection `rodadas`
-4. Scores estão em `rodadas` para BR < 7, sendo todos filtrados pelo filter(br >= 7)
-
-### Próximos passos obrigatórios
-
-**1. Diagnóstico DB (Replit ou MCP Mongo):**
-```
-db.moduleconfigs.findOne({ liga_id: "684cb1c8af923da7c7df51de", modulo_id: "pontos_corridos", temporada: 2026 })
-db.rodadas.find({ ligaId: ObjectId("684cb1c8af923da7c7df51de"), temporada: 2026 }).limit(3)
-db.rodadas.distinct("rodada", { temporada: 2026 })
+OU verificar diretamente no MongoDB:
+```javascript
+// Verificar se INSCRICAO_TEMPORADA está no cache
+db.extratofinanceirocaches.findOne(
+  { liga_id: "684cb1c8af923da7c7df51de", time_id: 645089, temporada: 2026 },
+  { historico_transacoes: 1, saldo_consolidado: 1 }
+)
 ```
 
-**2. Ver função reconstruirCacheDeRodadas** no controller (~linha 520+) — essa função SÁ FUNCIONA para reconstruir caches, o script deve usar a mesma lógica
+### Fase 2 — FIX CRÍTICO: aplicar v7.2 em verificarCacheValido
+**Arquivo:** `controllers/extratoFinanceiroCacheController.js`
+**Onde:** função `verificarCacheValido`, path normal ativo (linha ~1503)
+**O que fazer:** Após `adicionarLancamentosIniciaisAoResumo(resumoCalculado)`, adicionar
+verificação de inscrição ausente do cache (mesmo v7.2 que `getExtratoCache` já tem).
+**Referência exata:** `getExtratoCache` linhas 915–967 (bloco v7.2 FIX completo)
 
-**3. Corrigir o script** com base no diagnóstico e re-testar no Replit
+### Fase 3 — INVESTIGAR diferença de 29 entre tesouraria e app
+Comparar `aplicarAjusteInscricaoBulk` (tesouraria) vs v7.2 manual (app).
+Ver se `divida_anterior` está sendo aplicada em ambos.
 
-**4. Validação pós-fix:**
-- Admin PC mostra 35 times com confrontos consistentes em todas as rodadas
-- Bruno Barros aparece em R1–R4 com pontos reais
-- Antonio Luis aparece em R4 normalmente
-- R5 consolida corretamente
+### Fase 4 — VALIDAR: as 3 fontes mostram o mesmo valor
+Após os fixes, rodar `audit-antonio-luis-2026.js` novamente e testar as 3 telas.
 
-### Arquivos-chave
-| Arquivo | Relevância |
-|---------|-----------|
-| `controllers/pontosCorridosCacheController.js` | reconstruirCacheDeRodadas (~linha 520+) |
-| `utils/moduleConfigHelper.js` | buscarConfigSimplificada — como rodadaInicial é lido |
-| `scripts/regenerar-bracket-pontos-corridos.js` | Script com bug (commit 3cb9f38) |
-| `models/Rodada.js` | ligaId: ObjectId, rodada: Number |
-| `models/PontosCorridosCache.js` | liga_id: String (não ObjectId!) |
+### Fase 5 — (Opcional, futuro) Consolidar todos os paths em saldo-calculator.js
+Refatoração maior — não obrigatória nesta sessão.
 
-### Fix sistêmico pendente (após resolver o imediato)
-Atualizar `pontosCorridosCacheController.js` para buscar participantes via `InscricaoTemporada`
-além de `liga.participantes` — evita recorrência para futuros inscritos pelo fluxo 2026.
+---
+
+## ARQUIVOS-CHAVE DESTA TAREFA
+
+| Arquivo | Linha crítica | Papel |
+|---------|--------------|-------|
+| `controllers/extratoFinanceiroCacheController.js` | ~915 (v7.2 FIX) | App path — CORRETO |
+| `controllers/extratoFinanceiroCacheController.js` | ~1503 (verificarCacheValido normal) | Admin extrato — FALTANDO v7.2 |
+| `controllers/tesourariaController.js` | ~50 (_calcularSaldoCore) | Admin tabela |
+| `utils/saldo-calculator.js` | ~281 (aplicarAjusteInscricaoBulk) | Fonte verdade — referência canônica |
+| `scripts/applied-fixes/audit-antonio-luis-2026.js` | — | Script diagnóstico DB |
+| `public/js/fluxo-financeiro/fluxo-financeiro-core.js` | ~1328 (_calcularSaldoFinal) | Admin frontend recalculation |
+| `public/js/fluxo-financeiro/extrato-render-v2.js` | ~51 (renderHeroCardV2) | Hero card lê saldo_atual ?? saldo |
+
+---
+
+## CONTEXTO ADICIONAL DA SESSÃO
+
+- Branch de trabalho: `claude/reset-2026-finances-Hne9m`
+- Não foi feito push desta sessão de investigação (somente leitura de código, sem .env disponível)
+- O commit `dfa41e0` (anterior) contém scripts de reset/auditoria 2026 — não relacionado ao bug atual
+- A análise foi 100% via leitura de código
+- Próxima sessão DEVE começar confirmando hipótese no banco antes de codar
