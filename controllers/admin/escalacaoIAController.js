@@ -414,26 +414,19 @@ async function gatoMestreStatus(req, res) {
 // =====================================================================
 async function gatoMestreConectar(req, res) {
     try {
-        const { email, password } = req.body;
+        const { glbid } = req.body;
 
-        if (!email || !password) {
-            return res.status(400).json({ success: false, message: 'Email e senha obrigatórios' });
+        if (!glbid) {
+            return res.status(400).json({ success: false, message: 'Token GLBID obrigatório' });
         }
 
-        const resultado = await cartolaProService.autenticar(email, password);
-
-        if (!resultado.success) {
-            return res.status(401).json({ success: false, message: resultado.error });
-        }
+        const email = req.session.admin?.email || 'admin';
 
         const auth = {
-            access_token: resultado.accessToken,
-            refresh_token: resultado.refreshToken,
-            id_token: resultado.idToken,
-            glbid: resultado.glbId || null,
+            glbid,
             email,
             nome: email.split('@')[0],
-            expires_at: Math.floor(Date.now() / 1000) + (resultado.expiresIn || 300),
+            expires_at: Math.floor(Date.now() / 1000) + 7200, // 2 horas estimado
         };
 
         const salvo = await systemTokenService.salvarTokenSistema(auth);

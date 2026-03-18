@@ -54,10 +54,27 @@
                 <!-- Estado: desconectado -->
                 <div id="eia-gm-form">
                     <div class="eia-gatomestre-form">
-                        <p class="eia-gatomestre-hint">Entre com sua conta Globo (mesma do Cartola FC) para ativar as sugestões premium do GatoMestre.</p>
+                        <p class="eia-gatomestre-hint">Cole o token GLBID do seu browser após fazer login no Cartola FC.</p>
+                        <div class="eia-gm-steps">
+                            <div class="eia-gm-step">
+                                <span class="eia-gm-step-num">1</span>
+                                <span>Abra <a href="https://cartola.globo.com" target="_blank">cartola.globo.com</a> e faça login normalmente</span>
+                            </div>
+                            <div class="eia-gm-step">
+                                <span class="eia-gm-step-num">2</span>
+                                <span>Pressione <strong>F12</strong> → aba <strong>Application</strong> → <strong>Cookies</strong> → <code>cartola.globo.com</code></span>
+                            </div>
+                            <div class="eia-gm-step">
+                                <span class="eia-gm-step-num">3</span>
+                                <span>Localize o cookie <code>GLBID</code> e copie seu valor</span>
+                            </div>
+                            <div class="eia-gm-step">
+                                <span class="eia-gm-step-num">4</span>
+                                <span>Cole abaixo e clique <strong>Conectar</strong></span>
+                            </div>
+                        </div>
                         <div class="eia-gatomestre-form-row">
-                            <input type="email" id="eia-gm-input-email" class="eia-gatomestre-input" placeholder="Email da conta Globo" autocomplete="username">
-                            <input type="password" id="eia-gm-input-senha" class="eia-gatomestre-input" placeholder="Senha" autocomplete="current-password">
+                            <input type="text" id="eia-gm-input-glbid" class="eia-gatomestre-input" placeholder="Cole aqui o valor do cookie GLBID" autocomplete="off" spellcheck="false">
                         </div>
                         <div class="eia-gatomestre-actions">
                             <button class="eia-gm-btn eia-gm-btn-primary" id="eia-gm-btn-conectar" onclick="window.GatoMestreCard?.conectar()">
@@ -270,14 +287,12 @@
         }
 
         async function conectar() {
-            var emailEl = el('eia-gm-input-email');
-            var senhaEl = el('eia-gm-input-senha');
+            var glbidEl = el('eia-gm-input-glbid');
             var btnEl   = el('eia-gm-btn-conectar');
-            if (!emailEl || !senhaEl) return;
+            if (!glbidEl) return;
 
-            var email = emailEl.value.trim();
-            var senha = senhaEl.value;
-            if (!email || !senha) { mostrarMsg('Preencha email e senha.', 'erro'); return; }
+            var glbid = glbidEl.value.trim();
+            if (!glbid) { mostrarMsg('Cole o token GLBID antes de conectar.', 'erro'); return; }
 
             limparMsg();
             btnEl.disabled = true;
@@ -288,12 +303,12 @@
                     method: 'POST',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password: senha })
+                    body: JSON.stringify({ glbid })
                 });
                 var data = await r.json();
                 if (data.success) {
                     mostrarMsg('Conectado com sucesso!', 'sucesso');
-                    senhaEl.value = '';
+                    glbidEl.value = '';
                     setTimeout(carregar, 500);
                 } else {
                     mostrarMsg(data.message || 'Erro ao conectar.', 'erro');
