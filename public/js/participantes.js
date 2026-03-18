@@ -77,7 +77,7 @@ function abrirCampinhoParticipante(timeId) {
         console.warn('[PARTICIPANTES] Não foi possível gravar o alvo do campinho no localStorage:', error);
     }
 
-    const campinhoUrl = `${window.location.origin}/participante`;
+    const campinhoUrl = `${window.location.origin}/participante/`;
     window.open(campinhoUrl, '_blank');
 }
 
