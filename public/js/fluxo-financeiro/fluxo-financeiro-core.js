@@ -800,6 +800,7 @@ export class FluxoFinanceiroCore {
         // ✅ v6.16 FIX: Incluir lançamentos iniciais (inscrição, legado, dívida) no cálculo from scratch
         // Sem isso, inscrição (-R$180) não aparecia no saldo do extrato (casamento com tesouraria)
         let saldoLancamentosIniciais = 0;
+        let pagouInscricaoParaFiltro = false;
         try {
             if (this.cache?.carregarInscricoes2026) {
                 await this.cache.carregarInscricoes2026();
@@ -810,12 +811,14 @@ export class FluxoFinanceiroCore {
                 const pagouInscricao = statusInscricao.pagouInscricao === true || statusInscricao.inscricaoQuitada === true;
                 if (typeof inscricaoDetalhe.saldo_inicial_temporada === 'number') {
                     saldoLancamentosIniciais = inscricaoDetalhe.saldo_inicial_temporada;
+                    pagouInscricaoParaFiltro = pagouInscricao;
                 } else {
                     const pagou = pagouInscricao || inscricaoDetalhe.pagou_inscricao === true;
                     const taxa = Number(inscricaoDetalhe.taxa_inscricao) || 0;
                     const divida = Number(inscricaoDetalhe.divida_anterior) || 0;
                     const saldoTransferido = Number(inscricaoDetalhe.saldo_transferido) || 0;
                     saldoLancamentosIniciais = (pagou ? 0 : taxa) + divida - saldoTransferido;
+                    pagouInscricaoParaFiltro = pagou;
                 }
                 console.log(`[FLUXO-CORE] 📋 Inscrição incluída no cálculo: R$ ${saldoLancamentosIniciais.toFixed(2)}`);
             }
@@ -824,6 +827,17 @@ export class FluxoFinanceiroCore {
         }
         extrato.resumo.saldo_lancamentos_iniciais = saldoLancamentosIniciais;
         extrato.resumo.saldoAjustes = 0;
+
+        // ✅ vI7 FIX: Se pagou inscrição e saldo_inicial_temporada já contabiliza como quitado (>= 0),
+        // filtrar pagamento de inscrição de saldo_acertos para evitar double-count.
+        // Motivo: saldo_inicial_temporada=0 (pago em dinheiro) ou >0 (saldo anterior cobriu e sobrou)
+        // não inclui a taxa (-R$180), mas saldo_acertos ainda tem o pagamento (+R$180) → inflação.
+        if (pagouInscricaoParaFiltro && saldoLancamentosIniciais >= 0) {
+            const { acertos: acertosFiltrados } = this._filtrarAcertosInscricao(extrato.acertos, true);
+            extrato.acertos = acertosFiltrados;
+            extrato.resumo.saldo_acertos = acertosFiltrados?.resumo?.saldo ?? 0;
+            console.log(`[FLUXO-CORE] 🧹 Acertos de inscrição filtrados do saldo pendente (pagouInscricao=true, saldoInicial=${saldoLancamentosIniciais.toFixed(2)})`);
+        }
 
         // ✅ v6.6: Calcular AMBOS os saldos separadamente
         extrato.resumo.saldo_temporada = this._calcularSaldoTemporada(extrato.resumo); // Histórico (imutável)
