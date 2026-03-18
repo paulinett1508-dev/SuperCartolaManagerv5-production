@@ -63,12 +63,21 @@ export class LayoutManager {
     _injectSidebar(doc) {
         const sidebar = doc.querySelector(".app-sidebar");
         const toggleBtn = doc.querySelector(".sidebar-toggle-btn");
+        const mobileToggle = doc.querySelector(".mobile-sidebar-toggle");
+        const overlay = doc.querySelector(".sidebar-overlay");
         const placeholder = document.getElementById("sidebar-placeholder");
 
         if (sidebar && placeholder) {
             // ✅ v1.1: Incluir botão toggle junto com sidebar
+            // ✅ v1.2: Incluir mobile toggle + overlay para responsividade
             const fragment = document.createDocumentFragment();
             if (toggleBtn) fragment.appendChild(toggleBtn);
+            if (mobileToggle && !document.getElementById('mobileSidebarToggle')) {
+                fragment.appendChild(mobileToggle);
+            }
+            if (overlay && !document.getElementById('sidebarOverlay')) {
+                fragment.appendChild(overlay);
+            }
             fragment.appendChild(sidebar);
             placeholder.replaceWith(fragment);
         }

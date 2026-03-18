@@ -1,0 +1,259 @@
+/**
+ * ADMIN MOBILE RESPONSIVE
+ * =======================
+ * CSS responsivo centralizado para o painel administrativo.
+ * Usa variáveis de _admin-tokens.css — NUNCA cores hardcoded.
+ *
+ * Breakpoint principal: 768px (mobile abaixo, desktop acima)
+ * Breakpoint secundário: 480px (smartphones pequenos)
+ */
+
+/* ========================================
+   SIDEBAR OVERLAY (Mobile)
+   ======================================== */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--surface-overlay-medium, rgba(0, 0, 0, 0.6));
+    z-index: 999;
+    transition: opacity 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.sidebar-overlay.active {
+    display: block;
+}
+
+/* ========================================
+   MOBILE BREAKPOINT: <= 768px
+   ======================================== */
+@media (max-width: 768px) {
+
+    /* --- Conteúdo principal ocupa tela toda --- */
+    .app-main,
+    .main-content,
+    .content-area,
+    .admin-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+    }
+
+    /* --- Page header com espaço para hamburger --- */
+    .page-header {
+        padding-left: 54px !important;
+    }
+
+    /* --- Tabelas: scroll horizontal --- */
+    .table-container,
+    .table-responsive,
+    .ranking-table-container,
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        max-width: 100vw;
+    }
+
+    table:not(.no-mobile-scroll) {
+        min-width: 600px;
+    }
+
+    /* --- Cards/Grids: coluna única --- */
+    .cards-grid,
+    .grid-2col,
+    .grid-2col-asymmetric,
+    .grid-3col,
+    .card-grid-wide,
+    .card-grid-4col,
+    .ligas-grid-new,
+    .dashboard-stats-new,
+    .responsive-grid.three-cols,
+    .responsive-grid.two-cols,
+    .form-grid-2col,
+    .form-grid-3col {
+        grid-template-columns: 1fr !important;
+        gap: 12px;
+    }
+
+    .card,
+    .content-card,
+    .liga-card-new,
+    .stat-card-new {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    /* --- Formulários: full width --- */
+    .form-row,
+    .form-group,
+    .form-inline {
+        flex-direction: column;
+    }
+
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea,
+    .form-control,
+    .search-input,
+    .search-input-new {
+        width: 100% !important;
+        min-width: unset !important;
+        box-sizing: border-box;
+    }
+
+    /* --- Botões de ação: empilhados --- */
+    .actions-bar,
+    .btn-group,
+    .action-buttons,
+    .module-toolbar,
+    .toolbar-actions,
+    .admin-tools-bar {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .toolbar-left,
+    .toolbar-right {
+        width: 100%;
+    }
+
+    .btn-action,
+    .btn-primary,
+    .btn-secondary,
+    .btn-primary-new,
+    .btn-secondary-new,
+    .toolbar-btn {
+        width: 100%;
+        justify-content: center;
+        min-height: 44px;
+    }
+
+    /* --- Modais: quase tela cheia --- */
+    .modal-content,
+    .modal-box,
+    .super-modal {
+        width: 95vw !important;
+        max-width: 95vw !important;
+        max-height: 90vh !important;
+        overflow-y: auto;
+        margin: 5vh auto !important;
+    }
+
+    /* --- Headers de módulos --- */
+    .module-header,
+    .section-header,
+    .liga-section-header,
+    .dashboard-header-greeting {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 10px;
+    }
+
+    .module-title,
+    .section-title,
+    .liga-section-title {
+        font-size: 1.1rem;
+    }
+
+    /* --- Tabs: scroll horizontal --- */
+    .tabs,
+    .tabs-horizontal,
+    .tab-nav {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        flex-wrap: nowrap;
+        scrollbar-width: none;
+    }
+
+    .tabs::-webkit-scrollbar,
+    .tabs-horizontal::-webkit-scrollbar,
+    .tab-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tab,
+    .tab-btn {
+        white-space: nowrap;
+        flex-shrink: 0;
+        min-height: 44px;
+    }
+
+    /* --- Touch targets mínimos (44px) --- */
+    button,
+    .btn,
+    a.btn,
+    .action-btn,
+    .sidebar-accordion-item a,
+    .sidebar-menu-item a {
+        min-height: 44px;
+    }
+
+    /* --- Badges e stats: wrap --- */
+    .badges-container,
+    .stat-badges,
+    .dashboard-header-alerts {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    /* --- Featured card: ajustar padding --- */
+    .liga-card-featured {
+        padding: 20px !important;
+    }
+
+    .liga-card-featured .liga-card-content {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    /* --- Temporada selector --- */
+    .temporada-selector {
+        width: 100%;
+    }
+
+    /* --- Wide content containers --- */
+    .wide-content,
+    .wide-content-full,
+    .container-centered {
+        padding-left: var(--container-padding-mobile, 16px) !important;
+        padding-right: var(--container-padding-mobile, 16px) !important;
+    }
+}
+
+/* ========================================
+   SMALL PHONE BREAKPOINT: <= 480px
+   ======================================== */
+@media (max-width: 480px) {
+
+    /* --- Padding ainda mais compacto --- */
+    .page-content {
+        padding: 10px !important;
+    }
+
+    .content-card {
+        padding: 16px !important;
+    }
+
+    /* --- Stat cards menores --- */
+    .stat-card-new {
+        padding: 12px !important;
+    }
+
+    /* --- Modais full width --- */
+    .modal-content,
+    .modal-box,
+    .super-modal {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+        max-height: 100vh !important;
+    }
+
+    /* --- Esconder textos opcionais --- */
+    .hide-on-small,
+    .optional-text {
+        display: none;
+    }
+}
