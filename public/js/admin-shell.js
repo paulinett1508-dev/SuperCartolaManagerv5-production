@@ -88,6 +88,21 @@
                 document.body.insertBefore(toggleBtn, document.body.firstChild);
             }
 
+            // Injetar mobile sidebar toggle + overlay (se não existirem)
+            const mobileToggle = doc.querySelector('.mobile-sidebar-toggle');
+            if (mobileToggle && !document.getElementById('mobileSidebarToggle')) {
+                document.body.insertBefore(mobileToggle, document.body.firstChild);
+            }
+            const overlay = doc.querySelector('.sidebar-overlay');
+            if (overlay && !document.getElementById('sidebarOverlay')) {
+                const sidebarEl = document.querySelector('.app-sidebar');
+                if (sidebarEl) {
+                    sidebarEl.parentNode.insertBefore(overlay, sidebarEl);
+                } else {
+                    document.body.insertBefore(overlay, document.body.firstChild);
+                }
+            }
+
             // Injetar scripts do layout (apenas uma vez)
             if (!window.__layoutScriptsInjected) {
                 window.__layoutScriptsInjected = true;

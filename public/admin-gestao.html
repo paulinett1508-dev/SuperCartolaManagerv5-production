@@ -15,11 +15,6 @@
     <script src="js/super-modal.js"></script>
 </head>
 <body>
-    <!-- Botão Toggle Mobile -->
-    <button class="mobile-sidebar-toggle" id="mobileSidebarToggle" onclick="toggleMobileSidebar()">
-        <span class="material-icons">menu</span>
-    </button>
-
     <div class="admin-page">
         <div id="sidebar-placeholder"></div>
         <main class="main-content">
@@ -397,27 +392,7 @@
             });
         }
 
-        // Toggle Sidebar Mobile
-        function toggleMobileSidebar() {
-            const sidebar = document.querySelector('.app-sidebar');
-            if (sidebar) {
-                sidebar.classList.toggle('mobile-open');
-            }
-        }
-
-        // Fechar sidebar ao clicar fora (mobile)
-        if (!window.__admin_gestao_state.mobileBound) {
-            window.__admin_gestao_state.mobileBound = true;
-            document.addEventListener('click', function(e) {
-                const sidebar = document.querySelector('.app-sidebar');
-                const toggleBtn = document.getElementById('mobileSidebarToggle');
-                if (sidebar && sidebar.classList.contains('mobile-open')) {
-                    if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
-                        sidebar.classList.remove('mobile-open');
-                    }
-                }
-            });
-        }
+        // Mobile sidebar toggle agora centralizado em layout.html
     </script>
 </body>
 </html>

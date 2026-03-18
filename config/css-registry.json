@@ -25,7 +25,7 @@
     "admin-shell": {
       "path": "public/css/admin-shell.css",
       "description": "Bundle admin que centraliza imports via @import",
-      "imports": ["_admin-tokens.css", "style.css", "modules/dashboard-redesign.css", "modules/super-modal.css"],
+      "imports": ["_admin-tokens.css", "style.css", "modules/dashboard-redesign.css", "modules/super-modal.css", "modules/admin-mobile-responsive.css"],
       "loadedBy": ["painel.html", "admin-orchestrator.html"]
     }
   },
@@ -84,6 +84,11 @@
         "path": "public/css/modules/layout-horizontal.css",
         "loadedBy": ["detalhe-liga.html", "analisar-participantes.html"],
         "description": "Utilitarios de layout responsivo wide"
+      },
+      {
+        "path": "public/css/modules/admin-mobile-responsive.css",
+        "loadedBy": ["admin-shell.css (@import)", "layout.html (dynamic inject)"],
+        "description": "CSS responsivo mobile centralizado para admin panel (sidebar drawer, tabelas, cards, forms, modais)"
       },
       {
         "path": "public/css/modules/extrato-v2.css",
