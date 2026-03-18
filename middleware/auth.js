@@ -47,7 +47,6 @@ export const PAGINAS_ADMIN = [
   "/admin.html",
   "/criar-liga.html",
   "/editar-liga.html",
-  "/ferramentas.html",
   "/ferramentas-rodadas.html",
   "/analisar-participantes.html",
   "/admin-consolidacao.html",
@@ -56,7 +55,7 @@ export const PAGINAS_ADMIN = [
   // Páginas adicionadas (estavam sem proteção)
   "/admin-gestao.html",
   "/historico-acessos.html",
-  "/preencher-liga.html",
+  "/auditoria-extratos.html",
   // ✅ Notificador - Sistema de avisos in-app
   "/notificador.html",
   // ✅ Fase 1 - Páginas que estavam sem proteção (integradas ao orquestrador)
@@ -67,8 +66,6 @@ export const PAGINAS_ADMIN = [
   "/dashboard-analytics.html",
   "/admin-analises-ia.html",
   "/modo-manutencao-avancado.html",
-  "/migrar-localstorage-mongodb.html",
-  "/wizard-primeira-liga.html",
 ];
 
 /**

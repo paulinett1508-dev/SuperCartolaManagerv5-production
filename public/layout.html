@@ -217,6 +217,12 @@
                                     <span>Escalação IA</span>
                                 </a>
                             </li>
+                            <li>
+                                <a href="auditoria-extratos.html" class="sidebar-accordion-item" data-page="auditoria-extratos.html">
+                                    <span class="material-icons">fact_check</span>
+                                    <span>Auditoria Extratos</span>
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -264,6 +270,12 @@
                                     <span>Raio-X Analytics</span>
                                 </a>
                             </li>
+                            <li>
+                                <a href="admin-orchestrator.html" class="sidebar-accordion-item" data-page="admin-orchestrator.html">
+                                    <span class="material-icons">settings_suggest</span>
+                                    <span>Orquestrador</span>
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -285,18 +297,6 @@
                                 <a href="admin-gestao.html" class="sidebar-accordion-item" data-page="admin-gestao.html">
                                     <span class="material-icons">shield</span>
                                     <span>Gestão de Admins</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="admin-validacao-migracao.html" class="sidebar-accordion-item" data-page="admin-validacao-migracao.html">
-                                    <span class="material-icons">verified</span>
-                                    <span>Validação Migração</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="migrar-localstorage-mongodb.html" class="sidebar-accordion-item" data-page="migrar-localstorage-mongodb.html">
-                                    <span class="material-icons">storage</span>
-                                    <span>Migrar Dados</span>
                                 </a>
                             </li>
                         </ul>
@@ -653,7 +653,6 @@
                         // Ligas
                         'detalhe-liga.html': 'ligas',
                         'editar-liga.html': 'ligas',
-                        'preencher-liga.html': 'ligas',
                         'criar-liga.html': 'ligas',
                         'gerenciar.html': 'ligas',
                         // Participantes
@@ -670,10 +669,10 @@
                         'api-football-analytics.html': 'analytics',
                         'historico-acessos.html': 'analytics',
                         'admin-analises-ia.html': 'analytics',
+                        'admin-orchestrator.html': 'analytics',
                         // Administração
                         'admin-gestao.html': 'administracao',
-                        'admin-validacao-migracao.html': 'administracao',
-                        'migrar-localstorage-mongodb.html': 'administracao'
+                        'auditoria-extratos.html': 'operacoes'
                     };
 
                     const accordionKey = pageToAccordion[currentPage];
@@ -900,7 +899,6 @@
                         "painel.html": { title: "Dashboard", subtitle: "Visao Geral do Sistema" },
                         "gerenciar.html": { title: "Gerenciar Ligas", subtitle: "Ferramentas Administrativas" },
                         "criar-liga.html": { title: "Nova Liga", subtitle: "Criar Nova Liga" },
-                        "preencher-liga.html": { title: "Nova Liga", subtitle: "Criar Nova Liga" },
                         "buscar-times.html": { title: "Buscar Times", subtitle: "Adicionar Times do Cartola FC" },
                         "gerenciar-modulos.html": { title: "Módulos", subtitle: "Gerenciar Módulos das Ligas" },
                         "ferramentas-rodadas.html": { title: "Rodadas", subtitle: "Popular e Gerenciar Rodadas" },
@@ -913,8 +911,8 @@
                         "github-analytics-unified.html": { title: "Repositório", subtitle: "Analytics do GitHub" },
                         "notificador.html": { title: "Notificador", subtitle: "Sistema de Avisos In-App" },
                         "admin-analises-ia.html": { title: "Raio-X Analytics", subtitle: "Análises Internas de Dados" },
-                        "admin-validacao-migracao.html": { title: "Validação", subtitle: "Validação de Migração" },
-                        "migrar-localstorage-mongodb.html": { title: "Migrar Dados", subtitle: "LocalStorage para MongoDB" },
+                        "auditoria-extratos.html": { title: "Auditoria Extratos", subtitle: "Integridade Financeira" },
+                        "admin-orchestrator.html": { title: "Orquestrador", subtitle: "Monitoramento de Ciclos" },
                         "modo-manutencao-avancado.html": { title: "Modo Manutenção", subtitle: "Configuração e Controle" },
                         "dashboard-saude.html": { title: "Saúde do Sistema", subtitle: "Monitoramento e Diagnóstico" },
                         "api-football-analytics.html": { title: "API Football", subtitle: "Monitoramento de APIs" },
@@ -978,7 +976,6 @@
                     'editar-liga.html',
                     'gerenciar.html',
                     'gerenciar-modulos.html',
-                    'preencher-liga.html',
                     'analisar-participantes.html',
                     'admin-gestao.html',
                     'historico-acessos.html',
@@ -989,8 +986,8 @@
                     'github-analytics-unified.html',
                     'notificador.html',
                     'admin-analises-ia.html',
-                    'admin-validacao-migracao.html',
-                    'migrar-localstorage-mongodb.html',
+                    'auditoria-extratos.html',
+                    'admin-orchestrator.html',
                     'modo-manutencao-avancado.html',
                     'tabelas-jogos.html'
                 ],
