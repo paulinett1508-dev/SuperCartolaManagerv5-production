@@ -1513,6 +1513,31 @@ export const verificarCacheValido = async (req, res) => {
             adicionarAcertosAoResumo(resumoCalculado); // ✅ v5.2: Incluir acertos
             adicionarLancamentosIniciaisAoResumo(resumoCalculado); // ✅ v6.9: Inscrição/legado
 
+            // ✅ v7.2 FIX (port from getExtratoCache): Se inscrição existe mas NÃO está no cache,
+            // compensar taxa/saldo/dívida no saldo. Sem isso, admin extrato ignora a taxa de inscrição.
+            if (temporadaNum >= CURRENT_SEASON) {
+                const inscricaoNoCache = lancamentosIniciais.some(t => t.tipo === 'INSCRICAO_TEMPORADA');
+                if (!inscricaoNoCache) {
+                    const InscricaoTemporada = mongoose.model('InscricaoTemporada');
+                    const inscDoc = await InscricaoTemporada.findOne({
+                        liga_id: String(ligaId),
+                        time_id: Number(timeId),
+                        temporada: temporadaNum,
+                    }).lean();
+                    if (inscDoc) {
+                        const taxaInsc = inscDoc.taxa_inscricao || 0;
+                        const saldoTransf = inscDoc.saldo_transferido || 0;
+                        const dividaAnt = inscDoc.divida_anterior || 0;
+                        if (taxaInsc > 0) resumoCalculado.saldo -= taxaInsc;
+                        if (saldoTransf !== 0) resumoCalculado.saldo += saldoTransf;
+                        if (dividaAnt > 0) resumoCalculado.saldo -= dividaAnt;
+                        resumoCalculado.saldo_final = resumoCalculado.saldo;
+                        resumoCalculado.saldo_atual = resumoCalculado.saldo;
+                        logger.log(`[CACHE-CONTROLLER] ✅ v7.2 FIX (verificarCacheValido): inscrição ausente — taxa=${taxaInsc} transf=${saldoTransf} divida=${dividaAnt} → saldo=${resumoCalculado.saldo}`);
+                    }
+                }
+            }
+
             return res.json({
                 valido: true,
                 cached: true,
