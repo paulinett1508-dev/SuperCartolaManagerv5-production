@@ -66,6 +66,8 @@ export const PAGINAS_ADMIN = [
   "/dashboard-analytics.html",
   "/admin-analises-ia.html",
   "/modo-manutencao-avancado.html",
+  // ✅ Escalação IA - requer admin
+  "/escalacao-ia.html",
 ];
 
 /**
