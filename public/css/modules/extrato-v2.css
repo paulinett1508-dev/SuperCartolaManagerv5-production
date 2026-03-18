@@ -46,13 +46,15 @@
    ======================================== */
 
 .extrato-hero-v2 {
-    background: var(--surface-card);
+    background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--extrato-border-neutral);
     border-radius: var(--extrato-card-radius);
     padding: var(--extrato-card-padding);
     position: relative;
     overflow: hidden;
-    transition: border-color 0.3s ease;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
 }
 
 .extrato-hero-v2::before {
@@ -62,17 +64,25 @@
     left: 0;
     right: 0;
     bottom: 0;
-    opacity: 0.5;
+    opacity: 0.6;
     pointer-events: none;
     transition: opacity 0.3s ease;
 }
 
-/* Blob glow decoration (verde = financeiro) */
+/* Blob glow decoration — muda cor por status */
 .extrato-hero-v2::after {
-    content: ''; position: absolute; width: 300px; height: 300px;
-    border-radius: 50%; background: var(--color-success-light, #22c55e);
-    filter: blur(60px); opacity: 0.08; top: -80px; right: -80px;
-    pointer-events: none; z-index: 0;
+    content: '';
+    position: absolute;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    filter: blur(80px);
+    opacity: 0.06;
+    top: -100px;
+    right: -100px;
+    pointer-events: none;
+    z-index: 0;
 }
 
 /* Variantes de status */
@@ -82,12 +92,20 @@
 .extrato-hero-v2--positive::before {
     background: var(--extrato-gradient-positive);
 }
+.extrato-hero-v2--positive::after {
+    background: var(--color-success-light, #22c55e);
+    opacity: 0.08;
+}
 
 .extrato-hero-v2--negative {
     border-color: var(--extrato-border-negative);
 }
 .extrato-hero-v2--negative::before {
     background: var(--extrato-gradient-negative);
+}
+.extrato-hero-v2--negative::after {
+    background: var(--color-danger, #ef4444);
+    opacity: 0.08;
 }
 
 .extrato-hero-v2--neutral {
@@ -226,15 +244,16 @@
     flex: 1;
     min-width: 80px;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 4px;
-    padding: 12px 8px;
+    gap: 10px;
+    padding: 12px 14px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 12px;
+    border-radius: 9999px;
     transition: all 0.2s ease;
     cursor: default;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .extrato-stat-pill-v2:hover {
@@ -242,11 +261,25 @@
     border-color: var(--surface-white-10);
 }
 
+.extrato-stat-pill-v2__icon {
+    font-size: 18px;
+    color: var(--text-muted, #a0a0a0);
+    flex-shrink: 0;
+}
+
+.extrato-stat-pill-v2__content {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
 .extrato-stat-pill-v2__value {
     font-family: var(--font-family-mono, 'JetBrains Mono', monospace);
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
     color: var(--text-primary, #ffffff);
+    white-space: nowrap;
 }
 
 .extrato-stat-pill-v2__value--positive { color: var(--extrato-icon-positive); }
@@ -258,6 +291,7 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--text-muted, #a0a0a0);
+    white-space: nowrap;
 }
 
 /* ========================================
@@ -265,10 +299,12 @@
    ======================================== */
 
 .extrato-timeline-v2 {
-    background: var(--surface-card);
+    background: rgba(255, 255, 255, 0.02);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: var(--extrato-card-radius);
     overflow: hidden;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .extrato-timeline-v2__header {
@@ -601,10 +637,12 @@
    ======================================== */
 
 .extrato-acertos-v2 {
-    background: var(--surface-card);
+    background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--color-info-muted);
     border-radius: var(--extrato-card-radius);
     overflow: hidden;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .extrato-acertos-v2__header {
@@ -731,10 +769,12 @@
    ======================================== */
 
 .extrato-chart-v2 {
-    background: var(--surface-card);
+    background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: var(--extrato-card-radius);
     padding: var(--extrato-card-padding);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .extrato-chart-v2__header {
@@ -810,10 +850,12 @@
    ======================================== */
 
 .extrato-performance-v2 {
-    background: var(--surface-card);
+    background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: var(--extrato-card-radius);
     padding: var(--extrato-card-padding);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .extrato-performance-v2__title {
@@ -947,7 +989,7 @@
 
     .extrato-stat-pill-v2 {
         flex: 0 0 auto;
-        min-width: 90px;
+        min-width: fit-content;
     }
 
     .extrato-timeline-v2__filters {
@@ -1028,17 +1070,17 @@
 /* --- 1. Hero Card: Borda laranja + sombras coloridas por status --- */
 .extrato-hero-v2 {
     border-color: rgba(255, 85, 0, 0.15);
-    box-shadow: 0 4px 20px var(--surface-overlay-light);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
 }
 
 .extrato-hero-v2--positive {
     border-color: rgba(34, 197, 94, 0.25);
-    box-shadow: 0 4px 20px rgba(34, 197, 94, 0.1);
+    box-shadow: 0 4px 24px rgba(16, 185, 129, 0.12);
 }
 
 .extrato-hero-v2--negative {
     border-color: rgba(239, 68, 68, 0.25);
-    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.1);
+    box-shadow: 0 4px 24px rgba(239, 68, 68, 0.12);
 }
 
 /* --- 2. Stat Pills: Contraste maior + tipografia bold --- */

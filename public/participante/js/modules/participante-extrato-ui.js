@@ -236,15 +236,6 @@ function renderHeroSaldoCard(saldo, statusTexto, taxaInscricao, pagouInscricao, 
     const valorClass = isPositivo ? 'extrato-hero__valor--positive' : isNegativo ? 'extrato-hero__valor--negative' : 'extrato-hero__valor--zero';
     const statusClass = isNegativo ? 'extrato-hero__status--devedor' : isPositivo ? 'extrato-hero__status--credor' : 'extrato-hero__status--quitado';
 
-    const inscricaoHtml = taxaInscricao > 0 ? `
-        <div class="extrato-hero__inscricao">
-            <span>Inscrição ${temporada}: ${formatarMoeda(taxaInscricao)}</span>
-            <span class="extrato-hero__inscricao-badge ${pagouInscricao ? 'extrato-hero__inscricao-badge--paga' : 'extrato-hero__inscricao-badge--devida'}">
-                ${pagouInscricao ? 'PAGA' : 'DEVENDO'}
-            </span>
-        </div>
-    ` : '';
-
     return `
         <div class="extrato-hero ${heroVariant}">
             <div class="extrato-hero__header">
@@ -265,7 +256,6 @@ function renderHeroSaldoCard(saldo, statusTexto, taxaInscricao, pagouInscricao, 
                 <span class="material-icons" style="font-size: 14px;">${isNegativo ? 'trending_down' : isPositivo ? 'trending_up' : 'check_circle'}</span>
                 ${statusTexto}
             </div>
-            ${inscricaoHtml}
         </div>
     `;
 }

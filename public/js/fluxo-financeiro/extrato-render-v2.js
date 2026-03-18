@@ -102,20 +102,32 @@ function renderHeroCardV2(resumo, temporada, rodadaParcial) {
 
             <div class="extrato-stats-v2">
                 <div class="extrato-stat-pill-v2">
-                    <span class="extrato-stat-pill-v2__value">${rodadas}</span>
-                    <span class="extrato-stat-pill-v2__label">Rodadas</span>
+                    <span class="material-icons extrato-stat-pill-v2__icon">bar_chart</span>
+                    <div class="extrato-stat-pill-v2__content">
+                        <span class="extrato-stat-pill-v2__label">Rodadas</span>
+                        <span class="extrato-stat-pill-v2__value">${rodadas}</span>
+                    </div>
                 </div>
                 <div class="extrato-stat-pill-v2">
-                    <span class="extrato-stat-pill-v2__value extrato-stat-pill-v2__value--positive">${sinalMoeda(totalGanhos)}</span>
-                    <span class="extrato-stat-pill-v2__label">Ganhos</span>
+                    <span class="material-icons extrato-stat-pill-v2__icon" style="color: var(--extrato-icon-positive)">trending_up</span>
+                    <div class="extrato-stat-pill-v2__content">
+                        <span class="extrato-stat-pill-v2__label">Ganhos</span>
+                        <span class="extrato-stat-pill-v2__value extrato-stat-pill-v2__value--positive">${sinalMoeda(totalGanhos)}</span>
+                    </div>
                 </div>
                 <div class="extrato-stat-pill-v2">
-                    <span class="extrato-stat-pill-v2__value extrato-stat-pill-v2__value--negative">-${formatarMoeda(totalPerdas)}</span>
-                    <span class="extrato-stat-pill-v2__label">Perdas</span>
+                    <span class="material-icons extrato-stat-pill-v2__icon" style="color: var(--extrato-icon-negative)">trending_down</span>
+                    <div class="extrato-stat-pill-v2__content">
+                        <span class="extrato-stat-pill-v2__label">Perdas</span>
+                        <span class="extrato-stat-pill-v2__value extrato-stat-pill-v2__value--negative">-${formatarMoeda(totalPerdas)}</span>
+                    </div>
                 </div>
                 <div class="extrato-stat-pill-v2">
-                    <span class="extrato-stat-pill-v2__value ${acertosTotal >= 0 ? 'extrato-stat-pill-v2__value--positive' : 'extrato-stat-pill-v2__value--negative'}">${sinalMoeda(acertosTotal)}</span>
-                    <span class="extrato-stat-pill-v2__label">Acertos</span>
+                    <span class="material-icons extrato-stat-pill-v2__icon">payments</span>
+                    <div class="extrato-stat-pill-v2__content">
+                        <span class="extrato-stat-pill-v2__label">Acertos</span>
+                        <span class="extrato-stat-pill-v2__value ${acertosTotal >= 0 ? 'extrato-stat-pill-v2__value--positive' : 'extrato-stat-pill-v2__value--negative'}">${sinalMoeda(acertosTotal)}</span>
+                    </div>
                 </div>
             </div>
         </div>
