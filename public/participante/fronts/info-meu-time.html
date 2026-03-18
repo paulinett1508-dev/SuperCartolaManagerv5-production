@@ -1,0 +1,69 @@
+<!-- INFO MEU TIME - Tela dedicada para noticias do time do coracao -->
+<div id="info-meu-time-container" class="p-4 pb-28">
+    <!-- Header com botao voltar -->
+    <div class="flex items-center gap-3 mb-4">
+        <button onclick="window.participanteNav && window.participanteNav.navegarPara('home')"
+                class="w-9 h-9 rounded-xl flex items-center justify-center"
+                style="background: var(--app-glass-bg); border: 1px solid var(--app-glass-border);">
+            <span class="material-icons" style="font-size:20px; color: var(--app-text-muted);">arrow_back</span>
+        </button>
+        <div>
+            <h1 style="font-family: 'Russo One', sans-serif; font-size: 16px; color: white; letter-spacing: 0.3px;">
+                Info do Meu Time
+            </h1>
+            <p id="info-meu-time-subtitle" style="font-size: 10px; color: var(--app-text-dim);">
+                Noticias do seu time do coracao
+            </p>
+        </div>
+    </div>
+
+    <!-- Container para noticias (renderizado por NoticiasTime) -->
+    <div id="info-meu-time-noticias">
+        <div class="flex flex-col items-center justify-center py-16">
+            <div class="w-10 h-10 border-4 border-zinc-700 border-t-orange-500 rounded-full animate-spin mb-4"></div>
+            <p class="text-sm text-gray-400">Carregando noticias...</p>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    (async function() {
+        // Aguardar auth
+        const clubeId = window.participanteAuth?.participante?.participante?.clube_id
+                      || window.participanteAuth?.participante?.clube_id
+                      || null;
+
+        if (!clubeId) {
+            const container = document.getElementById('info-meu-time-noticias');
+            if (container) {
+                container.innerHTML = `
+                    <div class="text-center py-16">
+                        <span class="material-icons text-4xl" style="color: var(--app-text-dim);">newspaper</span>
+                        <p class="text-gray-400 mt-3 text-sm">Nenhum time do coracao configurado</p>
+                    </div>
+                `;
+            }
+            return;
+        }
+
+        // Renderizar noticias usando componente existente
+        if (window.NoticiasTime) {
+            await window.NoticiasTime.renderizar({
+                clubeId,
+                containerId: 'info-meu-time-noticias',
+                limite: 15,
+                modo: 'completo'
+            });
+        } else {
+            const container = document.getElementById('info-meu-time-noticias');
+            if (container) {
+                container.innerHTML = `
+                    <div class="text-center py-16">
+                        <span class="material-icons text-4xl" style="color: var(--app-text-dim);">newspaper</span>
+                        <p class="text-gray-400 mt-3 text-sm">Componente de noticias nao disponivel</p>
+                    </div>
+                `;
+            }
+        }
+    })();
+</script>

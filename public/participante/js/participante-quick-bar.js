@@ -1,8 +1,10 @@
 // =====================================================================
-// QUICK ACCESS BAR v3.0 - Menu Dinâmico
+// QUICK ACCESS BAR v4.0 - Especial Sheet (Copa + Libertadores)
 // =====================================================================
-// 4 botões: Início (home), Ranking, Menu (sheet), Financeiro
+// 4 botões: Início (home), Ranking, Especial (sheet), Financeiro
 // GPU-accelerated, 60fps guaranteed, DOM caching
+// v4.0: Botão "Menu" substituído por "Especial" com Landing Pages
+//       Módulos movidos para grid inline na Home
 // v3.0: Botão "Ao Vivo" removido - substituído por Raio-X da Rodada (acessível via módulo Rodadas)
 // v2.7: Módulo inicial agora é "home" (temporada 2026 em andamento - rodada 1+)
 // v2.5: Menu dinâmico baseado em modulosAtivos e isLigaEstreante
@@ -193,9 +195,9 @@ class QuickAccessBar {
                     <span class="material-icons nav-icon">trending_up</span>
                     <span class="nav-label">Ranking Geral</span>
                 </button>
-                <button class="nav-item" data-page="menu" id="menuButton" type="button">
-                    <span class="material-icons nav-icon">apps</span>
-                    <span class="nav-label">Menu</span>
+                <button class="nav-item especial-btn" data-page="menu" id="menuButton" type="button">
+                    <span class="material-icons nav-icon">star</span>
+                    <span class="nav-label">Especial</span>
                 </button>
                 <button class="nav-item" data-page="extrato" type="button">
                     <span class="material-icons nav-icon">account_balance_wallet</span>
@@ -220,27 +222,57 @@ class QuickAccessBar {
     }
 
     /**
-     * ✅ v2.5: Menu dinâmico baseado em modulosAtivos e isLigaEstreante
-     * - Módulos base (extrato, ranking, rodadas) sempre visíveis
-     * - historico (Hall da Fama) oculto para ligas estreantes
-     * - Módulos opcionais não configurados mostram badge "Aguarde"
+     * ✅ v4.0: Sheet "Especial" — Landing Pages (Copa do Mundo + Libertadores)
+     * Módulos foram movidos para grid inline na Home
      */
     renderizarMenuContent() {
+        return `
+            <div class="menu-handle"></div>
+
+            <div class="especial-sheet-title">
+                <span class="material-icons">star</span>
+                Especial
+            </div>
+
+            <div class="especial-card especial-card-copa" data-module="copa-2026-mundo">
+                <div class="especial-card-icon">
+                    <span class="material-icons">public</span>
+                </div>
+                <div class="especial-card-text">
+                    <div class="especial-card-name">Copa do Mundo 2026</div>
+                    <div class="especial-card-desc">Jogos, grupos e tabela ao vivo</div>
+                </div>
+                <span class="material-icons especial-chevron">chevron_right</span>
+            </div>
+
+            <div class="especial-card especial-card-liberta" data-module="libertadores">
+                <div class="especial-card-icon">
+                    <span class="material-icons">emoji_events</span>
+                </div>
+                <div class="especial-card-text">
+                    <div class="especial-card-name">Libertadores 2026</div>
+                    <div class="especial-card-desc">Notícias e resultados da Liberta</div>
+                </div>
+                <span class="material-icons especial-chevron">chevron_right</span>
+            </div>
+        `;
+    }
+
+    /**
+     * ✅ v4.0: Gera HTML do grid de módulos para renderização inline na Home
+     * Reutiliza lógica de modulosAtivos, manutenção e liga estreante
+     */
+    gerarModulosInlineHTML() {
         const modulosAtivos = this.modulosAtivos || {};
         const isLigaEstreante = window.isLigaEstreante || false;
 
-        // Módulos base sempre visíveis (configurações agora está no header da tela Início)
         const modulosBase = ['extrato', 'ranking', 'rodadas'];
 
-        // Helper: verifica se módulo está ativo
         const isAtivo = (configKey) => {
             if (modulosBase.includes(configKey)) return true;
             return modulosAtivos[configKey] === true;
         };
 
-        // Helper: verifica se módulo base está em manutenção (admin desativou na liga OU via manutencao.json)
-        // ✅ v4.10: Premium bypass - participantes premium veem módulos normalmente
-        // FIX BUG#3: incorpora window.participanteModulosBloqueados (modo modulos do manutencao.json)
         const isPremium = window.participanteNav?._isPremium === true;
         const modulosBloqueadosManutencao = Array.isArray(window.participanteModulosBloqueados)
             ? window.participanteModulosBloqueados
@@ -252,7 +284,6 @@ class QuickAccessBar {
             return bloqueadoLiga || bloqueadoManutencao;
         };
 
-        // Helper: renderiza card do módulo
         const renderCard = (moduleId, configKey, icon, label) => {
             const manutencao = isEmManutencao(configKey);
             const ativo = isAtivo(configKey);
@@ -260,58 +291,46 @@ class QuickAccessBar {
 
             if (manutencao) {
                 return `
-                    <div class="menu-card manutencao"
+                    <div class="home-module-card manutencao"
                          data-module="${moduleId}"
                          data-disabled="true"
-                         data-disabled-message="O módulo ${label} está em manutenção."
-                         style="opacity:0.45;filter:grayscale(0.5)">
+                         data-disabled-message="O módulo ${label} está em manutenção.">
                         <span class="material-icons">${icon}</span>
-                        <span class="menu-card-label">${label}</span>
-                        <span class="badge-aguarde" style="background:rgba(255,85,0,0.2);color:var(--app-primary)">Em manutenção</span>
+                        <span class="home-module-card-label">${label}</span>
+                        <span class="home-badge-aguarde" style="background:rgba(255,85,0,0.2);color:var(--app-primary)">Em manutenção</span>
                     </div>
                 `;
             }
 
             return `
-                <div class="menu-card${aguarde ? ' aguarde' : ''}"
+                <div class="home-module-card${aguarde ? ' aguarde' : ''}"
                      data-module="${moduleId}"
                      ${aguarde ? 'data-action="aguarde-config"' : ''}>
                     <span class="material-icons">${icon}</span>
-                    <span class="menu-card-label">${label}</span>
-                    ${aguarde ? '<span class="badge-aguarde">Aguarde</span>' : ''}
+                    <span class="home-module-card-label">${label}</span>
+                    ${aguarde ? '<span class="home-badge-aguarde">Aguarde</span>' : ''}
                 </div>
             `;
         };
 
-        const escapeAttr = (value) =>
-            String(value || '')
-                .replace(/&/g, '&amp;')
-                .replace(/"/g, '&quot;');
-        const mercadoAberto = this.mercadoAberto === true;
-        // REMOVIDO: variáveis aoVivo* - botão "Ao Vivo" removido, substituído por Raio-X da Rodada
-
-        // Hall da Fama: ocultar completamente para ligas estreantes
         const hallDaFamaCard = isLigaEstreante ? '' : `
-            <div class="menu-card" data-module="historico">
+            <div class="home-module-card" data-module="historico">
                 <span class="material-icons">history</span>
-                <span class="menu-card-label">Hall da Fama</span>
+                <span class="home-module-card-label">Hall da Fama</span>
             </div>
         `;
 
         return `
-            <div class="menu-handle"></div>
-
-            <div class="menu-category">
-                <div class="menu-category-title">
+            <div class="home-module-category">
+                <div class="home-module-category-title">
                     <span class="material-icons">emoji_events</span>
                     Competições
                 </div>
-                <div class="menu-grid">
-                    <div class="menu-card" data-module="rodadas">
+                <div class="home-module-grid">
+                    <div class="home-module-card" data-module="rodadas">
                         <span class="material-icons">view_week</span>
-                        <span class="menu-card-label">Rodadas</span>
+                        <span class="home-module-card-label">Rodadas</span>
                     </div>
-                    <!-- REMOVIDO: Botão "Ao Vivo" - funcionalidade substituída por Raio-X da Rodada (acessível via Rodadas) -->
                     ${renderCard('pontos-corridos', 'pontosCorridos', 'format_list_numbered', 'Pontos Corridos')}
                     ${renderCard('mata-mata', 'mataMata', 'military_tech', 'Mata-Mata')}
                     ${renderCard('top10', 'top10', 'leaderboard', 'TOP 10')}
@@ -320,12 +339,12 @@ class QuickAccessBar {
                 </div>
             </div>
 
-            <div class="menu-category">
-                <div class="menu-category-title">
+            <div class="home-module-category">
+                <div class="home-module-category-title">
                     <span class="material-icons">workspace_premium</span>
                     Prêmios & Estatísticas
                 </div>
-                <div class="menu-grid">
+                <div class="home-module-grid">
                     ${renderCard('artilheiro', 'artilheiro', 'sports_soccer', 'Artilheiro')}
                     ${renderCard('luva-ouro', 'luvaOuro', 'sports_handball', 'Luva de Ouro')}
                     ${renderCard('capitao', 'capitaoLuxo', 'emoji_events', 'Capitão de Luxo')}
@@ -334,25 +353,25 @@ class QuickAccessBar {
                 </div>
             </div>
 
-            <div class="menu-category">
-                <div class="menu-category-title">
+            <div class="home-module-category">
+                <div class="home-module-category-title">
                     <span class="material-icons">upcoming</span>
                     Em Breve
                 </div>
-                <div class="menu-grid">
-                    <div class="menu-card copa-times-card" data-module="copa-times-sc">
+                <div class="home-module-grid">
+                    <div class="home-module-card" data-module="copa-times-sc">
                         <span class="material-icons" style="color: var(--app-gold);">emoji_events</span>
-                        <span class="menu-card-label">Copa de Times SC</span>
-                        <span class="badge-aguarde" style="background:rgba(255,215,0,0.2);color:var(--app-gold);border:1px solid var(--app-gold);padding:2px 8px;border-radius:12px;font-size:10px;font-weight:bold;">EM BREVE</span>
+                        <span class="home-module-card-label">Copa de Times SC</span>
+                        <span class="home-badge-em-breve" style="background:rgba(255,215,0,0.2);color:var(--app-gold);border:1px solid var(--app-gold);">EM BREVE</span>
                     </div>
-                    <div class="menu-card tiro-certo-card" data-module="tiro-certo">
+                    <div class="home-module-card" data-module="tiro-certo">
                         <span class="material-icons" style="color: var(--app-primary);">gps_fixed</span>
-                        <span class="menu-card-label">Tiro Certo</span>
-                        <span class="badge-aguarde tc-badge-turno">EM BREVE</span>
+                        <span class="home-module-card-label">Tiro Certo</span>
+                        <span class="home-badge-em-breve" style="background:rgba(255,85,0,0.12);color:var(--app-primary);border:1px solid rgba(255,85,0,0.25);">EM BREVE</span>
                     </div>
-                    <div class="menu-card disabled" data-action="em-breve">
+                    <div class="home-module-card" data-module="bolao-copa" data-action="em-breve" style="opacity:0.4">
                         <span class="material-icons">sports</span>
-                        <span class="menu-card-label">Bolão Copa</span>
+                        <span class="home-module-card-label">Bolão Copa</span>
                     </div>
                 </div>
             </div>
@@ -385,9 +404,9 @@ class QuickAccessBar {
 
         // Menu sheet - Event Delegation + Swipe
         if (menuSheet) {
-            // Click delegation for menu cards
+            // Click delegation for Especial sheet cards
             menuSheet.addEventListener('click', (e) => {
-                const card = e.target.closest('.menu-card');
+                const card = e.target.closest('.especial-card');
                 const handle = e.target.closest('.menu-handle');
 
                 if (handle) {
@@ -398,32 +417,9 @@ class QuickAccessBar {
                 if (!card) return;
 
                 const module = card.dataset.module;
-                const action = card.dataset.action;
-                if (card.dataset.disabled === 'true') {
-                    const message =
-                        card.dataset.disabledMessage ||
-                        'Ao Vivo só fica ativo quando o mercado estiver fechado.';
-                    this.mostrarToast(message, 'info');
-                    return;
-                }
-
-                if (action === 'em-breve') {
-                    this.mostrarToast('Em breve!');
-                    return;
-                }
-
-                // REMOVIDO: action 'ao-vivo' - funcionalidade substituída por Raio-X da Rodada
-
-                // ✅ v2.5: Módulo não configurado pelo admin
-                if (action === 'aguarde-config') {
-                    this.mostrarModalAguardeConfig(module);
-                    return;
-                }
-
                 if (module) {
                     this.fecharMenu();
                     this.navegarPara(module);
-                    // Clear nav active states
                     this._dom.navItems.forEach(nav => nav.classList.remove('active'));
                 }
             }, { passive: true });

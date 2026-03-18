@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MOCKUP - Nova Home Inicio</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --app-primary: #FF5500;
+            --app-primary-dark: #e8472b;
+            --app-primary-muted: rgba(255, 85, 0, 0.1);
+            --app-primary-border: rgba(255, 85, 0, 0.2);
+            --app-bg: #0a0a0a;
+            --app-surface: #1a1a1a;
+            --app-surface-elevated: #1c1c1c;
+            --app-text-primary: #ffffff;
+            --app-text-muted: rgba(255,255,255,0.55);
+            --app-text-dim: rgba(255,255,255,0.35);
+            --app-glass-bg: rgba(255,255,255,0.03);
+            --app-glass-border: rgba(255,255,255,0.06);
+            --app-glass-elevated: rgba(255,255,255,0.04);
+            --app-glass-hover: rgba(255,255,255,0.08);
+            --app-success-light: #22c55e;
+            --app-danger: #ef4444;
+            --app-warning: #eab308;
+            --app-pos-tec: #8b5cf6;
+            --app-indigo: #6366f1;
+            --app-teal: #14b8a6;
+            --app-pink: #ec4899;
+            --app-amber: #f59e0b;
+            --app-success: #10b981;
+            --app-gold: #D4AF37;
+            --app-copa-secondary: #D4AF37;
+            --app-info: #3b82f6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--app-bg);
+            color: var(--app-text-primary);
+            font-family: 'Inter', sans-serif;
+            max-width: 430px;
+            margin: 0 auto;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ═══ MOCKUP RIBBON ═══ */
+        .mockup-ribbon {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+            background: linear-gradient(90deg, #FF5500 0%, #e8472b 50%, #FF5500 100%);
+            background-size: 200% 100%;
+            animation: ribbon-shimmer 3s ease-in-out infinite;
+            color: white; text-align: center;
+            padding: 7px 12px;
+            font-size: 9px; font-weight: 700; letter-spacing: 2px;
+            text-transform: uppercase;
+            font-family: 'Russo One', sans-serif;
+            max-width: 430px; margin: 0 auto;
+        }
+        @keyframes ribbon-shimmer {
+            0%, 100% { background-position: 0% 0; }
+            50% { background-position: 100% 0; }
+        }
+
+        /* ═══ LEGEND ═══ */
+        .mockup-legend {
+            margin: 40px 16px 8px;
+            padding: 12px 14px;
+            background: rgba(255,255,255,0.02);
+            border: 1px dashed rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+        .mockup-legend-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 9px; color: rgba(255,255,255,0.4);
+            text-transform: uppercase; letter-spacing: 1.2px;
+            margin-bottom: 8px;
+        }
+        .legend-row { display: flex; gap: 14px; flex-wrap: wrap; }
+        .legend-item {
+            display: flex; align-items: center; gap: 5px;
+            font-size: 9px; color: var(--app-text-muted);
+        }
+        .legend-dot {
+            width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0;
+        }
+        .dot-new { background: #22c55e; }
+        .dot-changed { background: #eab308; }
+        .dot-moved { background: #3b82f6; }
+
+        /* ═══ ANNOTATION TAGS ═══ */
+        .tag {
+            display: inline-flex; align-items: center; gap: 3px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 7px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.6px;
+            padding: 2px 7px; border-radius: 3px;
+            position: absolute; z-index: 50;
+        }
+        .tag-new { color: #22c55e; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); }
+        .tag-changed { color: #eab308; background: rgba(234,179,8,0.1); border: 1px solid rgba(234,179,8,0.3); }
+        .tag-moved { color: #3b82f6; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); }
+
+        /* Highlight borders */
+        .hl-new { box-shadow: inset 0 0 0 1.5px rgba(34,197,94,0.35); border-radius: 14px; }
+        .hl-changed { box-shadow: inset 0 0 0 1.5px rgba(234,179,8,0.3); border-radius: 14px; }
+        .hl-moved { box-shadow: inset 0 0 0 1.5px rgba(59,130,246,0.3); border-radius: 14px; }
+
+        /* ═══ HEADER ═══ */
+        .app-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 16px;
+            background: rgba(20,20,20,0.98);
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .hdr-left { display: flex; align-items: center; gap: 10px; }
+        .hdr-avatar {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: linear-gradient(135deg, #333, #1a1a1a);
+            border: 2px solid var(--app-primary);
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+        .hdr-avatar .material-icons { font-size: 20px; color: var(--app-primary); }
+        .hdr-club {
+            position: absolute; bottom: -3px; right: -3px;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: #c42e2e; border: 2px solid var(--app-bg);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 6px; font-weight: 900; color: white;
+        }
+        .hdr-info { display: flex; flex-direction: column; }
+        .hdr-name { font-family: 'Russo One', sans-serif; font-size: 13px; color: white; }
+        .hdr-sub {
+            font-size: 9px; color: var(--app-text-dim);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .hdr-ver {
+            font-family: 'JetBrains Mono', monospace; font-size: 7px;
+            background: rgba(255,255,255,0.06); padding: 1px 5px; border-radius: 3px;
+        }
+
+        /* ═══ QUICK ACTIONS BAR ═══ */
+        .qa-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 7px;
+            padding: 10px 16px;
+            position: relative;
+        }
+        .qa-chip {
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+            padding: 10px 4px;
+            background: var(--app-glass-bg);
+            border: 1px solid var(--app-glass-border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .qa-chip:active { transform: scale(0.96); background: rgba(255,255,255,0.06); }
+        .qa-chip .material-icons { font-size: 22px; color: var(--app-primary); }
+        .qa-chip-label {
+            font-size: 9px; font-weight: 500; color: var(--app-text-muted);
+            text-align: center; line-height: 1.2;
+        }
+        .qa-chip-new {
+            border-color: rgba(34,197,94,0.25);
+            background: rgba(34,197,94,0.04);
+        }
+
+        /* ═══ HERO CARD ═══ */
+        .hero-section { padding: 0 16px; }
+        .hero-card {
+            background: var(--app-surface);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+        }
+        .hero-card::before {
+            content: ''; position: absolute;
+            width: 200px; height: 200px; border-radius: 50%;
+            background: var(--app-primary); filter: blur(60px); opacity: 0.07;
+            top: -80px; right: -60px; pointer-events: none;
+        }
+        .hero-market {
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            position: relative; z-index: 1;
+        }
+        .hero-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--app-success-light);
+            animation: dot-pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes dot-pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.5; }
+        }
+        .hero-market-title {
+            font-family: 'Russo One', sans-serif; font-size: 9px;
+            color: var(--app-success-light); letter-spacing: 0.3px;
+        }
+        .hero-sep { color: rgba(255,255,255,0.12); font-size: 8px; }
+        .hero-sub { font-size: 9px; color: var(--app-text-dim); flex: 1; }
+        .hero-chevron { font-size: 14px; color: rgba(255,255,255,0.2); }
+
+        .hero-pts-area {
+            text-align: center; padding: 14px 16px 8px;
+            position: relative; z-index: 1;
+        }
+        .hero-pts-label {
+            font-size: 9px; font-weight: 600; color: var(--app-text-dim);
+            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
+        }
+        .hero-pts-num {
+            font-family: 'JetBrains Mono', monospace; font-size: 38px;
+            font-weight: 700; color: var(--app-primary); line-height: 1; letter-spacing: -1px;
+        }
+        .hero-row {
+            display: flex; align-items: center; justify-content: center;
+            padding: 6px 14px 12px; position: relative; z-index: 1;
+        }
+        .hero-stat { display: flex; align-items: center; gap: 4px; padding: 0 14px; }
+        .hero-stat-lbl { font-size: 10px; color: var(--app-text-dim); }
+        .hero-stat-val {
+            font-family: 'JetBrains Mono', monospace; font-size: 13px;
+            font-weight: 700; color: white; letter-spacing: -0.3px;
+        }
+        .hero-stat-dim { font-size: 9px; color: var(--app-text-dim); }
+        .hero-sep-line { width: 1px; height: 16px; background: rgba(255,255,255,0.08); }
+        .hero-cta {
+            display: flex; align-items: center; justify-content: center; gap: 4px;
+            padding: 8px 14px;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            font-size: 11px; font-weight: 500; color: var(--app-primary);
+        }
+        .hero-cta .material-icons { font-size: 16px; }
+
+        /* ═══ INLINE MODULES GRID ═══ */
+        .modules-section {
+            padding: 12px 16px 0;
+            position: relative;
+        }
+        .mod-cat { margin-bottom: 20px; }
+        .mod-cat-title {
+            font-size: 10px; color: var(--app-text-dim);
+            text-transform: uppercase; letter-spacing: 1px;
+            font-weight: 600; padding: 0 0 10px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .mod-cat-title .material-icons { font-size: 14px; color: var(--app-primary); }
+        .mod-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .mod-card {
+            background: var(--app-glass-elevated);
+            border: 1px solid var(--app-glass-hover);
+            border-radius: 14px;
+            padding: 14px 6px;
+            display: flex; flex-direction: column; align-items: center;
+            gap: 6px; cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .mod-card:active { transform: scale(0.94); }
+        .mod-card .material-icons { font-size: 26px; }
+        .mod-card-label {
+            font-size: 10px; text-align: center; line-height: 1.2;
+            font-weight: 500; color: rgba(255,255,255,0.85);
+        }
+        /* Module icon colors */
+        .ic-rodadas { color: var(--app-pos-tec) !important; }
+        .ic-pc { color: var(--app-indigo) !important; }
+        .ic-mm { color: var(--app-danger) !important; }
+        .ic-top10 { color: var(--app-warning) !important; }
+        .ic-campinho { color: var(--app-primary) !important; }
+        .ic-resta { color: var(--app-primary) !important; }
+        .ic-artilheiro { color: var(--app-success) !important; }
+        .ic-luva { color: var(--app-teal) !important; }
+        .ic-capitao { color: var(--app-primary) !important; }
+        .ic-melhor { color: var(--app-pink) !important; }
+        .ic-hall { color: var(--app-amber) !important; }
+
+        .mod-card.em-breve { opacity: 0.5; position: relative; }
+        .badge-breve {
+            font-size: 7px; font-weight: 700;
+            padding: 2px 6px; border-radius: 10px;
+            text-transform: uppercase; letter-spacing: 0.3px;
+        }
+        .badge-gold { color: var(--app-gold); background: rgba(212,175,55,0.15); border: 1px solid rgba(212,175,55,0.3); }
+        .badge-orange { color: var(--app-primary); background: rgba(255,85,0,0.12); border: 1px solid rgba(255,85,0,0.25); }
+        .badge-dim { color: var(--app-text-dim); background: rgba(255,255,255,0.06); }
+
+        /* ═══ SECTION DIVIDER ═══ */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,85,0,0.12), transparent);
+            margin: 4px 16px 8px;
+        }
+
+        /* ═══ BOTTOM NAV ═══ */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(20,20,20,0.98);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding: 8px 0 14px;
+            z-index: 100;
+            max-width: 430px; margin: 0 auto;
+        }
+        .nav-row {
+            display: flex; justify-content: space-around; align-items: center;
+            padding: 0 12px;
+        }
+        .nav-btn {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 3px; background: none; border: none;
+            color: var(--app-text-dim); cursor: pointer;
+            padding: 6px 12px; border-radius: 12px;
+            position: relative; min-width: 60px;
+        }
+        .nav-btn.active { color: var(--app-primary); }
+        .nav-btn.active::before {
+            content: ''; position: absolute; top: -8px; left: 50%;
+            width: 28px; height: 3px; background: var(--app-primary);
+            border-radius: 0 0 3px 3px; transform: translateX(-50%);
+        }
+        .nav-btn .material-icons { font-size: 22px; }
+        .nav-btn.active .material-icons { transform: translateY(-2px); }
+        .nav-btn-label { font-size: 9px; font-weight: 500; letter-spacing: 0.2px; }
+
+        /* Especial golden glow */
+        .nav-btn.especial-btn .material-icons { color: var(--app-gold); }
+        .nav-btn.especial-btn .nav-btn-label { color: var(--app-gold); }
+
+        .bottom-spacer { height: 85px; }
+
+        /* ═══ ESPECIAL SHEET ═══ */
+        .esp-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .esp-overlay.vis { opacity: 1; visibility: visible; }
+
+        .esp-sheet {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: var(--app-surface);
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            z-index: 201;
+            padding: 0 0 28px;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+            max-width: 430px; margin: 0 auto;
+        }
+        .esp-sheet.vis { transform: translateY(0); }
+
+        .esp-handle {
+            width: 40px; height: 4px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px; margin: 16px auto 18px;
+        }
+        .esp-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 12px; color: white;
+            text-transform: uppercase; letter-spacing: 0.8px;
+            padding: 0 22px 14px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .esp-title .material-icons { font-size: 18px; color: var(--app-gold); }
+
+        .esp-card {
+            display: flex; align-items: center; gap: 14px;
+            margin: 0 18px 10px;
+            padding: 16px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            position: relative; overflow: hidden;
+        }
+        .esp-card:active { transform: scale(0.98); opacity: 0.85; }
+        .esp-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+        }
+
+        /* Copa variant */
+        .esp-copa {
+            background: linear-gradient(135deg, rgba(107,16,41,0.35) 0%, rgba(30,58,95,0.3) 100%);
+            border: 1px solid rgba(212,175,55,0.25);
+        }
+        .esp-copa::before { background: linear-gradient(90deg, #D4AF37, rgba(212,175,55,0.15)); }
+        .esp-copa .esp-icon {
+            background: rgba(212,175,55,0.12); border: 1px solid rgba(212,175,55,0.25);
+        }
+        .esp-copa .esp-icon .material-icons { color: var(--app-gold); }
+
+        /* Libertadores variant */
+        .esp-liberta {
+            background: linear-gradient(135deg, rgba(27,94,32,0.3) 0%, rgba(46,125,50,0.15) 100%);
+            border: 1px solid rgba(27,94,32,0.35);
+        }
+        .esp-liberta::before { background: linear-gradient(90deg, #2E7D32, rgba(46,125,50,0.15)); }
+        .esp-liberta .esp-icon {
+            background: rgba(46,125,50,0.15); border: 1px solid rgba(46,125,50,0.3);
+        }
+        .esp-liberta .esp-icon .material-icons { color: #4ade80; }
+
+        .esp-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .esp-icon .material-icons { font-size: 24px; }
+        .esp-text { flex: 1; }
+        .esp-name {
+            font-family: 'Russo One', sans-serif;
+            font-size: 13px; color: white; letter-spacing: 0.2px;
+        }
+        .esp-desc { font-size: 10px; color: var(--app-text-muted); margin-top: 2px; }
+        .esp-card .chevron { font-size: 20px; color: rgba(255,255,255,0.25); }
+    </style>
+</head>
+<body>
+
+<!-- RIBBON -->
+<div class="mockup-ribbon">PREVIEW — Clique em "Especial" para ver o sheet</div>
+
+<!-- LEGEND -->
+<div class="mockup-legend">
+    <div class="mockup-legend-title">Legenda</div>
+    <div class="legend-row">
+        <div class="legend-item"><div class="legend-dot dot-new"></div><strong style="color:#22c55e">NOVO</strong></div>
+        <div class="legend-item"><div class="legend-dot dot-changed"></div><strong style="color:#eab308">ALTERADO</strong></div>
+        <div class="legend-item"><div class="legend-dot dot-moved"></div><strong style="color:#3b82f6">MOVIDO</strong></div>
+    </div>
+</div>
+
+<!-- ═══ HEADER (inalterado) ═══ -->
+<div class="app-header">
+    <div class="hdr-left">
+        <div class="hdr-avatar">
+            <span class="material-icons">person</span>
+            <div class="hdr-club">FLA</div>
+        </div>
+        <div class="hdr-info">
+            <span class="hdr-name">FC WESLEY OLIVEIRA</span>
+            <span class="hdr-sub">Wesley Oliveira <span class="hdr-ver">v18.03.26.0742</span></span>
+        </div>
+    </div>
+    <span class="material-icons" style="color:var(--app-text-dim)">more_vert</span>
+</div>
+
+<!-- ═══ QUICK ACTIONS — ALTERADO ═══ -->
+<div style="position:relative">
+    <span class="tag tag-changed" style="top:2px;right:16px">ALTERADO — 4 chips</span>
+</div>
+<section class="qa-bar hl-changed">
+    <div class="qa-chip">
+        <span class="material-icons">groups</span>
+        <span class="qa-chip-label">Participantes</span>
+    </div>
+    <div class="qa-chip">
+        <span class="material-icons">workspace_premium</span>
+        <span class="qa-chip-label">Cartola PRO</span>
+    </div>
+    <div class="qa-chip qa-chip-new" style="box-shadow: 0 0 0 1.5px rgba(34,197,94,0.35);">
+        <span class="material-icons" style="color:var(--app-teal)">newspaper</span>
+        <span class="qa-chip-label">Info do Meu Time</span>
+    </div>
+    <div class="qa-chip qa-chip-new" style="box-shadow: 0 0 0 1.5px rgba(34,197,94,0.35);">
+        <span class="material-icons" style="color:var(--app-success-light)">calendar_month</span>
+        <span class="qa-chip-label">Agenda e Tabelas</span>
+    </div>
+</section>
+
+<!-- ═══ HERO CARD (inalterado) ═══ -->
+<section class="hero-section">
+    <div class="hero-card">
+        <div class="hero-market">
+            <span class="hero-dot"></span>
+            <span class="hero-market-title">MERCADO ABERTO</span>
+            <span class="hero-sep">&bull;</span>
+            <span class="hero-sub">Rodada 7 &bull; Fecha em 1h</span>
+            <span class="material-icons hero-chevron">chevron_right</span>
+        </div>
+        <div class="hero-pts-area">
+            <div class="hero-pts-label">RODADA 6</div>
+            <div class="hero-pts-num">82,89</div>
+        </div>
+        <div class="hero-row">
+            <div class="hero-stat">
+                <span class="hero-stat-lbl">Posicao</span>
+                <span class="hero-stat-val">12&ordm;</span>
+                <span class="hero-stat-dim">(de 35)</span>
+            </div>
+            <div class="hero-sep-line"></div>
+            <div class="hero-stat">
+                <span class="hero-stat-lbl">Total</span>
+                <span class="hero-stat-val">469,63</span>
+            </div>
+        </div>
+        <div class="hero-cta">
+            <span>Ver detalhes da rodada</span>
+            <span class="material-icons">chevron_right</span>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ MODULOS INLINE — MOVIDO do Menu ═══ -->
+<div style="position:relative">
+    <span class="tag tag-moved" style="top:4px;right:16px">MOVIDO do Menu sheet → Home</span>
+</div>
+<section class="modules-section hl-moved" style="margin:0 8px;padding:10px 10px 0;border-radius:16px;">
+
+    <!-- COMPETICOES -->
+    <div class="mod-cat">
+        <div class="mod-cat-title">
+            <span class="material-icons">emoji_events</span>
+            Competicoes
+        </div>
+        <div class="mod-grid">
+            <div class="mod-card"><span class="material-icons ic-rodadas">view_week</span><span class="mod-card-label">Rodadas</span></div>
+            <div class="mod-card"><span class="material-icons ic-pc">format_list_numbered</span><span class="mod-card-label">Pontos Corridos</span></div>
+            <div class="mod-card"><span class="material-icons ic-mm">military_tech</span><span class="mod-card-label">Mata-Mata</span></div>
+            <div class="mod-card"><span class="material-icons ic-top10">leaderboard</span><span class="mod-card-label">TOP 10</span></div>
+            <div class="mod-card"><span class="material-icons ic-campinho">sports_soccer</span><span class="mod-card-label">Meu Time da Rodada</span></div>
+            <div class="mod-card"><span class="material-icons ic-resta">person_off</span><span class="mod-card-label">Resta Um</span></div>
+        </div>
+    </div>
+
+    <!-- PREMIOS -->
+    <div class="mod-cat">
+        <div class="mod-cat-title">
+            <span class="material-icons">workspace_premium</span>
+            Premios & Estatisticas
+        </div>
+        <div class="mod-grid">
+            <div class="mod-card"><span class="material-icons ic-artilheiro">sports_soccer</span><span class="mod-card-label">Artilheiro</span></div>
+            <div class="mod-card"><span class="material-icons ic-luva">sports_handball</span><span class="mod-card-label">Luva de Ouro</span></div>
+            <div class="mod-card"><span class="material-icons ic-capitao">emoji_events</span><span class="mod-card-label">Capitao de Luxo</span></div>
+            <div class="mod-card"><span class="material-icons ic-melhor">calendar_month</span><span class="mod-card-label">Melhor do Mes</span></div>
+            <div class="mod-card"><span class="material-icons ic-hall">history</span><span class="mod-card-label">Hall da Fama</span></div>
+        </div>
+    </div>
+
+    <!-- EM BREVE -->
+    <div class="mod-cat">
+        <div class="mod-cat-title">
+            <span class="material-icons">upcoming</span>
+            Em Breve
+        </div>
+        <div class="mod-grid">
+            <div class="mod-card em-breve">
+                <span class="material-icons" style="color:var(--app-gold)!important">emoji_events</span>
+                <span class="mod-card-label">Copa de Times SC</span>
+                <span class="badge-breve badge-gold">EM BREVE</span>
+            </div>
+            <div class="mod-card em-breve">
+                <span class="material-icons" style="color:var(--app-primary)!important">gps_fixed</span>
+                <span class="mod-card-label">Tiro Certo</span>
+                <span class="badge-breve badge-orange">EM BREVE</span>
+            </div>
+            <div class="mod-card em-breve">
+                <span class="material-icons">sports</span>
+                <span class="mod-card-label">Bolao Copa</span>
+                <span class="badge-breve badge-dim">EM BREVE</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="bottom-spacer"></div>
+
+<!-- ═══ BOTTOM NAV — Menu vira Especial ═══ -->
+<nav class="bottom-nav">
+    <div class="nav-row">
+        <button class="nav-btn active">
+            <span class="material-icons">home</span>
+            <span class="nav-btn-label">Inicio</span>
+        </button>
+        <button class="nav-btn">
+            <span class="material-icons">trending_up</span>
+            <span class="nav-btn-label">Ranking Geral</span>
+        </button>
+        <button class="nav-btn especial-btn" id="btnEspecial" style="position:relative">
+            <span class="material-icons">auto_awesome</span>
+            <span class="nav-btn-label">Especial</span>
+            <span class="tag tag-changed" style="top:-20px;left:50%;transform:translateX(-50%);">ERA "MENU"</span>
+        </button>
+        <button class="nav-btn">
+            <span class="material-icons">account_balance_wallet</span>
+            <span class="nav-btn-label">Financeiro</span>
+        </button>
+    </div>
+</nav>
+
+<!-- ═══ ESPECIAL SHEET ═══ -->
+<div class="esp-overlay" id="espOverlay"></div>
+<div class="esp-sheet" id="espSheet">
+    <div class="esp-handle"></div>
+    <div class="esp-title">
+        <span class="material-icons">auto_awesome</span>
+        Especial
+    </div>
+    <div class="esp-card esp-copa">
+        <div class="esp-icon"><span class="material-icons">public</span></div>
+        <div class="esp-text">
+            <div class="esp-name">Copa do Mundo 2026</div>
+            <div class="esp-desc">Jogos, grupos e tabela ao vivo</div>
+        </div>
+        <span class="material-icons chevron">chevron_right</span>
+    </div>
+    <div class="esp-card esp-liberta">
+        <div class="esp-icon"><span class="material-icons">emoji_events</span></div>
+        <div class="esp-text">
+            <div class="esp-name">Libertadores 2026</div>
+            <div class="esp-desc">Noticias e resultados da Liberta</div>
+        </div>
+        <span class="material-icons chevron">chevron_right</span>
+    </div>
+</div>
+
+<!-- INTERACAO -->
+<script>
+    const btn = document.getElementById('btnEspecial');
+    const ov = document.getElementById('espOverlay');
+    const sh = document.getElementById('espSheet');
+
+    btn.addEventListener('click', () => {
+        ov.classList.add('vis');
+        sh.classList.add('vis');
+    });
+    ov.addEventListener('click', () => {
+        ov.classList.remove('vis');
+        sh.classList.remove('vis');
+    });
+
+    let ts = 0;
+    sh.addEventListener('touchstart', e => { ts = e.touches[0].clientY; });
+    sh.addEventListener('touchend', e => {
+        if (e.changedTouches[0].clientY - ts > 50) {
+            ov.classList.remove('vis');
+            sh.classList.remove('vis');
+        }
+    });
+</script>
+
+</body>
+</html>
