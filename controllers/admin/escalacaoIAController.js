@@ -427,10 +427,13 @@ async function gatoMestreConectar(req, res) {
         }
 
         const auth = {
-            glbid: resultado.glbId,
+            access_token: resultado.accessToken,
+            refresh_token: resultado.refreshToken,
+            id_token: resultado.idToken,
+            glbid: resultado.glbId || null,
             email,
             nome: email.split('@')[0],
-            expires_at: Math.floor(Date.now() / 1000) + (resultado.expiresIn || 7200),
+            expires_at: Math.floor(Date.now() / 1000) + (resultado.expiresIn || 300),
         };
 
         const salvo = await systemTokenService.salvarTokenSistema(auth);

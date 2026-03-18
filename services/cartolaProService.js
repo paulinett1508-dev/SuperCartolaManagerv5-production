@@ -71,79 +71,68 @@ const POSICAO_TIPO = {
 
 class CartolaProService {
     constructor() {
-        this.loginUrl = 'https://login.globo.com/api/authentication';
+        this.oidcUrl = 'https://goidc.globo.com/auth/realms/globo.com/protocol/openid-connect/token';
         this.apiUrl = 'https://api.cartolafc.globo.com';
     }
 
     /**
-     * Autentica usuário na API Globo
+     * Autentica usuário via OIDC Password Grant (Keycloak Globo)
      * @param {string} email - Email da conta Globo
      * @param {string} password - Senha da conta Globo
-     * @returns {Promise<{success: boolean, glbId?: string, error?: string}>}
+     * @returns {Promise<{success: boolean, glbId?: string, accessToken?: string, refreshToken?: string, expiresIn?: number, error?: string}>}
      */
     async autenticar(email, password) {
-        CartolaProLogger.info('Iniciando autenticação Globo', { email: email.substring(0, 3) + '***' });
+        CartolaProLogger.info('Iniciando autenticação Globo (OIDC)', { email: email.substring(0, 3) + '***' });
 
         try {
-            // Delay para simular comportamento humano
             await sleep(500 + Math.random() * 500);
 
-            const response = await httpClient.post(this.loginUrl, {
-                payload: {
-                    email: email,
+            const response = await axios.post(this.oidcUrl,
+                new URLSearchParams({
+                    grant_type: 'password',
+                    username: email,
                     password: password,
-                    serviceId: 4728 // ID do Cartola FC
+                    client_id: 'cartola-web@apps.globoid',
+                    scope: 'openid profile email',
+                }).toString(),
+                {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Origin': 'https://www.cartola.globo.com',
+                        'Referer': 'https://www.cartola.globo.com/',
+                    },
+                    timeout: 15000,
                 }
-            }, {
-                headers: {
-                    'Origin': 'https://login.globo.com',
-                    'Referer': 'https://login.globo.com/',
-                    'Accept': 'application/json, text/plain, */*',
-                }
-            });
+            );
 
-            if (response.status === 200 && response.data.glbId) {
-                const glbId = response.data.glbId;
-
-                CartolaProLogger.info('Autenticação bem-sucedida');
-
+            if (response.data?.access_token) {
+                CartolaProLogger.info('Autenticação OIDC bem-sucedida');
                 return {
                     success: true,
-                    glbId: glbId,
-                    expiresIn: 7200 // 2 horas (estimativa)
+                    accessToken: response.data.access_token,
+                    refreshToken: response.data.refresh_token,
+                    idToken: response.data.id_token,
+                    expiresIn: response.data.expires_in || 300,
                 };
             }
 
             CartolaProLogger.warn('Resposta inesperada da API Globo', { status: response.status });
-            return {
-                success: false,
-                error: 'Resposta inesperada do servidor'
-            };
+            return { success: false, error: 'Resposta inesperada do servidor' };
 
         } catch (error) {
             const status = error.response?.status;
-            const message = error.response?.data?.userMessage || error.message;
+            const errorDesc = error.response?.data?.error_description || error.message;
 
-            CartolaProLogger.error('Erro na autenticação', { status, message });
+            CartolaProLogger.error('Erro na autenticação', { status, message: errorDesc });
 
-            if (status === 401 || status === 400) {
-                return {
-                    success: false,
-                    error: 'Email ou senha incorretos'
-                };
+            if (status === 401 || status === 400 || status === 403) {
+                return { success: false, error: 'Email ou senha incorretos' };
             }
-
             if (status === 429) {
-                return {
-                    success: false,
-                    error: 'Muitas tentativas. Aguarde alguns minutos.'
-                };
+                return { success: false, error: 'Muitas tentativas. Aguarde alguns minutos.' };
             }
 
-            return {
-                success: false,
-                error: 'Erro ao conectar com a Globo. Tente novamente.'
-            };
+            return { success: false, error: `Erro ao conectar com a Globo (${status || 'rede'})` };
         }
     }
 
