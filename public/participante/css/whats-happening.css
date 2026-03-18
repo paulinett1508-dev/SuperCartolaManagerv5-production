@@ -46,6 +46,11 @@
     --wh-cooling-dark: #b45309;
     --wh-cooling-deep: #92400e;
     --wh-cooling-stone: #78716c;
+
+    /* Ember: brasas residuais (WAITING/FINISHED) */
+    --wh-ember-glow: rgba(255, 85, 0, 0.15);
+    --wh-ember-soft: rgba(255, 85, 0, 0.06);
+    --wh-ember-warm: rgba(255, 120, 30, 0.12);
 }
 
 /* ========================================
@@ -244,6 +249,18 @@
     }
 }
 
+/* Brasas: glow sutil laranja para estados "apagados" */
+@keyframes wh-ember-glow {
+    0%, 100% {
+        box-shadow: 0 2px 8px var(--wh-ember-soft);
+    }
+    50% {
+        box-shadow:
+            0 2px 12px var(--wh-ember-glow),
+            0 0 20px var(--wh-ember-soft);
+    }
+}
+
 @keyframes wh-fab-entrance {
     0% {
         opacity: 0;
@@ -337,14 +354,12 @@
     }
 }
 
-/* --- WAITING: Fogo apagado — estático, totalmente cinza, sem movimento --- */
+/* --- WAITING: Brasas tênues — cinza escuro com glow sutil de fogo residual --- */
 .wh-fab--waiting {
-    background: linear-gradient(135deg, var(--wh-gray-600) 0%, var(--wh-gray-500) 50%, var(--wh-gray-600) 100%) !important;
+    background: linear-gradient(135deg, var(--wh-gray-600) 0%, #4a4040 50%, var(--wh-gray-600) 100%) !important;
     background-size: 100% 100% !important;
-    border-color: rgba(107, 114, 128, 0.3) !important;
-    box-shadow:
-        0 2px 8px rgba(75, 85, 99, 0.3) !important;
-    animation: none !important;
+    border-color: rgba(180, 83, 9, 0.15) !important;
+    animation: wh-ember-glow 4s ease-in-out infinite !important;
 }
 
 /* Waiting + novidades: pulso quase imperceptível */
@@ -358,20 +373,20 @@
 }
 
 .wh-fab--waiting::before {
-    background: linear-gradient(135deg, var(--wh-gray-600), var(--wh-gray-500), var(--wh-gray-400), var(--wh-gray-600)) !important;
-    opacity: 0.15 !important;
-    animation: none !important;
+    background: linear-gradient(135deg, var(--wh-gray-600), var(--wh-cooling-dark), var(--wh-gray-500), var(--wh-gray-600)) !important;
+    opacity: 0.2 !important;
+    animation: wh-ring-rotate 10s linear infinite !important;
 }
 
 .wh-fab--waiting::after {
-    background: none !important;
-    animation: none !important;
+    background: radial-gradient(circle, var(--wh-ember-warm) 0%, transparent 70%) !important;
+    animation: wh-glow-pulse 5s ease-in-out infinite !important;
 }
 
 .wh-fab--waiting .wh-fab-icon {
     color: var(--app-text-muted) !important;
-    animation: none !important;
-    filter: grayscale(100%) opacity(0.55) !important;
+    animation: wh-icon-dance 3s ease-in-out infinite alternate !important;
+    filter: grayscale(70%) opacity(0.65) !important;
 }
 
 /* --- LIVE: Fogo vibrante máximo, todas animações ativas --- */
@@ -471,14 +486,12 @@
     60% { opacity: 0.65; transform: scale(0.98); }
 }
 
-/* --- FINISHED: Fogo apagado, ícone cinza estático --- */
+/* --- FINISHED: Cinzas com brasa residual mínima --- */
 .wh-fab--finished {
-    background: linear-gradient(135deg, var(--wh-gray-700) 0%, var(--wh-gray-600) 50%, var(--wh-gray-700) 100%) !important;
+    background: linear-gradient(135deg, var(--wh-gray-700) 0%, #3d3535 50%, var(--wh-gray-700) 100%) !important;
     background-size: 100% 100% !important;
     border-color: rgba(75, 85, 99, 0.3) !important;
-    box-shadow:
-        0 2px 8px rgba(55, 65, 81, 0.3) !important;
-    animation: none !important;
+    animation: wh-ember-glow 6s ease-in-out infinite !important;
 }
 
 /* Finished + novidades: pulso quase imperceptível */
@@ -492,20 +505,20 @@
 }
 
 .wh-fab--finished::before {
-    background: linear-gradient(135deg, var(--wh-gray-700), var(--wh-gray-600), var(--wh-gray-500), var(--wh-gray-700)) !important;
+    background: linear-gradient(135deg, var(--wh-gray-700), var(--wh-cooling-stone), var(--wh-gray-600), var(--wh-gray-700)) !important;
     opacity: 0.15 !important;
-    animation: none !important;
+    animation: wh-ring-rotate 15s linear infinite !important;
 }
 
 .wh-fab--finished::after {
-    background: none !important;
-    animation: none !important;
+    background: radial-gradient(circle, var(--wh-ember-soft) 0%, transparent 70%) !important;
+    animation: wh-glow-pulse 7s ease-in-out infinite !important;
 }
 
 .wh-fab--finished .wh-fab-icon {
     color: var(--app-text-muted) !important;
-    animation: none !important;
-    filter: grayscale(100%) !important;
+    animation: wh-cooling-flicker 4s ease-in-out infinite !important;
+    filter: grayscale(85%) !important;
 }
 
 /* ========================================
