@@ -228,7 +228,8 @@
       "Bash(__NEW_LINE_373e26140c37506f__ echo:*)",
       "Bash(__NEW_LINE_425f0077549bc756__ echo:*)",
       "Bash(timeout:*)",
-      "Skill(replit-patterns)"
+      "Skill(replit-patterns)",
+      "Bash(node -e \"JSON.parse\\(require\\(''fs''\\).readFileSync\\(''package.json'',''utf8''\\)\\)\")"
     ]
   },
   "enableAllProjectMcpServers": true,
