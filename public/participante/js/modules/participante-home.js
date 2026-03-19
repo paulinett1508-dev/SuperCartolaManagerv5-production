@@ -249,8 +249,10 @@ async function carregarDadosERenderizar(ligaId, timeId, participante) {
             ? cacheV2.get(`rodadas:${ligaId}:${temporada}`, async () => { const r = await fetch(`/api/rodadas/${ligaId}/rodadas?inicio=1&fim=${RODADA_FINAL_CAMPEONATO}&temporada=${temporada}`); return r.ok ? r.json() : rodadas; })
             : fetch(`/api/rodadas/${ligaId}/rodadas?inicio=1&fim=${RODADA_FINAL_CAMPEONATO}&temporada=${temporada}`).then(r => r.ok ? r.json() : rodadas);
 
+        // ✅ PERFORMANCE: buscarStatusMercado() já chamada no Promise.all anterior (linha ~198)
+        // Não duplicar — mercadoStatus já está populado e cacheado no CacheV2
         let [ligaFresh, rankingFresh, rodadasFresh] = await Promise.all([
-            fetchLiga, fetchRanking, fetchRodadas, buscarStatusMercado()
+            fetchLiga, fetchRanking, fetchRodadas
         ]);
 
         // Extrair dados do wrapper cacheHint (backend agora retorna { ranking/rodadas, cacheHint })
@@ -701,9 +703,21 @@ async function verificarStatusPremium() {
 
 async function buscarStatusMercado() {
     try {
-        const response = await fetch('/api/cartola/mercado/status');
-        if (response.ok) {
-            mercadoStatus = await response.json();
+        // ✅ PERFORMANCE: Usar CacheV2 (IndexedDB + memória) com TTL 2min
+        // Evita fetch repetido a cada navegação para Home
+        const cacheV2 = window.Cache;
+        const fetchMercado = async () => {
+            const response = await fetch('/api/cartola/mercado/status');
+            if (!response.ok) return null;
+            return response.json();
+        };
+
+        const data = cacheV2
+            ? await cacheV2.get('mercado:status', fetchMercado, { ttl: 2 * 60 * 1000 })
+            : await fetchMercado();
+
+        if (data) {
+            mercadoStatus = data;
             // Expor globalmente para outros módulos (Resta Um, Capitão, etc.)
             window.cartolaState = {
                 statusMercado: mercadoStatus.status_mercado,
