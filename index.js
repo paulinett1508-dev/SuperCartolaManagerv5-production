@@ -235,6 +235,17 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ====================================================================
+// 🛡️ CACHE EM MEMÓRIA DO index.html — imune a EIO pós-deploy
+// Lido uma vez no boot; catch-all serve da memória sem tocar no disco.
+// ====================================================================
+let cachedIndexHtml = null;
+try {
+  cachedIndexHtml = readFileSync(path.join(__dirname, "public", "index.html"), "utf8");
+} catch (e) {
+  console.error("[BOOT] Falha ao cachear index.html:", e.code || e.message);
+}
+
+// ====================================================================
 // 🚀 PORTA ABRE PRIMEIRO — Replit precisa ver o port antes do timeout
 // connectDB() pode demorar (cold start Atlas); porta NÃO pode esperar
 // ====================================================================
@@ -742,10 +753,18 @@ app.get("*", (req, res) => {
   if (ext && ext !== '.html') {
     return res.status(404).end();
   }
+
+  // ✅ FIX EIO: Servir da memória (cacheado no boot) — zero leitura de disco
+  if (cachedIndexHtml) {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    return res.send(cachedIndexHtml);
+  }
+
+  // Fallback: disco (só se cache falhou no boot — improvável)
   const htmlPath = path.resolve("public/index.html");
   res.sendFile(htmlPath, (err) => {
     if (!err) return;
-    // Retry uma vez após 500ms (EIO é transiente pós-deploy)
     setTimeout(() => {
       res.sendFile(htmlPath, (retryErr) => {
         if (!retryErr) return;
