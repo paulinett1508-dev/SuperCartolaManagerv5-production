@@ -83,6 +83,7 @@ const CACHE_CONFIG = {
 let edicaoAtual = null;
 let tamanhoTorneio = TAMANHO_TORNEIO_DEFAULT;
 let rodadaAtualGlobal = 0; // ✅ Rodada atual do Brasileirão (para bloqueio de fases futuras)
+let statusMercadoGlobal = null; // ✅ v2.2: Status do mercado para detecção de rodada ao vivo
 
 // ✅ Cache de status do mercado (evita fetches duplicados)
 let mercadoStatusCache = null;
@@ -924,6 +925,7 @@ async function carregarFase(fase, ligaId) {
       if (data) {
         rodada_atual = data.rodada_atual || 1;
         const mercadoAberto = data.status_mercado === 1;
+        statusMercadoGlobal = data.status_mercado; // ✅ v2.2: Capturar para detecção isLive
         const temporadaAPI = data.temporada || new Date().getFullYear();
         const anoAtual = new Date().getFullYear();
         const RODADA_FINAL_CAMPEONATO = data.rodada_final || RODADA_FINAL_CAMPEONATO;
@@ -942,6 +944,7 @@ async function carregarFase(fase, ligaId) {
         }
       } else {
         // ✅ v2.1 FIX: Fallback para rodadaAtualGlobal quando mercado indisponível
+        statusMercadoGlobal = null; // ✅ v2.2: Desconhecido = conservador (não isLive)
         if (rodadaAtualGlobal > 0) {
           rodada_atual = rodadaAtualGlobal;
           console.warn(`[MATA-ORQUESTRADOR] Mercado indisponível, usando rodadaAtualGlobal=${rodadaAtualGlobal}`);
@@ -952,6 +955,7 @@ async function carregarFase(fase, ligaId) {
     } catch (err) {
       console.warn("[MATA-ORQUESTRADOR] Erro ao buscar mercado:", err.message);
       // ✅ v2.1 FIX: Fallback para rodadaAtualGlobal quando mercado dá timeout
+      statusMercadoGlobal = null; // ✅ v2.2: Desconhecido = conservador (não isLive)
       if (rodadaAtualGlobal > 0) {
         rodada_atual = rodadaAtualGlobal;
         console.warn(`[MATA-ORQUESTRADOR] Usando rodadaAtualGlobal=${rodadaAtualGlobal} como fallback`);
@@ -1030,8 +1034,11 @@ async function carregarFase(fase, ligaId) {
     } = currentFaseInfo;
 
     let isPending = rodada_atual < rodadaPontosNum;
+    // ✅ v2.2: 3 estados — isPending (futura), isLive (ao vivo), isConcluded (encerrada)
+    const isLive = !isPending && rodada_atual === rodadaPontosNum && statusMercadoGlobal === 2;
+    const isConcluded = !isPending && !isLive;
     console.log(
-      `[MATA-ORQUESTRADOR] Rodada ${rodadaPontosNum} - Status: ${isPending ? "Pendente" : "Concluída"}`,
+      `[MATA-ORQUESTRADOR] Rodada ${rodadaPontosNum} - Status: ${isPending ? "Pendente" : isLive ? "AO VIVO" : "Concluída"}`,
     );
 
     // ✅ v1.9: BLOQUEAR fases cujos classificados ainda não são conhecidos
@@ -1045,8 +1052,8 @@ async function carregarFase(fase, ligaId) {
       console.log(`[MATA-ORQUESTRADOR] ⏳ Fase ${fase} pendente - exibindo classificados (fase anterior encerrada na rodada ${prevFaseRodada})`);
     }
 
-    // ✅ TENTAR CACHE PRIMEIRO (apenas para rodadas consolidadas)
-    if (!isPending) {
+    // ✅ TENTAR CACHE PRIMEIRO (apenas para rodadas consolidadas, NUNCA ao vivo)
+    if (isConcluded) {
       const cachedConfrontos = await getCachedConfrontos(
         ligaId,
         edicaoAtual,
@@ -1064,6 +1071,7 @@ async function carregarFase(fase, ligaId) {
           edicaoAtual,
           isPending,
           rodadaPontosNum,
+          false, // isLive=false — dados do cache são sempre de rodadas concluídas
         );
 
         if (fase === "final" && cachedConfrontos.length > 0) {
@@ -1073,6 +1081,7 @@ async function carregarFase(fase, ligaId) {
             cachedConfrontos[0],
             edicaoNome,
             isPending,
+            false, // isLive=false
           );
         }
 
@@ -1120,8 +1129,8 @@ async function carregarFase(fase, ligaId) {
         ? montarConfrontosPrimeiraFase(rankingBase, pontosRodadaAtual, tamanhoTorneio)
         : montarConfrontosFase(timesParaConfronto, pontosRodadaAtual, numJogos);
 
-    // ✅ v1.9: Session cache apenas para fases com pontos reais (evita cache de pontos nulos)
-    if (!isPending) {
+    // ✅ v1.9/v2.2: Session cache apenas para rodadas concluídas (nunca isPending ou isLive)
+    if (isConcluded) {
       await setCachedConfrontos(
         ligaId,
         edicaoAtual,
@@ -1138,7 +1147,7 @@ async function carregarFase(fase, ligaId) {
       typeof c.timeA?.pontos === 'number' && typeof c.timeB?.pontos === 'number'
     );
 
-    if (confrontosTemPontosReais) {
+    if (confrontosTemPontosReais && !isLive) {
       await salvarFaseNoMongoDB(
         ligaId,
         edicaoAtual,
@@ -1150,8 +1159,8 @@ async function carregarFase(fase, ligaId) {
       console.warn(`[MATA-ORQUESTRADOR] ⚠️ Fase ${fase} com pontos null — NÃO salvando no MongoDB (evita cache stale)`);
     }
 
-    // Calcular valores dos confrontos (isPending=true → valores=0)
-    calcularValoresConfronto(confrontos, isPending, fase);
+    // Calcular valores dos confrontos (isPending ou isLive → valores=0)
+    calcularValoresConfronto(confrontos, isPending || isLive, fase);
 
     // Renderizar tabela (rodadaPontosNum garante texto correto independente do tamanho do torneio)
     renderTabelaMataMata(
@@ -1161,12 +1170,13 @@ async function carregarFase(fase, ligaId) {
       edicaoAtual,
       isPending,
       rodadaPontosNum,
+      isLive,
     );
 
-    // Renderizar banner do campeão na FINAL apenas quando rodada já aconteceu
-    if (fase === "final" && confrontos.length > 0 && !isPending) {
+    // Renderizar banner do campeão na FINAL apenas quando rodada CONCLUÍDA (nunca ao vivo)
+    if (fase === "final" && confrontos.length > 0 && isConcluded) {
       const edicaoNome = edicaoSelecionada.nome;
-      renderBannerCampeao(contentId, confrontos[0], edicaoNome, false);
+      renderBannerCampeao(contentId, confrontos[0], edicaoNome, false, false);
       console.log(
         `[MATA-ORQUESTRADOR] Banner do campeão renderizado para ${edicaoNome}`,
       );
@@ -1191,6 +1201,7 @@ function setupCleanup() {
     pontosRodadaCache.clear();
     rankingBaseCache.clear();
     mercadoStatusCache = null;
+    statusMercadoGlobal = null;
     rodadasCarregados = false;
     console.log("[MATA-ORQUESTRADOR] Cleanup executado");
   });
@@ -1218,6 +1229,7 @@ window.addEventListener('consolidacao-detectada', (event) => {
   tamanhoTorneioCache.clear();
   mercadoStatusCache = null;
   mercadoStatusTimestamp = 0;
+  statusMercadoGlobal = null;
 
   // Recarregar mata-mata se a tela estiver visível
   const container = document.getElementById("mata-mata");

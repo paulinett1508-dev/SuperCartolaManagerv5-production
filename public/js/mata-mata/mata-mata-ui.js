@@ -211,15 +211,19 @@ export function renderTabelaMataMata(
   edicaoAtual,
   isPending = false,
   rodadaNum = null,
+  isLive = false,
 ) {
   const container = document.getElementById(containerId);
   if (!container) return;
 
   const formatPoints = (points) => {
     if (isPending) return "?";
-    return typeof points === "number"
-      ? points.toFixed(2).replace(".", ",")
-      : "-";
+    if (typeof points === "number") {
+      // ✅ v2.2: Truncar (NUNCA arredondar) — regra crítica do projeto
+      const truncated = Math.trunc(points * 100) / 100;
+      return truncated.toFixed(2).replace(".", ",");
+    }
+    return "-";
   };
 
   container.innerHTML = `
@@ -231,6 +235,11 @@ export function renderTabelaMataMata(
       <div class="mata-mata-rodada">
         ${rodadaNum ? `Pontuação da Rodada ${rodadaNum}` : getRodadaPontosText(faseLabel, edicaoAtual)}
       </div>
+      ${isLive ? `
+      <div class="parciais-live-badge">
+        <span>PARCIAL — Rodada em andamento</span>
+      </div>
+      ` : ""}
     </div>
     <div class="mata-mata-table-container">
       <table class="mata-mata-table">
@@ -250,19 +259,20 @@ export function renderTabelaMataMata(
               const valorA = c.timeA.valor || 0;
               const valorB = c.timeB.valor || 0;
 
-              // ✅ Determinar vencedor/perdedor baseado nos pontos
+              // ✅ v2.2: Vitória/derrota apenas quando rodada concluída (não isPending nem isLive)
+              const showResultado = !isPending && !isLive;
               const pontosA = c.timeA.pontos || 0;
               const pontosB = c.timeB.pontos || 0;
               const resultadoA =
-                !isPending && pontosA > pontosB
+                showResultado && pontosA > pontosB
                   ? "resultado-vitoria"
-                  : !isPending && pontosA < pontosB
+                  : showResultado && pontosA < pontosB
                     ? "resultado-derrota"
                     : "";
               const resultadoB =
-                !isPending && pontosB > pontosA
+                showResultado && pontosB > pontosA
                   ? "resultado-vitoria"
-                  : !isPending && pontosB < pontosA
+                  : showResultado && pontosB < pontosA
                     ? "resultado-derrota"
                     : "";
 
@@ -348,9 +358,11 @@ export function renderBannerCampeao(
   confronto,
   edicaoNome,
   isPending = false,
+  isLive = false,
 ) {
   const contentElement = document.getElementById(containerId);
-  if (!contentElement || isPending) return;
+  // ✅ v2.2: Nunca declarar campeão durante rodada ao vivo (pontos parciais)
+  if (!contentElement || isPending || isLive) return;
 
   // Determinar o campeão
   const timeA = confronto.timeA;
