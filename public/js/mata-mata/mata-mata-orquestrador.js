@@ -1034,8 +1034,10 @@ async function carregarFase(fase, ligaId) {
     } = currentFaseInfo;
 
     let isPending = rodada_atual < rodadaPontosNum;
-    // ✅ v2.2: 3 estados — isPending (futura), isLive (ao vivo), isConcluded (encerrada)
-    const isLive = !isPending && rodada_atual === rodadaPontosNum && statusMercadoGlobal === 2;
+    // ✅ v2.3: 3 estados — isPending (futura), isLive (não finalizada), isConcluded (encerrada)
+    // status_mercado: 1=aberto (não jogou), 2=jogos rolando, 3=processando, 4=finalizada, 6=temporada fim
+    // Quando rodada_atual === rodadaPontosNum, só é "concluída" se status=4/6 ou fallback (null)
+    const isLive = !isPending && rodada_atual === rodadaPontosNum && [1, 2, 3].includes(statusMercadoGlobal);
     const isConcluded = !isPending && !isLive;
     console.log(
       `[MATA-ORQUESTRADOR] Rodada ${rodadaPontosNum} - Status: ${isPending ? "Pendente" : isLive ? "AO VIVO" : "Concluída"}`,
