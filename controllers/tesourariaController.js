@@ -928,8 +928,8 @@ export async function postAcerto(req, res) {
 
         const sessentaSegundosAtras = new Date(Date.now() - 60000);
         const duplicata = await AcertoFinanceiro.findOne({
-            ligaId: String(ligaId),
-            timeId: String(timeId),
+            liga_id: String(ligaId),
+            time_id: Number(timeId),
             tipo,
             valor: valorNumerico,
             temporada: Number(temporada),
@@ -972,8 +972,8 @@ export async function postAcerto(req, res) {
                 console.log(`[TESOURARIA] ✅ TROCO DETECTADO: R$ ${valorTroco.toFixed(2)}`);
 
                 acertoTroco = new AcertoFinanceiro({
-                    ligaId: String(ligaId),
-                    timeId: String(timeId),
+                    liga_id: String(ligaId),
+                    time_id: Number(timeId),
                     nomeTime: nomeTimeFinal,
                     temporada,
                     tipo: "recebimento",
@@ -989,8 +989,8 @@ export async function postAcerto(req, res) {
         }
 
         const novoAcerto = new AcertoFinanceiro({
-            ligaId: String(ligaId),
-            timeId: String(timeId),
+            liga_id: String(ligaId),
+            time_id: Number(timeId),
             nomeTime: nomeTimeFinal,
             temporada,
             tipo,
