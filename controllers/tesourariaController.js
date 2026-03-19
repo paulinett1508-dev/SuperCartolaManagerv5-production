@@ -14,6 +14,7 @@ import FluxoFinanceiroCampos from "../models/FluxoFinanceiroCampos.js";
 import AcertoFinanceiro from "../models/AcertoFinanceiro.js";
 import InscricaoTemporada from "../models/InscricaoTemporada.js";
 import AjusteFinanceiro from "../models/AjusteFinanceiro.js";
+import Top10Cache from "../models/Top10Cache.js";
 import { CURRENT_SEASON, PREVIOUS_SEASON } from "../config/seasons.js";
 import {
     calcularResumoDeRodadas,
@@ -505,6 +506,43 @@ export async function getLiga(req, res) {
             capitaoLuxo: liga.modulos_ativos?.capitaoLuxo === true,
         };
 
+        // ✅ FIX Bug2: Bulk TOP10 lookup — cache pode não ter MICO/MITO se getExtratoFinanceiro nunca rodou
+        // Top10Cache é criado pela consolidação e contém posições; valores R$ vêm da config da liga
+        const top10DeltaMap = new Map();
+        if (modulosAtivos.top10) {
+            try {
+                const top10Cache = await Top10Cache.findOne({
+                    liga_id: ligaIdStr,
+                    temporada: temporadaNum
+                }).sort({ rodada_consolidada: -1 }).lean();
+
+                if (top10Cache?.mitos?.length || top10Cache?.micos?.length) {
+                    const configTop10 = liga.configuracoes?.top10 || {};
+                    const valoresMito = configTop10.valores_mito || {};
+                    const valoresMico = configTop10.valores_mico || {};
+
+                    (top10Cache.mitos || []).slice(0, 10).forEach((m, i) => {
+                        const tId = String(m.timeId || m.time_id);
+                        const pos = i + 1;
+                        const valor = valoresMito[pos] || valoresMito[String(pos)] || 0;
+                        if (valor) top10DeltaMap.set(tId, (top10DeltaMap.get(tId) || 0) + valor);
+                    });
+                    (top10Cache.micos || []).slice(0, 10).forEach((m, i) => {
+                        const tId = String(m.timeId || m.time_id);
+                        const pos = i + 1;
+                        const valor = valoresMico[pos] || valoresMico[String(pos)] || 0;
+                        if (valor) top10DeltaMap.set(tId, (top10DeltaMap.get(tId) || 0) + valor);
+                    });
+
+                    if (top10DeltaMap.size > 0) {
+                        console.log(`[TESOURARIA] TOP10 bulk lookup: ${top10DeltaMap.size} participantes com delta TOP10`);
+                    }
+                }
+            } catch (err) {
+                console.warn(`[TESOURARIA] Erro ao buscar Top10Cache (não-fatal):`, err.message);
+            }
+        }
+
         const participantes = [];
         let totalCredores = 0;
         let totalDevedores = 0;
@@ -527,6 +565,14 @@ export async function getLiga(req, res) {
                 ajustesList: ajustesFinMap.get(timeId) || [],
             });
             const saldoCampos = resumoCalculado.camposManuais || 0;
+
+            // ✅ FIX Bug2: Se TOP10 habilitado mas cache sem MICO/MITO, injetar delta do Top10Cache
+            const temTop10NoHistorico = historico.some(t => t.tipo === 'MITO' || t.tipo === 'MICO');
+            if (!temTop10NoHistorico && top10DeltaMap.has(timeId)) {
+                const deltaTop10 = top10DeltaMap.get(timeId);
+                saldoConsolidado += deltaTop10;
+                resumoCalculado.top10 = (resumoCalculado.top10 || 0) + deltaTop10;
+            }
 
             // B3-FALLBACK: Se inscrição sem saldo anterior, recalcular da temporada anterior
             if (temporadaNum >= CURRENT_SEASON &&

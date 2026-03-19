@@ -2282,8 +2282,11 @@ export class FluxoFinanceiroUI {
             const saldoFinalBase =
                 typeof p.saldoFinal === 'number' ? p.saldoFinal : 0;
 
-            const saldoTemporadaIntegrado = saldoTemporadaBase + deltaSaldo;
-            const saldoFinalIntegrado = saldoFinalBase + deltaSaldo;
+            // ✅ FIX: API saldoFinal já inclui TODOS os módulos (banco, PC, MM, TOP10, etc.)
+            // deltaIntegracoes é mantido apenas para exibição de breakdown visual,
+            // mas NÃO deve alterar o saldo — re-somar causava double-counting
+            const saldoTemporadaIntegrado = saldoTemporadaBase;
+            const saldoFinalIntegrado = saldoFinalBase;
             const situacaoIntegrada =
                 saldoFinalIntegrado > 0
                     ? 'credor'
