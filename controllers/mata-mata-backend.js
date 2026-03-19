@@ -1,8 +1,11 @@
 /**
- * MATA-MATA-BACKEND.JS v1.2
+ * MATA-MATA-BACKEND.JS v1.4
  * Lógica de Mata-Mata para Node.js - Espelho do frontend
  * Calcula todas as fases: primeira, oitavas, quartas, semis, final
  *
+ * v1.4: FIX CRÍTICO - Consolidação não deve pular fases com pontos null
+ *   - Confrontos salvos durante rodada ao vivo (pts null) eram considerados "calculados"
+ *   - Agora verifica se os pontos existem antes de considerar cache como válido
  * v1.2: FIX CRÍTICO - Usar tamanhoTorneio do MataMataCache (bracket salvo pelo admin)
  *   - Resolve bug onde participantes não classificados recebiam cobrança indevida
  *   - O cálculo financeiro agora respeita o bracket salvo em vez de recalcular independente
@@ -806,9 +809,17 @@ export async function calcularBracketParaConsolidacao(ligaId, rodadaAtual) {
             const indiceFaseAtual = rodadaAtual - edicao.rodadaInicial;
             const faseEsperada = fasesDaEdicao[Math.min(indiceFaseAtual, fasesDaEdicao.length - 1)];
 
-            if (cacheExistente?.dados_torneio?.[faseEsperada]?.length > 0) {
-                // Cache já tem dados para a fase esperada — admin já calculou
-                logger.log(`[MATA-CONSOLIDAÇÃO-CALC] ✅ Edição ${edicao.id}: cache já atualizado (fase ${faseEsperada} presente)`);
+            // ✅ v1.4: Verificar se a fase tem confrontos COM pontos reais (não null)
+            // Confrontos salvos durante rodada ao vivo podem ter pts null — não são "calculados"
+            const confrontosFaseEsperada = cacheExistente?.dados_torneio?.[faseEsperada];
+            const faseTemPontosReais = Array.isArray(confrontosFaseEsperada) && confrontosFaseEsperada.length > 0 &&
+                confrontosFaseEsperada.every(c =>
+                    typeof c.timeA?.pontos === 'number' && typeof c.timeB?.pontos === 'number'
+                );
+
+            if (faseTemPontosReais) {
+                // Cache já tem dados COM pontos reais para a fase esperada — admin já calculou
+                logger.log(`[MATA-CONSOLIDAÇÃO-CALC] ✅ Edição ${edicao.id}: cache já atualizado (fase ${faseEsperada} com pontos reais)`);
                 resultados.push({
                     edicao: edicao.id,
                     rodada_atual: cacheExistente.rodada_atual,
@@ -816,6 +827,10 @@ export async function calcularBracketParaConsolidacao(ligaId, rodadaAtual) {
                     ultima_atualizacao: cacheExistente.ultima_atualizacao
                 });
                 continue;
+            }
+
+            if (Array.isArray(confrontosFaseEsperada) && confrontosFaseEsperada.length > 0 && !faseTemPontosReais) {
+                logger.warn(`[MATA-CONSOLIDAÇÃO-CALC] ⚠️ Edição ${edicao.id}: fase ${faseEsperada} tem confrontos com pontos null — recalculando`);
             }
 
             // 3. Cache stale ou inexistente — calcular bracket
@@ -896,10 +911,17 @@ export async function calcularBracketParaConsolidacao(ligaId, rodadaAtual) {
                     break;
                 }
 
-                // Se fase já existe no cache, usar dados existentes para avançar vencedores
-                if (dadosTorneio[fase]?.length > 0) {
+                // Se fase já existe no cache COM pontos reais, usar dados existentes para avançar vencedores
+                // ✅ v1.4: Não reutilizar confrontos com pontos null (salvos durante rodada ao vivo)
+                const confrontosCacheFase = dadosTorneio[fase];
+                const cacheFaseTemPontos = Array.isArray(confrontosCacheFase) && confrontosCacheFase.length > 0 &&
+                    confrontosCacheFase.every(c =>
+                        typeof c.timeA?.pontos === 'number' && typeof c.timeB?.pontos === 'number'
+                    );
+
+                if (cacheFaseTemPontos) {
                     const proximosVencedores = [];
-                    dadosTorneio[fase].forEach(confronto => {
+                    confrontosCacheFase.forEach(confronto => {
                         const { vencedor } = determinarVencedor(confronto);
                         if (vencedor) {
                             vencedor.jogoAnterior = confronto.jogo;
@@ -908,6 +930,10 @@ export async function calcularBracketParaConsolidacao(ligaId, rodadaAtual) {
                     });
                     vencedoresAnteriores = proximosVencedores;
                     continue;
+                }
+
+                if (Array.isArray(confrontosCacheFase) && confrontosCacheFase.length > 0 && !cacheFaseTemPontos) {
+                    logger.warn(`[MATA-CONSOLIDAÇÃO-CALC] ⚠️ Edição ${edicao.id} - fase ${fase}: confrontos com pontos null no cache, recalculando`);
                 }
 
                 // Calcular fase
