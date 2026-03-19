@@ -97,7 +97,7 @@ async function getMercadoStatusCached() {
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000);
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
     const response = await fetch("/api/cartola/mercado/status", {
       signal: controller.signal,
     });
@@ -941,11 +941,23 @@ async function carregarFase(fase, ligaId) {
           }
         }
       } else {
-        rodada_atual = 0;
+        // ✅ v2.1 FIX: Fallback para rodadaAtualGlobal quando mercado indisponível
+        if (rodadaAtualGlobal > 0) {
+          rodada_atual = rodadaAtualGlobal;
+          console.warn(`[MATA-ORQUESTRADOR] Mercado indisponível, usando rodadaAtualGlobal=${rodadaAtualGlobal}`);
+        } else {
+          rodada_atual = 0;
+        }
       }
     } catch (err) {
-      console.warn("[MATA-ORQUESTRADOR] Erro ao buscar mercado, usando defaults seguros");
-      rodada_atual = 0;
+      console.warn("[MATA-ORQUESTRADOR] Erro ao buscar mercado:", err.message);
+      // ✅ v2.1 FIX: Fallback para rodadaAtualGlobal quando mercado dá timeout
+      if (rodadaAtualGlobal > 0) {
+        rodada_atual = rodadaAtualGlobal;
+        console.warn(`[MATA-ORQUESTRADOR] Usando rodadaAtualGlobal=${rodadaAtualGlobal} como fallback`);
+      } else {
+        rodada_atual = 0;
+      }
       isTemporadaAnterior = false;
     }
 
