@@ -25,6 +25,9 @@ const FASES_LIBERTADORES = [
 export async function inicializarLibertadoresParticipante(params) {
     if (window.Log) Log.info('LIBERTADORES', 'Inicializando LP Libertadores 2026...');
 
+    // Registrar cleanup no window para o navigation poder chamar ao sair
+    window.destruirLibertadoresParticipante = destruirLibertadoresParticipante;
+
     try {
         renderizarCountdown();
         countdownInterval = setInterval(renderizarCountdown, 60000);
