@@ -5,7 +5,6 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "webhook": "node webhook-server.js",
     "predev": "lsof -ti :3000 | xargs -r kill -15 2>/dev/null; sleep 1; true",
     "start": "NODE_ENV=production node index.js",
     "dev": "cross-env NODE_ENV=development node index.js",

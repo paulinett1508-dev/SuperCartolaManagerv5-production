@@ -57,6 +57,11 @@ async function retryRequest(requestFn, maxRetries = 3, baseDelay = 1000) {
         url: error.config?.url
       });
 
+      // Erros 4xx são determinísticos — retry não resolve, jogar imediatamente
+      if (error.response?.status >= 400 && error.response?.status < 500) {
+        throw error;
+      }
+
       if (attempt === maxRetries) {
         throw error;
       }
