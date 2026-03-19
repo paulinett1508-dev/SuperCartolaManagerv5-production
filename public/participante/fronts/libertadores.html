@@ -2,7 +2,7 @@
 <div id="libertadores-container" class="p-4 pb-28">
     <!-- Header com botao voltar -->
     <div class="flex items-center gap-3 mb-4">
-        <button onclick="window.participanteNav && window.participanteNav.navegarPara('home')"
+        <button onclick="window.quickAccessBar ? window.quickAccessBar.abrirMenu() : history.back()"
                 class="w-9 h-9 rounded-xl flex items-center justify-center"
                 style="background: var(--app-glass-bg); border: 1px solid var(--app-glass-border);">
             <span class="material-icons" style="font-size:20px; color: var(--app-text-muted);">arrow_back</span>
