@@ -234,6 +234,30 @@ import { protegerRotas, injetarSessaoDevAdmin, verificarAdmin } from "./middlewa
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ====================================================================
+// 🚀 PORTA ABRE PRIMEIRO — Replit precisa ver o port antes do timeout
+// connectDB() pode demorar (cold start Atlas); porta NÃO pode esperar
+// ====================================================================
+if (process.env.NODE_ENV !== "test") {
+  httpServer = app.listen(PORT, "0.0.0.0", () => {
+    const startupLog = IS_PRODUCTION ? originalConsole.log : console.log;
+    startupLog(`🚀 SUPER CARTOLA MANAGER RODANDO NA PORTA ${PORT}`);
+    startupLog(`🌍 Ambiente: ${IS_PRODUCTION ? 'PRODUÇÃO' : 'DESENVOLVIMENTO'}`);
+    startupLog(`📦 Versão: ${APP_VERSION.version} (build ${APP_VERSION.build})`);
+
+    if (IS_DEVELOPMENT) {
+      console.log(`💾 Sessões persistentes: ATIVADAS (MongoDB Store)`);
+      console.log(`🔐 Autenticação Admin: Google OAuth`);
+      console.log(`🔐 Autenticação Participante: Senha do Time`);
+      console.log(`🛡️ Segurança: Headers + Rate Limiting ATIVADOS`);
+      console.log(`📝 Logs: VERBOSE (desenvolvimento)`);
+    } else {
+      startupLog(`🔇 Logs: SILENCIADOS (produção)`);
+      startupLog(`🛡️ Erros: Mensagens genéricas (sem stack trace)`);
+    }
+  });
+}
+
 // Conectar ao Banco de Dados (Otimizado)
 await connectDB();
 
@@ -252,6 +276,9 @@ setupSecurity(app);
 
 // Trust proxy (necessário para rate limiting correto no Replit)
 app.set("trust proxy", 1);
+
+// Health check — responde imediatamente, usado pelo Replit no deploy
+app.get("/health", (req, res) => res.status(200).json({ status: "ok" }));
 
 // ====================================================================
 // 📦 COMPRESSION - Reduz ~70% do tamanho de JS/CSS na transferência
@@ -897,35 +924,9 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Inicialização do Servidor
+// Capturar intervalId do rate limiting (httpServer já foi iniciado no topo)
 if (process.env.NODE_ENV !== "test") {
-  try {
-    httpServer = app.listen(PORT, "0.0.0.0", () => {
-      // Capturar intervalId do rate limiting após inicialização
-      rateLimitCleanupIntervalId = getRateLimitCleanupIntervalId();
-      
-      // Log de inicialização sempre visível (usa console original)
-      const startupLog = IS_PRODUCTION ? originalConsole.log : console.log;
-
-      startupLog(`🚀 SUPER CARTOLA MANAGER RODANDO NA PORTA ${PORT}`);
-      startupLog(`🌍 Ambiente: ${IS_PRODUCTION ? 'PRODUÇÃO' : 'DESENVOLVIMENTO'}`);
-      startupLog(`📦 Versão: ${APP_VERSION.version} (build ${APP_VERSION.build})`);
-
-      if (IS_DEVELOPMENT) {
-        console.log(`💾 Sessões persistentes: ATIVADAS (MongoDB Store)`);
-        console.log(`🔐 Autenticação Admin: Google OAuth`);
-        console.log(`🔐 Autenticação Participante: Senha do Time`);
-        console.log(`🛡️ Segurança: Headers + Rate Limiting ATIVADOS`);
-        console.log(`📝 Logs: VERBOSE (desenvolvimento)`);
-      } else {
-        startupLog(`🔇 Logs: SILENCIADOS (produção)`);
-        startupLog(`🛡️ Erros: Mensagens genéricas (sem stack trace)`);
-      }
-    });
-  } catch (err) {
-    originalConsole.error("❌ Erro ao conectar ao MongoDB:", err.message);
-    process.exit(1);
-  }
+  rateLimitCleanupIntervalId = getRateLimitCleanupIntervalId();
 }
 
 // ====================================================================
