@@ -402,6 +402,21 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 
 ---
 
+### Infraestrutura — Context-Mode (Proteção de Contexto)
+
+#### context-mode
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `context-mode`, `ctx`, `proteção de contexto`, `economia de tokens`, `janela de contexto`, `output grande`, `ctx-doctor`, `ctx-stats`, `ctx-upgrade` |
+| **Frases PT-BR** | "output muito grande", "economizar contexto", "proteger contexto", "diagnóstico context-mode", "estatísticas de contexto", "atualizar context-mode", "rodar no sandbox", "analisar output grande", "indexar conteúdo", "quanto contexto economizei", "ctx doctor", "ctx stats" |
+| **Contexto** | Qualquer operação que possa gerar >20 linhas de output. Redirecionar para `ctx_batch_execute`, `ctx_execute`, `ctx_execute_file` ou `ctx_fetch_and_index` em vez de Bash/Read direto |
+| **Ferramentas** | `ctx_batch_execute` (múltiplos comandos), `ctx_execute` (sandbox JS/Python/Shell), `ctx_execute_file` (análise de arquivo), `ctx_fetch_and_index` (indexar URL), `ctx_search` (follow-up queries) |
+| **Skills** | `/context-mode:ctx-doctor` (diagnóstico), `/context-mode:ctx-stats` (economia), `/context-mode:ctx-upgrade` (atualizar), `/context-mode:ctx-cloud-setup` (cloud), `/context-mode:ctx-cloud-status` (status cloud) |
+| **Ativação automática** | Hooks PreToolUse e SessionStart já configurados. Roteamento automático via hook quando output estimado >20 linhas |
+| **NÃO confundir** | Cache de aplicação → `cache-auditor`; Performance do app → `performance-audit` |
+
+---
+
 ### 05 - Meta (Skills sobre Skills)
 
 #### skill-creator
@@ -486,6 +501,13 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | "pre-flight da rodada" | `live-experience` | Check antes da rodada |
 | "criar uma skill nova" | `skill-creator` | Meta |
 | "instalar skill X" | `skill-installer` | Meta |
+| "output muito grande" | `context-mode` | Proteção de contexto |
+| "economizar contexto" | `context-mode` | Redirecionar para sandbox |
+| "ctx doctor" | `context-mode:ctx-doctor` | Diagnóstico do plugin |
+| "ctx stats" | `context-mode:ctx-stats` | Economia da sessão |
+| "atualizar context-mode" | `context-mode:ctx-upgrade` | Update do plugin |
+| "analisar output grande" | `context-mode` | ctx_execute/ctx_batch_execute |
+| "quanto contexto economizei" | `context-mode:ctx-stats` | Relatório de economia |
 | "quais MCPs temos?" | `project-reference` | Referencia detalhada |
 | "detalhes das collections" | `project-reference` | Tipos de ID, divida tecnica |
 | "tabela de keywords completa" | `project-reference` | Keyword→Skill map |
@@ -553,6 +575,8 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | Documentação | `system-scribe` |
 | Deploy completo | `git-commit-push` → `replit-pull` |
 | Consulta API Cartola | `cartola-api` → `fact-checker` |
+| Diagnóstico context-mode | `/ctx-doctor` → `/ctx-stats` → `/ctx-upgrade` (se necessário) |
+| Análise de output grande | `context-mode` (ctx_batch_execute ou ctx_execute_file) → `ctx_search` (follow-up) |
 
 ---
 

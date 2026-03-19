@@ -229,7 +229,12 @@
       "Bash(__NEW_LINE_425f0077549bc756__ echo:*)",
       "Bash(timeout:*)",
       "Skill(replit-patterns)",
-      "Bash(node -e \"JSON.parse\\(require\\(''fs''\\).readFileSync\\(''package.json'',''utf8''\\)\\)\")"
+      "Bash(node -e \"JSON.parse\\(require\\(''fs''\\).readFileSync\\(''package.json'',''utf8''\\)\\)\")",
+      "mcp__plugin_context-mode_context-mode__ctx_stats",
+      "Skill(financial-operations)",
+      "mcp__plugin_context-mode_context-mode__ctx_batch_execute",
+      "mcp__plugin_context-mode_context-mode__ctx_execute_file",
+      "mcp__plugin_context-mode_context-mode__ctx_search"
     ]
   },
   "enableAllProjectMcpServers": true,
