@@ -341,6 +341,24 @@ export async function exportarExtratoPDF(timeId) {
             }
         });
 
+        // ✅ FIX: Processar transações TOP10 (MICO/MITO) que não estão merged nas rodadas
+        // O getExtratoFinanceiro retorna MICO/MITO como entries separadas em extrato.extrato
+        // que podem não estar refletidas no r.top10 das rodadas
+        const rodadasComTop10 = new Set();
+        extrato.rodadas.forEach(r => {
+            if ((r.top10 || 0) !== 0) rodadasComTop10.add(r.rodada);
+        });
+        const transacoesBrutas = extrato.extrato || extrato.transacoes || [];
+        transacoesBrutas.forEach(t => {
+            if (!t.tipo || !t.valor) return;
+            // Só adicionar se a rodada não teve top10 processado acima (evita double-counting)
+            if (t.tipo === "MITO" && !rodadasComTop10.has(t.rodada)) {
+                ganhos.push({ modulo: "TOP 10 MITOS", desc: `R${t.rodada} - Melhor da rodada`, valor: t.valor });
+            } else if (t.tipo === "MICO" && !rodadasComTop10.has(t.rodada)) {
+                perdas.push({ modulo: "TOP 10 MICOS", desc: `R${t.rodada} - Pior da rodada`, valor: t.valor });
+            }
+        });
+
         // Campos manuais - usar o nome exato do campo
         const campos = extrato.camposEditaveis || {};
         ["campo1", "campo2", "campo3", "campo4"].forEach((key) => {

@@ -8,6 +8,9 @@ import cartolaApiService from "../services/cartolaApiService.js";
 // Cache de escalações — não mudam durante a rodada (TTL 5min, max 500 entries)
 const escalacaoProxyCache = new NodeCache({ stdTTL: 300, maxKeys: 500 });
 
+// Cache do status do mercado — reduz chamadas externas à API Cartola (TTL 3min)
+const mercadoStatusCache = new NodeCache({ stdTTL: 180, maxKeys: 1 });
+
 const router = express.Router();
 const CARTOLA_API_BASE = "https://api.cartola.globo.com";
 
@@ -83,9 +86,14 @@ router.get("/mercado/status", async (req, res) => {
         });
     }
 
-    try {
-        console.log("🔄 [CARTOLA-PROXY] Buscando status do mercado...");
+    // ✅ PERFORMANCE: Cache NodeCache 3min — evita chamada externa a cada request
+    const CACHE_KEY = 'mercado_status';
+    const cached = mercadoStatusCache.get(CACHE_KEY);
+    if (cached) {
+        return res.json(cached);
+    }
 
+    try {
         const response = await axios.get(
             "https://api.cartola.globo.com/mercado/status",
             {
@@ -97,10 +105,6 @@ router.get("/mercado/status", async (req, res) => {
             },
         );
 
-        console.log(
-            "✅ [CARTOLA-PROXY] Status do mercado obtido:",
-            response.data,
-        );
         const cacheHint = buildCacheHint({
             rodadaAtual: response.data.rodada_atual,
             statusMercado: response.data.status_mercado,
@@ -108,7 +112,12 @@ router.get("/mercado/status", async (req, res) => {
             temporadaAtual: response.data.temporada,
             tipo: 'mercado'
         });
-        res.json({ ...response.data, cacheHint });
+        const resultado = { ...response.data, cacheHint };
+
+        // Cachear por 3 minutos (status do mercado muda raramente)
+        mercadoStatusCache.set(CACHE_KEY, resultado);
+
+        res.json(resultado);
     } catch (error) {
         console.error(
             "❌ [CARTOLA-PROXY] Erro ao buscar status do mercado:",
@@ -119,18 +128,19 @@ router.get("/mercado/status", async (req, res) => {
         const rodadaCalculada = calcularRodadaAtual();
         const agora = new Date();
 
-        console.log(
-            `⚠️ [CARTOLA-PROXY] Usando fallback dinâmico - Rodada: ${rodadaCalculada}`,
-        );
-
-        res.json({
+        const fallbackData = {
             rodada_atual: rodadaCalculada,
             status_mercado: 1, // ABERTO (permite banner aparecer)
             mes: agora.getMonth() + 1,
             ano: agora.getFullYear(),
             aviso: "Dados de fallback - API indisponível",
             fallback: true,
-        });
+        };
+
+        // Cachear fallback por 1 minuto (menos TTL pois é fallback)
+        mercadoStatusCache.set(CACHE_KEY, fallbackData, 60);
+
+        res.json(fallbackData);
     }
 });
 

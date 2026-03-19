@@ -1,4 +1,5 @@
-// MATA-MATA ORQUESTRADOR - Coordenador Principal v1.8
+// MATA-MATA ORQUESTRADOR - Coordenador Principal v2.1
+// ✅ v2.1: FIX CRÍTICO - Não salvar fase com pontos null no MongoDB (evita cache stale que bloqueia final)
 // ✅ v1.8: FIX - Persistir fases intermediárias no MongoDB (evita oitavas/primeira órfãs)
 // ✅ v1.5: Importa RODADA_FINAL_CAMPEONATO de season-config.js (elimina hardcode 38)
 // Responsável por: coordenação de módulos, carregamento dinâmico, cache
@@ -1118,15 +1119,24 @@ async function carregarFase(fase, ligaId) {
       );
     }
 
-    // MongoDB: salvar sempre que classificados são conhecidos (pending ou não)
-    // Quando a rodada jogar, o admin recomputa com pontos reais e sobrescreve
-    await salvarFaseNoMongoDB(
-      ligaId,
-      edicaoAtual,
-      fase,
-      confrontos,
-      rodada_atual,
+    // ✅ v2.1 FIX: NÃO salvar no MongoDB quando a fase atual tem pontos null
+    // Confrontos com pts null (rodada ao vivo/pendente) bloqueiam o recálculo posterior
+    // Fases anteriores (já consolidadas no loop acima) são salvas normalmente via salvarFaseNoMongoDB
+    const confrontosTemPontosReais = confrontos.every(c =>
+      typeof c.timeA?.pontos === 'number' && typeof c.timeB?.pontos === 'number'
     );
+
+    if (confrontosTemPontosReais) {
+      await salvarFaseNoMongoDB(
+        ligaId,
+        edicaoAtual,
+        fase,
+        confrontos,
+        rodada_atual,
+      );
+    } else {
+      console.warn(`[MATA-ORQUESTRADOR] ⚠️ Fase ${fase} com pontos null — NÃO salvando no MongoDB (evita cache stale)`);
+    }
 
     // Calcular valores dos confrontos (isPending=true → valores=0)
     calcularValoresConfronto(confrontos, isPending, fase);
