@@ -385,6 +385,11 @@
         "moduleColor": "--cw-accent (mapeavel por modulo)"
       },
       {
+        "path": "public/participante/css/libertadores-lp.css",
+        "loadedBy": ["participante/fronts/libertadores.html (inline <link>)"],
+        "description": "Landing Page da Libertadores 2026 — hero, countdown, notícias, timeline de fases. Namespace liberta-*. Usa tokens --app-liberta-*"
+      },
+      {
         "path": "public/participante/css/brasileirao-tabela.css",
         "loadedBy": ["participante/index.html"],
         "description": "Faixa Tabela do Brasileirão colapsável (Landing Page style). Namespace .brasileirao-*",

@@ -526,7 +526,7 @@ class ParticipanteNavigation {
      */
     _isModuloOpcionalInativo(moduloId) {
         // Módulos de sistema/base: sempre permitidos (inclui sub-módulos como rodada-xray)
-        const modulosPermitidos = ['home', 'boas-vindas', 'extrato', 'ranking', 'rodadas', 'rodada-xray', 'historico', 'configuracoes', 'copa-times-sc', 'copa-2026-mundo', 'regras'];
+        const modulosPermitidos = ['home', 'boas-vindas', 'extrato', 'ranking', 'rodadas', 'rodada-xray', 'historico', 'configuracoes', 'copa-times-sc', 'copa-2026-mundo', 'regras', 'libertadores'];
         if (modulosPermitidos.includes(moduloId)) return false;
 
         // Sem dados de módulos carregados: permitir (graceful degradation)
@@ -1026,6 +1026,7 @@ class ParticipanteNavigation {
             regras: "Regras",
             configuracoes: "Configurações",
             "copa-2026-mundo": "Copa do Mundo 2026",
+            "libertadores": "Libertadores 2026",
         };
         return nomes[moduloId] || moduloId;
     }
@@ -1081,6 +1082,7 @@ class ParticipanteNavigation {
             "rodada-xray": "/participante/js/modules/participante-rodada-xray.js",
             "resta-um": "/participante/js/modules/participante-resta-um.js",
             "tiro-certo": "/participante/js/modules/participante-tiro-certo.js",
+            "libertadores": "/participante/js/modules/participante-libertadores.js",
         };
 
         const jsPath = modulosPaths[modulo];

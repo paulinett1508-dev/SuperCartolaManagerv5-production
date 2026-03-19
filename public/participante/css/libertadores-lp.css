@@ -1,0 +1,436 @@
+/**
+ * Libertadores 2026 - Landing Page Styles
+ * =========================================
+ * LP dedicada à CONMEBOL Libertadores da América 2026
+ * Usa tokens de _app-tokens.css (--app-liberta-*)
+ * Mobile-first, dark theme, namespace: liberta-*
+ * Dependência: _app-tokens.css
+ */
+
+/* ═══════════════════════════════════════════════════
+   PAGE CONTAINER
+   ═══════════════════════════════════════════════════ */
+.liberta-page {
+    min-height: 100vh;
+    background: var(--app-bg, #0a0a0a);
+    padding-bottom: 5rem;
+}
+
+/* ═══════════════════════════════════════════════════
+   BOTAO VOLTAR
+   ═══════════════════════════════════════════════════ */
+.liberta-btn-voltar {
+    position: sticky;
+    top: 12px;
+    left: 12px;
+    z-index: 50;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--app-text-primary, #fff);
+    cursor: pointer;
+    margin: 12px 0 -48px 12px;
+    transition: background 0.2s, transform 0.15s;
+}
+.liberta-btn-voltar:active {
+    transform: scale(0.92);
+    background: rgba(0, 0, 0, 0.65);
+}
+.liberta-btn-voltar .material-icons {
+    font-size: 1.1rem;
+}
+
+/* ═══════════════════════════════════════════════════
+   HERO
+   ═══════════════════════════════════════════════════ */
+.liberta-hero {
+    position: relative;
+    overflow: hidden;
+    margin: 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--app-liberta-border, rgba(27, 94, 32, 0.35));
+    background: var(--app-surface, #1a1a1a);
+}
+
+/* Flag accent bar — Verde CONMEBOL → Dourado */
+.liberta-flag-accent {
+    height: 4px;
+    background: linear-gradient(
+        90deg,
+        var(--app-liberta-primary, #1B5E20) 0%,
+        var(--app-liberta-accent, #2E7D32) 50%,
+        var(--app-liberta-secondary, #D4AF37) 100%
+    );
+}
+
+.liberta-hero-content {
+    position: relative;
+    z-index: 1;
+    padding: 1.5rem 1rem 1.75rem;
+    text-align: center;
+}
+
+.liberta-hero-trophy {
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
+    font-size: 2.5rem;
+    line-height: 1;
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 2px 8px rgba(212, 175, 55, 0.4));
+}
+
+.liberta-hero-title {
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 2rem;
+    color: var(--app-text-primary, #fff);
+    letter-spacing: -0.02em;
+    margin: 0;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.liberta-hero-subtitle {
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 2.5rem;
+    color: var(--app-liberta-secondary, #D4AF37);
+    margin: 0;
+    line-height: 1;
+    font-style: italic;
+}
+
+.liberta-hero-local {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.6rem;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.5));
+    margin: 0.5rem 0 1.5rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+/* Countdown — grid boxes */
+.liberta-countdown {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    padding: 0 0.5rem;
+}
+
+.liberta-countdown-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--app-liberta-muted, rgba(27, 94, 32, 0.15));
+    border: 1px solid var(--app-liberta-border, rgba(27, 94, 32, 0.35));
+    border-radius: 0.5rem;
+    padding: 0.75rem 0.5rem;
+}
+
+.liberta-countdown-value {
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 1.75rem;
+    font-weight: 400;
+    color: var(--app-liberta-secondary, #D4AF37);
+    line-height: 1.2;
+}
+
+.liberta-countdown-label {
+    font-size: 0.55rem;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.5));
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-top: 0.15rem;
+}
+
+.liberta-hero-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    font-size: 0.7rem;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.5));
+    margin: 0;
+}
+
+.liberta-hero-info .material-icons {
+    font-size: 0.85rem;
+    color: var(--app-liberta-secondary, #D4AF37);
+}
+
+/* ═══════════════════════════════════════════════════
+   FORMATO STATS STRIP
+   ═══════════════════════════════════════════════════ */
+.liberta-stats-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin: 0 1rem 1.25rem;
+}
+
+.liberta-stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--app-surface, #1a1a1a);
+    border: 1px solid var(--app-border, #333);
+    border-radius: 0.65rem;
+    padding: 0.75rem 0.4rem;
+}
+
+.liberta-stat-value {
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 1.25rem;
+    color: var(--app-liberta-secondary, #D4AF37);
+    line-height: 1;
+}
+
+.liberta-stat-label {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.52rem;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.45));
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-align: center;
+    margin-top: 0.25rem;
+    line-height: 1.3;
+}
+
+/* ═══════════════════════════════════════════════════
+   SECTIONS GENÉRICO
+   ═══════════════════════════════════════════════════ */
+.liberta-section {
+    padding: 1.5rem 1rem 0;
+}
+
+.liberta-section + .liberta-section::before {
+    content: '';
+    display: block;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, var(--app-border, #333) 30%, var(--app-border, #333) 70%, transparent 100%);
+    margin: 0 0 1.25rem;
+    opacity: 0.5;
+}
+
+.liberta-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.liberta-section-icon .material-icons {
+    color: var(--app-liberta-secondary, #D4AF37);
+    font-size: 1.25rem;
+}
+
+.liberta-section-title {
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 1rem;
+    color: var(--app-text-primary, #fff);
+    margin: 0;
+    flex: 1;
+    text-transform: uppercase;
+    font-style: italic;
+}
+
+.liberta-section-badge {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: var(--app-liberta-secondary, #D4AF37);
+    background: var(--app-liberta-muted, rgba(27, 94, 32, 0.15));
+    border: 1px solid var(--app-liberta-border, rgba(27, 94, 32, 0.35));
+    border-radius: 999px;
+    padding: 0.15rem 0.5rem;
+    white-space: nowrap;
+}
+
+.liberta-loading-placeholder {
+    text-align: center;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.4));
+    font-size: 0.85rem;
+    padding: 2rem 0;
+}
+
+/* ═══════════════════════════════════════════════════
+   NOTÍCIAS — Cards lista
+   ═══════════════════════════════════════════════════ */
+.liberta-noticias-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.liberta-noticia-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    background: var(--app-surface, #1a1a1a);
+    border-radius: 0.75rem;
+    padding: 0.85rem;
+    border: 1px solid var(--app-border, #333);
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.liberta-noticia-card:active {
+    border-color: var(--app-liberta-secondary, #D4AF37);
+}
+
+.liberta-noticia-icon {
+    width: 2rem;
+    height: 2rem;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--app-liberta-muted, rgba(27, 94, 32, 0.15));
+    border-radius: 0.5rem;
+}
+
+.liberta-noticia-icon .material-icons {
+    font-size: 1rem;
+    color: var(--app-liberta-accent, #2E7D32);
+}
+
+.liberta-noticia-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.liberta-noticia-title {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--app-text-primary, #fff);
+    line-height: 1.4;
+    margin: 0 0 0.35rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.liberta-noticia-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.6rem;
+}
+
+.liberta-noticia-fonte {
+    color: var(--app-liberta-secondary, #D4AF37);
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.liberta-noticia-tempo {
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.4));
+}
+
+.liberta-noticia-chevron {
+    font-size: 1.1rem;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.3));
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+}
+
+/* ═══════════════════════════════════════════════════
+   FASES — Timeline vertical
+   ═══════════════════════════════════════════════════ */
+.liberta-timeline {
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.liberta-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.25rem;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    width: 2px;
+    background: var(--app-liberta-border, rgba(27, 94, 32, 0.35));
+}
+
+.liberta-timeline-item {
+    position: relative;
+    padding: 0 0 1.5rem 1.25rem;
+}
+
+.liberta-timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.liberta-timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -1.2rem;
+    top: 0.25rem;
+    width: 0.6rem;
+    height: 0.6rem;
+    background: var(--app-text-muted, rgba(255, 255, 255, 0.3));
+    border-radius: 50%;
+    border: 2px solid var(--app-bg, #0a0a0a);
+}
+
+.liberta-timeline-item--final::before {
+    background: var(--app-liberta-secondary, #D4AF37);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+    width: 0.75rem;
+    height: 0.75rem;
+    left: -1.25rem;
+}
+
+.liberta-timeline-item--active::before {
+    background: var(--app-liberta-accent, #2E7D32);
+    box-shadow: 0 0 8px rgba(46, 125, 50, 0.5);
+}
+
+.liberta-timeline-fase {
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 0.85rem;
+    color: var(--app-text-primary, #fff);
+    margin-bottom: 0.15rem;
+}
+
+.liberta-timeline-item--final .liberta-timeline-fase {
+    color: var(--app-liberta-secondary, #D4AF37);
+    font-style: italic;
+}
+
+.liberta-timeline-item--active .liberta-timeline-fase {
+    color: var(--app-liberta-accent, #2E7D32);
+}
+
+.liberta-timeline-info {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.6rem;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.5));
+    text-transform: uppercase;
+}
+
+.liberta-timeline-badge {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.5rem;
+    font-weight: 700;
+    color: var(--app-liberta-accent, #2E7D32);
+    background: rgba(46, 125, 50, 0.12);
+    border: 1px solid rgba(46, 125, 50, 0.25);
+    border-radius: 999px;
+    padding: 0.1rem 0.4rem;
+    margin-left: 0.4rem;
+    vertical-align: middle;
+    text-transform: uppercase;
+}

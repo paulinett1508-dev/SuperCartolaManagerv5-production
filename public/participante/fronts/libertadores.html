@@ -1,60 +1,100 @@
-<!-- LIBERTADORES 2026 - Tela dedicada -->
-<div id="libertadores-container" class="p-4 pb-28">
-    <!-- Header com botao voltar -->
-    <div class="flex items-center gap-3 mb-4">
-        <button onclick="window.quickAccessBar ? window.quickAccessBar.abrirMenu() : history.back()"
-                class="w-9 h-9 rounded-xl flex items-center justify-center"
-                style="background: var(--app-glass-bg); border: 1px solid var(--app-glass-border);">
-            <span class="material-icons" style="font-size:20px; color: var(--app-text-muted);">arrow_back</span>
-        </button>
-        <div>
-            <h1 style="font-family: 'Russo One', sans-serif; font-size: 16px; color: white; letter-spacing: 0.3px;">
-                Libertadores 2026
-            </h1>
-            <p style="font-size: 10px; color: var(--app-text-dim);">
-                Noticias e resultados da Libertadores
+<!-- LIBERTADORES 2026 - Landing Page / Hub -->
+<!-- Fragmento HTML para inserção via navegação SPA -->
+<div id="libertadores-container" class="liberta-page">
+
+    <!-- Botão Voltar -->
+    <button
+        onclick="window.quickAccessBar ? window.quickAccessBar.abrirMenu() : history.back()"
+        class="liberta-btn-voltar"
+        aria-label="Voltar">
+        <span class="material-icons">arrow_back</span>
+    </button>
+
+    <!-- ═══════════════════════════════════════════════════
+         HERO / COUNTDOWN
+         ═══════════════════════════════════════════════════ -->
+    <section class="liberta-hero">
+        <!-- Accent bar verde → dourado -->
+        <div class="liberta-flag-accent"></div>
+
+        <div class="liberta-hero-content">
+            <!-- Troféu -->
+            <div class="liberta-hero-trophy">🏆</div>
+
+            <h1 class="liberta-hero-title">Libertadores</h1>
+            <p class="liberta-hero-subtitle">2026</p>
+            <p class="liberta-hero-local">CONMEBOL Libertadores da América</p>
+
+            <!-- Countdown para a Final -->
+            <div class="liberta-countdown">
+                <div class="liberta-countdown-item">
+                    <span id="liberta-countdown-dias" class="liberta-countdown-value">---</span>
+                    <span class="liberta-countdown-label">Dias</span>
+                </div>
+                <div class="liberta-countdown-item">
+                    <span id="liberta-countdown-horas" class="liberta-countdown-value">--</span>
+                    <span class="liberta-countdown-label">Horas</span>
+                </div>
+                <div class="liberta-countdown-item">
+                    <span id="liberta-countdown-min" class="liberta-countdown-value">--</span>
+                    <span class="liberta-countdown-label">Mins</span>
+                </div>
+            </div>
+
+            <p class="liberta-hero-info">
+                <span class="material-icons">event_available</span>
+                Final estimada: Novembro 2026
             </p>
         </div>
-    </div>
+    </section>
 
-    <!-- Container de noticias da Libertadores -->
-    <div id="libertadores-noticias-container">
-        <div class="flex flex-col items-center justify-center py-16">
-            <div class="w-10 h-10 border-4 border-zinc-700 border-t-orange-500 rounded-full animate-spin mb-4"></div>
-            <p class="text-sm text-gray-400">Carregando noticias da Libertadores...</p>
+    <!-- ═══════════════════════════════════════════════════
+         STATS STRIP — Formato da competição
+         ═══════════════════════════════════════════════════ -->
+    <div class="liberta-stats-strip">
+        <div class="liberta-stat-item">
+            <span class="liberta-stat-value">32</span>
+            <span class="liberta-stat-label">Clubes</span>
+        </div>
+        <div class="liberta-stat-item">
+            <span class="liberta-stat-value">10</span>
+            <span class="liberta-stat-label">Países</span>
+        </div>
+        <div class="liberta-stat-item">
+            <span class="liberta-stat-value">8</span>
+            <span class="liberta-stat-label">Grupos</span>
         </div>
     </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         NOTÍCIAS
+         ═══════════════════════════════════════════════════ -->
+    <section class="liberta-section">
+        <div class="liberta-section-header">
+            <span class="liberta-section-icon"><span class="material-icons">newspaper</span></span>
+            <h2 class="liberta-section-title">Notícias</h2>
+        </div>
+        <div id="liberta-noticias-lista" class="liberta-noticias-lista">
+            <div class="liberta-loading-placeholder">Carregando notícias...</div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         FASES DA COMPETIÇÃO — Timeline
+         ═══════════════════════════════════════════════════ -->
+    <section class="liberta-section">
+        <div class="liberta-section-header">
+            <span class="liberta-section-icon"><span class="material-icons">military_tech</span></span>
+            <h2 class="liberta-section-title">Fases da Competição</h2>
+            <span class="liberta-section-badge">5 fases</span>
+        </div>
+        <div id="liberta-timeline" class="liberta-timeline">
+            <!-- Preenchido via JS -->
+        </div>
+    </section>
+
+    <!-- Bottom padding para bottom nav -->
+    <div class="pb-24"></div>
 </div>
 
-<script type="module">
-    (async function() {
-        try {
-            const mod = await import('/participante/js/modules/participante-jogos.js');
-            const container = document.getElementById('libertadores-noticias-container');
-            if (!container) return;
-
-            // Renderizar com fallback estatico imediato
-            container.innerHTML = mod.renderizarSecaoLibertadores(null);
-
-            // Buscar noticias reais via API
-            const res = await fetch('/api/noticias/libertadores');
-            if (res.ok) {
-                const data = await res.json();
-                if (data && data.success && data.noticias && data.noticias.length > 0) {
-                    container.innerHTML = mod.renderizarSecaoLibertadores(data.noticias);
-                }
-            }
-        } catch (err) {
-            if (window.Log) Log.warn("LIBERTADORES", "Erro:", err);
-            const container = document.getElementById('libertadores-noticias-container');
-            if (container) {
-                container.innerHTML = `
-                    <div class="text-center py-16">
-                        <span class="material-icons text-4xl" style="color: var(--app-text-dim);">emoji_events</span>
-                        <p class="text-gray-400 mt-3 text-sm">Erro ao carregar noticias</p>
-                    </div>
-                `;
-            }
-        }
-    })();
-</script>
+<link rel="stylesheet" href="/participante/css/libertadores-lp.css">
