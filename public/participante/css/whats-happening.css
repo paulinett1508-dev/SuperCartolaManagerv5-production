@@ -354,17 +354,21 @@
     }
 }
 
-/* --- WAITING: Brasas tênues — cinza escuro com glow sutil de fogo residual --- */
+/* --- WAITING: Fogo médio — gradiente laranja ativo, glow visível, mais calmo que LIVE --- */
 .wh-fab--waiting {
-    background: linear-gradient(135deg, var(--wh-gray-600) 0%, #4a4040 50%, var(--wh-gray-600) 100%) !important;
-    background-size: 100% 100% !important;
-    border-color: rgba(180, 83, 9, 0.15) !important;
-    animation: wh-ember-glow 4s ease-in-out infinite !important;
+    background: linear-gradient(135deg, var(--wh-fire-hot) 0%, var(--wh-fire-warm) 40%, var(--wh-fire-mid) 70%, var(--wh-cooling-dark) 100%) !important;
+    background-size: 250% 250% !important;
+    border-color: rgba(255, 140, 0, 0.4) !important;
+    box-shadow:
+        0 4px 18px rgba(255, 85, 0, 0.4),
+        0 0 35px rgba(255, 85, 0, 0.2),
+        inset 0 -2px 8px rgba(0, 0, 0, 0.2) !important;
+    animation: wh-gradient-shift 4s ease infinite, wh-breathe 3s ease-in-out infinite !important;
 }
 
-/* Waiting + novidades: pulso quase imperceptível */
+/* Waiting + novidades: pulso sutil */
 .wh-fab--waiting.has-updates {
-    animation: wh-gentle-pulse-muted 4s ease-in-out infinite !important;
+    animation: wh-gradient-shift 4s ease infinite, wh-gentle-pulse 3s ease-in-out infinite !important;
 }
 
 .wh-fab--waiting.has-updates::before,
@@ -373,20 +377,20 @@
 }
 
 .wh-fab--waiting::before {
-    background: linear-gradient(135deg, var(--wh-gray-600), var(--wh-cooling-dark), var(--wh-gray-500), var(--wh-gray-600)) !important;
-    opacity: 0.2 !important;
-    animation: wh-ring-rotate 10s linear infinite !important;
+    background: linear-gradient(135deg, var(--wh-fire-hot), var(--wh-fire-mid), var(--wh-cooling-dark), var(--wh-fire-hot)) !important;
+    opacity: 0.5 !important;
+    animation: wh-ring-rotate 4s linear infinite !important;
 }
 
 .wh-fab--waiting::after {
-    background: radial-gradient(circle, var(--wh-ember-warm) 0%, transparent 70%) !important;
-    animation: wh-glow-pulse 5s ease-in-out infinite !important;
+    background: radial-gradient(circle, rgba(255, 85, 0, 0.3) 0%, rgba(255, 140, 0, 0.1) 50%, transparent 70%) !important;
+    animation: wh-glow-pulse 3s ease-in-out infinite !important;
 }
 
 .wh-fab--waiting .wh-fab-icon {
-    color: var(--app-text-muted) !important;
-    animation: wh-icon-dance 3s ease-in-out infinite alternate !important;
-    filter: grayscale(70%) opacity(0.65) !important;
+    color: var(--app-text-primary) !important;
+    animation: wh-icon-dance 1.5s ease-in-out infinite alternate !important;
+    filter: drop-shadow(0 2px 6px rgba(255, 85, 0, 0.4)) !important;
 }
 
 /* --- LIVE: Fogo vibrante máximo, todas animações ativas --- */
