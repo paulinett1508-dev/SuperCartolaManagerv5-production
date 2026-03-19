@@ -8,14 +8,11 @@ externalPort = 80
 [deployment]
 deploymentTarget = "autoscale"
 build = ["sh", "-c", "npm install --omit=dev"]
-run = ["sh", "-c", "npm start"]
+run = ["npm", "start"]
 
 [nix]
 channel = "stable-25_05"
 packages = ["lsof", "codex", "undollar", "nix-output-monitor"]
-
-[agent]
-expertMode = true
 
 [workflows]
 runButton = "Dev"
