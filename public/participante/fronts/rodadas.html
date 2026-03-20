@@ -349,218 +349,6 @@
     margin-top: 2px;
 }
 
-/* Destaques (melhor/pior rodada) */
-.destaques-row {
-    gap: 10px;
-}
-
-.temp-destaque {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    background: rgba(0, 0, 0, 0.2);
-}
-
-.temp-destaque.melhor {
-    border-left: 3px solid var(--rodadas-success);
-}
-
-.temp-destaque.pior {
-    border-left: 3px solid var(--rodadas-danger);
-}
-
-.destaque-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.temp-destaque.melhor .destaque-icon {
-    background: rgba(34, 197, 94, 0.15);
-    color: var(--rodadas-success);
-}
-
-.temp-destaque.pior .destaque-icon {
-    background: rgba(239, 68, 68, 0.15);
-    color: var(--rodadas-danger);
-}
-
-.destaque-icon .material-symbols-outlined {
-    font-size: 18px;
-}
-
-.destaque-info {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-}
-
-.destaque-label {
-    font-size: 9px;
-    color: var(--rodadas-text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-}
-
-.destaque-valor {
-    font-family: var(--rodadas-font-brand);
-    font-size: 14px;
-    color: var(--rodadas-text-white);
-}
-
-.destaque-pontos {
-    font-family: var(--rodadas-font-mono);
-    font-size: 11px;
-    color: var(--rodadas-text-muted);
-}
-
-/* Conquistas */
-.conquistas-row {
-    justify-content: space-around;
-    padding: 8px 0;
-}
-
-.temp-conquista {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-}
-
-.conquista-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.conquista-icon .material-symbols-outlined {
-    font-size: 20px;
-}
-
-.conquista-icon.top3 {
-    background: rgba(255, 193, 7, 0.15);
-    color: #ffc107;
-}
-
-.conquista-icon.acima {
-    background: rgba(34, 197, 94, 0.15);
-    color: var(--rodadas-success);
-}
-
-.conquista-icon.ultimo {
-    background: rgba(239, 68, 68, 0.15);
-    color: var(--rodadas-danger);
-}
-
-.conquista-valor {
-    font-family: var(--rodadas-font-mono);
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--rodadas-text-white);
-}
-
-.conquista-label {
-    font-size: 9px;
-    color: var(--rodadas-text-dim);
-    text-transform: uppercase;
-}
-
-/* Barra de aproveitamento */
-.temporada-aproveitamento {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    padding: 10px 12px;
-    margin-top: 4px;
-}
-
-.aproveitamento-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-    font-size: 11px;
-    color: var(--rodadas-text-muted);
-}
-
-.aproveitamento-header span:last-child {
-    font-family: var(--rodadas-font-mono);
-    font-weight: 600;
-    color: var(--rodadas-primary);
-}
-
-.aproveitamento-bar {
-    height: 6px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
-    overflow: hidden;
-}
-
-.aproveitamento-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--rodadas-primary), #ff8c42);
-    border-radius: 3px;
-    transition: width 0.6s ease;
-}
-
-/* v4.0: Toggle detalhes — progressive disclosure */
-.temp-detalhes-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    width: 100%;
-    padding: 8px;
-    margin-top: 8px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
-    color: var(--rodadas-text-muted);
-    font-size: 11px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease;
-}
-
-.temp-detalhes-toggle:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--rodadas-primary);
-}
-
-.temp-detalhes-chevron {
-    font-size: 18px;
-    transition: transform 0.3s ease;
-}
-
-.temp-detalhes-toggle[aria-expanded="true"] .temp-detalhes-chevron {
-    transform: rotate(180deg);
-}
-
-.temp-detalhes-body {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.35s ease;
-}
-
-.temp-detalhes-body.expanded {
-    max-height: 500px;
-}
-
-.aproveitamento-hint {
-    display: block;
-    font-size: 9px;
-    color: var(--rodadas-text-dim);
-    margin-top: 4px;
-    text-align: center;
-}
 
 /* === DETALHAMENTO DA RODADA === */
 .rodada-detalhamento-pro {
@@ -716,20 +504,6 @@
     border: 1px solid rgba(255, 215, 0, 0.2);
 }
 
-.mito-icon-row {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 11px;
-    color: var(--rodadas-gold);
-    font-family: var(--rodadas-font-brand);
-    letter-spacing: 0.3px;
-}
-
-.mito-icon-row .material-icons {
-    font-size: 14px;
-    color: var(--rodadas-gold);
-}
 
 /* === 2º-12º LUGAR - ZONA DE GANHO: verde elegante === */
 .posicao-badge-pro.pos-ganho {
@@ -754,20 +528,6 @@
     border: 1px solid rgba(220, 38, 38, 0.2);
 }
 
-.mico-icon-row {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 11px;
-    color: var(--app-danger);
-    font-family: var(--rodadas-font-brand);
-    letter-spacing: 0.3px;
-}
-
-.mico-icon-row .material-icons {
-    font-size: 14px;
-    color: var(--app-danger);
-}
 
 /* === ZONA DE PERDA (sem ser último) === */
 .posicao-badge-pro.pos-danger {
@@ -910,91 +670,46 @@
     margin-bottom: 8px;
 }
 
-/* === CARD DESTAQUES DA RODADA (colapsável) === */
-#rodadas-destaques-card {
+/* === CARD DESTAQUES DA RODADA — v8.0 Compact Inline === */
+.rod-destaques-compact {
     margin-top: 12px;
+    background: var(--rodadas-surface);
+    border: 1px solid var(--rodadas-border);
+    border-radius: 14px;
+    padding: 12px 14px;
 }
 
-.rod-destaques-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 16px;
-    background: var(--rodadas-surface, #1e2330);
-    border: 1px solid var(--rodadas-border, rgba(255,255,255,0.08));
-    border-radius: 16px;
-    cursor: pointer;
-    transition: transform 0.15s;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-}
-
-.rod-destaques-header:active {
-    transform: scale(0.98);
-}
-
-.rod-destaques-header-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.rod-destaques-icon-wrapper {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--app-primary, #ff5500) 0%, #c2410c 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.rod-destaques-icon-wrapper .material-icons {
-    font-size: 20px;
-    color: #fff;
-}
-
-.rod-destaques-header-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.rod-destaques-header-label {
-    font-family: 'Inter', sans-serif;
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--rodadas-text-muted, rgba(255,255,255,0.5));
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.rod-destaques-header-value-row {
+.rod-destaques-compact-header {
     display: flex;
     align-items: center;
     gap: 8px;
+    margin-bottom: 10px;
 }
 
-.rod-destaques-rodada-badge {
+.rod-destaques-compact-title {
+    font-family: 'Russo One', sans-serif;
+    font-size: 12px;
+    color: var(--app-text-primary);
+    letter-spacing: 0.3px;
+}
+
+.rod-destaques-compact-rodada {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--rodadas-text-primary, #fff);
-    letter-spacing: -0.3px;
+    font-size: 10px;
+    color: var(--rodadas-text-muted);
 }
 
 .rod-destaques-live-badge {
     display: inline-flex;
     align-items: center;
     font-family: 'Inter', sans-serif;
-    font-size: 9px;
+    font-size: 8px;
     font-weight: 700;
     color: #fff;
     background: #ef4444;
-    padding: 2px 7px;
-    border-radius: 4px;
-    letter-spacing: 0.5px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.4px;
     animation: rod-live-pulse 1.5s ease-in-out infinite;
 }
 
@@ -1008,230 +723,111 @@
     50% { opacity: 0.6; }
 }
 
-.rod-destaques-header-right {
-    display: flex;
-    align-items: center;
+.rod-destaques-compact-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
 }
 
-.rod-destaques-chevron {
-    font-size: 24px;
-    color: rgba(255,255,255,0.4);
-    transition: transform 0.3s ease;
-}
-
-#rodadas-destaques-card.expanded .rod-destaques-header {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    border-bottom: none;
-    box-shadow: none;
-}
-
-#rodadas-destaques-card.expanded .rod-destaques-chevron {
-    transform: rotate(180deg);
-}
-
-.rod-destaques-content {
-    max-height: 500px;
-    overflow: hidden;
-    transition: max-height 0.35s ease, opacity 0.3s ease, padding 0.3s ease;
-    background: var(--rodadas-surface, #1e2330);
-    border: 1px solid var(--rodadas-border, rgba(255,255,255,0.08));
-    border-top: none;
-    border-radius: 0 0 16px 16px;
-    padding: 14px 16px;
-    opacity: 1;
-}
-
-.rod-destaques-content.collapsed {
-    max-height: 0;
-    padding: 0 12px;
-    opacity: 0;
-    border: none;
-}
-
-.rod-destaques-strips {
+.rod-compact-item {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-}
-
-.rod-destaque-strip {
-    display: flex;
     align-items: center;
-    justify-content: space-between;
-    background: linear-gradient(135deg, #1a1a1a 0%, #141414 100%);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 14px;
-    padding: 14px 16px;
-    transition: transform 0.15s;
+    gap: 4px;
+    padding: 10px 4px 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    text-align: center;
 }
 
-.rod-destaque-strip:active {
-    transform: scale(0.98);
-}
-
-.rod-destaque-strip-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-width: 0;
-}
-
-.rod-destaque-strip-escudo {
+.rod-compact-escudo {
     position: relative;
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background: rgba(255,255,255,0.04);
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
 }
 
-.rod-destaque-strip-escudo img {
-    width: 36px;
-    height: 36px;
+.rod-compact-escudo img {
+    width: 28px;
+    height: 28px;
     object-fit: contain;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
 
-.rod-destaque-strip-badge {
+.rod-compact-badge {
     position: absolute;
-    bottom: -4px;
-    right: -4px;
-    width: 20px;
-    height: 20px;
+    bottom: -3px;
+    right: -3px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid #141414;
+    border: 2px solid var(--rodadas-surface);
 }
 
-.rod-destaque-strip-badge--capitao {
-    background: var(--app-primary, #ff5500);
+.rod-compact-badge--cap {
+    background: var(--app-primary);
     font-family: 'Russo One', sans-serif;
+    font-size: 8px;
+    color: #fff;
+}
+
+.rod-compact-badge--up {
+    background: var(--app-success-light);
+}
+
+.rod-compact-badge--up .material-icons,
+.rod-compact-badge--down .material-icons {
     font-size: 10px;
     color: #fff;
-    font-weight: 700;
 }
 
-.rod-destaque-strip-badge--up {
-    background: var(--app-success-light, #22c55e);
-    color: #fff;
+.rod-compact-badge--down {
+    background: var(--app-danger);
 }
 
-.rod-destaque-strip-badge--down {
-    background: var(--app-danger, #ef4444);
-    color: #fff;
+.rod-compact-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 8px;
+    font-weight: 600;
+    color: var(--rodadas-text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
 }
 
-.rod-destaque-strip-info {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    min-width: 0;
-}
-
-.rod-destaque-strip-label {
+.rod-compact-nome {
     font-family: 'Inter', sans-serif;
     font-size: 10px;
-    font-weight: 700;
-    color: rgba(255,255,255,0.5);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.rod-destaque-strip-value-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.rod-destaque-strip-nome {
-    font-family: 'Russo One', sans-serif;
-    font-size: 13px;
-    color: var(--rodadas-text-primary, #fff);
-    letter-spacing: 0.3px;
+    font-weight: 600;
+    color: var(--app-text-primary);
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    max-width: 100%;
 }
 
-.rod-destaque-strip-multiplicador {
+.rod-compact-pts {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    font-weight: 600;
-    color: var(--app-primary, #ff5500);
-    padding: 2px 6px;
-    background: rgba(255, 85, 0, 0.12);
-    border-radius: 4px;
-    flex-shrink: 0;
-}
-
-.rod-destaque-strip-right {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 3px;
-    flex-shrink: 0;
-}
-
-.rod-destaque-strip-right-label {
-    font-family: 'Inter', sans-serif;
-    font-size: 9px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.4);
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-}
-
-.rod-destaque-strip-pontos {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 20px;
+    font-size: 14px;
     font-weight: 700;
-    color: var(--rodadas-text-primary, #fff);
-    letter-spacing: -0.5px;
+    color: var(--app-text-primary);
+    letter-spacing: -0.3px;
 }
 
-.rod-destaque-strip-pontos--verde {
-    color: var(--app-success-light, #22c55e);
-}
+.rod-compact-pts--green { color: var(--app-success-light); }
+.rod-compact-pts--red { color: var(--app-danger); }
 
-.rod-destaque-strip-pontos--vermelho {
-    color: var(--app-danger, #ef4444);
-}
-
-.rod-destaques-ver-escalacao {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 10px;
-    padding: 8px 12px;
+.rod-compact-pos {
     font-family: 'Inter', sans-serif;
-    font-size: 12px;
-    color: rgba(255,255,255,0.5);
-    text-decoration: none;
-    border-radius: 8px;
-    background: rgba(255,255,255,0.04);
-    transition: background 0.15s, color 0.15s;
+    font-size: 8px;
+    color: var(--rodadas-text-dim);
 }
 
-.rod-destaques-ver-escalacao:active {
-    background: rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.7);
-}
-
-.rod-destaques-ver-escalacao .material-icons {
-    font-size: 16px;
-}
-
-.rod-destaques-ver-chevron {
-    margin-left: auto;
-    font-size: 16px !important;
-    color: rgba(255,255,255,0.2);
-}
 
 /* === TOAST === */
 .toast-desenvolvimento {
@@ -1309,167 +905,22 @@
 }
 
 /* === MEU RESUMO WRAPPER (colapsivel) === */
-.meu-resumo-wrapper {
-    background: #111827;
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 12px;
-    border: 1px solid rgba(255, 69, 0, 0.15);
-}
-
-.meu-resumo-toggle {
+/* === MEU STATUS INLINE (zona + financeiro acima do ranking) === */
+.meu-status-inline {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 10px 14px;
-    cursor: pointer;
-    user-select: none;
-    transition: background 0.2s ease;
+    gap: 8px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background: rgba(255, 69, 0, 0.06);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 69, 0, 0.1);
 }
 
-.meu-resumo-toggle:hover {
-    background: rgba(255, 69, 0, 0.05);
-}
-
-.meu-resumo-toggle-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
-    flex: 1;
-}
-
-.meu-resumo-toggle-left .material-icons {
-    font-size: 18px;
-    color: var(--rodadas-primary);
-}
-
-.meu-resumo-toggle-title {
-    font-family: var(--rodadas-font-body);
+.meu-status-fin {
+    font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
     font-weight: 600;
-    color: var(--rodadas-text-white);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.meu-resumo-toggle-subtitle {
-    font-size: 11px;
-    color: var(--rodadas-text-muted);
-    margin-top: 1px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.meu-resumo-toggle .me-toggle-chevron {
-    font-size: 20px;
-    color: var(--rodadas-text-muted);
-    transition: transform 0.3s ease;
-}
-
-.meu-resumo-toggle.expanded .me-toggle-chevron {
-    transform: rotate(180deg);
-}
-
-.meu-resumo-collapsible {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.4s ease;
-}
-
-.meu-resumo-collapsible.expanded {
-    max-height: 500px;
-}
-
-/* === MEU RESUMO (summary card acima do ranking) === */
-.meu-resumo-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 16px;
-    background: rgba(255, 69, 0, 0.08);
-    border-radius: 0;
-}
-
-.meu-resumo-posicao {
-    width: 42px;
-    height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 10px;
-    background: rgba(255, 69, 0, 0.15);
-    color: var(--rodadas-primary);
-    font-family: var(--rodadas-font-brand);
-    font-size: 16px;
-}
-
-.meu-resumo-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.meu-resumo-nome {
-    font-weight: 600;
-    color: var(--rodadas-text-white);
-    font-size: 14px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.meu-resumo-detalhes {
-    font-size: 12px;
-    color: var(--rodadas-text-muted);
-    margin-top: 2px;
-}
-
-.meu-resumo-pontos {
-    text-align: right;
-}
-
-.meu-resumo-pontos-valor {
-    font-family: var(--rodadas-font-mono);
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--rodadas-primary);
-}
-
-.meu-resumo-pontos-label {
-    font-size: 10px;
-    color: var(--rodadas-text-dim);
-    text-transform: uppercase;
-}
-
-/* === MEU RESUMO - Variante MITO (1º lugar) === */
-.meu-resumo-card.meu-resumo-mito {
-    background: linear-gradient(90deg, rgba(255, 215, 0, 0.10) 0%, rgba(255, 69, 0, 0.08) 100%);
-    border-color: rgba(255, 215, 0, 0.25);
-}
-.meu-resumo-mito .meu-resumo-posicao {
-    background: linear-gradient(135deg, var(--rodadas-gold), #ffb700, var(--rodadas-gold));
-    color: #000;
-    border: 2px solid rgba(255, 215, 0, 0.5);
-    box-shadow: 0 0 12px rgba(255, 215, 0, 0.25);
-}
-.meu-resumo-mito .meu-resumo-pontos-valor {
-    color: var(--rodadas-gold);
-}
-
-/* === MEU RESUMO - Variante MICO (último lugar) === */
-.meu-resumo-card.meu-resumo-mico {
-    background: linear-gradient(90deg, rgba(220, 38, 38, 0.10) 0%, rgba(255, 69, 0, 0.05) 100%);
-    border-color: rgba(220, 38, 38, 0.25);
-}
-.meu-resumo-mico .meu-resumo-posicao {
-    background: linear-gradient(135deg, #dc2626, #991b1b);
-    color: var(--app-text-primary);
-    border: 2px solid rgba(220, 38, 38, 0.5);
-    box-shadow: 0 0 12px rgba(220, 38, 38, 0.2);
-}
-.meu-resumo-mico .meu-resumo-pontos-valor {
-    color: var(--app-danger);
 }
 
 .btn-atualizar-parciais .material-icons {
@@ -3039,156 +2490,49 @@
             </div>
         </div>
 
-        <!-- v4.0: Seção colapsável — progressive disclosure -->
-        <button class="temp-detalhes-toggle" id="tempDetalhesToggle" onclick="window.toggleTemporadaDetalhes && window.toggleTemporadaDetalhes()">
-            <span>Ver detalhes</span>
-            <span class="material-symbols-outlined temp-detalhes-chevron" id="tempDetalhesChevron">expand_more</span>
-        </button>
-        <div class="temp-detalhes-body" id="tempDetalhesBody">
-            <!-- Linha 2: Destaques -->
-            <div class="temporada-row destaques-row">
-                <div class="temp-destaque melhor">
-                    <div class="destaque-icon"><span class="material-symbols-outlined">trending_up</span></div>
-                    <div class="destaque-info">
-                        <span class="destaque-label">Melhor Rodada</span>
-                        <span class="destaque-valor" id="tempMelhorRodada">R00</span>
-                        <span class="destaque-pontos" id="tempMelhorPontos">0 pts</span>
-                    </div>
-                </div>
-                <div class="temp-destaque pior">
-                    <div class="destaque-icon"><span class="material-symbols-outlined">trending_down</span></div>
-                    <div class="destaque-info">
-                        <span class="destaque-label">Pior Rodada</span>
-                        <span class="destaque-valor" id="tempPiorRodada">R00</span>
-                        <span class="destaque-pontos" id="tempPiorPontos">0 pts</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Linha 3: Conquistas -->
-            <div class="temporada-row conquistas-row">
-                <div class="temp-conquista">
-                    <span class="conquista-icon top3"><span class="material-symbols-outlined">military_tech</span></span>
-                    <span class="conquista-valor" id="tempVezesTop3">0</span>
-                    <span class="conquista-label">Top 3</span>
-                </div>
-                <div class="temp-conquista">
-                    <span class="conquista-icon acima"><span class="material-symbols-outlined">trending_up</span></span>
-                    <span class="conquista-valor" id="tempVezesAcimaMedia">0</span>
-                    <span class="conquista-label">Acima da Média</span>
-                </div>
-                <div class="temp-conquista">
-                    <span class="conquista-icon ultimo"><span class="material-symbols-outlined">sentiment_dissatisfied</span></span>
-                    <span class="conquista-valor" id="tempVezesUltimo">0</span>
-                    <span class="conquista-label">Último</span>
-                </div>
-            </div>
-
-            <!-- Barra de aproveitamento -->
-            <div class="temporada-aproveitamento">
-                <div class="aproveitamento-header">
-                    <span>Aproveitamento</span>
-                    <span id="tempAproveitamento">0%</span>
-                </div>
-                <div class="aproveitamento-bar">
-                    <div class="aproveitamento-fill" id="tempAproveitamentoBar" style="width: 0%"></div>
-                </div>
-                <span class="aproveitamento-hint" id="tempAproveitamentoHint">Rodadas acima da média da liga</span>
-            </div>
-        </div>
     </div>
 
-    <!-- Card Destaques da Rodada (colapsável) — exibido abaixo do card Meu Desempenho -->
-    <div id="rodadas-destaques-card" style="display: none;">
-        <button class="rod-destaques-header" id="rod-destaques-toggle" onclick="window.toggleRodadasDestaques && window.toggleRodadasDestaques()">
-            <div class="rod-destaques-header-left">
-                <div class="rod-destaques-icon-wrapper">
-                    <span class="material-icons">emoji_events</span>
+    <!-- Card Destaques da Rodada — v8.0 compact inline -->
+    <div id="rodadas-destaques-card" class="rod-destaques-compact" style="display: none;">
+        <div class="rod-destaques-compact-header">
+            <span class="rod-destaques-compact-title">Destaques</span>
+            <span class="rod-destaques-compact-rodada" id="rod-destaques-rodada">Rodada --</span>
+            <span class="rod-destaques-live-badge" id="rod-destaques-live-badge" style="display:none">AO VIVO</span>
+        </div>
+        <div class="rod-destaques-compact-grid">
+            <!-- Capitão -->
+            <div class="rod-compact-item" id="rod-destaque-capitao">
+                <div class="rod-compact-escudo" id="rod-escudo-capitao">
+                    <img src="/escudos/default.png" alt="" loading="lazy">
+                    <span class="rod-compact-badge rod-compact-badge--cap">C</span>
                 </div>
-                <div class="rod-destaques-header-info">
-                    <span class="rod-destaques-header-label">DESTAQUES DA RODADA</span>
-                    <div class="rod-destaques-header-value-row">
-                        <span class="rod-destaques-rodada-badge" id="rod-destaques-rodada">Rodada --</span>
-                        <span class="rod-destaques-live-badge" id="rod-destaques-live-badge" style="display:none">AO VIVO</span>
-                    </div>
-                </div>
+                <span class="rod-compact-label">Capitão</span>
+                <span class="rod-compact-nome" id="rod-nome-capitao">--</span>
+                <span class="rod-compact-pts" id="rod-pontos-capitao">0.00</span>
+                <span class="rod-compact-pos" id="rod-posicao-capitao">--</span>
             </div>
-            <div class="rod-destaques-header-right">
-                <span class="material-icons rod-destaques-chevron" id="rod-destaques-chevron">expand_more</span>
+            <!-- Maior -->
+            <div class="rod-compact-item rod-compact-item--up" id="rod-destaque-maior">
+                <div class="rod-compact-escudo" id="rod-escudo-maior">
+                    <img src="/escudos/default.png" alt="" loading="lazy">
+                    <span class="rod-compact-badge rod-compact-badge--up"><span class="material-icons">arrow_upward</span></span>
+                </div>
+                <span class="rod-compact-label">Melhor</span>
+                <span class="rod-compact-nome" id="rod-nome-maior">--</span>
+                <span class="rod-compact-pts rod-compact-pts--green" id="rod-pontos-maior">0.00</span>
+                <span class="rod-compact-pos" id="rod-posicao-maior">--</span>
             </div>
-        </button>
-
-        <div class="rod-destaques-content collapsed" id="rod-destaques-content">
-            <div class="rod-destaques-strips">
-                <!-- Capitão -->
-                <div class="rod-destaque-strip" id="rod-destaque-capitao">
-                    <div class="rod-destaque-strip-left">
-                        <div class="rod-destaque-strip-escudo" id="rod-escudo-capitao">
-                            <img src="/escudos/default.png" alt="Escudo" loading="lazy">
-                            <span class="rod-destaque-strip-badge rod-destaque-strip-badge--capitao">C</span>
-                        </div>
-                        <div class="rod-destaque-strip-info">
-                            <span class="rod-destaque-strip-label">CAPITÃO</span>
-                            <div class="rod-destaque-strip-value-row">
-                                <span class="rod-destaque-strip-nome" id="rod-nome-capitao">--</span>
-                                <span class="rod-destaque-strip-multiplicador" id="rod-badge-multiplicador">×1.5</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="rod-destaque-strip-right">
-                        <span class="rod-destaque-strip-right-label" id="rod-posicao-capitao">--</span>
-                        <span class="rod-destaque-strip-pontos" id="rod-pontos-capitao">0.00</span>
-                    </div>
+            <!-- Menor -->
+            <div class="rod-compact-item rod-compact-item--down" id="rod-destaque-menor">
+                <div class="rod-compact-escudo" id="rod-escudo-menor">
+                    <img src="/escudos/default.png" alt="" loading="lazy">
+                    <span class="rod-compact-badge rod-compact-badge--down"><span class="material-icons">arrow_downward</span></span>
                 </div>
-
-                <!-- Maior Pontuador -->
-                <div class="rod-destaque-strip" id="rod-destaque-maior">
-                    <div class="rod-destaque-strip-left">
-                        <div class="rod-destaque-strip-escudo" id="rod-escudo-maior">
-                            <img src="/escudos/default.png" alt="Escudo" loading="lazy">
-                            <span class="rod-destaque-strip-badge rod-destaque-strip-badge--up">
-                                <i class="material-icons" style="font-size:12px">thumb_up</i>
-                            </span>
-                        </div>
-                        <div class="rod-destaque-strip-info">
-                            <span class="rod-destaque-strip-label">MAIOR PONTUADOR</span>
-                            <span class="rod-destaque-strip-nome" id="rod-nome-maior">--</span>
-                        </div>
-                    </div>
-                    <div class="rod-destaque-strip-right">
-                        <span class="rod-destaque-strip-right-label" id="rod-posicao-maior">--</span>
-                        <span class="rod-destaque-strip-pontos rod-destaque-strip-pontos--verde" id="rod-pontos-maior">0.00</span>
-                    </div>
-                </div>
-
-                <!-- Menor Pontuador -->
-                <div class="rod-destaque-strip" id="rod-destaque-menor">
-                    <div class="rod-destaque-strip-left">
-                        <div class="rod-destaque-strip-escudo" id="rod-escudo-menor">
-                            <img src="/escudos/default.png" alt="Escudo" loading="lazy">
-                            <span class="rod-destaque-strip-badge rod-destaque-strip-badge--down">
-                                <i class="material-icons" style="font-size:12px">thumb_down</i>
-                            </span>
-                        </div>
-                        <div class="rod-destaque-strip-info">
-                            <span class="rod-destaque-strip-label">MENOR PONTUADOR</span>
-                            <span class="rod-destaque-strip-nome" id="rod-nome-menor">--</span>
-                        </div>
-                    </div>
-                    <div class="rod-destaque-strip-right">
-                        <span class="rod-destaque-strip-right-label" id="rod-posicao-menor">--</span>
-                        <span class="rod-destaque-strip-pontos rod-destaque-strip-pontos--vermelho" id="rod-pontos-menor">0.00</span>
-                    </div>
-                </div>
+                <span class="rod-compact-label">Pior</span>
+                <span class="rod-compact-nome" id="rod-nome-menor">--</span>
+                <span class="rod-compact-pts rod-compact-pts--red" id="rod-pontos-menor">0.00</span>
+                <span class="rod-compact-pos" id="rod-posicao-menor">--</span>
             </div>
-
-            <!-- Link para escalação completa -->
-            <a href="javascript:void(0)" class="rod-destaques-ver-escalacao"
-               onclick="window.participanteNav?.navegarPara('campinho')">
-                <span class="material-icons">groups</span>
-                Ver escalação completa
-                <span class="material-icons rod-destaques-ver-chevron">chevron_right</span>
-            </a>
         </div>
     </div>
 
