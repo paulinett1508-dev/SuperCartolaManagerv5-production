@@ -64,6 +64,7 @@ class ParticipanteNavigation {
             "info-meu-time": "/participante/fronts/info-meu-time.html",
             "agenda-tabelas": "/participante/fronts/agenda-tabelas.html",
             "libertadores": "/participante/fronts/libertadores.html",
+            "copa-brasil": "/participante/fronts/copa-brasil.html",
         };
 
         // ✅ v3.0: Controles simplificados (apenas debounce por tempo)
@@ -526,7 +527,7 @@ class ParticipanteNavigation {
      */
     _isModuloOpcionalInativo(moduloId) {
         // Módulos de sistema/base: sempre permitidos (inclui sub-módulos como rodada-xray)
-        const modulosPermitidos = ['home', 'boas-vindas', 'extrato', 'ranking', 'rodadas', 'rodada-xray', 'historico', 'configuracoes', 'copa-times-sc', 'copa-2026-mundo', 'regras', 'libertadores'];
+        const modulosPermitidos = ['home', 'boas-vindas', 'extrato', 'ranking', 'rodadas', 'rodada-xray', 'historico', 'configuracoes', 'copa-times-sc', 'copa-2026-mundo', 'regras', 'libertadores', 'copa-brasil'];
         if (modulosPermitidos.includes(moduloId)) return false;
 
         // Sem dados de módulos carregados: permitir (graceful degradation)
@@ -1027,6 +1028,7 @@ class ParticipanteNavigation {
             configuracoes: "Configurações",
             "copa-2026-mundo": "Copa do Mundo 2026",
             "libertadores": "Libertadores 2026",
+            "copa-brasil": "Copa do Brasil 2026",
         };
         return nomes[moduloId] || moduloId;
     }
@@ -1083,6 +1085,7 @@ class ParticipanteNavigation {
             "resta-um": "/participante/js/modules/participante-resta-um.js",
             "tiro-certo": "/participante/js/modules/participante-tiro-certo.js",
             "libertadores": "/participante/js/modules/participante-libertadores.js",
+            "copa-brasil": "/participante/js/modules/participante-copa-brasil.js",
         };
 
         const jsPath = modulosPaths[modulo];

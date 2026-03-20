@@ -101,6 +101,15 @@
     --app-liberta-gradient: linear-gradient(135deg, #1B5E20 0%, #0D3B12 50%, #D4AF37 100%);
     --app-liberta-gradient-subtle: linear-gradient(135deg, rgba(27, 94, 32, 0.2) 0%, rgba(13, 59, 18, 0.15) 100%);
 
+    /* Copa do Brasil */
+    --app-copabr-primary: #003087;               /* Azul marinho CBF */
+    --app-copabr-secondary: #D4AF37;             /* Dourado troféu */
+    --app-copabr-accent: #C41230;                /* Vermelho — detalhes CBF */
+    --app-copabr-muted: rgba(0, 48, 135, 0.15);
+    --app-copabr-border: rgba(0, 48, 135, 0.35);
+    --app-copabr-gradient: linear-gradient(135deg, #003087 0%, #001a52 50%, #D4AF37 100%);
+    --app-copabr-gradient-subtle: linear-gradient(135deg, rgba(0, 48, 135, 0.2) 0%, rgba(0, 26, 82, 0.15) 100%);
+
     /* Agenda do Dia (Jogos) */
     --app-agenda-primary: #1a6b35;              /* Verde gramado */
     --app-agenda-secondary: #0d3d1e;            /* Verde escuro */

@@ -390,6 +390,11 @@
         "description": "Landing Page da Libertadores 2026 — hero, countdown, notícias, timeline de fases. Namespace liberta-*. Usa tokens --app-liberta-*"
       },
       {
+        "path": "public/participante/css/copa-brasil-lp.css",
+        "loadedBy": ["participante/fronts/copa-brasil.html (inline <link>)"],
+        "description": "Landing Page da Copa do Brasil 2026 — hero, countdown, notícias, timeline de fases. Namespace copabr-*. Usa tokens --app-copabr-*"
+      },
+      {
         "path": "public/participante/css/brasileirao-tabela.css",
         "loadedBy": ["participante/index.html"],
         "description": "Faixa Tabela do Brasileirão colapsável (Landing Page style). Namespace .brasileirao-*",

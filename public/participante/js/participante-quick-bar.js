@@ -258,6 +258,17 @@ class QuickAccessBar {
                 </div>
                 <span class="material-icons especial-chevron">chevron_right</span>
             </div>
+
+            <div class="especial-card especial-card-copabr" data-module="copa-brasil">
+                <div class="especial-card-icon">
+                    <span class="material-icons">workspace_premium</span>
+                </div>
+                <div class="especial-card-text">
+                    <div class="especial-card-name">Copa do Brasil 2026</div>
+                    <div class="especial-card-desc">Mata-mata nacional — 92 clubes</div>
+                </div>
+                <span class="material-icons especial-chevron">chevron_right</span>
+            </div>
         `;
     }
 

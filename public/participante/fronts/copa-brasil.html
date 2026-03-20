@@ -1,0 +1,100 @@
+<!-- COPA DO BRASIL - Landing Page / Hub -->
+<!-- Fragmento HTML para inserção via navegação SPA -->
+<div id="copa-brasil-container" class="copabr-page">
+
+    <!-- Botão Voltar -->
+    <button
+        onclick="window.quickAccessBar ? window.quickAccessBar.abrirMenu() : history.back()"
+        class="copabr-btn-voltar"
+        aria-label="Voltar">
+        <span class="material-icons">arrow_back</span>
+    </button>
+
+    <!-- ═══════════════════════════════════════════════════
+         HERO / COUNTDOWN
+         ═══════════════════════════════════════════════════ -->
+    <section class="copabr-hero">
+        <!-- Faixa tricolor Azul → Vermelho → Dourado -->
+        <div class="copabr-flag-accent"></div>
+
+        <div class="copabr-hero-content">
+            <!-- Escudo/Troféu -->
+            <div class="copabr-hero-emblem">🏆</div>
+
+            <h1 class="copabr-hero-title">Copa do Brasil</h1>
+            <p class="copabr-hero-subtitle">2026</p>
+            <p class="copabr-hero-local">Competição Nacional de Mata-Mata — CBF</p>
+
+            <!-- Countdown para a Final -->
+            <div class="copabr-countdown">
+                <div class="copabr-countdown-item">
+                    <span id="copabr-countdown-dias" class="copabr-countdown-value">---</span>
+                    <span class="copabr-countdown-label">Dias</span>
+                </div>
+                <div class="copabr-countdown-item">
+                    <span id="copabr-countdown-horas" class="copabr-countdown-value">--</span>
+                    <span class="copabr-countdown-label">Horas</span>
+                </div>
+                <div class="copabr-countdown-item">
+                    <span id="copabr-countdown-min" class="copabr-countdown-value">--</span>
+                    <span class="copabr-countdown-label">Mins</span>
+                </div>
+            </div>
+
+            <p class="copabr-hero-info">
+                <span class="material-icons">event_available</span>
+                Final estimada: Outubro 2026
+            </p>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         STATS STRIP — Formato da competição
+         ═══════════════════════════════════════════════════ -->
+    <div class="copabr-stats-strip">
+        <div class="copabr-stat-item">
+            <span class="copabr-stat-value">92</span>
+            <span class="copabr-stat-label">Clubes</span>
+        </div>
+        <div class="copabr-stat-item">
+            <span class="copabr-stat-value">7</span>
+            <span class="copabr-stat-label">Fases</span>
+        </div>
+        <div class="copabr-stat-item">
+            <span class="copabr-stat-value">1</span>
+            <span class="copabr-stat-label">Campeão</span>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         NOTÍCIAS
+         ═══════════════════════════════════════════════════ -->
+    <section class="copabr-section">
+        <div class="copabr-section-header">
+            <span class="copabr-section-icon"><span class="material-icons">newspaper</span></span>
+            <h2 class="copabr-section-title">Notícias</h2>
+        </div>
+        <div id="copabr-noticias-lista" class="copabr-noticias-lista">
+            <div class="copabr-loading-placeholder">Carregando notícias...</div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         FASES DA COMPETIÇÃO — Timeline
+         ═══════════════════════════════════════════════════ -->
+    <section class="copabr-section">
+        <div class="copabr-section-header">
+            <span class="copabr-section-icon"><span class="material-icons">military_tech</span></span>
+            <h2 class="copabr-section-title">Fases da Competição</h2>
+            <span class="copabr-section-badge">7 fases</span>
+        </div>
+        <div id="copabr-timeline" class="copabr-timeline">
+            <!-- Preenchido via JS -->
+        </div>
+    </section>
+
+    <!-- Bottom padding para bottom nav -->
+    <div class="pb-24"></div>
+</div>
+
+<link rel="stylesheet" href="/participante/css/copa-brasil-lp.css?v=1">
