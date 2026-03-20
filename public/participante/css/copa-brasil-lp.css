@@ -115,62 +115,59 @@
     font-weight: 500;
 }
 
-/* Countdown — 3 boxes */
-.copabr-countdown {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 0.5rem;
-    margin-bottom: 1.25rem;
-    padding: 0 0.5rem;
-}
-
-.copabr-countdown-item {
+/* Chips de status — fase atual, próximo evento */
+.copabr-hero-chips {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    background: var(--app-copabr-muted, rgba(0, 48, 135, 0.15));
-    border: 1px solid var(--app-copabr-border, rgba(0, 48, 135, 0.35));
-    border-radius: 0.5rem;
-    padding: 0.75rem 0.5rem;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding: 0 0.25rem;
 }
 
-.copabr-countdown-value {
-    font-family: var(--app-font-brand, 'Russo One', sans-serif);
-    font-size: 1.75rem;
-    font-weight: 400;
-    color: var(--app-copabr-secondary, #D4AF37);
-    line-height: 1.2;
-}
-
-.copabr-countdown-label {
-    font-size: 0.55rem;
-    color: var(--app-text-muted, rgba(255, 255, 255, 0.5));
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    margin-top: 0.15rem;
-}
-
-.copabr-hero-info {
+.copabr-chip {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.35rem;
-    font-size: 0.7rem;
-    color: var(--app-text-muted, rgba(255, 255, 255, 0.5));
-    margin: 0;
+    gap: 0.4rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: 0.5rem;
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 600;
+    border: 1px solid transparent;
 }
 
-.copabr-hero-info .material-icons {
-    font-size: 0.85rem;
+.copabr-chip .material-icons {
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.copabr-chip--done {
+    background: rgba(34, 197, 94, 0.08);
+    border-color: rgba(34, 197, 94, 0.25);
+    color: #86efac;
+}
+.copabr-chip--done .material-icons { color: #4ade80; }
+
+.copabr-chip--next {
+    background: rgba(99, 153, 255, 0.1);
+    border-color: rgba(99, 153, 255, 0.3);
+    color: #93c5fd;
+}
+.copabr-chip--next .material-icons { color: #6699ff; }
+
+.copabr-chip--event {
+    background: var(--app-copabr-muted, rgba(0, 48, 135, 0.15));
+    border-color: var(--app-copabr-border, rgba(0, 48, 135, 0.35));
     color: var(--app-copabr-secondary, #D4AF37);
 }
+.copabr-chip--event .material-icons { color: var(--app-copabr-secondary, #D4AF37); }
 
 /* ═══════════════════════════════════════════════════
    STATS STRIP — Formato da competição
    ═══════════════════════════════════════════════════ */
 .copabr-stats-strip {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 0.5rem;
     margin: 0 1rem 1.25rem;
 }
@@ -393,8 +390,13 @@
 }
 
 .copabr-timeline-item--active::before {
-    background: var(--app-copabr-primary, #003087);
-    box-shadow: 0 0 8px rgba(0, 48, 135, 0.5);
+    background: #6699ff;
+    box-shadow: 0 0 8px rgba(102, 153, 255, 0.5);
+}
+
+.copabr-timeline-item--done::before {
+    background: #4ade80;
+    opacity: 0.6;
 }
 
 .copabr-timeline-fase {
@@ -413,6 +415,14 @@
     color: #6699ff;
 }
 
+.copabr-timeline-item--done .copabr-timeline-fase {
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.45));
+}
+
+.copabr-timeline-item--done .copabr-timeline-info {
+    opacity: 0.6;
+}
+
 .copabr-timeline-info {
     font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
     font-size: 0.6rem;
@@ -427,11 +437,17 @@
     font-size: 0.5rem;
     font-weight: 700;
     color: #6699ff;
-    background: rgba(0, 48, 135, 0.2);
-    border: 1px solid rgba(0, 48, 135, 0.4);
+    background: rgba(102, 153, 255, 0.12);
+    border: 1px solid rgba(102, 153, 255, 0.35);
     border-radius: 999px;
     padding: 0.1rem 0.4rem;
     margin-left: 0.4rem;
     vertical-align: middle;
     text-transform: uppercase;
+}
+
+.copabr-timeline-badge--done {
+    color: #4ade80;
+    background: rgba(74, 222, 128, 0.1);
+    border-color: rgba(74, 222, 128, 0.25);
 }
