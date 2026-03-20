@@ -373,143 +373,18 @@ function renderizarCardDesempenho(rodadas) {
     // Coletar dados do participante logado
     const meusDados = [];
     let totalPontos = 0;
-    let melhorRodada = { numero: 0, pontos: -Infinity };
-    let piorRodada = { numero: 0, pontos: Infinity };
-    let vezesTop3 = 0;
-    let vezesUltimo = 0;
-    let vezesAcimaMedia = 0;
     let somaPosicoesFinanceiras = 0;
     let rodadasComPosicao = 0;
-
-    // DEBUG: Log global para auditoria
-    if (window.Log) {
-        Log.info("[PARTICIPANTE-RODADAS]", `🔍 AUDITORIA SUA TEMPORADA: meuTimeId=${meuTimeId} (tipo: ${typeof meuTimeId}) | Total rodadas: ${rodadas.length}`);
-    }
 
     rodadas.forEach((rodada, idx) => {
         if (!rodada.jogou || !rodada.participantes?.length) return;
 
         const numeroRodada = obterNumeroRodada(rodada);
-
-        // Debug detalhado: verificar se meuTimeId está na lista de participantes
-        if (window.Log && idx < 2) {
-            const todosIds = rodada.participantes.map(p => {
-                const pId = p.timeId ?? p.time_id ?? p.id;
-                return `${pId}(${typeof pId})`;
-            });
-
-            const encontrado = rodada.participantes.find(p => {
-                const pId = p.timeId ?? p.time_id ?? p.id;
-                return compararTimeIds(pId, meuTimeId);
-            });
-
-            Log.info("[PARTICIPANTE-RODADAS]",
-                `DEBUG R${numeroRodada}: meuTimeId=${meuTimeId}(${typeof meuTimeId}) | encontrado=${!!encontrado} | participantes=${rodada.participantes.length}`);
-            Log.info("[PARTICIPANTE-RODADAS]", `IDs na rodada: ${todosIds.slice(0, 5).join(', ')}${todosIds.length > 5 ? '...' : ''}`);
-
-            // Verificar se o ID existe com comparação manual
-            const matches = rodada.participantes.filter(p => {
-                const pId = p.timeId ?? p.time_id ?? p.id;
-                return String(pId) === String(meuTimeId);
-            });
-            if (matches.length > 0) {
-                Log.info("[PARTICIPANTE-RODADAS]", `✅ Match encontrado: ${JSON.stringify(matches[0])}`);
-            }
-        }
         const meusPontos = rodada.meusPontos ?? 0;
 
-        meusDados.push({
-            rodada: numeroRodada,
-            pontos: meusPontos,
-            posicao: rodada.posicaoFinanceira
-        });
-
+        meusDados.push({ rodada: numeroRodada, pontos: meusPontos });
         totalPontos += meusPontos;
 
-        // Melhor rodada
-        if (meusPontos > melhorRodada.pontos) {
-            melhorRodada = { numero: numeroRodada, pontos: meusPontos };
-        }
-
-        // Pior rodada
-        if (meusPontos < piorRodada.pontos) {
-            piorRodada = { numero: numeroRodada, pontos: meusPontos };
-        }
-
-        // Calcular posição na rodada e média da liga
-        // FIX: Usar apenas rodadaNaoJogada para filtrar (campo 'ativo' pode estar desatualizado)
-        const participantesAtivos = rodada.participantes.filter((p) => !p.rodadaNaoJogada);
-
-        // DEBUG: Verificar se usuário passou no filtro
-        if (window.Log && idx < 2) {
-            const euNoFiltro = participantesAtivos.find(p => {
-                const pId = p.timeId ?? p.time_id ?? p.id;
-                return String(pId) === String(meuTimeId);
-            });
-            // DEBUG DETALHADO: Mostrar valores de rodadaNaoJogada
-            const amostraFiltro = rodada.participantes.slice(0, 5).map(p => ({
-                id: p.timeId ?? p.time_id,
-                rnj: p.rodadaNaoJogada,
-                tipo: typeof p.rodadaNaoJogada
-            }));
-            Log.info("[PARTICIPANTE-RODADAS]",
-                `DEBUG R${numeroRodada} FILTRO: antes=${rodada.participantes.length} | depois=${participantesAtivos.length} | eu_no_filtro=${!!euNoFiltro}`);
-            Log.info("[PARTICIPANTE-RODADAS]",
-                `DEBUG R${numeroRodada} AMOSTRA rodadaNaoJogada: ${JSON.stringify(amostraFiltro)}`);
-        }
-
-        if (participantesAtivos.length > 0) {
-            // Ordenar por pontos para descobrir posição
-            const ordenados = [...participantesAtivos].sort((a, b) => {
-                const pontosA = parseFloat(a.pontos || 0);
-                const pontosB = parseFloat(b.pontos || 0);
-                return pontosB - pontosA;
-            });
-
-            // Buscar posição - verificar múltiplos campos de ID
-            const idxFound = ordenados.findIndex((p) => {
-                const pId = p.timeId ?? p.time_id ?? p.id;
-                return compararTimeIds(pId, meuTimeId);
-            });
-            const minhaPosicao = idxFound + 1;
-
-            // DEBUG: Resultado da busca de posição
-            if (window.Log && idx < 2) {
-                Log.info("[PARTICIPANTE-RODADAS]",
-                    `DEBUG R${numeroRodada} POSICAO: idxFound=${idxFound} | minhaPosicao=${minhaPosicao} | totalOrdenados=${ordenados.length}`);
-                if (idxFound === -1) {
-                    // Mostrar todos os IDs para debug
-                    const idsOrdenados = ordenados.slice(0, 10).map(p => p.timeId ?? p.time_id ?? p.id);
-                    Log.warn("[PARTICIPANTE-RODADAS]",
-                        `⚠️ Não encontrado! meuTimeId=${meuTimeId} | IDs: ${idsOrdenados.join(', ')}`);
-                } else {
-                    // Mostrar se qualifica para cada categoria
-                    const somaPontosLiga = participantesAtivos.reduce((acc, p) => acc + parseFloat(p.pontos || 0), 0);
-                    const mediaLiga = somaPontosLiga / participantesAtivos.length;
-                    Log.info("[PARTICIPANTE-RODADAS]",
-                        `DEBUG R${numeroRodada} QUALIFICA: Top3=${minhaPosicao <= 3} | Ultimo=${minhaPosicao === ordenados.length} | AcimaMedia=${meusPontos > mediaLiga} (meusPontos=${meusPontos}, mediaLiga=${mediaLiga.toFixed(2)})`);
-                }
-            }
-
-            // Top 3
-            if (minhaPosicao >= 1 && minhaPosicao <= 3) {
-                vezesTop3++;
-            }
-
-            // Último lugar
-            if (minhaPosicao === ordenados.length && ordenados.length > 1) {
-                vezesUltimo++;
-            }
-
-            // Acima da média
-            const somaPontosLiga = participantesAtivos.reduce((acc, p) => acc + parseFloat(p.pontos || 0), 0);
-            const mediaLiga = somaPontosLiga / participantesAtivos.length;
-            if (meusPontos > mediaLiga) {
-                vezesAcimaMedia++;
-            }
-        }
-
-        // Posição financeira (para média)
         if (rodada.posicaoFinanceira) {
             somaPosicoesFinanceiras += rodada.posicaoFinanceira;
             rodadasComPosicao++;
@@ -523,23 +398,14 @@ function renderizarCardDesempenho(rodadas) {
         return;
     }
 
-    // Cálculos finais
     const mediaPontos = totalPontos / rodadasJogadas;
     const posicaoMedia = rodadasComPosicao > 0 ? (somaPosicoesFinanceiras / rodadasComPosicao) : null;
-    const aproveitamento = Math.round((vezesAcimaMedia / rodadasJogadas) * 100);
 
-    // Popular elementos do DOM
     const setEl = (id, value) => {
         const el = document.getElementById(id);
         if (el) el.textContent = value;
     };
 
-    const setStyle = (id, prop, value) => {
-        const el = document.getElementById(id);
-        if (el) el.style[prop] = value;
-    };
-
-    // Durante rodada em andamento (status=2), mostrar +1 rodada com badge ao vivo
     const badgeEl = document.getElementById("tempBadgeRodadas");
     if (badgeEl) {
         if (statusMercadoAtual === 2) {
@@ -551,23 +417,6 @@ function renderizarCardDesempenho(rodadas) {
     setEl("tempPontosTotal", totalPontos.toFixed(2).replace('.', ','));
     setEl("tempMediaPontos", mediaPontos.toFixed(2).replace('.', ','));
     setEl("tempPosicaoMedia", posicaoMedia ? `${posicaoMedia.toFixed(1)}º` : "-");
-
-    setEl("tempMelhorRodada", `R${String(melhorRodada.numero).padStart(2, '0')}`);
-    setEl("tempMelhorPontos", `${(Math.trunc((melhorRodada.pontos||0) * 100) / 100).toFixed(2)} pts`);
-    setEl("tempPiorRodada", `R${String(piorRodada.numero).padStart(2, '0')}`);
-    setEl("tempPiorPontos", `${(Math.trunc((piorRodada.pontos||0) * 100) / 100).toFixed(2)} pts`);
-
-    setEl("tempVezesTop3", vezesTop3);
-    setEl("tempVezesAcimaMedia", vezesAcimaMedia);
-    setEl("tempVezesUltimo", vezesUltimo);
-
-    if (window.Log) Log.info("[PARTICIPANTE-RODADAS]",
-        `Sua Temporada: ${rodadasJogadas} rodadas | Top3: ${vezesTop3} | AcimaMedia: ${vezesAcimaMedia} | Ultimo: ${vezesUltimo} | Aprov: ${aproveitamento}%`);
-
-    setEl("tempAproveitamento", `${aproveitamento}%`);
-    setStyle("tempAproveitamentoBar", "width", `${aproveitamento}%`);
-    const totalRodadasExibidas = statusMercadoAtual === 2 ? rodadasJogadas + 1 : rodadasJogadas;
-    setEl("tempAproveitamentoHint", `${vezesAcimaMedia} de ${totalRodadasExibidas} rodadas acima da média da liga`);
 
     card.style.display = "block";
 }
@@ -822,39 +671,7 @@ function _popularDestaquesCard(tipo, atleta, isCapitao = false) {
     }
 }
 
-function toggleRodadasDestaques() {
-    const card = document.getElementById('rodadas-destaques-card');
-    const content = document.getElementById('rod-destaques-content');
-    if (!card || !content) return;
 
-    const isExpanded = card.classList.contains('expanded');
-    if (isExpanded) {
-        card.classList.remove('expanded');
-        content.classList.add('collapsed');
-    } else {
-        card.classList.add('expanded');
-        content.classList.remove('collapsed');
-    }
-}
-
-window.toggleRodadasDestaques = toggleRodadasDestaques;
-
-// =====================================================================
-// TOGGLE DETALHES TEMPORADA — Progressive Disclosure v4.0
-// =====================================================================
-function toggleTemporadaDetalhes() {
-    const body = document.getElementById('tempDetalhesBody');
-    const toggle = document.getElementById('tempDetalhesToggle');
-    const chevron = document.getElementById('tempDetalhesChevron');
-    if (!body || !toggle) return;
-
-    const isExpanded = body.classList.contains('expanded');
-    body.classList.toggle('expanded');
-    toggle.setAttribute('aria-expanded', !isExpanded);
-    toggle.querySelector('span:first-child').textContent = isExpanded ? 'Ver detalhes' : 'Ocultar detalhes';
-}
-
-window.toggleTemporadaDetalhes = toggleTemporadaDetalhes;
 
 // =====================================================================
 // POSIÇÕES E CORES - Cartola
@@ -1298,25 +1115,6 @@ window.toggleMinhaEscalacao = function() {
     }
 };
 
-// ✅ v8.1: Toggle para expandir/colapsar Meu Resumo
-window.toggleMeuResumo = function() {
-    const header = document.querySelector('.meu-resumo-toggle');
-    const content = document.getElementById('meuResumoContent');
-
-    if (!header || !content) return;
-
-    const isExpanded = header.classList.contains('expanded');
-
-    if (isExpanded) {
-        header.classList.remove('expanded');
-        content.classList.remove('expanded');
-        localStorage.setItem('superCartola_meuResumoExpandido', 'false');
-    } else {
-        header.classList.add('expanded');
-        content.classList.add('expanded');
-        localStorage.setItem('superCartola_meuResumoExpandido', 'true');
-    }
-};
 
 // Helper para extrair clube_id da foto do atleta (fallback)
 function extrairClubeIdDaFoto(foto) {
@@ -1677,7 +1475,7 @@ function renderizarDetalhamentoRodada(rodadaData, isParcial = false, inativos = 
 
     if (!container) return;
 
-    // === "MEU RESUMO" card no topo do detalhamento ===
+    // === Linha compacta "Meu Status" acima do ranking ===
     let meuResumoHTML = '';
     const meuPartIndex = participantesOrdenados.findIndex(
         (p) => String(p.timeId || p.time_id) === String(meuTimeId)
@@ -1685,77 +1483,21 @@ function renderizarDetalhamentoRodada(rodadaData, isParcial = false, inativos = 
     if (meuPartIndex >= 0) {
         const meuPart = participantesOrdenados[meuPartIndex];
         const minhaPosicaoCalc = meuPart.posicao || meuPartIndex + 1;
-        const meusPontosCalc = Number(meuPart.pontos || 0);
         const meusValor = meuPart.valorFinanceiro || 0;
         const meusValorAbs = Math.abs(meusValor).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         const meusValorTexto = meusValor > 0 ? `+R$ ${meusValorAbs}` : meusValor < 0 ? `-R$ ${meusValorAbs}` : '';
-        const meusValorCor = meusValor > 0 ? 'var(--app-success-light)' : meusValor < 0 ? 'var(--app-danger)' : 'var(--app-text-primary)';
-        const meuNome = meuPart.nome || meuPart.nome_time || 'Meu Time';
+        const meusValorCor = meusValor > 0 ? 'var(--app-success-light)' : meusValor < 0 ? 'var(--app-danger)' : 'var(--app-text-muted)';
 
-        // Detalhes extras: zona label + mito/mico
         const meuZonaBadge = !isParcial ? calcularZonaLabel(minhaPosicaoCalc, totalParticipantes, meusValor, totalPerda) : '';
-        let detalhesExtra = meuZonaBadge;
 
-        // ✅ v7.0: Ícone e estilo especial se eu sou MITO ou MICO
-        const meuIsMito = minhaPosicaoCalc === 1 && !isParcial;
-        const meuIsMico = minhaPosicaoCalc === totalParticipantes && totalParticipantes > 1 && !isParcial;
-        const meuResumoExtraClass = meuIsMito ? 'meu-resumo-mito' : meuIsMico ? 'meu-resumo-mico' : '';
-        const meuPosicaoIcon = meuIsMito
-            ? '<span class="material-icons" style="font-size:22px;color:var(--app-gold);">emoji_events</span>'
-            : `${minhaPosicaoCalc}&#186;`;
-        const meuStatusLabel = meuIsMito
-            ? '<div class="mito-icon-row"><span class="material-icons">star</span> REI DA RODADA</div>'
-            : meuIsMico
-            ? '<div class="mico-icon-row"><span class="material-icons">trending_down</span> PIOR DA RODADA</div>'
-            : '';
-
-        // Em campo badge for parciais - mostrar escalados + jogando ao vivo
-        const titularesTotal = 12;
-        const escalados = meuPart.atletas ? meuPart.atletas.filter(a => !a.is_reserva).length : 0;
-        const jogandoAoVivo = meuPart.atletas ? meuPart.atletas.filter(a => !a.is_reserva && a.entrou_em_campo_real === true).length : 0;
-        const emCampoInfo = isParcial && escalados > 0
-            ? `<span style="margin-left:8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--app-text-muted)">${jogandoAoVivo}/12</span>`
-            : '';
-
-        // ✅ v8.1: Meu Resumo colapsivel (default: fechado)
-        const isResumoExpanded = localStorage.getItem('superCartola_meuResumoExpandido') === 'true';
-        const resumoExpandedClass = isResumoExpanded ? 'expanded' : '';
-        const pontosResumoFormatados = typeof window.truncarPontos === 'function'
-            ? window.truncarPontos(meusPontosCalc)
-            : (Math.trunc(meusPontosCalc * 100) / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-        meuResumoHTML = `
-            <div class="meu-resumo-wrapper">
-                <div class="meu-resumo-toggle ${resumoExpandedClass}" onclick="window.toggleMeuResumo()">
-                    <div class="meu-resumo-toggle-left">
-                        <span class="material-icons">person</span>
-                        <div>
-                            <div class="meu-resumo-toggle-title">Meu Resumo</div>
-                            <div class="meu-resumo-toggle-subtitle">${escapeHtml(meuNome)} • ${pontosResumoFormatados} pts • ${minhaPosicaoCalc}&#186;/${totalParticipantes}</div>
-                        </div>
-                    </div>
-                    <span class="material-icons me-toggle-chevron">expand_more</span>
+        if (meuZonaBadge || meusValorTexto) {
+            meuResumoHTML = `
+                <div class="meu-status-inline">
+                    ${meuZonaBadge}
+                    ${meusValorTexto ? `<span class="meu-status-fin" style="color:${meusValorCor}">${meusValorTexto}</span>` : ''}
                 </div>
-                <div class="meu-resumo-collapsible ${resumoExpandedClass}" id="meuResumoContent">
-                    <div class="meu-resumo-card ${meuResumoExtraClass}">
-                        <div class="meu-resumo-posicao">${meuPosicaoIcon}</div>
-                        <div class="meu-resumo-info">
-                            <div class="meu-resumo-nome">${meuNome}</div>
-                            <div class="meu-resumo-detalhes">
-                                ${detalhesExtra}
-                                ${!isParcial && meusValorTexto ? `<span style="color:${meusValorCor};font-family:'JetBrains Mono',monospace;font-size:12px;">${meusValorTexto}</span>` : ''}
-                                ${emCampoInfo}
-                            </div>
-                            ${meuStatusLabel}
-                        </div>
-                        <div class="meu-resumo-pontos">
-                            <div class="meu-resumo-pontos-valor">${pontosResumoFormatados}</div>
-                            <div class="meu-resumo-pontos-label">pontos</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+            `;
+        }
     }
 
     // ✅ v8.0: Agrupar participantes por zona financeira
