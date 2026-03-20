@@ -274,6 +274,15 @@
                 return;
             }
 
+            // ✅ FIX: Atualizar timestamp em toda resposta válida com dados
+            // Antes só atualizava quando hash mudava → "há 34min" mesmo com polling ativo
+            _lastUpdateTs = Date.now();
+            if (_isStale) {
+                _isStale = false;
+                _toast('Conexão restabelecida! Dados atualizados.', 'success', 3000);
+            }
+            _setState(MATCHDAY_STATES.LIVE);
+
             if (hash !== _lastParciaisHash) {
                 _lastParciaisHash = hash;
                 const prevRanking = _lastRanking;
@@ -300,15 +309,6 @@
                             : null
                     };
                 });
-
-                // Atualizar timestamp e resetar stale
-                _lastUpdateTs = Date.now();
-                if (_isStale) {
-                    _isStale = false;
-                    _toast('Conexão restabelecida! Dados atualizados.', 'success', 3000);
-                }
-
-                _setState(MATCHDAY_STATES.LIVE);
 
                 // ✅ Super Cache v2: salvar parciais para SWR
                 if (window.Cache && _ligaId) {
