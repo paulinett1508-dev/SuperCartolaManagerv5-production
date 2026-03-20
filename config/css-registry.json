@@ -385,6 +385,13 @@
         "moduleColor": "--cw-accent (mapeavel por modulo)"
       },
       {
+        "path": "public/participante/css/mito-mico-modal.css",
+        "loadedBy": ["participante/index.html"],
+        "description": "Modal celebratorio pos-rodada — exibe MITO (1o lugar) e MICO (ultimo) da rodada consolidada. Namespace .mmm-*. Uma exibicao por rodada via localStorage.",
+        "tokens": ["--app-mito", "--app-mico", "--app-z-modal", "--app-font-brand", "--app-surface-overlay"],
+        "keyframesUsed": ["app-fade-in-up (de _app-tokens.css — NAO redeclara)"]
+      },
+      {
         "path": "public/participante/css/libertadores-lp.css",
         "loadedBy": ["participante/fronts/libertadores.html (inline <link>)"],
         "description": "Landing Page da Libertadores 2026 — hero, countdown, notícias, timeline de fases. Namespace liberta-*. Usa tokens --app-liberta-*"

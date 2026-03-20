@@ -172,6 +172,9 @@ class ParticipanteNavigation {
         // ✅ Pré-carregar Widget "Campeão" (celebração de campeões)
         this.inicializarCampeaoWidget();
 
+        // ✅ Modal Mito & Mico (celebração pós-rodada, 1x por rodada)
+        this.inicializarMitoMicoModal();
+
         // ✅ v4.8: Atualizar módulos ao retornar do background (app resume)
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
@@ -453,6 +456,28 @@ class ParticipanteNavigation {
         } catch (error) {
             if (window.Log) Log.warn('PARTICIPANTE-NAV', 'Erro ao pre-carregar Widget Campeao:', error);
         }
+    }
+
+    /**
+     * ✅ Modal Mito & Mico — exibe resultado divertido pós-rodada (1x por rodada).
+     * Import dinâmico para não bloquear navegação principal.
+     * Delay de 800ms para garantir que o módulo inicial já renderizou.
+     */
+    inicializarMitoMicoModal() {
+        if (window.isLigaAposentada) return;
+
+        const { ligaId, timeId } = this.participanteData || {};
+        if (!ligaId) return;
+
+        setTimeout(() => {
+            import('/participante/js/modules/participante-mito-mico-modal.js?v=1')
+                .then(({ initMitoMicoModal }) => initMitoMicoModal({
+                    ligaId,
+                    timeId,
+                    temporada: new Date().getFullYear(),
+                }))
+                .catch(() => {});
+        }, 800);
     }
 
     renderizarMenuDinamico() {
