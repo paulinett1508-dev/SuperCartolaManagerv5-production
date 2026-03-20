@@ -23,7 +23,7 @@ const AppVersion = {
 
     // ✅ FIX MOBILE: Limpeza seletiva - remove apenas caches obsoletos, preserva SW ativo
     async limparCachesAntigos() {
-        const FLAG_KEY = 'sw_emergency_clean_v11';
+        const FLAG_KEY = 'sw_emergency_clean_v12';
         if (localStorage.getItem(FLAG_KEY)) {
             return; // Já foi feito
         }
@@ -31,7 +31,8 @@ const AppVersion = {
         try {
             // Limpar apenas caches com nomes antigos (não o atual do SW)
             // ⚠️ MANTER SINCRONIZADO com CACHE_NAME em service-worker.js
-            const CURRENT_SW_CACHE = 'super-cartola-v27-republish-fix';
+            // ⚠️ MANTER SINCRONIZADO com CACHE_NAME em service-worker.js
+            const CURRENT_SW_CACHE = 'super-cartola-v30-20260306';
             const cacheNames = await caches.keys();
             const obsoletos = cacheNames.filter(name => name !== CURRENT_SW_CACHE);
 
@@ -402,7 +403,7 @@ const AppVersion = {
         if ('caches' in window) {
             try {
                 // ⚠️ MANTER SINCRONIZADO com CACHE_NAME em service-worker.js
-                const CURRENT_SW_CACHE = 'super-cartola-v27-republish-fix';
+                const CURRENT_SW_CACHE = 'super-cartola-v30-20260306';
                 const names = await caches.keys();
                 const obsoletos = names.filter(name => name !== CURRENT_SW_CACHE);
                 if (obsoletos.length > 0) {

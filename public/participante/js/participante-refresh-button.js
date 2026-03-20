@@ -1,27 +1,30 @@
 // =====================================================================
-// PARTICIPANTE-REFRESH-BUTTON.JS - Botão de Atualização Manual v2.1
+// PARTICIPANTE-REFRESH-BUTTON.JS - Botão de Atualização Inteligente v3.0
 // =====================================================================
+// v3.0: Refresh incremental com comparação de versão servidor vs local
+//       - Mesma versão: limpa apenas dados voláteis (status, rankings)
+//       - Versão nova: limpeza completa + reload (assets + dados)
+//       - Preserva dados históricos imutáveis (rodadas consolidadas)
+//       - Botão sempre disponível (não apenas temporada encerrada)
 // v2.1: Fix duplicação de botão (verifica existência antes de adicionar)
-// Componente global para atualização de cache quando temporada encerrada
-// Substitui o pull-to-refresh quando os dados são estáticos
 // =====================================================================
 
-if (window.Log) Log.info('REFRESH-BUTTON', 'Carregando componente v2.1...');
+if (window.Log) Log.info('REFRESH-BUTTON', 'Carregando componente v3.0...');
 
 const RefreshButton = {
-    // Modal HTML
+    // Modal HTML — atualizado em showModal() com info de versão
     _modalHTML: `
         <div id="refreshModal" class="refresh-modal-overlay">
             <div class="refresh-modal-content">
                 <div class="refresh-modal-header">
-                    <div class="refresh-modal-icon">
-                        <span class="material-symbols-outlined">cached</span>
+                    <div class="refresh-modal-icon" id="refreshModalIconContainer">
+                        <span class="material-symbols-outlined" id="refreshModalIcon">cached</span>
                     </div>
-                    <h3 class="refresh-modal-title">Atualizar Dados</h3>
+                    <h3 class="refresh-modal-title" id="refreshModalTitle">Atualizar App</h3>
                 </div>
                 <div class="refresh-modal-body">
-                    <p>Isso vai limpar o cache local e buscar os dados novamente do servidor.</p>
-                    <p class="refresh-modal-hint">Use apenas se suspeitar que os dados estão desatualizados.</p>
+                    <p id="refreshModalDesc">Verificando versão...</p>
+                    <p class="refresh-modal-hint" id="refreshModalHint">Dados históricos (rodadas anteriores) são preservados.</p>
                 </div>
                 <div class="refresh-modal-actions">
                     <button id="refreshModalCancel" class="refresh-modal-btn refresh-modal-btn-cancel">
@@ -144,6 +147,15 @@ const RefreshButton = {
             color: #ff4500;
         }
 
+        .refresh-modal-icon--update {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(76, 175, 80, 0.1));
+            border-color: rgba(76, 175, 80, 0.5);
+        }
+
+        .refresh-modal-icon--update .material-symbols-outlined {
+            color: #4caf50;
+        }
+
         .refresh-modal-title {
             color: white;
             font-size: 18px;
@@ -167,6 +179,25 @@ const RefreshButton = {
             color: rgba(255, 255, 255, 0.5) !important;
             font-size: 12px !important;
             font-style: italic;
+        }
+
+        .refresh-modal-version-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .refresh-modal-version-tag--current {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .refresh-modal-version-tag--new {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
         }
 
         .refresh-modal-actions {
@@ -209,13 +240,20 @@ const RefreshButton = {
             filter: brightness(0.9);
         }
 
+        .refresh-modal-btn-confirm--update {
+            background: linear-gradient(135deg, #4caf50, #66bb6a);
+        }
+
         .refresh-modal-btn .material-symbols-outlined {
             font-size: 18px;
         }
     `,
 
-    // Inicializado?
+    // Estado interno
     _initialized: false,
+    _hasNewVersion: false,
+    _serverVersion: null,
+    _localVersion: null,
 
     /**
      * Inicializar o componente (injeta CSS e modal)
@@ -238,7 +276,7 @@ const RefreshButton = {
         }
 
         this._initialized = true;
-        if (window.Log) Log.info('REFRESH-BUTTON', '✅ Componente inicializado');
+        if (window.Log) Log.info('REFRESH-BUTTON', 'Componente v3.0 inicializado');
     },
 
     /**
@@ -261,19 +299,109 @@ const RefreshButton = {
             this.hideModal();
         });
 
-        // Botão confirmar
+        // Botão confirmar — decide refresh seletivo ou completo
         confirmBtn?.addEventListener('click', async () => {
-            await this.executeRefresh();
+            if (this._hasNewVersion) {
+                await this._executeFullRefresh();
+            } else {
+                await this._executeSmartRefresh();
+            }
         });
     },
 
     /**
-     * Mostrar modal de confirmação
+     * Verificar versão no servidor vs local
      */
-    showModal() {
+    async _checkVersion() {
+        try {
+            const response = await fetch('/api/app/check-version', {
+                headers: { 'x-client-type': 'app' }
+            });
+            if (!response.ok) return { hasNew: false, server: null, local: null };
+
+            const data = await response.json();
+            const serverVersion = data.version;
+            const localVersion = localStorage.getItem('app_version');
+
+            const hasNew = localVersion && serverVersion && localVersion !== serverVersion;
+
+            this._hasNewVersion = hasNew;
+            this._serverVersion = serverVersion;
+            this._localVersion = localVersion;
+
+            return { hasNew, server: serverVersion, local: localVersion };
+        } catch (error) {
+            if (window.Log) Log.warn('REFRESH-BUTTON', 'Erro ao verificar versão:', error);
+            return { hasNew: false, server: null, local: null };
+        }
+    },
+
+    /**
+     * Mostrar modal com verificação de versão
+     */
+    async showModal() {
         const modal = document.getElementById('refreshModal');
-        if (modal) {
-            modal.classList.add('active');
+        if (!modal) return;
+
+        // Reset estado visual
+        const iconContainer = document.getElementById('refreshModalIconContainer');
+        const icon = document.getElementById('refreshModalIcon');
+        const title = document.getElementById('refreshModalTitle');
+        const desc = document.getElementById('refreshModalDesc');
+        const hint = document.getElementById('refreshModalHint');
+        const confirmBtn = document.getElementById('refreshModalConfirm');
+
+        // Mostrar modal com "Verificando..."
+        if (icon) icon.textContent = 'sync';
+        if (title) title.textContent = 'Verificando...';
+        if (desc) desc.textContent = 'Comparando versão com o servidor...';
+        if (hint) hint.textContent = '';
+        if (confirmBtn) {
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<span class="material-symbols-outlined">hourglass_empty</span> Aguarde';
+        }
+
+        modal.classList.add('active');
+
+        // Verificar versão
+        const { hasNew, server, local } = await this._checkVersion();
+
+        if (hasNew) {
+            // Versão nova disponível
+            if (iconContainer) {
+                iconContainer.classList.add('refresh-modal-icon--update');
+            }
+            if (icon) icon.textContent = 'system_update';
+            if (title) title.textContent = 'Nova Versão Disponível';
+            if (desc) {
+                desc.innerHTML = `
+                    Versão atual: <span class="refresh-modal-version-tag refresh-modal-version-tag--current">v${local}</span><br>
+                    Nova versão: <span class="refresh-modal-version-tag refresh-modal-version-tag--new">v${server}</span>
+                `;
+            }
+            if (hint) hint.textContent = 'Atualizar agora traz a versão mais recente do servidor.';
+            if (confirmBtn) {
+                confirmBtn.disabled = false;
+                confirmBtn.classList.add('refresh-modal-btn-confirm--update');
+                confirmBtn.innerHTML = '<span class="material-symbols-outlined">system_update</span> Atualizar App';
+            }
+        } else {
+            // Mesma versão — refresh de dados da rodada
+            if (iconContainer) {
+                iconContainer.classList.remove('refresh-modal-icon--update');
+            }
+            if (icon) icon.textContent = 'refresh';
+            if (title) title.textContent = 'Atualizar Dados';
+            if (desc) {
+                const vTag = server ? `<span class="refresh-modal-version-tag refresh-modal-version-tag--current">v${server}</span>` : '';
+                desc.innerHTML = `App na versão mais recente ${vTag}<br>Atualizar dados da rodada atual.`;
+            }
+            if (hint) hint.textContent = 'Dados históricos (rodadas anteriores) são preservados.';
+            if (confirmBtn) {
+                confirmBtn.disabled = false;
+                confirmBtn.classList.remove('refresh-modal-btn-confirm--update');
+                confirmBtn.innerHTML = '<span class="material-symbols-outlined">refresh</span> Atualizar Dados';
+            }
         }
     },
 
@@ -288,25 +416,19 @@ const RefreshButton = {
     },
 
     /**
-     * Executar atualização (limpar cache e recarregar)
+     * Refresh SELETIVO — mesma versão, apenas dados voláteis da rodada atual
+     * Preserva: rodadas consolidadas, histórico, assets do SW, localStorage
      */
-    async executeRefresh() {
-        if (window.Log) Log.info('REFRESH-BUTTON', '🔄 Limpando cache e recarregando...');
+    async _executeSmartRefresh() {
+        if (window.Log) Log.info('REFRESH-BUTTON', 'Refresh seletivo — dados voláteis da rodada atual');
 
-        // Alterar texto do botão
-        const confirmBtn = document.getElementById('refreshModalConfirm');
-        if (confirmBtn) {
-            confirmBtn.innerHTML = `
-                <span class="material-symbols-outlined animate-spin">refresh</span>
-                Atualizando...
-            `;
-            confirmBtn.disabled = true;
-        }
+        this._setConfirmLoading();
 
         try {
-            // 1. Limpar IndexedDB
-            if (window.OfflineCache) {
-                await window.OfflineCache.clearAll();
+            // 1. Limpar stores voláteis no CacheV2 (IndexedDB)
+            if (window.Cache?.invalidateStore) {
+                await window.Cache.invalidateStore('status');    // mercado status
+                await window.Cache.invalidateStore('rankings');  // ranking atual
             }
 
             // 2. Limpar memória (ParticipanteCache)
@@ -314,39 +436,114 @@ const RefreshButton = {
                 window.ParticipanteCache.clear();
             }
 
-            // 3. Ativar overlay de reload
-            const glassOverlay = document.getElementById('reload-glass-overlay');
-            if (glassOverlay) {
-                glassOverlay.classList.add('is-active');
-            }
+            // 3. Feedback tátil
+            if (navigator.vibrate) navigator.vibrate(50);
 
-            // 4. Vibrar (feedback tátil)
-            if (navigator.vibrate) {
-                navigator.vibrate(50);
-            }
-
-            // 5. Aguardar um pouco e recarregar
-            setTimeout(() => {
-                window.location.reload();
-            }, 300);
+            // 4. Ativar overlay e recarregar
+            this._activateOverlayAndReload();
 
         } catch (error) {
-            if (window.Log) Log.error('REFRESH-BUTTON', 'Erro ao atualizar:', error);
+            if (window.Log) Log.error('REFRESH-BUTTON', 'Erro no refresh seletivo:', error);
             this.hideModal();
         }
     },
 
     /**
+     * Refresh COMPLETO — versão nova, limpa tudo e recarrega assets
+     */
+    async _executeFullRefresh() {
+        if (window.Log) Log.info('REFRESH-BUTTON', `Refresh completo — nova versão detectada (${this._localVersion} → ${this._serverVersion})`);
+
+        this._setConfirmLoading();
+
+        try {
+            // 1. Limpar version keys do localStorage
+            localStorage.removeItem('app_version');
+            localStorage.removeItem('app_server_boot');
+
+            // 2. Limpar CacheV2 completo (IndexedDB + memória)
+            if (window.Cache?.clearAll) {
+                await window.Cache.clearAll();
+            }
+
+            // 3. Limpar OfflineCache (IndexedDB)
+            if (window.OfflineCache?.clearAll) {
+                await window.OfflineCache.clearAll();
+            }
+
+            // 4. Limpar ParticipanteCache (memória)
+            if (window.ParticipanteCache) {
+                window.ParticipanteCache.clear();
+            }
+
+            // 5. Limpar caches do Service Worker (preservando cache ativo)
+            if ('caches' in window) {
+                try {
+                    const keys = await caches.keys();
+                    await Promise.all(keys.map(k => caches.delete(k)));
+                } catch (e) { /* ignorar — prosseguir com reload */ }
+            }
+
+            // 6. Forçar update do Service Worker
+            if ('serviceWorker' in navigator) {
+                try {
+                    const reg = await navigator.serviceWorker.getRegistration();
+                    if (reg) {
+                        if (reg.waiting) {
+                            reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+                        }
+                        await reg.update();
+                    }
+                } catch (e) { /* ignorar */ }
+            }
+
+            // 7. Limpar sessionStorage
+            sessionStorage.clear();
+
+            // 8. Feedback tátil
+            if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
+
+            // 9. Ativar overlay e recarregar
+            this._activateOverlayAndReload();
+
+        } catch (error) {
+            if (window.Log) Log.error('REFRESH-BUTTON', 'Erro no refresh completo:', error);
+            this.hideModal();
+        }
+    },
+
+    /**
+     * Helper: alterar botão para "Atualizando..."
+     */
+    _setConfirmLoading() {
+        const confirmBtn = document.getElementById('refreshModalConfirm');
+        if (confirmBtn) {
+            confirmBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Atualizando...';
+            confirmBtn.disabled = true;
+        }
+    },
+
+    /**
+     * Helper: ativar overlay e reload
+     */
+    _activateOverlayAndReload() {
+        const glassOverlay = document.getElementById('reload-glass-overlay');
+        if (glassOverlay) {
+            glassOverlay.classList.add('is-active');
+        }
+
+        setTimeout(() => {
+            window.location.reload();
+        }, 300);
+    },
+
+    /**
      * Criar botão de atualização
-     * @param {Object} options - Opções do botão
-     * @param {string} options.text - Texto do botão (padrão: "Atualizar Dados")
-     * @param {boolean} options.showIcon - Mostrar ícone (padrão: true)
-     * @returns {HTMLElement} Elemento do botão
      */
     createButton(options = {}) {
         this.init();
 
-        const text = options.text || 'Atualizar Dados';
+        const text = options.text || 'Atualizar App';
         const showIcon = options.showIcon !== false;
 
         const button = document.createElement('button');
@@ -365,8 +562,6 @@ const RefreshButton = {
 
     /**
      * Adicionar botão a um container
-     * @param {HTMLElement|string} container - Container ou seletor
-     * @param {Object} options - Opções do botão
      */
     addTo(container, options = {}) {
         this.init();
@@ -380,7 +575,7 @@ const RefreshButton = {
             return null;
         }
 
-        // ✅ v2.1: Evitar duplicação - verificar se já existe botão no container
+        // v2.1: Evitar duplicação
         const existingButton = containerEl.querySelector('.refresh-button-container');
         if (existingButton) {
             if (window.Log) Log.debug('REFRESH-BUTTON', 'Botão já existe no container, ignorando duplicação');
@@ -399,14 +594,10 @@ const RefreshButton = {
     },
 
     /**
-     * Verificar se deve mostrar botão (temporada encerrada)
+     * Sempre disponível (v3.0)
      */
     shouldShow() {
-        // Verificar via OfflineCache
-        if (window.OfflineCache?.TEMPORADA_ENCERRADA) {
-            return true;
-        }
-        return false;
+        return true;
     }
 };
 
@@ -416,4 +607,4 @@ RefreshButton.init();
 // Expor globalmente
 window.RefreshButton = RefreshButton;
 
-if (window.Log) Log.info('REFRESH-BUTTON', '✅ Componente pronto');
+if (window.Log) Log.info('REFRESH-BUTTON', 'Componente v3.0 pronto');

@@ -336,6 +336,11 @@ async function carregarDadosERenderizar(ligaId, timeId, participante) {
 
     // ✅ v2.0: Renderizar grid de módulos inline na home (movido do Menu sheet)
     renderizarModulosInline();
+
+    // ✅ v3.0: Botão "Atualizar App" — sempre disponível na home
+    if (window.RefreshButton) {
+        RefreshButton.addTo('#home-container');
+    }
 }
 
 // =====================================================================
@@ -380,14 +385,36 @@ async function atualizarCardsHome(ligaId, timeId, participante) {
 
     homeAutoRefreshEmAndamento = true;
     try {
-        // IC-02: Re-buscar status do mercado a cada ciclo para detectar transicoes
+        // IC-02: Re-buscar status do mercado SEM cache para detectar transições em tempo real
         const statusAnterior = mercadoStatus?.status_mercado;
-        await buscarStatusMercado();
+        try {
+            const resp = await fetch('/api/cartola/mercado/status');
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data) {
+                    mercadoStatus = data;
+                    window.cartolaState = {
+                        statusMercado: data.status_mercado,
+                        mercadoFechado: data.status_mercado === 2,
+                        rodadaAtual: data.rodada_atual,
+                        temporada: data.temporada
+                    };
+                    // Atualizar CacheV2 para outros consumidores
+                    if (window.Cache) window.Cache.set('mercado:status', data, { ttl: 2 * 60 * 1000 });
+                }
+            }
+        } catch (e) { /* manter mercadoStatus anterior */ }
         const statusAtual = mercadoStatus?.status_mercado;
 
         // Detectar transicao de status (ex: 2→1 = jogos terminaram, 1→2 = mercado fechou)
         if (statusAnterior && statusAtual && statusAnterior !== statusAtual) {
             if (window.Log) Log.info("PARTICIPANTE-HOME", `Transicao de mercado detectada: ${statusAnterior} → ${statusAtual}`);
+            // Limpar estado de parciais ao sair do estágio "em andamento" (status 2)
+            if (statusAnterior === 2) {
+                parciaisAtivos = false;
+                dadosParciais = null;
+                if (ParciaisModule?.pararAutoRefresh) ParciaisModule.pararAutoRefresh();
+            }
             // Re-renderizar completo para refletir novo estado
             await carregarDadosERenderizar(ligaId, timeId, participante);
             return;
