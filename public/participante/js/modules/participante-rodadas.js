@@ -1037,129 +1037,166 @@ function renderizarMinhaEscalacao(rodadaData, isParcial) {
 
     // Posições do Cartola
     const POSICOES = {
-        1: { nome: 'GOL', cor: '#FF4500' },
+        1: { nome: 'GOL', cor: 'var(--app-pos-gol, #FF4500)' },
         2: { nome: 'LAT', cor: 'var(--app-info)' },
         3: { nome: 'ZAG', cor: 'var(--app-info)' },
         4: { nome: 'MEI', cor: 'var(--app-success-light)' },
         5: { nome: 'ATA', cor: 'var(--app-danger)' },
-        6: { nome: 'TEC', cor: '#6b7280' },
+        6: { nome: 'TEC', cor: 'var(--app-text-muted)' },
     };
 
-    // Ícones de status (Material Icons) — sem emojis
-    const ICON_UPCOMING  = '<span class="material-icons" style="font-size:14px;color:var(--app-text-muted)">schedule</span>';
-    const ICON_PLAYING   = '<span class="material-icons" style="font-size:14px;color:var(--app-warning)">sports_soccer</span>';
-    const ICON_PLAYED    = '<span class="material-icons" style="font-size:14px;color:var(--app-success)">check_circle</span>';
-    const ICON_FINISHED  = '<span class="material-icons" style="font-size:14px;color:var(--app-info)">check_circle</span>';
-    const ICON_ABSENT    = '<span class="material-icons" style="font-size:14px;color:var(--app-danger)">block</span>';
+    // Siglas dos clubes (fallback para display compacto)
+    const CLUBES_SIGLA = {
+        262: 'FLA', 263: 'BOT', 264: 'COR', 265: 'BAH', 266: 'FLU', 267: 'VAS',
+        275: 'PAL', 276: 'SAO', 277: 'SAN', 280: 'RBB', 282: 'CAM', 283: 'CRU',
+        284: 'GRE', 285: 'INT', 286: 'JUV', 287: 'VIT', 290: 'GOI', 292: 'SPT',
+        293: 'CAP', 354: 'CEA', 356: 'FOR', 1371: 'CUI', 2305: 'MIR',
+        270: 'CFC', 273: 'AME', 274: 'CHA', 288: 'PON', 315: 'NOV', 344: 'STA', 373: 'CRB',
+    };
+    // Nomes completos dos clubes (para display na meta line)
+    const CLUBES_NOME = {
+        262: 'Flamengo', 263: 'Botafogo', 264: 'Corinthians', 265: 'Bahia',
+        266: 'Fluminense', 267: 'Vasco', 275: 'Palmeiras', 276: 'São Paulo',
+        277: 'Santos', 280: 'Bragantino', 282: 'Atlético-MG', 283: 'Cruzeiro',
+        284: 'Grêmio', 285: 'Internacional', 286: 'Juventude', 287: 'Vitória',
+        290: 'Goiás', 292: 'Sport', 293: 'Athletico-PR', 354: 'Ceará',
+        356: 'Fortaleza', 1371: 'Cuiabá', 2305: 'Mirassol',
+        270: 'Coritiba', 273: 'América-MG', 274: 'Chapecoense', 288: 'Ponte Preta',
+        315: 'Novorizontino', 344: 'Santa Cruz', 373: 'CRB',
+    };
+
+    // Scouts — labels e classificação (positivo/negativo para cor)
+    const SCOUTS_CONFIG = {
+        G:  { label: 'G',  positivo: true },
+        A:  { label: 'A',  positivo: true },
+        FD: { label: 'FD', positivo: true },
+        FS: { label: 'FS', positivo: true },
+        PE: { label: 'PE', positivo: true },
+        DS: { label: 'DS', positivo: true },
+        SG: { label: 'SG', positivo: true },
+        DE: { label: 'DE', positivo: true },
+        FF: { label: 'FF', positivo: false },
+        FC: { label: 'FC', positivo: false },
+        FT: { label: 'FT', positivo: false },
+        CA: { label: 'CA', positivo: false },
+        CV: { label: 'CV', positivo: false },
+        GC: { label: 'GC', positivo: false },
+        GS: { label: 'GS', positivo: false },
+        I:  { label: 'I',  positivo: false },
+        PP: { label: 'PP', positivo: false },
+    };
+
+    // Renderizar scouts compactos
+    function renderScouts(scout) {
+        if (!scout || typeof scout !== 'object') return '';
+        const entries = Object.entries(scout).filter(([k]) => SCOUTS_CONFIG[k]);
+        if (entries.length === 0) return '';
+
+        const badges = entries.map(([key, val]) => {
+            const cfg = SCOUTS_CONFIG[key];
+            const qtyPrefix = val > 1 ? `${val}` : '';
+            const cssClass = cfg.positivo ? 'me-scout-pos' : 'me-scout-neg';
+            return `<span class="${cssClass}">${qtyPrefix}${cfg.label}</span>`;
+        }).join(' ');
+
+        return `<div class="me-card-scouts">${badges}</div>`;
+    }
 
     // Função para determinar status do jogo baseado em data/hora
     function obterStatusJogo(atleta) {
         if (!isParcial) {
-            // Rodada finalizada
-            return ICON_FINISHED;
+            return 'finished';
         }
-
-        // entrou_em_campo é a fonte mais confiável quando definida
         if (atleta.entrou_em_campo === true || (atleta.pontos_num != null && atleta.pontos_num !== 0)) {
-            return ICON_PLAYED; // Confirmado: jogou
+            return 'played';
         }
         if (atleta.entrou_em_campo === false) {
-            return ICON_ABSENT; // Confirmado: não jogou (ausente)
+            return 'absent';
         }
 
-        // entrou_em_campo é null/undefined → fallback por data/hora
         const jogoInfo = atleta.jogo || {};
         const dataJogo = jogoInfo.data_jogo || jogoInfo.data || null;
         const horaJogo = jogoInfo.hora || null;
 
-        if (!dataJogo) {
-            return ICON_UPCOMING; // Sem info de jogo → aguardando
-        }
+        if (!dataJogo) return 'upcoming';
 
         try {
-            // FIX #1: parsear como BRT (UTC-3) com offset explícito
-            // Evita erro de timezone quando browser está fora do Brasil
             const horaStr = horaJogo ? horaJogo.substring(0, 5) : '00:00';
             const dataHoraJogo = new Date(`${dataJogo}T${horaStr}:00-03:00`);
             const agora = new Date();
             const diffMinutos = (agora - dataHoraJogo) / (1000 * 60);
 
-            if (diffMinutos < -10) {
-                return ICON_UPCOMING; // Jogo ainda não começou
-            } else if (diffMinutos <= 150) {
-                // FIX #2: janela de 150min (90reg + 30prorrog + buffer)
-                // Evita marcar como encerrado em jogos com prorrogação ou atraso
-                return ICON_PLAYING; // Jogo em andamento (status incerto pelo API)
-            } else {
-                return ICON_FINISHED; // Mais de 2h30 → provável encerramento
-            }
+            if (diffMinutos < -10) return 'upcoming';
+            if (diffMinutos <= 150) return 'playing';
+            return 'finished';
         } catch (err) {
             if (window.Log) Log.warn('[RODADAS] Erro ao processar data do jogo:', err);
-            return ICON_UPCOMING;
+            return 'upcoming';
         }
     }
 
-    // Renderizar atleta na tabela
+    // Renderizar atleta como card compacto (estilo Cartola FC)
     function renderAtleta(a, isReserva = false, subInfo = null) {
-        const pos = POSICOES[a.posicao_id] || { nome: '???', cor: '#6b7280' };
+        const pos = POSICOES[a.posicao_id] || { nome: '???', cor: 'var(--app-text-muted)' };
         const pontosRaw = a.pontos_num ?? 0;
-        const pontosAtl = (Math.trunc(Number(pontosRaw) * 10) / 10).toFixed(1);
-        const pontosClass = pontosRaw > 0 ? 'color:var(--app-success-light)' : pontosRaw < 0 ? 'color:var(--app-danger)' : 'color:var(--app-text-muted)';
-        
-        // Status do jogo baseado em data/hora
-        const statusIcon = obterStatusJogo(a);
+        const pontosAtl = (Math.trunc(Number(pontosRaw) * 100) / 100).toFixed(2);
+        const pontosColorClass = pontosRaw > 0 ? 'me-pts-pos' : pontosRaw < 0 ? 'me-pts-neg' : 'me-pts-zero';
 
         const isCapitao = a.atleta_id === capitaoId;
         const isLuxo = a.atleta_id === reservaLuxoId && isReserva;
 
-        const capitaoBadge = isCapitao ? '<span style="background:var(--app-warning);color:var(--app-text-inverse);font-size:9px;padding:2px 5px;border-radius:3px;font-weight:bold;margin-left:4px;">C</span>' : '';
-        const luxoBadge = isLuxo ? '<span style="background:var(--app-purple);color:var(--app-text-white);font-size:9px;padding:2px 5px;border-radius:3px;font-weight:bold;margin-left:4px;">L</span>' : '';
+        const capitaoBadge = isCapitao ? '<span class="me-badge me-badge-cap">C</span>' : '';
+        const luxoBadge = isLuxo ? '<span class="me-badge me-badge-luxo">L</span>' : '';
 
-        // Badge de substituição (regras oficiais Cartola FC 2025/2026)
+        // Badge de substituição
         let subBadge = '';
         if (subInfo) {
             if (subInfo.tipo === 'luxo') {
                 const textoLuxo = subInfo.herdouCapitao
                     ? `Luxo ativado (C 1.5x) por ${subInfo.substituiu}`
                     : `Luxo ativado por ${subInfo.substituiu}`;
-                subBadge = `<div style="font-size:9px;color:var(--app-purple);margin-top:1px;"><span class="material-icons" style="font-size:10px;vertical-align:middle;">star</span> ${textoLuxo}</div>`;
+                subBadge = `<div class="me-card-sub me-card-sub-luxo"><span class="material-icons me-card-sub-icon">star</span> ${textoLuxo}</div>`;
             } else if (subInfo.tipo === 'posicao') {
-                subBadge = `<div style="font-size:9px;color:var(--app-success-light);margin-top:1px;"><span class="material-icons" style="font-size:10px;vertical-align:middle;">swap_vert</span> Entrou por ${subInfo.substituiu}</div>`;
+                subBadge = `<div class="me-card-sub me-card-sub-pos"><span class="material-icons me-card-sub-icon">swap_vert</span> Entrou por ${subInfo.substituiu}</div>`;
             } else if (subInfo.tipo === 'substituido') {
-                subBadge = '<div style="font-size:9px;color:var(--app-danger);margin-top:1px;opacity:0.8;">Não entrou em campo</div>';
+                subBadge = '<div class="me-card-sub me-card-sub-out">Não entrou em campo</div>';
             } else if (subInfo.tipo === 'substituido_luxo') {
-                subBadge = '<div style="font-size:9px;color:var(--app-purple);margin-top:1px;opacity:0.8;"><span class="material-icons" style="font-size:10px;vertical-align:middle;">swap_vert</span> Substituído pelo Luxo</div>';
+                subBadge = '<div class="me-card-sub me-card-sub-luxo"><span class="material-icons me-card-sub-icon">swap_vert</span> Substituído pelo Luxo</div>';
             }
         }
 
         const clubeId = a.clube_id || extrairClubeIdDaFoto(a.foto) || null;
         const escudoSrc = clubeId ? `/escudos/${clubeId}.png` : '/escudos/default.png';
+        const clubeNome = CLUBES_NOME[clubeId] || '';
 
         const csAtl = a.variacao_num ?? 0;
-        const csClass = csAtl > 0 ? 'color:var(--app-success-light)' : csAtl < 0 ? 'color:var(--app-danger)' : 'color:var(--app-text-muted)';
-        const csTexto = csAtl > 0 ? `+${csAtl.toFixed(1)}` : csAtl.toFixed(1);
+        const csColorClass = csAtl > 0 ? 'me-cs-pos' : csAtl < 0 ? 'me-cs-neg' : 'me-cs-zero';
+        const csTexto = csAtl > 0 ? `$+${(Math.trunc(csAtl * 100) / 100).toFixed(2)}` : `$${(Math.trunc(csAtl * 100) / 100).toFixed(2)}`;
+
+        // Scouts do atleta
+        const scoutsHTML = renderScouts(a.scout);
+
+        // Status do jogo
+        const status = obterStatusJogo(a);
+        const statusDot = status === 'playing' ? '<span class="me-card-live"></span>' : '';
+
+        // Multiplicador de capitão
+        const capMulti = isCapitao ? '<span class="me-cap-multi">x1,5</span>' : '';
 
         return `
-            <tr style="border-bottom:1px solid #1f2937;">
-                <td style="padding:8px 4px;text-align:center;">
-                    <span style="background:${pos.cor};color:var(--app-text-white);font-size:9px;padding:3px 7px;border-radius:4px;font-weight:bold;">${pos.nome}</span>
-                </td>
-                <td style="padding:8px 4px;text-align:center;">
-                    <img src="${escudoSrc}" alt="" onerror="this.onerror=null;this.src='/escudos/default.png'" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;">
-                </td>
-                <td style="padding:8px 8px;font-size:13px;color:#e5e7eb;">
-                    <div>${escapeHtml(a.apelido || 'Atleta')}${capitaoBadge}${luxoBadge}</div>${subBadge}
-                </td>
-                <td style="padding:8px 4px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:bold;${pontosClass};">
-                    ${pontosAtl}
-                </td>
-                <td style="padding:8px 4px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px;${csClass};">
-                    ${csTexto}
-                </td>
-                <td style="padding:8px 4px;text-align:center;font-size:14px;">
-                    ${statusIcon}
-                </td>
-            </tr>
+            <div class="me-card${status === 'absent' ? ' me-card-absent' : ''}">
+                <img class="me-card-escudo" src="${escudoSrc}" alt="" onerror="this.onerror=null;this.src='/escudos/default.png'">
+                <div class="me-card-info">
+                    <div class="me-card-nome">${statusDot}${escapeHtml(a.apelido || 'Atleta')}${capitaoBadge}${luxoBadge}</div>
+                    <div class="me-card-meta"><span class="me-pos-badge" style="color:${pos.cor}">${pos.nome}</span> | ${escapeHtml(clubeNome)}</div>
+                    ${subBadge}
+                </div>
+                <div class="me-card-stats">
+                    <div class="me-card-pts ${pontosColorClass}">${capMulti}${pontosAtl}</div>
+                    <div class="me-card-cs ${csColorClass}">${csTexto}</div>
+                    ${scoutsHTML}
+                </div>
+            </div>
         `;
     }
 
@@ -1172,7 +1209,7 @@ function renderizarMinhaEscalacao(rodadaData, isParcial) {
             }
             return renderAtleta(a, false, subInfo);
         }).join("")
-        : '<tr><td colspan="6" style="color:var(--app-text-muted);padding:12px;text-align:center;">Sem titulares</td></tr>';
+        : '<div class="me-card-empty">Sem titulares</div>';
 
     const reservasHTML = reservas.length > 0
         ? reservas.map(a => renderAtleta(a, true, substituicoes.get(a.atleta_id) || null)).join("")
@@ -1183,7 +1220,7 @@ function renderizarMinhaEscalacao(rodadaData, isParcial) {
     const expandedClass = isExpanded ? 'expanded' : '';
 
     container.innerHTML = `
-        <div class="minha-escalacao-container" style="background:#111827;border-radius:16px;overflow:hidden;margin-bottom:16px;border:1px solid #1f2937;">
+        <div class="minha-escalacao-container me-container">
             <!-- Toggle Header (sempre visível) -->
             <div class="me-toggle-header ${expandedClass}" onclick="window.toggleMinhaEscalacao()">
                 <div class="me-toggle-header-left">
@@ -1199,60 +1236,41 @@ function renderizarMinhaEscalacao(rodadaData, isParcial) {
             <!-- Conteúdo Colapsável -->
             <div class="me-collapsible-content ${expandedClass}" id="minhaEscalacaoContent">
                 <!-- Header com info do time -->
-                <div style="padding:16px;background:linear-gradient(135deg, rgba(255, 85, 0, 0.08) 0%, transparent 100%);border-bottom:1px solid #1f2937;">
-                    <div style="font-family:'Russo One',sans-serif;font-size:16px;color:var(--app-text-white);">${escapeHtml(nomeTime)}</div>
-                    <div style="font-size:12px;color:var(--app-text-muted);margin-top:2px;">${escapeHtml(nomeCartola)}</div>
+                <div class="me-header-info">
+                    <div class="me-header-nome">${escapeHtml(nomeTime)}</div>
+                    <div class="me-header-cartola">${escapeHtml(nomeCartola)}</div>
                 </div>
 
                 <!-- Stats -->
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 16px;">
-                    <div style="background:#1f2937;border-radius:8px;padding:10px;text-align:center;">
-                        <div style="font-size:11px;color:var(--app-text-muted);text-transform:uppercase;">Pontos</div>
-                        <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:bold;color:var(--app-primary);">${pontosFormatados}</div>
+                <div class="me-stats-grid">
+                    <div class="me-stat-box">
+                        <div class="me-stat-label">Pontos</div>
+                        <div class="me-stat-value me-stat-pontos">${pontosFormatados}</div>
                     </div>
-                    <div style="background:#1f2937;border-radius:8px;padding:10px;text-align:center;">
-                        <div style="font-size:11px;color:var(--app-text-muted);text-transform:uppercase;">Posição</div>
-                        <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:bold;color:var(--app-text-white);">${posicao}º <span style="font-size:12px;color:var(--app-text-muted);">/${totalPart}</span></div>
+                    <div class="me-stat-box">
+                        <div class="me-stat-label">Posição</div>
+                        <div class="me-stat-value">${posicao}º <span class="me-stat-total">/${totalPart}</span></div>
                     </div>
                 </div>
 
-                <!-- Tabela de Titulares -->
-                <div style="padding:8px 16px 16px;">
-                    <div style="font-size:11px;color:var(--app-text-muted);text-transform:uppercase;margin-bottom:8px;font-weight:bold;">Titulares (${titulares.length})</div>
-                    <table style="width:100%;border-collapse:collapse;font-size:13px;">
-                        <thead>
-                            <tr style="border-bottom:2px solid var(--app-border);color:var(--app-text-muted);font-size:10px;text-transform:uppercase;">
-                                <th style="padding:6px 4px;text-align:center;font-weight:600;">POS</th>
-                                <th style="padding:6px 4px;text-align:center;font-weight:600;">TIME</th>
-                                <th style="padding:6px 8px;text-align:left;font-weight:600;">JOGADOR</th>
-                                <th style="padding:6px 4px;text-align:right;font-weight:600;">PTS</th>
-                                <th style="padding:6px 4px;text-align:right;font-weight:600;">C$</th>
-                                <th style="padding:6px 4px;text-align:center;font-weight:600;">STATUS</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${titularesHTML}
-                        </tbody>
-                    </table>
+                <!-- Titulares -->
+                <div class="me-section">
+                    <div class="me-section-title">Titulares (${titulares.length})</div>
+                    ${titularesHTML}
                 </div>
 
                 <!-- Separador Banco de Reservas -->
                 ${reservas.length > 0 ? `
-                    <div style="margin:0 16px;padding:12px 0;display:flex;align-items:center;gap:8px;">
-                        <div style="flex:1;border-top:1px dashed #374151;"></div>
-                        <span style="font-size:10px;color:var(--app-text-muted);text-transform:uppercase;font-weight:700;letter-spacing:1px;display:flex;align-items:center;gap:4px;">
-                            <span class="material-icons" style="font-size:14px;">event_seat</span>
-                            BANCO
+                    <div class="me-banco-divider">
+                        <div class="me-banco-line"></div>
+                        <span class="me-banco-label">
+                            <span class="material-icons me-banco-icon">event_seat</span>
+                            Reservas
                         </span>
-                        <div style="flex:1;border-top:1px dashed #374151;"></div>
+                        <div class="me-banco-line"></div>
                     </div>
-                    <div style="padding:8px 16px 16px;background:rgba(107,114,128,0.06);border-radius:0 0 16px 16px;">
-                        <div style="font-size:10px;color:var(--app-text-muted);text-transform:uppercase;margin-bottom:8px;font-weight:600;letter-spacing:0.5px;">Reservas (${reservas.length})</div>
-                        <table style="width:100%;border-collapse:collapse;font-size:13px;opacity:0.7;">
-                            <tbody>
-                                ${reservasHTML}
-                            </tbody>
-                        </table>
+                    <div class="me-section me-section-reservas">
+                        ${reservasHTML}
                     </div>
                 ` : ''}
             </div>
@@ -2170,99 +2188,132 @@ async function abrirCampinhoModal(targetTimeId, rodada, rodadaData = null) {
         }
     }
 
-    // Função para determinar status do jogo baseado em data/hora (contexto modal)
-    const ICON_UPCOMING2  = '<span class="material-icons" style="font-size:14px;color:var(--app-text-muted)">schedule</span>';
-    const ICON_PLAYING2   = '<span class="material-icons" style="font-size:14px;color:var(--app-warning)">sports_soccer</span>';
-    const ICON_PLAYED2    = '<span class="material-icons" style="font-size:14px;color:var(--app-success)">check_circle</span>';
-    const ICON_FINISHED2  = '<span class="material-icons" style="font-size:14px;color:var(--app-info)">check_circle</span>';
-    const ICON_ABSENT2    = '<span class="material-icons" style="font-size:14px;color:var(--app-danger)">block</span>';
+    // Posições do Cartola (modal)
+    const POSICOES_MODAL = {
+        1: { nome: 'GOL', cor: 'var(--app-pos-gol, #FF4500)' },
+        2: { nome: 'LAT', cor: 'var(--app-info)' },
+        3: { nome: 'ZAG', cor: 'var(--app-info)' },
+        4: { nome: 'MEI', cor: 'var(--app-success-light)' },
+        5: { nome: 'ATA', cor: 'var(--app-danger)' },
+        6: { nome: 'TEC', cor: 'var(--app-text-muted)' },
+    };
 
-    function obterStatusJogo(atleta) {
+    // Siglas dos clubes (modal)
+    const CLUBES_NOME_MODAL = {
+        262: 'Flamengo', 263: 'Botafogo', 264: 'Corinthians', 265: 'Bahia',
+        266: 'Fluminense', 267: 'Vasco', 275: 'Palmeiras', 276: 'São Paulo',
+        277: 'Santos', 280: 'Bragantino', 282: 'Atlético-MG', 283: 'Cruzeiro',
+        284: 'Grêmio', 285: 'Internacional', 286: 'Juventude', 287: 'Vitória',
+        290: 'Goiás', 292: 'Sport', 293: 'Athletico-PR', 354: 'Ceará',
+        356: 'Fortaleza', 1371: 'Cuiabá', 2305: 'Mirassol',
+        270: 'Coritiba', 273: 'América-MG', 274: 'Chapecoense',
+    };
+
+    // Scouts config (modal)
+    const SCOUTS_MODAL = {
+        G:  { label: 'G',  positivo: true },  A:  { label: 'A',  positivo: true },
+        FD: { label: 'FD', positivo: true },   FS: { label: 'FS', positivo: true },
+        PE: { label: 'PE', positivo: true },   DS: { label: 'DS', positivo: true },
+        SG: { label: 'SG', positivo: true },   DE: { label: 'DE', positivo: true },
+        FF: { label: 'FF', positivo: false },  FC: { label: 'FC', positivo: false },
+        FT: { label: 'FT', positivo: false },  CA: { label: 'CA', positivo: false },
+        CV: { label: 'CV', positivo: false },  GC: { label: 'GC', positivo: false },
+        GS: { label: 'GS', positivo: false },  I:  { label: 'I',  positivo: false },
+        PP: { label: 'PP', positivo: false },
+    };
+
+    function renderScoutsModal(scout) {
+        if (!scout || typeof scout !== 'object') return '';
+        const entries = Object.entries(scout).filter(([k]) => SCOUTS_MODAL[k]);
+        if (entries.length === 0) return '';
+        const badges = entries.map(([key, val]) => {
+            const cfg = SCOUTS_MODAL[key];
+            const qtyPrefix = val > 1 ? `${val}` : '';
+            const cssClass = cfg.positivo ? 'me-scout-pos' : 'me-scout-neg';
+            return `<span class="${cssClass}">${qtyPrefix}${cfg.label}</span>`;
+        }).join(' ');
+        return `<div class="me-card-scouts">${badges}</div>`;
+    }
+
+    function obterStatusJogoModal(atleta) {
         const jogoInfo = atleta.jogo || {};
         const dataJogo = jogoInfo.data_jogo || jogoInfo.data || null;
         const horaJogo = jogoInfo.hora || null;
 
-        // Atleta confirmado ausente
-        if (atleta.entrou_em_campo === false) return ICON_ABSENT2;
-
-        // Atleta confirmado em campo ou com pontos
-        if (atleta.entrou_em_campo === true || (atleta.pontos_num != null && atleta.pontos_num !== 0)) return ICON_PLAYED2;
-
-        if (!dataJogo) return ICON_UPCOMING2;
+        if (atleta.entrou_em_campo === false) return 'absent';
+        if (atleta.entrou_em_campo === true || (atleta.pontos_num != null && atleta.pontos_num !== 0)) return 'played';
+        if (!dataJogo) return 'upcoming';
 
         try {
             const horaStr = horaJogo ? horaJogo.substring(0, 5) : '00:00';
-            const dataHoraJogo = new Date(`${dataJogo}T${horaStr}:00-03:00`); // BRT fixo
+            const dataHoraJogo = new Date(`${dataJogo}T${horaStr}:00-03:00`);
             const agora = new Date();
             const diffMinutos = (agora - dataHoraJogo) / (1000 * 60);
-
-            if (diffMinutos < -10) return ICON_UPCOMING2;
-            else if (diffMinutos <= 150) return ICON_PLAYING2;
-            else return ICON_FINISHED2;
+            if (diffMinutos < -10) return 'upcoming';
+            if (diffMinutos <= 150) return 'playing';
+            return 'finished';
         } catch (err) {
             if (window.Log) Log.warn('[RODADAS] Erro ao processar data do jogo:', err);
-            return ICON_UPCOMING2;
+            return 'upcoming';
         }
     }
 
-    // Renderizar atleta na tabela
+    // Renderizar atleta como card compacto (modal - estilo Cartola FC)
     function renderAtleta(a, isReserva = false, subInfo = null) {
-        const pos = POSICOES[a.posicao_id] || { nome: '???', cor: '#6b7280' };
+        const pos = POSICOES_MODAL[a.posicao_id] || { nome: '???', cor: 'var(--app-text-muted)' };
         const pontosRaw = a.pontos_efetivos ?? a.pontos_num ?? 0;
-        const pontosAtl = (Math.trunc(Number(pontosRaw) * 10) / 10).toFixed(1);
-        const pontosClass = pontosRaw > 0 ? 'color:var(--app-success-light)' : pontosRaw < 0 ? 'color:var(--app-danger)' : 'color:var(--app-text-muted)';
-        
-        // Status do jogo baseado em data/hora
-        const statusIcon = obterStatusJogo(a);
+        const pontosAtl = (Math.trunc(Number(pontosRaw) * 100) / 100).toFixed(2);
+        const pontosColorClass = pontosRaw > 0 ? 'me-pts-pos' : pontosRaw < 0 ? 'me-pts-neg' : 'me-pts-zero';
 
         const isCapitao = String(a.atleta_id) === String(capitaoId);
-        const capitaoBadge = isCapitao ? '<span style="background:var(--app-warning);color:var(--app-text-inverse);font-size:9px;padding:2px 5px;border-radius:3px;font-weight:bold;margin-left:4px;">C</span>' : '';
+        const isLuxo = isReserva && (a.is_reserva_luxo || a.atleta_id === reservaLuxoIdModal);
 
-        // Badge de substituição (modal - regras oficiais Cartola FC 2025/2026)
+        const capitaoBadge = isCapitao ? '<span class="me-badge me-badge-cap">C</span>' : '';
+        const luxoBadge = isLuxo ? '<span class="me-badge me-badge-luxo">L</span>' : '';
+
         let subBadge = '';
         if (subInfo) {
             if (subInfo.tipo === 'luxo') {
                 const textoLuxo = subInfo.herdouCapitao
                     ? `Luxo ativado (C 1.5x) por ${subInfo.substituiu}`
                     : `Luxo ativado por ${subInfo.substituiu}`;
-                subBadge = `<div style="font-size:9px;color:var(--app-purple);margin-top:1px;"><span class="material-icons" style="font-size:10px;vertical-align:middle;">star</span> ${textoLuxo}</div>`;
+                subBadge = `<div class="me-card-sub me-card-sub-luxo"><span class="material-icons me-card-sub-icon">star</span> ${textoLuxo}</div>`;
             } else if (subInfo.tipo === 'posicao') {
-                subBadge = `<div style="font-size:9px;color:var(--app-success-light);margin-top:1px;"><span class="material-icons" style="font-size:10px;vertical-align:middle;">swap_vert</span> Entrou por ${subInfo.substituiu}</div>`;
+                subBadge = `<div class="me-card-sub me-card-sub-pos"><span class="material-icons me-card-sub-icon">swap_vert</span> Entrou por ${subInfo.substituiu}</div>`;
             } else if (subInfo.tipo === 'substituido') {
-                subBadge = '<div style="font-size:9px;color:var(--app-danger);margin-top:1px;opacity:0.8;">Não entrou em campo</div>';
+                subBadge = '<div class="me-card-sub me-card-sub-out">Não entrou em campo</div>';
             } else if (subInfo.tipo === 'substituido_luxo') {
-                subBadge = '<div style="font-size:9px;color:var(--app-purple);margin-top:1px;opacity:0.8;"><span class="material-icons" style="font-size:10px;vertical-align:middle;">swap_vert</span> Substituído pelo Luxo</div>';
+                subBadge = '<div class="me-card-sub me-card-sub-luxo"><span class="material-icons me-card-sub-icon">swap_vert</span> Substituído pelo Luxo</div>';
             }
         }
 
         const clubeId = a.clube_id || extrairClubeIdDaFoto(a.foto) || null;
         const escudoSrc = clubeId ? `/escudos/${clubeId}.png` : '/escudos/default.png';
+        const clubeNome = CLUBES_NOME_MODAL[clubeId] || '';
 
         const csAtl = a.variacao_num ?? 0;
-        const csClass = csAtl > 0 ? 'color:var(--app-success-light)' : csAtl < 0 ? 'color:var(--app-danger)' : 'color:var(--app-text-muted)';
-        const csTexto = csAtl > 0 ? `+${csAtl.toFixed(1)}` : csAtl.toFixed(1);
+        const csColorClass = csAtl > 0 ? 'me-cs-pos' : csAtl < 0 ? 'me-cs-neg' : 'me-cs-zero';
+        const csTexto = csAtl > 0 ? `$+${(Math.trunc(csAtl * 100) / 100).toFixed(2)}` : `$${(Math.trunc(csAtl * 100) / 100).toFixed(2)}`;
+
+        const scoutsHTML = renderScoutsModal(a.scout);
+        const status = obterStatusJogoModal(a);
+        const statusDot = status === 'playing' ? '<span class="me-card-live"></span>' : '';
+        const capMulti = isCapitao ? '<span class="me-cap-multi">x1,5</span>' : '';
 
         return `
-            <tr style="border-bottom:1px solid #1f2937;">
-                <td style="padding:8px 4px;text-align:center;">
-                    <span style="background:${pos.cor};color:var(--app-text-white);font-size:9px;padding:3px 7px;border-radius:4px;font-weight:bold;">${pos.nome}</span>
-                </td>
-                <td style="padding:8px 4px;text-align:center;">
-                    <img src="${escudoSrc}" alt="" onerror="this.onerror=null;this.src='/escudos/default.png'" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;">
-                </td>
-                <td style="padding:8px 8px;font-size:13px;color:#e5e7eb;">
-                    <div>${escapeHtml(a.apelido || 'Atleta')}${capitaoBadge}</div>${subBadge}
-                </td>
-                <td style="padding:8px 4px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:bold;${pontosClass};">
-                    ${pontosAtl}
-                </td>
-                <td style="padding:8px 4px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px;${csClass};">
-                    ${csTexto}
-                </td>
-                <td style="padding:8px 4px;text-align:center;font-size:14px;">
-                    ${statusIcon}
-                </td>
-            </tr>
+            <div class="me-card${status === 'absent' ? ' me-card-absent' : ''}">
+                <img class="me-card-escudo" src="${escudoSrc}" alt="" onerror="this.onerror=null;this.src='/escudos/default.png'">
+                <div class="me-card-info">
+                    <div class="me-card-nome">${statusDot}${escapeHtml(a.apelido || 'Atleta')}${capitaoBadge}${luxoBadge}</div>
+                    <div class="me-card-meta"><span class="me-pos-badge" style="color:${pos.cor}">${pos.nome}</span> | ${escapeHtml(clubeNome)}</div>
+                    ${subBadge}
+                </div>
+                <div class="me-card-stats">
+                    <div class="me-card-pts ${pontosColorClass}">${capMulti}${pontosAtl}</div>
+                    <div class="me-card-cs ${csColorClass}">${csTexto}</div>
+                    ${scoutsHTML}
+                </div>
+            </div>
         `;
     }
 
@@ -2275,7 +2326,7 @@ async function abrirCampinhoModal(targetTimeId, rodada, rodadaData = null) {
             }
             return renderAtleta(a, false, subInfo);
         }).join("")
-        : '<tr><td colspan="6" style="color:var(--app-text-muted);padding:12px;text-align:center;">Sem dados de escalação</td></tr>';
+        : '<div class="me-card-empty">Sem dados de escalação</div>';
 
     const reservasHTML = reservas.length > 0
         ? reservas.map(a => renderAtleta(a, true, substituicoesModal.get(a.atleta_id) || null)).join("")
@@ -2314,45 +2365,24 @@ async function abrirCampinhoModal(targetTimeId, rodada, rodadaData = null) {
                 </div>
             </div>
 
-            <!-- Tabela de Titulares -->
-            <div style="padding:8px 20px 16px;">
-                <div style="font-size:11px;color:var(--app-text-muted);text-transform:uppercase;margin-bottom:8px;font-weight:bold;">Titulares (${titulares.length})</div>
-                <table style="width:100%;border-collapse:collapse;font-size:13px;">
-                    <thead>
-                        <tr style="border-bottom:2px solid var(--app-border);color:var(--app-text-muted);font-size:10px;text-transform:uppercase;">
-                            <th style="padding:6px 4px;text-align:center;font-weight:600;">POS</th>
-                            <th style="padding:6px 4px;text-align:center;font-weight:600;">TIME</th>
-                            <th style="padding:6px 8px;text-align:left;font-weight:600;">JOGADOR</th>
-                            <th style="padding:6px 4px;text-align:right;font-weight:600;">PTS</th>
-                            <th style="padding:6px 4px;text-align:right;font-weight:600;">C$</th>
-                            <th style="padding:6px 4px;text-align:center;font-weight:600;">STATUS</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${titularesHTML}
-                    </tbody>
-                </table>
+            <!-- Titulares -->
+            <div class="me-section" style="padding-left:20px;padding-right:20px;">
+                <div class="me-section-title">Titulares (${titulares.length})</div>
+                ${titularesHTML}
             </div>
 
             ${reservas.length > 0 ? `
                 <!-- Separador Banco de Reservas -->
-                <div style="margin:0 20px;padding:12px 0;display:flex;align-items:center;gap:8px;">
-                    <div style="flex:1;border-top:1px dashed #374151;"></div>
-                    <span style="font-size:10px;color:var(--app-text-muted);text-transform:uppercase;font-weight:700;letter-spacing:1px;display:flex;align-items:center;gap:4px;">
-                        <span class="material-icons" style="font-size:14px;">event_seat</span>
-                        BANCO
+                <div class="me-banco-divider" style="margin:0 20px;">
+                    <div class="me-banco-line"></div>
+                    <span class="me-banco-label">
+                        <span class="material-icons me-banco-icon">event_seat</span>
+                        Reservas
                     </span>
-                    <div style="flex:1;border-top:1px dashed #374151;"></div>
+                    <div class="me-banco-line"></div>
                 </div>
-
-                <!-- Tabela de Reservas -->
-                <div style="padding:8px 20px 24px;background:rgba(107,114,128,0.06);">
-                    <div style="font-size:10px;color:var(--app-text-muted);text-transform:uppercase;margin-bottom:8px;font-weight:600;letter-spacing:0.5px;">Reservas (${reservas.length})</div>
-                    <table style="width:100%;border-collapse:collapse;font-size:13px;opacity:0.7;">
-                        <tbody>
-                            ${reservasHTML}
-                        </tbody>
-                    </table>
+                <div class="me-section me-section-reservas" style="padding-left:20px;padding-right:20px;padding-bottom:24px;">
+                    ${reservasHTML}
                 </div>
             ` : ''}
         </div>

@@ -458,6 +458,7 @@ async function buscarECalcularPontuacao(time, rodada, atletasPontuados) {
                     is_capitao: isCapitao,
                     is_reserva: false,
                     foto: atleta.foto || atletaPontuado?.foto || null,
+                    scout: atletaPontuado?.scout || {},
                     substituido_por: null,
                     substituido_por_luxo: false,
                 };
@@ -520,6 +521,7 @@ async function buscarECalcularPontuacao(time, rodada, atletasPontuados) {
                     contribuiu,
                     substituiu_apelido: substituiuApelido,
                     foto: atleta.foto || atletaPontuado?.foto || null,
+                    scout: atletaPontuado?.scout || {},
                 });
             });
 
@@ -603,6 +605,7 @@ async function buscarECalcularPontuacao(time, rodada, atletasPontuados) {
                     luxo_herdou_capitao: luxoHerdouCapitao,
                     substituiu_apelido: substituiuApelido,
                     foto: luxoAtleta.foto || atletaPontuado?.foto || null,
+                    scout: atletaPontuado?.scout || {},
                 });
             }
         }
