@@ -96,6 +96,43 @@ async function perguntarPerplexity(pergunta, options = {}) {
     }
 }
 
+/**
+ * Versao estendida de perguntarPerplexity que aceita systemPrompt customizado.
+ */
+async function perguntarPerplexityCustom(pergunta, systemPrompt, options = {}) {
+    const apiKey = getApiKey();
+    if (!apiKey) return null;
+
+    try {
+        const resp = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                model: options.model || 'sonar',
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: pergunta },
+                ],
+                max_tokens: options.maxTokens || 3000,
+                temperature: options.temperature || 0.3,
+            }),
+        });
+
+        if (!resp.ok) return null;
+        const data = await resp.json();
+        return {
+            resposta: data.choices?.[0]?.message?.content,
+            buscadoEm: new Date().toISOString(),
+        };
+    } catch (error) {
+        console.error(`${LOG_PREFIX} Erro Custom: ${error.message}`);
+        return null;
+    }
+}
+
 // =====================================================================
 // PESQUISAS ESPECIFICAS PARA ESCALACAO
 // =====================================================================
@@ -450,6 +487,7 @@ async function gerarJustificativaEscalacao(escalacao, contexto) {
 export default {
     isDisponivel,
     perguntarPerplexity,
+    perguntarPerplexityCustom,
     buscarMelhoresJogadores,
     buscarJogadoresDuvida,
     buscarDisponibilidadeReal,
