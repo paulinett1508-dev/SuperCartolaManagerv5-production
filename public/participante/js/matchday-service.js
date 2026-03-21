@@ -392,10 +392,37 @@
         },
     };
 
+    // ─── Offline/Online detection ─────────────────────────────────
+    let _offlineToastShown = false;
+
+    function _onOffline() {
+        if (_offlineToastShown) return;
+        _offlineToastShown = true;
+        _toast('Sem conexão — dados podem estar desatualizados', 'warning', 8000);
+        if (window.Log) Log.warn('[MatchdayService] Dispositivo offline');
+    }
+
+    function _onOnline() {
+        if (!_offlineToastShown) return;
+        _offlineToastShown = false;
+        _toast('Conexão restabelecida!', 'success', 3000);
+        if (window.Log) Log.info('[MatchdayService] Dispositivo online');
+        // Forçar re-check imediato de status
+        _checkStatus();
+    }
+
+    window.addEventListener('offline', _onOffline);
+    window.addEventListener('online', _onOnline);
+
+    // Verificar estado inicial
+    if (!navigator.onLine) {
+        _onOffline();
+    }
+
     // ─── Bootstrap ──────────────────────────────────────────────────
     // Iniciar polling de status imediatamente
     _checkStatus();
 
-    if (window.Log) Log.info('[MatchdayService] Inicializado (FEAT-026 v2.0)');
+    if (window.Log) Log.info('[MatchdayService] Inicializado (FEAT-026 v2.1)');
 
 })();

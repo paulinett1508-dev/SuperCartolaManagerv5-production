@@ -29,6 +29,9 @@ function escapeHtml(str) {
 // Estado da interface
 let rodadaAtualSelecionada = null;
 
+// ✅ v2.6: Cache do ranking anterior para highlight de mudanças
+let _prevParciaisMap = null;
+
 // Função para cache de elementos DOM
 function getElement(id) {
   if (!elementsCache.has(id)) {
@@ -385,8 +388,10 @@ function renderizarCardApp(rank, index, posLabel, banco, isParcial = false) {
   if(varPos > 0) { varPosIcon = '▲'; varPosClass = 'up'; }
   if(varPos < 0) { varPosIcon = '▼'; varPosClass = 'down'; }
 
+  const participantKey = rank.participante_id || rank.timeId || rank.nome_time || index;
+
   return `
-    <div class="ranking-card">
+    <div class="ranking-card" data-parcial-key="${participantKey}" data-parcial-score="${scoreParcial}">
       <div class="rc-pos">
         <div class="rc-pos-num">${index + 1}</div>
         <div class="rc-pos-idx ${varPosClass}">${varPosIcon}</div>
@@ -591,7 +596,34 @@ export async function exibirRankingParciais(
     });
   }
 
-  if(rankingList) rankingList.innerHTML = listHTML;
+  if(rankingList) {
+    rankingList.innerHTML = listHTML;
+
+    // ✅ v2.6: Highlight visual de mudanças de pontuação entre updates
+    if (_prevParciaisMap) {
+      const cards = rankingList.querySelectorAll(".ranking-card[data-parcial-key]");
+      cards.forEach(card => {
+        const key = card.dataset.parcialKey;
+        const score = card.dataset.parcialScore;
+        const prevScore = _prevParciaisMap[key];
+        if (prevScore != null && prevScore !== score) {
+          const subiu = parseFloat(score) > parseFloat(prevScore);
+          card.style.transition = "background-color 0.4s ease";
+          card.style.backgroundColor = subiu
+            ? "rgba(34, 197, 94, 0.15)"   // --color-success translúcido
+            : "rgba(239, 68, 68, 0.15)";  // --color-danger translúcido
+          setTimeout(() => { card.style.backgroundColor = ""; }, 2000);
+        }
+      });
+    }
+
+    // Atualizar mapa para próxima comparação
+    const newMap = {};
+    rankingList.querySelectorAll(".ranking-card[data-parcial-key]").forEach(card => {
+      newMap[card.dataset.parcialKey] = card.dataset.parcialScore;
+    });
+    _prevParciaisMap = newMap;
+  }
   limparExportContainer();
 }
 

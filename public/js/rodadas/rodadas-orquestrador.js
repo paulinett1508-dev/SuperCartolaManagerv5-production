@@ -56,6 +56,44 @@ let ligaIdAtual = null;
 let exportModules = null;
 let carregamentoEmAndamento = false;
 
+// ✅ v3.1: Timestamp de última atualização de parciais
+let _parciaisLastUpdateTs = null;
+let _parciaisTimestampTimer = null;
+
+function _atualizarTimestampParciais() {
+  const el = document.getElementById("parciaisLastUpdate");
+  if (!el || !_parciaisLastUpdateTs) return;
+  const diff = Math.floor((Date.now() - _parciaisLastUpdateTs) / 1000);
+  let texto;
+  if (diff < 5) texto = "Atualizado agora";
+  else if (diff < 60) texto = `Atualizado há ${diff}s`;
+  else texto = `Atualizado há ${Math.floor(diff / 60)}min`;
+  el.textContent = texto;
+}
+
+function _iniciarTimestampParciais() {
+  _parciaisLastUpdateTs = Date.now();
+  const el = document.getElementById("parciaisLastUpdate");
+  if (el) {
+    el.style.display = "";
+    _atualizarTimestampParciais();
+  }
+  clearInterval(_parciaisTimestampTimer);
+  _parciaisTimestampTimer = setInterval(_atualizarTimestampParciais, 10000);
+
+  // Registrar cleanup na navegação
+  if (window.registerSectionCleanup) {
+    window.registerSectionCleanup("rodadas", _pararTimestampParciais);
+  }
+}
+
+function _pararTimestampParciais() {
+  clearInterval(_parciaisTimestampTimer);
+  _parciaisTimestampTimer = null;
+  const el = document.getElementById("parciaisLastUpdate");
+  if (el) el.style.display = "none";
+}
+
 // ==============================
 // CARREGAMENTO DE MÓDULOS EXTERNOS
 // ==============================
@@ -269,6 +307,8 @@ async function carregarRodadaFinalizada(rodada) {
   if (btnRefresh) {
     btnRefresh.style.display = "none";
   }
+  // ✅ v3.1: Esconder timestamp quando rodada não é parciais
+  _pararTimestampParciais();
 }
 
 // CARREGAR RODADA COM PARCIAIS
@@ -323,6 +363,8 @@ async function carregarRodadaParciais(rodada, forcarRecalculo = false) {
 
   await exibirRankingParciais(rankingsParciais, rodada, ligaIdAtual);
   configurarBotaoRefresh(rodada);
+  // ✅ v3.1: Atualizar timestamp de última atualização
+  _iniciarTimestampParciais();
 }
 
 // CONFIGURAR BOTÃO DE REFRESH

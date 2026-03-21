@@ -1,6 +1,34 @@
 const urlParams = new URLSearchParams(window.location.search);
 const ligaId = urlParams.get("id");
-document.addEventListener("DOMContentLoaded", () => {
+
+// ✅ v1.2: Registry de cleanups — módulos registram funções de limpeza ao serem carregados
+const _sectionCleanups = {};
+let _currentSection = null;
+
+/**
+ * Registra cleanup para uma seção (chamado pelos módulos ao inicializar)
+ * Uso: window.registerSectionCleanup('rodadas', () => clearInterval(myTimer));
+ */
+window.registerSectionCleanup = function (sectionId, cleanupFn) {
+  if (!_sectionCleanups[sectionId]) _sectionCleanups[sectionId] = [];
+  _sectionCleanups[sectionId].push(cleanupFn);
+};
+
+function _cleanupCurrentSection() {
+  if (!_currentSection) return;
+  const fns = _sectionCleanups[_currentSection];
+  if (fns) {
+    fns.forEach(fn => {
+      try { fn(); } catch (e) {
+        console.warn(`[NAVIGATION] Cleanup error (${_currentSection}):`, e);
+      }
+    });
+    // Limpar para evitar re-registro duplicado
+    _sectionCleanups[_currentSection] = [];
+  }
+}
+
+function _initNavigation() {
   if (!ligaId) {
     if (typeof SuperModal !== 'undefined' && SuperModal.toast) {
       SuperModal.toast.error("Erro: ID da liga não encontrado na URL. Redirecionando para gerenciamento...");
@@ -16,6 +44,9 @@ document.addEventListener("DOMContentLoaded", () => {
     button.addEventListener("click", async () => {
       const sectionId = button.getAttribute("data-section");
       if (!sectionId) return;
+      // ✅ v1.2: Cleanup da seção anterior antes de trocar
+      _cleanupCurrentSection();
+      _currentSection = sectionId;
       navButtons.forEach((btn) => btn.classList.remove("active"));
       sections.forEach((section) => section.classList.remove("active"));
       button.classList.add("active");
@@ -81,4 +112,11 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => targetButton.click(), 100);
     }
   }
-});
+}
+
+// ✅ v1.2: readyState check — garante init mesmo se script carrega após DOMContentLoaded
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", _initNavigation);
+} else {
+  _initNavigation();
+}
