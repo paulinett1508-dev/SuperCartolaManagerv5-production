@@ -263,7 +263,7 @@ function renderizarGridRodadas(rodadas) {
     rodadas.forEach(r => rodadasMap.set(r.numero, r));
 
     container.innerHTML = `
-        <div class="rodadas-mini-grid" id="grid-todas-rodadas" style="padding:0 4px;">
+        <div class="rodadas-mini-grid" id="grid-todas-rodadas">
             ${renderizarMiniCards(1, RODADA_FINAL_CAMPEONATO, rodadasMap)}
         </div>
     `;
