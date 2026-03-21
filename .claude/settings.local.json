@@ -235,7 +235,10 @@
       "mcp__plugin_context-mode_context-mode__ctx_batch_execute",
       "mcp__plugin_context-mode_context-mode__ctx_execute_file",
       "mcp__plugin_context-mode_context-mode__ctx_search",
-      "WebFetch(domain:super-cartola-manager-paulinett.replit.app)"
+      "WebFetch(domain:super-cartola-manager-paulinett.replit.app)",
+      "Bash(pip install:*)",
+      "Bash(python -m playwright install chromium)",
+      "Bash(python:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
