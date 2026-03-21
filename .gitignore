@@ -22,3 +22,8 @@ credentials.json
 
 # Claude Code workspace config (debug, history, credentials locais)
 .claude_config/
+
+.server.pid
+credentials.json
+*.bak
+bun.lock
