@@ -66,12 +66,27 @@
     async function inicializar() {
         console.log('[ESCALACAO-IA] Inicializando módulo v2.0...');
         configurarTabs();
+        configurarToggleProfessor();
         // Rastrear alteração manual do patrimônio pelo usuário
         document.getElementById('eia-patrimonio')?.addEventListener('change', () => {
             patrimonioAlteradoManualmente = true;
         });
         await carregarStatusFontes();
         await tentarAutoLoad();
+    }
+
+    // =====================================================================
+    // TOGGLE MODO PROFESSOR — estado visual do card
+    // =====================================================================
+
+    function configurarToggleProfessor() {
+        const checkbox = document.getElementById('eia-modo-professor');
+        const card = document.getElementById('eia-professor-card');
+        if (!checkbox || !card) return;
+
+        checkbox.addEventListener('change', () => {
+            card.classList.toggle('ativo', checkbox.checked);
+        });
     }
 
     // =====================================================================

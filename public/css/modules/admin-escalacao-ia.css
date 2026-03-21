@@ -930,10 +930,6 @@
         font-size: 12px;
     }
 
-    .eia-controle-toggle {
-        order: -1;
-        width: 100%;
-    }
 }
 
 /* =============================================
@@ -1239,35 +1235,88 @@
 }
 
 /* =============================================
-   MODO PROFESSOR — TOGGLE SWITCH
+   MODO PROFESSOR — CARD STANDALONE
    ============================================= */
-.eia-controle-toggle {
-    justify-content: center;
+.eia-professor-card {
+    margin-bottom: 12px;
+    border-radius: 12px;
+    border: 1px dashed var(--color-info-border);
+    background: var(--surface-card);
+    transition: all 0.3s ease;
+    overflow: hidden;
 }
 
-.eia-toggle {
+.eia-professor-card.ativo {
+    border-style: solid;
+    border-color: var(--color-info);
+    background: linear-gradient(135deg, var(--surface-card) 0%, rgba(59, 130, 246, 0.08) 100%);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.12);
+}
+
+.eia-professor-toggle {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 18px;
     cursor: pointer;
     user-select: none;
-    padding: 8px 14px;
-    background: var(--surface-card-elevated, #2a2a2a);
-    border: 1px dashed var(--color-info-border);
-    border-radius: 10px;
-    transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
 }
 
-.eia-toggle:hover {
-    background: rgba(59, 130, 246, 0.06);
+.eia-professor-toggle:hover {
+    background: rgba(59, 130, 246, 0.04);
 }
 
-/* Estado ativo — container com glow */
-.eia-toggle:has(.eia-toggle-input:checked) {
-    background: var(--color-info-muted);
-    border-style: solid;
-    border-color: var(--color-info-border);
-    box-shadow: 0 0 12px rgba(59, 130, 246, 0.15);
+.eia-professor-toggle-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+}
+
+.eia-professor-icon {
+    font-size: 28px !important;
+    color: var(--color-info);
+    flex-shrink: 0;
+    opacity: 0.7;
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.eia-professor-card.ativo .eia-professor-icon {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.eia-professor-toggle-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.eia-professor-toggle-title {
+    font-family: 'Russo One', sans-serif;
+    font-size: 14px;
+    color: var(--text-primary, #fff);
+    letter-spacing: 0.3px;
+}
+
+.eia-professor-card.ativo .eia-professor-toggle-title {
+    color: var(--color-info);
+}
+
+.eia-professor-toggle-desc {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: var(--text-muted, rgba(255,255,255,0.4));
+    line-height: 1.3;
+}
+
+/* Switch (right side) */
+.eia-professor-switch-wrapper {
+    position: relative;
+    flex-shrink: 0;
 }
 
 .eia-toggle-input {
@@ -1277,65 +1326,37 @@
     height: 0;
 }
 
-.eia-toggle-slider {
+.eia-professor-switch {
     position: relative;
-    width: 40px;
-    height: 22px;
+    display: block;
+    width: 44px;
+    height: 24px;
     background: var(--surface-white-10);
-    border-radius: 11px;
+    border-radius: 12px;
     border: 1px solid var(--border-default, rgba(255,255,255,0.15));
-    transition: background 0.25s, border-color 0.25s;
-    flex-shrink: 0;
+    transition: background 0.3s, border-color 0.3s;
 }
 
-.eia-toggle-slider::after {
+.eia-professor-switch::after {
     content: '';
     position: absolute;
-    top: 2px;
-    left: 2px;
+    top: 3px;
+    left: 3px;
     width: 16px;
     height: 16px;
     background: var(--text-muted, rgba(255,255,255,0.5));
     border-radius: 50%;
-    transition: transform 0.25s, background 0.25s;
+    transition: transform 0.3s, background 0.3s;
 }
 
-.eia-toggle-input:checked + .eia-toggle-slider {
+.eia-toggle-input:checked ~ .eia-professor-switch {
     background: var(--color-info);
     border-color: var(--color-info);
 }
 
-.eia-toggle-input:checked + .eia-toggle-slider::after {
-    transform: translateX(18px);
+.eia-toggle-input:checked ~ .eia-professor-switch::after {
+    transform: translateX(20px);
     background: #fff;
-}
-
-.eia-toggle-content {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.eia-toggle-label {
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text-primary, #fff);
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.eia-toggle-label .material-icons {
-    color: var(--color-info);
-    font-size: 18px;
-}
-
-.eia-toggle-sub {
-    font-family: 'Inter', sans-serif;
-    font-size: 10px;
-    color: var(--text-muted, rgba(255,255,255,0.45));
-    letter-spacing: 0.2px;
 }
 
 /* =============================================
