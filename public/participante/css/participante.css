@@ -279,6 +279,7 @@ body {
     border-radius: 0;
     padding: var(--app-space-5);
     overflow-y: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     width: 100%;
 }
