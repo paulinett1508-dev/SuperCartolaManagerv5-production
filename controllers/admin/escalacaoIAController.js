@@ -86,12 +86,14 @@ async function gerarAnalise(req, res) {
         }
 
         // 3. Gerar justificativas IA para cada cenario
+        const modoProfessor = req.query.modoProfessor === 'true';
         const cenariosComJustificativa = [];
         for (const cenario of resultado.cenarios) {
             const justificativas = await aiSynthesizer.gerarJustificativas(cenario, {
                 rodada: dadosAgregados.rodada,
                 patrimonio,
                 fontesAtivas: dadosAgregados.fontesAtivas,
+                modoProfessor,
             });
 
             cenariosComJustificativa.push({
