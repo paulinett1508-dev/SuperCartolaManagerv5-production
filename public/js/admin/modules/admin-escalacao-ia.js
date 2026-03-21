@@ -211,6 +211,7 @@
         try {
             atualizarLoadingStep('Coletando dados da API Cartola...');
             const modoProfessor = isModoProfessorAtivo();
+            console.log('[ESCALACAO-IA] Modo Professor:', modoProfessor, '| Checkbox:', document.getElementById('eia-modo-professor')?.checked);
             const params = new URLSearchParams({ esquemaId });
             if (patrimonio) params.set('patrimonio', patrimonio);
             if (modoProfessor) params.set('modoProfessor', 'true');
@@ -389,6 +390,8 @@
     function renderizarEscalacao(escalacao, justificativas) {
         const container = document.getElementById('eia-escalacao');
         if (!container) return;
+
+        console.log('[ESCALACAO-IA] Renderizando escalação. modoProfessor:', isModoProfessorAtivo(), '| justificativas:', Object.keys(justificativas || {}).length);
 
         // Ordenar por posição: GOL, LAT, ZAG, MEI, ATA, TEC
         const ordenada = [...escalacao].sort((a, b) => a.posicaoId - b.posicaoId);
