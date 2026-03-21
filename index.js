@@ -1,3 +1,6 @@
+import dns from 'dns';
+dns.setServers(['8.8.8.8', '8.8.4.4']);
+
 import cron from "node-cron";
 import compression from "compression";
 // Executar scraper de jogos Globo Esporte diariamente às 6h (horário do servidor)
