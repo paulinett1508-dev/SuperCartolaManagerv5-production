@@ -448,7 +448,7 @@
                         <div class="eia-jogador-confianca-bar"
                              style="width: ${confianca}%; background: ${corConfianca};"></div>
                     </div>
-                    ${justificativa ? `<div class="eia-jogador-justificativa">${isModoProfessorAtivo() ? '<span class="eia-professor-badge"><span class="material-icons">school</span>Dica do Professor</span>' : ''}${formatarJustificativa(justificativa)}</div>` : ''}
+                    ${justificativa ? `<div class="eia-jogador-justificativa">${isModoProfessorAtivo() ? '<div class="eia-professor-badge"><span class="material-icons">school</span>Dica do Professor</div>' : ''}${formatarJustificativa(justificativa)}</div>` : ''}
                 </div>
             `;
         }).join('');
@@ -543,7 +543,7 @@
                     <div class="eia-jogador-confianca-bar eia-jogador-confianca-bar--luxo"
                          style="width: ${confianca}%;"></div>
                 </div>
-                ${justificativa ? `<div class="eia-jogador-justificativa">${isModoProfessorAtivo() ? '<span class="eia-professor-badge"><span class="material-icons">school</span>Dica do Professor</span>' : ''}${formatarJustificativa(justificativa)}</div>` : ''}
+                ${justificativa ? `<div class="eia-jogador-justificativa">${isModoProfessorAtivo() ? '<div class="eia-professor-badge"><span class="material-icons">school</span>Dica do Professor</div>' : ''}${formatarJustificativa(justificativa)}</div>` : ''}
             </div>
         `;
     }
@@ -589,7 +589,7 @@
                     <div class="eia-jogador-confianca-bar"
                          style="width: ${confianca}%; background: ${corConfianca};"></div>
                 </div>
-                ${justificativa ? `<div class="eia-jogador-justificativa">${isModoProfessorAtivo() ? '<span class="eia-professor-badge"><span class="material-icons">school</span>Dica do Professor</span>' : ''}${formatarJustificativa(justificativa)}</div>` : ''}
+                ${justificativa ? `<div class="eia-jogador-justificativa">${isModoProfessorAtivo() ? '<div class="eia-professor-badge"><span class="material-icons">school</span>Dica do Professor</div>' : ''}${formatarJustificativa(justificativa)}</div>` : ''}
             </div>
         `;
     }

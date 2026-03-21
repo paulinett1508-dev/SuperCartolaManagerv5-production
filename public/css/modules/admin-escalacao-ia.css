@@ -1363,24 +1363,25 @@
    MODO PROFESSOR — BADGE DICA DO PROFESSOR
    ============================================= */
 .eia-professor-badge {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 3px;
+    gap: 4px;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 4px;
+    padding: 4px 8px;
+    border-radius: 6px;
     background: var(--color-info-muted);
     color: var(--color-info);
     border: 1px solid var(--color-info-border);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
+    width: fit-content;
 }
 
 .eia-professor-badge .material-icons {
-    font-size: 11px;
+    font-size: 14px;
 }
 
 /* Justificativas com strong (Markdown bold) */
