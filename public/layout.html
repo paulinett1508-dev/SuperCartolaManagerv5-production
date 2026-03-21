@@ -1186,7 +1186,8 @@
                         const newScripts = Array.from(doc.querySelectorAll('script:not([src])')).filter(s => {
                             const text = s.textContent || '';
                             // Filtrar APENAS o script do layout.html (contém marcadores únicos de infraestrutura)
-                            const isLayoutInfraScript = text.includes('__layout_state') || text.includes('SPANavigation');
+                            // ✅ FIX: Usar 'const SPANavigation' para não filtrar páginas que apenas referenciam SPANavigation
+                            const isLayoutInfraScript = text.includes('__layout_state') || text.includes('const SPANavigation');
                             return !isLayoutInfraScript;
                         });
 
