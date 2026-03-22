@@ -13,6 +13,7 @@
 if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Carregando módulo v5.0...");
 
 import { RODADA_FINAL_CAMPEONATO } from "/js/config/seasons-client.js";
+import { injectModuleLP } from './module-lp-engine.js';
 // ✅ v4.0: RODADA_FINAL dinâmico - obtido da API, fallback centralizado
 let RODADA_FINAL = RODADA_FINAL_CAMPEONATO;
 
@@ -64,10 +65,18 @@ export async function inicializarArtilheiroParticipante({
     _currentParticipante = participante;
     window.MatchdayService?.setContext({ ligaId });
 
-    // ✅ LP: Init acordeons + carregar regras e premiações (non-blocking)
-    _initLPAccordions('artilheiro-lp-wrapper');
-    _lpCarregarComoFunciona(ligaId, 'artilheiro', 'lp-regras-body-artilheiro');
-    _lpCarregarPremiacoesHibrida(ligaId, 'artilheiro', 'artilheiro_premiacao', 'lp-premiacoes-body-artilheiro');
+    // ✅ LP: Injetar LP via engine (non-blocking)
+    injectModuleLP({
+        wrapperId:    'artilheiro-lp-wrapper',
+        insertBefore: 'artilheiro-content',
+        ligaId,
+        moduloKey:    'artilheiro',
+        titulo:       'Artilheiro',
+        tagline:      'Quem vai marcar mais gols na temporada?',
+        icon:         'sports_soccer',
+        colorClass:   'module-lp-artilheiro',
+        premiacaoLabel: 'Premiação',
+    });
 
     const container = document.getElementById("artilheiro-content");
     if (!container) {
@@ -1316,112 +1325,4 @@ export function destruirArtilheiroParticipante() {
 window.destruirArtilheiroParticipante = destruirArtilheiroParticipante;
 
 if (window.Log) Log.info("[PARTICIPANTE-ARTILHEIRO] Modulo v5.0 carregado (UX elevada + MatchdayService)");
-
-// =====================================================================
-// MODULE LP — Landing Page Utils (Artilheiro)
-// =====================================================================
-
-/** Carrega "Como Funciona" da API regras-modulos (admin editável) */
-function _lpCarregarComoFunciona(ligaId, moduloKey, bodyId) {
-    const body = document.getElementById(bodyId);
-    if (!body || !ligaId) return;
-    fetch(`/api/regras-modulos/${ligaId}/${moduloKey}`)
-        .then(r => r.ok ? r.json() : Promise.reject())
-        .then(data => {
-            if (data?.regra?.conteudo_html) {
-                body.innerHTML = `<div class="module-lp-regras-content">${data.regra.conteudo_html}</div>`;
-            } else {
-                body.innerHTML = '<p style="color:var(--app-text-muted);font-size:var(--app-font-sm);">Regras ainda nao configuradas pelo admin.</p>';
-            }
-        })
-        .catch(() => {
-            body.innerHTML = '<p style="color:var(--app-text-muted);font-size:var(--app-font-sm);">Nao foi possivel carregar as regras.</p>';
-        });
-}
-
-/** Init accordion toggle behavior for a module LP wrapper */
-function _initLPAccordions(wrapperId) {
-    const wrapper = document.getElementById(wrapperId);
-    if (!wrapper) return;
-    wrapper.querySelectorAll('.module-lp-accordion-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const isOpen = btn.getAttribute('aria-expanded') === 'true';
-            btn.setAttribute('aria-expanded', String(!isOpen));
-        });
-    });
-}
-
-/** Format currency value BRL */
-function _lpFormatCurrency(val) {
-    const n = parseFloat(val) || 0;
-    return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-
-/**
- * Híbrida: tenta carregar valores reais de financeiro_override (ModuleConfig),
- * se não existir usa texto descritivo de regras-modulos como fallback.
- */
-function _lpCarregarPremiacoesHibrida(ligaId, moduloSlug, regraKey, bodyId) {
-    const body = document.getElementById(bodyId);
-    if (!body || !ligaId) return;
-
-    // 1. Tentar ModuleConfig (valores financeiros reais)
-    fetch(`/api/liga/${ligaId}/modulos/${moduloSlug}`)
-        .then(r => r.ok ? r.json() : null)
-        .then(data => {
-            const fo = data?.config?.financeiro_override || data?.financeiro_override;
-            const html = fo ? _lpRenderFinanceiroHtml(fo) : '';
-            if (html) {
-                body.innerHTML = html;
-                return;
-            }
-            // 2. Fallback: texto descritivo de regras-modulos
-            return fetch(`/api/regras-modulos/${ligaId}/${regraKey}`)
-                .then(r => r.ok ? r.json() : null)
-                .then(rd => {
-                    if (rd?.regra?.conteudo_html) {
-                        body.innerHTML = `<div class="module-lp-premiacoes-content">${rd.regra.conteudo_html}</div>`;
-                    } else {
-                        body.innerHTML = '<p style="color:var(--app-text-muted);font-size:var(--app-font-sm);text-align:center;">Premiacoes ainda nao configuradas pelo admin.</p>';
-                    }
-                });
-        })
-        .catch(() => { body.innerHTML = '<p style="color:var(--app-text-muted);font-size:var(--app-font-sm);text-align:center;">Nao foi possivel carregar as premiacoes.</p>'; });
-}
-
-/** Render financeiro_override into HTML grid */
-function _lpRenderFinanceiroHtml(fo) {
-    const posLabels = { '1': '1º Lugar', '2': '2º Lugar', '3': '3º Lugar', '4': '4º Lugar', '5': '5º Lugar' };
-    const posClasses = { '1': 'pos-1', '2': 'pos-2', '3': 'pos-3' };
-    const keyLabels = { vitoria: 'Vitória', derrota: 'Derrota', empate: 'Empate', por_gol: 'Por Gol', campeao: 'Campeão' };
-    let html = '';
-    if (fo.valores_por_posicao && Object.keys(fo.valores_por_posicao).length) {
-        Object.entries(fo.valores_por_posicao)
-            .sort(([a], [b]) => Number(a) - Number(b))
-            .filter(([, val]) => Number(val) > 0)
-            .forEach(([pos, val]) => {
-                html += `<div class="module-lp-premiacoes-item">
-                    <span class="module-lp-premiacoes-pos ${posClasses[pos] || ''}">${posLabels[pos] || pos + 'º'}</span>
-                    <span class="module-lp-premiacoes-val">${_lpFormatCurrency(val)}</span>
-                </div>`;
-            });
-    } else if (fo.valores_simples && Object.keys(fo.valores_simples).length) {
-        Object.entries(fo.valores_simples).forEach(([key, val]) => {
-            html += `<div class="module-lp-premiacoes-item">
-                <span class="module-lp-premiacoes-pos">${keyLabels[key] || key}</span>
-                <span class="module-lp-premiacoes-val">${_lpFormatCurrency(val)}</span>
-            </div>`;
-        });
-    } else if (fo.valores_por_fase) {
-        Object.entries(fo.valores_por_fase).forEach(([fase, vals]) => {
-            if (vals?.vitoria !== undefined) {
-                html += `<div class="module-lp-premiacoes-item">
-                    <span class="module-lp-premiacoes-pos">${fase} — Vitória</span>
-                    <span class="module-lp-premiacoes-val">${_lpFormatCurrency(vals.vitoria)}</span>
-                </div>`;
-            }
-        });
-    }
-    return html ? `<div class="module-lp-premiacoes-grid">${html}</div>` : '';
-}
 
