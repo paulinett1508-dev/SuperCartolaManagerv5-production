@@ -28,14 +28,16 @@ export async function inicializarRodadaXrayParticipante(payload) {
         _timeId = payload?.timeId || participante?.timeId;
 
         injectModuleLP({
-            wrapperId:    'raio-x-lp-wrapper',
-            insertBefore: 'xrayContainer',
-            ligaId:       _ligaId,
-            moduloKey:    'raio_x',
-            titulo:       'Raio-X da Rodada',
-            tagline:      'Análise completa após cada rodada',
-            icon:         'sensors',
-            colorClass:   'module-lp-raio-x',
+            wrapperId:                 'raio-x-lp-wrapper',
+            insertBefore:              'xrayContainer',
+            ligaId:                    _ligaId,
+            moduloKey:                 'raio_x',
+            titulo:                    'Raio-X da Rodada',
+            tagline:                   'Análise completa após cada rodada',
+            icon:                      'sensors',
+            colorClass:                'module-lp-raio-x',
+            showComoFuncionaAccordion: false,
+            showPremiacaoAccordion:    false,
         });
 
         // Parâmetros da rodada (passados via window.xrayParams pelo módulo de rodadas)

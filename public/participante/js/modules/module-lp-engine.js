@@ -27,6 +27,8 @@
  * @property {string}   [premiacaoSource]           - 'regra' (default) or 'moduleconfig'
  * @property {Function} [premiacaoModuleConfigFn]   - async (ligaId) => htmlString, used when premiacaoSource='moduleconfig'
  * @property {boolean}  [showPremiacaoAccordion]    - Default true. Pass false to hide the premiacao accordion (e.g. Extrato)
+ * @property {boolean}  [showComoFuncionaAccordion] - Default true. Pass false to hide the "Como Funciona" accordion (e.g. Raio-X)
+ * @property {boolean}  [showCloseBtn]              - Default true. Pass false to hide the close (X) button in the hero.
  */
 
 /**
@@ -44,10 +46,34 @@ function _buildLPHtml(config) {
         colorClass,
         premiacaoLabel,
         showPremiacaoAccordion,
+        showComoFuncionaAccordion,
+        showCloseBtn,
     } = config;
 
     const labelPremio = premiacaoLabel || 'Premiação';
     const mostrarPremio = showPremiacaoAccordion !== false;
+    const mostrarComoFunciona = showComoFuncionaAccordion !== false;
+    const mostrarClose = showCloseBtn !== false;
+
+    const closeBtnHtml = mostrarClose
+        ? `<button class="module-lp-close-btn" aria-label="Fechar"><span class="material-icons">close</span></button>`
+        : '';
+
+    const comoFuncionaAccordionHtml = mostrarComoFunciona ? `
+  <div class="module-lp-accordion" id="${wrapperId}-acc-como">
+    <button class="module-lp-accordion-btn" aria-expanded="false">
+      <div class="module-lp-accordion-btn-inner">
+        <span class="material-icons">menu_book</span>
+        <span class="module-lp-accordion-btn-label">Como Funciona</span>
+      </div>
+      <span class="material-icons module-lp-accordion-chevron">expand_more</span>
+    </button>
+    <div class="module-lp-accordion-body" id="lp-regras-body-${moduloKey}">
+      <div class="module-lp-accordion-inner">
+        <div class="lp-loading"><span class="material-icons lp-loading-icon">hourglass_empty</span></div>
+      </div>
+    </div>
+  </div>` : '';
 
     const premiacaoAccordionHtml = mostrarPremio ? `
     <div class="module-lp-accordion" id="${wrapperId}-acc-prem">
@@ -68,26 +94,14 @@ function _buildLPHtml(config) {
     return `
 <div id="${wrapperId}" class="module-lp ${colorClass}">
   <div class="module-lp-hero">
+    ${closeBtnHtml}
     <div class="module-lp-hero-icon-wrap">
       <span class="material-icons">${icon}</span>
     </div>
     <h1 class="module-lp-hero-title">${titulo}</h1>
     <p class="module-lp-hero-tagline">${tagline}</p>
   </div>
-  <div class="module-lp-accordion" id="${wrapperId}-acc-como">
-    <button class="module-lp-accordion-btn" aria-expanded="false">
-      <div class="module-lp-accordion-btn-inner">
-        <span class="material-icons">menu_book</span>
-        <span class="module-lp-accordion-btn-label">Como Funciona</span>
-      </div>
-      <span class="material-icons module-lp-accordion-chevron">expand_more</span>
-    </button>
-    <div class="module-lp-accordion-body" id="lp-regras-body-${moduloKey}">
-      <div class="module-lp-accordion-inner">
-        <div class="lp-loading"><span class="material-icons lp-loading-icon">hourglass_empty</span></div>
-      </div>
-    </div>
-  </div>
+  ${comoFuncionaAccordionHtml}
   ${premiacaoAccordionHtml}
 </div>
 <div class="module-lp-divider ${colorClass}"></div>`;
@@ -237,6 +251,7 @@ export function injectModuleLP(config) {
     var ligaId = config.ligaId;
     var moduloKey = config.moduloKey;
     var showPremiacaoAccordion = config.showPremiacaoAccordion !== false;
+    var showComoFuncionaAccordion = config.showComoFuncionaAccordion !== false;
 
     if (!moduloKey) {
         console.warn('[module-lp-engine] moduloKey is required');
@@ -264,8 +279,24 @@ export function injectModuleLP(config) {
     // --- Init accordion click listeners ---
     _initLPAccordions(wrapperId);
 
+    // --- Init close button ---
+    var wrapper = document.getElementById(wrapperId);
+    var closeBtn = wrapper ? wrapper.querySelector('.module-lp-close-btn') : null;
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function () {
+            if (wrapper) wrapper.style.display = 'none';
+            // Hide the sibling divider (immediately follows the wrapper)
+            var divider = wrapper && wrapper.nextElementSibling;
+            if (divider && divider.classList.contains('module-lp-divider')) {
+                divider.style.display = 'none';
+            }
+        });
+    }
+
     // --- Eager data fetch: Como Funciona ---
-    _fetchComoFunciona(ligaId, moduloKey);
+    if (showComoFuncionaAccordion) {
+        _fetchComoFunciona(ligaId, moduloKey);
+    }
 
     // --- Eager data fetch: Premiacao ---
     if (showPremiacaoAccordion) {

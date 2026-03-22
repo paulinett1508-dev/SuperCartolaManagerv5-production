@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup — LP Ranking Geral</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0f1117;
+    color: #f1f5f9;
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    padding: 24px 16px;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .label-top {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #64748b;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  /* PHONE FRAME */
+  .phone {
+    width: 320px;
+    min-height: 560px;
+    background: #0f172a;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 0 0 2px #1e293b, 0 24px 48px rgba(0,0,0,0.6);
+    position: relative;
+  }
+
+  /* TOP BAR do app */
+  .app-topbar {
+    background: #1e293b;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #334155;
+  }
+  .app-topbar-back { color: #8b5cf6; font-size: 20px; cursor: pointer; }
+  .app-topbar-title { font-family: 'Russo One', sans-serif; font-size: 14px; color: #f1f5f9; }
+
+  /* LP HERO */
+  .lp-hero {
+    padding: 28px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+    background: linear-gradient(180deg, rgba(139,92,246,0.08) 0%, transparent 100%);
+  }
+  .lp-hero-icon-ring {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: rgba(139,92,246,0.15);
+    border: 2px solid rgba(139,92,246,0.4);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .lp-hero-icon-ring .mat-icon { font-size: 30px; color: #a78bfa; font-family: 'Material Icons'; }
+  .lp-hero-title {
+    font-family: 'Russo One', sans-serif;
+    font-size: 22px;
+    color: #f1f5f9;
+    line-height: 1.2;
+  }
+  .lp-hero-tagline {
+    font-size: 13px;
+    color: #94a3b8;
+    max-width: 240px;
+    line-height: 1.5;
+  }
+
+  /* ACCORDIONS */
+  .lp-accordions { padding: 0 12px; display: flex; flex-direction: column; gap: 8px; }
+
+  .lp-accordion {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .lp-acc-btn {
+    width: 100%;
+    padding: 14px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #f1f5f9;
+  }
+  .lp-acc-btn-left { display: flex; align-items: center; gap: 10px; }
+  .lp-acc-icon { font-family: 'Material Icons'; font-size: 18px; color: #a78bfa; }
+  .lp-acc-label { font-family: 'Russo One', sans-serif; font-size: 13px; }
+  .lp-acc-chevron { font-family: 'Material Icons'; font-size: 18px; color: #64748b; }
+
+  .lp-acc-body {
+    padding: 0 14px 14px;
+    border-top: 1px solid #334155;
+  }
+  .lp-acc-body p { font-size: 12px; color: #94a3b8; line-height: 1.6; margin-top: 10px; }
+  .lp-acc-body ul { margin: 8px 0 0 16px; }
+  .lp-acc-body li { font-size: 12px; color: #94a3b8; line-height: 1.7; }
+
+  /* Ranking da Rodada — bônus table */
+  .bonus-table {
+    margin-top: 12px;
+    background: #0f172a;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #334155;
+  }
+  .bonus-table-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    padding: 6px 10px;
+    background: #1e293b;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #64748b;
+  }
+  .bonus-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    padding: 6px 10px;
+    border-top: 1px solid #1e293b;
+    font-size: 11px;
+    align-items: center;
+  }
+  .bonus-row .pos { color: #94a3b8; }
+  .bonus-row .gain { color: #22c55e; font-weight: 600; }
+  .bonus-row .loss { color: #f43f5e; font-weight: 600; }
+
+  /* Divider */
+  .lp-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(139,92,246,0.3), transparent);
+    margin: 14px 12px;
+  }
+
+  /* Ranking list preview */
+  .ranking-preview { padding: 0 12px 20px; }
+  .ranking-title { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; font-weight: 700; }
+  .rank-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px;
+    background: #1e293b;
+    border-radius: 8px;
+    margin-bottom: 6px;
+  }
+  .rank-pos { font-family: 'Russo One', sans-serif; font-size: 13px; color: #8b5cf6; width: 20px; }
+  .rank-name { flex: 1; font-size: 13px; color: #f1f5f9; }
+  .rank-pts { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #a78bfa; }
+
+  /* Placeholder admin text */
+  .premiacoes-placeholder {
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(139,92,246,0.06);
+    border: 1px dashed rgba(139,92,246,0.25);
+    border-radius: 8px;
+    font-size: 12px;
+    color: #64748b;
+    text-align: center;
+  }
+  .premiacoes-placeholder .mat-icon { font-family: 'Material Icons'; font-size: 16px; vertical-align: middle; color: #8b5cf6; }
+
+  /* PHONE 2 — Ranking da Rodada */
+  .phone-2 .lp-hero-icon-ring {
+    background: rgba(34,197,94,0.12);
+    border-color: rgba(34,197,94,0.35);
+  }
+  .phone-2 .lp-hero-icon-ring .mat-icon { color: #4ade80; }
+  .phone-2 .lp-acc-icon { color: #4ade80; }
+  .phone-2 .lp-hero-tagline { }
+  .phone-2 .lp-divider { background: linear-gradient(90deg, transparent, rgba(34,197,94,0.3), transparent); }
+  .phone-2 .rank-pos { color: #22c55e; }
+  .phone-2 .rank-pts { color: #4ade80; }
+  .phone-2 .lp-accordion { border-color: #1f3a2a; }
+
+  @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+  @import url('https://fonts.googleapis.com/css2?family=Russo+One&family=Inter:wght@400;600&family=JetBrains+Mono&display=swap');
+</style>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Inter:wght@400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- PHONE 1: Ranking Geral -->
+<div>
+  <p class="label-top">Ranking Geral</p>
+  <div class="phone">
+    <div class="app-topbar">
+      <span class="app-topbar-back">←</span>
+      <span class="app-topbar-title">Ranking Geral</span>
+    </div>
+
+    <!-- HERO -->
+    <div class="lp-hero">
+      <div class="lp-hero-icon-ring">
+        <span class="mat-icon">leaderboard</span>
+      </div>
+      <h1 class="lp-hero-title">Ranking Geral</h1>
+      <p class="lp-hero-tagline">Classificação acumulada de toda a temporada</p>
+    </div>
+
+    <!-- ACORDEÕES -->
+    <div class="lp-accordions">
+
+      <div class="lp-accordion">
+        <button class="lp-acc-btn">
+          <div class="lp-acc-btn-left">
+            <span class="lp-acc-icon">menu_book</span>
+            <span class="lp-acc-label">Como Funciona</span>
+          </div>
+          <span class="lp-acc-chevron">expand_more</span>
+        </button>
+        <div class="lp-acc-body">
+          <p>O Ranking Geral soma todos os seus pontos do Cartola FC ao longo da temporada. Quem fizer mais pontos no total é o campeão.</p>
+          <ul>
+            <li>Consistência é tudo</li>
+            <li>Desempate: rodada mais recente</li>
+            <li>Atualizado ao final de cada rodada</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="lp-accordion">
+        <button class="lp-acc-btn">
+          <div class="lp-acc-btn-left">
+            <span class="lp-acc-icon">emoji_events</span>
+            <span class="lp-acc-label">Premiação</span>
+          </div>
+          <span class="lp-acc-chevron">expand_more</span>
+        </button>
+        <div class="lp-acc-body">
+          <!-- Estado C: admin ainda não preencheu -->
+          <div class="premiacoes-placeholder">
+            <span class="mat-icon">info</span>
+            Premiação definida pelo organizador da liga
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="lp-divider"></div>
+
+    <!-- RANKING LIST PREVIEW -->
+    <div class="ranking-preview">
+      <p class="ranking-title">Temporada 2026</p>
+      <div class="rank-row">
+        <span class="rank-pos">1°</span>
+        <span class="rank-name">Felipe Araújo</span>
+        <span class="rank-pts">1.284,5 pts</span>
+      </div>
+      <div class="rank-row">
+        <span class="rank-pos">2°</span>
+        <span class="rank-name">Marcos Lima</span>
+        <span class="rank-pts">1.201,2 pts</span>
+      </div>
+      <div class="rank-row">
+        <span class="rank-pos">3°</span>
+        <span class="rank-name">João Pedro</span>
+        <span class="rank-pts">1.188,9 pts</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PHONE 2: Ranking da Rodada (com bônus/ônus) -->
+<div>
+  <p class="label-top">Por Rodadas — bônus/ônus do config</p>
+  <div class="phone phone-2">
+    <div class="app-topbar">
+      <span class="app-topbar-back">←</span>
+      <span class="app-topbar-title">Ranking da Rodada</span>
+    </div>
+
+    <div class="lp-hero">
+      <div class="lp-hero-icon-ring">
+        <span class="mat-icon">event</span>
+      </div>
+      <h1 class="lp-hero-title">Por Rodadas</h1>
+      <p class="lp-hero-tagline">Ganhe e perca dinheiro baseado na sua posição por rodada</p>
+    </div>
+
+    <div class="lp-accordions">
+
+      <div class="lp-accordion">
+        <button class="lp-acc-btn">
+          <div class="lp-acc-btn-left">
+            <span class="lp-acc-icon">menu_book</span>
+            <span class="lp-acc-label">Como Funciona</span>
+          </div>
+          <span class="lp-acc-chevron">expand_more</span>
+        </button>
+        <div class="lp-acc-body">
+          <p>A cada rodada você é rankeado pela pontuação. Dependendo da posição, você ganha, perde ou fica neutro financeiramente.</p>
+        </div>
+      </div>
+
+      <div class="lp-accordion">
+        <button class="lp-acc-btn">
+          <div class="lp-acc-btn-left">
+            <span class="lp-acc-icon">emoji_events</span>
+            <span class="lp-acc-label">Premiação por Rodada</span>
+          </div>
+          <span class="lp-acc-chevron">expand_more</span>
+        </button>
+        <div class="lp-acc-body">
+          <!-- Bônus/ônus puxados do ModuleConfig -->
+          <div class="bonus-table">
+            <div class="bonus-table-header">
+              <span>Posição</span>
+              <span>Bônus</span>
+              <span>Ônus</span>
+            </div>
+            <div class="bonus-row">
+              <span class="pos">🏆 Mito 1°</span>
+              <span class="gain">+R$ 20</span>
+              <span>—</span>
+            </div>
+            <div class="bonus-row">
+              <span class="pos">2°</span>
+              <span class="gain">+R$ 15</span>
+              <span>—</span>
+            </div>
+            <div class="bonus-row">
+              <span class="pos">3°</span>
+              <span class="gain">+R$ 10</span>
+              <span>—</span>
+            </div>
+            <div class="bonus-row">
+              <span class="pos">Zona neutra</span>
+              <span class="pos">—</span>
+              <span class="pos">—</span>
+            </div>
+            <div class="bonus-row">
+              <span class="pos">Ante-penúltimo</span>
+              <span>—</span>
+              <span class="loss">-R$ 10</span>
+            </div>
+            <div class="bonus-row">
+              <span class="pos">Penúltimo</span>
+              <span>—</span>
+              <span class="loss">-R$ 15</span>
+            </div>
+            <div class="bonus-row">
+              <span class="pos">🐔 Mico último</span>
+              <span>—</span>
+              <span class="loss">-R$ 20</span>
+            </div>
+          </div>
+          <p style="margin-top:8px; font-size:11px; color:#475569;">Valores configurados pelo admin da sua liga · Rodada 24</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="lp-divider"></div>
+
+    <div class="ranking-preview">
+      <p class="ranking-title">Rodada 24 · parcial</p>
+      <div class="rank-row">
+        <span class="rank-pos">1°</span>
+        <span class="rank-name">Carlos Eduardo</span>
+        <span class="rank-pts">87,4 pts</span>
+      </div>
+      <div class="rank-row">
+        <span class="rank-pos">2°</span>
+        <span class="rank-name">Renata Sousa</span>
+        <span class="rank-pts">82,1 pts</span>
+      </div>
+      <div class="rank-row">
+        <span class="rank-pos">3°</span>
+        <span class="rank-name">Diego Matos</span>
+        <span class="rank-pts">79,6 pts</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

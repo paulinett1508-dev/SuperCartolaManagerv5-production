@@ -272,6 +272,34 @@
     position: relative;
 }
 
+/* Close button — absolute, top-right of hero */
+.module-lp-close-btn {
+    position: absolute;
+    top: var(--app-space-3);
+    right: var(--app-space-3);
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--app-radius-full);
+    background: var(--app-surface-elevated, rgba(255,255,255,0.06));
+    border: 1px solid var(--lp-border);
+    color: var(--app-text-muted);
+    cursor: pointer;
+    transition: color var(--app-duration-fast) ease, background var(--app-duration-fast) ease;
+}
+
+.module-lp-close-btn:hover {
+    color: var(--lp-primary);
+    background: var(--lp-muted);
+}
+
+.module-lp-close-btn .material-icons {
+    font-size: 18px;
+}
+
 /* ============================================================
    4. ACCORDION (Como Funciona + Premiações)
    ============================================================ */

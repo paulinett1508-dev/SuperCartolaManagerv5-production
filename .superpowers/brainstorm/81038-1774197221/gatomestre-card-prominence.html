@@ -1,0 +1,215 @@
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  /* ---- base page sim ---- */
+  .page-sim {
+    background: #111; border-radius: 10px; padding: 14px;
+    display: flex; flex-direction: column; gap: 8px;
+    border: 1px solid #1e1e1e; min-height: 300px;
+  }
+  .page-header {
+    display: flex; align-items: center; gap: 6px;
+    color: #fff; font-size: 12px; font-weight: 700;
+    border-bottom: 1px solid #1e1e1e; padding-bottom: 8px; margin-bottom: 2px;
+  }
+  .page-header span { font-size: 14px; color: #ff4500; }
+
+  /* controles genéricos */
+  .ctrl-bar {
+    display: flex; gap: 5px; margin-bottom: 2px;
+  }
+  .ctrl-pill {
+    background: #1a1a1a; border: 1px solid #2a2a2a;
+    border-radius: 20px; padding: 4px 10px;
+    color: #555; font-size: 9px;
+  }
+  .ctrl-pill.active { border-color: #ff4500; color: #ff4500; }
+
+  /* ---- OPÇÃO A: igual às outras sections, só cor diferente ---- */
+  .card-generic {
+    border-radius: 8px; padding: 12px 14px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .card-generic.orange { background: #1a1a1a; border: 1px solid #2a2a2a; }
+  .card-generic.premium { background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.2); }
+  .card-generic.featured {
+    background: linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(255,69,0,0.08) 100%);
+    border: 1px solid rgba(245,158,11,0.3);
+    box-shadow: 0 0 24px rgba(245,158,11,0.08);
+  }
+  .card-header { display: flex; align-items: center; gap: 6px; }
+  .card-icon { font-size: 14px; }
+  .card-title { color: #fff; font-size: 11px; font-weight: 700; }
+  .card-badge {
+    font-size: 8px; font-weight: 800; padding: 1px 5px; border-radius: 8px;
+    background: #ff4500; color: #fff;
+  }
+  .card-badge.gold { background: linear-gradient(135deg,#f59e0b,#d97706); color:#000; }
+  .card-badge.connected { background: #22c55e; }
+  .card-status { color: #555; font-size: 9px; }
+  .card-input-row { display: flex; gap: 5px; margin-top: 4px; }
+  .card-input {
+    flex:1; padding: 6px 8px; background: #111; border: 1px solid #222;
+    border-radius: 5px; color: #666; font-size: 9px;
+  }
+  .card-btn {
+    padding: 6px 10px; border: none; border-radius: 5px;
+    color: #fff; font-size: 9px; font-weight: 700; cursor: pointer;
+  }
+  .card-btn.orange { background: #ff4500; }
+  .card-btn.gold { background: linear-gradient(135deg,#f59e0b,#d97706); color:#000; }
+
+  /* placeholder cards */
+  .placeholder-card {
+    background: #161616; border: 1px solid #1e1e1e; border-radius: 7px;
+    padding: 10px 12px; display: flex; align-items: center; gap: 6px;
+  }
+  .placeholder-icon { font-size: 12px; color: #333; }
+  .placeholder-text { color: #333; font-size: 9px; }
+  .placeholder-bar { flex:1; height:4px; background:#1a1a1a; border-radius:2px; }
+  .placeholder-bar-inner { height:100%; background:#2a2a2a; border-radius:2px; width:60%; }
+
+  .card-label { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 6px; text-align: center; }
+</style>
+
+<h2>Card GatoMestre — peso visual na página</h2>
+<p class="subtitle">Como o card de conexão deve se destacar no meio dos outros cards da <code>escalacao-ia.html</code>?</p>
+
+<div class="cards">
+
+  <!-- A: Igual às outras sections — só ícone e cor -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="page-sim">
+        <div class="page-header"><span>psychology</span> Escalação IA</div>
+
+        <!-- GatoMestre — mesmo nível visual -->
+        <div class="card-generic orange">
+          <div class="card-header">
+            <div class="card-icon">🧠</div>
+            <div class="card-title">Conexão GatoMestre PRO</div>
+            <div class="card-badge">Desconectado</div>
+          </div>
+          <div class="card-status">Entre com sua conta Globo para ativar</div>
+          <div class="card-input-row">
+            <input class="card-input" placeholder="email@gmail.com" readonly>
+            <input class="card-input" placeholder="••••••" readonly>
+            <div class="card-btn orange">Conectar</div>
+          </div>
+        </div>
+
+        <!-- Controles -->
+        <div class="ctrl-bar">
+          <div class="ctrl-pill active">Mitar</div>
+          <div class="ctrl-pill">Equilibrado</div>
+          <div class="ctrl-pill">Valorizar</div>
+        </div>
+
+        <!-- Outros cards placeholder -->
+        <div class="placeholder-card">
+          <div class="placeholder-icon">⚙️</div>
+          <div class="placeholder-text">Controles de geração</div>
+          <div class="placeholder-bar"><div class="placeholder-bar-inner"></div></div>
+        </div>
+        <div class="placeholder-card">
+          <div class="placeholder-icon">👥</div>
+          <div class="placeholder-text">Escalação titular</div>
+          <div class="placeholder-bar"><div class="placeholder-bar-inner" style="width:80%"></div></div>
+        </div>
+      </div>
+      <div class="card-label">A — Mesmo peso visual dos outros cards</div>
+    </div>
+    <div class="card-body">
+      <h3>Integrado</h3>
+      <p>GatoMestre não se diferencia visualmente. Mesma hierarquia dos outros cards. Mais discreto.</p>
+    </div>
+  </div>
+
+  <!-- B: Card premium dourado sutil -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="page-sim">
+        <div class="page-header"><span>psychology</span> Escalação IA</div>
+
+        <!-- GatoMestre — premium dourado -->
+        <div class="card-generic premium">
+          <div class="card-header">
+            <div class="card-icon">🧠</div>
+            <div class="card-title">Conexão GatoMestre PRO</div>
+            <div class="card-badge gold">PRO</div>
+          </div>
+          <div class="card-status" style="color:rgba(245,158,11,0.5)">Entre com sua conta Globo para ativar</div>
+          <div class="card-input-row">
+            <input class="card-input" placeholder="email@gmail.com" readonly>
+            <input class="card-input" placeholder="••••••" readonly>
+            <div class="card-btn gold">Conectar</div>
+          </div>
+        </div>
+
+        <div class="ctrl-bar">
+          <div class="ctrl-pill active">Mitar</div>
+          <div class="ctrl-pill">Equilibrado</div>
+          <div class="ctrl-pill">Valorizar</div>
+        </div>
+        <div class="placeholder-card">
+          <div class="placeholder-icon">⚙️</div>
+          <div class="placeholder-text">Controles de geração</div>
+          <div class="placeholder-bar"><div class="placeholder-bar-inner"></div></div>
+        </div>
+        <div class="placeholder-card">
+          <div class="placeholder-icon">👥</div>
+          <div class="placeholder-text">Escalação titular</div>
+          <div class="placeholder-bar"><div class="placeholder-bar-inner" style="width:80%"></div></div>
+        </div>
+      </div>
+      <div class="card-label">B — Card dourado sutil, badge PRO</div>
+    </div>
+    <div class="card-body">
+      <h3>Premium</h3>
+      <p>Borda e fundo dourado sutil. Badge "PRO" dourado. Visualmente diferente, mas não gritante.</p>
+    </div>
+  </div>
+
+  <!-- C: Card destaque com glow, hero da página -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="page-sim">
+        <div class="page-header"><span>psychology</span> Escalação IA</div>
+
+        <!-- GatoMestre — featured hero -->
+        <div class="card-generic featured">
+          <div class="card-header">
+            <div class="card-icon" style="font-size:16px">🧠</div>
+            <div class="card-title" style="font-size:12px">Conexão GatoMestre PRO</div>
+            <div class="card-badge gold">PRO</div>
+            <div class="card-badge connected" style="margin-left:auto">● Conectado</div>
+          </div>
+          <div class="card-status" style="color:rgba(245,158,11,0.6);font-size:8px">
+            admin@email.com · Expira em 1h42m
+          </div>
+        </div>
+
+        <div class="ctrl-bar">
+          <div class="ctrl-pill active">Mitar</div>
+          <div class="ctrl-pill">Equilibrado</div>
+          <div class="ctrl-pill">Valorizar</div>
+        </div>
+        <div class="placeholder-card">
+          <div class="placeholder-icon">⚙️</div>
+          <div class="placeholder-text">Controles de geração</div>
+          <div class="placeholder-bar"><div class="placeholder-bar-inner"></div></div>
+        </div>
+        <div class="placeholder-card">
+          <div class="placeholder-icon">👥</div>
+          <div class="placeholder-text">Escalação titular</div>
+          <div class="placeholder-bar"><div class="placeholder-bar-inner" style="width:80%"></div></div>
+        </div>
+      </div>
+      <div class="card-label">C — Hero destaque com glow dourado (estado conectado)</div>
+    </div>
+    <div class="card-body">
+      <h3>Hero destaque</h3>
+      <p>Card com glow dourado, claramente o elemento central da página. Mostra estado conectado de forma premium.</p>
+    </div>
+  </div>
+
+</div>
