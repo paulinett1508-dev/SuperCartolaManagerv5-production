@@ -1405,6 +1405,7 @@
                 },
 
                 async conectar() {
+                    let navigating = false;
                     const email = this._el('premium-email')?.value.trim();
                     const senha = this._el('premium-senha')?.value;
                     const btnEl  = this._el('premium-btn-conectar');
@@ -1434,6 +1435,7 @@
                         const data = await res.json();
 
                         if (data.success) {
+                            navigating = true;
                             window.location.href = '/participante/';
                             return;
                         }
@@ -1462,10 +1464,12 @@
                         errorEl.textContent = 'Erro de rede. Tente novamente.';
                         errorEl.style.display = 'block';
                     } finally {
-                        btnEl.disabled = false;
-                        iconEl.textContent = 'login';
-                        iconEl.style.animation = '';
-                        labelEl.textContent = 'Conectar com Globo';
+                        if (!navigating) {
+                            btnEl.disabled = false;
+                            iconEl.textContent = 'login';
+                            iconEl.style.animation = '';
+                            labelEl.textContent = 'Conectar com Globo';
+                        }
                     }
                 }
             };
