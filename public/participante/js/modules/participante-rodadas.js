@@ -57,9 +57,9 @@ async function buildPremiacaoRodadas(ligaId) {
         let rows = '';
         entries.forEach(({ pos, val }) => {
             const posLabel = pos === 1
-                ? '🏆 1° (Mito)'
+                ? '1° (Mito)'
                 : pos === totalPos
-                    ? '💸 ' + pos + '° (Mico)'
+                    ? pos + '° (Mico)'
                     : pos + '°';
             let valClass, valLabel;
             if (val > 0) {
