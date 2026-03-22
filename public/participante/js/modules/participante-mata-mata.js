@@ -18,6 +18,7 @@
 // =====================================================================
 
 import { CURRENT_SEASON } from "/js/config/seasons-client.js";
+import { injectModuleLP } from './module-lp-engine.js';
 
 // ✅ FIX: Edições carregadas dinamicamente da API (gerenciar-modulos)
 // Antes: hardcoded com dados de 2025 para 32 times → colide com regras do admin
@@ -194,6 +195,17 @@ export async function inicializarMataMata(params) {
   // ✅ CORREÇÃO: Usar participanteAuth como fallback em vez de localStorage (evita dados cruzados entre ligas)
   estado.ligaId = params?.ligaId || window.participanteAuth?.ligaId;
   estado.timeId = params?.timeId || window.participanteAuth?.timeId;
+
+  injectModuleLP({
+      wrapperId:    'mata-mata-lp-wrapper',
+      insertBefore: 'mata-mata-content',
+      ligaId:       estado.ligaId,
+      moduloKey:    'mata_mata',
+      titulo:       'Mata-Mata',
+      tagline:      'Eliminação direta — perca e esteja fora',
+      icon:         'sports_kabaddi',
+      colorClass:   'module-lp-mata-mata',
+  });
 
   if (!estado.ligaId) {
     if (window.Log) Log.error("[MATA-MATA] ❌ Liga ID não encontrado");
