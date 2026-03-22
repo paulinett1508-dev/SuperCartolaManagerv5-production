@@ -26,4 +26,4 @@ credentials.json
 .server.pid
 credentials.json
 *.bak
-bun.lock
+bun.lock.worktrees/

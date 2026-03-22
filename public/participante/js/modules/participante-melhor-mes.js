@@ -1,3 +1,4 @@
+import { injectModuleLP } from './module-lp-engine.js';
 // =====================================================================
 // PARTICIPANTE-MELHOR-MES.JS - v3.7 (Cache-First IndexedDB)
 // ✅ v3.7: Fix escapeHtml local + comparação de cache robusta
@@ -51,6 +52,17 @@ export async function inicializarMelhorMesParticipante({
 
     ligaIdAtual = ligaId;
     timeIdAtual = timeId;
+
+    injectModuleLP({
+        wrapperId:    'melhor-mes-lp-wrapper',
+        insertBefore: 'melhor-mes-content',
+        ligaId,
+        moduloKey:    'melhor_mes',
+        titulo:       'Melhor do Mês',
+        tagline:      'Competição mensal — uma nova chance a cada mês',
+        icon:         'calendar_month',
+        colorClass:   'module-lp-melhor-mes',
+    });
 
     // ✅ v3.6: CACHE-FIRST - Tentar carregar do IndexedDB primeiro
     let usouCache = false;

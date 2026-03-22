@@ -19,6 +19,7 @@ import * as ParciaisModule from "./participante-rodada-parcial.js";
 import * as PollingInteligenteModule from "./participante-rodadas-polling.js";
 
 import { RODADA_FINAL_CAMPEONATO } from "/js/config/seasons-client.js";
+import { injectModuleLP } from './module-lp-engine.js';
 
 // Estado do módulo
 let todasRodadasCache = [];
@@ -31,6 +32,62 @@ let parciaisInfo = null;
 // Ground truth: jogos realmente ao vivo (não apenas status_mercado=2)
 let _aoVivoConfirmado = false;
 const TEMPORADA_ATUAL = window.ParticipanteConfig?.CURRENT_SEASON || new Date().getFullYear();
+
+// =====================================================================
+// BUILD PREMIAÇÃO RODADAS - Para LP Engine
+// =====================================================================
+async function buildPremiacaoRodadas(ligaId) {
+    try {
+        const resp = await fetch('/api/liga/' + ligaId + '/modulos/ranking_rodada');
+        if (!resp.ok) return null;
+        const data = await resp.json();
+        const valoresManual = data?.config?.wizard_respostas?.valores_manual;
+        if (!valoresManual || Object.keys(valoresManual).length === 0) return null;
+
+        // valoresManual is a flat map: { "1": 20, "2": 15, ..., "N": -20 }
+        // positive = ganho (mito/Mito), negative = perda (mico/Mico), 0 = neutro
+        // Sort by position number
+        const entries = Object.entries(valoresManual)
+            .map(([pos, val]) => ({ pos: parseInt(pos, 10), val: Number(val) }))
+            .sort((a, b) => a.pos - b.pos);
+
+        if (entries.length === 0) return null;
+
+        const totalPos = entries.length;
+        let rows = '';
+        entries.forEach(({ pos, val }) => {
+            const posLabel = pos === 1
+                ? '1° (Mito)'
+                : pos === totalPos
+                    ? pos + '° (Mico)'
+                    : pos + '°';
+            let valClass, valLabel;
+            if (val > 0) {
+                valClass = 'ganho';
+                valLabel = '+R$ ' + val;
+            } else if (val < 0) {
+                valClass = 'perda';
+                valLabel = '-R$ ' + Math.abs(val);
+            } else {
+                valClass = 'neutro';
+                valLabel = '—';
+            }
+            rows += '<div class="lp-bonus-row">'
+                + '<span class="lp-bonus-pos">' + posLabel + '</span>'
+                + '<span class="lp-bonus-val ' + valClass + '">' + (val > 0 ? valLabel : '—') + '</span>'
+                + '<span class="lp-bonus-val ' + valClass + '">' + (val < 0 ? valLabel : '—') + '</span>'
+                + '</div>';
+        });
+
+        return '<div class="lp-bonus-table">'
+            + '<div class="lp-bonus-table-header"><span>Posição</span><span>Bônus</span><span>Ônus</span></div>'
+            + rows
+            + '</div>'
+            + '<p class="lp-bonus-nota">Valores configurados pelo admin da liga</p>';
+    } catch (_e) {
+        return null;
+    }
+}
 
 // =====================================================================
 // FUNÇÃO PRINCIPAL - EXPORTADA PARA NAVIGATION
@@ -54,6 +111,20 @@ export async function inicializarRodadasParticipante({
     if (window.Log) {
         Log.info("[PARTICIPANTE-RODADAS]", `🎯 meuTimeId definido: ${meuTimeId} (${typeof meuTimeId})`);
     }
+
+    injectModuleLP({
+        wrapperId:               'ranking-rodada-lp-wrapper',
+        insertBefore:            'rodadas-content',
+        ligaId,
+        moduloKey:               'banco',
+        titulo:                  'Ranking da Rodada',
+        tagline:                 'Ganhe e perca baseado na sua posição a cada rodada',
+        icon:                    'event',
+        colorClass:              'module-lp-ranking-rodada',
+        premiacaoLabel:          'Premiação por Rodada',
+        premiacaoSource:         'moduleconfig',
+        premiacaoModuleConfigFn: buildPremiacaoRodadas,
+    });
 
     // Aguardar DOM estar renderizado (double RAF)
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));

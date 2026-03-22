@@ -328,6 +328,87 @@ const MODULOS_DEFAULT = [
 <p><em>Valores e posições premiadas definidos pelo administrador da liga a cada edição.</em></p>`
     },
     {
+        modulo: 'ranking_geral_premiacao',
+        titulo: 'Premiação — Ranking Geral',
+        icone: 'emoji_events',
+        cor: '#8b5cf6',
+        ordem: 116,
+        conteudo_html: '',
+        ativo: true
+    },
+    {
+        modulo: 'banco_premiacao',
+        titulo: 'Premiação — Por Rodadas',
+        icone: 'emoji_events',
+        cor: '#22c55e',
+        ordem: 117,
+        conteudo_html: '',
+        ativo: true
+    },
+    {
+        modulo: 'top10_premiacao',
+        titulo: 'Premiação — TOP 10',
+        icone: 'emoji_events',
+        cor: '#f59e0b',
+        ordem: 118,
+        conteudo_html: '',
+        ativo: true
+    },
+    {
+        modulo: 'melhor_mes_premiacao',
+        titulo: 'Premiação — Melhor do Mês',
+        icone: 'emoji_events',
+        cor: '#06b6d4',
+        ordem: 119,
+        conteudo_html: '',
+        ativo: true
+    },
+    {
+        modulo: 'pontos_corridos_premiacao',
+        titulo: 'Premiação — Pontos Corridos',
+        icone: 'emoji_events',
+        cor: '#22c55e',
+        ordem: 120,
+        conteudo_html: '',
+        ativo: true
+    },
+    {
+        modulo: 'mata_mata_premiacao',
+        titulo: 'Premiação — Mata-Mata',
+        icone: 'emoji_events',
+        cor: '#ef4444',
+        ordem: 121,
+        conteudo_html: '',
+        ativo: true
+    },
+    {
+        modulo: 'tiro_certo_premiacao',
+        titulo: 'Premiação — Tiro Certo',
+        icone: 'emoji_events',
+        cor: '#f97316',
+        ordem: 122,
+        conteudo_html: '',
+        ativo: true
+    },
+    {
+        modulo: 'raio_x_premiacao',
+        titulo: 'Premiação — Raio-X da Rodada',
+        icone: 'emoji_events',
+        cor: '#06b6d4',
+        ordem: 123,
+        conteudo_html: '',
+        ativo: true
+    },
+    {
+        modulo: 'campinho_premiacao',
+        titulo: 'Premiação — Campinho Virtual',
+        icone: 'emoji_events',
+        cor: '#10b981',
+        ordem: 124,
+        conteudo_html: '',
+        ativo: true
+    },
+    {
         modulo: 'tiro_certo',
         titulo: 'Tiro Certo',
         icone: 'gps_fixed',
@@ -347,6 +428,24 @@ const MODULOS_DEFAULT = [
 <h4>Estratégia</h4>
 <p>Pense bem antes de escolher! Guarde os grandes favoritos para as rodadas finais e tente avançar com times menores no início.</p>
 <p><em>O último sobrevivente leva o prêmio sozinho!</em></p>`
+    },
+    {
+        modulo: 'raio_x',
+        titulo: 'Raio-X da Rodada',
+        icone: 'radar',
+        cor: '#06b6d4',
+        ordem: 17,
+        conteudo_html: '<p>O Raio-X da Rodada exibe uma análise visual detalhada do desempenho de todos os participantes em cada rodada. Veja a distribuição de pontuações, quem se destacou e quem ficou abaixo da média.</p><ul><li>Atualizado ao final de cada rodada</li><li>Visualização gráfica comparativa</li><li>Histórico completo da temporada</li></ul>',
+        ativo: true
+    },
+    {
+        modulo: 'campinho',
+        titulo: 'Campinho Virtual',
+        icone: 'sports_soccer',
+        cor: '#10b981',
+        ordem: 18,
+        conteudo_html: '<p>O Campinho Virtual exibe a escalação do seu time em campo, com cada jogador posicionado de acordo com o esquema tático escolhido. Acompanhe a pontuação de cada atleta em tempo real durante a rodada.</p><ul><li>Visualização tática do seu time</li><li>Pontuações em tempo real</li><li>Indicadores de status (capitão, jogou, não jogou)</li></ul>',
+        ativo: true
     }
 ];
 

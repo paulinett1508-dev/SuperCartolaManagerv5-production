@@ -5,9 +5,24 @@
 
 if (window.Log) Log.info('PARTICIPANTE-RANKING', 'Módulo v4.0 MOBILE-FIRST carregando...');
 
+import { injectModuleLP } from './module-lp-engine.js';
+
 // ===== IMPORT DO MÓDULO PRINCIPAL =====
 async function inicializarRankingParticipante(payload) {
     if (window.Log) Log.info('PARTICIPANTE-RANKING', '🚀 Inicializando módulo v4.0...');
+
+    const ligaId = payload && payload.ligaId;
+
+    injectModuleLP({
+        wrapperId:    'ranking-geral-lp-wrapper',
+        insertBefore: 'ranking-geral-content',
+        ligaId,
+        moduloKey:    'ranking_geral',
+        titulo:       'Ranking Geral',
+        tagline:      'Classificação acumulada de toda a temporada',
+        icon:         'leaderboard',
+        colorClass:   'module-lp-ranking-geral',
+    });
 
     try {
         // Importar módulo principal (com cache-busting)

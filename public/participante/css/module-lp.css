@@ -64,6 +64,114 @@
     --lp-glow: 0 0 20px rgba(244, 63, 94, 0.26), 0 0 48px rgba(244, 63, 94, 0.10);
 }
 
+.module-lp-ranking-geral {
+    --lp-primary: var(--app-purple, #8b5cf6);
+    --lp-muted: rgba(139, 92, 246, 0.12);
+    --lp-muted-strong: rgba(139, 92, 246, 0.22);
+    --lp-border: rgba(139, 92, 246, 0.25);
+    --lp-gradient-hero:
+        linear-gradient(145deg, rgba(139, 92, 246, 0.22) 0%, rgba(99, 102, 241, 0.06) 55%, transparent 90%),
+        radial-gradient(ellipse 55% 40% at 85% 90%, rgba(139, 92, 246, 0.10), transparent);
+    --lp-gradient-card: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(139, 92, 246, 0.03));
+    --lp-glow: 0 0 20px rgba(139, 92, 246, 0.22), 0 0 48px rgba(139, 92, 246, 0.08);
+}
+
+.module-lp-ranking-rodada {
+    --lp-primary: var(--app-success-light, #22c55e);
+    --lp-muted: rgba(34, 197, 94, 0.12);
+    --lp-muted-strong: rgba(34, 197, 94, 0.22);
+    --lp-border: rgba(34, 197, 94, 0.25);
+    --lp-gradient-hero:
+        linear-gradient(145deg, rgba(34, 197, 94, 0.22) 0%, rgba(16, 185, 129, 0.08) 55%, transparent 90%),
+        radial-gradient(ellipse 55% 40% at 15% 85%, rgba(34, 197, 94, 0.10), transparent);
+    --lp-gradient-card: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(34, 197, 94, 0.03));
+    --lp-glow: 0 0 20px rgba(34, 197, 94, 0.22), 0 0 48px rgba(34, 197, 94, 0.08);
+}
+
+.module-lp-top10 {
+    --lp-primary: var(--app-warning, #f59e0b);
+    --lp-muted: rgba(245, 158, 11, 0.12);
+    --lp-muted-strong: rgba(245, 158, 11, 0.22);
+    --lp-border: rgba(245, 158, 11, 0.25);
+    --lp-gradient-hero:
+        linear-gradient(145deg, rgba(245, 158, 11, 0.22) 0%, rgba(234, 179, 8, 0.06) 55%, transparent 90%),
+        radial-gradient(ellipse 55% 40% at 85% 90%, rgba(245, 158, 11, 0.10), transparent);
+    --lp-gradient-card: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(245, 158, 11, 0.03));
+    --lp-glow: 0 0 20px rgba(245, 158, 11, 0.22), 0 0 48px rgba(245, 158, 11, 0.08);
+}
+
+.module-lp-melhor-mes {
+    --lp-primary: var(--app-info, #06b6d4);
+    --lp-muted: rgba(6, 182, 212, 0.12);
+    --lp-muted-strong: rgba(6, 182, 212, 0.22);
+    --lp-border: rgba(6, 182, 212, 0.25);
+    --lp-gradient-hero:
+        linear-gradient(145deg, rgba(6, 182, 212, 0.22) 0%, rgba(14, 165, 233, 0.06) 55%, transparent 90%),
+        radial-gradient(ellipse 55% 40% at 85% 90%, rgba(6, 182, 212, 0.10), transparent);
+    --lp-gradient-card: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(6, 182, 212, 0.03));
+    --lp-glow: 0 0 20px rgba(6, 182, 212, 0.22), 0 0 48px rgba(6, 182, 212, 0.08);
+}
+
+.module-lp-pontos-corridos {
+    --lp-primary: var(--app-success-light, #22c55e);
+    --lp-muted: rgba(34, 197, 94, 0.10);
+    --lp-muted-strong: rgba(34, 197, 94, 0.20);
+    --lp-border: rgba(34, 197, 94, 0.22);
+    --lp-gradient-hero:
+        linear-gradient(145deg, rgba(34, 197, 94, 0.20) 0%, rgba(16, 185, 129, 0.06) 55%, transparent 90%),
+        radial-gradient(ellipse 55% 40% at 85% 90%, rgba(34, 197, 94, 0.08), transparent);
+    --lp-gradient-card: linear-gradient(135deg, rgba(34, 197, 94, 0.07), rgba(34, 197, 94, 0.02));
+    --lp-glow: 0 0 20px rgba(34, 197, 94, 0.20), 0 0 48px rgba(34, 197, 94, 0.07);
+}
+
+.module-lp-mata-mata {
+    --lp-primary: var(--app-danger, #ef4444);
+    --lp-muted: rgba(239, 68, 68, 0.12);
+    --lp-muted-strong: rgba(239, 68, 68, 0.22);
+    --lp-border: rgba(239, 68, 68, 0.25);
+    --lp-gradient-hero:
+        linear-gradient(145deg, rgba(239, 68, 68, 0.22) 0%, rgba(220, 38, 38, 0.06) 55%, transparent 90%),
+        radial-gradient(ellipse 55% 40% at 85% 90%, rgba(239, 68, 68, 0.10), transparent);
+    --lp-gradient-card: linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(239, 68, 68, 0.03));
+    --lp-glow: 0 0 20px rgba(239, 68, 68, 0.22), 0 0 48px rgba(239, 68, 68, 0.08);
+}
+
+.module-lp-tiro-certo {
+    --lp-primary: var(--app-warning-orange, #f97316);
+    --lp-muted: rgba(249, 115, 22, 0.12);
+    --lp-muted-strong: rgba(249, 115, 22, 0.22);
+    --lp-border: rgba(249, 115, 22, 0.25);
+    --lp-gradient-hero:
+        linear-gradient(145deg, rgba(249, 115, 22, 0.22) 0%, rgba(234, 88, 12, 0.06) 55%, transparent 90%),
+        radial-gradient(ellipse 55% 40% at 85% 90%, rgba(249, 115, 22, 0.10), transparent);
+    --lp-gradient-card: linear-gradient(135deg, rgba(249, 115, 22, 0.08), rgba(249, 115, 22, 0.03));
+    --lp-glow: 0 0 20px rgba(249, 115, 22, 0.22), 0 0 48px rgba(249, 115, 22, 0.08);
+}
+
+.module-lp-raio-x {
+    --lp-primary: var(--app-cyan, #06b6d4);
+    --lp-muted: rgba(6, 182, 212, 0.12);
+    --lp-muted-strong: rgba(6, 182, 212, 0.22);
+    --lp-border: rgba(6, 182, 212, 0.25);
+    --lp-gradient-hero:
+        linear-gradient(145deg, rgba(6, 182, 212, 0.22) 0%, rgba(8, 145, 178, 0.06) 55%, transparent 90%),
+        radial-gradient(ellipse 55% 40% at 85% 90%, rgba(6, 182, 212, 0.10), transparent);
+    --lp-gradient-card: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(6, 182, 212, 0.03));
+    --lp-glow: 0 0 20px rgba(6, 182, 212, 0.22), 0 0 48px rgba(6, 182, 212, 0.08);
+}
+
+.module-lp-campinho {
+    --lp-primary: var(--app-success, #10b981);
+    --lp-muted: rgba(16, 185, 129, 0.12);
+    --lp-muted-strong: rgba(16, 185, 129, 0.22);
+    --lp-border: rgba(16, 185, 129, 0.25);
+    --lp-gradient-hero:
+        linear-gradient(145deg, rgba(16, 185, 129, 0.22) 0%, rgba(5, 150, 105, 0.06) 55%, transparent 90%),
+        radial-gradient(ellipse 55% 40% at 85% 90%, rgba(16, 185, 129, 0.10), transparent);
+    --lp-gradient-card: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(16, 185, 129, 0.03));
+    --lp-glow: 0 0 20px rgba(16, 185, 129, 0.22), 0 0 48px rgba(16, 185, 129, 0.08);
+}
+
 /* ============================================================
    2. WRAPPER
    ============================================================ */
@@ -233,7 +341,7 @@
 }
 
 .module-lp-accordion-btn[aria-expanded="true"] ~ .module-lp-accordion-body {
-    max-height: 600px;
+    max-height: 1200px;
 }
 
 .module-lp-accordion-inner {
@@ -442,4 +550,97 @@
     .module-lp-hero {
         padding: var(--app-space-6) var(--app-space-4);
     }
+}
+
+/* ============================================================
+   LOADING + PLACEHOLDER STATE
+   ============================================================ */
+
+.lp-loading-icon {
+    font-size: var(--app-font-md, 16px);
+    vertical-align: middle;
+    opacity: 0.4;
+}
+
+.lp-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--app-space-4, 16px) 0;
+    color: var(--app-text-dim);
+}
+
+.lp-premiacao-placeholder {
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-2, 8px);
+    color: var(--app-text-muted);
+    font-size: var(--app-font-sm);
+    padding: var(--app-space-1, 4px) 0;
+}
+
+.lp-premiacao-placeholder-icon {
+    font-size: var(--app-font-lg, 18px);
+    opacity: 0.6;
+}
+
+/* ============================================================
+   BONUS/ÔNUS TABLE (Ranking da Rodada)
+   ============================================================ */
+
+.lp-bonus-table {
+    width: 100%;
+    border-radius: var(--app-radius-md);
+    overflow: hidden;
+    border: 1px solid var(--app-border);
+    background: var(--app-bg);
+}
+
+.lp-bonus-table-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    padding: var(--app-space-2) var(--app-space-4);
+    background: var(--app-surface);
+    font-size: var(--app-font-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--app-text-dim);
+}
+
+.lp-bonus-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    padding: var(--app-space-2) var(--app-space-4);
+    border-top: 1px solid var(--app-border);
+    font-size: var(--app-font-sm);
+    align-items: center;
+}
+
+.lp-bonus-row .lp-bonus-pos {
+    color: var(--app-text-secondary);
+}
+
+.lp-bonus-val {
+    font-family: var(--app-font-mono);
+    font-weight: 600;
+}
+
+.lp-bonus-val.ganho {
+    color: var(--app-success-light);
+}
+
+.lp-bonus-val.perda {
+    color: var(--app-danger);
+}
+
+.lp-bonus-val.neutro {
+    color: var(--app-text-dim);
+}
+
+.lp-bonus-nota {
+    margin-top: var(--app-space-3);
+    font-size: var(--app-font-xs);
+    color: var(--app-text-dim);
+    font-style: italic;
 }

@@ -9,6 +9,8 @@
 //       Quando mercado abre: consolida automaticamente com dados reais.
 // =====================================================================
 
+import { injectModuleLP } from './module-lp-engine.js';
+
 if (window.Log) Log.info('[PARTICIPANTE-RESTA-UM] Carregando módulo v3.0...');
 
 // Estado do módulo
@@ -36,10 +38,17 @@ export async function inicializarRestaUmParticipante({ participante, ligaId, tim
     _currentParticipante = participante;
     _wasLanterna = false;
 
-    // ✅ LP: Init acordeons + carregar regras e premiações (non-blocking via regras-modulos)
-    _initLPAccordions('restaum-lp-wrapper');
-    _lpCarregarComoFunciona(ligaId, 'resta_um', 'lp-regras-body-resta-um');
-    _lpCarregarPremiacoesDynamic(ligaId, 'resta_um_premiacao', 'lp-premiacoes-body-resta-um');
+    // ✅ LP: Injetar LP via engine (non-blocking)
+    injectModuleLP({
+        wrapperId:    'resta-um-lp-wrapper',
+        insertBefore: 'resta-um-content',
+        ligaId,
+        moduloKey:    'resta_um',
+        titulo:       'Resta Um',
+        tagline:      'Sobreviva cada rodada ou seja eliminado',
+        icon:         'warning',
+        colorClass:   'module-lp-resta-um',
+    });
 
     const container = document.getElementById('resta-um-content');
     if (!container) {
@@ -468,61 +477,12 @@ window.destruirRestaUmParticipante = destruirRestaUmParticipante;
 if (window.Log) Log.info('[PARTICIPANTE-RESTA-UM] Módulo v2.0 carregado');
 
 // =====================================================================
-// MODULE LP — Landing Page Utils (Resta Um)
+// MODULE LP — Resta Um: formatação e render de premiações
 // =====================================================================
-
-/** Carrega "Como Funciona" da API regras-modulos (admin editável) */
-function _lpCarregarComoFunciona(ligaId, moduloKey, bodyId) {
-    const body = document.getElementById(bodyId);
-    if (!body || !ligaId) return;
-    fetch(`/api/regras-modulos/${ligaId}/${moduloKey}`)
-        .then(r => r.ok ? r.json() : Promise.reject())
-        .then(data => {
-            if (data?.regra?.conteudo_html) {
-                body.innerHTML = `<div class="module-lp-regras-content">${data.regra.conteudo_html}</div>`;
-            } else {
-                body.innerHTML = '<p style="color:var(--app-text-muted);font-size:var(--app-font-sm);">Regras ainda nao configuradas pelo admin.</p>';
-            }
-        })
-        .catch(() => {
-            body.innerHTML = '<p style="color:var(--app-text-muted);font-size:var(--app-font-sm);">Nao foi possivel carregar as regras.</p>';
-        });
-}
-
-function _initLPAccordions(wrapperId) {
-    const wrapper = document.getElementById(wrapperId);
-    if (!wrapper) return;
-    wrapper.querySelectorAll('.module-lp-accordion-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const isOpen = btn.getAttribute('aria-expanded') === 'true';
-            btn.setAttribute('aria-expanded', String(!isOpen));
-        });
-    });
-}
 
 function _lpFormatCurrency(val) {
     const n = parseFloat(val) || 0;
     return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-
-
-/**
- * Fallback: carrega texto descritivo de regras-modulos (exibido até dados reais do status chegarem).
- * Se _carregarDados encontrar dados.premiacao, _lpRenderRestaUmPremiacoes sobrescreve.
- */
-function _lpCarregarPremiacoesDynamic(ligaId, moduloKey, bodyId) {
-    const body = document.getElementById(bodyId);
-    if (!body || !ligaId) return;
-    fetch(`/api/regras-modulos/${ligaId}/${moduloKey}`)
-        .then(r => r.ok ? r.json() : Promise.reject())
-        .then(data => {
-            if (data?.regra?.conteudo_html) {
-                body.innerHTML = `<div class="module-lp-premiacoes-content">${data.regra.conteudo_html}</div>`;
-            } else {
-                body.innerHTML = '<p style="color:var(--app-text-muted);font-size:var(--app-font-sm);text-align:center;">Premiacoes ainda nao configuradas pelo admin.</p>';
-            }
-        })
-        .catch(() => { body.innerHTML = '<p style="color:var(--app-text-muted);font-size:var(--app-font-sm);text-align:center;">Nao foi possivel carregar as premiacoes.</p>'; });
 }
 
 /**
@@ -530,7 +490,7 @@ function _lpCarregarPremiacoesDynamic(ligaId, moduloKey, bodyId) {
  * Respects viceHabilitado/terceiroHabilitado flags.
  */
 function _lpRenderRestaUmPremiacoes(premiacao) {
-    const body = document.getElementById('lp-premiacoes-body-resta-um');
+    const body = document.getElementById('lp-premiacoes-body-resta_um');
     if (!body || !premiacao) return;
 
     let html = '';

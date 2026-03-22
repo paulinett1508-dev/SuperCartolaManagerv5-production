@@ -15,6 +15,7 @@ if (window.Log) Log.info("[PARTICIPANTE-TOP10] Carregando módulo v5.3...");
 // CONFIGURAÇÃO DINÂMICA DO CAMPEONATO
 // =====================================================================
 import { RODADA_FINAL_CAMPEONATO } from "/js/config/seasons-client.js";
+import { injectModuleLP } from './module-lp-engine.js';
 const TEMPORADA_ATUAL = window.ParticipanteConfig?.CURRENT_SEASON || new Date().getFullYear();
 
 /**
@@ -141,6 +142,17 @@ export async function inicializarTop10Participante({
 
     // ✅ v5.2: Aguardar DOM estar renderizado (double RAF)
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    injectModuleLP({
+        wrapperId:    'top10-lp-wrapper',
+        insertBefore: 'top10-content',
+        ligaId,
+        moduloKey:    'top10',
+        titulo:       'TOP 10',
+        tagline:      'Melhores e piores pontuações da liga',
+        icon:         'military_tech',
+        colorClass:   'module-lp-top10',
+    });
 
     meuTimeIdGlobal = timeId;
 

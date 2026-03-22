@@ -1,3 +1,4 @@
+import { injectModuleLP } from './module-lp-engine.js';
 // =====================================================
 // MÓDULO: RAIO-X DA RODADA - v1.1
 // v1.1: Botão refresh — refaz ambas as APIs
@@ -25,6 +26,17 @@ export async function inicializarRodadaXrayParticipante(payload) {
         const participante = payload?.participante;
         _ligaId = payload?.ligaId || participante?.ligaId;
         _timeId = payload?.timeId || participante?.timeId;
+
+        injectModuleLP({
+            wrapperId:    'raio-x-lp-wrapper',
+            insertBefore: 'xrayContainer',
+            ligaId:       _ligaId,
+            moduloKey:    'raio_x',
+            titulo:       'Raio-X da Rodada',
+            tagline:      'Análise completa após cada rodada',
+            icon:         'sensors',
+            colorClass:   'module-lp-raio-x',
+        });
 
         // Parâmetros da rodada (passados via window.xrayParams pelo módulo de rodadas)
         const params = window.xrayParams || {};
