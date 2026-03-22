@@ -1,0 +1,154 @@
+<style>
+  .mockup-shell {
+    background: #0d0d0d;
+    border-radius: 12px;
+    padding: 28px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 340px;
+    justify-content: center;
+    gap: 12px;
+    font-family: 'Inter', sans-serif;
+    border: 1px solid #2a2a2a;
+  }
+  .mock-logo {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: #1c1c1e;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; margin-bottom: 4px;
+    border: 2px solid #ff4500;
+  }
+  .mock-title { color: #fff; font-size: 18px; font-weight: 700; }
+  .mock-sub { color: rgba(255,255,255,0.4); font-size: 11px; margin-bottom: 8px; }
+  .mock-input {
+    width: 220px; padding: 10px 12px;
+    background: #1c1c1e; border: 1px solid #333;
+    border-radius: 8px; color: #fff; font-size: 12px;
+  }
+  .mock-btn {
+    width: 220px; padding: 10px;
+    background: linear-gradient(135deg, #ff4500, #ff6a33);
+    border: none; border-radius: 8px;
+    color: #fff; font-weight: 700; font-size: 13px;
+    cursor: pointer; text-align: center;
+  }
+  .mock-divider {
+    width: 220px; display: flex; align-items: center; gap: 10px;
+    color: #444; font-size: 10px;
+  }
+  .mock-divider::before, .mock-divider::after {
+    content: ''; flex: 1; height: 1px; background: #333;
+  }
+  .mock-btn-outline {
+    width: 220px; padding: 10px;
+    background: transparent;
+    border: 1px solid #ff4500;
+    border-radius: 8px;
+    color: #ff4500; font-weight: 600; font-size: 12px;
+    text-align: center; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .mock-btn-gold {
+    width: 220px; padding: 10px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    border: none; border-radius: 8px;
+    color: #fff; font-weight: 700; font-size: 12px;
+    text-align: center; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .mock-link {
+    color: rgba(255,255,255,0.3); font-size: 10px;
+    text-decoration: underline; cursor: pointer; margin-top: 4px;
+  }
+  .mock-badge-pro {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #000; font-size: 9px; font-weight: 800;
+    padding: 2px 6px; border-radius: 10px;
+    letter-spacing: 0.5px;
+  }
+  .mock-section-label {
+    width: 220px; text-align: left;
+    font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px;
+    color: rgba(255,255,255,0.25);
+    margin-bottom: -4px;
+  }
+  .card-label {
+    font-size: 11px; color: rgba(255,255,255,0.5);
+    margin-top: 8px; text-align: center;
+  }
+</style>
+
+<h2>Como o login premium aparece para o participante?</h2>
+<p class="subtitle">O acesso Cartola Pro / Globo precisa estar disponível na tela de login. Qual abordagem faz mais sentido?</p>
+
+<div class="cards">
+
+  <!-- Opção A: Integrado no mesmo formulário -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup-shell">
+        <div class="mock-logo">⚽</div>
+        <div class="mock-title">Super Cartola</div>
+        <div class="mock-sub">Entre com o ID do seu time</div>
+        <input class="mock-input" placeholder="ID do Time (ex: 123456)" readonly>
+        <div class="mock-btn">Entrar</div>
+        <div class="mock-divider">ou</div>
+        <div class="mock-btn-gold">
+          <span>⚡</span> Entrar com Cartola Pro
+        </div>
+        <div style="color:rgba(255,255,255,0.25);font-size:9px;margin-top:2px;">Acesso premium — conta Globo</div>
+      </div>
+      <div class="card-label">A — Dois botões no mesmo card</div>
+    </div>
+    <div class="card-body">
+      <h3>Integrado</h3>
+      <p>O Cartola Pro aparece logo abaixo do login normal. Visível para todos — só ativa premium se elegível.</p>
+    </div>
+  </div>
+
+  <!-- Opção B: Tab switching -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup-shell">
+        <div class="mock-logo">⚽</div>
+        <div class="mock-title">Super Cartola</div>
+        <div class="mock-sub" style="margin-bottom:10px;">Como você quer entrar?</div>
+        <div style="width:220px;display:flex;background:#1a1a1a;border-radius:8px;padding:3px;gap:2px;margin-bottom:12px;">
+          <div style="flex:1;text-align:center;padding:6px 0;background:#ff4500;border-radius:6px;font-size:11px;font-weight:700;color:#fff;">Time ID</div>
+          <div style="flex:1;text-align:center;padding:6px 0;font-size:11px;color:#666;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;">
+            <span style="font-size:10px">⭐</span> Cartola Pro
+          </div>
+        </div>
+        <input class="mock-input" placeholder="ID do Time (ex: 123456)" readonly>
+        <div class="mock-btn">Entrar</div>
+      </div>
+      <div class="card-label">B — Tabs: Time ID | Cartola Pro</div>
+    </div>
+    <div class="card-body">
+      <h3>Tabs de modo</h3>
+      <p>Usuário escolhe explicitamente o método de login. Tab "Cartola Pro" troca o formulário para email+senha Globo.</p>
+    </div>
+  </div>
+
+  <!-- Opção C: Login normal + acesso oculto/sutil -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup-shell">
+        <div class="mock-logo">⚽</div>
+        <div class="mock-title">Super Cartola</div>
+        <div class="mock-sub">Entre com o ID do seu time</div>
+        <input class="mock-input" placeholder="ID do Time (ex: 123456)" readonly>
+        <div class="mock-btn">Entrar</div>
+        <div class="mock-link">Acesso Premium <span class="mock-badge-pro">PRO</span></div>
+      </div>
+      <div class="card-label">C — Link discreto abaixo do botão principal</div>
+    </div>
+    <div class="card-body">
+      <h3>Discreto</h3>
+      <p>Login normal em destaque. O acesso premium aparece como link sutil abaixo — menos intrusivo para usuários comuns.</p>
+    </div>
+  </div>
+
+</div>

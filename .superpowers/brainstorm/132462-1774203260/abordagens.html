@@ -1,0 +1,45 @@
+<h2>Como implementar as 9 Landing Pages?</h2>
+<p class="subtitle">Três abordagens — escolha a que faz mais sentido pro projeto</p>
+
+<div class="options">
+
+  <div class="option" data-choice="A" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Componente Compartilhado (LP Engine)</h3>
+      <p>Criar um módulo JS reutilizável <code>module-lp-engine.js</code> com uma função genérica <code>injectModuleLP(config)</code>. Cada página passa seu config e a LP é renderizada automaticamente — sem duplicar HTML/JS.</p>
+      <div class="pros-cons" style="margin-top:10px;">
+        <div class="pros"><h4>Prós</h4><ul><li>Zero duplicação</li><li>LP 10 ou LP 100 = mesma estrutura</li><li>Fácil manutenção futura</li></ul></div>
+        <div class="cons"><h4>Contras</h4><ul><li>Refatora o padrão atual (artilheiro, luva, capitão)</li><li>Mais trabalho inicial</li></ul></div>
+      </div>
+      <p style="margin-top:8px; font-size:12px; color:#94a3b8;"><strong>Recomendado</strong> — o padrão atual já está duplicado 4x, hora de unificar</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="B" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Seguir o padrão atual (copy &amp; adapt)</h3>
+      <p>Adicionar LP nas 9 páginas seguindo o mesmo padrão de artilheiro/luva/capitão. Cada página tem seu próprio HTML e JS de LP — igual ao que existe hoje.</p>
+      <div class="pros-cons" style="margin-top:10px;">
+        <div class="pros"><h4>Prós</h4><ul><li>Mudança cirúrgica</li><li>Sem risco de quebrar módulos existentes</li><li>Mais simples de implementar</li></ul></div>
+        <div class="cons"><h4>Contras</h4><ul><li>Aumenta duplicação no codebase</li><li>Manutenção futura: mudar o padrão = editar 13 arquivos</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="C" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Híbrido: Engine + migrar módulos existentes</h3>
+      <p>Criar o engine genérico <em>e</em> migrar os 4 módulos já existentes (artilheiro, luva, capitão, resta-um) para usá-lo também. Tudo unificado de uma vez.</p>
+      <div class="pros-cons" style="margin-top:10px;">
+        <div class="pros"><h4>Prós</h4><ul><li>Codebase limpo 100%</li><li>Consistência total</li></ul></div>
+        <div class="cons"><h4>Contras</h4><ul><li>Maior escopo — todos os 13 módulos tocados</li><li>Maior risco de regressão</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px; font-size:13px;">Clique para selecionar ou responda no terminal.</p>

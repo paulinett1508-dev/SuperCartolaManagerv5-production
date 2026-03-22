@@ -1,0 +1,147 @@
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .mockup-shell {
+    background: #0d0d0d; border-radius: 12px; padding: 24px 20px;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 300px; justify-content: center; gap: 10px;
+    border: 1px solid #2a2a2a; position: relative;
+  }
+  .mock-logo {
+    width: 52px; height: 52px; border-radius: 50%; background: #1c1c1e;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; border: 2px solid #f59e0b;
+  }
+  .mock-input {
+    width: 210px; padding: 9px 11px;
+    background: #1c1c1e; border: 1px solid #333;
+    border-radius: 7px; color: #666; font-size: 11px;
+  }
+  .mock-btn-gold {
+    width: 210px; padding: 9px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    border: none; border-radius: 7px;
+    color: #000; font-weight: 700; font-size: 12px; text-align: center;
+  }
+  .mock-back { color: rgba(245,158,11,0.4); font-size: 9px; cursor: pointer; }
+
+  /* Opção A: Banner vermelho claro */
+  .reject-banner {
+    width: 210px; padding: 10px 12px;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.35);
+    border-radius: 8px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .reject-banner-title { color: #ef4444; font-size: 11px; font-weight: 700; }
+  .reject-banner-sub { color: rgba(255,255,255,0.45); font-size: 9px; line-height: 1.4; }
+
+  /* Opção B: Substituição total do card com explicação */
+  .reject-card {
+    width: 210px; padding: 16px;
+    background: rgba(239,68,68,0.06);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 10px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;
+  }
+  .reject-icon { font-size: 28px; }
+  .reject-title { color: #ef4444; font-size: 12px; font-weight: 700; }
+  .reject-msg { color: rgba(255,255,255,0.4); font-size: 9px; line-height: 1.5; }
+  .reject-distinction {
+    width: 100%; background: rgba(255,255,255,0.04); border-radius: 6px;
+    padding: 8px; font-size: 8px; color: rgba(255,255,255,0.3); line-height: 1.6; text-align: left;
+  }
+  .reject-distinction strong { color: rgba(255,255,255,0.55); }
+
+  /* Opção C: Toast + permanece no card */
+  .mock-toast {
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    background: #1a1a1a; border: 1px solid #ef4444;
+    border-radius: 8px; padding: 8px 12px;
+    display: flex; align-items: flex-start; gap: 8px;
+    white-space: nowrap; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+  .mock-toast-icon { color: #ef4444; font-size: 14px; line-height: 1; }
+  .mock-toast-text { display: flex; flex-direction: column; gap: 2px; }
+  .mock-toast-title { color: #ef4444; font-size: 10px; font-weight: 700; }
+  .mock-toast-sub { color: rgba(255,255,255,0.4); font-size: 8px; max-width: 180px; white-space: normal; }
+
+  .card-label { font-size: 10px; color: rgba(255,255,255,0.35); margin-top: 6px; text-align: center; }
+</style>
+
+<h2>Como mostrar que o participante não é Premium no Super Cartola?</h2>
+<p class="subtitle">Autenticou na Globo com sucesso, mas não tem <code>premium=true</code> no nosso sistema. O que ele vê?</p>
+
+<div class="cards">
+
+  <!-- A: Banner de erro abaixo do botão, form permanece -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup-shell">
+        <div class="mock-logo">⭐</div>
+        <div style="color:#f59e0b;font-size:14px;font-weight:700;">Cartola Pro</div>
+        <div style="color:rgba(255,255,255,0.3);font-size:9px;margin-bottom:4px;">Conta Globo</div>
+        <div class="reject-banner">
+          <div class="reject-banner-title">⚠ Você não é Premium no Super Cartola</div>
+          <div class="reject-banner-sub">Ter Cartola PRO (Globo) não garante acesso. Este sistema requer cadastro premium separado pelo administrador.</div>
+        </div>
+        <div class="mock-back">← Voltar ao login normal</div>
+      </div>
+      <div class="card-label">A — Banner inline no card premium</div>
+    </div>
+    <div class="card-body">
+      <h3>Banner inline</h3>
+      <p>Erro aparece no próprio card. Form some, explicação clara fica visível. Usuário pode voltar.</p>
+    </div>
+  </div>
+
+  <!-- B: Card vira para tela de explicação detalhada -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup-shell">
+        <div class="reject-card">
+          <div class="reject-icon">🚫</div>
+          <div class="reject-title">Acesso negado</div>
+          <div class="reject-msg">Você autenticou na Globo, mas <strong style="color:rgba(255,255,255,0.6)">não é participante Premium</strong> no Super Cartola.</div>
+          <div class="reject-distinction">
+            <strong>Cartola PRO (Globo)</strong> — assinatura do app da Globo<br>
+            <strong>Premium Super Cartola</strong> — habilitado pelo seu administrador de liga<br><br>
+            Entre em contato com o admin da sua liga.
+          </div>
+        </div>
+        <div class="mock-back" style="margin-top:8px;">← Voltar ao login normal</div>
+      </div>
+      <div class="card-label">B — Card vira para tela de explicação</div>
+    </div>
+    <div class="card-body">
+      <h3>Tela de explicação</h3>
+      <p>Card inteiro mostra a distinção Cartola PRO vs Premium Super Cartola. Mais didático, mais espaço.</p>
+    </div>
+  </div>
+
+  <!-- C: Toast no topo + volta automaticamente ao form -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup-shell">
+        <div class="mock-toast">
+          <div class="mock-toast-icon">✕</div>
+          <div class="mock-toast-text">
+            <div class="mock-toast-title">Não é Premium no Super Cartola</div>
+            <div class="mock-toast-sub">Cartola PRO (Globo) ≠ Premium neste sistema. Fale com seu admin.</div>
+          </div>
+        </div>
+        <div style="color:#f59e0b;font-size:13px;font-weight:700;margin-top:20px;">Cartola Pro</div>
+        <div style="color:rgba(255,255,255,0.3);font-size:9px;">Conta Globo</div>
+        <input class="mock-input" placeholder="email@gmail.com" readonly>
+        <input class="mock-input" placeholder="••••••••" readonly>
+        <div class="mock-btn-gold">Conectar com Globo</div>
+        <div class="mock-back">← Voltar ao login normal</div>
+      </div>
+      <div class="card-label">C — Toast no topo, form permanece para retry</div>
+    </div>
+    <div class="card-body">
+      <h3>Toast + form permanece</h3>
+      <p>Notificação rápida no topo. O form não some — usuário pode tentar outro email ou voltar.</p>
+    </div>
+  </div>
+
+</div>

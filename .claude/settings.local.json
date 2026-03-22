@@ -278,7 +278,12 @@
       "Bash(pm2 delete:*)",
       "Bash(git -C /var/www/cartola add .gitignore)",
       "Bash(git -C /var/www/cartola commit -m \"chore: adicionar .worktrees/ ao .gitignore\")",
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "Bash(tmux -V)",
+      "Skill(commit-commands:commit-push-pr)",
+      "Bash(gh pr:*)",
+      "Bash(apt update:*)",
+      "Bash(apt install:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

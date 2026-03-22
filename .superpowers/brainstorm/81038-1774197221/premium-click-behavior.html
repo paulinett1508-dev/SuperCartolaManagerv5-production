@@ -1,0 +1,157 @@
+<style>
+  .mockup-shell {
+    background: #0d0d0d; border-radius: 12px; padding: 24px 20px;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 320px; justify-content: center; gap: 10px;
+    font-family: 'Inter', sans-serif; border: 1px solid #2a2a2a;
+  }
+  .mock-logo {
+    width: 56px; height: 56px; border-radius: 50%; background: #1c1c1e;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; border: 2px solid #ff4500;
+  }
+  .mock-title { color: #fff; font-size: 16px; font-weight: 700; }
+  .mock-sub { color: rgba(255,255,255,0.35); font-size: 10px; margin-bottom: 4px; }
+  .mock-input {
+    width: 210px; padding: 9px 11px;
+    background: #1c1c1e; border: 1px solid #333;
+    border-radius: 7px; color: #fff; font-size: 11px;
+  }
+  .mock-input.glow { border-color: #ff4500; box-shadow: 0 0 0 2px rgba(255,69,0,0.2); }
+  .mock-btn {
+    width: 210px; padding: 9px;
+    background: linear-gradient(135deg, #ff4500, #ff6a33);
+    border: none; border-radius: 7px;
+    color: #fff; font-weight: 700; font-size: 12px; text-align: center;
+  }
+  .mock-link {
+    color: rgba(255,255,255,0.28); font-size: 9px;
+    text-decoration: underline; cursor: pointer;
+  }
+  .mock-badge {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #000; font-size: 8px; font-weight: 800;
+    padding: 1px 5px; border-radius: 8px;
+  }
+  .mock-label {
+    width: 210px; font-size: 9px; color: rgba(255,255,255,0.35);
+    text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700;
+  }
+  /* Modal overlay */
+  .mock-overlay {
+    position: absolute; inset: 0; background: rgba(0,0,0,0.75);
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 12px;
+  }
+  .mock-modal {
+    background: #1a1a1a; border: 1px solid #f59e0b;
+    border-radius: 10px; padding: 16px; width: 200px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .mock-modal-title {
+    color: #f59e0b; font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .mock-modal-sub { color: rgba(255,255,255,0.4); font-size: 9px; }
+  .relative { position: relative; }
+  .mock-expand {
+    width: 210px; background: rgba(245,158,11,0.07);
+    border: 1px solid rgba(245,158,11,0.25); border-radius: 8px;
+    padding: 12px; display: flex; flex-direction: column; gap: 8px;
+    margin-top: 2px;
+  }
+  .mock-expand-label {
+    color: #f59e0b; font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .mock-btn-gold {
+    width: 100%; padding: 8px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    border: none; border-radius: 6px;
+    color: #000; font-weight: 700; font-size: 11px; text-align: center;
+  }
+  .card-label { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 6px; text-align: center; }
+  .arrow { color: #ff4500; font-size: 10px; }
+</style>
+
+<h2>O que acontece ao clicar em "Acesso Premium"?</h2>
+<p class="subtitle">Ao clicar no link discreto, qual comportamento você prefere?</p>
+
+<div class="cards">
+
+  <!-- A: Modal dourado sobrepõe a tela -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup-shell relative">
+        <div class="mock-logo">⚽</div>
+        <div class="mock-title">Super Cartola</div>
+        <div class="mock-sub">Entre com o ID do seu time</div>
+        <input class="mock-input" placeholder="ID do Time" readonly>
+        <div class="mock-btn">Entrar</div>
+        <div class="mock-link">Acesso Premium <span class="mock-badge">PRO</span></div>
+        <!-- Modal sobreposto -->
+        <div class="mock-overlay">
+          <div class="mock-modal">
+            <div class="mock-modal-title">⭐ Cartola Pro</div>
+            <div class="mock-modal-sub">Sua conta Globo (mesmo email do Cartola)</div>
+            <input class="mock-input" style="width:100%" placeholder="email@gmail.com" readonly>
+            <input class="mock-input" style="width:100%" placeholder="••••••••" readonly>
+            <div class="mock-btn-gold">Conectar</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-label">A — Modal sobrepõe a tela</div>
+    </div>
+    <div class="card-body">
+      <h3>Modal</h3>
+      <p>Clique no link → overlay dourado aparece com o form de email+senha Globo. Fechar descarta.</p>
+    </div>
+  </div>
+
+  <!-- B: Expande inline abaixo do link -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup-shell">
+        <div class="mock-logo">⚽</div>
+        <div class="mock-title">Super Cartola</div>
+        <div class="mock-sub">Entre com o ID do seu time</div>
+        <input class="mock-input" placeholder="ID do Time" readonly>
+        <div class="mock-btn">Entrar</div>
+        <div style="color:rgba(255,255,255,0.28);font-size:9px;text-decoration:underline;">Acesso Premium <span class="mock-badge">PRO</span> <span class="arrow">▲</span></div>
+        <!-- Expande abaixo -->
+        <div class="mock-expand">
+          <div class="mock-expand-label">⭐ Cartola Pro</div>
+          <input class="mock-input" style="width:100%;font-size:10px" placeholder="email@gmail.com" readonly>
+          <input class="mock-input" style="width:100%;font-size:10px" placeholder="••••••••" readonly>
+          <div class="mock-btn-gold">Conectar com Globo</div>
+        </div>
+      </div>
+      <div class="card-label">B — Expande inline abaixo do link</div>
+    </div>
+    <div class="card-body">
+      <h3>Inline expand</h3>
+      <p>Clique no link → o form aparece abaixo, no mesmo card, sem sair da tela. O link vira "▲ recolher".</p>
+    </div>
+  </div>
+
+  <!-- C: Troca o card inteiro -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup-shell" style="border-color:#f59e0b33">
+        <div class="mock-logo" style="border-color:#f59e0b">⭐</div>
+        <div class="mock-title" style="color:#f59e0b">Cartola Pro</div>
+        <div class="mock-sub">Conta Globo — mesmo email do Cartola FC</div>
+        <input class="mock-input glow" placeholder="email@gmail.com" readonly>
+        <input class="mock-input" placeholder="••••••••" readonly>
+        <div class="mock-btn-gold">Conectar com Globo</div>
+        <div class="mock-link" style="color:#f59e0b55">← Voltar ao login normal</div>
+      </div>
+      <div class="card-label">C — Troca o card inteiro (flip)</div>
+    </div>
+    <div class="card-body">
+      <h3>Card flip</h3>
+      <p>O card inteiro é substituído pelo form premium. Tem botão "← Voltar". Experiência mais imersiva.</p>
+    </div>
+  </div>
+
+</div>
