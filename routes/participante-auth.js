@@ -6,6 +6,7 @@ import passport from "passport";
 import { getGloboOidcConfig } from "../config/globo-oauth.js";
 import cartolaProService from "../services/cartolaProService.js";
 import bcrypt from "bcryptjs";
+import Liga from "../models/Liga.js";
 
 const router = express.Router();
 
@@ -1192,6 +1193,74 @@ function gerarHtmlPopupErro(codigo, mensagem) {
 </body>
 </html>`;
 }
+
+// ── EXPORT para testes ──────────────────────────────────────────────
+export async function handlerAuthPremium(req, res) {
+    try {
+        const { email, senha } = req.body;
+        // NUNCA logar senha
+        console.log('[PARTICIPANTE-AUTH] /auth/premium tentativa:', { email });
+
+        if (!email || !senha) {
+            return res.status(400).json({ success: false, code: 'MISSING_FIELDS', message: 'Email e senha são obrigatórios.' });
+        }
+
+        // 1. Autenticar na Globo
+        const authResult = await cartolaProService.autenticar(email, senha);
+        if (!authResult.success) {
+            return res.status(401).json({ success: false, code: 'INVALID_CREDENTIALS', message: 'Email ou senha incorretos.' });
+        }
+        const glbId = authResult.glbId;
+
+        // 2. Obter time_id
+        const timeResult = await cartolaProService.buscarMeuTime(glbId);
+        if (!timeResult.success || !timeResult.time?.timeId) {
+            return res.status(400).json({ success: false, code: 'NO_TIME', message: 'Não foi possível obter seu time da conta Globo.' });
+        }
+        const timeId = timeResult.time.timeId;
+
+        // 3. Buscar liga onde este time existe
+        const liga = await Liga.findOne({ 'participantes.time_id': timeId });
+        if (!liga) {
+            return res.status(404).json({ success: false, code: 'NO_LEAGUE', message: 'Time não encontrado em nenhuma liga.' });
+        }
+
+        // 4. Verificar premium em memória ($ positional operator inválido em filtro MongoDB)
+        const participante = liga.participantes.find(
+            p => String(p.time_id) === String(timeId) && p.premium === true
+        );
+        if (!participante) {
+            return res.status(403).json({ success: false, code: 'NOT_PREMIUM', message: 'Conta Globo válida, mas sem acesso Premium neste sistema.' });
+        }
+
+        // 5. Criar sessão
+        req.session.participante = {
+            timeId,
+            ligaId: liga._id,
+            premium: true,
+            nome_cartola: participante.nome_cartola || '',
+            nome_time:    participante.nome_time || '',
+            foto_perfil:  participante.foto_perfil || '',
+            foto_time:    participante.foto_time || '',
+            clube_id:     participante.clube_id || null,
+        };
+        req.session.cartolaProAuth = {
+            glbid:      glbId,
+            email:      email,
+            expires_at: Math.floor(Date.now() / 1000) + 7200,
+        };
+
+        console.log('[PARTICIPANTE-AUTH] /auth/premium sucesso:', { email, timeId });
+        return res.json({ success: true });
+
+    } catch (error) {
+        console.error('[PARTICIPANTE-AUTH] /auth/premium erro:', error.message);
+        return res.status(500).json({ success: false, code: 'SERVER_ERROR', message: 'Erro interno. Tente novamente.' });
+    }
+}
+
+// Rota
+router.post('/auth/premium', handlerAuthPremium);
 
 export { verificarSessaoParticipante };
 export default router;
