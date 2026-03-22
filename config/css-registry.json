@@ -394,7 +394,7 @@
       {
         "path": "public/participante/css/libertadores-lp.css",
         "loadedBy": ["participante/fronts/libertadores.html (inline <link>)"],
-        "description": "Landing Page da Libertadores 2026 — hero, countdown, notícias, timeline de fases. Namespace liberta-*. Usa tokens --app-liberta-*"
+        "description": "Landing Page da Libertadores 2026 — hero, countdown, grupos da fase de grupos (grid 2col), notícias, timeline de fases com estado upcoming. Namespace liberta-*. Usa tokens --app-liberta-*. Keyframes: app-pulse (de _app-tokens.css)"
       },
       {
         "path": "public/participante/css/copa-brasil-lp.css",
