@@ -540,6 +540,106 @@
                 opacity: 0.7;
                 cursor: not-allowed;
             }
+
+            /* Premium Link */
+            .premium-link-wrapper {
+                text-align: center;
+                margin-top: 12px;
+            }
+            .btn-premium-link {
+                background: transparent;
+                border: none;
+                color: rgba(255, 255, 255, 0.28);
+                font-size: 12px;
+                cursor: pointer;
+                text-decoration: underline;
+                font-family: var(--font-base, 'Inter', sans-serif);
+                padding: 4px 8px;
+                transition: color 0.2s ease;
+            }
+            .btn-premium-link:hover { color: rgba(255, 255, 255, 0.55); }
+            .premium-badge-link {
+                display: inline-block;
+                background: linear-gradient(135deg, var(--color-gold, #f59e0b), #d97706);
+                color: #000;
+                font-size: 8px;
+                font-weight: 800;
+                padding: 1px 5px;
+                border-radius: 8px;
+                letter-spacing: 0.5px;
+                vertical-align: middle;
+                margin-left: 3px;
+            }
+
+            /* Card Premium */
+            .premium-card {
+                background: rgba(245, 158, 11, 0.06);
+                border: 1px solid rgba(245, 158, 11, 0.25);
+                border-radius: 20px;
+                padding: 32px 24px;
+                width: 100%;
+                max-width: 380px;
+            }
+            .premium-card-header { text-align: center; margin-bottom: 20px; }
+            .premium-card-title { color: #f59e0b; font-size: 20px; font-weight: 700; margin: 8px 0 4px; }
+            .premium-card-sub { color: rgba(255,255,255,0.4); font-size: 12px; }
+            .premium-form { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+            .premium-input {
+                width: 100%; padding: 14px 16px;
+                background: rgba(0,0,0,0.3); border: 1px solid rgba(245,158,11,0.2);
+                border-radius: 12px; color: #fff; font-size: 15px;
+                font-family: var(--font-base, 'Inter', sans-serif);
+                transition: border-color 0.2s ease;
+            }
+            .premium-input:focus { outline: none; border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+            .premium-input::placeholder { color: rgba(255,255,255,0.25); }
+            .premium-btn-connect {
+                width: 100%; padding: 14px;
+                background: linear-gradient(135deg, #f59e0b, #d97706);
+                border: none; border-radius: 12px;
+                color: #000; font-weight: 700; font-size: 15px; cursor: pointer;
+                display: flex; align-items: center; justify-content: center; gap: 8px;
+                transition: box-shadow 0.2s ease, opacity 0.2s ease;
+            }
+            .premium-btn-connect:hover { box-shadow: 0 4px 20px rgba(245,158,11,0.4); }
+            .premium-btn-connect:disabled { opacity: 0.6; cursor: not-allowed; }
+            .premium-btn-connect .material-symbols-outlined { font-size: 20px; }
+            .premium-btn-voltar {
+                display: block; width: 100%; padding: 8px;
+                background: transparent; border: none;
+                color: rgba(245,158,11,0.45); font-size: 12px; cursor: pointer;
+                margin-top: 12px; text-align: center;
+                font-family: var(--font-base, 'Inter', sans-serif);
+            }
+            .premium-btn-voltar:hover { color: rgba(245,158,11,0.7); }
+            .premium-error {
+                background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
+                border-radius: 8px; padding: 10px 14px;
+                color: #ef4444; font-size: 13px;
+            }
+            /* Rejeição */
+            .premium-reject { text-align: center; padding: 8px 0 16px; }
+            .premium-reject-icon { font-size: 40px; color: #ef4444; margin-bottom: 12px; display: block; }
+            .premium-reject-title { color: #ef4444; font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+            .premium-reject-msg { color: rgba(255,255,255,0.55); font-size: 13px; line-height: 1.5; margin-bottom: 16px; }
+            .premium-reject-box {
+                background: rgba(255,255,255,0.04); border-radius: 10px;
+                padding: 14px; text-align: left; display: flex; flex-direction: column; gap: 10px;
+            }
+            .premium-reject-row { display: flex; flex-direction: column; gap: 2px; }
+            .premium-reject-row strong { color: rgba(255,255,255,0.7); font-size: 12px; }
+            .premium-reject-row span { color: rgba(255,255,255,0.35); font-size: 11px; }
+            .premium-reject-contact { color: rgba(255,255,255,0.3); font-size: 11px; margin-top: 8px; text-align: center; }
+            /* Transição: respeitar prefers-reduced-motion */
+            .login-container { transition: opacity 0.25s ease; }
+            @media (prefers-reduced-motion: reduce) {
+                .login-container { transition: none; }
+            }
+            /* Spin animation para loading do botão premium */
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
         </style>
     </head>
 
@@ -727,6 +827,15 @@
                 </button>
             </form>
 
+            <!-- Acesso Premium (link discreto) -->
+            <div class="premium-link-wrapper">
+                <button type="button" id="btn-acesso-premium" class="btn-premium-link"
+                        onclick="premiumFlow.iniciar()">
+                    Acesso Premium
+                    <span class="premium-badge-link">PRO</span>
+                </button>
+            </div>
+
             <!-- Loading -->
             <p class="loading-text" id="loading">Aguarde, validando...</p>
 
@@ -751,6 +860,62 @@
                     <span id="footerCopyright">© 2026 Todos os direitos reservados</span>
                 </div>
             </div>
+        </div>
+
+        <!-- Card Premium (oculto por padrão) -->
+        <div id="premium-card" class="premium-card" style="display:none;" aria-live="polite">
+
+            <!-- Estado: formulário -->
+            <div id="premium-form-panel">
+                <div class="premium-card-header">
+                    <span class="material-symbols-outlined" style="color:var(--color-gold,#f59e0b);font-size:28px;">star</span>
+                    <h2 class="premium-card-title">Cartola Pro</h2>
+                    <p class="premium-card-sub">Conta Globo — mesmo login do Cartola FC</p>
+                </div>
+                <div class="premium-form">
+                    <input type="email" id="premium-email" class="premium-input"
+                           placeholder="email@gmail.com" autocomplete="email" spellcheck="false">
+                    <input type="password" id="premium-senha" class="premium-input"
+                           placeholder="Senha" autocomplete="current-password">
+                    <div id="premium-error" class="premium-error" style="display:none;"></div>
+                    <button type="button" id="premium-btn-conectar" class="premium-btn-connect"
+                            onclick="premiumFlow.conectar()">
+                        <span class="material-symbols-outlined" id="premium-btn-icon">login</span>
+                        <span id="premium-btn-label">Conectar com Globo</span>
+                    </button>
+                </div>
+                <button type="button" class="premium-btn-voltar" onclick="premiumFlow.voltar()">
+                    <span class="material-symbols-outlined" style="font-size:14px;vertical-align:middle;">arrow_back</span>
+                    Voltar ao login normal
+                </button>
+            </div>
+
+            <!-- Estado: explicação (não é premium) -->
+            <div id="premium-reject-panel" style="display:none;">
+                <div class="premium-reject">
+                    <span class="material-symbols-outlined premium-reject-icon">block</span>
+                    <h3 class="premium-reject-title">Acesso negado</h3>
+                    <p class="premium-reject-msg">
+                        Você autenticou na Globo, mas não é participante Premium neste sistema.
+                    </p>
+                    <div class="premium-reject-box">
+                        <div class="premium-reject-row">
+                            <strong>Cartola PRO (Globo)</strong>
+                            <span>Assinatura paga no app da Globo</span>
+                        </div>
+                        <div class="premium-reject-row">
+                            <strong>Premium Super Cartola</strong>
+                            <span>Habilitado pelo administrador da sua liga</span>
+                        </div>
+                        <p class="premium-reject-contact">Entre em contato com o admin da sua liga.</p>
+                    </div>
+                </div>
+                <button type="button" class="premium-btn-voltar" onclick="premiumFlow.voltar()">
+                    <span class="material-symbols-outlined" style="font-size:14px;vertical-align:middle;">arrow_back</span>
+                    Voltar ao login normal
+                </button>
+            </div>
+
         </div>
 
         <script>
@@ -1208,6 +1373,105 @@
                     errorMessage.classList.add('show');
                 }
             }
+
+            // =====================================================================
+            // FLUXO PREMIUM
+            // =====================================================================
+            const premiumFlow = {
+                _loginCard: null,
+                _premiumCard: null,
+
+                _el(id) { return document.getElementById(id); },
+
+                iniciar() {
+                    this._loginCard  = document.querySelector('.login-container') || document.querySelector('[class*="login"]');
+                    this._premiumCard = this._el('premium-card');
+                    if (!this._premiumCard) return;
+                    if (this._loginCard) this._loginCard.style.display = 'none';
+                    this._premiumCard.style.display = 'block';
+                    this._el('premium-form-panel').style.display = 'block';
+                    this._el('premium-reject-panel').style.display = 'none';
+                    this._el('premium-error').style.display = 'none';
+                    setTimeout(() => this._el('premium-email')?.focus(), 50);
+                },
+
+                voltar() {
+                    if (this._loginCard) this._loginCard.style.display = '';
+                    if (this._premiumCard) this._premiumCard.style.display = 'none';
+                    const emailEl = this._el('premium-email');
+                    const senhaEl = this._el('premium-senha');
+                    if (emailEl) emailEl.value = '';
+                    if (senhaEl) senhaEl.value = '';
+                },
+
+                async conectar() {
+                    const email = this._el('premium-email')?.value.trim();
+                    const senha = this._el('premium-senha')?.value;
+                    const btnEl  = this._el('premium-btn-conectar');
+                    const iconEl = this._el('premium-btn-icon');
+                    const labelEl = this._el('premium-btn-label');
+                    const errorEl = this._el('premium-error');
+
+                    if (!email || !senha) {
+                        errorEl.textContent = 'Preencha email e senha.';
+                        errorEl.style.display = 'block';
+                        return;
+                    }
+
+                    errorEl.style.display = 'none';
+                    btnEl.disabled = true;
+                    iconEl.textContent = 'sync';
+                    iconEl.style.animation = 'spin 1s linear infinite';
+                    labelEl.textContent = 'Conectando...';
+
+                    try {
+                        const res = await fetch('/api/participante/auth/premium', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ email, senha })
+                        });
+                        const data = await res.json();
+
+                        if (data.success) {
+                            window.location.href = '/participante/';
+                            return;
+                        }
+
+                        if (data.code === 'NOT_PREMIUM') {
+                            this._el('premium-form-panel').style.display = 'none';
+                            this._el('premium-reject-panel').style.display = 'block';
+                            return;
+                        }
+
+                        if (data.code === 'CAPTCHA_REQUIRED') {
+                            errorEl.textContent = 'Autenticação automática bloqueada pela Globo. Use o método Bookmarklet no painel admin.';
+                            errorEl.style.display = 'block';
+                            return;
+                        }
+
+                        errorEl.textContent = data.message || 'Email ou senha incorretos.';
+                        errorEl.style.display = 'block';
+
+                    } catch (_) {
+                        errorEl.textContent = 'Erro de rede. Tente novamente.';
+                        errorEl.style.display = 'block';
+                    } finally {
+                        btnEl.disabled = false;
+                        iconEl.textContent = 'login';
+                        iconEl.style.animation = '';
+                        labelEl.textContent = 'Conectar com Globo';
+                    }
+                }
+            };
+
+            document.addEventListener('DOMContentLoaded', () => {
+                ['premium-email', 'premium-senha'].forEach(id => {
+                    document.getElementById(id)?.addEventListener('keydown', e => {
+                        if (e.key === 'Enter') premiumFlow.conectar();
+                    });
+                });
+            });
         </script>
 
         <!-- 🛡️ PROTEÇÃO CLIENT-SIDE -->
