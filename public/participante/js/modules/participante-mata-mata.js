@@ -214,12 +214,13 @@ export async function inicializarMataMata(params) {
       // Substitui o hardcoded EDICOES_MATA_MATA (dados de 2025, 32 times)
       const calendario = configData?.calendario_efetivo;
       if (Array.isArray(calendario) && calendario.length > 0) {
+        // ✅ v9.1: Coerção Number() para prevenir concatenação de string em cálculos de rodada
         EDICOES_MATA_MATA = calendario.map(e => ({
-          id: e.id,
+          id: Number(e.id),
           nome: e.nome,
-          rodadaInicial: e.rodadaInicial,
-          rodadaFinal: e.rodadaFinal,
-          rodadaDefinicao: e.rodadaDefinicao
+          rodadaInicial: Number(e.rodadaInicial),
+          rodadaFinal: Number(e.rodadaFinal),
+          rodadaDefinicao: Number(e.rodadaDefinicao)
         }));
         if (window.Log) Log.info(`[MATA-MATA] 📅 ${EDICOES_MATA_MATA.length} edições carregadas do admin config`);
       } else {
@@ -307,15 +308,21 @@ export const inicializarMataMataParticipante = inicializarMataMata;
 // =====================================================================
 async function carregarStatusMercado() {
   try {
-    const res = await fetch("/api/cartola/mercado/status");
+    // ✅ v9.1: Usar /api/matchday/status (detecção inteligente 3-tier via cartolaApiService)
+    // Antes: /api/cartola/mercado/status (proxy básico, sem fallback inteligente)
+    const res = await fetch("/api/matchday/status");
     if (res.ok) {
       const data = await res.json();
-      estado.rodadaAtual = data.rodada_atual || 37;
-      estado.mercadoAberto = data.status_mercado === 1;
+      estado.rodadaAtual = Number(data.rodada_atual) || 1;
+      estado.mercadoAberto = data.mercado_aberto === true || data.status_mercado === 1;
+      if (window.Log) Log.info(`[MATA-MATA] 📡 Status: rodada=${estado.rodadaAtual}, mercadoAberto=${estado.mercadoAberto}`);
     }
   } catch (e) {
-    estado.rodadaAtual = 37;
-    estado.mercadoAberto = true;
+    if (window.Log) Log.warn("[MATA-MATA] ⚠️ Erro ao buscar status mercado:", e.message);
+    // Manter valores anteriores se já existirem — não sobrescrever com defaults
+    if (estado.rodadaAtual <= 1) {
+      estado.rodadaAtual = 1;
+    }
   }
 }
 
@@ -1141,9 +1148,9 @@ function renderConfrontosCards(confrontos, fase, aoVivo = false, rodadaParciais 
     `;
   }
 
-  if (meuConfronto) {
-    html += renderMeuConfrontoCard(meuConfronto, meuTimeId, aoVivo);
-  } else {
+  // ✅ v9.1: Removido card "Seu Confronto" redundante — o confronto do participante
+  // já aparece destacado em "Todos os Confrontos" com classe .minha + badge de status
+  if (!meuConfronto) {
     const historico = estado.historicoParticipacao[estado.edicaoSelecionada];
 
     if (historico && historico.ultimaFase && historico.eliminado) {
@@ -1182,7 +1189,7 @@ function renderConfrontosCards(confrontos, fase, aoVivo = false, rodadaParciais 
     }
   }
 
-  html += renderConfrontosListaCards(confrontos, meuTimeId, fase);
+  html += renderConfrontosListaCards(confrontos, meuTimeId, fase, aoVivo);
   html += renderCardDesempenho();
 
   container.innerHTML = html;
@@ -1335,85 +1342,9 @@ function renderConfrontosProjetados(confrontosFaseAnterior, fase, rodadaDaFase) 
 }
 
 // =====================================================================
-// RENDER MEU CONFRONTO EM CARD
-// =====================================================================
-function renderMeuConfrontoCard(confronto, meuTimeId, aoVivo = false) {
-  const souTimeA = extrairTimeId(confronto.timeA) === meuTimeId;
-  const eu = souTimeA ? confronto.timeA : confronto.timeB;
-  const adv = souTimeA ? confronto.timeB : confronto.timeA;
-
-  const meusPts = (eu?.pontos != null) ? parseFloat(eu.pontos) : null;
-  const advPts = (adv?.pontos != null) ? parseFloat(adv.pontos) : null;
-  const pontosDisponiveis = meusPts != null && advPts != null;
-
-  const ganhando = pontosDisponiveis && meusPts > advPts;
-  const perdendo = pontosDisponiveis && meusPts < advPts;
-
-  const statusClass = !pontosDisponiveis
-    ? "empatando"
-    : ganhando
-      ? "passando"
-      : perdendo
-        ? "sendo-eliminado"
-        : "empatando";
-  const statusText = !pontosDisponiveis
-    ? "Aguardando pontos da rodada"
-    : ganhando
-      ? "Você está passando!"
-      : perdendo
-        ? (aoVivo ? "Você está sendo eliminado" : "Você foi eliminado")
-        : "Empate técnico";
-  const statusIcon = ganhando
-    ? "check_circle"
-    : perdendo
-      ? "warning"
-      : "drag_handle";
-
-  return `
-    <div class="mm-meu-confronto-card">
-      <div class="mm-mc-header-card">
-        <span class="material-symbols-outlined mm-mc-icon ${statusClass}">${ganhando ? "trending_up" : perdendo ? "trending_down" : "remove"}</span>
-        <span class="mm-mc-titulo">Seu Confronto</span>
-      </div>
-
-      <div class="mm-mc-versus">
-        <!-- Meu Time -->
-        <div class="mm-mc-time-card eu">
-          <img class="mm-mc-escudo-card" src="${getEscudoUrl(eu)}" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
-          <div class="mm-mc-time-info">
-            <span class="mm-mc-label">Você</span>
-            <span class="mm-mc-nome-cartoleiro">${escapeHtml(truncate(eu?.nome_cartola || eu?.nome_cartoleiro || "", 14))}</span>
-            <span class="mm-mc-nome">${escapeHtml(truncate(eu?.nome_time || eu?.nome || "Meu Time", 16))}</span>
-          </div>
-          <span class="mm-mc-pts ${ganhando ? "vencedor" : perdendo ? "perdedor" : "empate"}">${meusPts != null ? (typeof truncarPontos === 'function' ? truncarPontos(meusPts) : meusPts.toFixed(2)) : '\u2014'}</span>
-        </div>
-
-        <div class="mm-mc-x">VS</div>
-
-        <!-- Adversário -->
-        <div class="mm-mc-time-card adv">
-          <img class="mm-mc-escudo-card" src="${getEscudoUrl(adv)}" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
-          <div class="mm-mc-time-info">
-            <span class="mm-mc-label">Adversário</span>
-            <span class="mm-mc-nome-cartoleiro">${escapeHtml(truncate(adv?.nome_cartola || adv?.nome_cartoleiro || "", 14))}</span>
-            <span class="mm-mc-nome">${escapeHtml(truncate(adv?.nome_time || adv?.nome || "Adversário", 16))}</span>
-          </div>
-          <span class="mm-mc-pts ${perdendo ? "vencedor" : ganhando ? "perdedor" : "empate"}">${advPts != null ? (typeof truncarPontos === 'function' ? truncarPontos(advPts) : advPts.toFixed(2)) : '\u2014'}</span>
-        </div>
-      </div>
-
-      <div class="mm-mc-status-card ${statusClass}">
-        <span class="material-symbols-outlined">${statusIcon}</span>
-        <span>${statusText}</span>
-      </div>
-    </div>
-  `;
-}
-
-// =====================================================================
 // RENDER LISTA DE CONFRONTOS EM CARDS
 // =====================================================================
-function renderConfrontosListaCards(confrontos, meuTimeId, fase) {
+function renderConfrontosListaCards(confrontos, meuTimeId, fase, aoVivo = false) {
   let html = "";
 
   if (fase === "final" && confrontos.length > 0) {
@@ -1501,6 +1432,21 @@ function renderConfrontosListaCards(confrontos, meuTimeId, fase) {
         </div>
 
         <div class="mm-conf-diff">Diferença: ${diff} pts</div>
+        ${isMinha && ptsDispo ? `
+          <div class="mm-minha-status ${vencedorA && extrairTimeId(timeA) === meuTimeId || vencedorB && extrairTimeId(timeB) === meuTimeId ? 'passando' : (vencedorA || vencedorB) ? 'eliminado' : 'empate'}">
+            <span class="material-symbols-outlined">${
+              (vencedorA && extrairTimeId(timeA) === meuTimeId) || (vencedorB && extrairTimeId(timeB) === meuTimeId)
+                ? 'check_circle' : (vencedorA || vencedorB) ? 'warning' : 'drag_handle'
+            }</span>
+            <span>${
+              (vencedorA && extrairTimeId(timeA) === meuTimeId) || (vencedorB && extrairTimeId(timeB) === meuTimeId)
+                ? 'Você está passando!'
+                : (vencedorA || vencedorB)
+                  ? (aoVivo ? 'Você está sendo eliminado' : 'Você foi eliminado')
+                  : 'Empate técnico'
+            }</span>
+          </div>
+        ` : ''}
       </div>
     `;
   });
