@@ -890,7 +890,7 @@ router.get("/globo/popup/callback", async (req, res) => {
 router.post("/globo/create-session", async (req, res) => {
     console.log("[PARTICIPANTE-AUTH] Criando sessão via glbToken...");
 
-    const { glbToken, timeId } = req.body;
+    const { glbToken, timeId, requirePremium } = req.body;
 
     if (!glbToken || !timeId) {
         return res.status(400).json({
@@ -949,6 +949,15 @@ router.post("/globo/create-session", async (req, res) => {
         const participanteEncontrado = ligaEncontrada.participantes.find(
             (p) => String(p.time_id) === String(timeIdGlobo)
         );
+
+        // 5a. Verificar flag premium se exigido pelo fluxo
+        if (requirePremium && !participanteEncontrado?.premium) {
+            return res.status(403).json({
+                success: false,
+                code: "NOT_PREMIUM",
+                error: "Conta Globo válida, mas sem acesso Premium neste sistema."
+            });
+        }
 
         // ✅ v2.3: Incluir fallback para nome_cartoleiro
         const dadosReais = {
@@ -1195,78 +1204,14 @@ function gerarHtmlPopupErro(codigo, mensagem) {
 }
 
 // ── EXPORT para testes ──────────────────────────────────────────────
+// Rota legada desativada: o ROPC (Password Grant) da Globo foi revogado.
+// O login premium agora usa o popup OAuth via /globo/create-session?requirePremium=true.
 export async function handlerAuthPremium(req, res) {
-    try {
-        const { email, senha } = req.body;
-        // NUNCA logar senha
-        console.log('[PARTICIPANTE-AUTH] /auth/premium tentativa:', { email });
-
-        if (!email || !senha) {
-            return res.status(400).json({ success: false, code: 'MISSING_FIELDS', message: 'Email e senha são obrigatórios.' });
-        }
-
-        // 1. Autenticar na Globo
-        const authResult = await cartolaProService.autenticar(email, senha);
-        if (!authResult.success) {
-            return res.status(401).json({ success: false, code: 'INVALID_CREDENTIALS', message: 'Email ou senha incorretos.' });
-        }
-        const glbId = authResult.glbId;
-
-        // 2. Obter time_id
-        const timeResult = await cartolaProService.buscarMeuTime(glbId);
-        if (!timeResult.success || !timeResult.time?.timeId) {
-            return res.status(400).json({ success: false, code: 'NO_TIME', message: 'Não foi possível obter seu time da conta Globo.' });
-        }
-        const timeId = timeResult.time.timeId;
-
-        // 3. Buscar liga onde este time existe
-        const liga = await Liga.findOne({ 'participantes.time_id': timeId });
-        if (!liga) {
-            return res.status(404).json({ success: false, code: 'NO_LEAGUE', message: 'Time não encontrado em nenhuma liga.' });
-        }
-
-        // 4. Verificar premium em memória ($ positional operator inválido em filtro MongoDB)
-        const participante = liga.participantes.find(
-            p => String(p.time_id) === String(timeId) && p.premium === true
-        );
-        if (!participante) {
-            return res.status(403).json({ success: false, code: 'NOT_PREMIUM', message: 'Conta Globo válida, mas sem acesso Premium neste sistema.' });
-        }
-
-        // 5. Criar sessão (estrutura idêntica aos outros handlers do arquivo)
-        req.session.participante = {
-            timeId:  String(timeId),
-            ligaId:  liga._id.toString(),
-            premium: true,
-            participante: {
-                nome_cartola: participante.nome_cartola || '',
-                nome_time:    participante.nome_time || '',
-                foto_perfil:  participante.foto_perfil || '',
-                foto_time:    participante.foto_time || '',
-                clube_id:     participante.clube_id || null,
-            },
-        };
-        req.session.cartolaProAuth = {
-            glbid:      glbId,
-            email:      email,
-            expires_at: Math.floor(Date.now() / 1000) + 7200,
-        };
-
-        // Persistir sessão explicitamente (padrão de todos os handlers do arquivo)
-        await new Promise((resolve, reject) => {
-            req.session.save((err) => {
-                if (err) reject(err);
-                else resolve();
-            });
-        });
-
-        console.log('[PARTICIPANTE-AUTH] /auth/premium sucesso:', { email, timeId });
-        return res.json({ success: true });
-
-    } catch (error) {
-        console.error('[PARTICIPANTE-AUTH] /auth/premium erro:', error.message);
-        return res.status(500).json({ success: false, code: 'SERVER_ERROR', message: 'Erro interno. Tente novamente.' });
-    }
+    return res.status(410).json({
+        success: false,
+        code: 'FLOW_DEPRECATED',
+        message: 'Este método de login foi descontinuado. Use o botão "Entrar com Globo" na página de login.'
+    });
 }
 
 // Rota

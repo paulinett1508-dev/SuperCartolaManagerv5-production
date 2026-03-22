@@ -873,15 +873,11 @@
                     <p class="premium-card-sub">Conta Globo — mesmo login do Cartola FC</p>
                 </div>
                 <div class="premium-form">
-                    <input type="email" id="premium-email" class="premium-input"
-                           placeholder="email@gmail.com" autocomplete="email" spellcheck="false">
-                    <input type="password" id="premium-senha" class="premium-input"
-                           placeholder="Senha" autocomplete="current-password">
                     <div id="premium-error" class="premium-error" style="display:none;"></div>
                     <button type="button" id="premium-btn-conectar" class="premium-btn-connect"
                             onclick="premiumFlow.conectar()">
                         <span class="material-symbols-outlined" id="premium-btn-icon">login</span>
-                        <span id="premium-btn-label">Conectar com Globo</span>
+                        <span id="premium-btn-label">Entrar com Globo</span>
                     </button>
                 </div>
                 <button type="button" class="premium-btn-voltar" onclick="premiumFlow.voltar()">
@@ -1264,6 +1260,7 @@
             const OAUTH_DOMAIN = window.location.host;
 
             let popupWindow = null;
+            let isPremiumFlow = false;
 
             function abrirPopupGlobo() {
                 const loading = document.getElementById('loading');
@@ -1348,17 +1345,31 @@
                         credentials: 'include',
                         body: JSON.stringify({
                             glbToken: data.glbToken,
-                            timeId: data.timeId
+                            timeId: data.timeId,
+                            requirePremium: isPremiumFlow
                         })
                     });
 
                     const result = await response.json();
+
+                    // Tratamento especial para NOT_PREMIUM no fluxo premium
+                    if (response.status === 403 && result.code === 'NOT_PREMIUM') {
+                        isPremiumFlow = false;
+                        const premiumFormPanel = document.getElementById('premium-form-panel');
+                        const premiumRejectPanel = document.getElementById('premium-reject-panel');
+                        if (premiumFormPanel) premiumFormPanel.style.display = 'none';
+                        if (premiumRejectPanel) premiumRejectPanel.style.display = 'block';
+                        loading.classList.remove('show');
+                        return;
+                    }
 
                     if (!response.ok || !result.success) {
                         throw new Error(result.error || 'Erro ao criar sessão');
                     }
 
                     console.log('[LOGIN] Sessão criada via popup OAuth:', result);
+
+                    isPremiumFlow = false;
 
                     // Limpar chave do app
                     sessionStorage.removeItem('participante_app_loaded');
@@ -1392,100 +1403,22 @@
                     this._el('premium-form-panel').style.display = 'block';
                     this._el('premium-reject-panel').style.display = 'none';
                     this._el('premium-error').style.display = 'none';
-                    setTimeout(() => this._el('premium-email')?.focus(), 50);
                 },
 
                 voltar() {
+                    isPremiumFlow = false;
                     if (this._loginCard) this._loginCard.style.display = '';
                     if (this._premiumCard) this._premiumCard.style.display = 'none';
-                    const emailEl = this._el('premium-email');
-                    const senhaEl = this._el('premium-senha');
-                    if (emailEl) emailEl.value = '';
-                    if (senhaEl) senhaEl.value = '';
                 },
 
-                async conectar() {
-                    let navigating = false;
-                    const email = this._el('premium-email')?.value.trim();
-                    const senha = this._el('premium-senha')?.value;
-                    const btnEl  = this._el('premium-btn-conectar');
-                    const iconEl = this._el('premium-btn-icon');
-                    const labelEl = this._el('premium-btn-label');
+                conectar() {
                     const errorEl = this._el('premium-error');
-
-                    if (!email || !senha) {
-                        errorEl.textContent = 'Preencha email e senha.';
-                        errorEl.style.display = 'block';
-                        return;
-                    }
-
-                    errorEl.style.display = 'none';
-                    btnEl.disabled = true;
-                    iconEl.textContent = 'sync';
-                    iconEl.style.animation = 'spin 1s linear infinite';
-                    labelEl.textContent = 'Conectando...';
-
-                    try {
-                        const res = await fetch('/api/participante/auth/premium', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            credentials: 'include',
-                            body: JSON.stringify({ email, senha })
-                        });
-                        const data = await res.json();
-
-                        if (data.success) {
-                            navigating = true;
-                            window.location.href = '/participante/';
-                            return;
-                        }
-
-                        if (data.code === 'NOT_PREMIUM') {
-                            this._el('premium-form-panel').style.display = 'none';
-                            this._el('premium-reject-panel').style.display = 'block';
-                            return;
-                        }
-
-                        if (data.code === 'CAPTCHA_REQUIRED') {
-                            errorEl.textContent = 'Autenticação automática bloqueada pela Globo. Use o método Bookmarklet no painel admin.';
-                            errorEl.style.display = 'block';
-                            return;
-                        }
-
-                        // INVALID_CREDENTIALS e outros — mensagem explícita
-                        if (data.code === 'INVALID_CREDENTIALS') {
-                            errorEl.textContent = 'Email ou senha incorretos. Use as mesmas credenciais do Cartola FC.';
-                        } else {
-                            errorEl.textContent = data.message || 'Erro ao autenticar. Tente novamente.';
-                        }
-                        errorEl.style.display = 'block';
-
-                    } catch (_) {
-                        errorEl.textContent = 'Erro de rede. Tente novamente.';
-                        errorEl.style.display = 'block';
-                    } finally {
-                        if (!navigating) {
-                            btnEl.disabled = false;
-                            iconEl.textContent = 'login';
-                            iconEl.style.animation = '';
-                            labelEl.textContent = 'Conectar com Globo';
-                        }
-                    }
+                    if (errorEl) errorEl.style.display = 'none';
+                    isPremiumFlow = true;
+                    abrirPopupGlobo();
                 }
             };
 
-            const _bindPremiumKeys = () => {
-                ['premium-email', 'premium-senha'].forEach(id => {
-                    document.getElementById(id)?.addEventListener('keydown', e => {
-                        if (e.key === 'Enter') premiumFlow.conectar();
-                    });
-                });
-            };
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', _bindPremiumKeys);
-            } else {
-                _bindPremiumKeys();
-            }
         </script>
 
         <!-- 🛡️ PROTEÇÃO CLIENT-SIDE -->
