@@ -140,7 +140,7 @@ export async function inicializarHomeParticipante(params) {
             const state = MS.currentState;
             const STATES = MS.STATES;
             if (window.Log) Log.info("PARTICIPANTE-HOME", `Matchday state changed: ${state}`);
-            if ((state === STATES.LIVE || state === STATES.LOADING) && !_liveCardActive) {
+            if ((state === STATES.LIVE || state === STATES.LOADING || state === STATES.WAITING) && !_liveCardActive) {
                 ativarLiveRankingCard();
             }
         };
@@ -160,6 +160,12 @@ export function destruirHomeParticipante() {
         window.MatchdayService.off('matchday:state', _matchdayStateHandler);
         _matchdayStateHandler = null;
     }
+    // ✅ v1.4.3: Reset live card — sem isso _liveCardActive fica true e o card
+    // nunca reativa na próxima navegação Home→X→Home
+    _liveCardUnsubscribers.forEach(fn => fn());
+    _liveCardUnsubscribers = [];
+    _prevLiveRanking = null;
+    _liveCardActive = false;
 }
 window.destruirHomeParticipante = destruirHomeParticipante;
 
