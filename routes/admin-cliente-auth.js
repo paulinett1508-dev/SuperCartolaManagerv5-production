@@ -157,10 +157,10 @@ router.post("/login", async (req, res) => {
 
         // Verificar senha
         if (!admin.senhaHash) {
-            console.log(`[CLIENTE-AUTH] Login falhou - admin sem senha (use Replit Auth): ${emailLower}`);
+            console.log(`[CLIENTE-AUTH] Login falhou - admin sem senha cadastrada: ${emailLower}`);
             return res.status(401).json({
                 success: false,
-                message: "Esta conta usa autenticacao Replit. Use o botao 'Entrar com Replit'."
+                message: "Esta conta nao possui senha cadastrada. Use o login com Google ou contate o administrador."
             });
         }
 

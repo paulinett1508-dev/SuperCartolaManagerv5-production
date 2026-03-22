@@ -673,7 +673,7 @@
                         <div class="divider-line"></div>
                     </div>
 
-                    <!-- Botao OAuth (dominios Replit) -->
+                    <!-- Botao OAuth (redirect direto) -->
                     <button type="button" id="btnGloboOAuth" onclick="loginGlobo('oauth')" class="globo-btn oauth-btn">
                         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_circle</span>
                         <span>Entrar com Conta Globo</span>
@@ -1037,7 +1037,7 @@
                 const loading = document.getElementById('loading');
 
                 if (metodo === 'oauth') {
-                    // Redirecionar para OAuth (domínios Replit)
+                    // Redirecionar para OAuth (redirect direto)
                     loading.classList.add('show');
                     window.location.href = '/api/participante/auth/globo/login';
                     return;
@@ -1176,7 +1176,7 @@
 
                 try {
                     // Chamar endpoint LOCAL para criar sessão
-                    // O glbToken foi obtido via popup no domínio Replit
+                    // O glbToken foi obtido via popup OAuth
                     const response = await fetch('/api/participante/auth/globo/create-session', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -1272,7 +1272,7 @@
                     if (window.self !== window.top) {
                         window.top.location = window.self.location;
                     }
-                } catch(e) { /* Allow iframe in Replit preview */ }
+                } catch(e) { /* Allow iframe embedding */ }
             })();
         </script>
     </body>

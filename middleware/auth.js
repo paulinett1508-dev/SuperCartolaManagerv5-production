@@ -106,7 +106,7 @@ export function isPaginaParticipante(url) {
 /**
  * ✅ BYPASS DE DESENVOLVIMENTO
  * Injeta sessão admin automaticamente em NODE_ENV=development
- * Não afeta produção (Replit Auth continua funcionando)
+ * Não afeta produção (Google OAuth em uso)
  */
 export function injetarSessaoDevAdmin(req, res, next) {
   const isDev = process.env.NODE_ENV === 'development';

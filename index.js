@@ -327,8 +327,8 @@ app.use(cors({
     if (origin.endsWith('supercartolamanager.com.br')) {
       return callback(null, true);
     }
-    // Permitir dominios do Replit (dev e producao)
-    if (origin.endsWith('.replit.app') || origin.endsWith('.replit.dev') || origin.endsWith('.repl.co')) {
+    // Permitir localhost em desenvolvimento
+    if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
       return callback(null, true);
     }
     // Verificar whitelist
