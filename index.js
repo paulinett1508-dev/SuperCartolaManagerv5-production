@@ -572,6 +572,7 @@ console.log("[SERVER] 🔧 Rotas de modo manutenção registradas");
 // Aplicar rate limiting específico para login (tradicional e Globo)
 app.use("/api/participante/auth/login", authRateLimiter);
 app.use("/api/participante/auth/globo/direct", authRateLimiter);
+app.use("/api/participante/auth/premium", authRateLimiter);
 app.use("/api/participante/auth", participanteAuthRoutes);
 app.use("/api/participante/manutencao", manutencaoParticipanteRoutes);
 app.use("/api/participante/historico", participanteHistoricoRoutes);
