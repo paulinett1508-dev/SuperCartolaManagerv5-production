@@ -414,6 +414,46 @@ bash git log origin/$(git branch --show-current) -1 --oneline
 bash git status
 ```
 
+#### 5.4 PM2 Restart Automático (VPS)
+
+Após o push bem-sucedido, verificar se algum arquivo de **backend** foi modificado:
+
+```bash
+# Arquivos que exigem restart do PM2
+BACKEND_PATHS="routes/ controllers/ index.js middleware/ config/ utils/ models/ services/"
+
+# Verificar se o commit tocou backend
+bash git diff HEAD~1 --name-only | grep -E "^(routes|controllers|middleware|config|utils|models|services)/|^index\.js$"
+```
+
+**Regra de decisão:**
+
+| Arquivos modificados | Ação |
+|---|---|
+| `routes/`, `controllers/`, `index.js`, `middleware/`, `config/`, `utils/`, `models/`, `services/` | `pm2 restart cartola` |
+| Apenas `public/`, `*.md`, `.claude/`, `docs/` | Skip — estáticos, já live |
+
+```bash
+# Se backend modificado → restart automático
+bash pm2 restart cartola
+
+# Confirmar que subiu
+bash pm2 status cartola
+```
+
+**Output esperado após restart:**
+```
+[PM2] Restarting 'cartola' ...
+[PM2] Done.
+┌─────┬──────────┬─────────────┬─────────┬─────────┬──────────┐
+│ id  │ name     │ status      │ cpu     │ mem     │ uptime   │
+├─────┼──────────┼─────────────┼─────────┼─────────┼──────────┤
+│ 0   │ cartola  │ online      │ 0%      │ ~80mb   │ 0s       │
+└─────┴──────────┴─────────────┴─────────┴─────────┴──────────┘
+```
+
+> Se `pm2 restart` falhar ou status não for `online`, reportar ao usuário antes de continuar.
+
 ---
 
 ### FASE 6: LEMBRETE DE CUSTO DA SESSÃO
@@ -442,6 +482,7 @@ Para ver o custo desta sessão, execute /usage no Claude Code.
 **Commit:** [hash] - [mensagem]
 **Arquivos:** [quantidade] modificados
 **Branch:** [nome da branch] → origin/[branch]
+**PM2:** ♻️ Reiniciado (backend alterado) | ⏭️ Skipped (só estáticos)
 
 **Resumo:**
 - [módulo 1]: [descrição]
@@ -623,6 +664,10 @@ bash git diff | grep "console\.log" && echo "⚠️ Remova debug code"
           ↓
 🚀 FASE 5: PUSH
    git push origin [branch]
+          ↓
+♻️ FASE 5.4: PM2 RESTART
+   backend alterado? → pm2 restart cartola
+   só estáticos?    → skip
           ↓
 💰 FASE 6: USAGE REPORT
    /usage → capturar métricas da sessão

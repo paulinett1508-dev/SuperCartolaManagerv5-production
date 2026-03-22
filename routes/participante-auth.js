@@ -1270,7 +1270,7 @@ export async function handlerAuthPremium(req, res) {
 }
 
 // Rota
-router.post('/auth/premium', handlerAuthPremium);
+router.post('/premium', handlerAuthPremium);
 
 export { verificarSessaoParticipante };
 export default router;
