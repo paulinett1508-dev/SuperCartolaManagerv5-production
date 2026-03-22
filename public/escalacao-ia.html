@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="css/modules/dashboard-redesign.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Russo+One&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-    <link rel="stylesheet" href="css/modules/admin-escalacao-ia.css?v=6" />
+    <link rel="stylesheet" href="css/modules/admin-escalacao-ia.css?v=8" />
 </head>
 <body>
     <div id="sidebar-placeholder"></div>
@@ -54,34 +54,72 @@
                 <!-- Estado: desconectado -->
                 <div id="eia-gm-form">
                     <div class="eia-gatomestre-form">
-                        <p class="eia-gatomestre-hint">Adicione o favorito abaixo uma vez — depois é só 1 clique para copiar o GLBID.</p>
-                        <div class="eia-gm-steps">
-                            <div class="eia-gm-step">
-                                <span class="eia-gm-step-num">1</span>
-                                <span>Arraste o botão abaixo para sua <strong>barra de favoritos</strong></span>
-                            </div>
-                            <div class="eia-gm-bookmarklet-row">
-                                <a class="eia-gm-bookmarklet" href="javascript:(function(){var g=document.cookie.split(';').find(function(c){return c.trim().startsWith('GLBID=');});if(g){var v=g.split('=').slice(1).join('=').trim();navigator.clipboard.writeText(v).then(function(){alert('\u2705 GLBID copiado! Cole no Super Cartola Manager.');}).catch(function(){prompt('Copie o GLBID:',v);});}else{alert('GLBID n\u00e3o encontrado. Fa\u00e7a login no Cartola FC primeiro.');}})()">⚡ Copiar GLBID</a>
-                                <span class="eia-gm-bookmarklet-hint">← arraste para favoritos</span>
-                            </div>
-                            <div class="eia-gm-step">
-                                <span class="eia-gm-step-num">2</span>
-                                <span>Faça login em <a href="https://cartola.globo.com" target="_blank">cartola.globo.com</a> e clique no favorito</span>
-                            </div>
-                            <div class="eia-gm-step">
-                                <span class="eia-gm-step-num">3</span>
-                                <span>Cole o valor copiado abaixo e clique <strong>Conectar</strong></span>
-                            </div>
-                        </div>
-                        <div class="eia-gatomestre-form-row">
-                            <input type="text" id="eia-gm-input-glbid" class="eia-gatomestre-input" placeholder="Cole aqui o valor do cookie GLBID" autocomplete="off" spellcheck="false">
-                        </div>
-                        <div class="eia-gatomestre-actions">
-                            <button class="eia-gm-btn eia-gm-btn-primary" id="eia-gm-btn-conectar" onclick="window.GatoMestreCard?.conectar()">
-                                <span class="material-icons">link</span>
-                                Conectar
+
+                        <!-- Tabs de método -->
+                        <div class="eia-gm-method-tabs">
+                            <button class="eia-gm-method-tab active" data-panel="credenciais" onclick="window.GatoMestreCard?.trocarMetodo('credenciais')">
+                                <span class="material-icons">vpn_key</span>
+                                Email + Senha
+                            </button>
+                            <button class="eia-gm-method-tab" data-panel="bookmarklet" onclick="window.GatoMestreCard?.trocarMetodo('bookmarklet')">
+                                <span class="material-icons">bookmark</span>
+                                Bookmarklet
                             </button>
                         </div>
+
+                        <!-- Painel: Email + Senha (primário) -->
+                        <div class="eia-gm-method-panel active" id="eia-gm-panel-credenciais">
+                            <p class="eia-gatomestre-hint">Use as credenciais da sua conta Globo (o mesmo login do Cartola FC).</p>
+                            <div class="eia-gatomestre-form-row">
+                                <input type="email" id="eia-gm-input-email" class="eia-gatomestre-input" placeholder="Email da conta Globo" autocomplete="email" spellcheck="false">
+                            </div>
+                            <div class="eia-gatomestre-form-row">
+                                <input type="password" id="eia-gm-input-senha" class="eia-gatomestre-input" placeholder="Senha" autocomplete="current-password">
+                            </div>
+                            <div class="eia-gatomestre-actions">
+                                <button class="eia-gm-btn eia-gm-btn-primary" id="eia-gm-btn-credenciais" onclick="window.GatoMestreCard?.conectarCredenciais()">
+                                    <span class="material-icons" id="eia-gm-cred-icon">login</span>
+                                    <span id="eia-gm-cred-label">Conectar</span>
+                                </button>
+                            </div>
+                            <p class="eia-gm-aviso-credenciais">
+                                <span class="material-icons" style="font-size:13px;vertical-align:middle;">info</span>
+                                Credenciais enviadas direto à Globo — não armazenadas aqui.
+                            </p>
+                        </div>
+
+                        <!-- Painel: Bookmarklet (fallback) -->
+                        <div class="eia-gm-method-panel" id="eia-gm-panel-bookmarklet">
+                            <p class="eia-gatomestre-hint">Adicione o favorito abaixo uma vez — depois é só 1 clique para copiar o GLBID.</p>
+                            <div class="eia-gm-steps">
+                                <div class="eia-gm-step">
+                                    <span class="eia-gm-step-num">1</span>
+                                    <span>Arraste o botão abaixo para sua <strong>barra de favoritos</strong></span>
+                                </div>
+                                <div class="eia-gm-bookmarklet-row">
+                                    <a class="eia-gm-bookmarklet" href="javascript:(function(){var g=document.cookie.split(';').find(function(c){return c.trim().startsWith('GLBID=');});if(g){var v=g.split('=').slice(1).join('=').trim();navigator.clipboard.writeText(v).then(function(){alert('\u2705 GLBID copiado! Cole no Super Cartola Manager.');}).catch(function(){prompt('Copie o GLBID:',v);});}else{alert('GLBID n\u00e3o encontrado. Fa\u00e7a login no Cartola FC primeiro.');}})()">⚡ Copiar GLBID</a>
+                                    <span class="eia-gm-bookmarklet-hint">← arraste para favoritos</span>
+                                </div>
+                                <div class="eia-gm-step">
+                                    <span class="eia-gm-step-num">2</span>
+                                    <span>Faça login em <a href="https://cartola.globo.com" target="_blank">cartola.globo.com</a> e clique no favorito</span>
+                                </div>
+                                <div class="eia-gm-step">
+                                    <span class="eia-gm-step-num">3</span>
+                                    <span>Cole o valor copiado abaixo e clique <strong>Conectar</strong></span>
+                                </div>
+                            </div>
+                            <div class="eia-gatomestre-form-row">
+                                <input type="text" id="eia-gm-input-glbid" class="eia-gatomestre-input" placeholder="Cole aqui o valor do cookie GLBID" autocomplete="off" spellcheck="false">
+                            </div>
+                            <div class="eia-gatomestre-actions">
+                                <button class="eia-gm-btn eia-gm-btn-primary" id="eia-gm-btn-conectar" onclick="window.GatoMestreCard?.conectar()">
+                                    <span class="material-icons">link</span>
+                                    Conectar
+                                </button>
+                            </div>
+                        </div>
+
                         <div class="eia-gatomestre-msg" id="eia-gm-msg"></div>
                     </div>
                 </div>
@@ -346,12 +384,65 @@
             } catch(e) { /* silencioso */ }
         }
 
+        async function conectarCredenciais() {
+            var emailEl  = el('eia-gm-input-email');
+            var senhaEl  = el('eia-gm-input-senha');
+            var btnEl    = el('eia-gm-btn-credenciais');
+            var iconEl   = el('eia-gm-cred-icon');
+            var labelEl  = el('eia-gm-cred-label');
+            if (!emailEl || !senhaEl) return;
+
+            var email = emailEl.value.trim();
+            var senha = senhaEl.value;
+            if (!email || !senha) { mostrarMsg('Preencha email e senha.', 'erro'); return; }
+
+            limparMsg();
+            btnEl.disabled = true;
+            iconEl.textContent = 'sync';
+            iconEl.style.animation = 'spin 1s linear infinite';
+            labelEl.textContent = 'Conectando...';
+
+            try {
+                var r = await fetch(BASE + '/conectar-credenciais', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, senha: senha })
+                });
+                var data = await r.json();
+                if (data.success) {
+                    senhaEl.value = '';
+                    mostrarMsg('Conectado com sucesso!', 'sucesso');
+                    setTimeout(carregar, 500);
+                } else {
+                    mostrarMsg(data.message || 'Erro ao conectar.', 'erro');
+                }
+            } catch(e) {
+                mostrarMsg('Erro de rede. Tente novamente.', 'erro');
+            } finally {
+                btnEl.disabled = false;
+                iconEl.textContent = 'login';
+                iconEl.style.animation = '';
+                labelEl.textContent = 'Conectar';
+            }
+        }
+
+        function trocarMetodo(painel) {
+            ['credenciais', 'bookmarklet'].forEach(function(p) {
+                var tab   = document.querySelector('.eia-gm-method-tab[data-panel="' + p + '"]');
+                var panel = el('eia-gm-panel-' + p);
+                if (tab)   tab.classList.toggle('active', p === painel);
+                if (panel) panel.classList.toggle('active', p === painel);
+            });
+            limparMsg();
+        }
+
         function toggleAbrir() {
             var card = el('eia-gm-card');
             if (card) card.classList.toggle('aberto');
         }
 
-        window.GatoMestreCard = { carregar, conectar, desconectar, toggleAbrir };
+        window.GatoMestreCard = { carregar, conectar, conectarCredenciais, desconectar, toggleAbrir, trocarMetodo };
     })();
     </script>
 </body>

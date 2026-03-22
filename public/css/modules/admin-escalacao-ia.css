@@ -129,13 +129,13 @@
 .eia-fonte-badge--ativo {
     background: var(--color-success-muted);
     color: var(--color-success-text);
-    border: 1px solid rgba(16, 185, 129, 0.3);
+    border: 1px solid var(--module-saude-border);
 }
 
 .eia-fonte-badge--inativo {
     background: rgba(255, 255, 255, 0.05);
     color: var(--text-muted, rgba(255,255,255,0.4));
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--surface-white-10);
 }
 
 /* =============================================
@@ -324,7 +324,7 @@
 
 .eia-tab[data-modo="mitar"].active {
     background: rgba(239, 68, 68, 0.12);
-    color: #ef4444;
+    color: var(--color-danger);
     border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
@@ -336,7 +336,7 @@
 
 .eia-tab[data-modo="valorizar"].active {
     background: rgba(34, 197, 94, 0.12);
-    color: #22c55e;
+    color: var(--color-success-light);
     border: 1px solid rgba(34, 197, 94, 0.2);
 }
 
@@ -1232,6 +1232,49 @@
     font-size: 10px;
     color: var(--text-muted, rgba(255,255,255,0.4));
     font-style: italic;
+}
+
+/* Tabs de método de conexão (Credenciais vs Bookmarklet) */
+.eia-gm-method-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 10px;
+}
+.eia-gm-method-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md, 6px);
+    color: var(--text-muted);
+    font-family: var(--font-family-base);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+.eia-gm-method-tab .material-icons { font-size: 14px; }
+.eia-gm-method-tab:hover { color: var(--text-primary); border-color: var(--border-default); }
+.eia-gm-method-tab.active {
+    background: var(--color-primary-muted, rgba(249,115,22,0.15));
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+.eia-gm-method-panel { display: none; }
+.eia-gm-method-panel.active { display: block; }
+
+/* Aviso de transparência no painel de credenciais */
+.eia-gm-aviso-credenciais {
+    margin-top: 8px;
+    font-size: 10px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 /* =============================================
