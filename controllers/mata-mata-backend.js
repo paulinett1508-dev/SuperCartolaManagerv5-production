@@ -201,7 +201,7 @@ function criarMapaPontos(ranking) {
  * 16 times → 4 fases: oitavas, quartas, semis, final
  * 8 times  → 3 fases: quartas, semis, final
  */
-function getFasesParaTamanho(tamanho) {
+export function getFasesParaTamanho(tamanho) {
     if (tamanho >= 32) return ["primeira", "oitavas", "quartas", "semis", "final"];
     if (tamanho >= 16) return ["oitavas", "quartas", "semis", "final"];
     if (tamanho >= 8)  return ["quartas", "semis", "final"];
@@ -280,7 +280,7 @@ function montarConfrontosPrimeiraFase(rankingBase, pontosRodadaAtual, tamanhoTor
 /**
  * Monta confrontos de fases eliminatórias (oitavas, quartas, semis, final)
  */
-function montarConfrontosFase(
+export function montarConfrontosFase(
     vencedoresAnteriores,
     pontosRodadaAtual,
     numJogos,
@@ -322,7 +322,7 @@ function montarConfrontosFase(
  * Determina vencedor de um confronto
  * Critério: maior pontuação, empate decide por ranking na rodada de definição
  */
-function determinarVencedor(confronto) {
+export function determinarVencedor(confronto) {
     const { timeA, timeB } = confronto;
 
     const pontosAValidos = typeof timeA.pontos === "number";

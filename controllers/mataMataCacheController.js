@@ -1,6 +1,8 @@
 import MataMataCache from "../models/MataMataCache.js";
+import ModuleConfig from "../models/ModuleConfig.js";
 import { CURRENT_SEASON } from "../config/seasons.js";
-import { calcularBracketParaConsolidacao } from "./mata-mata-backend.js";
+import { calcularBracketParaConsolidacao, getFasesParaTamanho, montarConfrontosFase, determinarVencedor } from "./mata-mata-backend.js";
+import parciaisService from "../services/parciaisRankingService.js";
 import logger from '../utils/logger.js';
 
 export const salvarCacheMataMata = async (req, res) => {
@@ -77,11 +79,113 @@ export const lerCacheMataMata = async (req, res) => {
             return res.status(404).json({ cached: false });
         }
 
+        // ── SISTEMA VIVO: enriquecer fase ao vivo com parciais em tempo real ──
+        let dadosTorneio = cache.dados_torneio || {};
+        let aoVivo = false;
+        let rodadaResposta = cache.rodada_atual;
+
+        try {
+            const status = await parciaisService.buscarStatusMercado();
+            const mercadoFechado = status && status.status_mercado !== 1;
+
+            if (status && mercadoFechado) {
+                const rodadaAtual = status.rodada_atual;
+                rodadaResposta = rodadaAtual;
+
+                // Buscar calendário da edição no ModuleConfig
+                const moduleConfig = await ModuleConfig.findOne({
+                    liga_id: ligaId,
+                    modulo: 'mata_mata',
+                    temporada: temporadaFiltro,
+                    ativo: true,
+                }).lean();
+
+                const calendario = moduleConfig?.calendario_override || [];
+                const edicaoConfig = calendario.find(e => Number(e.edicao) === Number(edicao));
+
+                if (edicaoConfig) {
+                    const tamanhoTorneio = cache.tamanhoTorneio || 8;
+                    const fases = getFasesParaTamanho(tamanhoTorneio);
+                    const rodadaInicial = Number(edicaoConfig.rodada_inicial);
+
+                    // Mapear rodada de cada fase
+                    const rodadasFases = {};
+                    fases.forEach((fase, idx) => { rodadasFases[fase] = rodadaInicial + idx; });
+
+                    // Identificar fase ao vivo (rodada da fase === rodada atual)
+                    const faseViva = fases.find(f => rodadasFases[f] === rodadaAtual);
+
+                    if (faseViva) {
+                        // Buscar confrontos da fase — do cache ou derivados dos vencedores anteriores
+                        let confrontosFaseViva = dadosTorneio[faseViva];
+
+                        if (!confrontosFaseViva || confrontosFaseViva.length === 0) {
+                            // Fase sem cache: derivar bracket dos vencedores da fase anterior
+                            const faseIdx = fases.indexOf(faseViva);
+                            if (faseIdx > 0) {
+                                const fasePrev = fases[faseIdx - 1];
+                                const confrontosPrev = dadosTorneio[fasePrev];
+                                if (confrontosPrev && confrontosPrev.length > 0) {
+                                    const vencedores = confrontosPrev
+                                        .map((c, jogoIdx) => {
+                                            const { vencedor } = determinarVencedor(c);
+                                            return vencedor ? { ...vencedor, jogoAnterior: jogoIdx + 1 } : null;
+                                        })
+                                        .filter(Boolean);
+
+                                    if (vencedores.length >= 2) {
+                                        const numJogos = Math.ceil(vencedores.length / 2);
+                                        confrontosFaseViva = montarConfrontosFase(vencedores, {}, numJogos, tamanhoTorneio);
+                                        logger.log(`[CACHE-MATA] 🔨 Semis derivadas de ${fasePrev}: ${vencedores.length} vencedores`);
+                                    }
+                                }
+                            }
+                        }
+
+                        // Overlay com pontos ao vivo das parciais
+                        if (confrontosFaseViva && confrontosFaseViva.length > 0) {
+                            const parciais = await parciaisService.buscarRankingParcial(ligaId);
+
+                            if (parciais && parciais.disponivel && parciais.ranking) {
+                                const pontosMap = {};
+                                parciais.ranking.forEach(t => {
+                                    pontosMap[String(t.timeId)] = t.pontos_rodada_atual ?? 0;
+                                });
+
+                                confrontosFaseViva = confrontosFaseViva.map(c => ({
+                                    ...c,
+                                    timeA: { ...c.timeA, pontos: pontosMap[String(c.timeA?.timeId)] ?? null },
+                                    timeB: { ...c.timeB, pontos: pontosMap[String(c.timeB?.timeId)] ?? null },
+                                }));
+
+                                logger.log(`[CACHE-MATA] ✅ Parciais ao vivo aplicadas na fase ${faseViva} (R${rodadaAtual})`);
+                            } else {
+                                // Parciais indisponíveis: manter estrutura com pontos null
+                                confrontosFaseViva = confrontosFaseViva.map(c => ({
+                                    ...c,
+                                    timeA: { ...c.timeA, pontos: null },
+                                    timeB: { ...c.timeB, pontos: null },
+                                }));
+                                logger.log(`[CACHE-MATA] ⏳ Parciais indisponíveis — fase ${faseViva} com pontos null`);
+                            }
+
+                            dadosTorneio = { ...dadosTorneio, [faseViva]: confrontosFaseViva };
+                            aoVivo = true;
+                        }
+                    }
+                }
+            }
+        } catch (liveErr) {
+            // Falha no enriquecimento ao vivo não deve derrubar a resposta
+            logger.warn('[CACHE-MATA] ⚠️ Erro ao enriquecer com parciais ao vivo:', liveErr.message);
+        }
+
         res.json({
             cached: true,
-            rodada: cache.rodada_atual,
-            dados: cache.dados_torneio,
+            rodada: rodadaResposta,
+            dados: dadosTorneio,
             updatedAt: cache.ultima_atualizacao,
+            aoVivo,
         });
     } catch (error) {
         logger.error("[CACHE-MATA] Erro ao ler:", error);
