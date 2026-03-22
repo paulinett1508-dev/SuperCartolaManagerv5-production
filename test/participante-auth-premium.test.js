@@ -43,16 +43,25 @@ describe('POST /api/participante/auth/premium', () => {
     mockAutenticar.mockResolvedValue({ success: true, glbId: 'glb123' });
     mockBuscarMeuTime.mockResolvedValue({ success: true, time: { timeId: 13935277 } });
     mockLigaFindOne.mockResolvedValue({
-      _id: 'liga1',
+      _id: { toString: () => 'liga1' },
       participantes: [{ time_id: 13935277, premium: true, nome_cartola: 'Paulinett', nome_time: 'Urubu Play' }]
     });
 
-    const req = { body: { email: 'p@p.com', senha: 'abc' }, session: {} };
+    const req = {
+      body: { email: 'p@p.com', senha: 'abc' },
+      session: { save: jest.fn((cb) => cb(null)) }
+    };
     const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
 
     await handlerAuthPremium(req, res);
 
-    expect(req.session.participante).toMatchObject({ premium: true, timeId: 13935277 });
+    // Estrutura aninhada — igual aos outros handlers do arquivo
+    expect(req.session.participante).toMatchObject({
+      timeId: '13935277',
+      premium: true,
+      participante: expect.objectContaining({ nome_cartola: 'Paulinett', nome_time: 'Urubu Play' })
+    });
+    expect(req.session.save).toHaveBeenCalled();
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
   });
 

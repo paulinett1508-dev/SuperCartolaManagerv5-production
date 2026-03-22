@@ -1233,22 +1233,32 @@ export async function handlerAuthPremium(req, res) {
             return res.status(403).json({ success: false, code: 'NOT_PREMIUM', message: 'Conta Globo válida, mas sem acesso Premium neste sistema.' });
         }
 
-        // 5. Criar sessão
+        // 5. Criar sessão (estrutura idêntica aos outros handlers do arquivo)
         req.session.participante = {
-            timeId,
-            ligaId: liga._id.toString(),
+            timeId:  String(timeId),
+            ligaId:  liga._id.toString(),
             premium: true,
-            nome_cartola: participante.nome_cartola || '',
-            nome_time:    participante.nome_time || '',
-            foto_perfil:  participante.foto_perfil || '',
-            foto_time:    participante.foto_time || '',
-            clube_id:     participante.clube_id || null,
+            participante: {
+                nome_cartola: participante.nome_cartola || '',
+                nome_time:    participante.nome_time || '',
+                foto_perfil:  participante.foto_perfil || '',
+                foto_time:    participante.foto_time || '',
+                clube_id:     participante.clube_id || null,
+            },
         };
         req.session.cartolaProAuth = {
             glbid:      glbId,
             email:      email,
             expires_at: Math.floor(Date.now() / 1000) + 7200,
         };
+
+        // Persistir sessão explicitamente (padrão de todos os handlers do arquivo)
+        await new Promise((resolve, reject) => {
+            req.session.save((err) => {
+                if (err) reject(err);
+                else resolve();
+            });
+        });
 
         console.log('[PARTICIPANTE-AUTH] /auth/premium sucesso:', { email, timeId });
         return res.json({ success: true });
