@@ -1396,12 +1396,35 @@ window.fecharModalJogosLista = function() {
     if (container) container.innerHTML = '';
 };
 
-if (window.Log) Log.info('PARTICIPANTE-JOGOS', 'Modulo v5.6 carregado (modal de listagem completa)');
+/**
+ * Toggle expand/collapse da seção Agenda do Dia
+ * ✅ v5.8: Movido para cá (antes estava em participante-home.js)
+ * para funcionar tanto na home quanto na tela agenda-tabelas
+ */
+window.toggleJogosHome = function() {
+    const section = document.getElementById('jogos-home-section');
+    const content = document.getElementById('jogos-home-content');
+
+    if (!section || !content) return;
+
+    const isExpanded = section.classList.contains('expanded');
+
+    if (isExpanded) {
+        section.classList.remove('expanded');
+        content.classList.add('collapsed');
+    } else {
+        section.classList.add('expanded');
+        content.classList.remove('collapsed');
+    }
+};
+
+if (window.Log) Log.info('PARTICIPANTE-JOGOS', 'Modulo v5.8 carregado (toggle agenda + modal listagem)');
 
 // ✅ DEBUG: Confirmar funções globais disponíveis
-console.log('[JOGOS-DEBUG] ✅ Versão 5.6 carregada.');
+console.log('[JOGOS-DEBUG] ✅ Versão 5.8 carregada.');
 console.log('[JOGOS-DEBUG] Funções disponíveis:', {
     expandirJogo: typeof window.expandirJogo,
     abrirModalJogos: typeof window.abrirModalJogos,
-    fecharModalJogosLista: typeof window.fecharModalJogosLista
+    fecharModalJogosLista: typeof window.fecharModalJogosLista,
+    toggleJogosHome: typeof window.toggleJogosHome
 });

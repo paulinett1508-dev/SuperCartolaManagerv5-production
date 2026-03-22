@@ -80,8 +80,8 @@ const RefreshButton = {
         .refresh-button-container {
             display: flex;
             justify-content: flex-end;
-            padding: 8px 12px;
-            margin-bottom: 8px;
+            padding: 4px 4px 0 4px;
+            margin-bottom: 4px;
         }
 
         /* ============================================
