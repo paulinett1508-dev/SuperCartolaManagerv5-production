@@ -60,7 +60,7 @@ function _buildLPHtml(config) {
       </button>
       <div class="module-lp-accordion-body" id="lp-premiacoes-body-${moduloKey}">
         <div class="module-lp-accordion-inner">
-          <div class="lp-loading"><span class="material-icons" style="font-size:16px;vertical-align:middle;opacity:0.4;">hourglass_empty</span></div>
+          <div class="lp-loading"><span class="material-icons lp-loading-icon">hourglass_empty</span></div>
         </div>
       </div>
     </div>` : '';
@@ -84,7 +84,7 @@ function _buildLPHtml(config) {
     </button>
     <div class="module-lp-accordion-body" id="lp-regras-body-${moduloKey}">
       <div class="module-lp-accordion-inner">
-        <div class="lp-loading"><span class="material-icons" style="font-size:16px;vertical-align:middle;opacity:0.4;">hourglass_empty</span></div>
+        <div class="lp-loading"><span class="material-icons lp-loading-icon">hourglass_empty</span></div>
       </div>
     </div>
   </div>
@@ -150,8 +150,8 @@ function _fetchComoFunciona(ligaId, moduloKey) {
  * @returns {string}
  */
 function _premiacaoPlaceholderHtml() {
-    return '<div class="lp-premiacao-placeholder" style="display:flex;align-items:center;gap:8px;color:var(--app-text-muted);font-size:var(--app-font-sm);padding:4px 0;">'
-        + '<span class="material-icons" style="font-size:18px;opacity:0.6;">info_outline</span>'
+    return '<div class="lp-premiacao-placeholder">'
+        + '<span class="material-icons lp-premiacao-placeholder-icon">info_outline</span>'
         + 'Premiação definida pelo organizador da liga'
         + '</div>';
 }
@@ -237,6 +237,11 @@ export function injectModuleLP(config) {
     var ligaId = config.ligaId;
     var moduloKey = config.moduloKey;
     var showPremiacaoAccordion = config.showPremiacaoAccordion !== false;
+
+    if (!moduloKey) {
+        console.warn('[module-lp-engine] moduloKey is required');
+        return;
+    }
 
     // --- SPA Guard: idempotency ---
     var existing = document.getElementById(wrapperId);
