@@ -446,6 +446,36 @@ async function gatoMestreConectar(req, res) {
 }
 
 // =====================================================================
+// GATOMESTRE: CONECTAR VIA CREDENCIAIS (email + senha Globo)
+// =====================================================================
+async function gatoMestreConectarCredenciais(req, res) {
+    try {
+        const { email, senha } = req.body;
+
+        if (!email || !senha) {
+            return res.status(400).json({ success: false, message: 'Email e senha são obrigatórios' });
+        }
+
+        const auth = await systemTokenService.autenticarComCredenciais(email, senha);
+        const salvo = await systemTokenService.salvarTokenSistema(auth);
+
+        if (!salvo) {
+            return res.status(500).json({ success: false, message: 'Erro ao salvar token' });
+        }
+
+        console.log(`${LOG_PREFIX} Token GatoMestre obtido via credenciais para: ${email}`);
+        res.json({ success: true, message: 'Conectado com sucesso', email });
+
+    } catch (error) {
+        if (error.code === 'INVALID_CREDENTIALS') {
+            return res.status(401).json({ success: false, message: error.message || 'Credenciais inválidas. Verifique email e senha.' });
+        }
+        console.error(`${LOG_PREFIX} Erro ao conectar via credenciais:`, error.message);
+        res.status(500).json({ success: false, message: 'Erro ao autenticar. Tente o método Bookmarklet.' });
+    }
+}
+
+// =====================================================================
 // GATOMESTRE: DESCONECTAR (revoga token de sistema)
 // =====================================================================
 async function gatoMestreDesconectar(req, res) {
@@ -472,5 +502,6 @@ export default {
     buscarSalva,
     gatoMestreStatus,
     gatoMestreConectar,
+    gatoMestreConectarCredenciais,
     gatoMestreDesconectar,
 };

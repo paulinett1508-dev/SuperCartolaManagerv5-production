@@ -70,6 +70,10 @@ router.get('/gatomestre/status', requireAdmin, escalacaoIAController.gatoMestreS
 // POST /api/admin/escalacao-ia/gatomestre/conectar
 router.post('/gatomestre/conectar', requireAdmin, escalacaoIAController.gatoMestreConectar);
 
+// Conectar via credenciais Globo (email + senha)
+// POST /api/admin/escalacao-ia/gatomestre/conectar-credenciais
+router.post('/gatomestre/conectar-credenciais', requireAdmin, escalacaoIAController.gatoMestreConectarCredenciais);
+
 // Desconectar: revoga token de sistema
 // DELETE /api/admin/escalacao-ia/gatomestre/desconectar
 router.delete('/gatomestre/desconectar', requireAdmin, escalacaoIAController.gatoMestreDesconectar);

@@ -199,6 +199,46 @@ async function fazerRequisicaoAutenticada(endpoint, params = {}) {
 }
 
 // =====================================================================
+// AUTENTICAR COM CREDENCIAIS GLOBO (email + senha)
+// =====================================================================
+async function autenticarComCredenciais(email, senha) {
+    const resp = await axios.post(
+        'https://login.globo.com/api/authentication',
+        {
+            payload: {
+                email,
+                password: senha,
+                serviceId: 438,
+                captcha: '',
+            },
+        },
+        {
+            headers: {
+                'Content-Type': 'application/json',
+                'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36',
+                'Accept': 'application/json',
+            },
+            timeout: 15000,
+            validateStatus: (s) => s < 500,
+        }
+    );
+
+    if (resp.status === 401 || !resp.data?.glbId) {
+        const msg = resp.data?.userMessage || resp.data?.UserMessage || 'Credenciais inválidas';
+        const err = new Error(msg);
+        err.code = 'INVALID_CREDENTIALS';
+        throw err;
+    }
+
+    return {
+        glbid: resp.data.glbId,
+        email,
+        nome: email.split('@')[0],
+        expires_at: Math.floor(Date.now() / 1000) + 7200,
+    };
+}
+
+// =====================================================================
 // STATUS DO TOKEN
 // =====================================================================
 async function statusToken() {
@@ -231,4 +271,5 @@ export default {
     revogarTokenSistema,
     fazerRequisicaoAutenticada,
     statusToken,
+    autenticarComCredenciais,
 };
