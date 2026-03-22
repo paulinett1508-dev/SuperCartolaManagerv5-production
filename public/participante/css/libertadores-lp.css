@@ -434,3 +434,100 @@
     vertical-align: middle;
     text-transform: uppercase;
 }
+
+/* ═══════════════════════════════════════════════════
+   STATS STRIP — 4 colunas
+   ═══════════════════════════════════════════════════ */
+.liberta-stats-strip--4col {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.liberta-stat-item--highlight {
+    border-color: var(--app-liberta-border, rgba(27, 94, 32, 0.35));
+    background: var(--app-liberta-muted, rgba(27, 94, 32, 0.15));
+}
+
+/* ═══════════════════════════════════════════════════
+   GRUPOS — Grid + Cards
+   ═══════════════════════════════════════════════════ */
+.liberta-grupos-chamada {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.75rem;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.5));
+    margin: -0.5rem 0 1rem;
+    font-style: italic;
+}
+
+.liberta-grupos-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.liberta-grupo-card {
+    background: var(--app-surface, #1a1a1a);
+    border: 1px solid var(--app-border, #333);
+    border-radius: 0.65rem;
+    overflow: hidden;
+}
+
+.liberta-grupo-header {
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 0.7rem;
+    color: var(--app-liberta-secondary, #D4AF37);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.5rem 0.6rem 0.25rem;
+    border-bottom: 1px solid var(--app-liberta-border, rgba(27, 94, 32, 0.35));
+    background: var(--app-liberta-muted, rgba(27, 94, 32, 0.15));
+}
+
+.liberta-grupo-times {
+    padding: 0.35rem 0;
+}
+
+.liberta-grupo-time {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.6rem;
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.7rem;
+    color: var(--app-text-primary, #fff);
+}
+
+.liberta-grupo-pais {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.5rem;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.4));
+    min-width: 1.6rem;
+    text-transform: uppercase;
+}
+
+.liberta-grupo-time--br {
+    color: var(--app-liberta-accent, #2E7D32);
+    font-weight: 600;
+}
+
+.liberta-grupo-time--br .liberta-grupo-pais {
+    color: var(--app-liberta-accent, #2E7D32);
+}
+
+/* ═══════════════════════════════════════════════════
+   TIMELINE — Estado "upcoming" (próxima fase)
+   ═══════════════════════════════════════════════════ */
+.liberta-timeline-item--upcoming::before {
+    background: var(--app-liberta-accent, #2E7D32);
+    box-shadow: 0 0 8px rgba(46, 125, 50, 0.3);
+    animation: app-pulse 2s ease-in-out infinite;
+}
+
+.liberta-timeline-item--upcoming .liberta-timeline-fase {
+    color: var(--app-liberta-accent, #2E7D32);
+}
+
+.liberta-timeline-badge--upcoming {
+    color: var(--app-liberta-accent, #2E7D32);
+    background: rgba(46, 125, 50, 0.12);
+    border: 1px solid rgba(46, 125, 50, 0.25);
+}

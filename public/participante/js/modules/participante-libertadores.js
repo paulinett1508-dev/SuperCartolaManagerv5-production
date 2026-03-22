@@ -1,21 +1,75 @@
 // participante-libertadores.js
-// v1.0 - Controller da Landing Page "Libertadores 2026"
+// v2.0 - Controller da Landing Page "Libertadores 2026"
+// v2.0 - Atualizado com grupos definidos (sorteio 19/Mar/2026)
 //
 // Fontes de dados:
 //   - API: /api/noticias/libertadores (Google News RSS, cache 30min)
+//   - Grupos: dados estáticos do sorteio oficial CONMEBOL
 
 let countdownInterval = null;
 
-// Data da Final da Libertadores 2026 (estimada — 3ª semana de novembro)
-const FINAL_DATE = new Date('2026-11-21T21:00:00-03:00');
+// Data da Final da Libertadores 2026 — 28 Nov, Estádio Centenário, Montevidéu
+const FINAL_DATE = new Date('2026-11-28T21:00:00-03:00');
 
-// Fases estáticas da competição
+// Fases da competição (datas confirmadas CONMEBOL)
 const FASES_LIBERTADORES = [
-    { fase: 'Fase de Grupos',       info: 'Fevereiro — Maio 2026',  times: '32 clubes • 8 grupos',  ativa: false },
-    { fase: 'Oitavas de Final',     info: 'Maio — Junho 2026',      times: '16 clubes',              ativa: false },
-    { fase: 'Quartas de Final',     info: 'Julho — Agosto 2026',    times: '8 clubes',               ativa: false },
-    { fase: 'Semifinais',           info: 'Setembro — Outubro 2026',times: '4 clubes',               ativa: false },
-    { fase: 'Grande Final',         info: 'Novembro 2026',          times: 'Jogo único',             final: true  },
+    { fase: 'Fase de Grupos',       info: '7 Abr — 28 Mai 2026',   times: '32 clubes • 8 grupos',  proxima: true },
+    { fase: 'Oitavas de Final',     info: 'Julho 2026',             times: '16 clubes',              ativa: false },
+    { fase: 'Quartas de Final',     info: 'Setembro 2026',          times: '8 clubes',               ativa: false },
+    { fase: 'Semifinais',           info: 'Outubro 2026',           times: '4 clubes',               ativa: false },
+    { fase: 'Grande Final',         info: '28 Nov 2026 · Centenário, Montevidéu', times: 'Jogo único', final: true },
+];
+
+// Grupos definidos — Sorteio 19/Mar/2026 (CONMEBOL, Luque/PAR)
+const GRUPOS_LIBERTADORES = [
+    { grupo: 'A', times: [
+        { nome: 'Flamengo', pais: 'BRA', brasileiro: true },
+        { nome: 'Estudiantes', pais: 'ARG' },
+        { nome: 'Cusco', pais: 'PER' },
+        { nome: 'Ind. Medellín', pais: 'COL' },
+    ]},
+    { grupo: 'B', times: [
+        { nome: 'Nacional', pais: 'URU' },
+        { nome: 'Universitario', pais: 'PER' },
+        { nome: 'Coquimbo Unido', pais: 'CHI' },
+        { nome: 'Tolima', pais: 'COL' },
+    ]},
+    { grupo: 'C', times: [
+        { nome: 'Fluminense', pais: 'BRA', brasileiro: true },
+        { nome: 'Bolívar', pais: 'BOL' },
+        { nome: 'Dep. La Guaira', pais: 'VEN' },
+        { nome: 'Ind. Rivadavia', pais: 'ARG' },
+    ]},
+    { grupo: 'D', times: [
+        { nome: 'Boca Juniors', pais: 'ARG' },
+        { nome: 'Cruzeiro', pais: 'BRA', brasileiro: true },
+        { nome: 'Univ. Católica', pais: 'CHI' },
+        { nome: 'Barcelona', pais: 'ECU' },
+    ]},
+    { grupo: 'E', times: [
+        { nome: 'Peñarol', pais: 'URU' },
+        { nome: 'Corinthians', pais: 'BRA', brasileiro: true },
+        { nome: 'Santa Fe', pais: 'COL' },
+        { nome: 'Platense', pais: 'ARG' },
+    ]},
+    { grupo: 'F', times: [
+        { nome: 'Palmeiras', pais: 'BRA', brasileiro: true },
+        { nome: 'Cerro Porteño', pais: 'PAR' },
+        { nome: 'Junior Barranquilla', pais: 'COL' },
+        { nome: 'Sporting Cristal', pais: 'PER' },
+    ]},
+    { grupo: 'G', times: [
+        { nome: 'LDU', pais: 'ECU' },
+        { nome: 'Lanús', pais: 'ARG' },
+        { nome: 'Always Ready', pais: 'BOL' },
+        { nome: 'Mirassol', pais: 'BRA', brasileiro: true },
+    ]},
+    { grupo: 'H', times: [
+        { nome: 'Ind. del Valle', pais: 'ECU' },
+        { nome: 'Libertad', pais: 'PAR' },
+        { nome: 'Rosario Central', pais: 'ARG' },
+        { nome: 'Univ. Central', pais: 'VEN' },
+    ]},
 ];
 
 // ═══════════════════════════════════════════════════
@@ -32,6 +86,7 @@ export async function inicializarLibertadoresParticipante(params) {
         renderizarCountdown();
         countdownInterval = setInterval(renderizarCountdown, 60000);
 
+        renderizarGrupos();
         renderizarFases();
 
         await carregarNoticias();
@@ -79,6 +134,30 @@ function renderizarCountdown() {
 }
 
 // ═══════════════════════════════════════════════════
+// GRUPOS
+// ═══════════════════════════════════════════════════
+
+function renderizarGrupos() {
+    const container = document.getElementById('liberta-grupos-grid');
+    if (!container) return;
+
+    container.innerHTML = GRUPOS_LIBERTADORES.map(g => {
+        const timesHtml = g.times.map(t => {
+            const cls = t.brasileiro ? 'liberta-grupo-time liberta-grupo-time--br' : 'liberta-grupo-time';
+            return `<div class="${cls}">
+                <span class="liberta-grupo-pais">${t.pais}</span>
+                <span class="liberta-grupo-nome">${t.nome}</span>
+            </div>`;
+        }).join('');
+
+        return `<div class="liberta-grupo-card">
+            <div class="liberta-grupo-header">Grupo ${g.grupo}</div>
+            <div class="liberta-grupo-times">${timesHtml}</div>
+        </div>`;
+    }).join('');
+}
+
+// ═══════════════════════════════════════════════════
 // FASES (TIMELINE)
 // ═══════════════════════════════════════════════════
 
@@ -89,13 +168,16 @@ function renderizarFases() {
     container.innerHTML = FASES_LIBERTADORES.map(f => {
         const isFinal = !!f.final;
         const isAtiva = !!f.ativa;
-        const cls = isFinal
-            ? 'liberta-timeline-item liberta-timeline-item--final'
-            : isAtiva
-            ? 'liberta-timeline-item liberta-timeline-item--active'
-            : 'liberta-timeline-item';
+        const isProxima = !!f.proxima;
 
-        const badge = isAtiva ? '<span class="liberta-timeline-badge">em andamento</span>' : '';
+        let cls = 'liberta-timeline-item';
+        if (isFinal) cls += ' liberta-timeline-item--final';
+        else if (isAtiva) cls += ' liberta-timeline-item--active';
+        else if (isProxima) cls += ' liberta-timeline-item--upcoming';
+
+        let badge = '';
+        if (isAtiva) badge = '<span class="liberta-timeline-badge">em andamento</span>';
+        else if (isProxima) badge = '<span class="liberta-timeline-badge liberta-timeline-badge--upcoming">em breve</span>';
 
         return `
         <div class="${cls}">
