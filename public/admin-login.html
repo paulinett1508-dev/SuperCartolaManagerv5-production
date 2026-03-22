@@ -11,248 +11,250 @@
     <link rel="stylesheet" href="css/modules/super-modal.css" />
     <script src="js/super-modal.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body {
-            font-family: "Inter", sans-serif;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-        }
+    body {
+        font-family: var(--font-family-base, 'Inter', sans-serif);
+        background: var(--surface-bg, #0a0a0a);
+        min-height: 100vh;
+        display: flex;
+        align-items: stretch;
+        color: var(--text-primary, #fff);
+    }
 
-        .container {
-            text-align: center;
-            padding: 40px 20px;
-            max-width: 400px;
-            width: 100%;
-        }
+    /* ── HERO (esquerda) ── */
+    .hero {
+        width: 240px;
+        flex-shrink: 0;
+        background: var(--surface-card, #1e1e1e);
+        border-right: 1px solid var(--border-subtle, #2a2a2a);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        padding: 40px 24px;
+        position: relative;
+        overflow: hidden;
+    }
+    .hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: var(--color-primary, #ff4500);
+        opacity: 0.06;
+        pointer-events: none;
+    }
+    .hero-icon {
+        width: 72px; height: 72px;
+        border-radius: var(--radius-xl, 18px);
+        background: rgba(255,255,255,0.04);
+        border: 1px solid var(--border-default, #333);
+        display: flex; align-items: center; justify-content: center;
+    }
+    .hero-icon .material-icons {
+        font-size: 36px;
+        color: var(--color-primary, #ff4500);
+    }
+    .hero-name {
+        font-family: var(--font-family-brand, 'Russo One', sans-serif);
+        font-size: 14px;
+        color: var(--text-primary, #fff);
+        text-align: center;
+        line-height: 1.3;
+    }
+    .hero-label {
+        font-size: 10px;
+        color: var(--text-muted, rgba(255,255,255,0.35));
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+    }
 
-        .logo {
-            margin-bottom: 24px;
-        }
-        .logo .material-icons {
-            font-size: 64px;
-            color: #ff4500;
-        }
+    /* ── FORM (direita) ── */
+    .form-side {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        background: var(--surface-bg, #0a0a0a);
+    }
+    .form-container {
+        width: 100%;
+        max-width: 360px;
+    }
+    .form-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text-primary, #fff);
+        margin-bottom: 4px;
+    }
+    .form-subtitle {
+        color: var(--text-muted, rgba(255,255,255,0.4));
+        font-size: 13px;
+        margin-bottom: 28px;
+    }
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+        display: block;
+        color: var(--text-secondary, rgba(255,255,255,0.6));
+        font-size: 12px;
+        font-weight: 500;
+        margin-bottom: 6px;
+    }
+    .form-group input {
+        width: 100%;
+        padding: 12px 14px;
+        background: var(--surface-card, #1e1e1e);
+        border: 1px solid var(--border-subtle, #2a2a2a);
+        border-radius: var(--radius-md, 8px);
+        color: var(--text-primary, #fff);
+        font-size: 14px;
+        transition: border-color var(--transition-fast, 0.15s ease);
+        font-family: var(--font-family-base, 'Inter', sans-serif);
+    }
+    .form-group input:focus {
+        border-color: var(--color-primary, #ff4500);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(255,69,0,0.15);
+    }
+    .form-group input::placeholder {
+        color: var(--text-disabled, rgba(255,255,255,0.2));
+    }
+    .btn-login {
+        width: 100%;
+        padding: 13px 20px;
+        background: var(--color-primary, #ff4500);
+        border: none;
+        border-radius: var(--radius-md, 8px);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        transition: box-shadow var(--transition-fast, 0.15s ease), opacity var(--transition-fast, 0.15s ease);
+        font-family: var(--font-family-base, 'Inter', sans-serif);
+        margin-bottom: 14px;
+    }
+    .btn-login:hover { box-shadow: 0 4px 16px rgba(255,69,0,0.35); }
+    .btn-login:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-login .material-icons { font-size: 18px; }
 
-        h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: #fff;
-        }
+    .divider {
+        display: flex; align-items: center; gap: 12px;
+        margin: 18px 0;
+        color: var(--text-muted, rgba(255,255,255,0.25));
+        font-size: 12px;
+    }
+    .divider::before, .divider::after {
+        content: ''; flex: 1;
+        height: 1px;
+        background: var(--border-subtle, #222);
+    }
+    .btn-google {
+        width: 100%;
+        padding: 12px 20px;
+        background: var(--surface-card, #1e1e1e);
+        border: 1px solid var(--border-subtle, #2a2a2a);
+        border-radius: var(--radius-md, 8px);
+        color: var(--text-secondary, rgba(255,255,255,0.6));
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        transition: border-color var(--transition-fast, 0.15s ease);
+        text-decoration: none;
+        font-family: var(--font-family-base, 'Inter', sans-serif);
+    }
+    .btn-google:hover { border-color: var(--border-default, #444); }
 
-        .subtitle {
-            color: #a0a0a0;
-            font-size: 0.95rem;
-            margin-bottom: 32px;
-        }
+    .error-message {
+        background: var(--color-danger-muted, rgba(239,68,68,0.1));
+        border: 1px solid var(--color-danger, rgba(239,68,68,0.3));
+        color: var(--color-danger, #ef4444);
+        padding: 10px 14px;
+        border-radius: var(--radius-md, 8px);
+        margin-bottom: 16px;
+        font-size: 13px;
+        display: none;
+    }
+    .error-message.show { display: block; }
+    .success-message {
+        background: var(--color-success-muted, rgba(34,197,94,0.1));
+        border: 1px solid var(--color-success, rgba(34,197,94,0.3));
+        color: var(--color-success, #22c55e);
+        padding: 10px 14px;
+        border-radius: var(--radius-md, 8px);
+        margin-bottom: 16px;
+        font-size: 13px;
+        display: none;
+    }
+    .success-message.show { display: block; }
 
-        .login-card {
-            background: #1e1e1e;
-            border: 1px solid #333;
-            border-radius: 16px;
-            padding: 32px 24px;
-        }
+    /* ── Modal trocar senha (preservado) ── */
+    .modal {
+        display: none; position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.85);
+        align-items: center; justify-content: center;
+        z-index: 9999;
+    }
+    .modal.show { display: flex; }
+    .modal-content {
+        background: var(--surface-card, #1a1a1a);
+        border-radius: var(--radius-lg, 12px);
+        padding: 24px;
+        max-width: 400px; width: 90%;
+        border: 2px solid var(--color-warning, #f59e0b);
+    }
+    .modal-content h3 {
+        color: var(--color-warning, #f59e0b);
+        margin: 0 0 16px;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .modal-content p {
+        color: var(--text-muted, #9ca3af);
+        margin: 0 0 20px;
+        font-size: 13px;
+    }
 
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-        .form-group label {
-            display: block;
-            color: #a0a0a0;
-            font-size: 0.85rem;
-            margin-bottom: 8px;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 14px 16px;
-            background: #252525;
-            border: 1px solid #444;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 1rem;
-            transition: border-color 0.2s;
-        }
-        .form-group input:focus {
-            border-color: #ff4500;
-            outline: none;
-        }
-        .form-group input::placeholder {
-            color: #666;
-        }
-
-        .btn-login {
-            width: 100%;
-            padding: 14px 24px;
-            background: linear-gradient(135deg, #ff4500 0%, #e8472b 100%);
-            border: none;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s;
-            margin-bottom: 16px;
-        }
-        .btn-login:hover {
-            box-shadow: 0 4px 16px rgba(255, 69, 0, 0.4);
-        }
-        .btn-login:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        .btn-login .material-icons {
-            font-size: 20px;
-        }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin: 24px 0;
-            color: #666;
-            font-size: 0.85rem;
-        }
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: #333;
-        }
-
-        .btn-google {
-            width: 100%;
-            padding: 14px 24px;
-            background: #252525;
-            border: 1px solid #444;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 0.95rem;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s;
-            text-decoration: none;
-        }
-        .btn-google:hover {
-            border-color: #666;
-            background: #2a2a2a;
-        }
-
-        .error-message {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #ef4444;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 0.9rem;
-            display: none;
-        }
-        .error-message.show {
-            display: block;
-        }
-
-        .success-message {
-            background: rgba(34, 197, 94, 0.1);
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            color: #22c55e;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 0.9rem;
-            display: none;
-        }
-        .success-message.show {
-            display: block;
-        }
-
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            color: #666;
-            text-decoration: none;
-            font-size: 0.9rem;
-            margin-top: 24px;
-            transition: color 0.2s;
-        }
-        .back-link:hover {
-            color: #fff;
-        }
-        .back-link .material-icons {
-            font-size: 18px;
-        }
-
-        /* Modal troca senha */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.85);
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-        .modal.show {
-            display: flex;
-        }
-        .modal-content {
-            background: #1a1a1a;
-            border-radius: 12px;
-            padding: 24px;
-            max-width: 400px;
-            width: 90%;
-            border: 2px solid #f59e0b;
-        }
-        .modal-content h3 {
-            color: #f59e0b;
-            margin: 0 0 16px 0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .modal-content p {
-            color: #9ca3af;
-            margin: 0 0 20px 0;
-            font-size: 0.9rem;
-        }
-    </style>
+    /* ── Mobile: hero some, single column ── */
+    @media (max-width: 768px) {
+        body { flex-direction: column; }
+        .hero { display: none; }
+        .form-side { padding: 40px 24px; align-items: flex-start; }
+    }
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">
+    <!-- HERO -->
+    <aside class="hero">
+        <div class="hero-icon">
             <span class="material-icons">admin_panel_settings</span>
         </div>
+        <div class="hero-name">Super Cartola<br>Manager</div>
+        <div class="hero-label">Admin Panel</div>
+    </aside>
 
-        <h1>Login Administrador</h1>
-        <p class="subtitle">Acesse o painel de gestao da sua liga</p>
+    <!-- FORM -->
+    <main class="form-side">
+        <div class="form-container">
+            <h1 class="form-title">Entrar</h1>
+            <p class="form-subtitle">Acesse o painel de gestão da sua liga</p>
 
-        <div class="login-card">
             <div class="error-message" id="errorMessage"></div>
             <div class="success-message" id="successMessage"></div>
 
             <form id="loginForm">
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" id="email" name="email" placeholder="seu@email.com" autocomplete="email" required />
+                    <input type="email" id="email" name="email"
+                           placeholder="seu@email.com" autocomplete="email" required />
                 </div>
                 <div class="form-group">
                     <label for="senha">Senha</label>
-                    <input type="password" id="senha" name="senha" placeholder="Sua senha" autocomplete="current-password" required />
+                    <input type="password" id="senha" name="senha"
+                           placeholder="Sua senha" autocomplete="current-password" required />
                 </div>
                 <button type="submit" class="btn-login" id="btnLogin">
                     <span class="material-icons">login</span>
@@ -264,17 +266,12 @@
 
             <a href="/api/admin/auth/login" class="btn-google">
                 <span class="material-icons">login</span>
-                Entrar com Google (Admin)
+                Entrar com Google
             </a>
         </div>
+    </main>
 
-        <a href="/" class="back-link">
-            <span class="material-icons">arrow_back</span>
-            Voltar ao inicio
-        </a>
-    </div>
-
-    <!-- Modal Trocar Senha -->
+    <!-- Modal Trocar Senha (preservado intacto) -->
     <div class="modal" id="modalTrocarSenha">
         <div class="modal-content">
             <h3>
@@ -285,11 +282,13 @@
             <form id="formTrocarSenha">
                 <div class="form-group">
                     <label for="novaSenha">Nova Senha (minimo 6 caracteres)</label>
-                    <input type="password" id="novaSenha" name="novaSenha" placeholder="Digite nova senha" autocomplete="new-password" minlength="6" required />
+                    <input type="password" id="novaSenha" name="novaSenha"
+                           placeholder="Digite nova senha" autocomplete="new-password" minlength="6" required />
                 </div>
                 <div class="form-group">
                     <label for="confirmarSenha">Confirmar Nova Senha</label>
-                    <input type="password" id="confirmarSenha" name="confirmarSenha" placeholder="Confirme a senha" autocomplete="new-password" minlength="6" required />
+                    <input type="password" id="confirmarSenha" name="confirmarSenha"
+                           placeholder="Confirme a senha" autocomplete="new-password" minlength="6" required />
                 </div>
                 <button type="submit" class="btn-login">
                     <span class="material-icons">lock</span>
