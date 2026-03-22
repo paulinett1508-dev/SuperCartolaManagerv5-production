@@ -562,6 +562,14 @@
     opacity: 0.4;
 }
 
+.lp-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--app-space-4, 16px) 0;
+    color: var(--app-text-dim);
+}
+
 .lp-premiacao-placeholder {
     display: flex;
     align-items: center;
