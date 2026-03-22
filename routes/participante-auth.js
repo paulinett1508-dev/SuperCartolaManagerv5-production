@@ -1236,7 +1236,7 @@ export async function handlerAuthPremium(req, res) {
         // 5. Criar sessão
         req.session.participante = {
             timeId,
-            ligaId: liga._id,
+            ligaId: liga._id.toString(),
             premium: true,
             nome_cartola: participante.nome_cartola || '',
             nome_time:    participante.nome_time || '',
