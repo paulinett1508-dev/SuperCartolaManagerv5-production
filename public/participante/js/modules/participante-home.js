@@ -41,6 +41,8 @@ const CLUBES_CACHE_TTL = 12 * 60 * 60 * 1000; // 12h
 const HOME_AUTO_REFRESH_MS = 60000; // 60s
 let homeAutoRefreshId = null;
 let homeAutoRefreshEmAndamento = false;
+let _matchdayStateHandler = null; // ✅ v1.4.2: Referência do listener para poder remover no destruir
+let _homeRenderCancelado = false; // ✅ v1.4.2: Flag para bloquear mutações de state após timeout
 
 // Estado de parciais
 let dadosParciais = null;
@@ -116,6 +118,7 @@ export async function inicializarHomeParticipante(params) {
         return;
     }
 
+    _homeRenderCancelado = false; // ✅ v1.4.2: Reset flag ao iniciar nova carga
     pararAutoRefreshHome();
     await carregarDadosERenderizar(ligaId, timeId, participante);
     iniciarAutoRefreshHome(ligaId, timeId, participante);
@@ -131,19 +134,34 @@ export async function inicializarHomeParticipante(params) {
             ativarLiveRankingCard();
         }
 
-        // Escutar mudanças de estado do matchday
-        MS.on('matchday:state', () => {
+        // ✅ v1.4.2: Salvar referência para remover no destruirHomeParticipante (evita leak)
+        if (_matchdayStateHandler) MS.off('matchday:state', _matchdayStateHandler);
+        _matchdayStateHandler = () => {
             const state = MS.currentState;
             const STATES = MS.STATES;
             if (window.Log) Log.info("PARTICIPANTE-HOME", `Matchday state changed: ${state}`);
             if ((state === STATES.LIVE || state === STATES.LOADING) && !_liveCardActive) {
                 ativarLiveRankingCard();
             }
-        });
+        };
+        MS.on('matchday:state', _matchdayStateHandler);
     }
 }
 
 window.inicializarHomeParticipante = inicializarHomeParticipante;
+
+// ✅ v1.4.1: Cleanup chamado pelo navigation.js ao sair do módulo Home
+// Evita timers órfãos acumulando entre navegações Home → X → Home
+export function destruirHomeParticipante() {
+    _homeRenderCancelado = true; // ✅ v1.4.2: Bloqueia mutações de state em background
+    pararAutoRefreshHome();
+    // ✅ v1.4.2: Remover listener do MatchdayService (evita acúmulo em Home→X→Home)
+    if (window.MatchdayService && _matchdayStateHandler) {
+        window.MatchdayService.off('matchday:state', _matchdayStateHandler);
+        _matchdayStateHandler = null;
+    }
+}
+window.destruirHomeParticipante = destruirHomeParticipante;
 
 // =====================================================================
 // CARREGAR DADOS E RENDERIZAR - v1.1 FIX REFRESH
@@ -192,10 +210,15 @@ async function carregarDadosERenderizar(ligaId, timeId, participante) {
     }
 
     // Verificar status de renovacao e premium em paralelo
-    await Promise.all([
-        verificarStatusRenovacao(ligaId, timeId),
-        verificarStatusPremium(),
-        buscarStatusMercado()
+    // ✅ v1.4.1: Promise.race com timeout de 5s — evita travar em servidor frio (pós-restart VPS)
+    // As 3 funções já têm try/catch com fallback (false/null), então timeout é seguro
+    await Promise.race([
+        Promise.all([
+            verificarStatusRenovacao(ligaId, timeId),
+            verificarStatusPremium(),
+            buscarStatusMercado()
+        ]),
+        new Promise(r => setTimeout(r, 5000))
     ]);
 
     // Buscar dados do cache ou API
@@ -704,7 +727,7 @@ async function verificarStatusRenovacao(ligaId, timeId) {
     try {
         const url = `/api/inscricoes/${ligaId}/${TEMPORADA_ATUAL}/${timeId}`;
         const response = await fetch(url);
-        if (response.ok) {
+        if (response.ok && !_homeRenderCancelado) {
             const data = await response.json();
             if (data.success && data.inscricao) {
                 const status = data.inscricao.status;
@@ -719,7 +742,7 @@ async function verificarStatusRenovacao(ligaId, timeId) {
 async function verificarStatusPremium() {
     try {
         const response = await fetch('/api/cartola-pro/verificar-premium', { credentials: 'include' });
-        if (response.ok) {
+        if (response.ok && !_homeRenderCancelado) {
             const data = await response.json();
             participantePremium = data.premium === true;
         }
@@ -743,7 +766,7 @@ async function buscarStatusMercado() {
             ? await cacheV2.get('mercado:status', fetchMercado, { ttl: 2 * 60 * 1000 })
             : await fetchMercado();
 
-        if (data) {
+        if (data && !_homeRenderCancelado) {
             mercadoStatus = data;
             // Expor globalmente para outros módulos (Resta Um, Capitão, etc.)
             window.cartolaState = {

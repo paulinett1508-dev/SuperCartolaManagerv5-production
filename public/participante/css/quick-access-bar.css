@@ -418,9 +418,9 @@
 }
 
 .especial-sheet-title {
-    font-family: 'Russo One', sans-serif;
+    font-family: var(--app-font-brand);
     font-size: 13px;
-    color: var(--app-text-white, #fff);
+    color: var(--app-text-white);
     text-transform: uppercase;
     letter-spacing: 0.8px;
     display: flex;
@@ -543,9 +543,9 @@
     flex: 1;
 }
 .especial-card-name {
-    font-family: 'Russo One', sans-serif;
+    font-family: var(--app-font-brand);
     font-size: 13px;
-    color: #fff;
+    color: var(--app-text-white);
     letter-spacing: 0.2px;
 }
 .especial-card-desc {

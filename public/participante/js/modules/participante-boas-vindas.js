@@ -841,7 +841,7 @@ function renderizarBoasVindas(container, data, ligaRules) {
                             <h1 class="text-xl font-bold leading-tight tracking-tight text-white">Olá, ${escapeHtml(primeiroNome)}! 👋</h1>
                             ${seloPremium}
                         </div>
-                        <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide" style="background: linear-gradient(135deg, #ff4500, #e63e00); color: white;">
+                        <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide" style="background: var(--app-gradient-primary); color: var(--app-text-white);">
                             ${TEMPORADA_ATUAL}
                         </span>
                     </div>
@@ -982,7 +982,7 @@ function renderizarBoasVindas(container, data, ligaRules) {
                             <h1 class="text-xl font-bold leading-tight tracking-tight text-white">Olá, ${escapeHtml(primeiroNome)}! 👋</h1>
                             ${seloPremium}
                         </div>
-                        <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide" style="background: linear-gradient(135deg, #ff4500, #e63e00); color: white;">
+                        <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide" style="background: var(--app-gradient-primary); color: var(--app-text-white);">
                             ${TEMPORADA_ATUAL}
                         </span>
                     </div>

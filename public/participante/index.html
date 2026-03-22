@@ -61,14 +61,14 @@
         <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
 
         <!-- Design Tokens (SEMPRE PRIMEIRO) -->
-        <link rel="stylesheet" href="css/_app-tokens.css" />
+        <link rel="stylesheet" href="css/_app-tokens.css?v=20260322" />
         <!-- CSS BASE -->
-        <link rel="stylesheet" href="css/participante.css" />
+        <link rel="stylesheet" href="css/participante.css?v=20260322" />
         <!-- Error Toast -->
-        <link rel="stylesheet" href="css/error-toast.css" />
+        <link rel="stylesheet" href="css/error-toast.css?v=20260322" />
 
         <!-- ✅ Splash Screen CSS -->
-        <link rel="stylesheet" href="css/splash-screen.css" />
+        <link rel="stylesheet" href="css/splash-screen.css?v=20260322" />
 
         <!-- ✅ Sistema de Versionamento -->
         <link rel="stylesheet" href="/css/app/app-version.css" />
@@ -77,34 +77,34 @@
         <link rel="stylesheet" href="css/quick-access-bar.css?v=2" />
 
         <!-- ✅ Tabelas Esportivas -->
-        <link rel="stylesheet" href="css/tabelas-esportes.css" />
+        <link rel="stylesheet" href="css/tabelas-esportes.css?v=20260322" />
 
         <!-- ✅ Notícias do Time -->
-        <link rel="stylesheet" href="css/noticias-time.css" />
+        <link rel="stylesheet" href="css/noticias-time.css?v=20260322" />
 
         <!-- ✅ Tabela do Brasileirão -->
-        <link rel="stylesheet" href="css/brasileirao-tabela.css" />
+        <link rel="stylesheet" href="css/brasileirao-tabela.css?v=20260322" />
 
         <!-- ✅ TurnoGroup: colapsável por turno (componente reutilizável) -->
-        <link rel="stylesheet" href="css/components/turno-group.css" />
+        <link rel="stylesheet" href="css/components/turno-group.css?v=20260322" />
 
         <!-- ✅ Campinho Virtual -->
-        <link rel="stylesheet" href="css/campinho.css" />
+        <link rel="stylesheet" href="css/campinho.css?v=20260322" />
 
         <!-- ✅ Copa de Times Super Cartola -->
-        <link rel="stylesheet" href="css/copa-sc.css" />
+        <link rel="stylesheet" href="css/copa-sc.css?v=20260322" />
 
         <!-- ✅ Copa do Mundo 2026 (flip cards sedes, modal estádio, home strip, countdown) -->
         <link rel="stylesheet" href="css/copa-mundo-2026.css?v=2" />
 
         <!-- ✅ Tiro Certo Survival (teaser 2º turno) -->
-        <link rel="stylesheet" href="css/tiro-certo.css" />
+        <link rel="stylesheet" href="css/tiro-certo.css?v=20260322" />
 
         <!-- ✅ Extrato Bank (redesign banco digital) -->
-        <link rel="stylesheet" href="css/extrato-bank.css" />
+        <link rel="stylesheet" href="css/extrato-bank.css?v=20260322" />
 
         <!-- ✅ Loading Overlay (navegação entre módulos) -->
-        <link rel="stylesheet" href="css/pull-refresh.css" />
+        <link rel="stylesheet" href="css/pull-refresh.css?v=20260322" />
 
         <!-- ✅ Live Experience / Matchday (FEAT-026) -->
         <link rel="stylesheet" href="css/matchday.css?v=2.0" />
@@ -119,10 +119,10 @@
         <link rel="stylesheet" href="css/whats-happening.css?v=4" />
 
         <!-- ✅ Widget "Raio-X da Rodada" -->
-        <link rel="stylesheet" href="css/round-xray-widget.css" />
+        <link rel="stylesheet" href="css/round-xray-widget.css?v=20260322" />
 
         <!-- ✅ Widget "Campeao" (celebracao de campeoes) -->
-        <link rel="stylesheet" href="css/campeao-widget.css" />
+        <link rel="stylesheet" href="css/campeao-widget.css?v=20260322" />
 
         <!-- ✅ Modal Mito & Mico (celebração pós-rodada) -->
         <link rel="stylesheet" href="css/mito-mico-modal.css?v=1" />
@@ -866,6 +866,7 @@
                         id="headerMenuToggle"
                         class="header-toggle-btn"
                         title="Menu"
+                        aria-label="Menu"
                     >
                         <span class="material-icons">more_vert</span>
                     </button>
@@ -1126,7 +1127,7 @@
 
         <!-- Scripts participante -->
         <script src="js/participante-auth.js"></script>
-        <script src="js/participante-navigation.js?v=22.03.26.0001"></script>
+        <script src="js/participante-navigation.js?v=22.03.26.0002"></script>
         <script src="js/participante-season-selector.js" type="module"></script>
         <script src="js/participante-status.js" defer></script>
 
@@ -1604,7 +1605,7 @@
                                 <p class="text-[10px] text-white/50 uppercase tracking-wider">Super Cartola Manager</p>
                             </div>
                         </div>
-                        <button onclick="fecharPremiacoes2026()" class="p-2 rounded-full hover:bg-white/10 transition-colors">
+                        <button onclick="fecharPremiacoes2026()" class="p-2 rounded-full hover:bg-white/10 transition-colors" aria-label="Fechar">
                             <span class="material-icons text-white/60">close</span>
                         </button>
                     </div>
@@ -2113,7 +2114,7 @@
                                 <p id="participantes-subtitulo" class="text-xs text-white/50">Carregando...</p>
                             </div>
                         </div>
-                        <button onclick="fecharParticipantes2026()" class="p-2 rounded-full hover:bg-white/10 transition-colors">
+                        <button onclick="fecharParticipantes2026()" class="p-2 rounded-full hover:bg-white/10 transition-colors" aria-label="Fechar">
                             <span class="material-icons text-white/60">close</span>
                         </button>
                     </div>
@@ -2467,7 +2468,7 @@
                                 <p id="escalacao-subtitulo" class="text-xs text-white/50">Carregando...</p>
                             </div>
                         </div>
-                        <button onclick="fecharEscalacaoParticipante()" class="p-2 rounded-full hover:bg-white/10 transition-colors">
+                        <button onclick="fecharEscalacaoParticipante()" class="p-2 rounded-full hover:bg-white/10 transition-colors" aria-label="Fechar">
                             <span class="material-icons text-white/60">close</span>
                         </button>
                     </div>
@@ -2826,7 +2827,7 @@
                                 <p id="regras-subtitulo" class="text-xs text-white/50">Configuracoes da temporada</p>
                             </div>
                         </div>
-                        <button onclick="fecharRegras2026()" class="p-2 rounded-full hover:bg-white/10 transition-colors">
+                        <button onclick="fecharRegras2026()" class="p-2 rounded-full hover:bg-white/10 transition-colors" aria-label="Fechar">
                             <span class="material-icons text-white/60">close</span>
                         </button>
                     </div>

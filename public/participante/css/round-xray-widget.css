@@ -124,7 +124,7 @@
     position: sticky;
     top: 0;
     background: var(--app-surface);
-    z-index: 10;
+    z-index: var(--app-z-header);
     border-radius: var(--app-radius-2xl) var(--app-radius-2xl) 0 0;
 }
 
@@ -719,10 +719,10 @@
     border: none;
     border-radius: var(--app-radius-lg);
     padding: 14px;
-    font-family: 'Russo One', sans-serif;
+    font-family: var(--app-font-brand);
     font-size: 13px;
     font-weight: 400;
-    color: white;
+    color: var(--app-text-white);
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
     margin-top: 24px;

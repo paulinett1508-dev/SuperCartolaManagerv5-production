@@ -28,6 +28,15 @@
 
 const CAMPINHO_TARGET_KEY = 'scm_campinho_target';
 
+// ✅ v4.9.1: Versão estável por sessão — permite cache de módulos dentro da mesma sessão,
+// mas força re-download após reload de página (deploy). Evita re-download a cada navegação.
+const _MODULE_SESSION_V = (() => {
+    const KEY = 'scm_nav_module_v';
+    let v = sessionStorage.getItem(KEY);
+    if (!v) { v = Date.now().toString(); sessionStorage.setItem(KEY, v); }
+    return v;
+})();
+
 if (window.Log) Log.info('PARTICIPANTE-NAV', '🚀 Carregando sistema de navegação v4.9...');
 
 class ParticipanteNavigation {
@@ -953,10 +962,12 @@ class ParticipanteNavigation {
             // ✅ v4.2: Aguardar DOM renderizar antes de carregar JS do módulo
             await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
+            // ✅ v4.9.2: Setar ANTES de carregarModuloJS — timers órfãos se auto-cancelam imediatamente
+            window.moduloAtualParticipante = moduloId;
+
             await this.carregarModuloJS(moduloId);
 
             this.moduloAtual = moduloId;
-            window.moduloAtualParticipante = moduloId; // Expor globalmente para tracking
             sessionStorage.setItem("participante_modulo_atual", moduloId);
 
             // ✅ v4.9: Atualizar hash para deep linking
@@ -1118,9 +1129,8 @@ class ParticipanteNavigation {
         if (jsPath) {
             try {
                 // ✅ v4.6: Import direto - SW não intercepta mais /js/modules/ (v4.0)
-                // ✅ v4.7: Cache busting para forçar reload de módulos atualizados
-                const cacheBuster = `?v=${Date.now()}`;
-                const moduloJS = await import(jsPath + cacheBuster);
+                // ✅ v4.9.1: Versão estável por sessão (não Date.now() a cada nav)
+                const moduloJS = await import(jsPath + '?v=' + _MODULE_SESSION_V);
 
                 const moduloCamelCase = modulo
                     .split("-")

@@ -482,7 +482,7 @@
 .brasileirao-lp-overlay {
     position: fixed;
     inset: 0;
-    z-index: 9999;
+    z-index: var(--app-z-fab);
     background: var(--app-surface, #0a0a0a);
     animation: brasileiraoLpSlideIn 0.3s ease-out;
     overflow: hidden;
