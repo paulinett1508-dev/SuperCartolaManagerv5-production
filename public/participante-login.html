@@ -1450,7 +1450,12 @@
                             return;
                         }
 
-                        errorEl.textContent = data.message || 'Email ou senha incorretos.';
+                        // INVALID_CREDENTIALS e outros — mensagem explícita
+                        if (data.code === 'INVALID_CREDENTIALS') {
+                            errorEl.textContent = 'Email ou senha incorretos. Use as mesmas credenciais do Cartola FC.';
+                        } else {
+                            errorEl.textContent = data.message || 'Erro ao autenticar. Tente novamente.';
+                        }
                         errorEl.style.display = 'block';
 
                     } catch (_) {
@@ -1465,13 +1470,18 @@
                 }
             };
 
-            document.addEventListener('DOMContentLoaded', () => {
+            const _bindPremiumKeys = () => {
                 ['premium-email', 'premium-senha'].forEach(id => {
                     document.getElementById(id)?.addEventListener('keydown', e => {
                         if (e.key === 'Enter') premiumFlow.conectar();
                     });
                 });
-            });
+            };
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', _bindPremiumKeys);
+            } else {
+                _bindPremiumKeys();
+            }
         </script>
 
         <!-- 🛡️ PROTEÇÃO CLIENT-SIDE -->
