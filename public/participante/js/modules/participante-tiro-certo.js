@@ -1,3 +1,4 @@
+import { injectModuleLP } from './module-lp-engine.js';
 /**
  * PARTICIPANTE TIRO CERTO - Controller v1.0
  *
@@ -59,6 +60,17 @@ export async function inicializarTiroCertoParticipante({ participante, ligaId, t
     _timeId = parseInt(timeId);
     _participante = participante;
     _timeSelecionado = null;
+
+    injectModuleLP({
+        wrapperId:    'tiro-certo-lp-wrapper',
+        insertBefore: 'tiro-certo-container',
+        ligaId,
+        moduloKey:    'tiro_certo',
+        titulo:       'Tiro Certo',
+        tagline:      'Modo Survival — escolha o vencedor ou seja eliminado',
+        icon:         'gps_fixed',
+        colorClass:   'module-lp-tiro-certo',
+    });
 
     // Detectar premium via participante-navigation (com fallbacks)
     const isPremiumNav = window.participanteNav?._isPremium === true;
