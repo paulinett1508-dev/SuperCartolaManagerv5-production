@@ -597,6 +597,8 @@ async function carregarExtrato(ligaId, timeId) {
                     inscricao: cacheData.inscricao || null,
                     fonte: cacheData.fonte,
                     temporada: temporada,
+                    // ✅ v6.1 FIX: Passar ligaConfig para indicadores de zona (X/✓/○)
+                    ligaConfig: cacheData.ligaConfig || null,
                 };
                 usouCacheBackend = true;
             } else if (!ePreTemporadaReal && (cacheData.fonte === 'inscricao-nova-temporada' ||
@@ -630,6 +632,8 @@ async function carregarExtrato(ligaId, timeId) {
                         extratoTravado: cacheData.extratoTravado || false,
                         rodadaTravada: cacheData.rodadaTravada || null,
                         rodadaDesistencia: cacheData.rodadaDesistencia || null,
+                        // ✅ v6.1 FIX: Passar ligaConfig para indicadores de zona (X/✓/○)
+                        ligaConfig: cacheData.ligaConfig || null,
                     };
                     usouCacheBackend = true;
                     if (window.Log)

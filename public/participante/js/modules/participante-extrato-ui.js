@@ -1054,6 +1054,7 @@ export async function renderizarExtratoParticipante(extrato, participanteId) {
     if (extrato.ligaConfig?.zonaConfig) {
         const zonaConfig = extrato.ligaConfig.zonaConfig;
         ligaConfigCache = {
+            liga_id: extrato.ligaId || window.PARTICIPANTE_IDS?.ligaId,
             ranking_rodada: {
                 total_participantes: zonaConfig.totalParticipantes || DEFAULT_TOTAL_PARTICIPANTES,
                 faixas: zonaConfig.faixas || null,
@@ -1064,6 +1065,14 @@ export async function renderizarExtratoParticipante(extrato, participanteId) {
         };
         window.ligaConfigCache = ligaConfigCache;
         if (window.Log) Log.debug("[EXTRATO-UI] ✅ ligaConfigCache populado:", { totalParticipantes: zonaConfig.totalParticipantes });
+    } else {
+        // ✅ v11.4 FIX: Fallback — buscar config da liga via API quando ligaConfig não vem no extrato
+        // Cobre: path de cálculo (fluxoFinanceiroController), caches antigos, e dados do IndexedDB
+        const ligaId = extrato.ligaId || window.PARTICIPANTE_IDS?.ligaId;
+        if (ligaId && (!ligaConfigCache || ligaConfigCache.liga_id !== ligaId)) {
+            await fetchLigaConfigSilent(ligaId);
+            if (window.Log) Log.debug("[EXTRATO-UI] 🔄 ligaConfigCache via fallback API:", { ligaId, populado: !!ligaConfigCache });
+        }
     }
 
     await verificarStatusRenovacao();
