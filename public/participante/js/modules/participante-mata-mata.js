@@ -214,12 +214,13 @@ export async function inicializarMataMata(params) {
       // Substitui o hardcoded EDICOES_MATA_MATA (dados de 2025, 32 times)
       const calendario = configData?.calendario_efetivo;
       if (Array.isArray(calendario) && calendario.length > 0) {
+        // ✅ v9.1: Coerção Number() para prevenir concatenação de string em cálculos de rodada
         EDICOES_MATA_MATA = calendario.map(e => ({
-          id: e.id,
+          id: Number(e.id),
           nome: e.nome,
-          rodadaInicial: e.rodadaInicial,
-          rodadaFinal: e.rodadaFinal,
-          rodadaDefinicao: e.rodadaDefinicao
+          rodadaInicial: Number(e.rodadaInicial),
+          rodadaFinal: Number(e.rodadaFinal),
+          rodadaDefinicao: Number(e.rodadaDefinicao)
         }));
         if (window.Log) Log.info(`[MATA-MATA] 📅 ${EDICOES_MATA_MATA.length} edições carregadas do admin config`);
       } else {
@@ -307,15 +308,21 @@ export const inicializarMataMataParticipante = inicializarMataMata;
 // =====================================================================
 async function carregarStatusMercado() {
   try {
-    const res = await fetch("/api/cartola/mercado/status");
+    // ✅ v9.1: Usar /api/matchday/status (detecção inteligente 3-tier via cartolaApiService)
+    // Antes: /api/cartola/mercado/status (proxy básico, sem fallback inteligente)
+    const res = await fetch("/api/matchday/status");
     if (res.ok) {
       const data = await res.json();
-      estado.rodadaAtual = data.rodada_atual || 37;
-      estado.mercadoAberto = data.status_mercado === 1;
+      estado.rodadaAtual = Number(data.rodada_atual) || 1;
+      estado.mercadoAberto = data.mercado_aberto === true || data.status_mercado === 1;
+      if (window.Log) Log.info(`[MATA-MATA] 📡 Status: rodada=${estado.rodadaAtual}, mercadoAberto=${estado.mercadoAberto}`);
     }
   } catch (e) {
-    estado.rodadaAtual = 37;
-    estado.mercadoAberto = true;
+    if (window.Log) Log.warn("[MATA-MATA] ⚠️ Erro ao buscar status mercado:", e.message);
+    // Manter valores anteriores se já existirem — não sobrescrever com defaults
+    if (estado.rodadaAtual <= 1) {
+      estado.rodadaAtual = 1;
+    }
   }
 }
 
@@ -894,7 +901,7 @@ function renderClassificados(classificados, container) {
         <span class="mm-classificado-pos">${time.rankR2 || "?"}</span>
         <img class="mm-classificado-escudo" src="${getEscudoUrl(time)}" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
         <div class="mm-classificado-info">
-          <div class="mm-classificado-nome">${escapeHtml(truncate(time.nome_time || "Time", 18))}</div>
+          <div class="mm-classificado-nome">${escapeHtml(truncate(time.nome_time || time.nome || "Time", 18))}</div>
           <div class="mm-classificado-cartola">${escapeHtml(truncate(time.nome_cartola || time.nome_cartoleiro || "", 20))}</div>
         </div>
         <div class="mm-classificado-adversario">
@@ -1141,9 +1148,9 @@ function renderConfrontosCards(confrontos, fase, aoVivo = false, rodadaParciais 
     `;
   }
 
-  if (meuConfronto) {
-    html += renderMeuConfrontoCard(meuConfronto, meuTimeId, aoVivo);
-  } else {
+  // ✅ v9.1: Removido card "Seu Confronto" redundante — o confronto do participante
+  // já aparece destacado em "Todos os Confrontos" com classe .minha + badge de status
+  if (!meuConfronto) {
     const historico = estado.historicoParticipacao[estado.edicaoSelecionada];
 
     if (historico && historico.ultimaFase && historico.eliminado) {
@@ -1182,7 +1189,7 @@ function renderConfrontosCards(confrontos, fase, aoVivo = false, rodadaParciais 
     }
   }
 
-  html += renderConfrontosListaCards(confrontos, meuTimeId, fase);
+  html += renderConfrontosListaCards(confrontos, meuTimeId, fase, aoVivo);
   html += renderCardDesempenho();
 
   container.innerHTML = html;
@@ -1272,14 +1279,14 @@ function renderConfrontosProjetados(confrontosFaseAnterior, fase, rodadaDaFase) 
         <div class="mm-meu-times">
           <div class="mm-meu-time">
             <img src="${getEscudoUrl(eu)}" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
-            <span class="mm-meu-nome">${escapeHtml(truncate(eu?.nome_time || "Você", 12))}</span>
+            <span class="mm-meu-nome">${escapeHtml(truncate(eu?.nome_time || eu?.nome || "Você", 12))}</span>
             <span class="mm-meu-pts mm-pts-pendente">—</span>
           </div>
           <div class="mm-meu-vs">VS</div>
           <div class="mm-meu-time">
             ${adv
               ? `<img src="${getEscudoUrl(adv)}" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
-                 <span class="mm-meu-nome">${escapeHtml(truncate(adv?.nome_time || "Adversário", 12))}</span>
+                 <span class="mm-meu-nome">${escapeHtml(truncate(adv?.nome_time || adv?.nome || "Adversário", 12))}</span>
                  <span class="mm-meu-pts mm-pts-pendente">—</span>`
               : `<span class="mm-meu-nome">A definir</span>`
             }
@@ -1307,7 +1314,7 @@ function renderConfrontosProjetados(confrontosFaseAnterior, fase, rodadaDaFase) 
           <div class="mm-conf-time">
             <img class="mm-conf-escudo" src="${getEscudoUrl(timeA)}" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
             <div class="mm-conf-info">
-              <span class="mm-conf-nome">${escapeHtml(truncate(timeA.nome_time || "A definir", 14))}</span>
+              <span class="mm-conf-nome">${escapeHtml(truncate(timeA.nome_time || timeA.nome || "A definir", 14))}</span>
               <span class="mm-conf-cartola">${escapeHtml(truncate(timeA.nome_cartola || timeA.nome_cartoleiro || "", 16))}</span>
             </div>
             <span class="mm-conf-pts empate">—</span>
@@ -1317,7 +1324,7 @@ function renderConfrontosProjetados(confrontosFaseAnterior, fase, rodadaDaFase) 
             ${timeB
               ? `<img class="mm-conf-escudo" src="${getEscudoUrl(timeB)}" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
                  <div class="mm-conf-info">
-                   <span class="mm-conf-nome">${escapeHtml(truncate(timeB.nome_time || "A definir", 14))}</span>
+                   <span class="mm-conf-nome">${escapeHtml(truncate(timeB.nome_time || timeB.nome || "A definir", 14))}</span>
                    <span class="mm-conf-cartola">${escapeHtml(truncate(timeB.nome_cartola || timeB.nome_cartoleiro || "", 16))}</span>
                  </div>
                  <span class="mm-conf-pts empate">—</span>`
@@ -1335,85 +1342,9 @@ function renderConfrontosProjetados(confrontosFaseAnterior, fase, rodadaDaFase) 
 }
 
 // =====================================================================
-// RENDER MEU CONFRONTO EM CARD
-// =====================================================================
-function renderMeuConfrontoCard(confronto, meuTimeId, aoVivo = false) {
-  const souTimeA = extrairTimeId(confronto.timeA) === meuTimeId;
-  const eu = souTimeA ? confronto.timeA : confronto.timeB;
-  const adv = souTimeA ? confronto.timeB : confronto.timeA;
-
-  const meusPts = (eu?.pontos != null) ? parseFloat(eu.pontos) : null;
-  const advPts = (adv?.pontos != null) ? parseFloat(adv.pontos) : null;
-  const pontosDisponiveis = meusPts != null && advPts != null;
-
-  const ganhando = pontosDisponiveis && meusPts > advPts;
-  const perdendo = pontosDisponiveis && meusPts < advPts;
-
-  const statusClass = !pontosDisponiveis
-    ? "empatando"
-    : ganhando
-      ? "passando"
-      : perdendo
-        ? "sendo-eliminado"
-        : "empatando";
-  const statusText = !pontosDisponiveis
-    ? "Aguardando pontos da rodada"
-    : ganhando
-      ? "Você está passando!"
-      : perdendo
-        ? (aoVivo ? "Você está sendo eliminado" : "Você foi eliminado")
-        : "Empate técnico";
-  const statusIcon = ganhando
-    ? "check_circle"
-    : perdendo
-      ? "warning"
-      : "drag_handle";
-
-  return `
-    <div class="mm-meu-confronto-card">
-      <div class="mm-mc-header-card">
-        <span class="material-symbols-outlined mm-mc-icon ${statusClass}">${ganhando ? "trending_up" : perdendo ? "trending_down" : "remove"}</span>
-        <span class="mm-mc-titulo">Seu Confronto</span>
-      </div>
-
-      <div class="mm-mc-versus">
-        <!-- Meu Time -->
-        <div class="mm-mc-time-card eu">
-          <img class="mm-mc-escudo-card" src="${getEscudoUrl(eu)}" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
-          <div class="mm-mc-time-info">
-            <span class="mm-mc-label">Você</span>
-            <span class="mm-mc-nome-cartoleiro">${escapeHtml(truncate(eu?.nome_cartola || eu?.nome_cartoleiro || "", 14))}</span>
-            <span class="mm-mc-nome">${escapeHtml(truncate(eu?.nome_time || "Meu Time", 16))}</span>
-          </div>
-          <span class="mm-mc-pts ${ganhando ? "vencedor" : perdendo ? "perdedor" : "empate"}">${meusPts != null ? (typeof truncarPontos === 'function' ? truncarPontos(meusPts) : meusPts.toFixed(2)) : '\u2014'}</span>
-        </div>
-
-        <div class="mm-mc-x">VS</div>
-
-        <!-- Adversário -->
-        <div class="mm-mc-time-card adv">
-          <img class="mm-mc-escudo-card" src="${getEscudoUrl(adv)}" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
-          <div class="mm-mc-time-info">
-            <span class="mm-mc-label">Adversário</span>
-            <span class="mm-mc-nome-cartoleiro">${escapeHtml(truncate(adv?.nome_cartola || adv?.nome_cartoleiro || "", 14))}</span>
-            <span class="mm-mc-nome">${escapeHtml(truncate(adv?.nome_time || "Adversário", 16))}</span>
-          </div>
-          <span class="mm-mc-pts ${perdendo ? "vencedor" : ganhando ? "perdedor" : "empate"}">${advPts != null ? (typeof truncarPontos === 'function' ? truncarPontos(advPts) : advPts.toFixed(2)) : '\u2014'}</span>
-        </div>
-      </div>
-
-      <div class="mm-mc-status-card ${statusClass}">
-        <span class="material-symbols-outlined">${statusIcon}</span>
-        <span>${statusText}</span>
-      </div>
-    </div>
-  `;
-}
-
-// =====================================================================
 // RENDER LISTA DE CONFRONTOS EM CARDS
 // =====================================================================
-function renderConfrontosListaCards(confrontos, meuTimeId, fase) {
+function renderConfrontosListaCards(confrontos, meuTimeId, fase, aoVivo = false) {
   let html = "";
 
   if (fase === "final" && confrontos.length > 0) {
@@ -1436,7 +1367,7 @@ function renderConfrontosListaCards(confrontos, meuTimeId, fase) {
           <div class="mm-campeao-time">
             <img class="mm-campeao-escudo" src="${getEscudoUrl(campeao)}" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
             <div class="mm-campeao-info">
-              <p class="mm-campeao-nome">${escapeHtml(campeao.nome_time || "Time")}</p>
+              <p class="mm-campeao-nome">${escapeHtml(campeao.nome_time || campeao.nome || "Time")}</p>
               <p class="mm-campeao-cartola">${escapeHtml(campeao.nome_cartola || campeao.nome_cartoleiro || "")}</p>
               <p class="mm-campeao-pts">${typeof truncarPontos === 'function' ? truncarPontos(ptsCampeao) : ptsCampeao.toFixed(2)} pts</p>
             </div>
@@ -1481,7 +1412,7 @@ function renderConfrontosListaCards(confrontos, meuTimeId, fase) {
           <div class="mm-conf-time ${vencedorA ? "vencedor" : vencedorB ? "perdedor" : ""}">
             <img class="mm-conf-escudo" src="${getEscudoUrl(timeA)}" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
             <div class="mm-conf-info">
-              <span class="mm-conf-nome">${escapeHtml(truncate(timeA.nome_time || "A definir", 14))}</span>
+              <span class="mm-conf-nome">${escapeHtml(truncate(timeA.nome_time || timeA.nome || "A definir", 14))}</span>
               <span class="mm-conf-cartola">${escapeHtml(truncate(timeA.nome_cartola || timeA.nome_cartoleiro || "", 16))}</span>
             </div>
             <span class="mm-conf-pts ${vencedorA ? "vencedor" : vencedorB ? "perdedor" : "empate"}">${ptsA != null ? (typeof truncarPontos === 'function' ? truncarPontos(ptsA) : ptsA.toFixed(2)) : '\u2014'}</span>
@@ -1493,7 +1424,7 @@ function renderConfrontosListaCards(confrontos, meuTimeId, fase) {
           <div class="mm-conf-time ${vencedorB ? "vencedor" : vencedorA ? "perdedor" : ""}">
             <img class="mm-conf-escudo" src="${getEscudoUrl(timeB)}" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
             <div class="mm-conf-info">
-              <span class="mm-conf-nome">${escapeHtml(truncate(timeB.nome_time || "A definir", 14))}</span>
+              <span class="mm-conf-nome">${escapeHtml(truncate(timeB.nome_time || timeB.nome || "A definir", 14))}</span>
               <span class="mm-conf-cartola">${escapeHtml(truncate(timeB.nome_cartola || timeB.nome_cartoleiro || "", 16))}</span>
             </div>
             <span class="mm-conf-pts ${vencedorB ? "vencedor" : vencedorA ? "perdedor" : "empate"}">${ptsB != null ? (typeof truncarPontos === 'function' ? truncarPontos(ptsB) : ptsB.toFixed(2)) : '\u2014'}</span>
@@ -1501,6 +1432,21 @@ function renderConfrontosListaCards(confrontos, meuTimeId, fase) {
         </div>
 
         <div class="mm-conf-diff">Diferença: ${diff} pts</div>
+        ${isMinha && ptsDispo ? `
+          <div class="mm-minha-status ${vencedorA && extrairTimeId(timeA) === meuTimeId || vencedorB && extrairTimeId(timeB) === meuTimeId ? 'passando' : (vencedorA || vencedorB) ? 'eliminado' : 'empate'}">
+            <span class="material-symbols-outlined">${
+              (vencedorA && extrairTimeId(timeA) === meuTimeId) || (vencedorB && extrairTimeId(timeB) === meuTimeId)
+                ? 'check_circle' : (vencedorA || vencedorB) ? 'warning' : 'drag_handle'
+            }</span>
+            <span>${
+              (vencedorA && extrairTimeId(timeA) === meuTimeId) || (vencedorB && extrairTimeId(timeB) === meuTimeId)
+                ? 'Você está passando!'
+                : (vencedorA || vencedorB)
+                  ? (aoVivo ? 'Você está sendo eliminado' : 'Você foi eliminado')
+                  : 'Empate técnico'
+            }</span>
+          </div>
+        ` : ''}
       </div>
     `;
   });
@@ -1893,7 +1839,7 @@ async function carregarConfrontosParciais(container, edicao) {
         timeA: {
           time_id: timeA.timeId,
           timeId: timeA.timeId,
-          nome_time: timeA.nome_time,
+          nome_time: timeA.nome_time || timeA.nome,
           nome_cartola: timeA.nome_cartola,
           nome_cartoleiro: timeA.nome_cartola,
           clube_id: timeA.clube_id,
@@ -1903,7 +1849,7 @@ async function carregarConfrontosParciais(container, edicao) {
         timeB: {
           time_id: timeB.timeId,
           timeId: timeB.timeId,
-          nome_time: timeB.nome_time,
+          nome_time: timeB.nome_time || timeB.nome,
           nome_cartola: timeB.nome_cartola,
           nome_cartoleiro: timeB.nome_cartola,
           clube_id: timeB.clube_id,
@@ -1947,7 +1893,7 @@ async function carregarConfrontosParciais(container, edicao) {
             <div class="mm-conf-time">
               <img class="mm-conf-escudo" src="${getEscudoUrl(timeA)}" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
               <div class="mm-conf-info">
-                <span class="mm-conf-nome">${escapeHtml(truncate(timeA.nome_time || "A definir", 14))}</span>
+                <span class="mm-conf-nome">${escapeHtml(truncate(timeA.nome_time || timeA.nome || "A definir", 14))}</span>
                 <span class="mm-conf-cartola">${escapeHtml(truncate(timeA.nome_cartola || "", 16))}</span>
               </div>
               <span class="mm-conf-pts empate">${posA}º</span>
@@ -1956,7 +1902,7 @@ async function carregarConfrontosParciais(container, edicao) {
             <div class="mm-conf-time">
               <img class="mm-conf-escudo" src="${getEscudoUrl(timeB)}" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">
               <div class="mm-conf-info">
-                <span class="mm-conf-nome">${escapeHtml(truncate(timeB.nome_time || "A definir", 14))}</span>
+                <span class="mm-conf-nome">${escapeHtml(truncate(timeB.nome_time || timeB.nome || "A definir", 14))}</span>
                 <span class="mm-conf-cartola">${escapeHtml(truncate(timeB.nome_cartola || "", 16))}</span>
               </div>
               <span class="mm-conf-pts empate">${posB}º</span>

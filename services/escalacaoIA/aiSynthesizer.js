@@ -12,6 +12,7 @@
  */
 
 import perplexityService from '../perplexityAnalysisService.js';
+import professorPrompt from './professorPrompt.js';
 import NodeCache from 'node-cache';
 
 const cache = new NodeCache({ stdTTL: 1800 }); // 30 min
@@ -104,7 +105,8 @@ function gerarJustificativaLocal(jogador) {
  * @returns {Object} { justificativas: { [atletaId]: string }, resumo: string, usouIA: bool }
  */
 async function gerarJustificativas(cenario, contexto = {}) {
-    const cacheKey = `synth_${cenario.modo}_r${contexto.rodada}`;
+    const modoProfessor = contexto.modoProfessor || false;
+    const cacheKey = `synth_${cenario.modo}_r${contexto.rodada}${modoProfessor ? '_prof' : ''}`;
     const cached = cache.get(cacheKey);
     if (cached) return cached;
 
@@ -123,22 +125,36 @@ async function gerarJustificativas(cenario, contexto = {}) {
 
     if (perplexityService.isDisponivel()) {
         try {
-            console.log(`${LOG_PREFIX} Gerando justificativas via Perplexity...`);
-            const resultado = await perplexityService.gerarJustificativaEscalacao(
-                escalacao.map(j => ({
-                    posicao: j.posicaoAbrev,
-                    nome: j.nome,
-                    clubeAbrev: j.clubeAbrev,
-                    preco: j.preco,
-                    scoreFinal: j.scoreFinal,
-                })),
-                {
-                    rodada: contexto.rodada,
-                    patrimonio: contexto.patrimonio,
-                    modo: cenario.modo,
-                    formacao: cenario.formacao,
-                }
-            );
+            console.log(`${LOG_PREFIX} Gerando justificativas via Perplexity (Modo Professor: ${modoProfessor})...`);
+            
+            let resultado;
+            if (modoProfessor) {
+                console.log(`${LOG_PREFIX} Iniciando Modo Professor...`);
+                const systemPrompt = professorPrompt.getSystemPromptProfessor(cenario.modo);
+                const jogadoresTexto = escalacao
+                    .map(j => `**${j.nome}** (${j.clubeAbrev}) - ${j.posicaoAbrev} | C$ ${j.preco} | Score: ${j.scoreFinal?.toFixed(1)}`)
+                    .join('\n');
+                
+                const userPrompt = `Professor, analise esta escalacao para a rodada ${contexto.rodada} (Modo: ${cenario.modo.toUpperCase()}):\n\n${jogadoresTexto}\n\nExplique a estrategia por tras de cada escolha e de uma aula sobre a rodada.`;
+                
+                resultado = await perplexityService.perguntarPerplexityCustom(userPrompt, systemPrompt, { temperature: 0.4 });
+            } else {
+                resultado = await perplexityService.gerarJustificativaEscalacao(
+                    escalacao.map(j => ({
+                        posicao: j.posicaoAbrev,
+                        nome: j.nome,
+                        clubeAbrev: j.clubeAbrev,
+                        preco: j.preco,
+                        scoreFinal: j.scoreFinal,
+                    })),
+                    {
+                        rodada: contexto.rodada,
+                        patrimonio: contexto.patrimonio,
+                        modo: cenario.modo,
+                        formacao: cenario.formacao,
+                    }
+                );
+            }
 
             if (resultado?.resposta) {
                 // Parsear resposta da IA em justificativas por jogador

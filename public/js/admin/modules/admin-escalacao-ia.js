@@ -17,18 +17,76 @@
     let patrimonioAlteradoManualmente = false;
 
     // =====================================================================
+    // HELPERS MODO PROFESSOR
+    // =====================================================================
+
+    function isModoProfessorAtivo() {
+        return document.getElementById('eia-modo-professor')?.checked || false;
+    }
+
+    /**
+     * Converte **texto** em <strong>texto</strong> (sanitizado).
+     * Escapa HTML antes de converter para evitar XSS.
+     */
+    function formatarJustificativa(texto) {
+        if (!texto) return '';
+        // Escapar HTML
+        const escaped = texto
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+        // Converter **bold**
+        return escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    /**
+     * Extrai a "Lição da Rodada" do texto do resumo.
+     * O professorPrompt pede que a IA termine com uma lição.
+     */
+    function extrairLicaoDaRodada(resumo) {
+        if (!resumo) return null;
+        // Procurar padrões comuns: "Lição da Rodada:", "Lição:", "Dica do Professor:"
+        const regex = /(?:li[çc][aã]o\s*(?:da\s*rodada)?|dica\s*do\s*professor)\s*[:]\s*(.+)/i;
+        const match = resumo.match(regex);
+        if (match) return match[1].trim();
+
+        // Fallback: última frase após ponto final se resumo longo
+        const frases = resumo.split(/\.\s+/);
+        if (frases.length >= 3) {
+            const ultima = frases[frases.length - 1].trim();
+            if (ultima.length > 20) return ultima.replace(/\.$/, '');
+        }
+        return null;
+    }
+
+    // =====================================================================
     // INICIALIZAÇÃO
     // =====================================================================
 
     async function inicializar() {
         console.log('[ESCALACAO-IA] Inicializando módulo v2.0...');
         configurarTabs();
+        configurarToggleProfessor();
         // Rastrear alteração manual do patrimônio pelo usuário
         document.getElementById('eia-patrimonio')?.addEventListener('change', () => {
             patrimonioAlteradoManualmente = true;
         });
         await carregarStatusFontes();
         await tentarAutoLoad();
+    }
+
+    // =====================================================================
+    // TOGGLE MODO PROFESSOR — estado visual do card
+    // =====================================================================
+
+    function configurarToggleProfessor() {
+        const checkbox = document.getElementById('eia-modo-professor');
+        const card = document.getElementById('eia-professor-card');
+        if (!checkbox || !card) return;
+
+        checkbox.addEventListener('change', () => {
+            card.classList.toggle('ativo', checkbox.checked);
+        });
     }
 
     // =====================================================================
@@ -152,9 +210,12 @@
 
         try {
             atualizarLoadingStep('Coletando dados da API Cartola...');
-            const url = patrimonio
-                ? `${API_BASE}/gerar?patrimonio=${patrimonio}&esquemaId=${esquemaId}`
-                : `${API_BASE}/gerar?esquemaId=${esquemaId}`;
+            const modoProfessor = isModoProfessorAtivo();
+            console.log('[ESCALACAO-IA] Modo Professor:', modoProfessor, '| Checkbox:', document.getElementById('eia-modo-professor')?.checked);
+            const params = new URLSearchParams({ esquemaId });
+            if (patrimonio) params.set('patrimonio', patrimonio);
+            if (modoProfessor) params.set('modoProfessor', 'true');
+            const url = `${API_BASE}/gerar?${params}`;
             const resp = await fetch(url);
 
             if (!resp.ok) {
@@ -217,9 +278,11 @@
 
         try {
             atualizarLoadingStep('Limpando cache e re-analisando...');
-            const refreshUrl = patrimonio
-                ? `${API_BASE}/refresh?patrimonio=${patrimonio}&esquemaId=${esquemaId}`
-                : `${API_BASE}/refresh?esquemaId=${esquemaId}`;
+            const modoProfessor = isModoProfessorAtivo();
+            const refreshParams = new URLSearchParams({ esquemaId });
+            if (patrimonio) refreshParams.set('patrimonio', patrimonio);
+            if (modoProfessor) refreshParams.set('modoProfessor', 'true');
+            const refreshUrl = `${API_BASE}/refresh?${refreshParams}`;
             const resp = await fetch(refreshUrl, {
                 method: 'POST',
             });
@@ -311,6 +374,9 @@
         if (elFontes) elFontes.textContent = dadosCompletos?.fontesAtivas?.length || 0;
         if (elResumo) elResumo.textContent = cenario.resumo || '';
 
+        // Lição da Rodada (Modo Professor)
+        renderizarLicaoDaRodada(cenario.resumo);
+
         // Badge anti-confronto
         renderizarBadgeAntiConfronto(cenario);
 
@@ -324,6 +390,8 @@
     function renderizarEscalacao(escalacao, justificativas) {
         const container = document.getElementById('eia-escalacao');
         if (!container) return;
+
+        console.log('[ESCALACAO-IA] Renderizando escalação. modoProfessor:', isModoProfessorAtivo(), '| justificativas:', Object.keys(justificativas || {}).length);
 
         // Ordenar por posição: GOL, LAT, ZAG, MEI, ATA, TEC
         const ordenada = [...escalacao].sort((a, b) => a.posicaoId - b.posicaoId);
@@ -380,7 +448,7 @@
                         <div class="eia-jogador-confianca-bar"
                              style="width: ${confianca}%; background: ${corConfianca};"></div>
                     </div>
-                    ${justificativa ? `<div class="eia-jogador-justificativa">${justificativa}</div>` : ''}
+                    ${justificativa ? `<div class="eia-jogador-justificativa">${isModoProfessorAtivo() ? '<div class="eia-professor-badge"><span class="material-icons">school</span>Dica do Professor</div>' : ''}${formatarJustificativa(justificativa)}</div>` : ''}
                 </div>
             `;
         }).join('');
@@ -475,7 +543,7 @@
                     <div class="eia-jogador-confianca-bar eia-jogador-confianca-bar--luxo"
                          style="width: ${confianca}%;"></div>
                 </div>
-                ${justificativa ? `<div class="eia-jogador-justificativa">${justificativa}</div>` : ''}
+                ${justificativa ? `<div class="eia-jogador-justificativa">${isModoProfessorAtivo() ? '<div class="eia-professor-badge"><span class="material-icons">school</span>Dica do Professor</div>' : ''}${formatarJustificativa(justificativa)}</div>` : ''}
             </div>
         `;
     }
@@ -521,7 +589,7 @@
                     <div class="eia-jogador-confianca-bar"
                          style="width: ${confianca}%; background: ${corConfianca};"></div>
                 </div>
-                ${justificativa ? `<div class="eia-jogador-justificativa">${justificativa}</div>` : ''}
+                ${justificativa ? `<div class="eia-jogador-justificativa">${isModoProfessorAtivo() ? '<div class="eia-professor-badge"><span class="material-icons">school</span>Dica do Professor</div>' : ''}${formatarJustificativa(justificativa)}</div>` : ''}
             </div>
         `;
     }
@@ -564,6 +632,32 @@
         return ` <span class="eia-disp-badge ${config.cls}" title="${tooltip}">
             <span class="material-icons">${config.icon}</span>${config.label}
         </span>`;
+    }
+
+    function renderizarLicaoDaRodada(resumo) {
+        // Remover bloco anterior
+        const anterior = document.getElementById('eia-licao-rodada');
+        if (anterior) anterior.remove();
+
+        if (!isModoProfessorAtivo()) return;
+
+        const licao = extrairLicaoDaRodada(resumo);
+        if (!licao) return;
+
+        const container = document.getElementById('eia-resumo');
+        if (!container) return;
+
+        const bloco = document.createElement('div');
+        bloco.id = 'eia-licao-rodada';
+        bloco.className = 'eia-licao-rodada';
+        bloco.innerHTML = `
+            <div class="eia-licao-header">
+                <span class="material-icons">school</span>
+                <span>Lição da Rodada</span>
+            </div>
+            <p class="eia-licao-texto">${formatarJustificativa(licao)}</p>
+        `;
+        container.appendChild(bloco);
     }
 
     function renderizarFontesAtivas(fontes) {

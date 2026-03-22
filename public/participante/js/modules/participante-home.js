@@ -1217,25 +1217,8 @@ window.toggleLibertaHome = toggleLibertaHome;
 
 // =====================================================================
 // TOGGLE JOGOS/AGENDA DO DIA (Colapsável)
+// ✅ v1.5: Movido para participante-jogos.js (funciona em home + agenda-tabelas)
 // =====================================================================
-function toggleJogosHome() {
-    const section = document.getElementById('jogos-home-section');
-    const content = document.getElementById('jogos-home-content');
-
-    if (!section || !content) return;
-
-    const isExpanded = section.classList.contains('expanded');
-
-    if (isExpanded) {
-        section.classList.remove('expanded');
-        content.classList.add('collapsed');
-    } else {
-        section.classList.add('expanded');
-        content.classList.remove('collapsed');
-    }
-}
-
-window.toggleJogosHome = toggleJogosHome;
 
 // =====================================================================
 // TOGGLE NOTÍCIAS DO TIME (Colapsável)

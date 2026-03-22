@@ -258,12 +258,16 @@ function montarConfrontosPrimeiraFase(rankingBase, pontosRodadaAtual, tamanhoTor
             timeA: {
                 timeId: timeA.timeId,
                 nome: timeA.nome_time || timeA.nome_cartola,
+                nome_time: timeA.nome_time || null,
+                nome_cartola: timeA.nome_cartola || null,
                 pontos: pontosA,
                 rankR2: i + 1,
             },
             timeB: {
                 timeId: timeB.timeId,
                 nome: timeB.nome_time || timeB.nome_cartola,
+                nome_time: timeB.nome_time || null,
+                nome_cartola: timeB.nome_cartola || null,
                 pontos: pontosB,
                 rankR2: tamanhoTorneio - i,
             },

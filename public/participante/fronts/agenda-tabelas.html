@@ -1,21 +1,12 @@
 <!-- AGENDA E TABELAS - Tela dedicada para Jogos do Dia + Tabela Brasileirao -->
-<div id="agenda-tabelas-container" class="p-4 pb-28">
-    <!-- Header com botao voltar -->
-    <div class="flex items-center gap-3 mb-4">
-        <button onclick="window.participanteNav && window.participanteNav.navegarPara('home')"
-                class="w-9 h-9 rounded-xl flex items-center justify-center"
-                style="background: var(--app-glass-bg); border: 1px solid var(--app-glass-border);">
-            <span class="material-icons" style="font-size:20px; color: var(--app-text-muted);">arrow_back</span>
-        </button>
-        <div>
-            <h1 style="font-family: 'Russo One', sans-serif; font-size: 16px; color: white; letter-spacing: 0.3px;">
-                Agenda e Tabelas
-            </h1>
-            <p style="font-size: 10px; color: var(--app-text-dim);">
-                Jogos do dia e tabela do Brasileirao
-            </p>
-        </div>
-    </div>
+<div id="agenda-tabelas-container" class="px-4 pt-2 pb-28">
+    <!-- Botão voltar compacto -->
+    <button onclick="window.participanteNav && window.participanteNav.navegarPara('home')"
+            class="flex items-center gap-1 mb-2 py-1 px-0 bg-transparent border-none cursor-pointer"
+            style="-webkit-tap-highlight-color: transparent;">
+        <span class="material-icons" style="font-size:18px; color: var(--app-text-muted);">arrow_back</span>
+        <span style="font-size: 11px; color: var(--app-text-muted);">Início</span>
+    </button>
 
     <!-- Jogos do Dia (Agenda) -->
     <div id="agenda-jogos-container" class="mb-6">
@@ -33,86 +24,3 @@
         </div>
     </div>
 </div>
-
-<script type="module">
-    (async function() {
-        // Carregar Jogos do Dia
-        try {
-            const mod = await import('/participante/js/modules/participante-jogos.js');
-            const result = await mod.obterJogosAoVivo();
-
-            const jogosContainer = document.getElementById('agenda-jogos-container');
-            if (jogosContainer && result.jogos && result.jogos.length > 0) {
-                // Resolver clube do participante
-                const clubeId = window.participanteAuth?.participante?.participante?.clube_id
-                              || window.participanteAuth?.participante?.clube_id
-                              || null;
-                let clubeInfo = null;
-                if (clubeId && window.getClubesNomeMap) {
-                    const map = window.getClubesNomeMap();
-                    const nome = map[Number(clubeId)];
-                    if (nome && nome !== 'Seu Time') clubeInfo = { clubeId, clubeNome: nome };
-                }
-
-                jogosContainer.innerHTML = mod.renderizarJogosAoVivo(
-                    result.jogos, result.fonte, result.aoVivo, result.atualizadoEm, clubeInfo
-                );
-
-                // Auto-refresh se tem jogos ao vivo
-                if (result.aoVivo) {
-                    mod.iniciarAutoRefresh((novoResult) => {
-                        const c = document.getElementById('agenda-jogos-container');
-                        if (c) {
-                            c.innerHTML = mod.renderizarJogosAoVivo(
-                                novoResult.jogos, novoResult.fonte, novoResult.aoVivo, novoResult.atualizadoEm, clubeInfo
-                            );
-                        }
-                    });
-                }
-            } else if (jogosContainer) {
-                const msg = result.mensagem || 'Sem jogos brasileiros hoje';
-                jogosContainer.innerHTML = `
-                    <div class="rounded-xl p-4 text-center" style="background: var(--app-glass-bg); border: 1px solid var(--app-glass-border);">
-                        <div class="flex items-center justify-center gap-2" style="color: var(--app-text-muted);">
-                            <span class="material-icons text-base" style="color: var(--app-primary);">sports_soccer</span>
-                            <span class="text-xs font-medium">${msg}</span>
-                        </div>
-                    </div>
-                `;
-            }
-        } catch (err) {
-            if (window.Log) Log.warn("AGENDA-TABELAS", "Erro jogos:", err);
-            const jogosContainer = document.getElementById('agenda-jogos-container');
-            if (jogosContainer) {
-                jogosContainer.innerHTML = `
-                    <div class="text-center py-6">
-                        <span class="material-icons text-2xl" style="color: var(--app-text-dim);">sports_soccer</span>
-                        <p class="text-gray-500 mt-2 text-xs">Erro ao carregar jogos</p>
-                    </div>
-                `;
-            }
-        }
-
-        // Carregar Tabela do Brasileirao
-        try {
-            if (window.BrasileiraoTabela) {
-                await window.BrasileiraoTabela.renderizar({
-                    containerId: 'agenda-brasileirao-container',
-                    temporada: new Date().getFullYear()
-                });
-            } else {
-                const container = document.getElementById('agenda-brasileirao-container');
-                if (container) {
-                    container.innerHTML = `
-                        <div class="text-center py-6">
-                            <span class="material-icons text-2xl" style="color: var(--app-text-dim);">table_chart</span>
-                            <p class="text-gray-500 mt-2 text-xs">Tabela nao disponivel</p>
-                        </div>
-                    `;
-                }
-            }
-        } catch (err) {
-            if (window.Log) Log.warn("AGENDA-TABELAS", "Erro brasileirao:", err);
-        }
-    })();
-</script>

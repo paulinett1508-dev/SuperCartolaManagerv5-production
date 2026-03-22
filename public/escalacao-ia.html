@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="css/modules/dashboard-redesign.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Russo+One&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-    <link rel="stylesheet" href="css/modules/admin-escalacao-ia.css?v=2" />
+    <link rel="stylesheet" href="css/modules/admin-escalacao-ia.css?v=6" />
 </head>
 <body>
     <div id="sidebar-placeholder"></div>
@@ -90,6 +90,23 @@
 
         <!-- Fontes Status -->
         <div id="eia-fontes-status" class="eia-fontes-badges" style="margin-bottom: 16px;"></div>
+
+        <!-- Modo Professor — Card independente -->
+        <div class="eia-professor-card" id="eia-professor-card">
+            <label class="eia-professor-toggle" for="eia-modo-professor">
+                <div class="eia-professor-toggle-left">
+                    <span class="material-icons eia-professor-icon">school</span>
+                    <div class="eia-professor-toggle-text">
+                        <span class="eia-professor-toggle-title">Modo Professor</span>
+                        <span class="eia-professor-toggle-desc">Transforma a IA em mentor didático — justificativas estratégicas e Lição da Rodada</span>
+                    </div>
+                </div>
+                <div class="eia-professor-switch-wrapper">
+                    <input type="checkbox" id="eia-modo-professor" class="eia-toggle-input">
+                    <span class="eia-professor-switch"></span>
+                </div>
+            </label>
+        </div>
 
         <!-- Controles -->
         <div class="eia-controles">

@@ -117,11 +117,12 @@
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 8px;
+    max-width: 100%;
 }
 
 @media (min-width: 400px) {
     .rodadas-mini-grid {
-        grid-template-columns: repeat(10, 1fr);
+        grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
     }
 }
 

@@ -283,7 +283,7 @@ export function renderTabelaMataMata(
                   <div class="time-info">
                     <img src="/escudos/${c.timeA.clube_id}.png" class="escudo-img" onerror="this.onerror=null;this.src='/escudos/default.png'">
                     <div class="time-details">
-                      <span class="time-nome">${esc(c.timeA.nome_time)}</span>
+                      <span class="time-nome">${esc(c.timeA.nome_time || c.timeA.nome)}</span>
                       <span class="time-cartoleiro">${esc(c.timeA.nome_cartoleiro || c.timeA.nome_cartola) || "—"}</span>
                     </div>
                   </div>
@@ -305,7 +305,7 @@ export function renderTabelaMataMata(
                   <div class="time-info">
                     <img src="/escudos/${c.timeB.clube_id}.png" class="escudo-img" onerror="this.onerror=null;this.src='/escudos/default.png'">
                     <div class="time-details">
-                      <span class="time-nome">${esc(c.timeB.nome_time)}</span>
+                      <span class="time-nome">${esc(c.timeB.nome_time || c.timeB.nome)}</span>
                       <span class="time-cartoleiro">${esc(c.timeB.nome_cartoleiro || c.timeB.nome_cartola) || "—"}</span>
                     </div>
                   </div>
@@ -394,7 +394,7 @@ export function renderBannerCampeao(
                class="campeao-escudo" 
                onerror="this.onerror=null;this.src='/escudos/default.png'">
           <div class="campeao-detalhes">
-            <div class="campeao-time-nome">${esc(campeao.nome_time)}</div>
+            <div class="campeao-time-nome">${esc(campeao.nome_time || campeao.nome)}</div>
             <div class="campeao-cartoleiro">${esc(campeao.nome_cartoleiro || campeao.nome_cartola) || "—"}</div>
             <div class="campeao-pontos">${(Math.trunc((campeao.pontos||0) * 100) / 100).toFixed(2).replace(".", ",")} pts</div>
             ${timeCoracaoHTML}
@@ -407,7 +407,7 @@ export function renderBannerCampeao(
             <img src="/escudos/${viceCampeao.clube_id}.png" 
                  class="vice-escudo" 
                  onerror="this.onerror=null;this.src='/escudos/default.png'">
-            <span class="vice-nome">${esc(viceCampeao.nome_time)}</span>
+            <span class="vice-nome">${esc(viceCampeao.nome_time || viceCampeao.nome)}</span>
             <span class="vice-pontos">${(Math.trunc((viceCampeao.pontos||0) * 100) / 100).toFixed(2).replace(".", ",")} pts</span>
           </div>
         </div>
