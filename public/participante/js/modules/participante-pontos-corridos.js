@@ -1,3 +1,4 @@
+import { injectModuleLP } from './module-lp-engine.js';
 // PARTICIPANTE PONTOS CORRIDOS - v5.7
 // ✅ v5.7: BYE notice — aviso ao participante quando está de folga na rodada
 // ✅ v5.6: Rodadas futuras navegáveis (bracket a partir da ordem canônica do admin)
@@ -179,6 +180,17 @@ export async function inicializarPontosCorridosParticipante(params = {}) {
 
     const participante = params.participante || window.participanteData || {};
     estadoPC.ligaId = params.ligaId || participante.ligaId;
+
+    injectModuleLP({
+        wrapperId:    'pontos-corridos-lp-wrapper',
+        insertBefore: 'pontosCorridosModule',
+        ligaId:       estadoPC.ligaId,
+        moduloKey:    'pontos_corridos',
+        titulo:       'Pontos Corridos',
+        tagline:      'Campeonato interno estilo Brasileirão',
+        icon:         'format_list_numbered',
+        colorClass:   'module-lp-pontos-corridos',
+    });
     estadoPC.timeId = params.timeId || participante.timeId;
 
     // ✅ AUDIT-FIX: Buscar status mercado ANTES para obter temporada da API
