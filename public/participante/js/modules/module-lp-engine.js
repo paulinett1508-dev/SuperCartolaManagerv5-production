@@ -23,7 +23,7 @@
  * @property {string}   tagline                    - Hero tagline text
  * @property {string}   icon                       - Material Icons name for hero
  * @property {string}   colorClass                 - CSS color-scoping class (e.g. 'module-lp-artilheiro')
- * @property {string}   [premiacaoLabel]            - Label for premiacao accordion. Default: 'Premiacao'
+ * @property {string}   [premiacaoLabel]            - Label for premiacao accordion. Default: 'Premiação'
  * @property {string}   [premiacaoSource]           - 'regra' (default) or 'moduleconfig'
  * @property {Function} [premiacaoModuleConfigFn]   - async (ligaId) => htmlString, used when premiacaoSource='moduleconfig'
  * @property {boolean}  [showPremiacaoAccordion]    - Default true. Pass false to hide the premiacao accordion (e.g. Extrato)
@@ -46,7 +46,7 @@ function _buildLPHtml(config) {
         showPremiacaoAccordion,
     } = config;
 
-    const labelPremio = premiacaoLabel || 'Premiacao';
+    const labelPremio = premiacaoLabel || 'Premiação';
     const mostrarPremio = showPremiacaoAccordion !== false;
 
     const premiacaoAccordionHtml = mostrarPremio ? `
@@ -152,7 +152,7 @@ function _fetchComoFunciona(ligaId, moduloKey) {
 function _premiacaoPlaceholderHtml() {
     return '<div class="lp-premiacao-placeholder" style="display:flex;align-items:center;gap:8px;color:var(--app-text-muted);font-size:var(--app-font-sm);padding:4px 0;">'
         + '<span class="material-icons" style="font-size:18px;opacity:0.6;">info_outline</span>'
-        + 'Premiacao definida pelo organizador da liga'
+        + 'Premiação definida pelo organizador da liga'
         + '</div>';
 }
 
