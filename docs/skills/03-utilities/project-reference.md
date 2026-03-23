@@ -26,7 +26,6 @@ description: Referência detalhada do projeto — MCPs, collections, keyword map
 | "ja existe esse CSS?", "anti-frank", "ative modo anti-frank", "antes de criar CSS", "blindar frontend" | **anti-frankenstein** | Specialist |
 | "git push", "commit", "suba mudanças" | **git-commit-push** | Utility |
 | "reiniciar servidor", "restart" | **restart-server** | Utility |
-| "pull no replit", "deploy", "sincronizar" | **replit-pull** | Utility |
 | "nova sessao", "handover", "retomar" | **newsession** | Utility |
 | "verifique se", "confirme que", "e verdade?" | **fact-checker** | Utility |
 | "ta complexo", "duplicado", "antes de codar" | **ai-problems-detection** | Utility |

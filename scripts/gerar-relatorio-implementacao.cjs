@@ -288,7 +288,7 @@ function renderizarRelatorio(prs) {
 
   md += `### Checklist Rápido de Testes Pós-Pull\n\n`;
   md += '```\n';
-  md += '1. [ ] Reiniciar servidor (restart no Replit)\n';
+  md += '1. [ ] Reiniciar servidor (docker compose restart scm-prod)\n';
   md += '2. [ ] Verificar logs de inicialização (sem erros de require/import)\n';
   md += '3. [ ] Acessar painel admin - verificar menu Ferramentas\n';
   md += '4. [ ] Testar Analisar Participantes (/analisar-participantes.html)\n';

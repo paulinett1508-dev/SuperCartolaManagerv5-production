@@ -14,7 +14,7 @@ if [ -z "$USERNAME" ]; then
   exit 1
 fi
 
-# Try to extract token from git remote (Replit pattern)
+# Try to extract token from git remote
 TOKEN="${GITHUB_TOKEN:-$(git remote get-url origin 2>/dev/null | sed -n 's|https://\(ghp_[^@]*\)@.*|\1|p' || true)}"
 
 TMPFILE=$(mktemp /tmp/gh-profile-XXXXXX.json)

@@ -1,11 +1,11 @@
 ---
 name: restart-server
-description: Reiniciar servidor Node.js no ambiente Replit usando npm run dev
+description: Reiniciar container Docker do servidor na VPS
 ---
 
 # /restart-server - Reiniciar Servidor de Desenvolvimento
 
-Skill para reiniciar o servidor Node.js no ambiente Replit usando `npm run dev`.
+Skill para reiniciar o container Docker do servidor na VPS.
 
 ## Quando Usar
 - Após fazer alterações em arquivos backend (controllers, routes, services)
@@ -46,7 +46,7 @@ else
   echo "📋 Últimas linhas do log:"
   tail -20 /tmp/server.log 2>/dev/null || echo "Log não disponível"
   echo ""
-  echo "💡 Verifique o Replit ou execute manualmente: npm run dev"
+  echo "💡 Execute manualmente: docker compose restart scm-prod"
 fi
 ```
 

@@ -72,7 +72,7 @@ case "$1" in
         ;;
     
     "sync")
-        run_analysis "🔄 Verificar sincronização Replit ↔ GitHub" \
+        run_analysis "🔄 Verificar sincronização VPS ↔ GitHub" \
             "node scripts/analisar-branches-github.js --sync-check"
         ;;
     
@@ -98,7 +98,7 @@ case "$1" in
         echo "  ativas     - Branches em desenvolvimento"
         echo "  sem-merge  - Branches sem merge (não mergeadas)"
         echo "  prs        - Incluir informações de Pull Requests"
-        echo "  sync       - Verificar sincronização Replit ↔ GitHub"
+        echo "  sync       - Verificar sincronização VPS ↔ GitHub"
         echo "  auto-sync  - Sincronizar automaticamente branches atrasadas"
         echo "  stats      - Apenas estatísticas"
         echo "  todas      - Todas as branches com detalhes"

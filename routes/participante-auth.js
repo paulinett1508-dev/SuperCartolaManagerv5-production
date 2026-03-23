@@ -11,18 +11,6 @@ import { getBaseURL } from "../config/base-url.js";
 
 const router = express.Router();
 
-// Middleware de autenticação Replit (Legado/Admin)
-function verificarAutenticacao(req, res, next) {
-    if (req.headers["x-replit-user-id"]) {
-        req.user = {
-            id: req.headers["x-replit-user-id"],
-            name: req.headers["x-replit-user-name"],
-            roles: req.headers["x-replit-user-roles"],
-        };
-        return next();
-    }
-    res.status(401).json({ erro: "Não autenticado" });
-}
 
 // Middleware para verificar sessão de participante ativo
 function verificarSessaoParticipante(req, res, next) {
@@ -770,43 +758,9 @@ router.post("/logout", (req, res) => {
     });
 });
 
-// Rota de extrato do participante (Proxy interno)
-router.get(
-    "/extrato/:timeId/:ligaId",
-    verificarAutenticacao,
-    async (req, res) => {
-        try {
-            const { timeId, ligaId } = req.params;
-            // ... (Mantido código original de proxy interno) ...
-            const extratoUrl = `/api/extrato-cache/${ligaId}/times/${timeId}/cache`;
-
-            // Importar axios dinamicamente se necessário ou usar o global
-            const axios = (await import("axios")).default;
-
-            const baseURL =
-                process.env.BASE_URL ||
-                `http://localhost:${process.env.PORT || 3000}`;
-            const response = await axios.get(`${baseURL}${extratoUrl}`, {
-                params: req.query,
-            });
-
-            res.json(response.data);
-        } catch (error) {
-            console.error(
-                "[PARTICIPANTE-AUTH] Erro ao buscar extrato:",
-                error.message,
-            );
-            res.status(error.response?.status || 500).json({
-                success: false,
-                message: "Erro ao buscar extrato",
-            });
-        }
-    },
-);
-
 // =====================================================================
 // POPUP OAUTH - Para domínios customizados (cross-origin)
-// Fluxo: Popup abre no Replit -> OAuth Globo -> Retorna token -> Janela pai cria sessão local
+// Fluxo: Popup OAuth Globo -> Retorna token -> Janela pai cria sessão local
 // =====================================================================
 
 // GET /globo/popup - Inicia OAuth em modo popup

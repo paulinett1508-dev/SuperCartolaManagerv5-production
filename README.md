@@ -5,7 +5,7 @@ Sistema de gerenciamento de ligas do Cartola FC.
 ## Status
 - ✅ CI/CD Pipeline ativo
 - ✅ Testes automáticos configurados
-- ✅ Deploy automático no Replit
+- ✅ Deploy automático via webhook (VPS)
 ```
 
 **Commit changes:**

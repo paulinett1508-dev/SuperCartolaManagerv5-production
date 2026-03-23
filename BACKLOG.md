@@ -104,7 +104,7 @@ _Próximas sprints - Impacto significativo no sistema_
     **FASE 1: Setup Básico** ✅ CONCLUÍDA
     - [x] Instalar biblioteca: `npm install web-push`
     - [x] Gerar VAPID keys: `npx web-push generate-vapid-keys`
-    - [x] Armazenar keys nos Replit Secrets (`VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`)
+    - [x] Armazenar keys no `.env` (`VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`)
     - [x] Criar collection MongoDB: `push_subscriptions`
     - [x] Criar modelo: `models/PushSubscription.js`
 
@@ -151,9 +151,9 @@ _Próximas sprints - Impacto significativo no sistema_
   - **Considerações Técnicas Críticas:**
     
     **Segurança:**
-    - ⚠️ VAPID keys NUNCA no código, sempre em Replit Secrets
+    - ⚠️ VAPID keys NUNCA no código, sempre em variáveis de ambiente (`.env`)
     - ⚠️ Validar `req.session.usuario` antes de salvar subscription
-    - ⚠️ HTTPS obrigatório (Replit já tem SSL)
+    - ⚠️ HTTPS obrigatório (VPS com SSL via Nginx)
     
     **Compatibilidade:**
     - ✅ Chrome/Edge: Suporte total (desktop + Android)
@@ -197,7 +197,7 @@ _Próximas sprints - Impacto significativo no sistema_
     └── middleware/auth.js                                ✅ MODIFICADO (+2 linhas)
 
     🔧 Config
-    ├── .env (via Replit Secrets)                         ✅ CONFIGURADO
+    ├── .env                                              ✅ CONFIGURADO
     │   ├── VAPID_PUBLIC_KEY
     │   ├── VAPID_PRIVATE_KEY
     │   └── VAPID_SUBJECT (email)
@@ -814,7 +814,7 @@ _Reavaliar periodicamente - Ideias interessantes mas sem cronograma_
       - **SofaScore API** (não oficial): Scraping arriscado
       - **Perplexity AI**: Para consultas pontuais, não real-time
     - [ ] Criar conta e obter API key
-    - [ ] Armazenar em Replit Secrets: `FOOTBALL_API_KEY`
+    - [ ] Armazenar em variável de ambiente: `FOOTBALL_API_KEY`
     
     **FASE 2: Service de Integração** (~3h)
     - [ ] Criar `services/footballApiService.js`:
@@ -1219,11 +1219,11 @@ _Scripts e ferramentas para análise, debug e gestão do projeto_
   - **Descrição:** Script inteligente para análise de branches do repositório GitHub com integração de Pull Requests e verificação de sincronização
   - **Arquivo:** `scripts/analisar-branches-github.js`
   - **Documentação:** `docs/SKILL-ANALISE-BRANCHES.md`
-  - **Workflow:** Claude Code Web → GitHub (PRs) → Replit (sincronização)
+  - **Workflow:** Claude Code → GitHub (PRs) → VPS (deploy automático)
   - **Funcionalidades v2.0:**
     - ✅ **Integração com GitHub API** - Busca PRs automaticamente
     - ✅ **Informações de Pull Request** - Número, status, autor, data de merge
-    - ✅ **Verificação de Sincronização** - Detecta branches desatualizadas no Replit
+    - ✅ **Verificação de Sincronização** - Detecta branches desatualizadas
     - ✅ **Alertas Críticos** - Avisa quando branch atual está atrasada/divergente
     - ✅ Listagem de branches remotas com data e autor
     - ✅ Identificação automática de status (Operante, Implementado, Pendente, Abortado)
@@ -1241,7 +1241,7 @@ _Scripts e ferramentas para análise, debug e gestão do projeto_
     # Com informações de Pull Requests (NOVO v2.0)
     node scripts/analisar-branches-github.js --prs
     
-    # Verificar sincronização Replit ↔ GitHub (NOVO v2.0)
+    # Verificar sincronização VPS ↔ GitHub (NOVO v2.0)
     node scripts/analisar-branches-github.js --sync-check
     
     # Branches de janeiro de 2026 com PRs
@@ -1258,7 +1258,7 @@ _Scripts e ferramentas para análise, debug e gestão do projeto_
     node scripts/analisar-branches-github.js --ajuda
     ```
   - **Status atual:** 100% funcional com integração PR e sync check
-  - **Impacto:** ALTO - Essencial para workflow Claude Code Web → GitHub → Replit
+  - **Impacto:** ALTO - Essencial para workflow Claude Code → GitHub → VPS
   - **Complexidade:** MÉDIA-ALTA (~4h implementadas v1.0 + v2.0)
   - **Changelog v2.0:**
     - GitHub API integration via HTTPS

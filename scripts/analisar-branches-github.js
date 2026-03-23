@@ -10,10 +10,9 @@
  * 5. Permite filtro por intervalo de datas
  * 6. Identifica branches já mergeadas vs. ativas
  * 7. Mostra status de PR (aberto, mergeado, fechado) e número
- * 8. Verifica sincronização Replit ↔ GitHub
- * 
- * Workflow Claude Code Web → GitHub → Replit:
- *   Claude Code Web cria PRs → GitHub armazena → Replit precisa sincronizar
+ * 8. Verifica sincronização VPS ↔ GitHub
+ *
+ * Workflow Claude Code → GitHub → VPS (deploy automático via webhook)
  * 
  * Uso:
  *   node scripts/analisar-branches-github.js                              # Todas as branches
@@ -154,7 +153,7 @@ ${cores.bright}Opções:${cores.reset}
   ${cores.verde}--status <tipo>${cores.reset}     Filtrar por status (operante, implementado, pendente, abortado)
   ${cores.verde}--detalhes${cores.reset}          Mostrar commits de cada branch
   ${cores.verde}--prs${cores.reset}               Buscar info de Pull Requests do GitHub
-  ${cores.verde}--sync-check${cores.reset}        Verificar sincronização Replit ↔ GitHub
+  ${cores.verde}--sync-check${cores.reset}        Verificar sincronização VPS ↔ GitHub
   ${cores.verde}--auto-sync${cores.reset}         Sincronizar automaticamente branches atrasadas
   ${cores.verde}--sem-merge${cores.reset}         Mostrar apenas branches sem merge (não mergeadas)
   ${cores.verde}--ajuda${cores.reset}             Mostrar esta mensagem
@@ -288,7 +287,7 @@ ${cores.bright}Exemplos:${cores.reset}
   }
 
   verificarSincronizacao() {
-    console.log(`${cores.azul}🔄 Verificando sincronização Replit ↔ GitHub...${cores.reset}\n`);
+    console.log(`${cores.azul}🔄 Verificando sincronização VPS ↔ GitHub...${cores.reset}\n`);
 
     const resultados = {
       atualizado: [],

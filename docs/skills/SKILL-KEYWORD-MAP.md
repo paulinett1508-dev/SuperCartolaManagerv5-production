@@ -217,15 +217,6 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 | **Contexto** | Após mudanças backend, servidor não respondendo |
 | **Localização** | `docs/skills/03-utilities/restart-server.md` |
 
-#### replit-pull
-| Tipo | Keywords |
-|------|----------|
-| **Primárias** | `replit pull`, `replit`, `deploy`, `sincronizar replit`, `produção` |
-| **Frases PT-BR** | "pull no replit", "atualizar replit", "puxa no replit", "sincroniza o replit", "manda pro replit", "deploy replit", "publicar", "subir pra produção" |
-| **Contexto** | Enviar código do GitHub para ambiente Replit (produção) |
-| **NÃO confundir** | Git push (GitHub) ≠ Replit pull (deploy para produção) |
-| **Localização** | `docs/skills/03-utilities/replit-pull.md` |
-
 #### newsession
 | Tipo | Keywords |
 |------|----------|
@@ -351,15 +342,6 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 | **Contexto** | Auditoria holística de UI/UX/Design de TODAS as telas do app participante (PWA Mobile) |
 | **NÃO confundir** | Criar tela nova → `frontend-crafter`; Auditar 1 módulo (backend+frontend) → `auditor-module`; Auditoria de cache → `cache-auditor` |
 | **Localização** | `docs/skills/04-project-specific/ux-auditor-app.md` |
-
-#### replit-patterns
-| Tipo | Keywords |
-|------|----------|
-| **Primárias** | `replit`, `deploy`, `limites replit`, `secrets`, `filesystem`, `autoscale`, `produção replit`, `Reserved VM` |
-| **Frases PT-BR** | "limites do replit", "como configurar deploy", "secrets no replit", "filesystem efêmero", "app reiniciando", "502 bad gateway", ".replit config", "replit nix" |
-| **Contexto** | Configuração de deploy, troubleshooting no Replit, limites de plano, secrets management, filesystem efêmero |
-| **NÃO confundir** | Fazer deploy → `replit-pull`; Git push → `git-commit-push` |
-| **Localização** | `docs/skills/04-project-specific/replit-patterns.md` |
 
 #### analise-branches
 | Tipo | Keywords |
@@ -691,7 +673,6 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | "revise esse controller" | `code-inspector` | Code review |
 | "faça um push" | `git-commit-push` | Versionamento |
 | "reinicie o servidor" | `restart-server` | Operação de infra |
-| "atualize o replit" | `replit-pull` | Deploy |
 | "salve o contexto" | `newsession` | Handover de sessão |
 | "tem certeza disso?" | `fact-checker` | Validação de fatos |
 | "antes de codar, verifique" | `ai-problems-detection` | Pré-check |
@@ -765,7 +746,6 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | "parou de funcionar" | `systematic-debugging` | Regressão |
 | "pattern tailwind" | `tailwind-patterns` | Utility classes |
 | "como tratar esse erro?" | `error-handling` | Try/catch patterns |
-| "limites do replit" | `replit-patterns` | Deploy/config Replit |
 | "tá tudo consistente?" | `post-implementation-conformity` | Auditoria pós-implementação |
 | "nada ficou pra trás?" | `post-implementation-conformity` | Conformidade cruzada |
 | "auditar conformidade" | `post-implementation-conformity` | Cross-references + docs |
@@ -804,7 +784,7 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | Nova skill | `skill-creator` → `post-implementation-conformity` → `git-commit-push` |
 | CSS novo (pipeline completo) | `frontend-design` → `anti-frankenstein` → `frontend-crafter` → `post-implementation-conformity` → `git-commit-push` |
 | Refatoração | `Refactor-Monolith` → `code-inspector` → `git-commit-push` |
-| Deploy completo | `git-commit-push` → `replit-pull` → `restart-server` |
+| Deploy completo | `git-commit-push` → `deploy` |
 | Auditoria de módulo | `auditor-module` → `code-inspector` → `cache-auditor` |
 | Auditoria UX pré-release | `ux-auditor-app` → `cache-auditor` → `code-inspector` |
 | Auditoria UX + correção | `ux-auditor-app` → `frontend-crafter` |
@@ -825,7 +805,7 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | Entrega de interface | `frontend-crafter` → `ui-ux-quality-gates` → `ux-auditor-app` |
 | Review arquitetural | `architecture-reviewer` → `code-inspector` → `performance-audit` |
 | Documentação | `system-scribe` |
-| Deploy completo | `git-commit-push` → `replit-pull` |
+| Deploy completo | `git-commit-push` → `deploy` |
 | Consulta API Cartola | `cartola-api` → `fact-checker` |
 | Diagnóstico context-mode | `/ctx-doctor` → `/ctx-stats` → `/ctx-upgrade` (se necessário) |
 | Análise de output grande | `context-mode` (ctx_batch_execute ou ctx_execute_file) → `ctx_search` (follow-up) |

@@ -159,7 +159,7 @@ async function main() {
         const MONGO_URI = process.env.MONGO_URI;
         if (!MONGO_URI) {
             console.error('❌ ERRO: Variável MONGO_URI não configurada!');
-            console.error('   Configure a Secret MONGO_URI nos Replit Secrets.');
+            console.error('   Configure a variável MONGO_URI no arquivo .env.');
             process.exit(1);
         }
 

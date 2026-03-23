@@ -201,7 +201,7 @@ async function analisarParticipantes(opcoes = {}) {
         if (mongoUri) {
             console.log(`   MONGO_URI: Configurada (${mongoUri.substring(0, 20)}...)`);
         } else {
-            console.log(`   MONGO_URI: Não encontrada no .env (provavelmente nos Replit Secrets)`);
+            console.log(`   MONGO_URI: Não encontrada no .env`);
         }
         // ✅ J1 FIX: MONGO_URI_DEV foi descontinuada — banco único cartola-manager
         console.log();
