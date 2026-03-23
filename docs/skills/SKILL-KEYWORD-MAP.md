@@ -435,6 +435,238 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 | **Contexto** | Ampliar capacidades com skills externas |
 | **Localização** | `docs/skills/05-meta/skill-installer.md` |
 
+#### claude-code-project-structure
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `estrutura claude code`, `migration mode`, `auditar .claude`, `reorganizar projeto`, `CLAUDE.md template`, `hooks estrutura`, `skills estrutura` |
+| **Frases PT-BR** | "auditar estrutura do projeto Claude", "reorganizar .claude/", "CLAUDE.md tá ok?", "migration mode", "estrutura de pastas Claude Code", "hooks do projeto", "onboarding Claude Code" |
+| **Contexto** | Auditar ou reorganizar a infraestrutura Claude Code do projeto (.claude/, CLAUDE.md, hooks, skills, MCP) — não o sistema Super Cartola |
+| **Localização** | `/root/.claude/skills/claude-code-project-structure/` (skill global) |
+
+---
+
+### 06 - Agnostic-Core (Skills Genéricas do Ecossistema)
+
+Skills instaladas a partir do `.agnostic-core/` — referência em `.claude/skills/` e `.agnostic-core/skills/`.
+
+#### unit-testing
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `unit test`, `teste unitário`, `jest`, `vitest`, `coverage`, `mock`, `AAA`, `padrão AAA` |
+| **Frases PT-BR** | "escrever teste unitário", "coverage do módulo", "mockar dependência", "testar essa função", "testes passando?", "aumentar cobertura" |
+| **Contexto** | Escrita ou revisão de testes unitários |
+| **Localização** | `.claude/skills/unit-testing/SKILL.md` |
+| **Base agnóstica** | `.agnostic-core/skills/testing/unit-testing.md` |
+
+#### integration-testing
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `integration test`, `teste de integração`, `supertest`, `banco de teste`, `API test` |
+| **Frases PT-BR** | "teste com banco real", "testar endpoint completo", "teste de integração", "API test com supertest" |
+| **Contexto** | Testes que envolvem múltiplas camadas (API + banco, service + cache) |
+| **Localização** | `.claude/skills/integration-testing/SKILL.md` |
+| **Base agnóstica** | `.agnostic-core/skills/testing/integration-testing.md` |
+
+#### tdd-workflow
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `tdd`, `test driven development`, `red green refactor`, `testar primeiro` |
+| **Frases PT-BR** | "usar TDD", "ciclo TDD", "red-green-refactor", "escrever teste antes de implementar", "quando usar TDD" |
+| **Contexto** | Desenvolvimento com ciclo TDD, especialmente lógica de negócio complexa |
+| **Localização** | `.claude/skills/tdd-workflow/SKILL.md` |
+| **Base agnóstica** | `.agnostic-core/skills/testing/tdd-workflow.md` |
+
+#### e2e-testing
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `e2e`, `end to end`, `playwright`, `cypress`, `smoke test`, `Page Object Model` |
+| **Frases PT-BR** | "teste e2e", "testar fluxo completo", "smoke test", "playwright", "teste pós-deploy" |
+| **Contexto** | Testes de fluxo completo, smoke tests pós-deploy |
+| **Localização** | `.claude/skills/e2e-testing/SKILL.md` |
+| **Base agnóstica** | `.agnostic-core/skills/testing/e2e-testing.md` |
+
+#### owasp-checklist
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `owasp`, `owasp top 10`, `injection`, `XSS`, `CSRF`, `SSRF`, `checklist de segurança` |
+| **Frases PT-BR** | "checar owasp", "vulnerabilidades da aplicação", "top 10 owasp", "prevenir injection", "XSS protection" |
+| **Contexto** | Revisão de segurança, pré-deploy, novos endpoints |
+| **NÃO confundir** | Hardening de endpoint específico → `api-hardening`; Auditoria SPARC → `code-inspector` |
+| **Localização** | `.claude/skills/owasp-checklist/SKILL.md` |
+| **Base agnóstica** | `.agnostic-core/skills/security/owasp-checklist.md` |
+
+#### observabilidade
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `observabilidade`, `logs estruturados`, `métricas`, `SLO`, `SLA`, `RED`, `USE`, `tracing`, `alertas` |
+| **Frases PT-BR** | "como monitorar o sistema", "adicionar logs estruturados", "definir SLO", "métricas do app", "alertas de produção", "rastreabilidade" |
+| **Contexto** | Implementar logging, métricas, alertas e tracing no sistema |
+| **Localização** | `.claude/skills/observabilidade/SKILL.md` |
+| **Base agnóstica** | `.agnostic-core/skills/devops/observabilidade.md` |
+
+#### pre-deploy-checklist
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `pre-deploy`, `checklist deploy`, `antes do deploy`, `go-live`, `pré-release` |
+| **Frases PT-BR** | "checklist antes de fazer deploy", "o que verificar antes de subir", "pré-release checklist", "antes do go-live" |
+| **Contexto** | Antes de qualquer deploy em produção |
+| **NÃO confundir** | Procedimento de deploy → `deploy-procedures` |
+| **Localização** | `.claude/skills/pre-deploy-checklist/SKILL.md` |
+| **Base agnóstica** | `.agnostic-core/skills/devops/pre-deploy-checklist.md` |
+
+#### deploy-procedures
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `procedimento de deploy`, `deploy zero-downtime`, `rollback`, `hotfix deploy`, `5 fases deploy` |
+| **Frases PT-BR** | "como fazer o deploy com segurança", "procedimento de rollback", "deploy sem downtime", "hotfix em produção" |
+| **Contexto** | Execução segura de deploy, rollback, hotfix |
+| **Localização** | `.claude/skills/deploy-procedures/SKILL.md` |
+| **Base agnóstica** | `.agnostic-core/skills/devops/deploy-procedures.md` |
+
+#### commit-conventions
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `conventional commits`, `formato de commit`, `feat`, `fix`, `chore`, `breaking change`, `commitlint` |
+| **Frases PT-BR** | "formato do commit", "como escrever mensagem de commit", "conventional commits", "tipo de commit correto" |
+| **Contexto** | Revisão ou padronização de mensagens de commit |
+| **NÃO confundir** | Fazer commit → `git-commit-push` |
+| **Localização** | `.claude/skills/commit-conventions/SKILL.md` |
+| **Base agnóstica** | `.agnostic-core/skills/git/commit-conventions.md` |
+
+#### branching-strategy
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `estratégia de branch`, `git flow`, `trunk based`, `nomenclatura de branch`, `proteção de branch` |
+| **Frases PT-BR** | "como nomear a branch", "strategy de branches", "trunk-based vs gitflow", "proteger main", "PR workflow" |
+| **Contexto** | Definição ou revisão de estratégia de branches |
+| **Localização** | `.claude/skills/branching-strategy/SKILL.md` |
+| **Base agnóstica** | `.agnostic-core/skills/git/branching-strategy.md` |
+
+#### model-routing
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `qual modelo usar`, `opus`, `sonnet`, `haiku`, `model routing`, `roteamento de modelo` |
+| **Frases PT-BR** | "qual Claude usar para isso?", "quando usar Opus?", "quando usar Haiku?", "melhor modelo para essa tarefa" |
+| **Contexto** | Escolher o modelo Claude adequado para cada tipo de tarefa |
+| **Localização** | `.claude/skills/model-routing/SKILL.md` |
+| **Base agnóstica** | `.agnostic-core/skills/ai/model-routing.md` |
+
+#### context-management
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `context rot`, `handover de contexto`, `sessão longa`, `quando fazer compact`, `contexto cheio` |
+| **Frases PT-BR** | "contexto tá ficando grande", "quando fazer /compact?", "handover de sessão", "contexto tá poluído", "contexto fresco" |
+| **Contexto** | Gerenciar contexto em sessões longas, decidir quando compactar ou iniciar nova sessão |
+| **NÃO confundir** | Handover de sessão → `newsession`; Proteção de output → `context-mode` |
+| **Localização** | `.claude/skills/context-management/SKILL.md` |
+| **Base agnóstica** | `.agnostic-core/skills/workflow/context-management.md` |
+
+#### goal-backward-planning
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `goal backward`, `planejamento reverso`, `waves`, `checkpoint protocol`, `Goal→Truths→Artifacts` |
+| **Frases PT-BR** | "planejamento por waves", "planejamento do objetivo para trás", "checkpoint de wave", "definir truths do projeto" |
+| **Contexto** | Planejamento de features ou projetos grandes usando abordagem goal-backward |
+| **Localização** | `.claude/skills/goal-backward-planning/SKILL.md` |
+| **Base agnóstica** | `.agnostic-core/skills/workflow/goal-backward-planning.md` |
+
+#### gestao-de-incidentes
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `incidente`, `outage`, `produção caiu`, `emergência`, `post-mortem`, `on-call` |
+| **Frases PT-BR** | "o app caiu em produção", "incidente em prod", "post-mortem do incidente", "como responder ao outage", "sistema indisponível" |
+| **Contexto** | Resposta a incidentes em produção, post-mortem |
+| **Localização** | `.claude/skills/gestao-de-incidentes/SKILL.md` |
+| **Base agnóstica** | `.agnostic-core/skills/workflow/gestao-de-incidentes.md` |
+
+#### nodejs-patterns
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `padrões node.js`, `graceful shutdown`, `connection pooling`, `env validation`, `MVC node` |
+| **Frases PT-BR** | "padrão MVC node", "graceful shutdown", "validar env vars", "connection pool", "estrutura node correta" |
+| **Contexto** | Implementar padrões Node.js corretos: shutdown, env, pooling |
+| **NÃO confundir** | Express específico → `express-best-practices` |
+| **Localização** | `.claude/skills/nodejs-patterns/SKILL.md` |
+| **Base agnóstica** | `.agnostic-core/skills/nodejs/nodejs-patterns.md` |
+
+#### pre-implementation
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `verificar antes de implementar`, `já existe solução`, `solução mais simples`, `DRY check`, `pre-implementation` |
+| **Frases PT-BR** | "já existe isso no projeto?", "tem solução mais simples?", "verificar antes de criar", "checar duplicação", "antes de implementar" |
+| **Contexto** | Sanity check antes de escrever código novo — detectar duplicação e overengineering |
+| **NÃO confundir** | Detecção de problemas de IA → `ai-problems-detection`; Pré-deploy → `pre-deploy-checklist` |
+| **Localização** | `.claude/skills/pre-implementation/SKILL.md` |
+| **Base agnóstica** | `.agnostic-core/skills/audit/pre-implementation.md` |
+
+#### query-compliance
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `query compliance`, `query segura`, `índice`, `injection prevention`, `transação segura` |
+| **Frases PT-BR** | "essa query tá segura?", "falta índice nessa query", "injection na query", "otimizar essa query", "transação atômica" |
+| **Contexto** | Revisão de queries MongoDB para segurança e performance |
+| **NÃO confundir** | Operações de banco → `db-guardian`; Performance → `performance-audit` |
+| **Localização** | `.claude/skills/query-compliance/SKILL.md` |
+| **Base agnóstica** | `.agnostic-core/skills/database/query-compliance.md` |
+
+#### schema-design
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `design de schema`, `modelagem`, `normalização`, `schema MongoDB`, `índices de schema` |
+| **Frases PT-BR** | "modelar esse schema", "normalizar o banco", "como estruturar essa collection", "schema correto para isso", "migrations seguras" |
+| **Contexto** | Modelagem de schema MongoDB, definição de índices, migrations seguras |
+| **NÃO confundir** | Operações → `db-guardian`; Queries → `query-compliance` |
+| **Localização** | `.claude/skills/schema-design/SKILL.md` |
+| **Base agnóstica** | `.agnostic-core/skills/database/schema-design.md` |
+
+#### rest-api-design
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `REST API design`, `nomenclatura de rota`, `HTTP methods`, `status codes`, `paginação API`, `versionamento API` |
+| **Frases PT-BR** | "nomenclatura das rotas correta?", "qual status code retornar?", "como paginar esse endpoint?", "versionamento de API", "design de REST API" |
+| **Contexto** | Criação ou revisão de design de endpoints REST |
+| **NÃO confundir** | Express middleware → `express-best-practices`; Segurança → `api-hardening` |
+| **Localização** | `.claude/skills/rest-api-design/SKILL.md` |
+| **Base agnóstica** | `.agnostic-core/skills/backend/rest-api-design.md` |
+
+#### caching-strategies
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `estratégias de cache`, `cache-aside`, `L1 L2 L3`, `stale-while-revalidate`, `Redis keys`, `invalidação de cache` |
+| **Frases PT-BR** | "qual estratégia de cache usar?", "cache-aside vs write-through", "como invalidar cache", "camadas de cache", "TTL correto" |
+| **Contexto** | Definição de estratégia de cache: qual camada, qual padrão, qual TTL |
+| **NÃO confundir** | Auditoria de cache existente → `cache-auditor`; Cache stale participante → `cache-sentinel` |
+| **Localização** | `.claude/skills/caching-strategies/SKILL.md` |
+| **Base agnóstica** | `.agnostic-core/skills/performance/caching-strategies.md` |
+
+#### accessibility
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `acessibilidade`, `wcag`, `aria`, `contraste`, `a11y`, `teclado`, `screen reader` |
+| **Frases PT-BR** | "app tá acessível?", "contraste ok?", "navegação por teclado", "aria labels", "WCAG 2.1", "acessibilidade do app" |
+| **Contexto** | Implementar ou auditar acessibilidade WCAG 2.1 AA |
+| **NÃO confundir** | UX completo → `ux-auditor-app`; Quality gates → `ui-ux-quality-gates` |
+| **Localização** | `.claude/skills/accessibility/SKILL.md` |
+| **Base agnóstica** | `.agnostic-core/skills/frontend/accessibility.md` |
+
+---
+
+### Agents Disponíveis (.claude/agents/)
+
+Agentes especializados instalados do agnostic-core. Referenciar pelo path ou ativar via prompt:
+
+| Agent | Função | Path |
+|-------|--------|------|
+| `security-reviewer` | Revisão de segurança com severidades CRITICA/ALTA/MEDIA/BAIXA | `.claude/agents/security-reviewer.md` |
+| `frontend-reviewer` | Revisão HTML/CSS/JS com WCAG 2.1 AA e UX guidelines | `.claude/agents/frontend-reviewer.md` |
+| `test-reviewer` | Coverage, design de testes, status APROVADO/BLOQUEAR | `.claude/agents/test-reviewer.md` |
+| `performance-reviewer` | N+1, índices, cache ausente, prioridade por ROI | `.claude/agents/performance-reviewer.md` |
+| `codebase-mapper` | Gera STACK.md, ARCHITECTURE.md, CONVENTIONS.md, CONCERNS.md | `.claude/agents/codebase-mapper.md` |
+| `migration-validator` | Lock risk, reversibilidade, status APROVADO/AJUSTAR/BLOQUEAR | `.claude/agents/migration-validator.md` |
+| `docs-generator` | README, ADR, CHANGELOG, OpenAPI a partir do código | `.claude/agents/docs-generator.md` |
+| `database-architect` | Schema design, índices, migrations, seleção de ORM | `.claude/agents/database-architect.md` |
+| `devops-engineer` | Deploy, rollback, zero-downtime, emergência | `.claude/agents/devops-engineer.md` |
+
 ---
 
 ## Tabela Rápida de Resolução
@@ -538,6 +770,26 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | "nada ficou pra trás?" | `post-implementation-conformity` | Conformidade cruzada |
 | "auditar conformidade" | `post-implementation-conformity` | Cross-references + docs |
 | "antes de fechar a tarefa" | `post-implementation-conformity` | Validação final |
+| "escrever teste unitário" | `unit-testing` | Padrão AAA + coverage |
+| "teste de integração" | `integration-testing` | Banco isolado + API test |
+| "usar TDD" | `tdd-workflow` | Ciclo Red-Green-Refactor |
+| "smoke test" | `e2e-testing` | Teste pós-deploy |
+| "checkar owasp" | `owasp-checklist` | OWASP Top 10 |
+| "antes do deploy" | `pre-deploy-checklist` | Checklist pré-release |
+| "procedimento de rollback" | `deploy-procedures` | Deploy seguro |
+| "o app caiu" | `gestao-de-incidentes` | Incidente em produção |
+| "logs estruturados" | `observabilidade` | Métricas RED/USE |
+| "qual modelo Claude usar?" | `model-routing` | Opus/Sonnet/Haiku |
+| "formato de commit correto" | `commit-conventions` | Conventional Commits |
+| "nomear a branch" | `branching-strategy` | Trunk-based vs GitFlow |
+| "já existe no projeto?" | `pre-implementation` | Checar duplicação |
+| "essa query tá segura?" | `query-compliance` | Query compliance |
+| "modelar o schema" | `schema-design` | MongoDB schema design |
+| "nomenclatura das rotas" | `rest-api-design` | REST API design |
+| "qual estratégia de cache?" | `caching-strategies` | Cache-aside, L1-L3 |
+| "app tá acessível?" | `accessibility` | WCAG 2.1 AA |
+| "contexto tá grande" | `context-management` | Context rot + handover |
+| "padrão node correto" | `nodejs-patterns` | MVC, graceful shutdown |
 
 ---
 
@@ -577,6 +829,14 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | Consulta API Cartola | `cartola-api` → `fact-checker` |
 | Diagnóstico context-mode | `/ctx-doctor` → `/ctx-stats` → `/ctx-upgrade` (se necessário) |
 | Análise de output grande | `context-mode` (ctx_batch_execute ou ctx_execute_file) → `ctx_search` (follow-up) |
+| Feature com testes TDD | `tdd-workflow` → `code` → `unit-testing` → `integration-testing` |
+| Deploy seguro | `pre-deploy-checklist` → `owasp-checklist` → `deploy-procedures` → `e2e-testing` (smoke) |
+| Incidente em produção | `gestao-de-incidentes` → `observabilidade` → `systematic-debugging` |
+| Nova endpoint REST | `rest-api-design` → `api-hardening` → `express-best-practices` → `query-compliance` |
+| Nova collection MongoDB | `schema-design` → `query-compliance` → `db-guardian` |
+| Mapeamento do codebase | Agente `codebase-mapper` → `architecture-reviewer` |
+| Security review completo | `owasp-checklist` → `api-hardening` → Agente `security-reviewer` |
+| Review de testes | Agente `test-reviewer` → `unit-testing` (gaps) |
 
 ---
 

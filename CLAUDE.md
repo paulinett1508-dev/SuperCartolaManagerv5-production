@@ -142,6 +142,49 @@ Commands: `/liste-pr-github` (filtro por período), `/security-review` (diff con
 - `skill-creator` — Cria, edita e avalia skills
 - `skill-installer` — Instala skills de lista curada ou repositório GitHub
 - `project-reference` — Referência do projeto: MCPs, collections, keyword map
+- `claude-code-project-structure` — Audita e reorganiza a estrutura Claude Code do projeto (`.claude/`, CLAUDE.md, hooks, skills, Migration Mode)
+
+**Agnostic-Core — Skills Genéricas (via `.agnostic-core/`)**
+- `unit-testing` — Padrão AAA, coverage 80%+, mocking, casos de borda
+- `integration-testing` — Banco isolado, testes de API, contratos
+- `tdd-workflow` — Ciclo Red-Green-Refactor, quando aplicar TDD
+- `e2e-testing` — Pirâmide de testes, Playwright, smoke tests pós-deploy
+- `owasp-checklist` — OWASP Top 10 com exemplos de correção por categoria
+- `observabilidade` — Logs estruturados, métricas RED/USE, tracing, alertas
+- `pre-deploy-checklist` — Checklist obrigatório antes de qualquer deploy
+- `deploy-procedures` — 5 fases de deploy: rollback, zero-downtime, smoke tests
+- `commit-conventions` — Conventional Commits: tipos, breaking changes, commitlint
+- `branching-strategy` — Trunk-based vs GitFlow, nomenclatura, proteção de branch
+- `model-routing` — Qual modelo Claude usar: Opus/Sonnet/Haiku por tipo de tarefa
+- `context-management` — Context rot, contextos frescos, handover protocol
+- `goal-backward-planning` — Goal→Truths→Artifacts, waves, checkpoint protocol
+- `gestao-de-incidentes` — Detecção, contenção, resolução e post-mortem de incidentes
+- `nodejs-patterns` — MVC, graceful shutdown, env validation, connection pooling
+- `pre-implementation` — Verificar duplicação e solução mais simples antes de implementar
+- `query-compliance` — Queries seguras, índices, injection prevention, transações
+- `schema-design` — Modelagem MongoDB, normalização, migrations seguras
+- `rest-api-design` — Nomenclatura de rotas, HTTP methods, status codes, paginação
+- `caching-strategies` — Camadas L1-L3, cache-aside, TTL, invalidação, Redis keys
+- `accessibility` — WCAG 2.1 AA: contraste, teclado, ARIA, formulários
+
+**Agents Disponíveis (.claude/agents/)**
+- `security-reviewer` — Revisão de segurança com severidades CRITICA/ALTA/MEDIA/BAIXA
+- `frontend-reviewer` — Revisão HTML/CSS/JS com WCAG 2.1 AA e UX guidelines
+- `test-reviewer` — Coverage, design de testes, status APROVADO/BLOQUEAR
+- `performance-reviewer` — N+1, índices, cache ausente, prioridade por ROI
+- `codebase-mapper` — Gera STACK.md, ARCHITECTURE.md, CONVENTIONS.md, CONCERNS.md
+- `migration-validator` — Reversibilidade, destrutividade, status APROVADO/AJUSTAR/BLOQUEAR
+- `docs-generator` — README, ADR, CHANGELOG, OpenAPI a partir do código
+- `database-architect` — Schema design, seleção de plataforma/ORM, índices, migrations
+- `devops-engineer` — Deploy, infraestrutura, rollback, zero-downtime, emergência
+
+**Slash Commands (.claude/commands/)**
+- `/brainstorm` — Explorar opções antes de implementar
+- `/debug` — Investigação sistemática de bugs
+- `/deploy` — Processo de deploy seguro e verificável
+- `/security-review` — Security review diff-aware do branch atual
+- `/liste-pr-github` — Listar PRs do GitHub por período
+- `/github-profile` — Busca perfil GitHub por username
 
 ## MCPs Disponíveis
 
@@ -188,5 +231,10 @@ Após correção do usuário: registrar em [`.claude/LESSONS.md`](.claude/LESSON
 
 ## Referência Agnostic-Core
 
-Base de conhecimento agnóstica integrada como submodule em `.agnostic-core/`.
+Base de conhecimento agnóstica em `.agnostic-core/` (submodule de `paulinett1508-dev/agnostic-core`).
 Skills, agents e workflows reutilizáveis: [`.agnostic-core/README.md`](.agnostic-core/README.md)
+
+Skills instaladas em `.claude/skills/` a partir do agnostic-core (21 novas skills).
+Agents disponíveis em `.claude/agents/` (9 agentes especializados).
+Guia de integração: [`.agnostic-core/docs/integration-guide.md`](.agnostic-core/docs/integration-guide.md)
+Roteamento de agents: [`.agnostic-core/docs/agent-routing-guide.md`](.agnostic-core/docs/agent-routing-guide.md)
