@@ -130,7 +130,7 @@ function formatarTimestamp(isoString) {
  * @param {string} atualizadoEm - ISO timestamp da última atualização
  * @param {Object|null} clubeInfo - { clubeId, clubeNome } do participante (opcional)
  */
-export function renderizarJogosAoVivo(jogos, fonte = 'soccerdata', aoVivo = false, atualizadoEm = null, clubeInfo = null) {
+export function renderizarJogosAoVivo(jogos, fonte = 'soccerdata', aoVivo = false, atualizadoEm = null, clubeInfo = null, options = {}) {
     if (!jogos || !jogos.length) return '';
 
     // ✅ v5.6: Agenda do dia (agendados) em bloco separado
@@ -161,28 +161,8 @@ export function renderizarJogosAoVivo(jogos, fonte = 'soccerdata', aoVivo = fals
     const totalJogos = jogos.length;
     const jogosAoVivoCount = jogos.filter(j => isJogoAoVivo(j)).length;
 
-    return `
-    <section id="jogos-home-section" class="jogos-home-section mx-4 mb-2">
-        <!-- Header Colapsável Agenda do Dia (Padrão Copa) -->
-        <button class="jogos-home-header" onclick="window.toggleJogosHome && window.toggleJogosHome()">
-            <div class="jogos-home-header-left">
-                <span class="material-icons" style="font-size:1.25rem;color:var(--app-success);">sports_soccer</span>
-                <div>
-                    <h2 class="font-brand text-white text-sm tracking-wide" style="margin:0;line-height:1.2;">Agenda do Dia</h2>
-                    <span class="text-[10px] text-white/70">${totalJogos} jogos · Brasileirão e mais</span>
-                </div>
-                ${jogosAoVivoCount > 0 ? `
-                    <span class="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 ml-2">
-                        <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
-                        ${jogosAoVivoCount} AO VIVO
-                    </span>
-                ` : ''}
-            </div>
-            <span class="material-icons jogos-home-chevron">expand_more</span>
-        </button>
-
-        <!-- Conteúdo Colapsável -->
-        <div class="jogos-home-content collapsed" id="jogos-home-content">
+    // Conteúdo interno (cards por liga, meu time, footer)
+    const conteudoInterno = `
             <div class="space-y-3 p-3">
                 ${meuTimeHtml}
                 ${jogosAgendados.length > 0
@@ -221,7 +201,34 @@ export function renderizarJogosAoVivo(jogos, fonte = 'soccerdata', aoVivo = fals
                     <span class="text-[10px] text-white/30">Dados: ${fonteTexto}</span>
                     ${atualizadoEm ? `<span class="text-[9px] text-white/20">Atualizado: ${formatarTimestamp(atualizadoEm)}</span>` : ''}
                 </div>
+            </div>`;
+
+    // Sem header: retorna apenas o conteúdo (usado na tela agenda-tabelas que já tem header próprio)
+    if (options.semHeader) return conteudoInterno;
+
+    return `
+    <section id="jogos-home-section" class="jogos-home-section mx-4 mb-2">
+        <!-- Header Colapsável Agenda do Dia (Padrão Copa) -->
+        <button class="jogos-home-header" onclick="window.toggleJogosHome && window.toggleJogosHome()">
+            <div class="jogos-home-header-left">
+                <span class="material-icons" style="font-size:1.25rem;color:var(--app-success);">sports_soccer</span>
+                <div>
+                    <h2 class="font-brand text-white text-sm tracking-wide" style="margin:0;line-height:1.2;">Agenda do Dia</h2>
+                    <span class="text-[10px] text-white/70">${totalJogos} jogos · Brasileirão e mais</span>
+                </div>
+                ${jogosAoVivoCount > 0 ? `
+                    <span class="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 ml-2">
+                        <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
+                        ${jogosAoVivoCount} AO VIVO
+                    </span>
+                ` : ''}
             </div>
+            <span class="material-icons jogos-home-chevron">expand_more</span>
+        </button>
+
+        <!-- Conteúdo Colapsável -->
+        <div class="jogos-home-content collapsed" id="jogos-home-content">
+            ${conteudoInterno}
         </div>
     </section>
     `;
