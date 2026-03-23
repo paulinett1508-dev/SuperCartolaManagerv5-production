@@ -8,13 +8,32 @@
         <span style="font-size: 11px; color: var(--app-text-muted);">Início</span>
     </button>
 
-    <!-- Jogos do Dia (Agenda) -->
-    <div id="agenda-jogos-container" class="mb-6">
-        <div class="flex flex-col items-center justify-center py-10">
-            <div class="w-10 h-10 border-4 border-zinc-700 border-t-orange-500 rounded-full animate-spin mb-4"></div>
-            <p class="text-sm text-gray-400">Carregando jogos do dia...</p>
+    <!-- Jogos do Dia (Agenda) — colapsavel -->
+    <section id="agenda-section" class="agenda-section mx-4 mb-2">
+        <button class="agenda-header" id="agenda-header">
+            <div class="agenda-header-left">
+                <div class="agenda-icon">
+                    <span class="material-icons">today</span>
+                </div>
+                <div class="agenda-header-info">
+                    <h2 class="agenda-header-title">Agenda do Dia</h2>
+                    <span class="agenda-header-sub" id="agenda-header-sub">Carregando...</span>
+                </div>
+            </div>
+            <div class="agenda-header-right" id="agenda-header-right">
+                <span class="material-icons agenda-chevron" id="agenda-chevron">expand_more</span>
+            </div>
+        </button>
+
+        <div class="agenda-content collapsed" id="agenda-content">
+            <div id="agenda-jogos-container">
+                <div class="flex flex-col items-center justify-center py-10">
+                    <div class="w-10 h-10 border-4 border-zinc-700 border-t-orange-500 rounded-full animate-spin mb-4"></div>
+                    <p class="text-sm text-gray-400">Carregando jogos do dia...</p>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
 
     <!-- Tabela do Brasileirao -->
     <div id="agenda-brasileirao-container">
