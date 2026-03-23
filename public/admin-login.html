@@ -43,10 +43,10 @@
         width: 200%;
         height: 200%;
         background:
-            radial-gradient(ellipse at 20% 50%, rgba(255, 85, 0, 0.35) 0%, transparent 50%),
-            radial-gradient(ellipse at 80% 20%, rgba(232, 71, 43, 0.25) 0%, transparent 50%),
-            radial-gradient(ellipse at 60% 80%, rgba(255, 107, 53, 0.2) 0%, transparent 50%),
-            radial-gradient(ellipse at 40% 30%, rgba(180, 40, 10, 0.3) 0%, transparent 40%);
+            radial-gradient(ellipse at 20% 50%, rgba(255, 85, 0, 0.6) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 20%, rgba(232, 71, 43, 0.45) 0%, transparent 50%),
+            radial-gradient(ellipse at 60% 80%, rgba(255, 107, 53, 0.4) 0%, transparent 50%),
+            radial-gradient(ellipse at 40% 30%, rgba(180, 40, 10, 0.5) 0%, transparent 40%);
         background-color: var(--surface-bg, #0a0a0a);
         animation: loginGradientShift 12s ease-in-out infinite alternate;
         z-index: 0;
@@ -60,15 +60,7 @@
     }
 
     .login-hero::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        opacity: 0.06;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='1.5'%3E%3Ccircle cx='300' cy='300' r='120'/%3E%3Ccircle cx='300' cy='300' r='8'/%3E%3Cline x1='300' y1='0' x2='300' y2='600'/%3E%3Cline x1='0' y1='300' x2='600' y2='300'/%3E%3Crect x='50' y='180' width='100' height='240' rx='4'/%3E%3Crect x='450' y='180' width='100' height='240' rx='4'/%3E%3Crect x='50' y='230' width='50' height='140' rx='4'/%3E%3Crect x='500' y='230' width='50' height='140' rx='4'/%3E%3Crect x='20' y='20' width='560' height='560' rx='8'/%3E%3C/g%3E%3C/svg%3E");
-        background-size: 500px 500px;
-        background-position: center;
-        background-repeat: no-repeat;
-        z-index: 1;
+        display: none;
     }
 
     .hero-decorations {
@@ -112,21 +104,13 @@
         padding: var(--space-10, 40px);
     }
 
-    .hero-logo {
-        width: 88px; height: 88px;
-        border-radius: var(--radius-xl, 16px);
-        background: var(--surface-white-10, rgba(255, 255, 255, 0.05));
-        border: 1px solid var(--color-primary-border, rgba(255, 85, 0, 0.25));
-        display: flex; align-items: center; justify-content: center;
-        margin: 0 auto 28px;
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+    .hero-logo-img {
+        width: 200px;
+        height: auto;
+        margin: 0 auto 20px;
+        display: block;
+        filter: drop-shadow(0 4px 24px rgba(255, 85, 0, 0.5));
         animation: admin-fade-in-up 0.8s ease-out both;
-    }
-    .hero-logo .material-icons {
-        font-size: 42px;
-        color: var(--color-primary, #FF5500);
-        filter: drop-shadow(0 0 12px rgba(255, 85, 0, 0.5));
     }
 
     .hero-brand {
@@ -435,9 +419,7 @@
         </div>
 
         <div class="hero-content">
-            <div class="hero-logo">
-                <span class="material-icons">sports_soccer</span>
-            </div>
+            <img src="img/newlogo-supercartola.png" alt="Super Cartola" class="hero-logo-img" />
             <h1 class="hero-brand">SUPER <span>CARTOLA</span><br>MANAGER</h1>
             <p class="hero-tagline">Admin Panel</p>
 
@@ -449,10 +431,6 @@
                 <div class="hero-feature">
                     <span class="material-icons">insights</span>
                     Estatisticas em tempo real
-                </div>
-                <div class="hero-feature">
-                    <span class="material-icons">emoji_events</span>
-                    Premiacao automatizada
                 </div>
             </div>
         </div>
