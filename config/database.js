@@ -42,7 +42,7 @@ const MAX_RETRIES = 5;
 const RETRY_DELAY_MS = 3000; // 3 segundos entre tentativas
 
 const connectDB = async () => {
-  // Verificar MONGO_URI a cada tentativa (Replit Secrets podem demorar a sincronizar pós-Republish)
+  // Verificar MONGO_URI a cada tentativa
   let lastError = null;
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {

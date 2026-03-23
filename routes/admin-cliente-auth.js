@@ -4,7 +4,7 @@
  *
  * IMPORTANTE: Este sistema é para clientes que adquiriram o sistema.
  * Eles NÃO são Super Admin, apenas Admin regular.
- * Super Admin sempre autentica via Replit Auth.
+ * Super Admin sempre autentica via Google OAuth.
  */
 import express from "express";
 import bcrypt from "bcryptjs";

@@ -195,7 +195,7 @@ class ParticipanteAuth {
     /**
      * Verifica se o app está em modo manutenção.
      * Se bloqueado, ativa a tela "Calma aê!" (ManutencaoScreen).
-     * Se dev bypass (admin logado via Replit Auth), libera normalmente.
+     * Se dev bypass (admin logado), libera normalmente.
      * v2.3: Limpa window.participanteModulosBloqueados quando manutenção desativada.
      *       Detecta ativação em tempo real via polling de 45s.
      * @returns {boolean} true se app está bloqueado por manutenção

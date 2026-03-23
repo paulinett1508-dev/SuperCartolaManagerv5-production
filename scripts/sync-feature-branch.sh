@@ -1,6 +1,6 @@
 #!/bin/bash
 # =================================================================
-# sync-feature-branch.sh - Sincronizar feature branch no Replit
+# sync-feature-branch.sh - Sincronizar feature branch via Git
 # =================================================================
 # Uso: bash scripts/sync-feature-branch.sh [branch-name]
 # Se não informar branch, detecta automaticamente a branch atual
@@ -117,9 +117,8 @@ echo -e "${BLUE}🔗 Tracking:${NC} $(git config branch.$(git branch --show-curr
 echo ""
 
 # 10. Verificar se precisa restart do servidor
-if [ -f ".replit" ]; then
-    echo -e "${YELLOW}🔄 IMPORTANTE: Reinicie o servidor Replit para aplicar as mudanças${NC}"
-    echo -e "${YELLOW}   Clique no botão ▶️ Stop e depois Run${NC}"
+if false; then
+    # bloco legado removido (era específico do Replit)
     echo ""
 fi
 

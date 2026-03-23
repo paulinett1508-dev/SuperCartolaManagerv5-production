@@ -3,7 +3,7 @@
 // =====================================================================
 // Endpoint PÚBLICO que o app participante consulta para saber se deve
 // exibir a tela "Calma aê!" ou liberar acesso normal.
-// Também suporta dev bypass via sessão admin (Replit Auth).
+// Também suporta dev bypass via sessão admin autenticada.
 // =====================================================================
 
 import express from "express";
@@ -36,7 +36,7 @@ function lerEstado() {
  * Retorna o estado de manutenção para o app participante.
  * Verifica na ordem:
  *   1. Manutenção ativa? Se não → libera
- *   2. Sessão admin (dev bypass via Replit Auth)? → libera com flag devBypass
+ *   2. Sessão admin (dev bypass)? → libera com flag devBypass
  *   3. Participante Premium? → libera com flag premiumBypass
  *   4. TimeId na whitelist? → libera
  *   5. Senão → bloqueado, retorna customização da splash
@@ -50,7 +50,7 @@ router.get("/status", async (req, res) => {
             return res.json({ ativo: false, bloqueado: false });
         }
 
-        // Dev bypass: admin logado via Replit Auth na mesma sessão
+        // Dev bypass: admin logado na mesma sessão
         const isAdmin = !!req.session?.admin;
         if (isAdmin) {
             console.log("[MANUTENCAO-APP] Dev bypass ativo para:", req.session.admin.email);

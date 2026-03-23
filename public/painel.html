@@ -158,6 +158,24 @@
                     </section>
 
                     <!-- ========================================
+                         CREDENCIAL CARTOLA (token manual)
+                         ======================================== -->
+                    <section class="cartola-token-section" id="cartolaTokenSection">
+                        <div class="cartola-token-bar" id="cartolaTokenBar">
+                            <div class="cartola-token-bar-left">
+                                <span class="material-icons cartola-token-icon" id="cartolaTokenIcon">bolt</span>
+                                <div class="cartola-token-info">
+                                    <span class="cartola-token-label">Credencial Cartola FC</span>
+                                    <span class="cartola-token-detail" id="cartolaTokenDetail">Verificando...</span>
+                                </div>
+                            </div>
+                            <button class="cartola-token-btn" id="cartolaTokenBtn" onclick="abrirModalCartolaToken()">
+                                Configurar
+                            </button>
+                        </div>
+                    </section>
+
+                    <!-- ========================================
                          ATALHOS RÁPIDOS (Fase 2)
                          ======================================== -->
                     <section class="quick-actions-section">
@@ -321,6 +339,62 @@
                         <button class="btn-carregar-mais" id="btnCarregarMais" onclick="carregarMaisHistorico()">
                             <span class="material-icons">expand_more</span>
                             Carregar mais
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal Credencial Cartola -->
+            <div class="modal-cartola-token-overlay" id="modalCartolaToken" style="display:none;" onclick="fecharModalCartolaToken(event)">
+                <div class="modal-cartola-token-content" onclick="event.stopPropagation()">
+                    <div class="modal-cartola-token-header">
+                        <div class="modal-cartola-token-title">
+                            <span class="material-icons">bolt</span>
+                            Credencial Cartola FC
+                        </div>
+                        <button class="modal-historico-close" onclick="fecharModalCartolaToken()">
+                            <span class="material-icons">close</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-cartola-token-body">
+                        <!-- Status atual -->
+                        <div class="cartola-token-status-box" id="modalTokenStatusBox">
+                            <span class="material-icons">hourglass_empty</span>
+                            <span>Verificando status...</span>
+                        </div>
+
+                        <div class="cartola-token-steps">
+                            <p class="cartola-token-steps-title">Como obter o token:</p>
+                            <ol class="cartola-token-steps-list">
+                                <li>Acesse <strong>cartola.globo.com</strong> e faça login com sua conta Globo</li>
+                                <li>Pressione <code>F12</code> → aba <strong>Application</strong> → <strong>Cookies</strong> → <code>https://cartola.globo.com</code></li>
+                                <li>Localize o cookie <code>glbid</code> e copie o valor completo</li>
+                            </ol>
+                        </div>
+
+                        <div class="cartola-token-input-group">
+                            <label class="cartola-token-input-label" for="inputGlbToken">Cole o token abaixo:</label>
+                            <input
+                                type="text"
+                                id="inputGlbToken"
+                                class="cartola-token-input"
+                                placeholder="Ex: AT-xxxxxxxxxxxxxxxxxxxxxxxx"
+                                autocomplete="off"
+                                spellcheck="false"
+                            />
+                        </div>
+
+                        <div id="cartolaTokenFeedback" class="cartola-token-feedback" style="display:none;"></div>
+                    </div>
+
+                    <div class="modal-cartola-token-footer">
+                        <button class="cartola-token-btn-revogar" id="btnRevogarToken" onclick="revogarCartolaToken()" style="display:none;">
+                            <span class="material-icons">delete_outline</span>
+                            Revogar
+                        </button>
+                        <button class="cartola-token-btn-salvar" id="btnSalvarToken" onclick="salvarCartolaToken()">
+                            <span class="material-icons">save</span>
+                            Salvar Token
                         </button>
                     </div>
                 </div>
@@ -1679,6 +1753,271 @@
                 })();
             }
         </script>
+
+        <script>
+            // ================================================================
+            // CREDENCIAL CARTOLA — Token Manual
+            // ================================================================
+            (function() {
+                function setStatusBox(box, cssClass, iconName, msg) {
+                    box.className = 'cartola-token-status-box ' + cssClass;
+                    while (box.firstChild) box.removeChild(box.firstChild);
+                    var icon = document.createElement('span');
+                    icon.className = 'material-icons';
+                    icon.textContent = iconName;
+                    var text = document.createElement('span');
+                    text.textContent = msg;
+                    box.appendChild(icon);
+                    box.appendChild(text);
+                }
+
+                function mostrarFeedback(el, tipo, msg) {
+                    if (!el) return;
+                    el.className = 'cartola-token-feedback feedback-' + tipo;
+                    el.textContent = msg;
+                    el.style.display = 'block';
+                }
+
+                async function carregarStatusCartolaToken() {
+                    var bar = document.getElementById('cartolaTokenBar');
+                    var icon = document.getElementById('cartolaTokenIcon');
+                    var detail = document.getElementById('cartolaTokenDetail');
+                    var btn = document.getElementById('cartolaTokenBtn');
+                    if (!bar) return;
+                    try {
+                        var resp = await fetch('/api/admin/auth/cartola-token/status');
+                        if (!resp.ok) return;
+                        var data = await resp.json();
+                        bar.classList.remove('token-ok', 'token-warn', 'token-missing');
+                        if (data.disponivel && !data.expirado) {
+                            bar.classList.add('token-ok');
+                            icon.textContent = 'verified';
+                            detail.textContent = 'Ativo' + (data.email ? ' \u00b7 ' + data.email : '');
+                            btn.textContent = 'Atualizar';
+                        } else if (data.disponivel && data.expirado && data.temRefresh) {
+                            bar.classList.add('token-warn');
+                            icon.textContent = 'warning';
+                            detail.textContent = 'Expirando em breve';
+                            btn.textContent = 'Renovar';
+                        } else {
+                            bar.classList.add('token-missing');
+                            icon.textContent = 'bolt';
+                            detail.textContent = 'Sem credencial \u2014 EscalacaoIA limitada';
+                            btn.textContent = 'Configurar';
+                        }
+                    } catch (e) {
+                        console.warn('[CartolaToken] Erro ao verificar status:', e.message);
+                    }
+                }
+
+                async function atualizarStatusNoModal() {
+                    var box = document.getElementById('modalTokenStatusBox');
+                    var btnRevogar = document.getElementById('btnRevogarToken');
+                    if (!box) return;
+                    try {
+                        var resp = await fetch('/api/admin/auth/cartola-token/status');
+                        var data = resp.ok ? await resp.json() : null;
+                        if (data && data.disponivel && !data.expirado) {
+                            setStatusBox(box, 'status-ok', 'verified', 'Token ativo' + (data.email ? ' \u00b7 ' + data.email : ''));
+                            if (btnRevogar) btnRevogar.style.display = 'inline-flex';
+                        } else if (data && data.temRefresh) {
+                            setStatusBox(box, 'status-warn', 'warning', 'Token expirando \u2014 cole um novo abaixo');
+                            if (btnRevogar) btnRevogar.style.display = 'inline-flex';
+                        } else {
+                            setStatusBox(box, 'status-missing', 'bolt', 'Nenhuma credencial configurada');
+                            if (btnRevogar) btnRevogar.style.display = 'none';
+                        }
+                    } catch(e) {
+                        setStatusBox(box, '', 'error_outline', 'Erro ao verificar');
+                    }
+                }
+
+                window.abrirModalCartolaToken = async function() {
+                    var modal = document.getElementById('modalCartolaToken');
+                    if (!modal) return;
+                    modal.style.display = 'flex';
+                    document.getElementById('inputGlbToken').value = '';
+                    document.getElementById('cartolaTokenFeedback').style.display = 'none';
+                    await atualizarStatusNoModal();
+                };
+
+                window.fecharModalCartolaToken = function(e) {
+                    if (e && e.target !== document.getElementById('modalCartolaToken')) return;
+                    var modal = document.getElementById('modalCartolaToken');
+                    if (modal) modal.style.display = 'none';
+                };
+
+                window.salvarCartolaToken = async function() {
+                    var input = document.getElementById('inputGlbToken');
+                    var feedback = document.getElementById('cartolaTokenFeedback');
+                    var btn = document.getElementById('btnSalvarToken');
+                    var glbToken = input ? input.value.trim() : '';
+                    if (!glbToken) {
+                        mostrarFeedback(feedback, 'error', 'Cole o token antes de salvar.');
+                        return;
+                    }
+                    btn.disabled = true;
+                    btn.textContent = 'Salvando...';
+                    try {
+                        var resp = await fetch('/api/admin/auth/cartola-token', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ glbToken: glbToken }),
+                        });
+                        var data = await resp.json();
+                        if (data.success) {
+                            mostrarFeedback(feedback, 'success', 'Token salvo! EscalacaoIA agora opera com credencial Cartola.');
+                            input.value = '';
+                            await atualizarStatusNoModal();
+                            carregarStatusCartolaToken();
+                        } else {
+                            mostrarFeedback(feedback, 'error', data.message || 'Erro ao salvar token.');
+                        }
+                    } catch(e) {
+                        mostrarFeedback(feedback, 'error', 'Erro de conexao. Tente novamente.');
+                    } finally {
+                        btn.disabled = false;
+                        btn.textContent = 'Salvar Token';
+                    }
+                };
+
+                window.revogarCartolaToken = async function() {
+                    if (!confirm('Revogar a credencial Cartola? A EscalacaoIA ficara sem acesso autenticado.')) return;
+                    var feedback = document.getElementById('cartolaTokenFeedback');
+                    try {
+                        var resp = await fetch('/api/admin/auth/cartola-token', { method: 'DELETE' });
+                        var data = await resp.json();
+                        if (data.success) {
+                            mostrarFeedback(feedback, 'success', 'Credencial revogada.');
+                            await atualizarStatusNoModal();
+                            carregarStatusCartolaToken();
+                        } else {
+                            mostrarFeedback(feedback, 'error', data.message || 'Erro ao revogar.');
+                        }
+                    } catch(e) {
+                        mostrarFeedback(feedback, 'error', 'Erro de conexao.');
+                    }
+                };
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', carregarStatusCartolaToken);
+                } else {
+                    carregarStatusCartolaToken();
+                }
+                document.addEventListener('spa:navigated', carregarStatusCartolaToken);
+            })();
+        </script>
+
+        <style>
+            /* Credencial Cartola - status bar + modal */
+            .cartola-token-section { margin-bottom: var(--space-4); }
+            .cartola-token-bar {
+                display: flex; align-items: center; justify-content: space-between;
+                gap: var(--space-3); padding: var(--space-3) var(--space-4);
+                background: var(--surface-card); border: 1px solid var(--border-subtle);
+                border-radius: var(--radius-lg); transition: var(--transition-normal);
+            }
+            .cartola-token-bar.token-ok { border-color: var(--color-success); background: color-mix(in srgb, var(--color-success) 8%, var(--surface-card)); }
+            .cartola-token-bar.token-warn { border-color: var(--color-warning); background: color-mix(in srgb, var(--color-warning) 8%, var(--surface-card)); }
+            .cartola-token-bar.token-missing { border-color: var(--color-danger); background: color-mix(in srgb, var(--color-danger) 6%, var(--surface-card)); }
+            .cartola-token-bar-left { display: flex; align-items: center; gap: var(--space-3); }
+            .cartola-token-icon { font-size: 20px; color: var(--text-muted); }
+            .token-ok .cartola-token-icon { color: var(--color-success); }
+            .token-warn .cartola-token-icon { color: var(--color-warning); }
+            .token-missing .cartola-token-icon { color: var(--color-danger); }
+            .cartola-token-info { display: flex; flex-direction: column; gap: 2px; }
+            .cartola-token-label { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+            .cartola-token-detail { font-size: 12px; color: var(--text-muted); }
+            .cartola-token-btn {
+                padding: var(--space-2) var(--space-4);
+                background: var(--surface-card-elevated); border: 1px solid var(--border-default);
+                border-radius: var(--radius-md); color: var(--text-primary);
+                font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap;
+                transition: var(--transition-fast);
+            }
+            .cartola-token-btn:hover { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+
+            .modal-cartola-token-overlay {
+                position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+                display: flex; align-items: center; justify-content: center;
+                z-index: 1000; padding: var(--space-4);
+            }
+            .modal-cartola-token-content {
+                background: var(--surface-card); border: 1px solid var(--border-default);
+                border-radius: var(--radius-xl); width: 100%; max-width: 520px;
+                display: flex; flex-direction: column; overflow: hidden;
+            }
+            .modal-cartola-token-header {
+                display: flex; align-items: center; justify-content: space-between;
+                padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--border-subtle);
+            }
+            .modal-cartola-token-title {
+                display: flex; align-items: center; gap: var(--space-2);
+                font-family: var(--font-family-brand); font-size: 16px; color: var(--text-primary);
+            }
+            .modal-cartola-token-body {
+                padding: var(--space-5); display: flex; flex-direction: column; gap: var(--space-4);
+            }
+            .cartola-token-status-box {
+                display: flex; align-items: center; gap: var(--space-2);
+                padding: var(--space-3) var(--space-4); border-radius: var(--radius-md);
+                font-size: 13px; font-weight: 500;
+                background: var(--surface-card-elevated); color: var(--text-muted);
+                border: 1px solid var(--border-subtle);
+            }
+            .cartola-token-status-box.status-ok { background: color-mix(in srgb, var(--color-success) 10%, var(--surface-card)); color: var(--color-success); border-color: var(--color-success); }
+            .cartola-token-status-box.status-warn { background: color-mix(in srgb, var(--color-warning) 10%, var(--surface-card)); color: var(--color-warning); border-color: var(--color-warning); }
+            .cartola-token-status-box.status-missing { background: color-mix(in srgb, var(--color-danger) 8%, var(--surface-card)); color: var(--color-danger); border-color: var(--color-danger); }
+            .cartola-token-steps {
+                background: var(--surface-card-elevated); border-radius: var(--radius-md);
+                padding: var(--space-3) var(--space-4); border: 1px solid var(--border-subtle);
+            }
+            .cartola-token-steps-title {
+                font-size: 12px; font-weight: 600; color: var(--text-muted);
+                text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-2);
+            }
+            .cartola-token-steps-list {
+                margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: var(--space-1);
+            }
+            .cartola-token-steps-list li { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+            .cartola-token-steps-list code {
+                background: var(--surface-overlay-subtle); border-radius: var(--radius-sm);
+                padding: 0 4px; font-family: var(--font-family-mono); font-size: 12px; color: var(--color-primary);
+            }
+            .cartola-token-input-group { display: flex; flex-direction: column; gap: var(--space-2); }
+            .cartola-token-input-label { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+            .cartola-token-input {
+                width: 100%; padding: var(--space-3) var(--space-4);
+                background: var(--surface-card-elevated); border: 1px solid var(--border-default);
+                border-radius: var(--radius-md); color: var(--text-primary);
+                font-family: var(--font-family-mono); font-size: 12px;
+                outline: none; transition: var(--transition-fast); box-sizing: border-box;
+            }
+            .cartola-token-input:focus { border-color: var(--color-primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 20%, transparent); }
+            .cartola-token-feedback { font-size: 13px; padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); }
+            .feedback-success { background: color-mix(in srgb, var(--color-success) 10%, var(--surface-card)); color: var(--color-success); border: 1px solid var(--color-success); }
+            .feedback-error { background: color-mix(in srgb, var(--color-danger) 10%, var(--surface-card)); color: var(--color-danger); border: 1px solid var(--color-danger); }
+            .modal-cartola-token-footer {
+                display: flex; align-items: center; justify-content: flex-end;
+                gap: var(--space-3); padding: var(--space-4) var(--space-5); border-top: 1px solid var(--border-subtle);
+            }
+            .cartola-token-btn-salvar {
+                display: inline-flex; align-items: center; gap: var(--space-2);
+                padding: var(--space-2) var(--space-5); background: var(--color-primary);
+                border: none; border-radius: var(--radius-md); color: #fff;
+                font-size: 14px; font-weight: 600; cursor: pointer; transition: var(--transition-fast);
+            }
+            .cartola-token-btn-salvar:hover:not(:disabled) { background: var(--color-primary-dark); }
+            .cartola-token-btn-salvar:disabled { opacity: 0.6; cursor: not-allowed; }
+            .cartola-token-btn-revogar {
+                display: inline-flex; align-items: center; gap: var(--space-2);
+                padding: var(--space-2) var(--space-4); background: transparent;
+                border: 1px solid var(--color-danger); border-radius: var(--radius-md);
+                color: var(--color-danger); font-size: 13px; font-weight: 500;
+                cursor: pointer; transition: var(--transition-fast); margin-right: auto;
+            }
+            .cartola-token-btn-revogar:hover { background: color-mix(in srgb, var(--color-danger) 10%, transparent); }
+        </style>
 
     </body>
 </html>

@@ -2,7 +2,7 @@
  * Configuração Google OAuth para Admin
  * Super Cartola Manager
  *
- * Substitui o Replit Auth como provider de autenticação admin.
+ * Provider de autenticação admin via Google OAuth.
  * Mantém a mesma shape de sessão (req.session.admin) para compatibilidade
  * total com middleware/auth.js e todas as rotas existentes.
  */
@@ -70,8 +70,7 @@ function configurarGoogleOAuth() {
             console.warn("[GOOGLE-OAUTH] Erro ao buscar MongoDB admin_id:", dbErr.message);
           }
 
-          // Shape IDENTICA ao que replit-auth.js montava
-          // Isso garante compatibilidade com middleware/auth.js e todas as rotas
+          // Shape da sessão admin — compatível com middleware/auth.js e todas as rotas
           const user = {
             id: profile.id,
             _id: mongoAdminId,          // MongoDB _id para filtro de tenant
@@ -105,7 +104,7 @@ function configurarGoogleOAuth() {
 
 /**
  * Registra as rotas de autenticação Google OAuth
- * Mesmos paths que replit-auth.js usava para zero mudança no frontend
+ * Registra as rotas de autenticação Google OAuth
  */
 export function setupGoogleAuthRoutes(app) {
   app.set("trust proxy", 1);
@@ -186,7 +185,7 @@ export function setupGoogleAuthRoutes(app) {
         return res.redirect("/?error=unauthorized");
       }
 
-      // Setar sessao admin (mesma shape que replit-auth usava)
+      // Setar sessao admin
       req.session.admin = req.user;
 
       // Pega o redirect da sessao (se existir) e limpa

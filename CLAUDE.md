@@ -16,7 +16,7 @@ Detalhes completos: [`docs/references/protocolo-planejamento.md`](docs/reference
 
 ## Tech Stack
 
-Node.js (Replit) · MongoDB (Native Driver) · HTML5/CSS3/Vanilla JS (ES6 Modules) · TailwindCSS (CDN) · MVC
+Node.js (Docker/VPS) · MongoDB (Native Driver) · HTML5/CSS3/Vanilla JS (ES6 Modules) · TailwindCSS (CDN) · MVC
 
 ## Coding Standards
 
@@ -134,9 +134,6 @@ Commands: `/liste-pr-github` (filtro por período), `/security-review` (diff con
 
 **Utilitários / DevOps**
 - `git-commit-push` — Commits e pushes automatizados com mensagens descritivas
-- `replit-patterns` — Padrões, limites e boas práticas para deploy no Replit
-- `replit-pull` — Sincroniza código do GitHub com o ambiente Replit (produção)
-- `restart-server` — Reinicia servidor Node.js no Replit via npm run dev
 - `delete-merged-branches` — Higienização de branches remotas já mergeadas
 - `skill-analise-branches` — Análise de branches do GitHub
 - `skill-creator` — Cria, edita e avalia skills

@@ -4,7 +4,7 @@
 /**
  * 🕐 SCRIPT DE CONSOLIDAÇÃO AUTOMÁTICA
  * 
- * Roda automaticamente via Scheduled Deployment do Replit
+ * Roda automaticamente via cron na VPS
  * Agenda sugerida: "Toda segunda-feira às 9h" (cron: 0 9 * * 1)
  * 
  * Este script consolida a rodada anterior quando o mercado fecha

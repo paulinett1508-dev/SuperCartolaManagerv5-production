@@ -178,7 +178,7 @@ router.post("/admins", requireSuperAdmin, async (req, res) => {
             });
         }
 
-        // Nota: Para persistir, precisa adicionar nos Secrets do Replit
+        // Nota: Para persistir, precisa adicionar na variavel de ambiente ADMIN_EMAILS no .env
         // SUPER_ADMIN_EMAILS é readonly (vem de env), então só logamos
         if (SUPER_ADMIN_EMAILS.includes(emailLower)) {
             console.log(`[ADMIN-GESTAO] Email ${emailLower} já é Super Admin via env`);
@@ -204,7 +204,7 @@ router.post("/admins", requireSuperAdmin, async (req, res) => {
                 id: result.insertedId,
                 ...novoAdmin
             },
-            nota: "Lembre-se de adicionar este email na variavel ADMIN_EMAILS nos Secrets do Replit para persistir"
+            nota: "Lembre-se de adicionar este email na variavel de ambiente ADMIN_EMAILS no .env para persistir"
         });
 
     } catch (error) {

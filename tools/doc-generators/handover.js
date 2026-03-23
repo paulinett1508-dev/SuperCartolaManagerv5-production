@@ -307,7 +307,7 @@ class ProjectHandover {
     return `# 🚀 PROJECT HANDOVER
 
 **Data:** ${new Date().toLocaleDateString("pt-BR")}  
-**Ambiente:** Replit
+**Ambiente:** VPS (Docker)
 
 ## 📋 RESUMO EXECUTIVO
 
@@ -347,7 +347,7 @@ ${this.apis.length ? this.apis.map((api) => `- \`${api}\``).join("\n") : "- Nenh
 
 ## 🚀 COMO INICIAR
 
-1. **Clone/Fork o projeto no Replit**
+1. **Clone o projeto**
 2. **Instale dependências:**
    ${this.getInstallCommand()}
 3. **Configure variáveis de ambiente**
@@ -366,7 +366,7 @@ ${this.apis.length ? this.apis.map((api) => `- \`${api}\``).join("\n") : "- Nenh
 ### Problemas Comuns
 - **Erro de dependências:** Execute \`npm install\` ou \`pip install -r requirements.txt\`
 - **Variáveis não definidas:** Verifique arquivo \`.env\`
-- **Porta ocupada:** Mude a porta no Replit ou no código
+- **Porta ocupada:** Mude a porta no `.env` ou no código
 
 ---
 *Handover gerado automaticamente em ${new Date().toLocaleString("pt-BR")}*`;
