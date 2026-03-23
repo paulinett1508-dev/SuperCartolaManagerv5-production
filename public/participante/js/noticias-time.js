@@ -1,8 +1,8 @@
 // =====================================================================
-// noticias-time.js - Notícias personalizadas do time do coração v1.0
+// noticias-time.js - Notícias personalizadas do time do coração v2.0
 // =====================================================================
 // Componente reutilizável que exibe notícias do clube favorito
-// Usado na Home e na tela de Manutenção
+// Usado na Home (completo), Manutenção (compacto) e Página dedicada (pagina)
 // =====================================================================
 
 const NoticiasTime = {
@@ -57,8 +57,9 @@ const NoticiasTime = {
      * @param {string} options.containerId - ID do elemento container
      * @param {number} [options.limite=5] - Quantidade máxima de notícias
      * @param {string} [options.modo='completo'] - 'completo' ou 'compacto'
+     * @param {boolean} [options.pagina=false] - true = página dedicada com hero
      */
-    async renderizar({ clubeId, containerId, limite = 5, modo = 'completo' }) {
+    async renderizar({ clubeId, containerId, limite = 5, modo = 'completo', pagina = false }) {
         const container = document.getElementById(containerId);
         if (!container) return;
 
@@ -68,55 +69,115 @@ const NoticiasTime = {
         }
 
         // Loading
-        container.innerHTML = this._renderLoading(modo);
+        container.innerHTML = this._renderLoading(modo, pagina);
 
         const resultado = await this.buscarNoticias(clubeId);
 
         if (resultado.erro || !resultado.noticias.length) {
-            container.innerHTML = this._renderVazio(resultado.clube, modo);
+            container.innerHTML = pagina
+                ? this._renderVazioPagina(resultado.clube)
+                : this._renderVazio(resultado.clube, modo);
+            if (pagina) this._setThemeVars(container, clubeId);
             return;
         }
 
         const noticias = resultado.noticias.slice(0, limite);
-        container.innerHTML = modo === 'compacto'
-            ? this._renderCompacto(noticias, resultado.clube, clubeId)
-            : this._renderCompleto(noticias, resultado.clube, clubeId);
+
+        if (pagina) {
+            container.innerHTML = this._renderPagina(noticias, resultado.clube, clubeId);
+            this._setThemeVars(container, clubeId);
+        } else {
+            container.innerHTML = modo === 'compacto'
+                ? this._renderCompacto(noticias, resultado.clube, clubeId)
+                : this._renderCompleto(noticias, resultado.clube, clubeId);
+        }
+    },
+
+    /**
+     * Seta CSS custom properties com cores do time no container
+     */
+    _setThemeVars(container, clubeId) {
+        const cores = this._CLUBES_CORES[Number(clubeId)];
+        if (!cores || !container) return;
+        const hex2rgb = (hex) => {
+            if (!hex || hex.startsWith('var(')) return '55, 65, 81';
+            const h = hex.replace('#', '');
+            return `${parseInt(h.substring(0, 2), 16)}, ${parseInt(h.substring(2, 4), 16)}, ${parseInt(h.substring(4, 6), 16)}`;
+        };
+        container.style.setProperty('--nt-cor1-rgb', hex2rgb(cores.cor1));
+        container.style.setProperty('--nt-cor2-rgb', hex2rgb(cores.cor2));
     },
 
     /**
      * Renderiza loading state
      */
-    _renderLoading(modo) {
+    _renderLoading(modo, pagina) {
+        if (pagina) {
+            return `
+                <div class="nt-skeleton-hero">
+                    <div class="skeleton-box" style="width:60px;height:60px;border-radius:var(--app-radius-lg);flex-shrink:0;"></div>
+                    <div style="flex:1;">
+                        <div class="skeleton-box" style="width:65%;height:18px;border-radius:6px;"></div>
+                        <div class="skeleton-box" style="width:40%;height:11px;border-radius:4px;margin-top:8px;"></div>
+                    </div>
+                </div>
+                <div class="nt-list">
+                    ${[1, 2, 3].map(() => `
+                        <div class="nt-skeleton-card">
+                            <div class="skeleton-box" style="width:28px;height:28px;border-radius:var(--app-radius-md);flex-shrink:0;"></div>
+                            <div style="flex:1;">
+                                <div class="skeleton-box" style="width:100%;height:12px;border-radius:4px;"></div>
+                                <div class="skeleton-box" style="width:70%;height:12px;border-radius:4px;margin-top:6px;"></div>
+                                <div class="skeleton-box" style="width:45%;height:8px;border-radius:4px;margin-top:8px;"></div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>`;
+        }
         if (modo === 'compacto') {
             return `
-                <div style="text-align:center;padding:16px;color:#9ca3af;">
-                    <span class="material-icons" style="animation:spin 1s linear infinite;font-size:20px;">autorenew</span>
+                <div style="text-align:center;padding:16px;color:var(--app-text-muted);">
+                    <span class="material-icons" style="animation:app-spin 0.8s linear infinite;font-size:20px;">autorenew</span>
                     <div style="font-size:0.75rem;margin-top:6px;">Buscando notícias...</div>
                 </div>`;
         }
         return `
             <section class="noticias-home-section mx-4 mb-2">
                 <div style="text-align:center;padding:24px;background:var(--app-surface);border-radius:12px;border:1px solid var(--app-noticias-border);">
-                    <div style="width:32px;height:32px;border:3px solid #374151;border-top-color:#ff6d00;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px;"></div>
-                    <p style="font-size:0.8rem;color:#9ca3af;">Buscando notícias do seu time...</p>
+                    <div class="app-spinner" style="margin:0 auto 12px;"></div>
+                    <p style="font-size:0.8rem;color:var(--app-text-muted);">Buscando notícias do seu time...</p>
                 </div>
             </section>`;
     },
 
     /**
-     * Renderiza estado vazio (sem notícias)
+     * Renderiza estado vazio (sem notícias) — Home/Manutenção
      */
     _renderVazio(clube, modo) {
         if (modo === 'compacto') return '';
         return `
             <section class="noticias-home-section mx-4 mb-2">
-                <div style="background:#1c1c1e;border-radius:12px;padding:20px;text-align:center;border:1px solid var(--app-noticias-border);">
-                    <span class="material-icons" style="font-size:32px;color:#4b5563;">newspaper</span>
-                    <p style="font-size:0.8rem;color:#6b7280;margin-top:8px;">
+                <div style="background:var(--app-surface-elevated);border-radius:12px;padding:20px;text-align:center;border:1px solid var(--app-noticias-border);">
+                    <span class="material-icons" style="font-size:32px;color:var(--app-text-dim);">newspaper</span>
+                    <p style="font-size:0.8rem;color:var(--app-text-muted);margin-top:8px;">
                         Nenhuma notícia encontrada${clube ? ` sobre ${clube}` : ''} no momento
                     </p>
                 </div>
             </section>`;
+    },
+
+    /**
+     * Renderiza estado vazio — Página dedicada (premium)
+     */
+    _renderVazioPagina(clube) {
+        return `
+            <div class="nt-empty">
+                <div class="nt-empty-icon-wrap">
+                    <span class="material-icons">newspaper</span>
+                </div>
+                <p class="nt-empty-text">Nenhuma notícia encontrada${clube ? ` sobre o ${this._sanitizeHtml(clube)}` : ''}</p>
+                <p class="nt-empty-hint">As notícias serão atualizadas em breve</p>
+            </div>`;
     },
 
     /**
@@ -279,6 +340,56 @@ const NoticiasTime = {
     },
 
     /**
+     * Renderiza página dedicada — Premium v2.0
+     */
+    _renderPagina(noticias, clube, clubeId) {
+        const clubeSanitizado = this._sanitizeHtml(clube);
+
+        const noticiasHTML = noticias.map((noticia, idx) => {
+            const isFirst = idx === 0;
+
+            return `
+                <a href="${this._sanitizeUrl(noticia.link)}" target="_blank" rel="noopener noreferrer"
+                   class="nt-card ${isFirst ? 'nt-card--featured' : ''}">
+                    ${!isFirst ? '<div class="nt-card-accent"></div>' : ''}
+                    <div class="nt-card-body">
+                        <div class="nt-card-badge">
+                            <img src="/escudos/${clubeId}.png" alt="${clubeSanitizado}"
+                                 onerror="this.style.display='none'">
+                        </div>
+                        <div class="nt-card-text">
+                            <h4 class="nt-card-titulo">${this._sanitizeHtml(noticia.titulo)}</h4>
+                            <div class="nt-card-meta">
+                                ${noticia.fonte ? `<span class="nt-card-fonte">${this._sanitizeHtml(noticia.fonte)}</span>` : ''}
+                                ${noticia.tempoRelativo ? `<span class="nt-card-tempo"><span class="material-icons">schedule</span>${noticia.tempoRelativo}</span>` : ''}
+                            </div>
+                        </div>
+                        <span class="material-icons nt-card-arrow">chevron_right</span>
+                    </div>
+                </a>`;
+        }).join('');
+
+        return `
+            <div class="nt-hero">
+                <div class="nt-hero-content">
+                    <img src="/escudos/${clubeId}.png" class="nt-hero-escudo" alt="${clubeSanitizado}"
+                         onerror="this.style.display='none'">
+                    <div class="nt-hero-info">
+                        <h2 class="nt-hero-nome">${clubeSanitizado}</h2>
+                        <div class="nt-hero-stats">
+                            <span class="material-icons">newspaper</span>
+                            <span>${noticias.length} notícia${noticias.length !== 1 ? 's' : ''} recente${noticias.length !== 1 ? 's' : ''}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="nt-hero-accent"></div>
+            </div>
+            <div class="nt-list">
+                ${noticiasHTML}
+            </div>`;
+    },
+
+    /**
      * Renderiza modo compacto (para Manutenção)
      */
     _renderCompacto(noticias, clube, clubeId) {
@@ -343,4 +454,4 @@ const NoticiasTime = {
 // Expor globalmente
 window.NoticiasTime = NoticiasTime;
 
-console.log('[NOTICIAS-TIME] Componente v1.0 carregado');
+console.log('[NOTICIAS-TIME] Componente v2.0 carregado');

@@ -294,7 +294,7 @@
       {
         "path": "public/participante/css/noticias-time.css",
         "loadedBy": ["participante/index.html"],
-        "description": "Componente de noticias do time"
+        "description": "Componente de noticias do time v2.0. Home: .noticias-section, .noticias-item, .noticias-thumbnail, .noticias-titulo, .noticias-meta, .noticias-arrow. Pagina dedicada (prefixo nt-): .nt-themed, .nt-hero, .nt-hero-escudo, .nt-hero-nome, .nt-hero-accent, .nt-list, .nt-card, .nt-card--featured, .nt-card-accent, .nt-card-body, .nt-card-badge, .nt-card-titulo, .nt-card-fonte, .nt-card-tempo, .nt-card-arrow, .nt-skeleton-hero, .nt-skeleton-card, .nt-empty. Keyframe: nt-accent-pulse."
       },
       {
         "path": "public/participante/css/campinho.css",
