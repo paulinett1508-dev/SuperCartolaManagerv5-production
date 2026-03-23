@@ -78,7 +78,7 @@ export async function inicializarAgendaTabelasParticipante() {
             }
 
             jogosContainer.innerHTML = mod.renderizarJogosAoVivo(
-                result.jogos, result.fonte, result.aoVivo, result.atualizadoEm, clubeInfo
+                result.jogos, result.fonte, result.aoVivo, result.atualizadoEm, clubeInfo, { semHeader: true }
             );
             _atualizarHeaderAgenda(result);
 
@@ -88,7 +88,7 @@ export async function inicializarAgendaTabelasParticipante() {
                     const c = document.getElementById('agenda-jogos-container');
                     if (c) {
                         c.innerHTML = mod.renderizarJogosAoVivo(
-                            novoResult.jogos, novoResult.fonte, novoResult.aoVivo, novoResult.atualizadoEm, clubeInfo
+                            novoResult.jogos, novoResult.fonte, novoResult.aoVivo, novoResult.atualizadoEm, clubeInfo, { semHeader: true }
                         );
                         _atualizarHeaderAgenda(novoResult);
                     }
