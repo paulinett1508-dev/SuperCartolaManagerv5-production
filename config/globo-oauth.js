@@ -8,6 +8,9 @@ import { Strategy } from "openid-client/passport";
 import passport from "passport";
 import memoize from "memoizee";
 import { getBaseURL } from "./base-url.js";
+import { getDB } from "./database.js";
+import { isAdminAutorizado, isSuperAdmin as checkSuperAdmin, upsertAdminGloboId } from "./admin-config.js";
+import systemTokenService from "../services/systemTokenService.js";
 
 // =====================================================================
 // CONFIGURACAO GLOBO OIDC
@@ -421,3 +424,153 @@ export function getGloboToken(req) {
 }
 
 export { getGloboOidcConfig };
+
+// =====================================================================
+// SETUP DAS ROTAS OAUTH GLOBO - ADMIN (primary auth)
+// Callback separado do participante para isolar sessões
+// =====================================================================
+export function setupAdminGloboOAuthRoutes(app) {
+
+    function ensureGloboAdminStrategy(config) {
+        const baseURL = getBaseURL();
+        const callbackURL = `${baseURL}/api/admin/oauth/callback`;
+        const strategyName = `globo-admin:${baseURL}`;
+
+        if (!registeredStrategies.has(strategyName)) {
+            log('info', 'Criando strategy admin para baseURL:', baseURL);
+            const strategy = new Strategy(
+                { name: strategyName, config, scope: "openid email profile", callbackURL },
+                verifyGlobo
+            );
+            passport.use(strategy);
+            registeredStrategies.add(strategyName);
+        }
+        return strategyName;
+    }
+
+    // =========================================================
+    // GET /api/admin/auth/cartola-login — inicia fluxo Globo OIDC
+    // =========================================================
+    app.get('/api/admin/auth/cartola-login', async (req, res, next) => {
+        log('info', 'Iniciando login admin via Cartola...');
+        try {
+            const config = await getGloboOidcConfig();
+            const strategyName = ensureGloboAdminStrategy(config);
+
+            if (req.query.redirect) {
+                req.session.redirectAfterLogin = req.query.redirect;
+                req.session.save((err) => {
+                    if (err) log('error', 'Erro ao salvar redirect na sessao admin:', err);
+                    passport.authenticate(strategyName, {
+                        prompt: 'select_account',
+                        scope: ['openid', 'email', 'profile']
+                    })(req, res, next);
+                });
+            } else {
+                passport.authenticate(strategyName, {
+                    prompt: 'select_account',
+                    scope: ['openid', 'email', 'profile']
+                })(req, res, next);
+            }
+        } catch (error) {
+            log('error', 'Erro ao iniciar login Cartola admin:', error.message);
+            res.redirect('/?error=cartola_login_failed');
+        }
+    });
+
+    // =========================================================
+    // GET /api/admin/oauth/callback — recebe tokens da Globo
+    // =========================================================
+    app.get('/api/admin/oauth/callback', async (req, res, next) => {
+        log('info', 'Callback admin OAuth recebido');
+
+        if (req.query.error) {
+            log('error', 'Erro retornado pela Globo (admin):', req.query.error);
+            return res.redirect(`/?error=${encodeURIComponent(req.query.error)}`);
+        }
+
+        try {
+            const config = await getGloboOidcConfig();
+            const strategyName = ensureGloboAdminStrategy(config);
+
+            passport.authenticate(strategyName, {
+                failureRedirect: '/?error=cartola_unauthorized'
+            })(req, res, async (err) => {
+                if (err) {
+                    log('error', 'Erro no callback admin:', err.message);
+                    return res.redirect('/?error=cartola_auth_failed');
+                }
+                if (!req.user) {
+                    return res.redirect('/?error=cartola_no_user');
+                }
+
+                const email = req.user.email;
+                const db = getDB();
+
+                // Verificar autorização admin
+                const autorizado = await isAdminAutorizado(email, db);
+                if (!autorizado) {
+                    log('warn', 'Tentativa de acesso admin nao autorizado via Cartola:', email);
+                    return res.redirect('/?error=unauthorized');
+                }
+
+                // Vincular globo_id ao documento do admin
+                await upsertAdminGloboId(email, req.user.globo_id, db);
+
+                // Buscar _id do admin no MongoDB para filtro multi-tenant
+                let mongoAdminId = null;
+                try {
+                    const adminDoc = await db.collection('admins').findOne(
+                        { email: email.toLowerCase() },
+                        { projection: { _id: 1 } }
+                    );
+                    mongoAdminId = adminDoc?._id?.toString() || null;
+                } catch (_) {}
+
+                // Montar sessão admin — shape compatível com google-oauth.js
+                req.session.admin = {
+                    id: req.user.globo_id,
+                    _id: mongoAdminId,
+                    email,
+                    nome: req.user.nome,
+                    foto: req.user.foto,
+                    provider: 'cartola',
+                    expires_at: req.user.expires_at,
+                    superAdmin: checkSuperAdmin(email),
+                    cartolaAuth: {
+                        globo_id: req.user.globo_id,
+                        glbid: req.user.glbid,
+                        access_token: req.user.access_token,
+                        refresh_token: req.user.refresh_token,
+                        expires_at: req.user.expires_at,
+                    },
+                };
+
+                // Auto-save token de sistema para escalacaoIA
+                try {
+                    await systemTokenService.salvarTokenSistema({ ...req.user });
+                    log('info', 'Token de sistema atualizado após login admin:', email);
+                } catch (e) {
+                    log('warn', 'Falha ao salvar token de sistema (nao bloqueia login):', e.message);
+                }
+
+                const redirectTo = req.session.redirectAfterLogin || '/painel.html';
+                delete req.session.redirectAfterLogin;
+
+                req.session.save((saveErr) => {
+                    if (saveErr) {
+                        log('error', 'Erro ao salvar sessao admin:', saveErr);
+                        return res.redirect('/?error=session');
+                    }
+                    log('info', 'Admin autenticado via Cartola:', email);
+                    res.redirect(redirectTo);
+                });
+            });
+        } catch (error) {
+            log('error', 'Erro no callback admin (catch):', error.message);
+            res.redirect('/?error=cartola_callback_error');
+        }
+    });
+
+    log('info', 'Rotas OAuth Globo Admin configuradas com sucesso');
+}

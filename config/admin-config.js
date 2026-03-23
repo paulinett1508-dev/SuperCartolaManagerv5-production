@@ -185,6 +185,26 @@ export const DEFAULT_LIGA_CONFIG = {
     cards_desabilitados: [],
 };
 
+/**
+ * Vincula globo_id ao documento do admin (chamado após login via Cartola)
+ * Upsert silencioso — falha nunca bloqueia o login
+ *
+ * @param {string} email - Email do admin
+ * @param {string} globo_id - ID Globo retornado pelo OIDC
+ * @param {Object} db - Instância do MongoDB
+ */
+export async function upsertAdminGloboId(email, globo_id, db) {
+    if (!email || !globo_id || !db) return;
+    try {
+        await db.collection('admins').updateOne(
+            { email: email.toLowerCase().trim() },
+            { $set: { globo_id, globo_id_atualizado_em: new Date() } }
+        );
+    } catch (error) {
+        console.error('[admin-config] Erro ao salvar globo_id:', error.message);
+    }
+}
+
 // ============================================================================
 // EXPORTS
 // ============================================================================
