@@ -449,7 +449,10 @@ async function obterResumoParaExibicao(temporada) {
         };
     }
 
-    const rodadaAtual = calendario.obterRodadaAtual();
+    let rodadaAtual = calendario.obterRodadaAtual();
+    const rodadaCartola = await obterRodadaCartola();
+    if (rodadaCartola) rodadaAtual = rodadaCartola;
+
     const proximoJogo = calendario.obterProximoJogo();
     const temAoVivo = calendario.temJogosAoVivo();
 
@@ -517,7 +520,10 @@ async function obterTodasRodadas(temporada) {
 
     // Recalcular rodada_atual dinamicamente (stats do MongoDB podem estar stale)
     // NOTA: ...calendario.stats não funciona em subdocumento Mongoose — extrair explicitamente
-    const rodadaAtualDinamica = calendario.obterRodadaAtual();
+    let rodadaAtualDinamica = calendario.obterRodadaAtual();
+    const rodadaCartolaRodadas = await obterRodadaCartola();
+    if (rodadaCartolaRodadas) rodadaAtualDinamica = rodadaCartolaRodadas;
+
     const s = calendario.stats;
 
     return {
