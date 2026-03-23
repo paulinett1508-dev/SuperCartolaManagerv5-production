@@ -361,6 +361,52 @@ async function sincronizarTabela(temporada, forcar = false) {
 }
 
 // =====================================================================
+// CARTOLA FC — FONTE DE VERDADE PARA RODADA ATUAL
+// =====================================================================
+
+let rodadaCartolaCache = { valor: null, timestamp: 0 };
+const RODADA_CARTOLA_TTL = 5 * 60 * 1000; // 5 minutos
+
+/**
+ * Consulta a API do Cartola FC para obter a rodada atual.
+ * Cache de 5min. AbortController para timeout (node-fetch v3).
+ * @returns {Promise<number|null>}
+ */
+async function obterRodadaCartola() {
+    if (rodadaCartolaCache.valor && Date.now() - rodadaCartolaCache.timestamp < RODADA_CARTOLA_TTL) {
+        return rodadaCartolaCache.valor;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    try {
+        const res = await fetch('https://api.cartola.globo.com/mercado/status', {
+            signal: controller.signal,
+            headers: { 'User-Agent': 'SuperCartolaManager/1.0' },
+        });
+        clearTimeout(timeoutId);
+
+        const data = await res.json();
+        const rodada = data?.rodada_atual;
+
+        if (Number.isInteger(rodada) && rodada >= 1 && rodada <= 38) {
+            rodadaCartolaCache = { valor: rodada, timestamp: Date.now() };
+            return rodada;
+        }
+
+        console.warn('[BRASILEIRAO-SERVICE] Cartola FC retornou rodada invalida:', rodada);
+    } catch (err) {
+        clearTimeout(timeoutId);
+        if (err.name !== 'AbortError') {
+            console.warn('[BRASILEIRAO-SERVICE] Falha ao consultar Cartola FC:', err.message);
+        }
+    }
+
+    return null;
+}
+
+// =====================================================================
 // API PÚBLICA DO SERVICE
 // =====================================================================
 
@@ -403,7 +449,10 @@ async function obterResumoParaExibicao(temporada) {
         };
     }
 
-    const rodadaAtual = calendario.obterRodadaAtual();
+    let rodadaAtual = calendario.obterRodadaAtual();
+    const rodadaCartola = await obterRodadaCartola();
+    if (rodadaCartola) rodadaAtual = rodadaCartola;
+
     const proximoJogo = calendario.obterProximoJogo();
     const temAoVivo = calendario.temJogosAoVivo();
 
@@ -471,7 +520,10 @@ async function obterTodasRodadas(temporada) {
 
     // Recalcular rodada_atual dinamicamente (stats do MongoDB podem estar stale)
     // NOTA: ...calendario.stats não funciona em subdocumento Mongoose — extrair explicitamente
-    const rodadaAtualDinamica = calendario.obterRodadaAtual();
+    let rodadaAtualDinamica = calendario.obterRodadaAtual();
+    const rodadaCartolaRodadas = await obterRodadaCartola();
+    if (rodadaCartolaRodadas) rodadaAtualDinamica = rodadaCartolaRodadas;
+
     const s = calendario.stats;
 
     return {
@@ -685,6 +737,7 @@ export default {
     obterTodasRodadas,
     obterStatus,
     getCartolaId,
+    obterRodadaCartola,
 };
 
 export {
@@ -696,4 +749,5 @@ export {
     obterTodasRodadas,
     obterStatus,
     getCartolaId,
+    obterRodadaCartola,
 };

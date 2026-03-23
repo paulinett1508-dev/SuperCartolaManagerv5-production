@@ -917,3 +917,112 @@
     font-weight: 500;
     color: rgba(255, 255, 255, 0.45);
 }
+
+/* =====================================================================
+   AGENDA DO DIA — Colapsavel (espelha padrao .brasileirao-*)
+   Zero cores hardcoded — usa tokens do design system
+   ===================================================================== */
+
+.agenda-section {
+    padding: 0;
+    position: relative;
+}
+
+.agenda-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--app-glass-bg);
+    border: 1px solid var(--app-glass-border);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.agenda-header:active {
+    opacity: 0.85;
+    transform: scale(0.995);
+}
+
+.agenda-section.expanded .agenda-header {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-color: transparent;
+}
+
+.agenda-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.agenda-header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.agenda-header-title {
+    font-family: 'Russo One', sans-serif;
+    font-size: 13px;
+    color: white;
+    letter-spacing: 0.3px;
+    margin: 0;
+}
+
+.agenda-header-sub {
+    font-size: 10px;
+    color: var(--app-text-muted);
+}
+
+.agenda-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.agenda-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--app-glass-bg);
+    border: 1px solid var(--app-glass-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.agenda-icon .material-icons {
+    font-size: 16px;
+    color: var(--app-primary);
+}
+
+.agenda-chevron {
+    font-size: 20px;
+    color: var(--app-text-muted);
+    transition: transform 0.3s ease;
+}
+
+.agenda-section.expanded .agenda-chevron {
+    transform: rotate(180deg);
+}
+
+.agenda-content {
+    background: var(--app-glass-bg);
+    border: 1px solid var(--app-glass-border);
+    border-top: none;
+    border-bottom-left-radius: 14px;
+    border-bottom-right-radius: 14px;
+    overflow: hidden;
+    max-height: 800px;
+    transition: max-height 0.35s ease;
+}
+
+.agenda-content.collapsed {
+    max-height: 0;
+    border-width: 0;
+}

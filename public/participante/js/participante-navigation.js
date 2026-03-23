@@ -561,7 +561,7 @@ class ParticipanteNavigation {
      */
     _isModuloOpcionalInativo(moduloId) {
         // Módulos de sistema/base: sempre permitidos (inclui sub-módulos como rodada-xray)
-        const modulosPermitidos = ['home', 'boas-vindas', 'extrato', 'ranking', 'rodadas', 'rodada-xray', 'historico', 'configuracoes', 'copa-times-sc', 'copa-2026-mundo', 'regras', 'libertadores', 'copa-brasil'];
+        const modulosPermitidos = ['home', 'boas-vindas', 'extrato', 'ranking', 'rodadas', 'rodada-xray', 'historico', 'configuracoes', 'copa-times-sc', 'copa-2026-mundo', 'regras', 'libertadores', 'copa-brasil', 'info-meu-time', 'agenda-tabelas'];
         if (modulosPermitidos.includes(moduloId)) return false;
 
         // Sem dados de módulos carregados: permitir (graceful degradation)
@@ -1123,6 +1123,7 @@ class ParticipanteNavigation {
             "libertadores": "/participante/js/modules/participante-libertadores.js",
             "copa-brasil": "/participante/js/modules/participante-copa-brasil.js",
             "agenda-tabelas": "/participante/js/modules/participante-agenda-tabelas.js",
+            "info-meu-time": "/participante/js/modules/participante-info-meu-time.js",
         };
 
         const jsPath = modulosPaths[modulo];
