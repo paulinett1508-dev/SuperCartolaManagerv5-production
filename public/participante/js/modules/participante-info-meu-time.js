@@ -58,5 +58,6 @@ export async function inicializarInfoMeuTimeParticipante(payload) {
         containerId: 'info-meu-time-noticias',
         limite: 15,
         modo: 'completo',
+        pagina: true,
     });
 }

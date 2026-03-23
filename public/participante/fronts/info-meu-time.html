@@ -1,4 +1,4 @@
-<!-- INFO MEU TIME - Tela dedicada para noticias do time do coracao -->
+<!-- INFO MEU TIME - Tela dedicada para noticias do time do coracao v2.0 -->
 <div id="info-meu-time-container" class="p-4 pb-28">
     <!-- Header com botao voltar -->
     <div class="flex items-center gap-3 mb-4">
@@ -8,20 +8,20 @@
             <span class="material-icons" style="font-size:20px; color: var(--app-text-muted);">arrow_back</span>
         </button>
         <div>
-            <h1 style="font-family: 'Russo One', sans-serif; font-size: 16px; color: white; letter-spacing: 0.3px;">
+            <h1 style="font-family: var(--app-font-brand), sans-serif; font-size: var(--app-font-lg); color: var(--app-text-primary); letter-spacing: 0.3px;">
                 Info do Meu Time
             </h1>
-            <p id="info-meu-time-subtitle" style="font-size: 10px; color: var(--app-text-dim);">
+            <p id="info-meu-time-subtitle" style="font-size: var(--app-font-xs); color: var(--app-text-dim);">
                 Noticias do seu time do coracao
             </p>
         </div>
     </div>
 
     <!-- Container para noticias (renderizado por NoticiasTime) -->
-    <div id="info-meu-time-noticias">
+    <div id="info-meu-time-noticias" class="nt-themed">
         <div class="flex flex-col items-center justify-center py-16">
-            <div class="w-10 h-10 border-4 border-zinc-700 border-t-orange-500 rounded-full animate-spin mb-4"></div>
-            <p class="text-sm text-gray-400">Carregando noticias...</p>
+            <div class="app-spinner"></div>
+            <p style="font-size: var(--app-font-sm); color: var(--app-text-muted); margin-top: var(--app-space-4);">Carregando noticias...</p>
         </div>
     </div>
 </div>
