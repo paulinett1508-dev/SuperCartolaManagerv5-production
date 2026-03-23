@@ -31,6 +31,7 @@ let statusMercadoAtual = 1;
 let parciaisInfo = null;
 // Ground truth: jogos realmente ao vivo (não apenas status_mercado=2)
 let _aoVivoConfirmado = false;
+let _aoVivoRefreshInterval = null;
 const TEMPORADA_ATUAL = window.ParticipanteConfig?.CURRENT_SEASON || new Date().getFullYear();
 
 // =====================================================================
@@ -170,6 +171,22 @@ export async function inicializarRodadasParticipante({
         ]);
         if (window.Log)
             Log.info("[PARTICIPANTE-RODADAS] 📊 Parciais:", parciaisInfo, "| AO VIVO confirmado:", _aoVivoConfirmado);
+
+        // 2.1. Refresh periódico do status ao vivo (60s) durante rodada ativa
+        if (statusMercadoAtual === 2 && !_aoVivoRefreshInterval) {
+            _aoVivoRefreshInterval = setInterval(async () => {
+                if (statusMercadoAtual !== 2) {
+                    clearInterval(_aoVivoRefreshInterval);
+                    _aoVivoRefreshInterval = null;
+                    return;
+                }
+                const novoAoVivo = window.isRodadaRealmenteAoVivo ? await window.isRodadaRealmenteAoVivo() : false;
+                if (novoAoVivo !== _aoVivoConfirmado) {
+                    _aoVivoConfirmado = novoAoVivo;
+                    if (todasRodadasCache.length) renderizarCardDesempenho(todasRodadasCache);
+                }
+            }, 60_000);
+        }
 
         // 3. Buscar rodadas consolidadas
         const response = await fetch(
@@ -479,8 +496,10 @@ function renderizarCardDesempenho(rodadas) {
 
     const badgeEl = document.getElementById("tempBadgeRodadas");
     if (badgeEl) {
-        if (statusMercadoAtual === 2) {
+        if (statusMercadoAtual === 2 && _aoVivoConfirmado) {
             badgeEl.innerHTML = `${rodadasJogadas + 1} RODADAS <span style="font-size:0.65em;background:#ef4444;color:#fff;padding:1px 5px;border-radius:3px;vertical-align:middle;margin-left:3px;">AO VIVO</span>`;
+        } else if (statusMercadoAtual === 2) {
+            badgeEl.innerHTML = `${rodadasJogadas + 1} RODADAS <span style="font-size:0.65em;background:#f59e0b;color:#000;padding:1px 5px;border-radius:3px;vertical-align:middle;margin-left:3px;">EM ANDAMENTO</span>`;
         } else {
             badgeEl.textContent = `${rodadasJogadas} RODADAS`;
         }
