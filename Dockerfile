@@ -53,6 +53,7 @@ COPY --chown=scm:scm routes/ ./routes/
 COPY --chown=scm:scm services/ ./services/
 COPY --chown=scm:scm utils/ ./utils/
 COPY --chown=scm:scm scripts/ ./scripts/
+COPY --chown=scm:scm jobs/ ./jobs/
 
 # Variáveis de ambiente padrão
 ENV NODE_ENV=production

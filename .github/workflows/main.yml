@@ -21,9 +21,16 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
-    - name: Trigger Replit Deploy
-      run: |
-        curl -X POST \
-          -H "Content-Type: application/json" \
-          -H "X-Replit-Signature: ${{ secrets.REPLIT_WEBHOOK_SECRET }}" \
-          https://replit.com/@paulinett1508/SuperCartolaManagerv5/__repl
+    - name: Deploy to Production VPS
+      uses: appleboy/ssh-action@v1
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        script: |
+          cd /var/www/cartola
+          git pull origin main
+          docker compose build scm-prod
+          docker compose up -d scm-prod
+          echo "Deployed at $(date)"
+          docker logs scm-prod --tail 20

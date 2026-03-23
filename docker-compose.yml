@@ -37,7 +37,9 @@ services:
     container_name: scm-prod
     env_file: .env.prod
     ports:
-      - "3000:3000"
+      - "5000:3000"
+    volumes:
+      - ./data:/app/data
     restart: unless-stopped
     logging:
       driver: "json-file"
