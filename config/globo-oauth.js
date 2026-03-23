@@ -14,6 +14,14 @@ import memoize from "memoizee";
 const GLOBO_ISSUER = "https://goidc.globo.com/auth/realms/globo.com";
 const GLOBO_CLIENT_ID = "cartola-web@apps.globoid";
 
+// URL base do ambiente (mesmo padrao de google-oauth.js)
+function getBaseURL() {
+    if (process.env.BASE_URL) return process.env.BASE_URL;
+    if (process.env.NODE_ENV === "production") return "https://supercartolamanager.com.br";
+    if (process.env.NODE_ENV === "staging") return "https://staging.supercartolamanager.com.br";
+    return "http://localhost:3000";
+}
+
 // Logger especifico para OAuth Globo
 function log(level, message, data = null) {
     const timestamp = new Date().toISOString();
@@ -122,18 +130,21 @@ const verifyGlobo = async (tokens, done) => {
 // =====================================================================
 const registeredStrategies = new Set();
 
-function ensureGloboStrategy(domain, config) {
-    const strategyName = `globo:${domain}`;
+function ensureGloboStrategy(config) {
+    const baseURL = getBaseURL();
+    const callbackURL = `${baseURL}/api/cartola-pro/oauth/callback`;
+    const strategyName = `globo:${baseURL}`;
 
     if (!registeredStrategies.has(strategyName)) {
-        log('info', 'Criando strategy para dominio:', domain);
+        log('info', 'Criando strategy para baseURL:', baseURL);
+        log('info', 'CallbackURL:', callbackURL);
 
         const strategy = new Strategy(
             {
                 name: strategyName,
                 config,
                 scope: "openid email profile",
-                callbackURL: `https://${domain}/api/cartola-pro/oauth/callback`
+                callbackURL
             },
             verifyGlobo
         );
@@ -168,7 +179,7 @@ export function setupGloboOAuthRoutes(router) {
 
         try {
             const config = await getGloboOidcConfig();
-            const strategyName = ensureGloboStrategy(req.hostname, config);
+            const strategyName = ensureGloboStrategy(config);
 
             log('info', 'Redirecionando para login Globo...');
 
@@ -198,7 +209,7 @@ export function setupGloboOAuthRoutes(router) {
 
         try {
             const config = await getGloboOidcConfig();
-            const strategyName = ensureGloboStrategy(req.hostname, config);
+            const strategyName = ensureGloboStrategy(config);
 
             passport.authenticate(strategyName, {
                 failureRedirect: '/participante/?error=oauth_failed'
@@ -312,7 +323,8 @@ export function setupGloboOAuthRoutes(router) {
                 issuer: GLOBO_ISSUER,
                 client_id: GLOBO_CLIENT_ID,
                 hostname: req.hostname,
-                callback_url: `https://${req.hostname}/api/cartola-pro/oauth/callback`,
+                base_url: getBaseURL(),
+                callback_url: `${getBaseURL()}/api/cartola-pro/oauth/callback`,
                 oidc_loaded: !!config,
                 session_has_participante: !!req.session?.participante,
                 session_has_globo_auth: !!req.session?.cartolaProAuth
