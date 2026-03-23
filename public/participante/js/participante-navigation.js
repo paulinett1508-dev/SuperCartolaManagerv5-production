@@ -1123,6 +1123,7 @@ class ParticipanteNavigation {
             "libertadores": "/participante/js/modules/participante-libertadores.js",
             "copa-brasil": "/participante/js/modules/participante-copa-brasil.js",
             "agenda-tabelas": "/participante/js/modules/participante-agenda-tabelas.js",
+            "info-meu-time": "/participante/js/modules/participante-info-meu-time.js",
         };
 
         const jsPath = modulosPaths[modulo];
