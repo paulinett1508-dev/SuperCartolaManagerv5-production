@@ -112,13 +112,21 @@
         padding: var(--space-10, 40px);
     }
 
-    .hero-logo-img {
-        width: 200px;
-        height: auto;
-        margin: 0 auto -35px;
-        display: block;
-        filter: drop-shadow(0 4px 24px rgba(255, 85, 0, 0.5));
+    .hero-brand-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+        margin-bottom: var(--space-2, 8px);
         animation: admin-fade-in-up 0.8s ease-out both;
+    }
+
+    .hero-logo-img {
+        width: 180px;
+        height: auto;
+        display: block;
+        margin-bottom: -28px;
+        filter: drop-shadow(0 4px 24px rgba(255, 85, 0, 0.5));
     }
 
     .hero-brand {
@@ -127,7 +135,7 @@
         line-height: var(--line-height-tight, 1.2);
         color: var(--text-primary, #fff);
         text-shadow: 0 0 40px rgba(255, 85, 0, 0.3);
-        margin-bottom: var(--space-2, 8px);
+        margin-bottom: 0;
         animation: admin-fade-in-up 0.8s ease-out 0.15s both;
     }
     .hero-brand span {
@@ -325,6 +333,31 @@
         background: linear-gradient(90deg, transparent, var(--surface-white-10, rgba(255,255,255,0.08)), transparent);
     }
 
+    .btn-cartola {
+        width: 100%;
+        padding: 15px var(--space-6, 24px);
+        background: var(--gradient-primary, linear-gradient(135deg, #FF5500 0%, #e8472b 100%));
+        border: none;
+        border-radius: var(--radius-lg, 12px);
+        color: #fff;
+        font-size: 15px;
+        font-weight: var(--font-weight-bold, 700);
+        font-family: var(--font-family-base, 'Inter', sans-serif);
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center; gap: var(--space-2, 10px);
+        transition: all var(--transition-normal, 0.25s ease);
+        text-decoration: none;
+        position: relative;
+        overflow: hidden;
+        animation: admin-fade-in-up 0.5s ease-out 0.4s both;
+    }
+    .btn-cartola:hover {
+        box-shadow: var(--shadow-primary-lg, 0 8px 25px rgba(255, 85, 0, 0.5));
+        transform: translateY(-1px);
+    }
+    .btn-cartola:active { transform: translateY(0); }
+    .btn-cartola .material-icons { font-size: 20px; }
+
     .btn-google {
         width: 100%;
         padding: 14px var(--space-6, 24px);
@@ -426,8 +459,10 @@
         </div>
 
         <div class="hero-content">
-            <img src="/img/newlogo-supercartola.png" alt="Super Cartola" class="hero-logo-img" />
-            <h1 class="hero-brand">SUPER <span>CARTOLA</span><br>MANAGER</h1>
+            <div class="hero-brand-group">
+                <img src="/img/newlogo-supercartola.png" alt="Super Cartola" class="hero-logo-img" />
+                <h1 class="hero-brand">SUPER <span>CARTOLA</span><br>MANAGER</h1>
+            </div>
             <p class="hero-tagline">Admin Panel</p>
 
             <div class="hero-features">
@@ -459,6 +494,20 @@
             <div class="error-message" id="errorMessage"></div>
             <div class="success-message" id="successMessage"></div>
 
+            <a href="/api/admin/auth/cartola-login" class="btn-cartola">
+                <span class="material-icons">sports_soccer</span>
+                Entrar com Cartola FC
+            </a>
+
+            <div class="divider">ou acesso alternativo</div>
+
+            <a href="/api/admin/auth/login" class="btn-google">
+                <span class="material-icons">login</span>
+                Entrar com Google
+            </a>
+
+            <div class="divider">acesso direto</div>
+
             <form id="loginForm">
                 <div class="form-group">
                     <label for="email">Email</label>
@@ -475,13 +524,6 @@
                     Entrar
                 </button>
             </form>
-
-            <div class="divider">ou</div>
-
-            <a href="/api/admin/auth/login" class="btn-google">
-                <span class="material-icons">login</span>
-                Entrar com Google
-            </a>
 
             <div class="form-footer">
                 Super Cartola Manager &copy; 2026

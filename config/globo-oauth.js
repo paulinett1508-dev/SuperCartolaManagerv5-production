@@ -8,6 +8,9 @@ import { Strategy } from "openid-client/passport";
 import passport from "passport";
 import memoize from "memoizee";
 import { getBaseURL } from "./base-url.js";
+import { getDB } from "./database.js";
+import { isAdminAutorizado, isSuperAdmin as checkSuperAdmin, upsertAdminGloboId } from "./admin-config.js";
+import systemTokenService from "../services/systemTokenService.js";
 
 // =====================================================================
 // CONFIGURACAO GLOBO OIDC
@@ -209,7 +212,7 @@ export function setupGloboOAuthRoutes(router) {
 
             passport.authenticate(strategyName, {
                 failureRedirect: '/participante/?error=oauth_failed'
-            })(req, res, (err) => {
+            })(req, res, async (err) => {
                 if (err) {
                     log('error', 'Erro no callback:', err.message);
                     return res.redirect('/participante/?error=oauth_callback_error');
@@ -220,7 +223,70 @@ export function setupGloboOAuthRoutes(router) {
                     return res.redirect('/participante/?error=oauth_no_user');
                 }
 
-                // Preservar dados existentes antes de regenerar sessao
+                // ── FLUXO ADMIN ────────────────────────────────────────
+                if (req.session?.pendingAdminAuth) {
+                    const email = req.user.email;
+                    const db = getDB();
+
+                    const autorizado = await isAdminAutorizado(email, db);
+                    if (!autorizado) {
+                        log('warn', 'Tentativa admin nao autorizado via Cartola:', email);
+                        delete req.session.pendingAdminAuth;
+                        return res.redirect('/?error=unauthorized');
+                    }
+
+                    await upsertAdminGloboId(email, req.user.globo_id, db);
+
+                    let mongoAdminId = null;
+                    try {
+                        const adminDoc = await db.collection('admins').findOne(
+                            { email: email.toLowerCase() },
+                            { projection: { _id: 1 } }
+                        );
+                        mongoAdminId = adminDoc?._id?.toString() || null;
+                    } catch (_) {}
+
+                    req.session.admin = {
+                        id: req.user.globo_id,
+                        _id: mongoAdminId,
+                        email,
+                        nome: req.user.nome,
+                        foto: req.user.foto,
+                        provider: 'cartola',
+                        expires_at: req.user.expires_at,
+                        superAdmin: checkSuperAdmin(email),
+                        cartolaAuth: {
+                            globo_id: req.user.globo_id,
+                            glbid: req.user.glbid,
+                            access_token: req.user.access_token,
+                            refresh_token: req.user.refresh_token,
+                            expires_at: req.user.expires_at,
+                        },
+                    };
+
+                    delete req.session.pendingAdminAuth;
+
+                    try {
+                        await systemTokenService.salvarTokenSistema({ ...req.user });
+                        log('info', 'Token de sistema atualizado apos login admin:', email);
+                    } catch (e) {
+                        log('warn', 'Falha ao salvar token de sistema:', e.message);
+                    }
+
+                    const redirectTo = req.session.redirectAfterLogin || '/painel.html';
+                    delete req.session.redirectAfterLogin;
+
+                    return req.session.save((saveErr) => {
+                        if (saveErr) {
+                            log('error', 'Erro ao salvar sessao admin:', saveErr.message);
+                            return res.redirect('/?error=session');
+                        }
+                        log('info', 'Admin autenticado via Cartola:', email);
+                        res.redirect(redirectTo);
+                    });
+                }
+
+                // ── FLUXO PARTICIPANTE (comportamento original) ─────────
                 const participanteData = req.session.participante;
                 const cookieData = req.session.cookie;
 
@@ -421,3 +487,41 @@ export function getGloboToken(req) {
 }
 
 export { getGloboOidcConfig };
+
+// =====================================================================
+// SETUP DAS ROTAS OAUTH GLOBO - ADMIN (primary auth)
+// Reutiliza o callback registrado /api/cartola-pro/oauth/callback
+// com flag de sessão para distinguir fluxo admin vs participante
+// =====================================================================
+export function setupAdminGloboOAuthRoutes(app) {
+
+    // =========================================================
+    // GET /api/admin/auth/cartola-login — inicia fluxo Globo OIDC
+    // =========================================================
+    app.get('/api/admin/auth/cartola-login', async (req, res, next) => {
+        log('info', 'Iniciando login admin via Cartola...');
+        try {
+            const config = await getGloboOidcConfig();
+            const strategyName = ensureGloboStrategy(config);
+
+            // Flag para o callback saber que é fluxo admin
+            req.session.pendingAdminAuth = true;
+            if (req.query.redirect) {
+                req.session.redirectAfterLogin = req.query.redirect;
+            }
+
+            req.session.save((err) => {
+                if (err) log('error', 'Erro ao salvar sessao antes de cartola login:', err);
+                passport.authenticate(strategyName, {
+                    prompt: 'select_account',
+                    scope: ['openid', 'email', 'profile']
+                })(req, res, next);
+            });
+        } catch (error) {
+            log('error', 'Erro ao iniciar login Cartola admin:', error.message);
+            res.redirect('/?error=cartola_login_failed');
+        }
+    });
+
+    log('info', 'Rota login Cartola Admin configurada');
+}

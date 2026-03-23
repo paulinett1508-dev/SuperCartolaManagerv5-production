@@ -79,8 +79,9 @@ if (IS_PRODUCTION) {
 // ⚡ USAR CONEXÃO OTIMIZADA
 import connectDB from "./config/database.js";
 
-// 🔐 AUTH (Google OAuth - substitui Replit Auth)
+// 🔐 AUTH (Google OAuth + Cartola/Globo OIDC)
 import passport, { setupGoogleAuthRoutes } from "./config/google-oauth.js";
+import { setupAdminGloboOAuthRoutes } from "./config/globo-oauth.js";
 
 // 🛡️ SEGURANÇA
 import { setupSecurity, authRateLimiter, getRateLimitCleanupIntervalId } from "./middleware/security.js";
@@ -249,8 +250,7 @@ try {
 }
 
 // ====================================================================
-// 🚀 PORTA ABRE PRIMEIRO — Replit precisa ver o port antes do timeout
-// connectDB() pode demorar (cold start Atlas); porta NÃO pode esperar
+// 🚀 PORTA ABRE PRIMEIRO — connectDB() pode demorar (cold start Atlas); porta NÃO pode esperar
 // ====================================================================
 if (process.env.NODE_ENV !== "test") {
   httpServer = app.listen(PORT, "0.0.0.0", () => {
@@ -288,10 +288,10 @@ try {
 // ====================================================================
 setupSecurity(app);
 
-// Trust proxy (necessário para rate limiting correto no Replit)
+// Trust proxy (necessário para rate limiting correto atrás do Nginx)
 app.set("trust proxy", 1);
 
-// Health check — responde imediatamente, usado pelo Replit no deploy
+// Health check — responde imediatamente (usado pelo Docker healthcheck)
 app.get("/health", (req, res) => res.status(200).json({ status: "ok" }));
 
 // ====================================================================
@@ -481,7 +481,7 @@ app.use((req, res, next) => {
 
 // ✅ FIX 503: Servir HTML fragments ANTES do session middleware
 // Sem isso, cada request a .html passava pelo MongoStore session lookup
-// → latência + 503 sob carga (Replit proxy timeout).
+// → latência + 503 sob carga (proxy timeout).
 app.use('/fronts', express.static('public/fronts', {
   setHeaders: (res) => res.setHeader('Cache-Control', 'no-cache'),
 }));
@@ -530,9 +530,13 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Setup Google OAuth routes (substitui Replit Auth)
+// Setup Google OAuth routes (fallback admin)
 setupGoogleAuthRoutes(app);
 console.log("[SERVER] Google OAuth ativado");
+
+// Setup Cartola/Globo OIDC routes (primary admin auth)
+setupAdminGloboOAuthRoutes(app);
+console.log("[SERVER] Cartola/Globo OIDC Admin ativado");
 
 // 🔐 Rotas de autenticação admin (Google OAuth) - ANTES do protegerRotas
 app.use("/api/admin/auth", adminAuthRoutes);
@@ -1207,50 +1211,3 @@ process.on("uncaughtException", (error) => {
 export default app;
 
 
-// Webhook para GitHub Actions
-// 🔒 SEC-FIX: Validação HMAC SHA-256 obrigatória
-app.post('/github-sync', express.json(), (req, res) => {
-  const webhookSecret = process.env.GITHUB_WEBHOOK_SECRET;
-
-  // Em produção, exigir secret configurado
-  if (!webhookSecret) {
-    if (process.env.NODE_ENV === 'production') {
-      console.error('[WEBHOOK] GITHUB_WEBHOOK_SECRET nao configurado - bloqueando em producao');
-      return res.status(403).json({ error: 'Webhook secret nao configurado' });
-    }
-    console.warn('[WEBHOOK] GITHUB_WEBHOOK_SECRET nao configurado - permitindo apenas em dev');
-  }
-
-  // Validar assinatura HMAC se secret configurado
-  if (webhookSecret) {
-    const signature = req.headers['x-hub-signature-256'];
-    if (!signature) {
-      console.warn('[WEBHOOK] Requisicao sem assinatura X-Hub-Signature-256');
-      return res.status(401).json({ error: 'Assinatura ausente' });
-    }
-
-    const payload = JSON.stringify(req.body);
-    const expectedSig = 'sha256=' + crypto.createHmac('sha256', webhookSecret).update(payload).digest('hex');
-
-    if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSig))) {
-      console.warn('[WEBHOOK] Assinatura HMAC invalida');
-      return res.status(401).json({ error: 'Assinatura invalida' });
-    }
-  }
-
-  console.log('[WEBHOOK] GitHub sync autorizado');
-
-  exec('bash scripts/sync-replit.sh', (error, stdout, stderr) => {
-    if (error) {
-      console.error('[WEBHOOK] Erro no sync:', error);
-      return res.status(500).json({ error: error.message });
-    }
-
-    console.log('[WEBHOOK] Sync concluido:', stdout);
-    res.json({
-      success: true,
-      message: 'Sync executado',
-      timestamp: new Date().toISOString()
-    });
-  });
-});
