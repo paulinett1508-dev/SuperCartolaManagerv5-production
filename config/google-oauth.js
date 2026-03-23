@@ -10,29 +10,7 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { getDB } from "./database.js";
 import { isAdminAutorizado, isSuperAdmin as checkSuperAdmin, SUPER_ADMIN_EMAILS } from "./admin-config.js";
-
-/**
- * Obtém a URL base do ambiente
- */
-function getBaseURL() {
-  // Prioridade 1: BASE_URL definida manualmente
-  if (process.env.BASE_URL) {
-    return process.env.BASE_URL;
-  }
-
-  // Prioridade 2: Produção
-  if (process.env.NODE_ENV === "production") {
-    return "https://supercartolamanager.com.br";
-  }
-
-  // Prioridade 3: Staging
-  if (process.env.NODE_ENV === "staging") {
-    return "https://staging.supercartolamanager.com.br";
-  }
-
-  // Fallback: localhost
-  return "http://localhost:3000";
-}
+import { getBaseURL } from "./base-url.js";
 
 /**
  * Configura o Passport com Google OAuth
@@ -285,4 +263,4 @@ function verificarConfigOAuth() {
 }
 
 export default passport;
-export { configurarGoogleOAuth, verificarConfigOAuth, getBaseURL };
+export { configurarGoogleOAuth, verificarConfigOAuth, getBaseURL }; // getBaseURL re-exported from base-url.js

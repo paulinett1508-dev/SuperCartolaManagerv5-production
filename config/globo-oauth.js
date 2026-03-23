@@ -7,6 +7,7 @@ import * as client from "openid-client";
 import { Strategy } from "openid-client/passport";
 import passport from "passport";
 import memoize from "memoizee";
+import { getBaseURL } from "./base-url.js";
 
 // =====================================================================
 // CONFIGURACAO GLOBO OIDC
@@ -122,18 +123,21 @@ const verifyGlobo = async (tokens, done) => {
 // =====================================================================
 const registeredStrategies = new Set();
 
-function ensureGloboStrategy(domain, config) {
-    const strategyName = `globo:${domain}`;
+function ensureGloboStrategy(config) {
+    const baseURL = getBaseURL();
+    const callbackURL = `${baseURL}/api/cartola-pro/oauth/callback`;
+    const strategyName = `globo:${baseURL}`;
 
     if (!registeredStrategies.has(strategyName)) {
-        log('info', 'Criando strategy para dominio:', domain);
+        log('info', 'Criando strategy para baseURL:', baseURL);
+        log('info', 'CallbackURL:', callbackURL);
 
         const strategy = new Strategy(
             {
                 name: strategyName,
                 config,
                 scope: "openid email profile",
-                callbackURL: `https://${domain}/api/cartola-pro/oauth/callback`
+                callbackURL
             },
             verifyGlobo
         );
@@ -168,7 +172,7 @@ export function setupGloboOAuthRoutes(router) {
 
         try {
             const config = await getGloboOidcConfig();
-            const strategyName = ensureGloboStrategy(req.hostname, config);
+            const strategyName = ensureGloboStrategy(config);
 
             log('info', 'Redirecionando para login Globo...');
 
@@ -193,12 +197,15 @@ export function setupGloboOAuthRoutes(router) {
         // Verificar erro retornado pela Globo
         if (req.query.error) {
             log('error', 'Erro retornado pela Globo:', req.query.error);
-            return res.redirect(`/participante/?error=${req.query.error}`);
+            const OAUTH_ERRORS = ['invalid_request', 'unauthorized_client', 'access_denied',
+                'unsupported_response_type', 'invalid_scope', 'server_error', 'temporarily_unavailable'];
+            const safeError = OAUTH_ERRORS.includes(req.query.error) ? req.query.error : 'oauth_error';
+            return res.redirect(`/participante/?error=${encodeURIComponent(safeError)}`);
         }
 
         try {
             const config = await getGloboOidcConfig();
-            const strategyName = ensureGloboStrategy(req.hostname, config);
+            const strategyName = ensureGloboStrategy(config);
 
             passport.authenticate(strategyName, {
                 failureRedirect: '/participante/?error=oauth_failed'
@@ -213,28 +220,43 @@ export function setupGloboOAuthRoutes(router) {
                     return res.redirect('/participante/?error=oauth_no_user');
                 }
 
-                // Salvar dados de autenticacao Globo na sessao do participante
-                req.session.cartolaProAuth = {
-                    globo_id: req.user.globo_id,
-                    glbid: req.user.glbid,
-                    email: req.user.email,
-                    nome: req.user.nome,
-                    access_token: req.user.access_token,
-                    refresh_token: req.user.refresh_token,
-                    expires_at: req.user.expires_at,
-                    authenticated_at: Date.now()
-                };
+                // Preservar dados existentes antes de regenerar sessao
+                const participanteData = req.session.participante;
+                const cookieData = req.session.cookie;
 
-                req.session.save((saveErr) => {
-                    if (saveErr) {
-                        log('error', 'Erro ao salvar sessao:', saveErr.message);
-                        return res.redirect('/participante/?error=session_save_error');
+                req.session.regenerate((regErr) => {
+                    if (regErr) {
+                        log('error', 'Erro ao regenerar sessao:', regErr.message);
+                        return res.redirect('/participante/?error=session_error');
                     }
 
-                    log('info', 'Autenticacao Globo concluida com sucesso:', req.user.email);
+                    // Restaurar dados preservados
+                    req.session.participante = participanteData;
+                    Object.assign(req.session.cookie, cookieData);
 
-                    // Redirecionar de volta para o app com sucesso
-                    res.redirect('/participante/?cartola_pro=success');
+                    // Salvar dados de autenticacao Globo na sessao
+                    req.session.cartolaProAuth = {
+                        globo_id: req.user.globo_id,
+                        glbid: req.user.glbid,
+                        email: req.user.email,
+                        nome: req.user.nome,
+                        access_token: req.user.access_token,
+                        refresh_token: req.user.refresh_token,
+                        expires_at: req.user.expires_at,
+                        authenticated_at: Date.now()
+                    };
+
+                    req.session.save((saveErr) => {
+                        if (saveErr) {
+                            log('error', 'Erro ao salvar sessao:', saveErr.message);
+                            return res.redirect('/participante/?error=session_save_error');
+                        }
+
+                        log('info', 'Autenticacao Globo concluida com sucesso:', req.user.email);
+
+                        // Redirecionar de volta para o app com sucesso
+                        res.redirect('/participante/?cartola_pro=success');
+                    });
                 });
             });
 
@@ -304,6 +326,10 @@ export function setupGloboOAuthRoutes(router) {
     // GET /oauth/debug - Debug da configuracao
     // =========================================================
     router.get("/oauth/debug", async (req, res) => {
+        if (!req.session?.participante) {
+            return res.status(401).json({ ok: false, error: 'Autenticacao necessaria' });
+        }
+
         try {
             const config = await getGloboOidcConfig();
 
@@ -312,7 +338,8 @@ export function setupGloboOAuthRoutes(router) {
                 issuer: GLOBO_ISSUER,
                 client_id: GLOBO_CLIENT_ID,
                 hostname: req.hostname,
-                callback_url: `https://${req.hostname}/api/cartola-pro/oauth/callback`,
+                base_url: getBaseURL(),
+                callback_url: `${getBaseURL()}/api/cartola-pro/oauth/callback`,
                 oidc_loaded: !!config,
                 session_has_participante: !!req.session?.participante,
                 session_has_globo_auth: !!req.session?.cartolaProAuth

@@ -608,6 +608,8 @@ app.use("/api/jogos-ao-vivo", jogosAoVivoRoutes); // API-Football
 app.use("/api/ligas", ligaRoutes);
 app.use("/api/cartola", cartolaRoutes);
 app.use("/api/cartola", cartolaProxyRoutes);
+app.use("/api/cartola-pro/oauth/login", authRateLimiter);
+app.use("/api/cartola-pro/oauth/callback", authRateLimiter);
 app.use("/api/cartola-pro", cartolaProRoutes);
 app.use("/api/times", timesRoutes);
 app.use("/api/time", timesRoutes);

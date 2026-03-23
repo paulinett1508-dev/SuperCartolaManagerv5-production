@@ -7,6 +7,7 @@ import { getGloboOidcConfig } from "../config/globo-oauth.js";
 import cartolaProService from "../services/cartolaProService.js";
 import bcrypt from "bcryptjs";
 import Liga from "../models/Liga.js";
+import { getBaseURL } from "../config/base-url.js";
 
 const router = express.Router();
 
@@ -83,9 +84,10 @@ const globoVerifyCallback = async (tokens, done) => {
     }
 };
 
-function ensureUnifiedGloboStrategy(domain, config, isPopup = false) {
+function ensureUnifiedGloboStrategy(config, isPopup = false) {
+    const baseURL = getBaseURL();
     const suffix = isPopup ? ':popup' : '';
-    const strategyName = `globo-unified:${domain}${suffix}`;
+    const strategyName = `globo-unified:${baseURL}${suffix}`;
     const callbackPath = isPopup
         ? '/api/participante/auth/globo/popup/callback'
         : '/api/participante/auth/globo/callback';
@@ -98,7 +100,7 @@ function ensureUnifiedGloboStrategy(domain, config, isPopup = false) {
                 name: strategyName,
                 config,
                 scope: "openid email profile",
-                callbackURL: `https://${domain}${callbackPath}`
+                callbackURL: `${baseURL}${callbackPath}`
             },
             globoVerifyCallback
         );
@@ -118,7 +120,7 @@ router.get("/globo/login", async (req, res, next) => {
 
     try {
         const config = await getGloboOidcConfig();
-        const strategyName = ensureUnifiedGloboStrategy(req.hostname, config);
+        const strategyName = ensureUnifiedGloboStrategy(config);
 
         passport.authenticate(strategyName, {
             prompt: "login consent",
@@ -139,12 +141,15 @@ router.get("/globo/callback", async (req, res, next) => {
 
     if (req.query.error) {
         console.error("[PARTICIPANTE-AUTH] Erro retornado pela Globo:", req.query.error);
-        return res.redirect(`/participante-login.html?error=${req.query.error}`);
+        const OAUTH_ERRORS = ['invalid_request', 'unauthorized_client', 'access_denied',
+            'unsupported_response_type', 'invalid_scope', 'server_error', 'temporarily_unavailable'];
+        const safeError = OAUTH_ERRORS.includes(req.query.error) ? req.query.error : 'oauth_error';
+        return res.redirect(`/participante-login.html?error=${encodeURIComponent(safeError)}`);
     }
 
     try {
         const config = await getGloboOidcConfig();
-        const strategyName = ensureUnifiedGloboStrategy(req.hostname, config);
+        const strategyName = ensureUnifiedGloboStrategy(config);
 
         passport.authenticate(strategyName, {
             failureRedirect: "/participante-login.html?error=oauth_failed"
@@ -211,43 +216,52 @@ router.get("/globo/callback", async (req, res, next) => {
 
                 // 7. Configurar sessao longa (365 dias para login Globo)
                 const ONE_YEAR = 1000 * 60 * 60 * 24 * 365;
-                req.session.cookie.maxAge = ONE_YEAR;
 
-                // 8. CRIAR SESSAO UNIFICADA
-                // Sessao participante (navegacao do app)
-                req.session.participante = {
-                    timeId: String(timeIdGlobo),
-                    ligaId: ligaEncontrada._id.toString(),
-                    participante: dadosReais
-                };
-
-                // Sessao Cartola PRO (funcionalidades premium)
-                req.session.cartolaProAuth = {
-                    globo_id: req.user.globo_id,
-                    glbid: glbToken,
-                    email: req.user.email,
-                    nome: req.user.nome,
-                    access_token: req.user.access_token,
-                    refresh_token: req.user.refresh_token,
-                    expires_at: req.user.expires_at,
-                    authenticated_at: Date.now(),
-                    method: "unified_oauth"
-                };
-
-                // 9. Salvar sessao
-                req.session.save((saveErr) => {
-                    if (saveErr) {
-                        console.error("[PARTICIPANTE-AUTH] Erro ao salvar sessao unificada:", saveErr);
-                        return res.redirect("/participante-login.html?error=session_save_error");
+                // 8. Regenerar sessao para prevenir session fixation
+                req.session.regenerate((regErr) => {
+                    if (regErr) {
+                        console.error("[PARTICIPANTE-AUTH] Erro ao regenerar sessao:", regErr);
+                        return res.redirect("/participante-login.html?error=session_error");
                     }
 
-                    console.log("[PARTICIPANTE-AUTH] Sessao unificada criada com sucesso:", {
-                        timeId: timeIdGlobo,
-                        email: req.user.email
-                    });
+                    req.session.cookie.maxAge = ONE_YEAR;
 
-                    // Redirecionar para app do participante
-                    res.redirect("/participante/");
+                    // CRIAR SESSAO UNIFICADA
+                    // Sessao participante (navegacao do app)
+                    req.session.participante = {
+                        timeId: String(timeIdGlobo),
+                        ligaId: ligaEncontrada._id.toString(),
+                        participante: dadosReais
+                    };
+
+                    // Sessao Cartola PRO (funcionalidades premium)
+                    req.session.cartolaProAuth = {
+                        globo_id: req.user.globo_id,
+                        glbid: glbToken,
+                        email: req.user.email,
+                        nome: req.user.nome,
+                        access_token: req.user.access_token,
+                        refresh_token: req.user.refresh_token,
+                        expires_at: req.user.expires_at,
+                        authenticated_at: Date.now(),
+                        method: "unified_oauth"
+                    };
+
+                    // 9. Salvar sessao
+                    req.session.save((saveErr) => {
+                        if (saveErr) {
+                            console.error("[PARTICIPANTE-AUTH] Erro ao salvar sessao unificada:", saveErr);
+                            return res.redirect("/participante-login.html?error=session_save_error");
+                        }
+
+                        console.log("[PARTICIPANTE-AUTH] Sessao unificada criada com sucesso:", {
+                            timeId: timeIdGlobo,
+                            email: req.user.email
+                        });
+
+                        // Redirecionar para app do participante
+                        res.redirect("/participante/");
+                    });
                 });
 
             } catch (innerError) {
@@ -806,7 +820,7 @@ router.get("/globo/popup", async (req, res, next) => {
     try {
         const config = await getGloboOidcConfig();
         // Usar strategy com callback de popup
-        const strategyName = ensureUnifiedGloboStrategy(req.hostname, config, true);
+        const strategyName = ensureUnifiedGloboStrategy(config, true);
 
         passport.authenticate(strategyName, {
             prompt: "login consent",
@@ -831,7 +845,7 @@ router.get("/globo/popup/callback", async (req, res) => {
     try {
         const config = await getGloboOidcConfig();
         // Usar strategy com callback de popup
-        const strategyName = ensureUnifiedGloboStrategy(req.hostname, config, true);
+        const strategyName = ensureUnifiedGloboStrategy(config, true);
 
         passport.authenticate(strategyName, {
             failureRedirect: "/api/participante/auth/globo/popup/error"
