@@ -542,8 +542,10 @@ function renderizarCampinhoCompleto(escalacao, adversario, confronto, ligaId, ti
 
     // Determinar status da rodada (parcial ao vivo vs consolidada)
     const isParcial = statusMercado?.status_mercado === 2;
+    const _aoVivoData = window.getAoVivoData?.();
+    const _realmenteAoVivo = isParcial && (_aoVivoData?.stats?.aoVivo > 0 || _aoVivoData?.calendarioAberto === true);
     const statusClasse = isParcial ? 'parcial' : 'consolidada';
-    const statusTexto = isParcial ? 'AO VIVO' : 'CONSOLIDADA';
+    const statusTexto = _realmenteAoVivo ? 'AO VIVO' : isParcial ? 'PARCIAL' : 'CONSOLIDADA';
 
     return `
         <div class="campinho-wrapper campinho-screen">
