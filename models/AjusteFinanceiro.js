@@ -71,6 +71,20 @@ const AjusteFinanceiroSchema = new mongoose.Schema({
     },
 
     // =========================================================================
+    // IDEMPOTÊNCIA E RASTREABILIDADE
+    // =========================================================================
+    chaveIdempotencia: {
+        type: String,
+        default: null,
+        index: true,
+        sparse: true,
+    },
+    metadata: {
+        type: mongoose.Schema.Types.Mixed,
+        default: null,
+    },
+
+    // =========================================================================
     // CONTROLE
     // =========================================================================
     ativo: {
@@ -186,7 +200,9 @@ AjusteFinanceiroSchema.statics.criar = async function(dados) {
         temporada: Number(dados.temporada || CURRENT_SEASON),
         descricao: dados.descricao,
         valor: Number(dados.valor),
-        criado_por: dados.criado_por || ''
+        criado_por: dados.criado_por || '',
+        ...(dados.chaveIdempotencia && { chaveIdempotencia: dados.chaveIdempotencia }),
+        ...(dados.metadata && { metadata: dados.metadata }),
     });
 
     return ajuste.save();

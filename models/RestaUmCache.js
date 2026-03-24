@@ -83,6 +83,11 @@ const RestaUmCacheSchema = new mongoose.Schema({
     fluxoFinanceiroHabilitado: { type: Boolean, default: false },
     taxaEliminacao: { type: Number, default: 0 }, // pré-calculado na criação
 
+    // Controle de recovery: rodadas que já tiveram débitos financeiros lançados.
+    // Se rodadaAtual >= X mas X não está aqui, os débitos de X podem ter sido perdidos
+    // por crash entre o save() do guard e o lançamento dos AjusteFinanceiro.
+    debitosLancados: { type: [Number], default: [] },
+
     ultima_atualizacao: { type: Date, default: Date.now },
 }, {
     timestamps: true,
