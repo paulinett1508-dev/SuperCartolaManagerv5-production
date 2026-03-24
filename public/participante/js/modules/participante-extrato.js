@@ -833,6 +833,13 @@ async function carregarExtrato(ligaId, timeId) {
             }
         }
 
+        // ✅ FIX SALDO-CONSISTÊNCIA: Invalidar cache de extrato no CacheV2
+        // Garante que ao voltar para a Home, o saldo exibido seja o mesmo valor fresco
+        // que acabamos de receber do servidor (evita divergência Home vs Financeiro)
+        if (extratoData && window.Cache?.invalidatePrefix) {
+            window.Cache.invalidatePrefix('extrato:');
+        }
+
         // Renderizar se necessário
         // ✅ v5.2: Não renderizar se timeout já disparou (evita sobrescrever tela de timeout)
         if (deveReRenderizar && !timeoutFired) {

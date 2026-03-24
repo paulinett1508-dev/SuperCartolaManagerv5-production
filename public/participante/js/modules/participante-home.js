@@ -330,9 +330,11 @@ async function carregarDadosERenderizar(ligaId, timeId, participante) {
             }
         };
 
-        extratoFresh = cacheV2
-            ? await cacheV2.get(`extrato:${ligaId}:${timeId}:${temporadaExtrato}`, fetchExtrato)
-            : await fetchExtrato();
+        // ✅ FIX SALDO-CONSISTÊNCIA: Sempre buscar extrato fresco do servidor
+        // CacheV2 SWR (TTL 1h) servia dados stale quando acertos financeiros eram
+        // registrados, causando divergência entre saldo na Home vs tela Financeiro.
+        // Dados financeiros são críticos e devem sempre vir frescos.
+        extratoFresh = await fetchExtrato();
 
         if (cache && extratoFresh) {
             cache.setExtrato(ligaId, timeId, extratoFresh);
@@ -652,7 +654,9 @@ function processarDadosParaRender(liga, ranking, rodadas, extratoData, meuTimeId
     // Fallback para cálculo manual apenas se não houver dados do extrato
     const saldoConsolidado = extratoData?.resumo?.saldo ?? extratoData?.saldo_atual ?? extratoData?.resumo?.saldo_final ?? null;
 
-    // Cálculo manual apenas como último fallback (não inclui acertos/ajustes)
+    // ⚠️ FALLBACK DE EMERGÊNCIA: calcula saldo apenas por rodadas
+    // EXCLUI: acertos financeiros, taxa de inscrição, ajustes dinâmicos, saldo anterior
+    // Pode divergir significativamente do saldo real — usar somente quando extratoData indisponível
     const saldoCalculadoPorRodadas = minhasRodadas.reduce((total, rodada) => {
         return total + (parseFloat(rodada.valorFinanceiro || rodada.ganho_rodada || 0));
     }, 0);
