@@ -1,16 +1,16 @@
 /**
- * Copa do Brasil - Landing Page Styles
+ * Copa do Nordeste - Landing Page Styles
  * =============================================
- * LP dedicada à Copa do Brasil
- * Usa tokens de _app-tokens.css (--app-copabr-*)
- * Mobile-first, dark theme, namespace: copabr-*
+ * LP dedicada à Copa do Nordeste
+ * Usa tokens de _app-tokens.css (--app-copane-*)
+ * Mobile-first, dark theme, namespace: copane-*
  * Dependência: _app-tokens.css
  */
 
 /* ═══════════════════════════════════════════════════
    PAGE CONTAINER
    ═══════════════════════════════════════════════════ */
-.copabr-page {
+.copane-page {
     min-height: 100vh;
     background: var(--app-bg, #0a0a0a);
     padding-bottom: 5rem;
@@ -19,7 +19,7 @@
 /* ═══════════════════════════════════════════════════
    BOTÃO VOLTAR
    ═══════════════════════════════════════════════════ */
-.copabr-btn-voltar {
+.copane-btn-voltar {
     position: sticky;
     top: 12px;
     left: 12px;
@@ -39,56 +39,60 @@
     margin: 12px 0 -48px 12px;
     transition: background 0.2s, transform 0.15s;
 }
-.copabr-btn-voltar:active {
+.copane-btn-voltar:active {
     transform: scale(0.92);
     background: rgba(0, 0, 0, 0.65);
 }
-.copabr-btn-voltar .material-icons {
+.copane-btn-voltar .material-icons {
     font-size: 1.1rem;
 }
 
 /* ═══════════════════════════════════════════════════
    HERO
    ═══════════════════════════════════════════════════ */
-.copabr-hero {
+.copane-hero {
     position: relative;
     overflow: hidden;
     margin: 1rem;
     border-radius: 0.75rem;
-    border: 1px solid var(--app-copabr-border, rgba(0, 48, 135, 0.35));
+    border: 1px solid var(--app-copane-border, rgba(230, 81, 0, 0.35));
     background: var(--app-surface, #1a1a1a);
 }
 
-/* Faixa tricolor — Azul → Vermelho → Dourado */
-.copabr-flag-accent {
+/* Faixa tricolor — Verde → Laranja → Dourado */
+.copane-flag-accent {
     height: 4px;
     background: linear-gradient(
         90deg,
-        var(--app-copabr-primary, #003087) 0%,
-        var(--app-copabr-accent, #C41230) 50%,
-        var(--app-copabr-secondary, #D4AF37) 100%
+        var(--app-copane-accent, #2D6A4F) 0%,
+        var(--app-copane-primary, #E65100) 50%,
+        var(--app-copane-secondary, #D4AF37) 100%
     );
 }
 
-.copabr-hero-content {
+.copane-hero-content {
     position: relative;
     z-index: 1;
     padding: 1.5rem 1rem 1.75rem;
     text-align: center;
 }
 
-/* Escudo/troféu */
-.copabr-hero-emblem {
-    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
+/* Troféu */
+.copane-hero-emblem {
     font-size: 2.5rem;
     line-height: 1;
     margin-bottom: 1rem;
-    filter: drop-shadow(0 2px 8px rgba(212, 175, 55, 0.4));
+    filter: drop-shadow(0 2px 8px rgba(230, 81, 0, 0.4));
 }
 
-.copabr-hero-title {
+.copane-hero-emblem .material-icons {
+    font-size: 2.5rem;
+    color: var(--app-copane-secondary, #D4AF37);
+}
+
+.copane-hero-title {
     font-family: var(--app-font-brand, 'Russo One', sans-serif);
-    font-size: 2rem;
+    font-size: 1.8rem;
     color: var(--app-text-primary, #fff);
     letter-spacing: -0.02em;
     margin: 0;
@@ -96,16 +100,16 @@
     text-transform: uppercase;
 }
 
-.copabr-hero-subtitle {
+.copane-hero-subtitle {
     font-family: var(--app-font-brand, 'Russo One', sans-serif);
     font-size: 2.5rem;
-    color: var(--app-copabr-secondary, #D4AF37);
+    color: var(--app-copane-primary, #E65100);
     margin: 0;
     line-height: 1;
     font-style: italic;
 }
 
-.copabr-hero-local {
+.copane-hero-local {
     font-family: var(--app-font-base, 'Inter', sans-serif);
     font-size: 0.6rem;
     color: var(--app-text-muted, rgba(255, 255, 255, 0.5));
@@ -115,8 +119,8 @@
     font-weight: 500;
 }
 
-/* Chips de status — fase atual, próximo evento */
-.copabr-hero-chips {
+/* Chips de status */
+.copane-hero-chips {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -124,7 +128,7 @@
     padding: 0 0.25rem;
 }
 
-.copabr-chip {
+.copane-chip {
     display: flex;
     align-items: center;
     gap: 0.4rem;
@@ -136,43 +140,43 @@
     border: 1px solid transparent;
 }
 
-.copabr-chip .material-icons {
+.copane-chip .material-icons {
     font-size: 0.9rem;
     flex-shrink: 0;
 }
 
-.copabr-chip--done {
+.copane-chip--done {
     background: rgba(34, 197, 94, 0.08);
     border-color: rgba(34, 197, 94, 0.25);
     color: #86efac;
 }
-.copabr-chip--done .material-icons { color: #4ade80; }
+.copane-chip--done .material-icons { color: #4ade80; }
 
-.copabr-chip--next {
-    background: rgba(99, 153, 255, 0.1);
-    border-color: rgba(99, 153, 255, 0.3);
-    color: #93c5fd;
+.copane-chip--next {
+    background: rgba(230, 81, 0, 0.1);
+    border-color: rgba(230, 81, 0, 0.3);
+    color: #ffab91;
 }
-.copabr-chip--next .material-icons { color: #6699ff; }
+.copane-chip--next .material-icons { color: var(--app-copane-primary, #E65100); }
 
-.copabr-chip--event {
-    background: var(--app-copabr-muted, rgba(0, 48, 135, 0.15));
-    border-color: var(--app-copabr-border, rgba(0, 48, 135, 0.35));
-    color: var(--app-copabr-secondary, #D4AF37);
+.copane-chip--event {
+    background: var(--app-copane-muted, rgba(230, 81, 0, 0.15));
+    border-color: var(--app-copane-border, rgba(230, 81, 0, 0.35));
+    color: var(--app-copane-secondary, #D4AF37);
 }
-.copabr-chip--event .material-icons { color: var(--app-copabr-secondary, #D4AF37); }
+.copane-chip--event .material-icons { color: var(--app-copane-secondary, #D4AF37); }
 
 /* ═══════════════════════════════════════════════════
-   STATS STRIP — Formato da competição
+   STATS STRIP
    ═══════════════════════════════════════════════════ */
-.copabr-stats-strip {
+.copane-stats-strip {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 0.5rem;
     margin: 0 1rem 1.25rem;
 }
 
-.copabr-stat-item {
+.copane-stat-item {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -182,14 +186,14 @@
     padding: 0.75rem 0.4rem;
 }
 
-.copabr-stat-value {
+.copane-stat-value {
     font-family: var(--app-font-brand, 'Russo One', sans-serif);
     font-size: 1.25rem;
-    color: var(--app-copabr-secondary, #D4AF37);
+    color: var(--app-copane-primary, #E65100);
     line-height: 1;
 }
 
-.copabr-stat-label {
+.copane-stat-label {
     font-family: var(--app-font-base, 'Inter', sans-serif);
     font-size: 0.52rem;
     color: var(--app-text-muted, rgba(255, 255, 255, 0.45));
@@ -203,11 +207,11 @@
 /* ═══════════════════════════════════════════════════
    SECTIONS GENÉRICO
    ═══════════════════════════════════════════════════ */
-.copabr-section {
+.copane-section {
     padding: 1.5rem 1rem 0;
 }
 
-.copabr-section + .copabr-section::before {
+.copane-section + .copane-section::before {
     content: '';
     display: block;
     height: 1px;
@@ -216,19 +220,19 @@
     opacity: 0.5;
 }
 
-.copabr-section-header {
+.copane-section-header {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     margin-bottom: 1rem;
 }
 
-.copabr-section-icon .material-icons {
-    color: var(--app-copabr-secondary, #D4AF37);
+.copane-section-icon .material-icons {
+    color: var(--app-copane-primary, #E65100);
     font-size: 1.25rem;
 }
 
-.copabr-section-title {
+.copane-section-title {
     font-family: var(--app-font-brand, 'Russo One', sans-serif);
     font-size: 1rem;
     color: var(--app-text-primary, #fff);
@@ -238,19 +242,19 @@
     font-style: italic;
 }
 
-.copabr-section-badge {
+.copane-section-badge {
     font-family: var(--app-font-base, 'Inter', sans-serif);
     font-size: 0.6rem;
     font-weight: 600;
-    color: var(--app-copabr-secondary, #D4AF37);
-    background: var(--app-copabr-muted, rgba(0, 48, 135, 0.15));
-    border: 1px solid var(--app-copabr-border, rgba(0, 48, 135, 0.35));
+    color: var(--app-copane-primary, #E65100);
+    background: var(--app-copane-muted, rgba(230, 81, 0, 0.15));
+    border: 1px solid var(--app-copane-border, rgba(230, 81, 0, 0.35));
     border-radius: 999px;
     padding: 0.15rem 0.5rem;
     white-space: nowrap;
 }
 
-.copabr-loading-placeholder {
+.copane-loading-placeholder {
     text-align: center;
     color: var(--app-text-muted, rgba(255, 255, 255, 0.4));
     font-size: 0.85rem;
@@ -258,61 +262,67 @@
 }
 
 /* ═══════════════════════════════════════════════════
-   CONFRONTOS 5ª FASE — Grid de jogos
+   GRUPOS — Grid 2x2
    ═══════════════════════════════════════════════════ */
-.copabr-confrontos-info {
-    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
-    font-size: 0.6rem;
-    color: var(--app-text-muted, rgba(255, 255, 255, 0.5));
-    text-transform: uppercase;
-    margin: 0 0 0.75rem;
-}
-
-.copabr-confrontos-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-}
-
-.copabr-confronto-card {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.copane-grupos-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 0.5rem;
+}
+
+.copane-grupo-card {
     background: var(--app-surface, #1a1a1a);
     border: 1px solid var(--app-border, #333);
-    border-radius: 0.5rem;
-    padding: 0.55rem 0.75rem;
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+    overflow: hidden;
 }
 
-.copabr-confronto-time {
-    font-family: var(--app-font-base, 'Inter', sans-serif);
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--app-text-primary, #fff);
-    flex: 1;
-    text-align: center;
+.copane-grupo-header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--app-copane-border, rgba(230, 81, 0, 0.35));
 }
 
-.copabr-confronto-vs {
-    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
-    font-size: 0.55rem;
-    font-weight: 700;
-    color: var(--app-copabr-secondary, #D4AF37);
+.copane-grupo-label {
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 0.7rem;
+    color: var(--app-copane-primary, #E65100);
     text-transform: uppercase;
-    flex-shrink: 0;
+}
+
+.copane-grupo-times {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.copane-grupo-time {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.65rem;
+    color: var(--app-text-primary, #fff);
+    line-height: 1.4;
+    padding: 0.15rem 0;
+}
+
+.copane-grupo-time--destaque {
+    color: var(--app-copane-primary, #E65100);
+    font-weight: 600;
 }
 
 /* ═══════════════════════════════════════════════════
    NOTÍCIAS — Cards lista
    ═══════════════════════════════════════════════════ */
-.copabr-noticias-lista {
+.copane-noticias-lista {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
 
-.copabr-noticia-card {
+.copane-noticia-card {
     display: flex;
     align-items: flex-start;
     gap: 0.75rem;
@@ -326,32 +336,32 @@
     -webkit-tap-highlight-color: transparent;
 }
 
-.copabr-noticia-card:active {
-    border-color: var(--app-copabr-secondary, #D4AF37);
+.copane-noticia-card:active {
+    border-color: var(--app-copane-primary, #E65100);
 }
 
-.copabr-noticia-icon {
+.copane-noticia-icon {
     width: 2rem;
     height: 2rem;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--app-copabr-muted, rgba(0, 48, 135, 0.15));
+    background: var(--app-copane-muted, rgba(230, 81, 0, 0.15));
     border-radius: 0.5rem;
 }
 
-.copabr-noticia-icon .material-icons {
+.copane-noticia-icon .material-icons {
     font-size: 1rem;
-    color: var(--app-copabr-primary, #003087);
+    color: var(--app-copane-primary, #E65100);
 }
 
-.copabr-noticia-text {
+.copane-noticia-text {
     flex: 1;
     min-width: 0;
 }
 
-.copabr-noticia-title {
+.copane-noticia-title {
     font-family: var(--app-font-base, 'Inter', sans-serif);
     font-size: 0.82rem;
     font-weight: 600;
@@ -364,24 +374,24 @@
     overflow: hidden;
 }
 
-.copabr-noticia-meta {
+.copane-noticia-meta {
     display: flex;
     align-items: center;
     gap: 0.4rem;
     font-size: 0.6rem;
 }
 
-.copabr-noticia-fonte {
-    color: var(--app-copabr-secondary, #D4AF37);
+.copane-noticia-fonte {
+    color: var(--app-copane-primary, #E65100);
     font-weight: 700;
     text-transform: uppercase;
 }
 
-.copabr-noticia-tempo {
+.copane-noticia-tempo {
     color: var(--app-text-muted, rgba(255, 255, 255, 0.4));
 }
 
-.copabr-noticia-chevron {
+.copane-noticia-chevron {
     font-size: 1.1rem;
     color: var(--app-text-muted, rgba(255, 255, 255, 0.3));
     flex-shrink: 0;
@@ -391,31 +401,31 @@
 /* ═══════════════════════════════════════════════════
    FASES — Timeline vertical
    ═══════════════════════════════════════════════════ */
-.copabr-timeline {
+.copane-timeline {
     position: relative;
     padding-left: 1.5rem;
 }
 
-.copabr-timeline::before {
+.copane-timeline::before {
     content: '';
     position: absolute;
     left: 0.25rem;
     top: 0.5rem;
     bottom: 0.5rem;
     width: 2px;
-    background: var(--app-copabr-border, rgba(0, 48, 135, 0.35));
+    background: var(--app-copane-border, rgba(230, 81, 0, 0.35));
 }
 
-.copabr-timeline-item {
+.copane-timeline-item {
     position: relative;
     padding: 0 0 1.5rem 1.25rem;
 }
 
-.copabr-timeline-item:last-child {
+.copane-timeline-item:last-child {
     padding-bottom: 0;
 }
 
-.copabr-timeline-item::before {
+.copane-timeline-item::before {
     content: '';
     position: absolute;
     left: -1.2rem;
@@ -427,64 +437,64 @@
     border: 2px solid var(--app-bg, #0a0a0a);
 }
 
-.copabr-timeline-item--final::before {
-    background: var(--app-copabr-secondary, #D4AF37);
+.copane-timeline-item--final::before {
+    background: var(--app-copane-secondary, #D4AF37);
     box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
     width: 0.75rem;
     height: 0.75rem;
     left: -1.25rem;
 }
 
-.copabr-timeline-item--active::before {
-    background: #6699ff;
-    box-shadow: 0 0 8px rgba(102, 153, 255, 0.5);
+.copane-timeline-item--active::before {
+    background: var(--app-copane-primary, #E65100);
+    box-shadow: 0 0 8px rgba(230, 81, 0, 0.5);
 }
 
-.copabr-timeline-item--done::before {
+.copane-timeline-item--done::before {
     background: #4ade80;
     opacity: 0.6;
 }
 
-.copabr-timeline-fase {
+.copane-timeline-fase {
     font-family: var(--app-font-brand, 'Russo One', sans-serif);
     font-size: 0.85rem;
     color: var(--app-text-primary, #fff);
     margin-bottom: 0.15rem;
 }
 
-.copabr-timeline-item--final .copabr-timeline-fase {
-    color: var(--app-copabr-secondary, #D4AF37);
+.copane-timeline-item--final .copane-timeline-fase {
+    color: var(--app-copane-secondary, #D4AF37);
     font-style: italic;
 }
 
-.copabr-timeline-item--active .copabr-timeline-fase {
-    color: #6699ff;
+.copane-timeline-item--active .copane-timeline-fase {
+    color: var(--app-copane-primary, #E65100);
 }
 
-.copabr-timeline-item--done .copabr-timeline-fase {
+.copane-timeline-item--done .copane-timeline-fase {
     color: var(--app-text-muted, rgba(255, 255, 255, 0.45));
 }
 
-.copabr-timeline-item--done .copabr-timeline-info {
+.copane-timeline-item--done .copane-timeline-info {
     opacity: 0.6;
 }
 
-.copabr-timeline-info {
+.copane-timeline-info {
     font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
     font-size: 0.6rem;
     color: var(--app-text-muted, rgba(255, 255, 255, 0.5));
     text-transform: uppercase;
 }
 
-.copabr-timeline-badge {
+.copane-timeline-badge {
     display: inline-flex;
     align-items: center;
     font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
     font-size: 0.5rem;
     font-weight: 700;
-    color: #6699ff;
-    background: rgba(102, 153, 255, 0.12);
-    border: 1px solid rgba(102, 153, 255, 0.35);
+    color: var(--app-copane-primary, #E65100);
+    background: rgba(230, 81, 0, 0.12);
+    border: 1px solid rgba(230, 81, 0, 0.35);
     border-radius: 999px;
     padding: 0.1rem 0.4rem;
     margin-left: 0.4rem;
@@ -492,7 +502,7 @@
     text-transform: uppercase;
 }
 
-.copabr-timeline-badge--done {
+.copane-timeline-badge--done {
     color: #4ade80;
     background: rgba(74, 222, 128, 0.1);
     border-color: rgba(74, 222, 128, 0.25);
