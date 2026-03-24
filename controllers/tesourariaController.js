@@ -253,6 +253,15 @@ export async function getParticipantes(req, res) {
                     else if (t.tipo === 'RESTA_UM' || (t.tipo === 'AJUSTE' && t.descricao?.startsWith('Resta Um'))) breakdown.restaUm += t.valor || 0;
                 });
 
+                // historico_transacoes usa formato consolidado (sem tipo) → Resta Um não aparece no forEach.
+                // Popular breakdown.restaUm diretamente dos AjusteFinanceiro quando não encontrado no historico.
+                if (breakdown.restaUm === 0) {
+                    const ajustesList = ajustesFinMap.get(key) || [];
+                    breakdown.restaUm = ajustesList
+                        .filter(a => a.descricao?.startsWith('Resta Um'))
+                        .reduce((acc, a) => acc + (a.valor || 0), 0);
+                }
+
                 const acertosList = acertosMap.get(key) || [];
                 const acertosTemporada = acertosList.filter(a => Number(a.temporada) === temporadaNum);
                 let totalPago = 0;
@@ -623,6 +632,15 @@ export async function getLiga(req, res) {
                 else if (t.tipo === 'LUVA_OURO') breakdown.luvaOuro += t.valor || 0;
                 else if (t.tipo === 'RESTA_UM' || (t.tipo === 'AJUSTE' && t.descricao?.startsWith('Resta Um'))) breakdown.restaUm += t.valor || 0;
             });
+
+            // historico_transacoes usa formato consolidado (sem tipo) → Resta Um não aparece no forEach.
+            // Popular breakdown.restaUm diretamente dos AjusteFinanceiro quando não encontrado no historico.
+            if (breakdown.restaUm === 0) {
+                const ajustesListRU = ajustesFinMap.get(timeId) || [];
+                breakdown.restaUm = ajustesListRU
+                    .filter(a => a.descricao?.startsWith('Resta Um'))
+                    .reduce((acc, a) => acc + (a.valor || 0), 0);
+            }
 
             const acertosList = acertosMap.get(timeId) || [];
             const acertosTemporada = acertosList.filter(a => Number(a.temporada) === temporadaNum);
