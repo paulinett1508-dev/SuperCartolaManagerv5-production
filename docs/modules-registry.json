@@ -96,6 +96,24 @@
     "complexity": "high",
     "audits": ["financial", "ui", "security", "business", "performance"]
   },
+  "resta-um": {
+    "name": "Resta Um",
+    "category": "competition",
+    "description": "Eliminação progressiva rodada a rodada — sobreviva ou seja eliminado",
+    "hasFinancial": true,
+    "hasUI": true,
+    "hasAPI": true,
+    "complexity": "high",
+    "colorVar": "--module-resta-um-primary",
+    "status": "active",
+    "files": {
+      "controller": "controllers/restaUmController.js",
+      "manager": "services/orchestrator/managers/RestaUmManager.js",
+      "model": "models/RestaUmCache.js",
+      "frontend": "public/participante/js/modules/participante-resta-um.js"
+    },
+    "audits": ["financial", "ui", "security", "business", "performance"]
+  },
   "campinho": {
     "name": "Campinho",
     "category": "game",

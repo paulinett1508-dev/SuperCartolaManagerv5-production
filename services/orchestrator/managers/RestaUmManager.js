@@ -13,6 +13,7 @@ import BaseManager from './BaseManager.js';
 import RestaUmCache from '../../../models/RestaUmCache.js';
 import Rodada from '../../../models/Rodada.js';
 import AjusteFinanceiro from '../../../models/AjusteFinanceiro.js';
+import { invalidarExtratoCache } from '../../../utils/cache-invalidator.js';
 import { CURRENT_SEASON } from '../../../config/seasons.js';
 
 export default class RestaUmManager extends BaseManager {
@@ -27,6 +28,36 @@ export default class RestaUmManager extends BaseManager {
             temColeta: false,
             temFinanceiro: true,
         });
+    }
+
+    /**
+     * Tenta recuperar débitos financeiros não lançados por falha entre o save()
+     * do guard de idempotência e o lançamento dos AjusteFinanceiro.
+     * Seguro de chamar múltiplas vezes — _lancarDebitoEliminacao é idempotente.
+     *
+     * @returns {boolean} true se havia débitos pendentes e foram lançados
+     */
+    async _recoveryFinanceiro(edicao, rodada) {
+        const debitosLancados = edicao.debitosLancados || [];
+        if (debitosLancados.includes(rodada)) return false;
+        if (!edicao.fluxoFinanceiroHabilitado || !edicao.taxaEliminacao) return false;
+
+        const eliminadosNaRodada = edicao.participantes.filter(p => p.rodadaEliminacao === rodada);
+        if (eliminadosNaRodada.length === 0) return false;
+
+        console.log(`[RESTA-UM] R${rodada} recovery financeiro — ${eliminadosNaRodada.length} débito(s) pendente(s)`);
+        for (const el of eliminadosNaRodada) {
+            await this._lancarDebitoEliminacao(
+                edicao.liga_id, edicao.temporada,
+                el.timeId, el.nomeTime,
+                edicao.taxaEliminacao, edicao.edicao, rodada,
+            ).catch(err => console.error('[RESTA-UM-FIN] Erro no débito recovery:', err.message));
+        }
+
+        edicao.debitosLancados = [...debitosLancados, rodada];
+        edicao.markModified('debitosLancados');
+        await edicao.save();
+        return true;
     }
 
     /**
@@ -170,6 +201,10 @@ export default class RestaUmManager extends BaseManager {
                     edicao.taxaEliminacao, edicao.edicao, rodada,
                 ).catch(err => console.error('[RESTA-UM-FIN] Erro no débito:', err.message));
             }
+            // Marcar rodada como financeiramente processada (recovery de janela de falha)
+            edicao.debitosLancados = [...(edicao.debitosLancados || []), rodada];
+            edicao.markModified('debitosLancados');
+            await edicao.save();
         }
 
         // Fluxo financeiro: créditos para premiados quando finalizar
@@ -293,6 +328,7 @@ export default class RestaUmManager extends BaseManager {
                 if (pendente) {
                     // Idempotência primária: rodadaAtual já cobre esta rodada
                     if (pendente.rodadaAtual >= rodada) {
+                        await this._recoveryFinanceiro(pendente, rodada);
                         console.log(`[RESTA-UM] R${rodada} já processada (rodadaAtual=${pendente.rodadaAtual}, pendente) para liga ${ligaId} — ignorando`);
                         return { consolidado: true, ignorado: true, motivo: 'rodada_ja_processada' };
                     }
@@ -330,6 +366,7 @@ export default class RestaUmManager extends BaseManager {
 
             // Idempotência primária: rodadaAtual já cobre esta rodada
             if (edicao.rodadaAtual >= rodada) {
+                await this._recoveryFinanceiro(edicao, rodada);
                 console.log(`[RESTA-UM] R${rodada} já processada (rodadaAtual=${edicao.rodadaAtual}) para liga ${ligaId} — ignorando`);
                 return { consolidado: true, ignorado: true, motivo: 'rodada_ja_processada' };
             }
@@ -352,16 +389,16 @@ export default class RestaUmManager extends BaseManager {
 
     /**
      * Cria débito idempotente para participante eliminado.
-     * Usa descricao única como chave de idempotência.
+     * Usa chaveIdempotencia dedicada (não descricao) como chave de proteção.
      */
     async _lancarDebitoEliminacao(ligaId, temporada, timeId, nomeTime, taxaEliminacao, edicaoNum, rodada) {
-        const descricao = `Resta Um E${edicaoNum} - Eliminado R${rodada}`;
+        const chaveIdempotencia = `resta_um-debito-e${edicaoNum}-r${rodada}-t${timeId}`;
+
         const jaExiste = await AjusteFinanceiro.findOne({
             liga_id: String(ligaId),
             time_id: Number(timeId),
             temporada: Number(temporada),
-            descricao,
-            ativo: true,
+            chaveIdempotencia,
         }).lean();
 
         if (jaExiste) {
@@ -373,10 +410,14 @@ export default class RestaUmManager extends BaseManager {
             liga_id: String(ligaId),
             time_id: timeId,
             temporada,
-            descricao,
+            descricao: `Resta Um E${edicaoNum} - Eliminado R${rodada}`,
             valor: -Math.abs(taxaEliminacao), // débito = negativo
             criado_por: 'RestaUmManager',
+            chaveIdempotencia,
+            metadata: { modulo: 'resta_um', edicao: edicaoNum, rodada },
         });
+
+        await invalidarExtratoCache(String(ligaId), timeId, temporada, 'RestaUm débito eliminação');
         console.log(`[RESTA-UM-FIN] Débito criado: ${nomeTime} -R$${taxaEliminacao} (R${rodada})`);
     }
 
@@ -408,13 +449,12 @@ export default class RestaUmManager extends BaseManager {
         for (const { p, valor, label } of premiados) {
             if (!valor || valor <= 0) continue;
 
-            const descricao = `Resta Um E${edicao.edicao} - ${label}`;
+            const chaveIdempotencia = `resta_um-${label.toLowerCase().replace(/\s+/g, '_')}-e${edicao.edicao}-t${p.timeId}`;
             const jaExiste = await AjusteFinanceiro.findOne({
                 liga_id: String(ligaId),
                 time_id: Number(p.timeId),
                 temporada: Number(temporada),
-                descricao,
-                ativo: true,
+                chaveIdempotencia,
             }).lean();
 
             if (jaExiste) {
@@ -426,10 +466,14 @@ export default class RestaUmManager extends BaseManager {
                 liga_id: String(ligaId),
                 time_id: p.timeId,
                 temporada,
-                descricao,
+                descricao: `Resta Um E${edicao.edicao} - ${label}`,
                 valor: Math.abs(valor), // crédito = positivo
                 criado_por: 'RestaUmManager',
+                chaveIdempotencia,
+                metadata: { modulo: 'resta_um', edicao: edicao.edicao, posicao: label },
             });
+
+            await invalidarExtratoCache(String(ligaId), p.timeId, temporada, `RestaUm crédito ${label}`);
             console.log(`[RESTA-UM-FIN] Crédito criado: ${p.nomeTime} +R$${valor} (${label})`);
         }
     }

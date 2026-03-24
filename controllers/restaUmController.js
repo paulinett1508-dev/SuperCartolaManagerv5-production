@@ -577,6 +577,7 @@ export async function editarEdicao(req, res) {
         }
 
         // Recalcular taxa se premiação ou fluxo mudaram
+        let avisoTaxaRetroativa = false;
         if (premiacao !== undefined || fluxoFinanceiroHabilitado !== undefined) {
             const p = edicao.premiacao;
             const numGanhadores = 2 + (p.terceiroHabilitado ? 1 : 0);
@@ -585,6 +586,12 @@ export async function editarEdicao(req, res) {
                 + (p.terceiroHabilitado ? p.terceiro : 0);
             const payers = (edicao.participantes || []).length - numGanhadores;
             edicao.taxaEliminacao = payers > 0 ? Math.trunc(pool / payers * 100) / 100 : 0;
+
+            // Aviso: débitos já lançados em rodadas anteriores usam o valor antigo
+            if (!isPendente && (edicao.debitosLancados || []).length > 0 && premiacao !== undefined) {
+                avisoTaxaRetroativa = true;
+                logger.warn(`[RESTA-UM] Liga ${ligaId} — premiação alterada com ${edicao.debitosLancados.length} rodada(s) já processada(s). Débitos anteriores NÃO são recalculados.`);
+            }
         }
 
         edicao.ultima_atualizacao = new Date();
@@ -596,6 +603,9 @@ export async function editarEdicao(req, res) {
             success: true,
             edicao: edicaoNum,
             status: edicao.status,
+            ...(avisoTaxaRetroativa && {
+                aviso: 'Premiação alterada com eliminações já processadas. Débitos das rodadas anteriores não são recalculados retroativamente — apenas novas eliminações usarão a taxa atualizada.',
+            }),
         });
 
     } catch (error) {
