@@ -568,6 +568,7 @@ function atualizarCardsHomeUI(data) {
 
     const {
         posicao,
+        totalParticipantes,
         pontosTotal,
         ultimaRodada,
         rodadaAtual,
@@ -588,6 +589,7 @@ function atualizarCardsHomeUI(data) {
 
     if (ultimaPontuacaoEl) {
         ultimaPontuacaoEl.textContent = formatarPontos(pontosUltimaRodada);
+        ultimaPontuacaoEl.style.color = getCorPontosZona(posicao, totalParticipantes);
     }
 
     if (pontosRankingEl) {
@@ -936,6 +938,14 @@ function calcularValoresCards(data) {
     };
 }
 
+function getCorPontosZona(posicao, totalParticipantes) {
+    const zona = getZonaInfo(posicao, totalParticipantes);
+    const zonaClass = zona.zonaClass || 'zona-neutra';
+    if (zonaClass === 'zona-premiacao') return 'var(--app-success)';
+    if (zonaClass === 'zona-risco') return 'var(--app-danger)';
+    return 'var(--app-text-primary)';
+}
+
 function renderShortcutButton(label, icon, onClick, enabled) {
     const classes = enabled ? "" : " home-action-disabled";
     const handler = enabled ? `onclick="${onClick}"` : "";
@@ -1111,9 +1121,14 @@ function renderizarHome(container, data, ligaId) {
         pontosRankingEl.textContent = formatarPontos(pontosTotal);
     }
 
+    const corPontosZona = getCorPontosZona(posicao, totalParticipantes);
+
     if (rodadaEmAndamento) {
         // Rodada em andamento: placeholder ate parciais carregarem
-        if (ultimaPontuacaoEl) ultimaPontuacaoEl.textContent = '--';
+        if (ultimaPontuacaoEl) {
+            ultimaPontuacaoEl.textContent = '--';
+            ultimaPontuacaoEl.style.color = corPontosZona;
+        }
         if (pontuacaoLabelEl) pontuacaoLabelEl.innerHTML = `<span id="home-rodada-num">RODADA ${rodadaParaExibir}</span>`;
         if (perfStatusEl) perfStatusEl.innerHTML = '<span class="andamento-badge-mini">RODADA EM ANDAMENTO</span>';
     } else {
@@ -1122,6 +1137,7 @@ function renderizarHome(container, data, ligaId) {
 
         if (ultimaPontuacaoEl) {
             ultimaPontuacaoEl.textContent = formatarPontos(pontosUltimaRodada);
+            ultimaPontuacaoEl.style.color = corPontosZona;
         }
 
         if (pontuacaoLabelEl) {
@@ -1355,21 +1371,6 @@ function atualizarPainelAvisos(rodadaAtual, totalParticipantes, extras = {}) {
                     </div>
                     <span class="home-aviso-texto">Pré-temporada ${temporadaSelecionada} - Renove sua inscrição!</span>
                     <span class="home-aviso-badge">NOVO</span>
-                </div>
-            `;
-        }
-
-        // Aviso de saldo negativo
-        const saldo = extras.saldoFinanceiro ?? 0;
-        if (saldo < 0) {
-            const saldoFormatado = `R$ ${Math.abs(saldo).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
-            avisosHTML += `
-                <div class="home-aviso-secundario home-aviso--danger" onclick="window.participanteNav?.navegarPara('extrato')">
-                    <div class="home-aviso-icon-mini home-aviso-icon--danger">
-                        <span class="material-icons">trending_down</span>
-                    </div>
-                    <span class="home-aviso-texto">Saldo negativo: -${saldoFormatado}</span>
-                    <span class="home-aviso-badge home-aviso-badge--danger">ALERTA</span>
                 </div>
             `;
         }
