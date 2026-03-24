@@ -245,7 +245,7 @@ class TooltipRegrasFinanceiras {
      * @private
      */
     _formatarValor(valor) {
-        if (typeof valor === 'object' && valor.valor !== undefined) {
+        if (valor !== null && typeof valor === 'object' && valor.valor !== undefined) {
             valor = valor.valor;
         }
         

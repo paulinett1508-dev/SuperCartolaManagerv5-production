@@ -250,7 +250,7 @@ export async function getParticipantes(req, res) {
                     if (t.tipo === 'MELHOR_MES') breakdown.melhorMes += t.valor || 0;
                     else if (t.tipo === 'ARTILHEIRO' || t.tipo === 'ARTILHEIRO_PREMIACAO') breakdown.artilheiro += t.valor || 0;
                     else if (t.tipo === 'LUVA_OURO') breakdown.luvaOuro += t.valor || 0;
-                    else if (t.tipo === 'RESTA_UM') breakdown.restaUm += t.valor || 0;
+                    else if (t.tipo === 'RESTA_UM' || (t.tipo === 'AJUSTE' && t.descricao?.startsWith('Resta Um'))) breakdown.restaUm += t.valor || 0;
                 });
 
                 const acertosList = acertosMap.get(key) || [];
@@ -621,7 +621,7 @@ export async function getLiga(req, res) {
                 if (t.tipo === 'MELHOR_MES') breakdown.melhorMes += t.valor || 0;
                 else if (t.tipo === 'ARTILHEIRO' || t.tipo === 'ARTILHEIRO_PREMIACAO') breakdown.artilheiro += t.valor || 0;
                 else if (t.tipo === 'LUVA_OURO') breakdown.luvaOuro += t.valor || 0;
-                else if (t.tipo === 'RESTA_UM') breakdown.restaUm += t.valor || 0;
+                else if (t.tipo === 'RESTA_UM' || (t.tipo === 'AJUSTE' && t.descricao?.startsWith('Resta Um'))) breakdown.restaUm += t.valor || 0;
             });
 
             const acertosList = acertosMap.get(timeId) || [];
