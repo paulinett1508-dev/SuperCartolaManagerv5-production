@@ -449,6 +449,16 @@ async function obterResumoParaExibicao(temporada) {
         };
     }
 
+    // Background sync se dados estão > 2h — não bloqueia a resposta
+    if (calendario.ultima_atualizacao) {
+        const horasDesde = (Date.now() - new Date(calendario.ultima_atualizacao).getTime()) / 3600000;
+        if (horasDesde > 2) {
+            sincronizarTabela(temporada, false).catch(e =>
+                console.warn('[BRASILEIRAO-SERVICE] Background sync falhou:', e.message)
+            );
+        }
+    }
+
     let rodadaAtual = calendario.obterRodadaAtual();
     const rodadaCartola = await obterRodadaCartola();
     if (rodadaCartola) rodadaAtual = rodadaCartola;
