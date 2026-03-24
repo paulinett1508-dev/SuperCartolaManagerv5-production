@@ -161,6 +161,25 @@ function iniciar() {
 
     // Verificar a cada hora
     jobTimer = setInterval(verificarEExecutar, CONFIG.INTERVALO_VERIFICACAO * 60 * 1000);
+
+    // Sync de inicialização: se dados ausentes ou > 24h, sincronizar imediatamente
+    CalendarioBrasileirao.findOne(
+        { temporada: CONFIG.TEMPORADA_PADRAO },
+        { ultima_atualizacao: 1 }
+    ).lean().then(cal => {
+        if (!cal || !cal.ultima_atualizacao) {
+            console.log('[SYNC-BRASILEIRAO] Sem dados para temporada ' + CONFIG.TEMPORADA_PADRAO + ' — sync de inicialização...');
+            executarSync();
+        } else {
+            const horas = (Date.now() - new Date(cal.ultima_atualizacao).getTime()) / 3600000;
+            if (horas > 24) {
+                console.log(`[SYNC-BRASILEIRAO] Dados com ${Math.floor(horas)}h — sync de inicialização...`);
+                executarSync();
+            }
+        }
+    }).catch(err => {
+        console.warn('[SYNC-BRASILEIRAO] Erro ao verificar dados na inicialização:', err.message);
+    });
 }
 
 /**

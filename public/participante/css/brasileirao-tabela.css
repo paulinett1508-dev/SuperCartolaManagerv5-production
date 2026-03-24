@@ -1017,12 +1017,14 @@
     border-top: none;
     border-bottom-left-radius: 14px;
     border-bottom-right-radius: 14px;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     max-height: 800px;
     transition: max-height 0.35s ease;
 }
 
 .agenda-content.collapsed {
     max-height: 0;
+    overflow: hidden;
     border-width: 0;
 }
