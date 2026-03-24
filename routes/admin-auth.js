@@ -3,8 +3,12 @@
  * Super Cartola Manager
  */
 import express from "express";
+import crypto from "crypto";
 import axios from "axios";
 import systemTokenService from "../services/systemTokenService.js";
+
+// Debug tokens em memória (Map<token, expiresAt>)
+const debugTokens = new Map();
 
 const router = express.Router();
 
@@ -156,6 +160,51 @@ router.delete("/cartola-token", async (req, res) => {
 
   console.log(`[ADMIN-AUTH] Token Cartola revogado por ${req.session.admin.email}`);
   res.json({ success: true, message: "Token revogado" });
+});
+
+// =========================================================================
+// DEBUG TOKEN — Ativação de logs em produção (admin-only)
+// =========================================================================
+
+function cleanExpiredDebugTokens() {
+  const now = Date.now();
+  for (const [token, expiresAt] of debugTokens) {
+    if (now > expiresAt) debugTokens.delete(token);
+  }
+}
+
+/**
+ * GET /api/admin/auth/debug-token
+ * Gera token temporário para ativar debug no frontend (30min).
+ * Requer sessão admin.
+ */
+router.get("/debug-token", (req, res) => {
+  if (!req.session?.admin) {
+    return res.status(401).json({ success: false, message: "Não autenticado como admin" });
+  }
+
+  cleanExpiredDebugTokens();
+
+  const token = crypto.randomBytes(16).toString("hex");
+  const TTL_MS = 30 * 60 * 1000;
+  debugTokens.set(token, Date.now() + TTL_MS);
+
+  console.log(`[ADMIN-AUTH] Debug token gerado por ${req.session.admin.email}`);
+  res.json({ success: true, token });
+});
+
+/**
+ * GET /api/admin/auth/debug-validate/:token
+ * Valida se um debug token ainda é válido.
+ * Rota pública (log-manager.js roda antes do login).
+ */
+router.get("/debug-validate/:token", (req, res) => {
+  cleanExpiredDebugTokens();
+
+  const expiresAt = debugTokens.get(req.params.token);
+  const valid = !!expiresAt && Date.now() < expiresAt;
+
+  res.json({ valid });
 });
 
 export default router;
