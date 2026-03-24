@@ -1,13 +1,36 @@
 // participante-copa-brasil.js
-// v1.0 - Controller da Landing Page "Copa do Brasil 2026"
+// v1.1 - Controller da Landing Page "Copa do Brasil 2026"
+// v1.1: Atualiza 5ª Fase com confrontos do sorteio (23/03/2026)
 //
 // Fontes de dados:
 //   - API: /api/noticias/copa-brasil (Google News RSS, cache 30min)
 
 
+// Confrontos da 5ª Fase — Sorteio realizado em 23/03/2026 na CBF
+// Formato: { mandanteIda: 'Time A', visitanteIda: 'Time B' }
+// O mandante da ida joga em casa primeiro; volta no campo do outro
+const CONFRONTOS_5A_FASE = [
+    { mandanteIda: 'Ceará',          visitanteIda: 'Atlético-MG' },
+    { mandanteIda: 'Goiás',          visitanteIda: 'Cruzeiro' },
+    { mandanteIda: 'Atlético-GO',    visitanteIda: 'Athletico-PR' },
+    { mandanteIda: 'Vitória',        visitanteIda: 'Flamengo' },
+    { mandanteIda: 'Confiança',      visitanteIda: 'Grêmio' },
+    { mandanteIda: 'Paysandu',       visitanteIda: 'Vasco' },
+    { mandanteIda: 'CRB',            visitanteIda: 'Fortaleza' },
+    { mandanteIda: 'Remo',           visitanteIda: 'Bahia' },
+    { mandanteIda: 'Chapecoense',    visitanteIda: 'Botafogo' },
+    { mandanteIda: 'Mirassol',       visitanteIda: 'RB Bragantino' },
+    { mandanteIda: 'Barra-SC',       visitanteIda: 'Corinthians' },
+    { mandanteIda: 'Operário-PR',    visitanteIda: 'Fluminense' },
+    { mandanteIda: 'Jacuipense',     visitanteIda: 'Palmeiras' },
+    { mandanteIda: 'Athletic-MG',    visitanteIda: 'Internacional' },
+    { mandanteIda: 'Coritiba',       visitanteIda: 'Santos' },
+    { mandanteIda: 'Juventude',      visitanteIda: 'São Paulo' },
+];
+
+
 // Eventos futuros da Copa do Brasil 2026 — countdown dinâmico para o próximo
 const EVENTOS_COPA_BRASIL = [
-    { label: 'Sorteio da 5ª Fase',    data: new Date('2026-03-23T14:00:00-03:00') },
     { label: '5ª Fase — Ida',         data: new Date('2026-04-22T00:00:00-03:00') },
     { label: '5ª Fase — Volta',       data: new Date('2026-05-13T00:00:00-03:00') },
     { label: 'Oitavas de Final — Ida',data: new Date('2026-08-02T00:00:00-03:00') },
@@ -50,6 +73,7 @@ export async function inicializarCopaBrasilParticipante(params) {
 
     try {
         renderizarInfoHero();
+        renderizarConfrontos5aFase();
         renderizarFases();
         await carregarNoticias();
 
@@ -98,6 +122,23 @@ function renderizarInfoHero() {
     }
 
     container.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════
+// CONFRONTOS 5ª FASE — Sorteio 23/03/2026
+// ═══════════════════════════════════════════════════
+
+function renderizarConfrontos5aFase() {
+    const container = document.getElementById('copabr-confrontos-5fase');
+    if (!container) return;
+
+    container.innerHTML = CONFRONTOS_5A_FASE.map(c => `
+        <div class="copabr-confronto-card">
+            <span class="copabr-confronto-time">${c.mandanteIda}</span>
+            <span class="copabr-confronto-vs">vs</span>
+            <span class="copabr-confronto-time">${c.visitanteIda}</span>
+        </div>`
+    ).join('');
 }
 
 // ═══════════════════════════════════════════════════

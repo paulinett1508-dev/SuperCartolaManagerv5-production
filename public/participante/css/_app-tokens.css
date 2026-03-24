@@ -110,6 +110,15 @@
     --app-copabr-gradient: linear-gradient(135deg, #003087 0%, #001a52 50%, #D4AF37 100%);
     --app-copabr-gradient-subtle: linear-gradient(135deg, rgba(0, 48, 135, 0.2) 0%, rgba(0, 26, 82, 0.15) 100%);
 
+    /* Copa do Nordeste 2026 */
+    --app-copane-primary: #E65100;               /* Laranja Sol do Nordeste */
+    --app-copane-secondary: #D4AF37;             /* Dourado troféu */
+    --app-copane-accent: #2D6A4F;                /* Verde sertão */
+    --app-copane-muted: rgba(230, 81, 0, 0.15);
+    --app-copane-border: rgba(230, 81, 0, 0.35);
+    --app-copane-gradient: linear-gradient(135deg, #E65100 0%, #BF360C 50%, #D4AF37 100%);
+    --app-copane-gradient-subtle: linear-gradient(135deg, rgba(230, 81, 0, 0.2) 0%, rgba(191, 54, 12, 0.15) 100%);
+
     /* Agenda do Dia (Jogos) */
     --app-agenda-primary: #1a6b35;              /* Verde gramado */
     --app-agenda-secondary: #0d3d1e;            /* Verde escuro */
