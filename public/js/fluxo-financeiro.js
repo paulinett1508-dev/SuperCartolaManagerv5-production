@@ -77,7 +77,7 @@ async function carregarModulos() {
     // ✅ v8.10: Carregar módulo de renderização v2 ANTES da UI
     // Este módulo define window.renderExtratoV2 que é usado pela UI
     try {
-        await import("./fluxo-financeiro/extrato-render-v2.js?v8.20");
+        await import("./fluxo-financeiro/extrato-render-v2.js?v8.21");
         console.log("[FLUXO] ✅ extrato-render-v2.js carregado");
     } catch (e) {
         console.warn("[FLUXO] extrato-render-v2.js não encontrado, usando renderização legada");
