@@ -351,6 +351,42 @@ function calcularResumoDeRodadas(rodadas, camposManuais = null) {
     };
 }
 
+/**
+ * Injeta ajustes do Resta Um diretamente nas rodadas correspondentes.
+ * Ajustes com descrição "Resta Um ... - Eliminado R{n}" são adicionados ao campo
+ * `restaUm` + `restaUmDescricao` do objeto-rodada, permitindo exibição inline na
+ * timeline do extrato (ao invés de aparecer apenas em "Movimentações Especiais").
+ *
+ * @param {Array} ajustes - Lista de AjusteFinanceiro (docs do banco)
+ * @param {Array} rodadas - Array de rodadas consolidadas (mutado in-place)
+ * @returns {Array} Ajustes que NÃO foram injetados (outros módulos, multas manuais)
+ */
+function injetarRestaUmNasRodadas(ajustes, rodadas) {
+    if (!ajustes || !ajustes.length || !rodadas || !rodadas.length) return ajustes || [];
+
+    const rodadasMap = new Map();
+    for (const r of rodadas) {
+        if (r.rodada != null) rodadasMap.set(r.rodada, r);
+    }
+
+    const naoInjetados = [];
+    for (const a of ajustes) {
+        const match = a.descricao && /resta um/i.test(a.descricao) &&
+            a.descricao.match(/eliminado\s+r(\d+)/i);
+        if (match) {
+            const rodadaNum = parseInt(match[1], 10);
+            const rodada = rodadasMap.get(rodadaNum);
+            if (rodada) {
+                rodada.restaUm = (rodada.restaUm || 0) + (a.valor || 0);
+                rodada.restaUmDescricao = a.descricao;
+                continue; // Injetado — não vai para lancamentosIniciais
+            }
+        }
+        naoInjetados.push(a);
+    }
+    return naoInjetados;
+}
+
 // ✅ v3.4: FUNÇÃO MELHORADA - Detecta corretamente cache corrompido
 function transformarTransacoesEmRodadas(transacoes, ligaId) {
     if (!Array.isArray(transacoes) || transacoes.length === 0) return [];
@@ -832,20 +868,9 @@ export const getExtratoCache = async (req, res) => {
         );
         logger.log(`[CACHE-CONTROLLER] 📋 Lançamentos iniciais: ${lancamentosIniciais.length}, taxa=${taxaInscricaoValor}, saldoAnterior=${saldoAnteriorTransferidoValor}, total=${saldoLancamentosIniciais}`);
 
-        // ✅ v7.1: Incluir ajustes financeiros individuais (Resta Um, multas) APÓS cálculo de saldo
-        // (saldo dos ajustes já é computado separadamente via saldoAjustesGlobal — evitar double-counting)
-        if (ajustesLista && ajustesLista.length > 0) {
-            ajustesLista.forEach(a => {
-                lancamentosIniciais.push({
-                    rodada: null,
-                    tipo: 'AJUSTE',
-                    descricao: a.descricao,
-                    valor: a.valor,
-                    data: a.criado_em,
-                });
-            });
-            logger.log(`[CACHE-CONTROLLER] 📋 Ajustes financeiros incluídos para display: ${ajustesLista.length} entries`);
-        }
+        // ✅ v7.5: Guardar ajustes para injeção após rodadasConsolidadas ser construído
+        // (Resta Um vai inline na rodada; demais vão para lancamentosIniciais)
+        const ajustesPendentes = ajustesLista || [];
 
         // ✅ v7.4 FIX: Detectar formato consolidado vs raw transactions
         // Admin frontend salva objetos consolidados (bonusOnus, pontosCorridos, mataMata...)
@@ -884,6 +909,18 @@ export const getExtratoCache = async (req, res) => {
                 rodadasConsolidadas,
                 rodadaDesistencia,
             );
+        }
+
+        // ✅ v7.5: Injetar Resta Um nas rodadas; demais ajustes vão para lancamentosIniciais
+        const ajustesSobra = injetarRestaUmNasRodadas(ajustesPendentes, rodadasConsolidadas);
+        ajustesSobra.forEach(a => {
+            lancamentosIniciais.push({
+                rodada: null, tipo: 'AJUSTE',
+                descricao: a.descricao, valor: a.valor, data: a.criado_em,
+            });
+        });
+        if (ajustesPendentes.length > 0) {
+            logger.log(`[CACHE-CONTROLLER] 📋 Ajustes: ${ajustesPendentes.length - ajustesSobra.length} injetados nas rodadas, ${ajustesSobra.length} em lancamentosIniciais`);
         }
 
         const resumoCalculado = calcularResumoDeRodadas(
@@ -1431,15 +1468,14 @@ export const verificarCacheValido = async (req, res) => {
                 acc + (parseFloat(t.valor) || 0), 0
             );
 
-            // ✅ v7.1: Incluir ajustes financeiros individuais APÓS cálculo de saldo (display only)
-            if (ajustesListaVal && ajustesListaVal.length > 0) {
-                ajustesListaVal.forEach(a => {
-                    lancamentosIniciais.push({
-                        rodada: null, tipo: 'AJUSTE',
-                        descricao: a.descricao, valor: a.valor, data: a.criado_em,
-                    });
+            // ✅ v7.5: Pré-temporada tem rodadas=[]; injetarRestaUmNasRodadas retorna tudo para lancamentosIniciais
+            const ajustesPreTemporada = ajustesListaVal || [];
+            injetarRestaUmNasRodadas(ajustesPreTemporada, []).forEach(a => {
+                lancamentosIniciais.push({
+                    rodada: null, tipo: 'AJUSTE',
+                    descricao: a.descricao, valor: a.valor, data: a.criado_em,
                 });
-            }
+            });
 
             const camposAtivos = await buscarCamposManuais(ligaId, timeId, temporadaNum);
 
@@ -1665,15 +1701,18 @@ export const lerCacheExtratoFinanceiro = async (req, res) => {
             saldoLancamentosIniciais += parseFloat(l.valor) || 0;
         });
 
-        // ✅ v7.1: Incluir ajustes financeiros individuais APÓS cálculo de saldo (display only)
-        if (ajustesListaVal && ajustesListaVal.length > 0) {
-            ajustesListaVal.forEach(a => {
-                lancamentosIniciais.push({
-                    rodada: null, tipo: 'AJUSTE',
-                    descricao: a.descricao, valor: a.valor, data: a.criado_em,
-                });
+        // ✅ v7.5: Injetar ajustes do Resta Um diretamente nas rodadas (inline display)
+        // Ajustes de outros módulos (multas manuais etc.) continuam em lancamentosIniciais.
+        // Saldo total permanece correto via saldoAjustesLer (calcularTotal independente).
+        const ajustesNaoInjetados = ajustesListaVal && ajustesListaVal.length > 0
+            ? injetarRestaUmNasRodadas(ajustesListaVal, rodadasConsolidadas)
+            : [];
+        ajustesNaoInjetados.forEach(a => {
+            lancamentosIniciais.push({
+                rodada: null, tipo: 'AJUSTE',
+                descricao: a.descricao, valor: a.valor, data: a.criado_em,
             });
-        }
+        });
 
         const camposAtivos = await buscarCamposManuais(ligaId, timeId, temporadaNum);
         const resumoCalculado = calcularResumoDeRodadas(
