@@ -6,6 +6,7 @@
 // =====================================================================
 
 import CalendarioCompeticao from '../models/CalendarioCompeticao.js';
+import { obterJogosGloboMultiDatas } from '../scripts/scraper-jogos-globo.js';
 
 // =====================================================================
 // CONFIGURAÇÃO
@@ -235,6 +236,116 @@ async function atualizarPlacaresAoVivo(competicao, temporada, jogosAoVivo) {
 }
 
 // =====================================================================
+// SYNC MULTI-DATAS (resultados históricos via Globo ~5 dias)
+// =====================================================================
+
+/**
+ * Sincroniza resultados de múltiplos dias usando obterJogosGloboMultiDatas.
+ * Captura jogos encerrados de dias anteriores que nunca foram persistidos.
+ * Chamada em obterResumoAoVivo para garantir que resultados passados
+ * (window de ~2 dias anteriores da Globo) sempre entrem no MongoDB.
+ */
+async function sincronizarMultiDatas(competicao, temporada) {
+    let dadosPorData;
+    try {
+        dadosPorData = await obterJogosGloboMultiDatas();
+    } catch (err) {
+        console.warn(`[COMPETICAO-SERVICE] sincronizarMultiDatas falhou ao buscar Globo:`, err.message);
+        return { sincronizados: 0 };
+    }
+
+    let calendarioDoc = await CalendarioCompeticao.findOne({ competicao, temporada });
+    let mudancas = 0;
+
+    for (const [data, jogos] of Object.entries(dadosPorData)) {
+        const jogosComp = jogos.filter(j => ligaCorresponde(j.liga || j.ligaOriginal, competicao));
+        if (jogosComp.length === 0) continue;
+
+        for (const jogo of jogosComp) {
+            const novoStatus = converterStatus(jogo.statusRaw);
+            if (!novoStatus) continue;
+
+            // Criar documento se ainda não existir
+            if (!calendarioDoc) {
+                calendarioDoc = new CalendarioCompeticao({ competicao, temporada, partidas: [] });
+            }
+
+            // Match por id_externo
+            let idx = -1;
+            if (jogo.id) {
+                idx = calendarioDoc.partidas.findIndex(p => p.id_externo === String(jogo.id));
+            }
+
+            // Fallback: match por nomes normalizados + data do jogo
+            if (idx < 0) {
+                const normM = normalizar(jogo.mandante);
+                const normV = normalizar(jogo.visitante);
+                idx = calendarioDoc.partidas.findIndex(p => {
+                    if (p.data !== data) return false;
+                    const pM = normalizar(p.mandante);
+                    const pV = normalizar(p.visitante);
+                    return (pM.includes(normM) || normM.includes(pM)) &&
+                           (pV.includes(normV) || normV.includes(pV));
+                });
+            }
+
+            if (idx < 0) {
+                // Jogo não existe — adicionar
+                calendarioDoc.partidas.push({
+                    id_externo: jogo.id ? String(jogo.id) : null,
+                    fase: null,
+                    grupo: null,
+                    data,
+                    horario: jogo.horario || '00:00',
+                    mandante: jogo.mandante,
+                    visitante: jogo.visitante,
+                    placar_mandante: typeof jogo.golsMandante === 'number' ? jogo.golsMandante : null,
+                    placar_visitante: typeof jogo.golsVisitante === 'number' ? jogo.golsVisitante : null,
+                    status: novoStatus,
+                    estadio: jogo.estadio || null,
+                });
+                mudancas++;
+                continue;
+            }
+
+            // Jogo existe — atualizar se mudou
+            const partida = calendarioDoc.partidas[idx];
+            let mudou = false;
+
+            if (partida.status !== novoStatus) {
+                partida.status = novoStatus;
+                mudou = true;
+            }
+            if (novoStatus === 'encerrado' || novoStatus === 'ao_vivo') {
+                if (typeof jogo.golsMandante === 'number' && partida.placar_mandante !== jogo.golsMandante) {
+                    partida.placar_mandante = jogo.golsMandante;
+                    mudou = true;
+                }
+                if (typeof jogo.golsVisitante === 'number' && partida.placar_visitante !== jogo.golsVisitante) {
+                    partida.placar_visitante = jogo.golsVisitante;
+                    mudou = true;
+                }
+            }
+            if (!partida.id_externo && jogo.id) {
+                partida.id_externo = String(jogo.id);
+                mudou = true;
+            }
+            if (mudou) mudancas++;
+        }
+    }
+
+    if (mudancas > 0 && calendarioDoc) {
+        calendarioDoc.ultima_atualizacao = new Date();
+        calendarioDoc.atualizarStats?.();
+        calendarioDoc.calcularClassificacao?.();
+        await calendarioDoc.save();
+        console.log(`[COMPETICAO-SERVICE] ${competicao}: ${mudancas} partidas sincronizadas via multi-datas Globo`);
+    }
+
+    return { sincronizados: mudancas };
+}
+
+// =====================================================================
 // API PÚBLICA
 // =====================================================================
 
@@ -358,11 +469,15 @@ async function obterResumoAoVivo(competicao, temporada) {
         const dados = await response.json();
         const jogos = dados.jogos || [];
 
-        // Atualizar MongoDB com jogos desta competição
+        // Atualizar MongoDB com jogos desta competição (ao vivo / hoje)
         const jogosComp = jogos.filter(j => ligaCorresponde(j.liga || j.ligaOriginal, competicao));
         if (jogosComp.length > 0) {
             await atualizarPlacaresAoVivo(competicao, temporada, jogos);
         }
+
+        // Sincronizar resultados históricos (~2 dias atrás) via Globo multi-datas
+        // Garante que jogos encerrados de dias anteriores entrem no MongoDB
+        await sincronizarMultiDatas(competicao, temporada);
 
         // Retornar resumo atualizado
         const resumo = await obterResumo(competicao, temporada);
@@ -412,6 +527,7 @@ export default {
     obterResumoAoVivo,
     atualizarPlacaresAoVivo,
     sincronizarDeJogosAoVivo,
+    sincronizarMultiDatas,
     hookAtualizarCompeticoes,
     ligaCorresponde,
     MAPA_NOMES,
@@ -424,6 +540,7 @@ export {
     obterResumoAoVivo,
     atualizarPlacaresAoVivo,
     sincronizarDeJogosAoVivo,
+    sincronizarMultiDatas,
     hookAtualizarCompeticoes,
     ligaCorresponde,
     MAPA_NOMES,
