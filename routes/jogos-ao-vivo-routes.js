@@ -29,6 +29,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import obterJogosGloboEsporte, { obterJogosGloboMultiDatas } from '../scripts/scraper-jogos-globo.js';
 import apiOrchestrator from '../services/api-orchestrator.js';
+import competicaoService from '../services/competicao-service.js';
 import copaDoMundo from '../config/copa-do-mundo-2026.js';
 import CalendarioRodada from '../models/CalendarioRodada.js';
 
@@ -811,6 +812,12 @@ router.get('/', async (req, res) => {
       const stats = calcularEstatisticas(jogosMesclados);
 
       console.log(`[JOGOS-DIA] ✅ Mesclado: ${soccerData.jogos.length} ao vivo (${livescoreFonte}) + ${jogosAgenda.length} agenda = ${jogosMesclados.length} jogos`);
+
+      // Hook: atualizar competições (Copa NE, Copa BR, Libertadores, Copa Mundo)
+      // Fire-and-forget para não atrasar response
+      competicaoService.hookAtualizarCompeticoes(jogosMesclados).catch(err =>
+        console.error('[JOGOS-DIA] Erro hook competições:', err.message)
+      );
 
       // Recalcular Copa com dados ao vivo mesclados
       const copaFresh = montarDadosCopa(dataHoje, jogosMesclados);

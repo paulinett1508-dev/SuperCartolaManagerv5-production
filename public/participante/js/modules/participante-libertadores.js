@@ -1,12 +1,15 @@
 // participante-libertadores.js
-// v2.0 - Controller da Landing Page "Libertadores 2026"
+// v3.0 - Controller da Landing Page "Libertadores 2026"
+// v3.0: Dados dinâmicos via /api/competicao/libertadores (SoccerDataAPI + Globo)
 // v2.0 - Atualizado com grupos definidos (sorteio 19/Mar/2026)
 //
 // Fontes de dados:
+//   - API: /api/competicao/libertadores/resumo (classificação, resultados dinâmicos)
 //   - API: /api/noticias/libertadores (Google News RSS, cache 30min)
-//   - Grupos: dados estáticos do sorteio oficial CONMEBOL
+//   - Fallback: dados estáticos do sorteio oficial CONMEBOL
 
 let countdownInterval = null;
+let dadosAPILiberta = null;
 
 // Data da Final da Libertadores 2026 — 28 Nov, Estádio Centenário, Montevidéu
 const FINAL_DATE = new Date('2026-11-28T21:00:00-03:00');
@@ -83,6 +86,9 @@ export async function inicializarLibertadoresParticipante(params) {
     window.destruirLibertadoresParticipante = destruirLibertadoresParticipante;
 
     try {
+        // Carregar dados dinâmicos em paralelo
+        dadosAPILiberta = await carregarDadosAPILiberta();
+
         renderizarCountdown();
         countdownInterval = setInterval(renderizarCountdown, 60000);
 
@@ -101,6 +107,22 @@ export function destruirLibertadoresParticipante() {
     if (countdownInterval) {
         clearInterval(countdownInterval);
         countdownInterval = null;
+    }
+}
+
+// ═══════════════════════════════════════════════════
+// API DINÂMICA
+// ═══════════════════════════════════════════════════
+
+async function carregarDadosAPILiberta() {
+    try {
+        const res = await fetch('/api/competicao/libertadores/resumo');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        return (data.success && (data.grupos?.length > 0 || data.ultimos_resultados?.length > 0)) ? data : null;
+    } catch (err) {
+        if (window.Log) Log.warn('LIBERTADORES', 'API indisponível, usando fallback:', err.message);
+        return null;
     }
 }
 

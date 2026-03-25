@@ -507,3 +507,94 @@
     background: rgba(74, 222, 128, 0.1);
     border-color: rgba(74, 222, 128, 0.25);
 }
+
+/* ═══════════════════════════════════════════════════
+   RESULTADOS / JOGOS — Cards dinâmicos
+   ═══════════════════════════════════════════════════ */
+.copane-resultados {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.copane-resultados-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.copane-resultados-label {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.55rem;
+    font-weight: 700;
+    color: var(--app-copane-primary, #E65100);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 0.15rem;
+}
+
+.copane-jogo-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: var(--app-surface, #1a1a1a);
+    border: 1px solid var(--app-border, #333);
+    border-radius: 0.5rem;
+    padding: 0.55rem 0.75rem;
+    position: relative;
+}
+
+.copane-jogo-card--live {
+    border-color: var(--app-copane-primary, #E65100);
+    background: rgba(230, 81, 0, 0.08);
+}
+
+.copane-jogo-time {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--app-text-primary, #fff);
+    flex: 1;
+    text-align: center;
+}
+
+.copane-jogo-placar {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--app-copane-secondary, #D4AF37);
+    flex-shrink: 0;
+    min-width: 3rem;
+    text-align: center;
+}
+
+.copane-jogo-data {
+    position: absolute;
+    top: 0.15rem;
+    right: 0.4rem;
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.45rem;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.35));
+}
+
+/* Classificação dinâmica: posição + pontos */
+.copane-grupo-pos {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.55rem;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.4));
+    width: 1.2rem;
+    flex-shrink: 0;
+}
+
+.copane-grupo-nome {
+    flex: 1;
+}
+
+.copane-grupo-pts {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.55rem;
+    color: var(--app-copane-primary, #E65100);
+    font-weight: 700;
+    flex-shrink: 0;
+}

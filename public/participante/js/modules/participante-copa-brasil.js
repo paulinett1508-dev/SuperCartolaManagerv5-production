@@ -1,9 +1,15 @@
 // participante-copa-brasil.js
-// v1.1 - Controller da Landing Page "Copa do Brasil 2026"
+// v2.0 - Controller da Landing Page "Copa do Brasil 2026"
+// v2.0: Dados dinâmicos via /api/competicao/copa-brasil (SoccerDataAPI + Globo)
 // v1.1: Atualiza 5ª Fase com confrontos do sorteio (23/03/2026)
 //
 // Fontes de dados:
+//   - API: /api/competicao/copa-brasil/resumo (resultados dinâmicos)
 //   - API: /api/noticias/copa-brasil (Google News RSS, cache 30min)
+//   - Fallback: confrontos hardcoded abaixo
+
+// Dados dinâmicos da API
+let dadosAPICopaBR = null;
 
 
 // Confrontos da 5ª Fase — Sorteio realizado em 23/03/2026 na CBF
@@ -72,12 +78,18 @@ export async function inicializarCopaBrasilParticipante(params) {
     window.destruirCopaBrasilParticipante = destruirCopaBrasilParticipante;
 
     try {
+        // Carregar dados dinâmicos e notícias em paralelo
+        const [apiData] = await Promise.all([
+            carregarDadosAPICopaBR(),
+            carregarNoticias(),
+        ]);
+        dadosAPICopaBR = apiData;
+
         renderizarInfoHero();
         renderizarConfrontos5aFase();
         renderizarFases();
-        await carregarNoticias();
 
-        if (window.Log) Log.info('COPA-BRASIL', 'LP renderizada com sucesso');
+        if (window.Log) Log.info('COPA-BRASIL', dadosAPICopaBR ? 'LP com dados dinâmicos' : 'LP com dados estáticos');
     } catch (erro) {
         console.error('[COPA-BRASIL] Erro na inicialização:', erro);
     }
@@ -85,6 +97,22 @@ export async function inicializarCopaBrasilParticipante(params) {
 
 export function destruirCopaBrasilParticipante() {
     // noop — sem intervalos ativos
+}
+
+// ═══════════════════════════════════════════════════
+// API DINÂMICA
+// ═══════════════════════════════════════════════════
+
+async function carregarDadosAPICopaBR() {
+    try {
+        const res = await fetch('/api/competicao/copa-brasil/resumo');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        return (data.success && (data.ultimos_resultados?.length > 0 || data.proximos_jogos?.length > 0)) ? data : null;
+    } catch (err) {
+        if (window.Log) Log.warn('COPA-BRASIL', 'API indisponível, usando fallback:', err.message);
+        return null;
+    }
 }
 
 // ═══════════════════════════════════════════════════
@@ -132,13 +160,29 @@ function renderizarConfrontos5aFase() {
     const container = document.getElementById('copabr-confrontos-5fase');
     if (!container) return;
 
-    container.innerHTML = CONFRONTOS_5A_FASE.map(c => `
-        <div class="copabr-confronto-card">
+    // Se API tem resultados, tentar enriquecer confrontos com placares
+    const resultadosAPI = dadosAPICopaBR?.ultimos_resultados || [];
+
+    container.innerHTML = CONFRONTOS_5A_FASE.map(c => {
+        // Procurar resultado da API para este confronto
+        const resultado = resultadosAPI.find(r =>
+            (r.mandante?.toLowerCase().includes(c.mandanteIda.toLowerCase()) &&
+             r.visitante?.toLowerCase().includes(c.visitanteIda.toLowerCase())) ||
+            (r.mandante?.toLowerCase().includes(c.visitanteIda.toLowerCase()) &&
+             r.visitante?.toLowerCase().includes(c.mandanteIda.toLowerCase()))
+        );
+
+        const placar = resultado && resultado.placar_mandante !== null
+            ? `<span class="copabr-confronto-placar">${resultado.placar_mandante} x ${resultado.placar_visitante}</span>`
+            : '<span class="copabr-confronto-vs">vs</span>';
+
+        return `
+        <div class="copabr-confronto-card${resultado?.status === 'ao_vivo' ? ' copabr-confronto-card--live' : ''}">
             <span class="copabr-confronto-time">${c.mandanteIda}</span>
-            <span class="copabr-confronto-vs">vs</span>
+            ${placar}
             <span class="copabr-confronto-time">${c.visitanteIda}</span>
-        </div>`
-    ).join('');
+        </div>`;
+    }).join('');
 }
 
 // ═══════════════════════════════════════════════════

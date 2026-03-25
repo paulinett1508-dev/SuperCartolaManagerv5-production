@@ -526,6 +526,22 @@
     color: var(--app-copabr-secondary, #D4AF37);
 }
 
+/* Copa do Nordeste variant */
+.especial-card-copane {
+    background: linear-gradient(135deg, rgba(230, 81, 0, 0.25) 0%, rgba(45, 106, 79, 0.15) 100%);
+    border: 1px solid var(--app-copane-border, rgba(230, 81, 0, 0.35));
+}
+.especial-card-copane::before {
+    background: linear-gradient(90deg, var(--app-copane-primary, #E65100), rgba(230, 81, 0, 0.15));
+}
+.especial-card-copane .especial-card-icon {
+    background: var(--app-copane-muted, rgba(230, 81, 0, 0.15));
+    border: 1px solid var(--app-copane-border, rgba(230, 81, 0, 0.35));
+}
+.especial-card-copane .especial-card-icon .material-icons {
+    color: var(--app-copane-primary, #E65100);
+}
+
 .especial-card-icon {
     width: 44px;
     height: 44px;
