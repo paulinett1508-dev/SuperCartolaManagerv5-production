@@ -159,6 +159,20 @@
 }
 .copane-chip--next .material-icons { color: var(--app-copane-primary, #E65100); }
 
+.copane-chip--live {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
+}
+.copane-chip--live .material-icons { color: var(--app-danger, #ef4444); }
+
+.copane-chip--stale {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.35);
+    color: #fcd34d;
+}
+.copane-chip--stale .material-icons { color: #f59e0b; }
+
 .copane-chip--event {
     background: var(--app-copane-muted, rgba(230, 81, 0, 0.15));
     border-color: var(--app-copane-border, rgba(230, 81, 0, 0.35));
@@ -548,6 +562,29 @@
 .copane-jogo-card--live {
     border-color: var(--app-copane-primary, #E65100);
     background: rgba(230, 81, 0, 0.08);
+}
+
+/* Live dot — pulsing indicator */
+.copane-live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--app-danger, #ef4444);
+    animation: copane-live-pulse 1.5s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+.copane-live-dot--small {
+    width: 6px;
+    height: 6px;
+    position: absolute;
+    top: 0.35rem;
+    left: 0.4rem;
+}
+
+@keyframes copane-live-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
 }
 
 .copane-jogo-time {
