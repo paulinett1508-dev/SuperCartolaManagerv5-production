@@ -1,55 +1,27 @@
 // participante-copa-nordeste.js
-// v1.0 - Controller da Landing Page "Copa do Nordeste 2026"
+// v2.0 - Controller da Landing Page "Copa do Nordeste 2026"
+// v2.0: Dados dinâmicos via /api/competicao/copa-nordeste (SoccerDataAPI + Globo)
+//       Fallback: dados hardcoded para quando API ainda não tem dados
 //
 // Fontes de dados:
+//   - API: /api/competicao/copa-nordeste/resumo (classificação, resultados, próximos jogos)
 //   - API: /api/noticias/copa-nordeste (Google News RSS, cache 1h)
+//   - Fallback: dados estáticos hardcoded abaixo
 
+
+// ═══════════════════════════════════════════════════
+// DADOS ESTÁTICOS (FALLBACK)
+// ═══════════════════════════════════════════════════
 
 // Grupos da Copa do Nordeste 2026 — 20 times, 4 grupos de 5
-const GRUPOS_COPA_NORDESTE = {
-    A: {
-        label: 'Grupo A',
-        times: [
-            { nome: 'Vitória',        destaque: true },
-            { nome: 'ASA' },
-            { nome: 'Sousa' },
-            { nome: 'Itabaiana' },
-            { nome: 'Fluminense-PI' },
-        ]
-    },
-    B: {
-        label: 'Grupo B',
-        times: [
-            { nome: 'Juazeirense' },
-            { nome: 'CRB',            destaque: true },
-            { nome: 'Botafogo-PB' },
-            { nome: 'Confiança' },
-            { nome: 'Piauí' },
-        ]
-    },
-    C: {
-        label: 'Grupo C',
-        times: [
-            { nome: 'Ceará',          destaque: true },
-            { nome: 'Sport',          destaque: true },
-            { nome: 'América-RN' },
-            { nome: 'Imperatriz' },
-            { nome: 'Ferroviário' },
-        ]
-    },
-    D: {
-        label: 'Grupo D',
-        times: [
-            { nome: 'Fortaleza',      destaque: true },
-            { nome: 'Retrô' },
-            { nome: 'ABC' },
-            { nome: 'Maranhão' },
-            { nome: 'Jacuipense' },
-        ]
-    }
+const GRUPOS_FALLBACK = {
+    A: { label: 'Grupo A', times: [{ nome: 'Vitória', destaque: true }, { nome: 'ASA' }, { nome: 'Sousa' }, { nome: 'Itabaiana' }, { nome: 'Fluminense-PI' }] },
+    B: { label: 'Grupo B', times: [{ nome: 'Juazeirense' }, { nome: 'CRB', destaque: true }, { nome: 'Botafogo-PB' }, { nome: 'Confiança' }, { nome: 'Piauí' }] },
+    C: { label: 'Grupo C', times: [{ nome: 'Ceará', destaque: true }, { nome: 'Sport', destaque: true }, { nome: 'América-RN' }, { nome: 'Imperatriz' }, { nome: 'Ferroviário' }] },
+    D: { label: 'Grupo D', times: [{ nome: 'Fortaleza', destaque: true }, { nome: 'Retrô' }, { nome: 'ABC' }, { nome: 'Maranhão' }, { nome: 'Jacuipense' }] }
 };
 
-// Eventos futuros da Copa do Nordeste 2026 — countdown dinâmico
+// Eventos countdown
 const EVENTOS_COPA_NORDESTE = [
     { label: 'Início da Fase de Grupos',  data: new Date('2026-03-25T00:00:00-03:00') },
     { label: 'Fim da Fase de Grupos',     data: new Date('2026-05-04T00:00:00-03:00') },
@@ -60,7 +32,6 @@ const EVENTOS_COPA_NORDESTE = [
     { label: 'Grande Final — Volta',      data: new Date('2026-06-07T00:00:00-03:00') },
 ];
 
-// Retorna o próximo evento que ainda não ocorreu
 function proximoEvento() {
     const agora = new Date();
     return EVENTOS_COPA_NORDESTE.find(e => e.data > agora) || EVENTOS_COPA_NORDESTE[EVENTOS_COPA_NORDESTE.length - 1];
@@ -68,64 +39,95 @@ function proximoEvento() {
 
 // Fases da competição — 4 fases
 const FASES_COPA_NORDESTE = [
-    { fase: 'Fase de Grupos',    info: '25 Mar — 4 Mai 2026',  times: '20 clubes — 4 grupos de 5',        proxima: true },
-    { fase: 'Quartas de Final',  info: '11 Mai 2026',          times: '8 clubes — jogo único'                             },
-    { fase: 'Semifinais',        info: '18 + 25 Mai 2026',     times: '4 clubes — ida/volta'                              },
-    { fase: 'Grande Final',      info: '31 Mai + 7 Jun 2026',  times: 'Ida e volta',                      final: true     },
+    { fase: 'Fase de Grupos',    info: '25 Mar — 4 Mai 2026',  times: '20 clubes — 4 grupos de 5',  proxima: true },
+    { fase: 'Quartas de Final',  info: '11 Mai 2026',          times: '8 clubes — jogo único'                     },
+    { fase: 'Semifinais',        info: '18 + 25 Mai 2026',     times: '4 clubes — ida/volta'                      },
+    { fase: 'Grande Final',      info: '31 Mai + 7 Jun 2026',  times: 'Ida e volta',                 final: true  },
 ];
+
+// Dados dinâmicos da API (preenchidos após fetch)
+let dadosAPI = null;
 
 // ═══════════════════════════════════════════════════
 // INICIALIZAÇÃO
 // ═══════════════════════════════════════════════════
 
 export async function inicializarCopaNordesteParticipante(params) {
-    if (window.Log) Log.info('COPA-NORDESTE', 'Inicializando LP Copa do Nordeste 2026...');
+    if (window.Log) Log.info('COPA-NORDESTE', 'Inicializando LP Copa do Nordeste 2026 v2.0...');
 
-    // Registrar cleanup no window para o navigation poder chamar ao sair
     window.destruirCopaNordesteParticipante = destruirCopaNordesteParticipante;
 
     try {
+        // Carregar dados dinâmicos e notícias em paralelo
+        const [apiData] = await Promise.all([
+            carregarDadosAPI(),
+            carregarNoticias(),
+        ]);
+
+        dadosAPI = apiData;
+
         renderizarInfoHero();
         renderizarGrupos();
+        renderizarResultados();
         renderizarFases();
-        await carregarNoticias();
 
-        if (window.Log) Log.info('COPA-NORDESTE', 'LP renderizada com sucesso');
+        if (window.Log) Log.info('COPA-NORDESTE', dadosAPI ? 'LP com dados dinâmicos' : 'LP com dados estáticos (fallback)');
     } catch (erro) {
         console.error('[COPA-NORDESTE] Erro na inicialização:', erro);
     }
 }
 
 export function destruirCopaNordesteParticipante() {
-    // noop — sem intervalos ativos
+    dadosAPI = null;
 }
 
 // ═══════════════════════════════════════════════════
-// INFO HERO — Status dinâmico da competição
+// API DINÂMICA
+// ═══════════════════════════════════════════════════
+
+async function carregarDadosAPI() {
+    try {
+        const res = await fetch('/api/competicao/copa-nordeste/resumo');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        if (data.success && (data.grupos?.length > 0 || data.ultimos_resultados?.length > 0)) {
+            return data;
+        }
+        return null;
+    } catch (err) {
+        if (window.Log) Log.warn('COPA-NORDESTE', 'API indisponível, usando fallback:', err.message);
+        return null;
+    }
+}
+
+// ═══════════════════════════════════════════════════
+// INFO HERO
 // ═══════════════════════════════════════════════════
 
 function renderizarInfoHero() {
     const container = document.getElementById('copane-status-chips');
     if (!container) return;
 
-    const faseAtual = [...FASES_COPA_NORDESTE].reverse().find(f => f.concluida);
-    const fasePendente = FASES_COPA_NORDESTE.find(f => f.proxima);
     const evento = proximoEvento();
-
     let html = '';
 
-    if (faseAtual) {
-        html += `<div class="copane-chip copane-chip--done">
-            <span class="material-icons">check_circle</span>
-            ${faseAtual.fase} concluída
+    // Se tem dados da API, mostrar info real
+    if (dadosAPI?.tem_jogos_ao_vivo) {
+        html += `<div class="copane-chip copane-chip--next">
+            <span class="material-icons">sports_soccer</span>
+            Jogos ao vivo agora
         </div>`;
     }
+
+    const fasePendente = FASES_COPA_NORDESTE.find(f => f.proxima);
     if (fasePendente) {
         html += `<div class="copane-chip copane-chip--next">
             <span class="material-icons">hourglass_top</span>
-            Próxima: ${fasePendente.fase}
+            ${fasePendente.fase}
         </div>`;
     }
+
     if (evento) {
         const dataStr = evento.data.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
         html += `<div class="copane-chip copane-chip--event">
@@ -134,18 +136,52 @@ function renderizarInfoHero() {
         </div>`;
     }
 
+    // Indicador de dados dinâmicos
+    if (dadosAPI?.ultima_atualizacao) {
+        const atualizado = new Date(dadosAPI.ultima_atualizacao);
+        const tempoStr = atualizado.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        html += `<div class="copane-chip copane-chip--done">
+            <span class="material-icons">sync</span>
+            Dados atualizados ${tempoStr}
+        </div>`;
+    }
+
     container.innerHTML = html;
 }
 
 // ═══════════════════════════════════════════════════
-// GRUPOS — Grid 2x2
+// GRUPOS — Dinâmico (API) ou Estático (fallback)
 // ═══════════════════════════════════════════════════
 
 function renderizarGrupos() {
     const container = document.getElementById('copane-grupos');
     if (!container) return;
 
-    container.innerHTML = Object.values(GRUPOS_COPA_NORDESTE).map(grupo => {
+    // Se tem dados da API com classificação, renderizar tabela
+    if (dadosAPI?.grupos?.length > 0) {
+        container.innerHTML = dadosAPI.grupos.map(grupo => {
+            const timesHtml = grupo.classificacao.map((t, i) => {
+                const cls = i < 2 ? 'copane-grupo-time copane-grupo-time--destaque' : 'copane-grupo-time';
+                return `<div class="${cls}">
+                    <span class="copane-grupo-pos">${i + 1}.</span>
+                    <span class="copane-grupo-nome">${t.time}</span>
+                    <span class="copane-grupo-pts">${t.pontos}pts</span>
+                </div>`;
+            }).join('');
+
+            return `
+            <div class="copane-grupo-card">
+                <div class="copane-grupo-header">
+                    <span class="copane-grupo-label">Grupo ${grupo.nome}</span>
+                </div>
+                <div class="copane-grupo-times">${timesHtml}</div>
+            </div>`;
+        }).join('');
+        return;
+    }
+
+    // Fallback: dados estáticos
+    container.innerHTML = Object.values(GRUPOS_FALLBACK).map(grupo => {
         const timesHtml = grupo.times.map(t => {
             const cls = t.destaque ? 'copane-grupo-time copane-grupo-time--destaque' : 'copane-grupo-time';
             return `<div class="${cls}">${t.nome}</div>`;
@@ -162,6 +198,61 @@ function renderizarGrupos() {
 }
 
 // ═══════════════════════════════════════════════════
+// RESULTADOS + PRÓXIMOS JOGOS (só com API)
+// ═══════════════════════════════════════════════════
+
+function renderizarResultados() {
+    const container = document.getElementById('copane-resultados');
+    if (!container) return;
+
+    if (!dadosAPI) {
+        container.innerHTML = '<p class="copane-loading-placeholder">Resultados disponíveis quando houver jogos realizados</p>';
+        return;
+    }
+
+    let html = '';
+
+    // Jogos ao vivo
+    if (dadosAPI.jogos_ao_vivo?.length > 0) {
+        html += '<div class="copane-resultados-section"><p class="copane-resultados-label">Ao Vivo</p>';
+        html += dadosAPI.jogos_ao_vivo.map(j => renderizarJogoCard(j, true)).join('');
+        html += '</div>';
+    }
+
+    // Últimos resultados
+    if (dadosAPI.ultimos_resultados?.length > 0) {
+        html += '<div class="copane-resultados-section"><p class="copane-resultados-label">Últimos Resultados</p>';
+        html += dadosAPI.ultimos_resultados.map(j => renderizarJogoCard(j, false)).join('');
+        html += '</div>';
+    }
+
+    // Próximos jogos
+    if (dadosAPI.proximos_jogos?.length > 0) {
+        html += '<div class="copane-resultados-section"><p class="copane-resultados-label">Próximos Jogos</p>';
+        html += dadosAPI.proximos_jogos.map(j => renderizarJogoCard(j, false)).join('');
+        html += '</div>';
+    }
+
+    container.innerHTML = html || '<p class="copane-loading-placeholder">Nenhum jogo registrado ainda</p>';
+}
+
+function renderizarJogoCard(jogo, aoVivo) {
+    const placar = jogo.placar_mandante !== null
+        ? `${jogo.placar_mandante} x ${jogo.placar_visitante}`
+        : jogo.horario || 'A definir';
+    const dataStr = jogo.data ? new Date(jogo.data + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '';
+    const liveClass = aoVivo ? ' copane-jogo--live' : '';
+
+    return `
+    <div class="copane-jogo-card${liveClass}">
+        <span class="copane-jogo-time">${jogo.mandante}</span>
+        <span class="copane-jogo-placar">${placar}</span>
+        <span class="copane-jogo-time">${jogo.visitante}</span>
+        ${dataStr ? `<span class="copane-jogo-data">${dataStr}</span>` : ''}
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════
 // FASES (TIMELINE)
 // ═══════════════════════════════════════════════════
 
@@ -169,10 +260,19 @@ function renderizarFases() {
     const container = document.getElementById('copane-timeline');
     if (!container) return;
 
+    // Se API tem stats.fase_atual, usar para marcar fase ativa
+    const faseAtualAPI = dadosAPI?.stats?.fase_atual;
+
     container.innerHTML = FASES_COPA_NORDESTE.map(f => {
         const isFinal    = !!f.final;
-        const isConcluida = !!f.concluida;
-        const isProxima  = !!f.proxima;
+        let isProxima  = !!f.proxima;
+        let isConcluida = !!f.concluida;
+
+        // Override com dados da API se disponível
+        if (faseAtualAPI) {
+            const faseSlug = f.fase.toLowerCase().replace(/\s+/g, '-').replace('fase-de-', '');
+            isProxima = faseSlug.includes(faseAtualAPI) || (faseAtualAPI === 'grupos' && f.proxima);
+        }
 
         const cls = isFinal
             ? 'copane-timeline-item copane-timeline-item--final'

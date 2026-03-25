@@ -303,6 +303,21 @@
     flex-shrink: 0;
 }
 
+.copabr-confronto-placar {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--app-copabr-secondary, #D4AF37);
+    flex-shrink: 0;
+    min-width: 3rem;
+    text-align: center;
+}
+
+.copabr-confronto-card--live {
+    border-color: var(--app-copabr-secondary, #D4AF37);
+    background: linear-gradient(135deg, rgba(0, 48, 135, 0.15) 0%, rgba(212, 175, 55, 0.1) 100%);
+}
+
 /* ═══════════════════════════════════════════════════
    NOTÍCIAS — Cards lista
    ═══════════════════════════════════════════════════ */
