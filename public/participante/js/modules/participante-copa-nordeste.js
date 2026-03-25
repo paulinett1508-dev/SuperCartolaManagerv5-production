@@ -156,7 +156,7 @@ async function carregarDadosAPI() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
-        if (data.success && (data.grupos?.length > 0 || data.ultimos_resultados?.length > 0)) {
+        if (data.success && (data.grupos?.length > 0 || data.ultimos_resultados?.length > 0 || data.proximos_jogos?.length > 0)) {
             return data;
         }
         return null;

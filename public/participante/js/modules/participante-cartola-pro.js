@@ -41,10 +41,10 @@ function isOAuthDisponivel() {
     const hostname = window.location.hostname;
 
     // Dominios onde OAuth funciona (registrados na Globo)
+    // redirect_uri https://supercartolamanager.com.br/... NAO esta registrada — OAuth desativado em prod
     const dominiosPermitidos = [
         'localhost',
-        '127.0.0.1',
-        '.supercartolamanager.com.br'  // Producao e staging
+        '127.0.0.1'
     ];
 
     return dominiosPermitidos.some(d => {
