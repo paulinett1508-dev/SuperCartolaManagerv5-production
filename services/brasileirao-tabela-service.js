@@ -147,75 +147,153 @@ function formatarHora(dataISO) {
 }
 
 // =====================================================================
-// FONTE 1: API-FOOTBALL
+// FONTE 1: ESPN (gratuita, sem autenticação, calendário completo)
 // =====================================================================
 
+// Mapeamento ESPN displayName → ID Cartola
+const TIMES_ESPN_MAP = {
+    'Athletico-PR':       293,
+    'Atlético-MG':        282,
+    'Bahia':              265,
+    'Botafogo':           263,
+    'Chapecoense':        315,
+    'Corinthians':        264,
+    'Coritiba':           270,
+    'Cruzeiro':           283,
+    'Flamengo':           262,
+    'Fluminense':         266,
+    'Grêmio':             284,
+    'Internacional':      285,
+    'Mirassol':           2305,
+    'Palmeiras':          275,
+    'Red Bull Bragantino': 280,
+    'Remo':               1044,
+    'Santos':             277,
+    'São Paulo':          276,
+    'Vasco da Gama':      267,
+    'Vitória':            287,
+};
+
 /**
- * Busca todos os jogos do Brasileirão via API-Football
- * @param {number} temporada - Ano da temporada (ex: 2026)
- * @returns {Promise<Array>} Array de partidas formatadas
+ * Converte status ESPN para nosso enum de status
  */
-async function buscarViaApiFootball(temporada) {
-    const apiKey = process.env.API_FOOTBALL_KEY;
-    if (!apiKey) {
-        console.warn('[BRASILEIRAO-SERVICE] API_FOOTBALL_KEY não configurada');
-        return null;
+function converterStatusEspn(stateStr, completed) {
+    if (stateStr === 'in') return 'ao_vivo';
+    if (stateStr === 'post' || completed) return 'encerrado';
+    return 'agendado';
+}
+
+/**
+ * Infere número da rodada usando algoritmo greedy:
+ * cada time só pode jogar uma vez por rodada.
+ * Jogos são processados em ordem cronológica; o primeiro round disponível
+ * onde ambos os times ainda não jogaram é atribuído.
+ * Isso garante atribuição correta mesmo com jogos adiados/remarcados.
+ */
+function inferirRodadas(partidas) {
+    if (!partidas.length) return partidas;
+
+    partidas.sort((a, b) => new Date(a.data) - new Date(b.data));
+
+    // rodada -> Set de IDs de times que já jogaram nessa rodada
+    const timesPorRodada = {};
+
+    for (const p of partidas) {
+        let rodada = 1;
+        while (true) {
+            if (!timesPorRodada[rodada]) timesPorRodada[rodada] = new Set();
+            const times = timesPorRodada[rodada];
+            if (!times.has(p.mandante_id) && !times.has(p.visitante_id)) {
+                times.add(p.mandante_id);
+                times.add(p.visitante_id);
+                p.rodada = rodada;
+                break;
+            }
+            rodada++;
+            if (rodada > 38) { p.rodada = 0; break; } // segurança
+        }
     }
 
-    console.log(`[BRASILEIRAO-SERVICE] Buscando temporada ${temporada} via API-Football...`);
+    return partidas;
+}
+
+/**
+ * Busca calendário completo do Brasileirão via ESPN API (sem autenticação).
+ * @param {number} temporada - Ano da temporada (ex: 2026)
+ * @returns {Promise<Array|null>} Array de partidas formatadas
+ */
+async function buscarViaEspn(temporada) {
+    console.log(`[BRASILEIRAO-SERVICE] Buscando temporada ${temporada} via ESPN...`);
 
     try {
-        const url = `https://v3.football.api-sports.io/fixtures?league=${CONFIG.API_FOOTBALL_LEAGUE_ID}&season=${temporada}`;
+        const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/bra.1/scoreboard` +
+            `?limit=500&dates=${temporada}0101-${temporada}1130`;
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), CONFIG.REQUEST_TIMEOUT_MS);
 
         const response = await fetch(url, {
-            headers: {
-                'x-apisports-key': apiKey,
-            },
-            timeout: CONFIG.REQUEST_TIMEOUT_MS,
+            signal: controller.signal,
+            headers: { 'User-Agent': 'SuperCartolaManager/1.0' },
         });
+        clearTimeout(timeoutId);
 
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const data = await response.json();
+        const events = data.events || [];
 
-        if (!data.response || !Array.isArray(data.response)) {
-            console.warn('[BRASILEIRAO-SERVICE] Resposta inválida da API-Football');
+        if (!events.length) {
+            console.warn('[BRASILEIRAO-SERVICE] ESPN retornou 0 jogos');
             return null;
         }
 
-        console.log(`[BRASILEIRAO-SERVICE] API-Football retornou ${data.response.length} jogos`);
+        console.log(`[BRASILEIRAO-SERVICE] ESPN retornou ${events.length} jogos`);
 
-        // Converter para nosso formato
-        const partidas = data.response.map(fixture => ({
-            id_externo: String(fixture.fixture.id),
-            rodada: extrairRodada(fixture.league.round),
-            data: formatarData(fixture.fixture.date),
-            horario: formatarHora(fixture.fixture.date),
-            mandante: fixture.teams.home.name,
-            visitante: fixture.teams.away.name,
-            mandante_id: getCartolaId(fixture.teams.home.name),
-            visitante_id: getCartolaId(fixture.teams.away.name),
-            placar_mandante: fixture.goals.home,
-            placar_visitante: fixture.goals.away,
-            status: converterStatusApiFootball(fixture.fixture.status.short),
-            estadio: fixture.fixture.venue?.name || null,
-            cidade: fixture.fixture.venue?.city || null,
-        }));
+        const partidas = events.map(event => {
+            const comp = event.competitions?.[0] || {};
+            const competitors = comp.competitors || [];
+            const home = competitors.find(c => c.homeAway === 'home') || {};
+            const away = competitors.find(c => c.homeAway === 'away') || {};
+            const status = event.status?.type || {};
+            const venue = comp.venue || event.venue || {};
 
-        // Filtrar apenas partidas com rodada válida (1-38)
+            const mandante = home.team?.displayName || '';
+            const visitante = away.team?.displayName || '';
+            const dataISO = event.date || comp.date || '';
+
+            return {
+                id_externo: `espn_${event.id}`,
+                rodada: 0, // será inferido por inferirRodadas()
+                data: formatarData(dataISO),
+                horario: formatarHora(dataISO),
+                mandante,
+                visitante,
+                mandante_id: TIMES_ESPN_MAP[mandante] || null,
+                visitante_id: TIMES_ESPN_MAP[visitante] || null,
+                placar_mandante: status.state === 'post' ? parseInt(home.score || 0) : null,
+                placar_visitante: status.state === 'post' ? parseInt(away.score || 0) : null,
+                status: converterStatusEspn(status.state, status.completed),
+                estadio: venue.fullName || null,
+                cidade: venue.address?.city || null,
+            };
+        }).filter(p => p.mandante_id && p.visitante_id && p.data);
+
+        // Inferir rodadas por clusters de data
+        inferirRodadas(partidas);
+
+        // Filtrar rodadas válidas (1-38)
         return partidas.filter(p => p.rodada >= 1 && p.rodada <= 38);
 
     } catch (error) {
-        console.error('[BRASILEIRAO-SERVICE] Erro API-Football:', error.message);
-        state.stats.lastError = { fonte: 'api-football', erro: error.message, data: new Date() };
+        console.error('[BRASILEIRAO-SERVICE] Erro ESPN:', error.message);
+        state.stats.lastError = { fonte: 'espn', erro: error.message, data: new Date() };
         return null;
     }
 }
 
 /**
- * Extrai número da rodada do formato "Regular Season - 5"
+ * Extrai número da rodada do formato "Regular Season - 5" (legado)
  */
 function extrairRodada(roundString) {
     if (!roundString) return 0;
@@ -304,10 +382,17 @@ async function sincronizarTabela(temporada, forcar = false) {
     let partidas = null;
     let fonte = null;
 
-    // Tentar API-Football primeiro
-    partidas = await buscarViaApiFootball(temporada);
+    // Tentar ESPN primeiro (gratuita, sem key, calendário completo)
+    partidas = await buscarViaEspn(temporada);
     if (partidas && partidas.length > 0) {
-        fonte = 'api-football';
+        fonte = 'espn';
+        // ESPN traz o calendário completo — limpar jogos não-encerrados antes do import
+        // para evitar duplicatas com dados antigos do seed algorítmico
+        const cal = await CalendarioBrasileirao.findOne({ temporada });
+        if (cal) {
+            cal.partidas = cal.partidas.filter(p => p.status === 'encerrado');
+            await cal.save();
+        }
     }
 
     // Fallback para Globo

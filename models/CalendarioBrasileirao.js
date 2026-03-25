@@ -83,8 +83,8 @@ const calendarioBrasileiraoSchema = new mongoose.Schema({
     },
     fonte: {
         type: String,
-        enum: ['api-football', 'globo', '365scores', 'manual', 'misto'],
-        default: 'api-football'
+        enum: ['api-football', 'espn', 'globo', '365scores', 'manual', 'misto'],
+        default: 'espn'
     },
     stats: {
         total_jogos: { type: Number, default: 380 },
