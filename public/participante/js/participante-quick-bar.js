@@ -38,6 +38,10 @@ class QuickAccessBar {
         // Touch state
         this._touchStartY = 0;
         this._isAnimating = false;
+
+        // Cache de previews das competições Especial (TTL: 60s)
+        this._especialPreviewCache = {};
+        this._ESPECIAL_PREVIEW_TTL = 60_000;
     }
 
     async inicializar() {
@@ -517,6 +521,9 @@ class QuickAccessBar {
             setTimeout(() => {
                 this._isAnimating = false;
             }, 350);
+
+            // Preview de resultados: fire-and-forget após animação (não bloqueia abertura)
+            setTimeout(() => this._carregarPreviewsEspeciais(), 200);
         });
     }
 
@@ -716,6 +723,116 @@ class QuickAccessBar {
 
         if (window.Log) Log.debug('QUICK-BAR', `Modal "Aguarde" exibido para: ${moduloId}`);
     }
+
+    // ═══════════════════════════════════════════════════
+    // PREVIEWS DE RESULTADOS NAS CARDS DO SHEET ESPECIAL
+    // ═══════════════════════════════════════════════════
+
+    /**
+     * Busca dados de cada competição e injeta mini-preview nas cards.
+     * Fire-and-forget: não bloqueia abertura do sheet.
+     * Cache de 60s para não re-buscar a cada abertura.
+     */
+    async _carregarPreviewsEspeciais() {
+        const competicoes = [
+            { slug: 'copa-nordeste', selector: '.especial-card-copane' },
+            { slug: 'copa-brasil',   selector: '.especial-card-copabr' },
+            { slug: 'libertadores',  selector: '.especial-card-liberta' },
+        ];
+
+        for (const { slug, selector } of competicoes) {
+            const cached = this._especialPreviewCache[slug];
+            if (cached && (Date.now() - cached.ts) < this._ESPECIAL_PREVIEW_TTL) {
+                this._injetarPreviewCard(selector, cached.preview);
+                continue;
+            }
+
+            fetch(`/api/competicao/${slug}/ao-vivo`)
+                .then(r => r.ok ? r.json() : null)
+                .then(data => {
+                    if (!data?.success) return;
+                    const preview = this._gerarTextoPreview(data);
+                    this._especialPreviewCache[slug] = { preview, ts: Date.now() };
+                    this._injetarPreviewCard(selector, preview);
+                })
+                .catch(() => {});
+        }
+    }
+
+    /**
+     * Gera objeto de preview com base nos dados da competição.
+     * Retorna { isLive, texto } ou null se sem dados.
+     */
+    _gerarTextoPreview(data) {
+        // 1. Jogo ao vivo
+        if (data.jogos_ao_vivo?.length > 0) {
+            const j = data.jogos_ao_vivo[0];
+            const m = _abreviarTime(j.mandante);
+            const v = _abreviarTime(j.visitante);
+            const placar = (j.placar_mandante !== null)
+                ? `${j.placar_mandante} × ${j.placar_visitante}`
+                : 'vs';
+            return { isLive: true, texto: `${m} ${placar} ${v}` };
+        }
+
+        // 2. Último resultado
+        if (data.ultimos_resultados?.length > 0) {
+            const j = data.ultimos_resultados[0];
+            const m = _abreviarTime(j.mandante);
+            const v = _abreviarTime(j.visitante);
+            return { isLive: false, texto: `${m} ${j.placar_mandante} × ${j.placar_visitante} ${v}` };
+        }
+
+        // 3. Próximo jogo
+        if (data.proximos_jogos?.length > 0) {
+            const j = data.proximos_jogos[0];
+            const m = _abreviarTime(j.mandante);
+            const v = _abreviarTime(j.visitante);
+            const hora = j.horario ? ` · ${j.horario}` : '';
+            return { isLive: false, texto: `Próx: ${m} vs ${v}${hora}` };
+        }
+
+        return null;
+    }
+
+    /**
+     * Injeta o preview na .especial-card-desc usando textContent (XSS-safe).
+     * O live dot é criado via DOM, não innerHTML.
+     */
+    _injetarPreviewCard(selector, preview) {
+        if (!preview) return;
+        const sheet = this._dom.menuSheet;
+        if (!sheet) return;
+        const desc = sheet.querySelector(`${selector} .especial-card-desc`);
+        if (!desc) return;
+
+        // Limpa conteúdo anterior
+        desc.textContent = '';
+
+        if (preview.isLive) {
+            const dot = document.createElement('span');
+            dot.className = 'especial-live-dot';
+            desc.appendChild(dot);
+        }
+
+        const txt = document.createTextNode(preview.texto);
+        desc.appendChild(txt);
+
+        const card = sheet.querySelector(selector);
+        if (card) {
+            card.classList.add('especial-card--com-preview');
+            if (preview.isLive) card.classList.add('especial-card--live');
+        }
+    }
+}
+
+// ─── Helper: abreviação de nome de time ────────────────────────────────────
+function _abreviarTime(nome) {
+    if (!nome) return '';
+    if (nome.length <= 8) return nome;
+    const palavras = nome.split(/[\s\-]+/);
+    if (palavras.length >= 2) return palavras.map(p => p[0]).join('').toUpperCase().substring(0, 3);
+    return nome.substring(0, 6);
 }
 
 // Singleton instance

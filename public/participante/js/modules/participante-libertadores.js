@@ -119,7 +119,7 @@ async function carregarDadosAPILiberta() {
         const res = await fetch('/api/competicao/libertadores/resumo');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        return (data.success && (data.grupos?.length > 0 || data.ultimos_resultados?.length > 0)) ? data : null;
+        return (data.success && (data.grupos?.length > 0 || data.ultimos_resultados?.length > 0 || data.proximos_jogos?.length > 0)) ? data : null;
     } catch (err) {
         if (window.Log) Log.warn('LIBERTADORES', 'API indisponível, usando fallback:', err.message);
         return null;

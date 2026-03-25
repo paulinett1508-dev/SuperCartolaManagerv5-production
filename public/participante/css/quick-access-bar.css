@@ -574,6 +574,41 @@
     color: rgba(255, 255, 255, 0.25);
 }
 
+/* ─── Preview de resultado nas cards Especial ─────────────────────────── */
+
+@keyframes especial-pulse-live {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.4; transform: scale(0.7); }
+}
+
+/* Live dot pulsante */
+.especial-live-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: var(--app-radius-full, 9999px);
+    background: var(--app-color-danger, #ef4444);
+    margin-right: 5px;
+    vertical-align: middle;
+    animation: especial-pulse-live 1.4s ease-in-out infinite;
+}
+
+/* Card com jogo ao vivo — borda e brilho sutil */
+.especial-card--live {
+    box-shadow: 0 0 0 1px var(--app-color-danger, #ef4444), 0 0 12px rgba(239, 68, 68, 0.2);
+}
+.especial-card--live .especial-card-desc {
+    color: var(--app-color-danger, #ef4444);
+    font-weight: 500;
+}
+
+/* Com preview: desc em destaque (resultado ou próximo) */
+.especial-card--com-preview .especial-card-desc {
+    color: var(--app-text-white, #fff);
+    font-size: 10px;
+    letter-spacing: 0.3px;
+}
+
 /* =====================================================================
    AJUSTE DO CONTAINER PRINCIPAL
    ===================================================================== */

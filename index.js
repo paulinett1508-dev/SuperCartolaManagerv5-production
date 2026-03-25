@@ -123,6 +123,7 @@ import rodadasCorrecaoRoutes from "./routes/rodadasCorrecaoRoutes.js";
 import calendarioRodadasRoutes from "./routes/calendario-rodadas-routes.js";
 import brasileiraoTabelaRoutes from "./routes/brasileirao-tabela-routes.js";
 import competicaoRoutes from "./routes/competicao-routes.js";
+import competicaoService from "./services/competicao-service.js";
 import golsRoutes from "./routes/gols.js";
 import artilheiroCampeaoRoutes from "./routes/artilheiro-campeao-routes.js";
 import luvaDeOuroRoutes from "./routes/luva-de-ouro-routes.js";
@@ -1092,6 +1093,23 @@ initAsyncPromise = (async () => {
   });
   cronJobs.push(cronLimpezaCache);
   console.log("[SERVER] 🔔 Cron de limpeza de cache agendado (diário 4h)");
+
+  // ⚽ CRON: Persistir resultados das competições Especial (Opção C)
+  // Roda a cada 5 min na janela de jogos (17h-23h BRT = 20h-02h UTC)
+  // Garante status agendado→encerrado no MongoDB independente de usuário ativo
+  const COMPETICOES_ESPECIAIS = ["copa-nordeste", "copa-brasil", "libertadores"];
+  const temporadaAtual = new Date().getFullYear();
+  const cronCompeticoes = cron.schedule("*/5 20-23,0-2 * * *", async () => {
+    for (const slug of COMPETICOES_ESPECIAIS) {
+      try {
+        await competicaoService.obterResumoAoVivo(slug, temporadaAtual);
+      } catch (err) {
+        console.error(`[CRON-COMPETICOES] Erro ao sincronizar ${slug}:`, err.message);
+      }
+    }
+  });
+  cronJobs.push(cronCompeticoes);
+  console.log("[SERVER] ⚽ Cron de competições Especial agendado (*/5 20h-02h UTC)");
 })().catch((err) => {
   const logFatal = IS_PRODUCTION ? originalConsole.error : console.error;
   logFatal("[INIT-ASYNC] ❌ ERRO FATAL na inicialização assíncrona:", err.message);
