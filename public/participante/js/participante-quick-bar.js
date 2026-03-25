@@ -269,6 +269,17 @@ class QuickAccessBar {
                 </div>
                 <span class="material-icons especial-chevron">chevron_right</span>
             </div>
+
+            <div class="especial-card especial-card-copane" data-module="copa-nordeste">
+                <div class="especial-card-icon">
+                    <span class="material-icons">flare</span>
+                </div>
+                <div class="especial-card-text">
+                    <div class="especial-card-name">Copa do Nordeste 2026</div>
+                    <div class="especial-card-desc">Nordestão — 20 clubes, 4 grupos</div>
+                </div>
+                <span class="material-icons especial-chevron">chevron_right</span>
+            </div>
         `;
     }
 
