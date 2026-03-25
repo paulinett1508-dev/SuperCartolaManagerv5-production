@@ -1,5 +1,5 @@
 name: supercartolamanagerv5
-on: 
+on:
   push:
     branches: [ main, dev ]
   pull_request:
@@ -29,6 +29,7 @@ jobs:
         key: ${{ secrets.VPS_SSH_KEY }}
         script: |
           cd /var/www/cartola
+          git checkout main
           git pull origin main
           docker compose build scm-prod
           docker compose up -d scm-prod
