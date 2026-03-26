@@ -414,7 +414,69 @@ bash git log origin/$(git branch --show-current) -1 --oneline
 bash git status
 ```
 
-#### 5.4 PM2 Restart Automático (VPS)
+#### 5.4 MERGE AUTOMÁTICO PARA MAIN
+
+**Contexto:** O ambiente Claude Code web cria feature branches automaticamente (`claude/<task>-<hash>`). A VPS roda `main`. Sem merge, as mudanças nunca refletem em produção.
+
+**REGRA:** Após push em feature branch, SEMPRE fazer merge para main. Conflitos são tarefa a resolver, NÃO motivo para abortar.
+
+**5.4.1 Detectar se precisa merge:**
+```bash
+BRANCH=$(git branch --show-current)
+# Se já está em main, pular essa fase
+if [[ "$BRANCH" == "main" || "$BRANCH" == "master" ]]; then
+    echo "Já em main — skip merge"
+else
+    echo "Feature branch detectada: $BRANCH → merge automático para main"
+fi
+```
+
+**5.4.2 Merge para main (se feature branch):**
+```bash
+# Salvar branch atual
+FEATURE_BRANCH=$(git branch --show-current)
+
+# Checkout main e atualizar
+git checkout main
+git pull origin main --no-rebase --no-edit
+
+# Tentar merge
+git merge $FEATURE_BRANCH --no-edit
+```
+
+**5.4.3 Resolver conflitos (se houver):**
+
+Se o merge falhar com conflitos:
+1. Listar arquivos conflitantes: `git diff --name-only --diff-filter=U`
+2. Para cada arquivo: ler conteúdo com marcadores `<<<<<<<`, resolver mantendo as mudanças da feature branch (HEAD/ours)
+3. `git add` dos arquivos resolvidos
+4. `git commit --no-edit` para completar o merge
+5. Se resolução falhar após 2 tentativas → `git merge --abort`, avisar usuário, e voltar para feature branch
+
+**IMPORTANTE:** Conflitos são uma tarefa a resolver, NÃO um motivo para abortar o fluxo.
+
+**5.4.4 Push main e voltar:**
+```bash
+# Push main atualizada
+git push origin main
+
+# Voltar para feature branch
+git checkout $FEATURE_BRANCH
+echo "✅ main atualizada e pushada com sucesso"
+```
+
+**5.4.5 Fallback (merge falhou completamente):**
+```bash
+# Abortar merge e voltar para feature branch
+git merge --abort
+git checkout $FEATURE_BRANCH
+echo "⚠️ Merge automático falhou — resolução manual necessária"
+echo "Execute: git checkout main && git merge $FEATURE_BRANCH"
+```
+
+---
+
+#### 5.5 PM2 Restart Automático (VPS)
 
 Após o push bem-sucedido, verificar se algum arquivo de **backend** foi modificado:
 
@@ -625,6 +687,8 @@ bash git diff | grep "console\.log" && echo "⚠️ Remova debug code"
 - [ ] Remote correto
 - [ ] Sem divergências ou conflitos
 - [ ] Push bem-sucedido
+- [ ] Se feature branch → merge automático para main
+- [ ] main pushada com sucesso
 - [ ] Status limpo (working tree clean)
 
 ### Custo (Pós-Push)
@@ -665,7 +729,12 @@ bash git diff | grep "console\.log" && echo "⚠️ Remova debug code"
 🚀 FASE 5: PUSH
    git push origin [branch]
           ↓
-♻️ FASE 5.4: PM2 RESTART
+🔀 FASE 5.4: MERGE MAIN
+   branch != main? → checkout main → merge → push → voltar
+          ↓
+   conflitos? → resolver como tarefa → continuar
+          ↓
+♻️ FASE 5.5: PM2 RESTART
    backend alterado? → pm2 restart cartola
    só estáticos?    → skip
           ↓
