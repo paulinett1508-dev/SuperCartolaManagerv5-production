@@ -280,6 +280,17 @@ class QuickAccessBar {
                 </div>
                 <span class="material-icons especial-chevron">chevron_right</span>
             </div>
+
+            <div class="especial-card especial-card-agenda" data-module="agenda-tabelas">
+                <div class="especial-card-icon">
+                    <span class="material-icons">calendar_month</span>
+                </div>
+                <div class="especial-card-text">
+                    <div class="especial-card-name">Agenda e Tabelas</div>
+                    <div class="especial-card-desc">Jogos do dia e tabela do Brasileirão</div>
+                </div>
+                <span class="material-icons especial-chevron">chevron_right</span>
+            </div>
         `;
     }
 
