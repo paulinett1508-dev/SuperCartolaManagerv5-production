@@ -417,6 +417,16 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 | **Contexto** | Ampliar capacidades com skills externas |
 | **Localização** | `docs/skills/05-meta/skill-installer.md` |
 
+#### autoresearch
+| Tipo | Keywords |
+|------|----------|
+| **Primárias** | `autoresearch`, `pesquisa autônoma`, `autonomous research`, `experiment loop`, `train loop`, `val_bpb`, `karpathy` |
+| **Frases PT-BR** | "rodar autoresearch", "pesquisa autônoma de ML", "loop de experimentação", "treinar modelo autônomo", "experimentação automática", "auto-research", "rodar pesquisa enquanto durmo" |
+| **Contexto** | Loop autônomo de experimentação ML: modifica train.py, treina, avalia val_bpb, keep/discard, repete indefinidamente. Baseado no programa do Karpathy |
+| **NÃO confundir** | Pesquisa de codebase → `pesquisa`; Planejamento → `workflow` |
+| **Localização** | `.claude/skills/autoresearch/SKILL.md` |
+| **Origem** | `github.com/karpathy/autoresearch` |
+
 #### claude-code-project-structure
 | Tipo | Keywords |
 |------|----------|

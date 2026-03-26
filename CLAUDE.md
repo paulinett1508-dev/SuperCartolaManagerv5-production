@@ -138,6 +138,7 @@ Commands: `/liste-pr-github` (filtro por período), `/security-review` (diff con
 - `skill-analise-branches` — Análise de branches do GitHub
 - `skill-creator` — Cria, edita e avalia skills
 - `skill-installer` — Instala skills de lista curada ou repositório GitHub
+- `autoresearch` — Loop autônomo de experimentação ML (karpathy/autoresearch)
 - `project-reference` — Referência do projeto: MCPs, collections, keyword map
 - `claude-code-project-structure` — Audita e reorganiza a estrutura Claude Code do projeto (`.claude/`, CLAUDE.md, hooks, skills, Migration Mode)
 
