@@ -6,13 +6,8 @@ if (window.Log) Log.info('BRASILEIRAO-LP', 'Carregando modulo v1.0...');
 
 export async function inicializarBrasileraoParticipante() {
     try {
-        if (window.BrasileiraoTabela) {
-            await window.BrasileiraoTabela.renderizar({
-                containerId: 'brasileirao-tabela-container',
-                temporada: new Date().getFullYear()
-            });
-        } else {
-            const container = document.getElementById('brasileirao-tabela-container');
+        if (!window.BrasileiraoTabela) {
+            const container = document.getElementById('brasileirao-classificacao-container');
             if (container) {
                 container.innerHTML = `
                     <div class="text-center py-6">
@@ -21,9 +16,19 @@ export async function inicializarBrasileraoParticipante() {
                     </div>
                 `;
             }
+            return;
         }
+
+        // Renderizar classificação e jogos da rodada em paralelo
+        await Promise.all([
+            window.BrasileiraoTabela.renderizarClassificacao('brasileirao-classificacao-container'),
+            window.BrasileiraoTabela.renderizar({
+                containerId: 'brasileirao-tabela-container',
+                temporada: new Date().getFullYear()
+            })
+        ]);
     } catch (err) {
-        if (window.Log) Log.warn('BRASILEIRAO-LP', 'Erro ao renderizar tabela:', err);
+        if (window.Log) Log.warn('BRASILEIRAO-LP', 'Erro ao renderizar:', err);
     }
 }
 

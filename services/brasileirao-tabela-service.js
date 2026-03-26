@@ -819,6 +819,46 @@ async function obterResumoAoVivo(temporada) {
     }
 }
 
+/**
+ * Retorna classificação calculada a partir dos jogos encerrados
+ * Cache em memória: 5 minutos
+ */
+let _classificacaoCache = { data: null, ts: 0 };
+const CLASSIFICACAO_CACHE_TTL = 5 * 60 * 1000; // 5 min
+
+async function obterClassificacao(temporada) {
+    const agora = Date.now();
+    if (_classificacaoCache.data && (agora - _classificacaoCache.ts) < CLASSIFICACAO_CACHE_TTL) {
+        return _classificacaoCache.data;
+    }
+
+    try {
+        const calendario = await CalendarioBrasileirao.findOne({ temporada }).lean(false);
+
+        if (!calendario || !calendario.partidas || calendario.partidas.length === 0) {
+            return { success: false, erro: 'Calendário não encontrado' };
+        }
+
+        const classificacao = calendario.calcularClassificacao();
+        const rodadaAtual = calendario.stats?.rodada_atual || calendario.obterRodadaAtual();
+
+        const resultado = {
+            success: true,
+            temporada,
+            rodada_atual: rodadaAtual,
+            classificacao,
+            ultima_atualizacao: calendario.ultima_atualizacao,
+        };
+
+        _classificacaoCache = { data: resultado, ts: agora };
+        return resultado;
+
+    } catch (error) {
+        console.error('[BRASILEIRAO-SERVICE] Erro classificacao:', error);
+        return { success: false, erro: 'Erro ao calcular classificação' };
+    }
+}
+
 // =====================================================================
 // EXPORTS
 // =====================================================================
@@ -833,6 +873,7 @@ export default {
     obterStatus,
     getCartolaId,
     obterRodadaCartola,
+    obterClassificacao,
 };
 
 export {
@@ -845,4 +886,5 @@ export {
     obterStatus,
     getCartolaId,
     obterRodadaCartola,
+    obterClassificacao,
 };

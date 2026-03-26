@@ -292,6 +292,80 @@ calendarioBrasileiraoSchema.methods.atualizarStats = function() {
     return this.stats;
 };
 
+/**
+ * Calcula classificação geral a partir dos jogos encerrados
+ * Retorna array de 20 times ordenado por pontos DESC
+ */
+calendarioBrasileiraoSchema.methods.calcularClassificacao = function() {
+    // Coletar todos os times do campeonato
+    const timesSet = new Map(); // nome → { time_id }
+    for (const p of this.partidas) {
+        if (!timesSet.has(p.mandante)) timesSet.set(p.mandante, p.mandante_id || null);
+        if (!timesSet.has(p.visitante)) timesSet.set(p.visitante, p.visitante_id || null);
+    }
+
+    // Inicializar tabela
+    const tabela = {};
+    for (const [time, timeId] of timesSet) {
+        tabela[time] = {
+            time,
+            time_id: timeId,
+            pontos: 0, jogos: 0, vitorias: 0, empates: 0, derrotas: 0,
+            gols_pro: 0, gols_contra: 0, saldo: 0,
+            ultimos5: []
+        };
+    }
+
+    // Processar jogos encerrados (ordenados por rodada para ultimos5)
+    const jogosEncerrados = this.partidas
+        .filter(p => p.status === 'encerrado' && p.placar_mandante !== null && p.placar_visitante !== null)
+        .sort((a, b) => a.rodada - b.rodada);
+
+    for (const jogo of jogosEncerrados) {
+        const m = tabela[jogo.mandante];
+        const v = tabela[jogo.visitante];
+        if (!m || !v) continue;
+
+        m.jogos++; v.jogos++;
+        m.gols_pro += jogo.placar_mandante;
+        m.gols_contra += jogo.placar_visitante;
+        v.gols_pro += jogo.placar_visitante;
+        v.gols_contra += jogo.placar_mandante;
+
+        if (jogo.placar_mandante > jogo.placar_visitante) {
+            m.pontos += 3; m.vitorias++; v.derrotas++;
+            m.ultimos5.push('V'); v.ultimos5.push('D');
+        } else if (jogo.placar_mandante < jogo.placar_visitante) {
+            v.pontos += 3; v.vitorias++; m.derrotas++;
+            v.ultimos5.push('V'); m.ultimos5.push('D');
+        } else {
+            m.pontos += 1; m.empates++;
+            v.pontos += 1; v.empates++;
+            m.ultimos5.push('E'); v.ultimos5.push('E');
+        }
+
+        m.saldo = m.gols_pro - m.gols_contra;
+        v.saldo = v.gols_pro - v.gols_contra;
+    }
+
+    // Ordenar: pontos DESC → vitórias → saldo → gols_pro
+    const classificacao = Object.values(tabela)
+        .sort((a, b) =>
+            b.pontos - a.pontos ||
+            b.vitorias - a.vitorias ||
+            b.saldo - a.saldo ||
+            b.gols_pro - a.gols_pro
+        )
+        .map((t, i) => ({
+            posicao: i + 1,
+            ...t,
+            aproveitamento: t.jogos > 0 ? Math.floor((t.pontos / (t.jogos * 3)) * 1000) / 10 : 0,
+            ultimos5: t.ultimos5.slice(-5)
+        }));
+
+    return classificacao;
+};
+
 // =====================================================================
 // MÉTODOS ESTÁTICOS
 // =====================================================================

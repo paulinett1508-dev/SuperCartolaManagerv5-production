@@ -292,6 +292,124 @@ const BrasileiraoTabela = {
         return `há ${diffDias} dia${diffDias > 1 ? 's' : ''}`;
     },
 
+    /**
+     * Busca e renderiza tabela de classificação no container especificado
+     */
+    async renderizarClassificacao(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        try {
+            const temporada = this._temporada || new Date().getFullYear();
+            const response = await fetch(`/api/brasileirao/classificacao/${temporada}`);
+            const data = await response.json();
+
+            if (!data.success || !data.classificacao || data.classificacao.length === 0) {
+                container.innerHTML = `
+                    <div class="brasileirao-class-vazio">
+                        <span class="material-icons">leaderboard</span>
+                        <p>Classificação disponível após início do campeonato</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Resolver clube do participante para destaque
+            const meuClubeId = window.participanteAuth?.participante?.participante?.clube_id
+                            || window.participanteAuth?.participante?.clube_id
+                            || null;
+
+            container.innerHTML = this._renderClassificacao(data.classificacao, data.rodada_atual, meuClubeId);
+        } catch (err) {
+            console.warn('[BRASILEIRAO-TABELA] Erro classificação:', err);
+        }
+    },
+
+    _renderClassificacao(classificacao, rodadaAtual, meuClubeId) {
+        const zonaClass = (pos) => {
+            if (pos <= 4) return 'brasileirao-zona-liberta';
+            if (pos <= 6) return 'brasileirao-zona-pre-liberta';
+            if (pos <= 12) return 'brasileirao-zona-sula';
+            if (pos <= 16) return '';
+            return 'brasileirao-zona-rebaixa';
+        };
+
+        const formaHtml = (ultimos5) => {
+            if (!ultimos5 || ultimos5.length === 0) return '';
+            return ultimos5.map(r => {
+                const cls = r === 'V' ? 'brasileirao-forma-v' : r === 'E' ? 'brasileirao-forma-e' : 'brasileirao-forma-d';
+                return `<span class="brasileirao-forma-dot ${cls}">${r}</span>`;
+            }).join('');
+        };
+
+        const rows = classificacao.map(t => {
+            const isMeu = meuClubeId && Number(t.time_id) === Number(meuClubeId);
+            const zona = zonaClass(t.posicao);
+            const meuClass = isMeu ? 'brasileirao-row-meu' : '';
+
+            return `
+                <tr class="brasileirao-class-row ${zona} ${meuClass}">
+                    <td class="brasileirao-class-pos">
+                        <span class="brasileirao-pos-num">${t.posicao}</span>
+                    </td>
+                    <td class="brasileirao-class-time">
+                        ${this._renderEscudo(t.time_id)}
+                        <span class="brasileirao-class-nome">${this._abreviarTime(t.time)}</span>
+                    </td>
+                    <td class="brasileirao-class-pts">${t.pontos}</td>
+                    <td class="brasileirao-class-num">${t.jogos}</td>
+                    <td class="brasileirao-class-num">${t.vitorias}</td>
+                    <td class="brasileirao-class-num">${t.empates}</td>
+                    <td class="brasileirao-class-num">${t.derrotas}</td>
+                    <td class="brasileirao-class-num brasileirao-class-hide-sm">${t.gols_pro}</td>
+                    <td class="brasileirao-class-num brasileirao-class-hide-sm">${t.gols_contra}</td>
+                    <td class="brasileirao-class-num">${t.saldo > 0 ? '+' : ''}${t.saldo}</td>
+                    <td class="brasileirao-class-num brasileirao-class-hide-sm">${t.aproveitamento}%</td>
+                    <td class="brasileirao-class-forma brasileirao-class-hide-xs">${formaHtml(t.ultimos5)}</td>
+                </tr>
+            `;
+        }).join('');
+
+        return `
+            <div class="brasileirao-class-container">
+                <div class="brasileirao-class-header-bar">
+                    <span class="material-icons">leaderboard</span>
+                    <span>Classificação</span>
+                    <span class="brasileirao-class-rodada">Rodada ${rodadaAtual || '?'}</span>
+                </div>
+                <div class="brasileirao-class-scroll">
+                    <table class="brasileirao-class-table">
+                        <thead>
+                            <tr>
+                                <th class="brasileirao-class-th-pos">#</th>
+                                <th class="brasileirao-class-th-time">Time</th>
+                                <th class="brasileirao-class-th-pts">P</th>
+                                <th class="brasileirao-class-th-num">J</th>
+                                <th class="brasileirao-class-th-num">V</th>
+                                <th class="brasileirao-class-th-num">E</th>
+                                <th class="brasileirao-class-th-num">D</th>
+                                <th class="brasileirao-class-th-num brasileirao-class-hide-sm">GP</th>
+                                <th class="brasileirao-class-th-num brasileirao-class-hide-sm">GC</th>
+                                <th class="brasileirao-class-th-num">SG</th>
+                                <th class="brasileirao-class-th-num brasileirao-class-hide-sm">%</th>
+                                <th class="brasileirao-class-th-forma brasileirao-class-hide-xs">Forma</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="brasileirao-class-legenda">
+                    <span class="brasileirao-leg-item brasileirao-zona-liberta"><span class="brasileirao-leg-dot"></span>Libertadores</span>
+                    <span class="brasileirao-leg-item brasileirao-zona-pre-liberta"><span class="brasileirao-leg-dot"></span>Pré-Liberta</span>
+                    <span class="brasileirao-leg-item brasileirao-zona-sula"><span class="brasileirao-leg-dot"></span>Sul-Americana</span>
+                    <span class="brasileirao-leg-item brasileirao-zona-rebaixa"><span class="brasileirao-leg-dot"></span>Rebaixamento</span>
+                </div>
+            </div>
+        `;
+    },
+
     _renderSemDados() {
         return `
             <section class="brasileirao-section mx-4 mb-2">

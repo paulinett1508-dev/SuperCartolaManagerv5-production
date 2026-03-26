@@ -1028,3 +1028,273 @@
     overflow: hidden;
     border-width: 0;
 }
+
+/* =====================================================================
+   CLASSIFICAÇÃO — Tabela estilo site esportivo (dark mode)
+   ===================================================================== */
+
+.brasileirao-class-container {
+    margin: 0 0.5rem 1rem;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(76, 175, 80, 0.2);
+    background: var(--app-surface, #111);
+}
+
+.brasileirao-class-header-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 12px;
+    background: linear-gradient(135deg, #064e3b 0%, #0f172a 100%);
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 12px;
+    color: var(--app-text-primary, #fff);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.brasileirao-class-header-bar .material-icons {
+    font-size: 16px;
+    color: var(--app-success-light, #4CAF50);
+}
+.brasileirao-class-rodada {
+    margin-left: auto;
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 10px;
+    color: rgba(255,255,255,0.5);
+    font-weight: 500;
+    text-transform: none;
+}
+
+/* Scroll horizontal em mobile */
+.brasileirao-class-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Tabela */
+.brasileirao-class-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 11px;
+}
+
+.brasileirao-class-table thead tr {
+    background: rgba(255,255,255,0.04);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.brasileirao-class-table th {
+    padding: 6px 4px;
+    font-size: 9px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    text-align: center;
+    white-space: nowrap;
+    letter-spacing: 0.03em;
+}
+.brasileirao-class-th-pos { width: 28px; }
+.brasileirao-class-th-time { text-align: left; padding-left: 8px; min-width: 110px; }
+.brasileirao-class-th-pts { width: 30px; }
+.brasileirao-class-th-num { width: 26px; }
+.brasileirao-class-th-forma { width: 70px; text-align: center; }
+
+/* Linhas */
+.brasileirao-class-row {
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s;
+}
+.brasileirao-class-row:last-child {
+    border-bottom: none;
+}
+
+/* Posição */
+.brasileirao-class-pos {
+    text-align: center;
+    padding: 7px 4px;
+    position: relative;
+}
+.brasileirao-pos-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--app-text-primary, #fff);
+}
+
+/* Zonas de classificação — cor no número da posição */
+.brasileirao-zona-liberta .brasileirao-pos-num {
+    background: rgba(29, 78, 216, 0.25);
+    color: #60a5fa;
+}
+.brasileirao-zona-pre-liberta .brasileirao-pos-num {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+}
+.brasileirao-zona-sula .brasileirao-pos-num {
+    background: rgba(249, 115, 22, 0.18);
+    color: #fb923c;
+}
+.brasileirao-zona-rebaixa .brasileirao-pos-num {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+}
+
+/* Barra lateral de zona */
+.brasileirao-class-row::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+}
+.brasileirao-zona-liberta::before { background: #3b82f6; }
+.brasileirao-zona-pre-liberta::before { background: #38bdf8; }
+.brasileirao-zona-sula::before { background: #f97316; }
+.brasileirao-zona-rebaixa::before { background: #ef4444; }
+
+.brasileirao-class-row {
+    position: relative;
+}
+
+/* Time */
+.brasileirao-class-time {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 4px 7px 8px;
+    min-width: 110px;
+}
+.brasileirao-class-time .brasileirao-escudo {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+.brasileirao-class-nome {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--app-text-primary, #fff);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
+}
+
+/* Pontos (destaque) */
+.brasileirao-class-pts {
+    text-align: center;
+    padding: 7px 4px;
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--app-text-primary, #fff);
+}
+
+/* Números gerais */
+.brasileirao-class-num {
+    text-align: center;
+    padding: 7px 3px;
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 10px;
+    color: rgba(255,255,255,0.6);
+}
+
+/* Linha do time do participante */
+.brasileirao-row-meu {
+    background: rgba(76, 175, 80, 0.1) !important;
+}
+.brasileirao-row-meu .brasileirao-class-nome {
+    color: var(--app-success-light, #4CAF50);
+    font-weight: 700;
+}
+
+/* Indicador de forma (últimos 5) */
+.brasileirao-class-forma {
+    text-align: center;
+    padding: 7px 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
+.brasileirao-forma-dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    font-size: 8px;
+    font-weight: 700;
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+}
+.brasileirao-forma-v {
+    background: rgba(34, 197, 94, 0.25);
+    color: #4ade80;
+}
+.brasileirao-forma-e {
+    background: rgba(250, 204, 21, 0.2);
+    color: #fbbf24;
+}
+.brasileirao-forma-d {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+}
+
+/* Legenda de zonas */
+.brasileirao-class-legenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 12px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+.brasileirao-leg-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 9px;
+    color: rgba(255,255,255,0.45);
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+}
+.brasileirao-leg-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+}
+.brasileirao-leg-item.brasileirao-zona-liberta .brasileirao-leg-dot { background: #3b82f6; }
+.brasileirao-leg-item.brasileirao-zona-pre-liberta .brasileirao-leg-dot { background: #38bdf8; }
+.brasileirao-leg-item.brasileirao-zona-sula .brasileirao-leg-dot { background: #f97316; }
+.brasileirao-leg-item.brasileirao-zona-rebaixa .brasileirao-leg-dot { background: #ef4444; }
+
+/* Estado vazio */
+.brasileirao-class-vazio {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: rgba(255,255,255,0.4);
+}
+.brasileirao-class-vazio .material-icons {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: rgba(255,255,255,0.2);
+}
+.brasileirao-class-vazio p {
+    font-size: 12px;
+    margin: 0;
+}
+
+/* Responsive — ocultar colunas em telas pequenas */
+@media (max-width: 480px) {
+    .brasileirao-class-hide-sm { display: none; }
+}
+@media (max-width: 380px) {
+    .brasileirao-class-hide-xs { display: none; }
+    .brasileirao-class-nome { max-width: 75px; }
+}

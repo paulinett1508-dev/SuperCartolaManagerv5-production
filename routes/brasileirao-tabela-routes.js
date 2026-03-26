@@ -172,6 +172,33 @@ router.get('/ao-vivo/:temporada', async (req, res) => {
     }
 });
 
+/**
+ * GET /api/brasileirao/classificacao/:temporada
+ * Retorna tabela de classificação calculada a partir dos jogos encerrados
+ */
+router.get('/classificacao/:temporada', async (req, res) => {
+    try {
+        const temporada = parseInt(req.params.temporada, 10);
+
+        if (isNaN(temporada) || temporada < 2020 || temporada > 2030) {
+            return res.status(400).json({
+                success: false,
+                erro: 'Temporada inválida',
+            });
+        }
+
+        const resultado = await brasileiraoService.obterClassificacao(temporada);
+        res.json(resultado);
+
+    } catch (error) {
+        console.error('[BRASILEIRAO-ROUTES] Erro classificacao:', error);
+        res.status(500).json({
+            success: false,
+            erro: 'Erro ao buscar classificação',
+        });
+    }
+});
+
 // =====================================================================
 // ENDPOINTS ADMIN (Requer autenticação)
 // =====================================================================
