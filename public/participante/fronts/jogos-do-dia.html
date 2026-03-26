@@ -1,0 +1,28 @@
+<!-- JOGOS DO DIA - Página dedicada -->
+<!-- Fragmento HTML para inserção via navegação SPA -->
+<div id="jogos-do-dia-container" class="px-4 pt-2 pb-28">
+
+    <!-- Botão Voltar -->
+    <button
+        onclick="window.participanteNav && window.participanteNav.navegarPara('home')"
+        class="flex items-center gap-1 mb-3 py-1 px-0 bg-transparent border-none cursor-pointer"
+        style="-webkit-tap-highlight-color: transparent;"
+        aria-label="Voltar">
+        <span class="material-icons" style="font-size: 18px; color: var(--app-text-muted);">arrow_back</span>
+        <span style="font-size: 11px; color: var(--app-text-muted); font-family: var(--app-font-base, 'Inter', sans-serif);">Início</span>
+    </button>
+
+    <!-- Header -->
+    <div class="flex items-center gap-2 mb-4">
+        <span class="material-icons" style="font-size: 22px; color: var(--app-success-light, #4CAF50);">today</span>
+        <h2 style="font-family: var(--app-font-brand, 'Russo One', sans-serif); font-size: 1.1rem; color: var(--app-text-primary, #fff); margin: 0;">Jogos do Dia</h2>
+    </div>
+
+    <!-- Container dos jogos -->
+    <div id="jogos-dia-lista">
+        <div class="flex items-center justify-center py-8">
+            <div class="animate-spin rounded-full h-6 w-6 border-2 border-transparent"
+                 style="border-top-color: var(--app-success-light, #4CAF50);"></div>
+        </div>
+    </div>
+</div>

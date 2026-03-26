@@ -72,6 +72,8 @@ class ParticipanteNavigation {
             "resta-um": "/participante/fronts/resta-um.html",
             "info-meu-time": "/participante/fronts/info-meu-time.html",
             "agenda-tabelas": "/participante/fronts/agenda-tabelas.html",
+            "brasileirao": "/participante/fronts/brasileirao.html",
+            "jogos-do-dia": "/participante/fronts/jogos-do-dia.html",
             "libertadores": "/participante/fronts/libertadores.html",
             "copa-brasil": "/participante/fronts/copa-brasil.html",
             "copa-nordeste": "/participante/fronts/copa-nordeste.html",
@@ -562,7 +564,7 @@ class ParticipanteNavigation {
      */
     _isModuloOpcionalInativo(moduloId) {
         // Módulos de sistema/base: sempre permitidos (inclui sub-módulos como rodada-xray)
-        const modulosPermitidos = ['home', 'boas-vindas', 'extrato', 'ranking', 'rodadas', 'rodada-xray', 'historico', 'configuracoes', 'copa-times-sc', 'copa-2026-mundo', 'regras', 'libertadores', 'copa-brasil', 'copa-nordeste', 'info-meu-time', 'agenda-tabelas'];
+        const modulosPermitidos = ['home', 'boas-vindas', 'extrato', 'ranking', 'rodadas', 'rodada-xray', 'historico', 'configuracoes', 'copa-times-sc', 'copa-2026-mundo', 'regras', 'libertadores', 'copa-brasil', 'copa-nordeste', 'info-meu-time', 'agenda-tabelas', 'brasileirao', 'jogos-do-dia'];
         if (modulosPermitidos.includes(moduloId)) return false;
 
         // Sem dados de módulos carregados: permitir (graceful degradation)
@@ -1125,6 +1127,8 @@ class ParticipanteNavigation {
             "copa-brasil": "/participante/js/modules/participante-copa-brasil.js",
             "copa-nordeste": "/participante/js/modules/participante-copa-nordeste.js",
             "agenda-tabelas": "/participante/js/modules/participante-agenda-tabelas.js",
+            "brasileirao": "/participante/js/modules/participante-brasileirao.js",
+            "jogos-do-dia": "/participante/js/modules/participante-jogos-do-dia.js",
             "info-meu-time": "/participante/js/modules/participante-info-meu-time.js",
         };
 

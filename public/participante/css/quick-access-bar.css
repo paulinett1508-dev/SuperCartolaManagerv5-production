@@ -542,19 +542,19 @@
     color: var(--app-copane-primary, #E65100);
 }
 
-/* Agenda e Tabelas variant */
-.especial-card-agenda {
+/* Brasileirão Série A variant */
+.especial-card-brasileirao {
     background: linear-gradient(135deg, rgba(46, 125, 50, 0.25) 0%, rgba(27, 94, 32, 0.15) 100%);
     border: 1px solid rgba(76, 175, 80, 0.3);
 }
-.especial-card-agenda::before {
+.especial-card-brasileirao::before {
     background: linear-gradient(90deg, var(--app-success-light, #4CAF50), rgba(76, 175, 80, 0.15));
 }
-.especial-card-agenda .especial-card-icon {
+.especial-card-brasileirao .especial-card-icon {
     background: rgba(76, 175, 80, 0.12);
     border: 1px solid rgba(76, 175, 80, 0.3);
 }
-.especial-card-agenda .especial-card-icon .material-icons {
+.especial-card-brasileirao .especial-card-icon .material-icons {
     color: var(--app-success-light, #4CAF50);
 }
 

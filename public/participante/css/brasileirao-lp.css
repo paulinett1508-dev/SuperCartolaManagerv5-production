@@ -1,0 +1,129 @@
+/**
+ * Brasileirão Série A 2026 - Landing Page Styles
+ * =========================================
+ * LP dedicada ao Campeonato Brasileiro Série A 2026
+ * Usa tokens de _app-tokens.css (--app-success-light)
+ * Mobile-first, dark theme, namespace: brasileirao-lp-*
+ */
+
+/* ═══════════════════════════════════════════════════
+   PAGE CONTAINER
+   ═══════════════════════════════════════════════════ */
+.brasileirao-lp-page {
+    min-height: 100vh;
+    background: var(--app-bg, #0a0a0a);
+    padding-bottom: 5rem;
+}
+
+/* ═══════════════════════════════════════════════════
+   BOTAO VOLTAR
+   ═══════════════════════════════════════════════════ */
+.brasileirao-lp-btn-voltar {
+    position: sticky;
+    top: 12px;
+    left: 12px;
+    z-index: 50;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--app-text-primary, #fff);
+    cursor: pointer;
+    margin: 12px 0 -48px 12px;
+    transition: background 0.2s, transform 0.15s;
+}
+.brasileirao-lp-btn-voltar:active {
+    transform: scale(0.92);
+    background: rgba(0, 0, 0, 0.65);
+}
+.brasileirao-lp-btn-voltar .material-icons {
+    font-size: 1.1rem;
+}
+
+/* ═══════════════════════════════════════════════════
+   HERO
+   ═══════════════════════════════════════════════════ */
+.brasileirao-lp-hero {
+    position: relative;
+    overflow: hidden;
+    margin: 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    background: var(--app-surface, #1a1a1a);
+}
+
+/* Flag accent bar — Verde Brasileirão */
+.brasileirao-lp-flag-accent {
+    height: 4px;
+    background: linear-gradient(
+        90deg,
+        #1B5E20 0%,
+        var(--app-success-light, #4CAF50) 50%,
+        #FFC107 100%
+    );
+}
+
+.brasileirao-lp-hero-content {
+    position: relative;
+    z-index: 1;
+    padding: 1.5rem 1rem 1.75rem;
+    text-align: center;
+}
+
+.brasileirao-lp-hero-icon {
+    margin-bottom: 0.75rem;
+}
+.brasileirao-lp-hero-icon .material-icons {
+    font-size: 2.5rem;
+    color: var(--app-success-light, #4CAF50);
+    filter: drop-shadow(0 2px 8px rgba(76, 175, 80, 0.4));
+}
+
+.brasileirao-lp-hero-title {
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 1.8rem;
+    color: var(--app-text-primary, #fff);
+    letter-spacing: -0.02em;
+    margin: 0;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.brasileirao-lp-hero-subtitle {
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 2.5rem;
+    color: var(--app-success-light, #4CAF50);
+    margin: 0;
+    line-height: 1;
+    font-style: italic;
+}
+
+.brasileirao-lp-hero-local {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.6rem;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.5));
+    margin: 0.5rem 0 0;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+.brasileirao-lp-hero-local .material-icons {
+    font-size: 0.75rem;
+}
+
+/* ═══════════════════════════════════════════════════
+   CONTENT (tabela container)
+   ═══════════════════════════════════════════════════ */
+.brasileirao-lp-content {
+    margin: 0 0.5rem;
+}

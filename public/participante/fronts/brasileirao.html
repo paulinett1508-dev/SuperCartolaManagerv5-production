@@ -1,0 +1,48 @@
+<!-- BRASILEIRÃO SÉRIE A 2026 - Landing Page -->
+<!-- Fragmento HTML para inserção via navegação SPA -->
+<div id="brasileirao-container" class="brasileirao-lp-page">
+
+    <!-- Botão Voltar -->
+    <button
+        onclick="window.quickAccessBar ? window.quickAccessBar.abrirMenu() : history.back()"
+        class="brasileirao-lp-btn-voltar"
+        aria-label="Voltar">
+        <span class="material-icons">arrow_back</span>
+    </button>
+
+    <!-- ═══════════════════════════════════════════════════
+         HERO
+         ═══════════════════════════════════════════════════ -->
+    <section class="brasileirao-lp-hero">
+        <!-- Accent bar verde -->
+        <div class="brasileirao-lp-flag-accent"></div>
+
+        <div class="brasileirao-lp-hero-content">
+            <!-- Ícone -->
+            <div class="brasileirao-lp-hero-icon">
+                <span class="material-icons">sports_soccer</span>
+            </div>
+
+            <h1 class="brasileirao-lp-hero-title">Brasileirão Série A</h1>
+            <p class="brasileirao-lp-hero-subtitle">2026</p>
+            <p class="brasileirao-lp-hero-local">
+                <span class="material-icons">stadium</span>
+                Campeonato Brasileiro da Série A
+            </p>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         TABELA DE CLASSIFICAÇÃO
+         ═══════════════════════════════════════════════════ -->
+    <div id="brasileirao-tabela-container" class="brasileirao-lp-content">
+        <div class="flex items-center justify-center py-8">
+            <div class="animate-spin rounded-full h-6 w-6 border-2 border-transparent"
+                 style="border-top-color: var(--app-success-light, #4CAF50);"></div>
+        </div>
+    </div>
+
+    <div class="pb-24"></div>
+</div>
+
+<link rel="stylesheet" href="/participante/css/brasileirao-lp.css?v=1">
