@@ -1,4 +1,3 @@
-import { injectModuleLP } from './module-lp-engine.js';
 // =====================================================================
 // PARTICIPANTE-CAMPINHO.JS - v2.1 (CAMPINHO VIRTUAL PREMIUM)
 // =====================================================================
@@ -71,17 +70,6 @@ export async function inicializarCampinhoParticipante(params) {
         if (window.Log) Log.error("PARTICIPANTE-CAMPINHO", "❌ Container não encontrado");
         return;
     }
-
-    injectModuleLP({
-        wrapperId:    'campinho-lp-wrapper',
-        insertBefore: 'campinho-container',
-        ligaId,
-        moduloKey:    'campinho',
-        titulo:       'Campinho Virtual',
-        tagline:      'Sua escalação no campo, ao vivo',
-        icon:         'stadium',
-        colorClass:   'module-lp-campinho',
-    });
 
     // Mostrar loading
     container.innerHTML = renderizarLoading();
