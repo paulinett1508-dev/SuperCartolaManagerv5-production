@@ -930,7 +930,6 @@ window.renderizarConteudoCompleto = function renderizarConteudoCompleto(containe
     container.innerHTML = `
         ${renderHeroSaldoCard(saldo, statusTexto, taxaInscricao, pagouInscricao, temporadaSelecionada || temporadaAtual)}
         ${renderQuickStatsRow(resumoBase, rodadasValidas, acertos)}
-        ${renderBotaoMeusAcertos(listaAcertos, saldoAcertos)}
         ${renderEvolutionChart(false)}
         ${renderTransactionTimeline(extrato.rodadas, acertos, extrato.lancamentosIniciais, ligaId)}
         ${renderPerformanceCard(rodadasValidas, ligaId)}
@@ -952,8 +951,6 @@ window.renderizarConteudoCompleto = function renderizarConteudoCompleto(containe
                 <div id="modalTop10Body" style="padding:16px"></div>
             </div>
         </div>
-
-        ${renderBottomSheetAcertos(listaAcertos, resumoAcertos, saldoTemporada, saldoAcertos)}
     `;
 
     // Setup timeline filters
@@ -999,7 +996,6 @@ function renderizarConteudoRenovadoPreTemporada(container, extrato) {
 
     container.innerHTML = `
         ${renderHeroSaldoCard(saldo, statusTexto, taxaInscricao, pagouInscricao, temporadaAtual)}
-        ${renderBotaoMeusAcertos(listaAcertos, saldoAcertos)}
         ${renderEvolutionChart(true)}
         ${renderTransactionTimeline([], acertos, lancamentosIniciais, '')}
 
@@ -1029,7 +1025,6 @@ function renderizarConteudoRenovadoPreTemporada(container, extrato) {
             </div>
         </div>
 
-        ${renderBottomSheetAcertos(listaAcertos, acertos.resumo || {}, saldo, saldoAcertos)}
     `;
 }
 
@@ -1300,11 +1295,9 @@ window.refreshAcertosBottomSheet = async function() {
             }
         }
 
-        const wasOpen = !document.getElementById('bottomSheetAcertos')?.classList.contains('hidden');
         const container = document.getElementById("fluxoFinanceiroContent");
         if (container && window.extratoAtual) {
             window.renderizarConteudoCompleto(container, window.extratoAtual);
-            if (wasOpen) setTimeout(() => window.abrirBottomSheetAcertos(), 100);
         }
         mostrarToast('Acertos atualizados!', 'success');
     } catch (error) {
