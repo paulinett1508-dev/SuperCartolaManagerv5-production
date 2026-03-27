@@ -1003,6 +1003,9 @@ class ParticipanteNavigation {
             container.style.transition = 'opacity 0.2s ease-out, transform 0.2s ease-out';
             container.style.opacity = '1';
             container.style.transform = 'translateY(0)';
+            // ✅ v4.4: Limpar transform após animação — transform: translateY(0) cria
+            // containing block para position:fixed, quebrando modais/bottom-sheets
+            setTimeout(() => { container.style.transform = ''; }, 250);
 
             if (window.SplashScreen) {
                 window.SplashScreen.hide();
