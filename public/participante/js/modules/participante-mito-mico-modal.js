@@ -1,7 +1,8 @@
 // =====================================================================
-// PARTICIPANTE MITO/MICO MODAL v1.0
+// PARTICIPANTE MITO/MICO MODAL v2.0
 // Modal celebratório que aparece 1x por rodada após consolidação.
-// Exibe o MITO (1º lugar) e o MICO (último) da última rodada consolidada.
+// Exibe APENAS para o participante que foi MITO ou MICO da rodada.
+// Card solo personalizado — MITO vê só o seu, MICO vê só o seu.
 // Controle de exibição via localStorage (uma vez por rodada/liga/temporada).
 // =====================================================================
 
@@ -58,8 +59,12 @@ export async function initMitoMicoModal({ ligaId, timeId, temporada }) {
         const isMito = String(mito.timeId || mito.time_id) === viewerTimeId;
         const isMico = String(mico.timeId || mico.time_id) === viewerTimeId;
 
-        // 8. Injetar e exibir modal
-        _injetarModal({ mito, mico, rodada: ultimaConsolidada, isMito, isMico });
+        // 8. Só exibir para o próprio MITO ou MICO — outros participantes não veem
+        if (!isMito && !isMico) return;
+
+        // 9. Injetar card solo personalizado
+        const pessoa = isMito ? mito : mico;
+        _injetarModal({ pessoa, tipo: isMito ? 'mito' : 'mico', rodada: ultimaConsolidada });
 
     } catch {
         // Silencioso — feature não-crítica, nunca deve quebrar o app
@@ -98,60 +103,42 @@ function _esc(str) {
         .replace(/"/g, '&quot;');
 }
 
-function _injetarModal({ mito, mico, rodada, isMito, isMico }) {
+function _injetarModal({ pessoa, tipo, rodada }) {
     document.getElementById('mmm-overlay')?.remove();
 
-    const mitoMsg = isMito
-        ? `<p class="mmm-viewer-badge mmm-viewer-badge--mito"><span class="material-symbols-outlined">emoji_events</span> Você foi o MITO desta rodada!</p>`
-        : '';
-    const micoMsg = isMico
-        ? `<p class="mmm-viewer-badge mmm-viewer-badge--mico"><span class="material-symbols-outlined">sentiment_very_dissatisfied</span> Você foi o MICO desta rodada!</p>`
-        : '';
+    const isMito = tipo === 'mito';
+    const icon   = isMito ? 'emoji_events' : 'sentiment_very_dissatisfied';
+    const titulo = isMito ? 'MITO DA RODADA' : 'MICO DA RODADA';
+    const msg    = isMito ? 'Você foi o destaque da rodada!' : 'Você foi o lanterna da rodada.';
+    const btnLabel = 'Ver Ranking';
 
     const html = `
-<div class="mmm-overlay" id="mmm-overlay" role="dialog" aria-modal="true" aria-label="Mito e Mico da Rodada ${rodada}">
-    <div class="mmm-card" id="mmm-card">
+<div class="mmm-overlay" id="mmm-overlay" role="dialog" aria-modal="true" aria-label="${titulo} ${rodada}">
+    <div class="mmm-card mmm-card--solo" id="mmm-card">
         <button class="mmm-close" id="mmm-close" aria-label="Fechar">
             <span class="material-symbols-outlined">close</span>
         </button>
 
         <div class="mmm-header">
             <p class="mmm-label-rodada">Rodada ${rodada}</p>
-            <h2 class="mmm-titulo">Mito &amp; Mico</h2>
+            <span class="mmm-tag mmm-tag--${tipo} mmm-tag--hero">
+                <span class="material-symbols-outlined">${icon}</span>
+                ${titulo}
+            </span>
         </div>
 
-        <div class="mmm-duo">
-            <div class="mmm-bloco mmm-bloco--mito">
-                <span class="mmm-tag mmm-tag--mito">
-                    <span class="material-symbols-outlined">emoji_events</span> MITO
-                </span>
-                <div class="mmm-escudo-wrap">
-                    ${_escudoHTML(mito, 'mito')}
-                </div>
-                <p class="mmm-nome-time">${_esc(mito.nome_time || 'Time')}</p>
-                <p class="mmm-nome-cartola">${_esc(mito.nome_cartola || '')}</p>
-                <p class="mmm-pontos mmm-pontos--mito">${_pts(mito)} pts</p>
+        <div class="mmm-bloco mmm-bloco--solo mmm-bloco--${tipo}">
+            <div class="mmm-escudo-wrap mmm-escudo-wrap--solo">
+                ${_escudoHTML(pessoa, tipo)}
             </div>
-
-            <div class="mmm-bloco mmm-bloco--mico">
-                <span class="mmm-tag mmm-tag--mico">
-                    <span class="material-symbols-outlined">sentiment_very_dissatisfied</span> MICO
-                </span>
-                <div class="mmm-escudo-wrap">
-                    ${_escudoHTML(mico, 'mico')}
-                </div>
-                <p class="mmm-nome-time">${_esc(mico.nome_time || 'Time')}</p>
-                <p class="mmm-nome-cartola">${_esc(mico.nome_cartola || '')}</p>
-                <p class="mmm-pontos mmm-pontos--mico">${_pts(mico)} pts</p>
-            </div>
+            <p class="mmm-nome-time mmm-nome-time--solo">${_esc(pessoa.nome_time || 'Time')}</p>
+            <p class="mmm-nome-cartola">${_esc(pessoa.nome_cartola || '')}</p>
+            <p class="mmm-pontos mmm-pontos--solo mmm-pontos--${tipo}">${_pts(pessoa)} pts</p>
         </div>
 
-        ${mitoMsg}
-        ${micoMsg}
+        <p class="mmm-msg mmm-msg--${tipo}">${msg}</p>
 
-        <button class="mmm-btn-fechar" id="mmm-btn-fechar">
-            Ver Top 10 completo
-        </button>
+        <button class="mmm-btn-fechar" id="mmm-btn-fechar">${btnLabel}</button>
     </div>
 </div>`;
 

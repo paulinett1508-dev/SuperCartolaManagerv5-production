@@ -482,7 +482,7 @@ class ParticipanteNavigation {
         if (!ligaId) return;
 
         setTimeout(() => {
-            import('/participante/js/modules/participante-mito-mico-modal.js?v=1')
+            import('/participante/js/modules/participante-mito-mico-modal.js?v=2')
                 .then(({ initMitoMicoModal }) => initMitoMicoModal({
                     ligaId,
                     timeId,

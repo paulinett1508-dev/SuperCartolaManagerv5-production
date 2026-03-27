@@ -1,5 +1,5 @@
 /* =========================================================
-   MITO & MICO MODAL — v1.0
+   MITO & MICO MODAL — v2.0
    Namespace: .mmm-*
    Tokens: _app-tokens.css (NUNCA hardcoded)
    @keyframes app-fade-in-up → definido em _app-tokens.css
@@ -217,6 +217,82 @@
     color: var(--app-mico);
     background: var(--app-danger-muted, rgba(239,68,68,0.1));
     border: 1px solid var(--app-danger-muted, rgba(239,68,68,0.2));
+}
+
+/* =========================================================
+   VARIANTE SOLO (card único personalizado)
+   ========================================================= */
+
+/* Card solo — um pouco mais estreito, centralizado */
+.mmm-card--solo {
+    max-width: 320px;
+}
+
+/* Tag hero — maior destaque no topo */
+.mmm-tag--hero {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.9rem;
+    margin-top: 0.25rem;
+    display: inline-flex;
+}
+
+.mmm-tag--hero .material-symbols-outlined {
+    font-size: 1rem;
+}
+
+/* Bloco solo — full width, mais espaçoso */
+.mmm-bloco--solo {
+    width: 100%;
+    padding: 1.25rem 1rem;
+    margin-bottom: 0.75rem;
+    gap: 0.4rem;
+}
+
+/* Escudo maior */
+.mmm-escudo-wrap--solo {
+    width: 5rem;
+    height: 5rem;
+}
+
+.mmm-escudo-wrap--solo .mmm-escudo {
+    width: 4.5rem;
+    height: 4.5rem;
+}
+
+.mmm-escudo-wrap--solo .mmm-escudo-fallback {
+    font-size: 3rem;
+}
+
+/* Nome do time maior */
+.mmm-nome-time--solo {
+    font-size: 1rem;
+    margin-top: 0.25rem;
+}
+
+/* Pontos maiores */
+.mmm-pontos--solo {
+    font-size: 1.5rem;
+    margin-top: 0.2rem;
+}
+
+/* Mensagem motivacional */
+.mmm-msg {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-align: center;
+    margin: 0 0 0.875rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 0.4rem;
+}
+
+.mmm-msg--mito {
+    color: var(--app-mito);
+    background: var(--app-gold-muted, rgba(255,215,0,0.1));
+}
+
+.mmm-msg--mico {
+    color: var(--app-mico);
+    background: var(--app-danger-muted, rgba(239,68,68,0.1));
 }
 
 /* Botão de ação */
