@@ -294,7 +294,8 @@
       "Bash(docker restart:*)",
       "Bash(ssh-keygen:*)",
       "Read(//root/.ssh/**)",
-      "Bash(gh run:*)"
+      "Bash(gh run:*)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(k,''''→'''',v.get\\(''''description'''',''''''''\\)\\) for k,v in d.items\\(\\) if ''''mito'''' in k.lower\\(\\) or ''''modal'''' in k.lower\\(\\) or ''''celebr'''' in k.lower\\(\\)]\")"
     ]
   },
   "enableAllProjectMcpServers": true,
