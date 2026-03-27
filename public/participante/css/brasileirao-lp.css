@@ -29,10 +29,10 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: rgba(0, 0, 0, 0.45);
+    background: var(--app-surface-overlay, rgba(0, 0, 0, 0.45));
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid var(--app-text-dim, rgba(255, 255, 255, 0.15));
     color: var(--app-text-primary, #fff);
     cursor: pointer;
     margin: 12px 0 -48px 12px;
@@ -40,7 +40,7 @@
 }
 .brasileirao-lp-btn-voltar:active {
     transform: scale(0.92);
-    background: rgba(0, 0, 0, 0.65);
+    background: var(--app-surface-overlay, rgba(0, 0, 0, 0.65));
 }
 .brasileirao-lp-btn-voltar .material-icons {
     font-size: 1.1rem;
@@ -54,7 +54,7 @@
     overflow: hidden;
     margin: 1rem;
     border-radius: 0.75rem;
-    border: 1px solid rgba(76, 175, 80, 0.3);
+    border: 1px solid var(--app-liberta-border, rgba(76, 175, 80, 0.3));
     background: var(--app-surface, #1a1a1a);
 }
 
@@ -63,9 +63,9 @@
     height: 4px;
     background: linear-gradient(
         90deg,
-        #1B5E20 0%,
+        var(--app-liberta-primary, #1B5E20) 0%,
         var(--app-success-light, #4CAF50) 50%,
-        #FFC107 100%
+        var(--app-warning, #FFC107) 100%
     );
 }
 
@@ -82,7 +82,7 @@
 .brasileirao-lp-hero-icon .material-icons {
     font-size: 2.5rem;
     color: var(--app-success-light, #4CAF50);
-    filter: drop-shadow(0 2px 8px rgba(76, 175, 80, 0.4));
+    filter: drop-shadow(0 2px 8px var(--app-success-muted, rgba(76, 175, 80, 0.4)));
 }
 
 .brasileirao-lp-hero-title {

@@ -246,8 +246,8 @@ const BrasileiraoTabela = {
     },
 
     _renderEscudo(clubeId) {
-        if (!clubeId) return '';
-        return `<img src="/escudos/${clubeId}.png" alt="" class="brasileirao-escudo" onerror="this.style.display='none'">`;
+        if (!clubeId || isNaN(Number(clubeId))) return '';
+        return `<img src="/escudos/${Number(clubeId)}.png" alt="" class="brasileirao-escudo" onerror="this.style.display='none'">`;
     },
 
     _abreviarTime(nome) {
@@ -261,7 +261,8 @@ const BrasileiraoTabela = {
             'Vasco da Gama': 'Vasco',
             'Internacional': 'Inter',
         };
-        return abreviacoes[nome] || nome;
+        const resultado = abreviacoes[nome] || nome;
+        return typeof window.escapeHtml === 'function' ? window.escapeHtml(resultado) : resultado;
     },
 
     _formatarPeriodo(dataInicio, dataFim) {

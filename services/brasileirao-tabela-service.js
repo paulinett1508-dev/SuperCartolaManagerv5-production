@@ -129,6 +129,7 @@ function converterStatusApiFootball(status) {
 function formatarData(dataISO) {
     if (!dataISO) return null;
     const date = new Date(dataISO);
+    if (isNaN(date.getTime())) return null;
     return date.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
 }
 
@@ -138,6 +139,7 @@ function formatarData(dataISO) {
 function formatarHora(dataISO) {
     if (!dataISO) return '00:00';
     const date = new Date(dataISO);
+    if (isNaN(date.getTime())) return '00:00';
     return date.toLocaleTimeString('pt-BR', {
         timeZone: 'America/Sao_Paulo',
         hour: '2-digit',
@@ -250,9 +252,12 @@ async function buscarViaEspn(temporada) {
 
         console.log(`[BRASILEIRAO-SERVICE] ESPN retornou ${events.length} jogos`);
 
-        const partidas = events.map(event => {
-            const comp = event.competitions?.[0] || {};
-            const competitors = comp.competitors || [];
+        const partidas = events.filter(event => {
+            const comp = event.competitions?.[0];
+            return comp && Array.isArray(comp.competitors) && comp.competitors.length >= 2;
+        }).map(event => {
+            const comp = event.competitions[0];
+            const competitors = comp.competitors;
             const home = competitors.find(c => c.homeAway === 'home') || {};
             const away = competitors.find(c => c.homeAway === 'away') || {};
             const status = event.status?.type || {};
@@ -317,12 +322,15 @@ async function buscarViaGlobo(temporada) {
         // Globo usa API interna para tabela de jogos
         const url = `https://ge.globo.com/futebol/brasileirao-serie-a/`;
 
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), CONFIG.REQUEST_TIMEOUT_MS);
         const response = await fetch(url, {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (compatible; SuperCartolaBot/1.0)',
             },
-            timeout: CONFIG.REQUEST_TIMEOUT_MS,
+            signal: controller.signal,
         });
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
@@ -369,7 +377,7 @@ async function sincronizarTabela(temporada, forcar = false) {
         const diff = Date.now() - state.ultimoSync.getTime();
         if (diff < CONFIG.CACHE_TTL_MS) {
             console.log('[BRASILEIRAO-SERVICE] Usando cache (sync recente)');
-            const calendario = await CalendarioBrasileirao.findOne({ temporada });
+            const calendario = await CalendarioBrasileirao.findOne({ temporada }).lean();
             return {
                 success: true,
                 fonte: 'cache',
@@ -425,7 +433,7 @@ async function sincronizarTabela(temporada, forcar = false) {
     }
 
     // Se não conseguiu dados de nenhuma fonte, retornar cache
-    const calendarioCache = await CalendarioBrasileirao.findOne({ temporada });
+    const calendarioCache = await CalendarioBrasileirao.findOne({ temporada }).lean();
     if (calendarioCache) {
         console.log('[BRASILEIRAO-SERVICE] Usando cache (fontes indisponíveis)');
         return {
@@ -538,9 +546,10 @@ async function obterResumoParaExibicao(temporada) {
     if (calendario.ultima_atualizacao) {
         const horasDesde = (Date.now() - new Date(calendario.ultima_atualizacao).getTime()) / 3600000;
         if (horasDesde > 2) {
-            sincronizarTabela(temporada, false).catch(e =>
-                console.warn('[BRASILEIRAO-SERVICE] Background sync falhou:', e.message)
-            );
+            sincronizarTabela(temporada, false).catch(e => {
+                console.warn('[BRASILEIRAO-SERVICE] Background sync falhou:', e.message);
+                state.stats.lastError = { fonte: 'background-sync', erro: e.message, data: new Date() };
+            });
         }
     }
 
@@ -745,12 +754,14 @@ async function atualizarPlacaresAoVivo(temporada, jogosAoVivo) {
         if (mudou) atualizados++;
     }
 
-    // Persistir se houve mudanças
+    // Persistir se houve mudanças e invalidar caches dependentes
     if (atualizados > 0) {
         calendario.ultima_atualizacao = new Date();
         calendario.atualizarStats();
         await calendario.save();
-        console.log(`[BRASILEIRAO-SERVICE] Placares ao vivo: ${atualizados} partidas atualizadas`);
+        // Invalidar cache de classificação (depende dos placares)
+        _classificacaoCache.ts = 0;
+        console.log(`[BRASILEIRAO-SERVICE] Placares ao vivo: ${atualizados} partidas atualizadas (cache classificação invalidado)`);
     }
 
     return { success: true, atualizados };
@@ -833,7 +844,7 @@ async function obterClassificacao(temporada) {
     }
 
     try {
-        const calendario = await CalendarioBrasileirao.findOne({ temporada }).lean(false);
+        const calendario = await CalendarioBrasileirao.findOne({ temporada });
 
         if (!calendario || !calendario.partidas || calendario.partidas.length === 0) {
             return { success: false, erro: 'Calendário não encontrado' };

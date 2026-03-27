@@ -5,6 +5,7 @@
 // =====================================================================
 
 import express from 'express';
+import { verificarAdmin } from '../middleware/auth.js';
 import brasileiraoService from '../services/brasileirao-tabela-service.js';
 import syncBrasileirao from '../jobs/sync-brasileirao.js';
 
@@ -207,12 +208,8 @@ router.get('/classificacao/:temporada', async (req, res) => {
  * POST /api/brasileirao/sync/:temporada
  * Força sincronização do calendário (Admin)
  */
-router.post('/sync/:temporada', async (req, res) => {
+router.post('/sync/:temporada', verificarAdmin, async (req, res) => {
     try {
-        if (!req.session?.admin) {
-            return res.status(403).json({ success: false, erro: 'Acesso negado. Faça login como administrador.' });
-        }
-
         const temporada = parseInt(req.params.temporada, 10);
 
         if (isNaN(temporada) || temporada < 2020 || temporada > 2030) {
@@ -232,7 +229,6 @@ router.post('/sync/:temporada', async (req, res) => {
         res.status(500).json({
             success: false,
             erro: 'Erro ao sincronizar calendário',
-            detalhes: error.message,
         });
     }
 });
@@ -241,7 +237,7 @@ router.post('/sync/:temporada', async (req, res) => {
  * GET /api/brasileirao/status
  * Retorna status do serviço (Admin)
  */
-router.get('/status', async (req, res) => {
+router.get('/status', verificarAdmin, async (req, res) => {
     try {
         const status = brasileiraoService.obterStatus();
         const jobStatus = syncBrasileirao.getStatus();
@@ -264,7 +260,7 @@ router.get('/status', async (req, res) => {
  * GET /api/brasileirao/admin/:temporada
  * Retorna dados completos para painel admin
  */
-router.get('/admin/:temporada', async (req, res) => {
+router.get('/admin/:temporada', verificarAdmin, async (req, res) => {
     try {
         const temporada = parseInt(req.params.temporada, 10);
 
