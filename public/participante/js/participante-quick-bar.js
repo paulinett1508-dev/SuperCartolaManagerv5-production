@@ -699,18 +699,21 @@ class QuickAccessBar {
                         <span class="material-icons text-3xl text-amber-500">hourglass_empty</span>
                     </div>
                     <h3 id="aguarde-titulo" class="text-lg font-bold text-white mb-2" style="font-family: 'Russo One', sans-serif;">
-                        ${nomeModulo}
+                        ${typeof window.escapeHtml === 'function' ? window.escapeHtml(nomeModulo) : nomeModulo}
                     </h3>
                     <p class="text-gray-400 text-sm mb-5">
                         Aguarde o administrador<br>configurar este módulo
                     </p>
-                    <button onclick="document.getElementById('modal-aguarde-config').remove()"
+                    <button id="btn-aguarde-fechar"
                             class="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-medium transition-colors">
                         Entendi
                     </button>
                 </div>
             `;
             document.body.appendChild(modal);
+            modal.querySelector('#btn-aguarde-fechar')?.addEventListener('click', () => {
+                document.getElementById('modal-aguarde-config')?.remove();
+            });
         } else {
             // Atualizar título e mostrar
             const titulo = modal.querySelector('#aguarde-titulo');

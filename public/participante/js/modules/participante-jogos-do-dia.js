@@ -22,7 +22,7 @@ export async function inicializarJogosDoDiaParticipante() {
                           || null;
             let clubeInfo = null;
             if (clubeId && window.getClubesNomeMap) {
-                const map = window.getClubesNomeMap();
+                const map = window.getClubesNomeMap?.() || {};
                 const nome = map[Number(clubeId)];
                 if (nome && nome !== 'Seu Time') clubeInfo = { clubeId, clubeNome: nome };
             }
@@ -48,7 +48,7 @@ export async function inicializarJogosDoDiaParticipante() {
                 <div class="rounded-xl p-4 text-center" style="background: var(--app-glass-bg); border: 1px solid var(--app-glass-border);">
                     <div class="flex items-center justify-center gap-2" style="color: var(--app-text-muted);">
                         <span class="material-icons text-base" style="color: var(--app-primary);">sports_soccer</span>
-                        <span class="text-xs font-medium">${msg}</span>
+                        <span class="text-xs font-medium">${typeof window.escapeHtml === 'function' ? window.escapeHtml(msg) : msg}</span>
                     </div>
                 </div>
             `;

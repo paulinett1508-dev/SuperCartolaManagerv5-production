@@ -15,7 +15,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(20, 20, 20, 0.98);
+    background: var(--app-surface-overlay, rgba(20, 20, 20, 0.98));
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-top: 1px solid var(--participante-border);
@@ -126,7 +126,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.85);
+    background: var(--app-surface-overlay, rgba(0, 0, 0, 0.85));
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     z-index: var(--app-z-overlay);
@@ -180,7 +180,7 @@
 .menu-handle {
     width: 40px;
     height: 4px;
-    background: rgba(255, 255, 255, 0.3);
+    background: var(--app-text-dim, rgba(255, 255, 255, 0.3));
     border-radius: 2px;
     margin: 16px auto 20px;
     cursor: pointer;
@@ -507,7 +507,7 @@
     border: 1px solid rgba(46, 125, 50, 0.3);
 }
 .especial-card-liberta .especial-card-icon .material-icons {
-    color: #4ade80;
+    color: var(--app-success-light);
 }
 
 /* Copa do Brasil variant */

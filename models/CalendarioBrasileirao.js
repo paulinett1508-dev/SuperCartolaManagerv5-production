@@ -396,8 +396,13 @@ calendarioBrasileiraoSchema.statics.obterOuCriar = async function(temporada) {
 
 /**
  * Importa partidas de uma fonte externa (merge inteligente)
+ * Semáforo simples para prevenir race condition entre syncs simultâneos
  */
+let _importLock = false;
 calendarioBrasileiraoSchema.statics.importarPartidas = async function(temporada, partidasNovas, fonte) {
+    if (_importLock) throw new Error('importarPartidas já em andamento — aguarde conclusão');
+    _importLock = true;
+    try {
     const calendario = await this.obterOuCriar(temporada);
 
     for (const nova of partidasNovas) {
@@ -430,6 +435,9 @@ calendarioBrasileiraoSchema.statics.importarPartidas = async function(temporada,
 
     await calendario.save();
     return calendario;
+    } finally {
+        _importLock = false;
+    }
 };
 
 const CalendarioBrasileirao = mongoose.model('CalendarioBrasileirao', calendarioBrasileiraoSchema);

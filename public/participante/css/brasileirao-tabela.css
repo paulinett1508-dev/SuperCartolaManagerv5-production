@@ -17,8 +17,8 @@
     justify-content: space-between;
     width: 100%;
     padding: 12px 16px;
-    /* Gradient verde-campo premium */
-    background: linear-gradient(135deg, #064e3b 0%, #0f172a 60%, #1e3a5f 100%);
+    /* Gradient verde-campo premium — tokens via variáveis */
+    background: linear-gradient(135deg, var(--app-liberta-primary, #064e3b) 0%, var(--app-bg, #0f172a) 60%, var(--app-copa-accent, #1e3a5f) 100%);
     border: 1px solid rgba(34, 197, 94, 0.28);
     border-radius: 14px;
     cursor: pointer;
@@ -35,7 +35,7 @@
     left: 0;
     right: 0;
     height: 2px;
-    background: linear-gradient(90deg, #22c55e 0%, rgba(34, 197, 94, 0.25) 70%, transparent 100%);
+    background: linear-gradient(90deg, var(--app-success-light) 0%, var(--app-success-muted, rgba(34, 197, 94, 0.25)) 70%, transparent 100%);
 }
 
 /* Textura sutil */
@@ -80,7 +80,7 @@
     width: 26px;
     height: 26px;
     border-radius: 7px;
-    background: rgba(34, 197, 94, 0.15);
+    background: var(--app-success-muted);
     border: 1px solid rgba(34, 197, 94, 0.3);
     display: flex;
     align-items: center;
@@ -90,7 +90,7 @@
 
 .brasileirao-icon .material-icons {
     font-size: 16px;
-    color: #4ade80;
+    color: var(--app-success-light);
 }
 
 .brasileirao-header-info {
@@ -100,18 +100,18 @@
 }
 
 .brasileirao-header-title {
-    font-family: 'Russo One', sans-serif;
+    font-family: var(--app-font-brand);
     font-size: 11px;
-    color: #ffffff;
+    color: var(--app-text-primary);
     letter-spacing: 0.3px;
     line-height: 1.2;
     margin: 0;
 }
 
 .brasileirao-header-sub {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--app-font-base);
     font-size: 9px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--app-text-muted);
     line-height: 1.2;
 }
 
@@ -127,10 +127,10 @@
     display: flex;
     align-items: center;
     gap: 5px;
-    font-family: 'Russo One', sans-serif;
+    font-family: var(--app-font-brand);
     font-size: 8px;
-    color: #ef4444;
-    background: rgba(239, 68, 68, 0.15);
+    color: var(--app-danger);
+    background: var(--app-danger-muted);
     border: 1px solid rgba(239, 68, 68, 0.3);
     padding: 2px 6px;
     border-radius: 20px;
@@ -140,7 +140,7 @@
 .brasileirao-live-dot {
     width: 6px;
     height: 6px;
-    background: #ef4444;
+    background: var(--app-danger);
     border-radius: 50%;
     animation: brasileiraoPulse 1.5s ease-in-out infinite;
 }
@@ -152,7 +152,7 @@
 
 .brasileirao-chevron {
     font-size: 18px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--app-text-muted);
     transition: transform 0.3s ease;
 }
 
@@ -202,9 +202,9 @@
 }
 
 .brasileirao-rodada-badge {
-    font-family: 'Russo One', sans-serif;
+    font-family: var(--app-font-brand);
     font-size: 11px;
-    color: #4ade80;
+    color: var(--app-success-light);
     background: rgba(34, 197, 94, 0.12);
     border: 1px solid rgba(34, 197, 94, 0.25);
     padding: 4px 10px;
@@ -218,7 +218,7 @@
     gap: 4px;
     font-size: 10px;
     font-weight: 600;
-    color: #ef4444;
+    color: var(--app-danger);
     background: rgba(239, 68, 68, 0.1);
     padding: 3px 8px;
     border-radius: 4px;
@@ -227,7 +227,7 @@
 .brasileirao-live-dot-sm {
     width: 5px;
     height: 5px;
-    background: #ef4444;
+    background: var(--app-danger);
     border-radius: 50%;
     animation: brasileiraoPulse 1.5s ease-in-out infinite;
 }
@@ -274,20 +274,20 @@
 
 .brasileirao-jogo-nome {
     flex: 1;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--app-font-base);
     font-size: 12px;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--app-text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .brasileirao-jogo-gol {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--app-font-mono);
     font-size: 14px;
     font-weight: 700;
-    color: #ffffff;
+    color: var(--app-text-primary);
     min-width: 18px;
     text-align: center;
 }
@@ -301,46 +301,46 @@
 }
 
 .brasileirao-jogo-data {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--app-font-base);
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-dim);
 }
 
 .brasileirao-jogo-fim {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--app-font-base);
     font-size: 9px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--app-text-dim);
     text-transform: uppercase;
 }
 
 .brasileirao-jogo-live-label {
-    font-family: 'Russo One', sans-serif;
+    font-family: var(--app-font-brand);
     font-size: 9px;
-    color: #ef4444;
+    color: var(--app-danger);
     letter-spacing: 0.5px;
 }
 
 .brasileirao-live-dot-xs {
     width: 8px;
     height: 8px;
-    background: #ef4444;
+    background: var(--app-danger);
     border-radius: 50%;
     animation: brasileiraoPulse 1.5s ease-in-out infinite;
     box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
 }
 
 .brasileirao-horario {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--app-font-mono);
     font-size: 11px;
     font-weight: 600;
-    color: #4ade80;
+    color: var(--app-success-light);
 }
 
 .brasileirao-sem-jogos {
     text-align: center;
     padding: 20px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-dim);
     font-size: 12px;
 }
 
@@ -354,9 +354,9 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    font-family: 'Russo One', sans-serif;
+    font-family: var(--app-font-brand);
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--app-text-muted);
     letter-spacing: 0.8px;
     margin-bottom: 10px;
 }
@@ -378,15 +378,15 @@
 }
 
 .brasileirao-proxima-num {
-    font-family: 'Russo One', sans-serif;
+    font-family: var(--app-font-brand);
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--app-text-light);
 }
 
 .brasileirao-proxima-datas {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--app-font-base);
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-dim);
 }
 
 /* === CTA === */
@@ -403,10 +403,10 @@
     gap: 8px;
     padding: 12px;
     border-radius: 10px;
-    font-family: 'Russo One', sans-serif;
+    font-family: var(--app-font-brand);
     font-size: 12px;
     letter-spacing: 0.5px;
-    color: #ffffff;
+    color: var(--app-text-primary);
     background: linear-gradient(135deg, rgba(6, 78, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
     border: 1px solid rgba(34, 197, 94, 0.35);
     cursor: pointer;
@@ -420,7 +420,7 @@
 
 .brasileirao-cta-btn .material-icons {
     font-size: 16px;
-    color: #4ade80;
+    color: var(--app-success-light);
 }
 
 /* === FOOTER === */
@@ -428,7 +428,7 @@
     padding: 8px 12px;
     text-align: center;
     font-size: 9px;
-    color: rgba(255, 255, 255, 0.25);
+    color: var(--app-text-disabled);
     border-top: 1px solid rgba(255, 255, 255, 0.03);
 }
 
@@ -439,7 +439,7 @@
     align-items: center;
     justify-content: center;
     padding: 30px;
-    background: linear-gradient(135deg, #064e3b 0%, #0f172a 100%);
+    background: linear-gradient(135deg, var(--app-liberta-primary, #064e3b) 0%, var(--app-bg, #0f172a) 100%);
     border: 1px solid rgba(34, 197, 94, 0.2);
     border-radius: 14px;
     gap: 12px;
@@ -449,7 +449,7 @@
     width: 28px;
     height: 28px;
     border: 3px solid rgba(34, 197, 94, 0.2);
-    border-top-color: #4ade80;
+    border-top-color: var(--app-success-light);
     border-radius: 50%;
     animation: brasileiraoSpin 1s linear infinite;
 }
@@ -460,7 +460,7 @@
 
 .brasileirao-loading span {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--app-text-muted);
 }
 
 /* === RESPONSIVO === */
@@ -526,7 +526,7 @@
     align-items: center;
     gap: 12px;
     padding: 16px;
-    background: linear-gradient(135deg, #064e3b 0%, #0f172a 100%);
+    background: linear-gradient(135deg, var(--app-liberta-primary, #064e3b) 0%, var(--app-bg, #0f172a) 100%);
     border-bottom: 1px solid rgba(34, 197, 94, 0.2);
     flex-shrink: 0;
 }
@@ -550,28 +550,28 @@
 
 .brasileirao-lp-back .material-icons {
     font-size: 20px;
-    color: #ffffff;
+    color: var(--app-text-primary);
 }
 
 .brasileirao-lp-title {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-family: 'Russo One', sans-serif;
+    font-family: var(--app-font-brand);
     font-size: 16px;
-    color: #ffffff;
+    color: var(--app-text-primary);
     flex: 1;
 }
 
 .brasileirao-lp-title .material-icons {
     font-size: 20px;
-    color: #4ade80;
+    color: var(--app-success-light);
 }
 
 .brasileirao-lp-refresh {
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--app-text-muted);
     cursor: pointer;
     padding: 6px;
     border-radius: 50%;
@@ -582,7 +582,7 @@
 }
 
 .brasileirao-lp-refresh:hover {
-    color: #4ade80;
+    color: var(--app-success-light);
     background: rgba(74, 222, 128, 0.1);
 }
 
@@ -617,7 +617,7 @@
 
 .brasileirao-lp-loading span {
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--app-text-muted);
 }
 
 .brasileirao-lp-erro {
@@ -627,7 +627,7 @@
     justify-content: center;
     padding: 60px 20px;
     gap: 12px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-dim);
 }
 
 .brasileirao-lp-erro .material-icons {
@@ -653,28 +653,28 @@
 }
 
 .brasileirao-lp-stat-valor {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--app-font-mono);
     font-size: 28px;
     font-weight: 700;
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--app-text-secondary);
 }
 
 .brasileirao-lp-stat-label {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--app-font-base);
     font-size: 10px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-dim);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .brasileirao-lp-stat-destaque .brasileirao-lp-stat-valor {
-    color: #4ade80;
+    color: var(--app-success-light);
     font-size: 32px;
 }
 
 .brasileirao-lp-stat-destaque .brasileirao-lp-stat-label {
-    color: #4ade80;
+    color: var(--app-success-light);
 }
 
 /* Rodadas Acordeão */
@@ -721,22 +721,22 @@
 }
 
 .brasileirao-lp-rodada-num {
-    font-family: 'Russo One', sans-serif;
+    font-family: var(--app-font-brand);
     font-size: 13px;
-    color: #ffffff;
+    color: var(--app-text-primary);
 }
 
 .brasileirao-lp-rodada-datas {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--app-font-base);
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-dim);
 }
 
 .brasileirao-lp-badge-atual {
-    font-family: 'Russo One', sans-serif;
+    font-family: var(--app-font-brand);
     font-size: 8px;
-    color: #4ade80;
-    background: rgba(34, 197, 94, 0.15);
+    color: var(--app-success-light);
+    background: var(--app-success-muted);
     border: 1px solid rgba(34, 197, 94, 0.3);
     padding: 3px 8px;
     border-radius: 4px;
@@ -745,9 +745,9 @@
 }
 
 .brasileirao-lp-badge-encerrada {
-    font-family: 'Russo One', sans-serif;
+    font-family: var(--app-font-brand);
     font-size: 8px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-dim);
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 3px 8px;
@@ -757,9 +757,9 @@
 }
 
 .brasileirao-lp-badge-concluida {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--app-font-mono);
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--app-text-muted);
     background: rgba(255, 255, 255, 0.06);
     padding: 3px 8px;
     border-radius: 4px;
@@ -768,7 +768,7 @@
 
 .brasileirao-lp-rodada-chevron {
     font-size: 20px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--app-text-dim);
     transition: transform 0.2s ease;
 }
 
@@ -797,7 +797,7 @@
 .brasileirao-lp-sem-jogos {
     text-align: center;
     padding: 16px;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--app-text-dim);
     font-size: 12px;
 }
 
@@ -828,20 +828,20 @@
 
 .brasileirao-lp-jogo-nome {
     flex: 1;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--app-font-base);
     font-size: 12px;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--app-text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .brasileirao-lp-jogo-gol {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--app-font-mono);
     font-size: 14px;
     font-weight: 700;
-    color: #ffffff;
+    color: var(--app-text-primary);
     min-width: 18px;
     text-align: center;
 }
@@ -855,22 +855,22 @@
 }
 
 .brasileirao-lp-horario {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--app-font-mono);
     font-size: 12px;
     font-weight: 600;
-    color: #4ade80;
+    color: var(--app-success-light);
 }
 
 .brasileirao-lp-live-dot {
     width: 8px;
     height: 8px;
-    background: #ef4444;
+    background: var(--app-danger);
     border-radius: 50%;
     animation: brasileiraoPulse 1.5s ease-in-out infinite;
 }
 
 .brasileirao-lp-fim {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--app-font-base);
     font-size: 9px;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.35);
@@ -886,19 +886,19 @@
 
 .brasileirao-jogo-adiado-badge,
 .brasileirao-lp-adiado-badge {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--app-font-base);
     font-size: 9px;
     font-weight: 600;
-    color: #fbbf24;
+    color: var(--app-warning);
     text-transform: uppercase;
 }
 
 .brasileirao-adiado,
 .brasileirao-lp-adiado {
-    font-family: 'Russo One', sans-serif;
+    font-family: var(--app-font-brand);
     font-size: 10px;
     font-weight: 600;
-    color: #fbbf24;
+    color: var(--app-warning);
     background: rgba(251, 191, 36, 0.12);
     padding: 3px 8px;
     border-radius: 4px;
@@ -912,7 +912,7 @@
 }
 
 .brasileirao-lp-data {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--app-font-base);
     font-size: 10px;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.45);
@@ -966,7 +966,7 @@
 }
 
 .agenda-header-title {
-    font-family: 'Russo One', sans-serif;
+    font-family: var(--app-font-brand);
     font-size: 13px;
     color: white;
     letter-spacing: 0.3px;
@@ -1046,7 +1046,7 @@
     align-items: center;
     gap: 6px;
     padding: 10px 12px;
-    background: linear-gradient(135deg, #064e3b 0%, #0f172a 100%);
+    background: linear-gradient(135deg, var(--app-liberta-primary, #064e3b) 0%, var(--app-bg, #0f172a) 100%);
     font-family: var(--app-font-brand, 'Russo One', sans-serif);
     font-size: 12px;
     color: var(--app-text-primary, #fff);
@@ -1131,19 +1131,19 @@
 /* Zonas de classificação — cor no número da posição */
 .brasileirao-zona-liberta .brasileirao-pos-num {
     background: rgba(29, 78, 216, 0.25);
-    color: #60a5fa;
+    color: var(--app-info-light);
 }
 .brasileirao-zona-pre-liberta .brasileirao-pos-num {
     background: rgba(56, 189, 248, 0.15);
-    color: #38bdf8;
+    color: var(--app-info-light);
 }
 .brasileirao-zona-sula .brasileirao-pos-num {
     background: rgba(249, 115, 22, 0.18);
-    color: #fb923c;
+    color: var(--app-pos-gol-light);
 }
 .brasileirao-zona-rebaixa .brasileirao-pos-num {
     background: rgba(239, 68, 68, 0.2);
-    color: #f87171;
+    color: var(--app-danger-light);
 }
 
 /* Barra lateral de zona */
@@ -1155,10 +1155,10 @@
     bottom: 0;
     width: 3px;
 }
-.brasileirao-zona-liberta::before { background: #3b82f6; }
-.brasileirao-zona-pre-liberta::before { background: #38bdf8; }
-.brasileirao-zona-sula::before { background: #f97316; }
-.brasileirao-zona-rebaixa::before { background: #ef4444; }
+.brasileirao-zona-liberta::before { background: var(--app-info); }
+.brasileirao-zona-pre-liberta::before { background: var(--app-info-light); }
+.brasileirao-zona-sula::before { background: var(--app-pos-gol); }
+.brasileirao-zona-rebaixa::before { background: var(--app-danger); }
 
 .brasileirao-class-row {
     position: relative;
@@ -1237,15 +1237,15 @@
 }
 .brasileirao-forma-v {
     background: rgba(34, 197, 94, 0.25);
-    color: #4ade80;
+    color: var(--app-success-light);
 }
 .brasileirao-forma-e {
     background: rgba(250, 204, 21, 0.2);
-    color: #fbbf24;
+    color: var(--app-warning);
 }
 .brasileirao-forma-d {
     background: rgba(239, 68, 68, 0.2);
-    color: #f87171;
+    color: var(--app-danger-light);
 }
 
 /* Legenda de zonas */
@@ -1269,10 +1269,10 @@
     height: 8px;
     border-radius: 2px;
 }
-.brasileirao-leg-item.brasileirao-zona-liberta .brasileirao-leg-dot { background: #3b82f6; }
-.brasileirao-leg-item.brasileirao-zona-pre-liberta .brasileirao-leg-dot { background: #38bdf8; }
-.brasileirao-leg-item.brasileirao-zona-sula .brasileirao-leg-dot { background: #f97316; }
-.brasileirao-leg-item.brasileirao-zona-rebaixa .brasileirao-leg-dot { background: #ef4444; }
+.brasileirao-leg-item.brasileirao-zona-liberta .brasileirao-leg-dot { background: var(--app-info); }
+.brasileirao-leg-item.brasileirao-zona-pre-liberta .brasileirao-leg-dot { background: var(--app-info-light); }
+.brasileirao-leg-item.brasileirao-zona-sula .brasileirao-leg-dot { background: var(--app-pos-gol); }
+.brasileirao-leg-item.brasileirao-zona-rebaixa .brasileirao-leg-dot { background: var(--app-danger); }
 
 /* Estado vazio */
 .brasileirao-class-vazio {

@@ -114,10 +114,19 @@ export async function inicializarCampinhoParticipante(params) {
         // Buscar extrato financeiro da rodada (assíncrono)
         buscarExtratoRodada(ligaId, timeId, rodadaConsolidada);
 
-        // Auto-refresh durante rodada ao vivo (a cada 60s)
+        // Auto-refresh durante rodada ao vivo (a cada 60s, max 5 erros consecutivos)
         if (isAoVivo) {
+            if (_campinhoRefreshTimer) clearInterval(_campinhoRefreshTimer);
+            let _refreshErros = 0;
+            const MAX_REFRESH_ERROS = 5;
             _campinhoRefreshTimer = setInterval(async () => {
                 if (!document.getElementById('campinho-container') || !document.contains(document.getElementById('campinho-container'))) {
+                    clearInterval(_campinhoRefreshTimer);
+                    _campinhoRefreshTimer = null;
+                    return;
+                }
+                if (_refreshErros >= MAX_REFRESH_ERROS) {
+                    if (window.Log) Log.warn("PARTICIPANTE-CAMPINHO", `Auto-refresh parado após ${MAX_REFRESH_ERROS} erros consecutivos`);
                     clearInterval(_campinhoRefreshTimer);
                     _campinhoRefreshTimer = null;
                     return;
@@ -130,8 +139,10 @@ export async function inicializarCampinhoParticipante(params) {
                         document.getElementById('campinho-container').innerHTML =
                             renderizarCampinhoCompleto(escalacaoAtualizada, dadosAdversario, null, ligaId, timeId, statusMercado);
                     }
+                    _refreshErros = 0;
                 } catch (e) {
-                    if (window.Log) Log.warn("PARTICIPANTE-CAMPINHO", "Erro no auto-refresh:", e);
+                    _refreshErros++;
+                    if (window.Log) Log.warn("PARTICIPANTE-CAMPINHO", `Erro no auto-refresh (${_refreshErros}/${MAX_REFRESH_ERROS}):`, e);
                 }
             }, 60000);
         }
@@ -387,9 +398,8 @@ function calcularPontosTotais(data) {
 
 async function tentarBuscarAtletasPontuados() {
     try {
-        const response = await fetch(`/api/cartola/atletas/pontuados?_t=${Date.now()}`, {
-            cache: 'no-store',
-            headers: { 'Cache-Control': 'no-cache, no-store', Pragma: 'no-cache' }
+        const response = await fetch('/api/cartola/atletas/pontuados', {
+            cache: 'no-store'
         });
         if (!response.ok) return { atletas: {} };
         return await response.json();
