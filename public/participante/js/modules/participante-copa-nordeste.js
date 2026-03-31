@@ -326,7 +326,7 @@ function renderizarGrupos() {
                 const cls = i < 2 ? 'copane-grupo-time copane-grupo-time--destaque' : 'copane-grupo-time';
                 return `<div class="${cls}">
                     <span class="copane-grupo-pos">${i + 1}.</span>
-                    <span class="copane-grupo-nome">${t.time}</span>
+                    <span class="copane-grupo-nome">${escapeHtml(t.time)}</span>
                     <span class="copane-grupo-pts">${t.pontos}pts</span>
                 </div>`;
             }).join('');
@@ -334,7 +334,7 @@ function renderizarGrupos() {
             return `
             <div class="copane-grupo-card">
                 <div class="copane-grupo-header">
-                    <span class="copane-grupo-label">Grupo ${grupo.nome}</span>
+                    <span class="copane-grupo-label">Grupo ${escapeHtml(grupo.nome)}</span>
                 </div>
                 <div class="copane-grupo-times">${timesHtml}</div>
             </div>`;
