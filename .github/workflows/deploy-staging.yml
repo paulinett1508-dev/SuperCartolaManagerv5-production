@@ -27,9 +27,17 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            cd /opt/super-cartola-manager
-            git pull origin develop
-            docker compose build scm-staging
+            cd /var/www/cartola
+            echo "=== PRE-DEPLOY STATUS ==="
+            git log --oneline -1
+            echo "=== PULLING develop ==="
+            git fetch origin develop
+            git checkout develop
+            git reset --hard origin/develop
+            echo "=== POST-PULL ==="
+            git log --oneline -1
+            echo "=== BUILDING (no-cache) ==="
+            docker compose build --no-cache scm-staging
             docker compose up -d scm-staging
-            echo "Staging deployed at $(date)"
-            docker logs --tail 20 scm-staging
+            echo "=== Staging deployed at $(date) ==="
+            docker logs scm-staging --tail 10

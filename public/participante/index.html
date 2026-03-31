@@ -3022,7 +3022,9 @@
         <!-- ERUDA: Mobile DevTools + Debug Report (só carrega com ?debug=true) -->
         <script>
         (function() {
-          if (!(new URLSearchParams(location.search).has('debug'))) return;
+          var isStaging = location.hostname.includes('staging') || location.hostname === 'localhost';
+          var hasDebugFlag = new URLSearchParams(location.search).has('debug');
+          if (!isStaging && !hasDebugFlag) return;
           var _logs = [];
           var _origConsole = {};
           ['log','warn','error','info'].forEach(function(type) {

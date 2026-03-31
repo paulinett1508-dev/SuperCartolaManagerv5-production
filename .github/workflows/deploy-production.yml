@@ -28,10 +28,16 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            cd /opt/super-cartola-manager
+            cd /var/www/cartola
+            echo "=== PRE-DEPLOY STATUS ==="
+            git log --oneline -1
+            echo "=== FETCHING TAG ${{ github.ref_name }} ==="
             git fetch --tags
             git checkout ${{ github.ref_name }}
-            docker compose build scm-prod
+            echo "=== POST-CHECKOUT ==="
+            git log --oneline -1
+            echo "=== BUILDING (no-cache) ==="
+            docker compose build --no-cache scm-prod
             docker compose up -d scm-prod
-            echo "Production deployed: ${{ github.ref_name }} at $(date)"
-            docker logs --tail 20 scm-prod
+            echo "=== Production deployed: ${{ github.ref_name }} at $(date) ==="
+            docker logs scm-prod --tail 10
