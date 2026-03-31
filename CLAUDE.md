@@ -211,6 +211,21 @@ Detalhes: [`docs/references/resta-um.md`](docs/references/resta-um.md)
 - **Renovação Temporada:** [`docs/SISTEMA-RENOVACAO-TEMPORADA.md`](docs/SISTEMA-RENOVACAO-TEMPORADA.md)
 - **Pré-Temporada:** detectar com `temporadaSelecionada > mercadoData.temporada`
 
+## Deploy (GitHub Actions → VPS)
+
+Push para `main` dispara deploy automático via `.github/workflows/main.yml`:
+1. **Test:** `npm ci` + validação básica (Ubuntu, Node 20)
+2. **Deploy:** SSH na VPS → `git pull origin main` → `docker compose build scm-prod` → `docker compose up -d scm-prod`
+3. **Diretório VPS:** `/var/www/cartola`
+
+**Outros pipelines:**
+- `deploy-staging.yml`: push para `develop` → deploy em `/opt/super-cartola-manager` (container `scm-staging`)
+- `deploy-production.yml`: tags `v*` → deploy em `/opt/super-cartola-manager` (container `scm-prod`)
+
+**REGRA:** Após merge para `main`, o deploy é AUTOMÁTICO. Não precisa de ação manual na VPS.
+Sempre verificar aba Actions no GitHub após push para confirmar sucesso do pipeline.
+Após deploy, sugerir **Ctrl+Shift+R** no navegador para limpar cache do frontend.
+
 ## Critical Rules
 
 1. NEVER remove `gemini_audit.py`
