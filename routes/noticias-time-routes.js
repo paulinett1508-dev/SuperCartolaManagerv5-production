@@ -6,6 +6,7 @@
 import express from 'express';
 import fetch from 'node-fetch';
 import { CLUBES as CLUBES_NOTICIAS } from '../public/js/shared/clubes-data.js';
+import { limparTexto, extrairTag, parseRSSItems, calcularTempoRelativo } from '../utils/rss-parser.js';
 
 const router = express.Router();
 
@@ -17,102 +18,16 @@ const CACHE_TTL = 30 * 60 * 1000; // 30 minutos
 let cacheLibertadores = null;
 const CACHE_TTL_LIBERTA = 60 * 60 * 1000; // 1 hora
 
+// Cache separado para Copa do Brasil
+let cacheCopaBrasil = null;
+const CACHE_TTL_COPABR = 60 * 60 * 1000; // 1 hora
+
 // Cache separado para Copa do Nordeste
 let cacheCopaNordeste = null;
 const CACHE_TTL_COPANE = 60 * 60 * 1000; // 1 hora
 
-/**
- * Extrai texto limpo de um possível CDATA ou HTML
- */
-function limparTexto(texto) {
-    if (!texto) return '';
-    return texto
-        .replace(/<!\[CDATA\[/g, '')
-        .replace(/\]\]>/g, '')
-        .replace(/<[^>]+>/g, '')
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'")
-        .replace(/&apos;/g, "'")
-        .trim();
-}
-
-/**
- * Parse simples de XML RSS (sem dependência externa)
- * Extrai items do feed RSS do Google News
- */
-function parseRSSItems(xml) {
-    const items = [];
-    const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
-    let match;
-
-    while ((match = itemRegex.exec(xml)) !== null) {
-        const itemXml = match[1];
-
-        const titulo = limparTexto(extrairTag(itemXml, 'title'));
-        const link = limparTexto(extrairTag(itemXml, 'link'));
-        const pubDate = limparTexto(extrairTag(itemXml, 'pubDate'));
-        const fonte = limparTexto(extrairTag(itemXml, 'source'));
-        const descricao = limparTexto(extrairTag(itemXml, 'description'));
-
-        // NOTA: Google News RSS não fornece <media:thumbnail> ou <enclosure> nos items
-        // Apenas o canal tem <image>, mas não os items individuais
-        // Alternativas futuras:
-        // 1. Scraping das URLs (complexo, lento, frágil)
-        // 2. API paga (NewsAPI, Globo Esporte API)
-        // 3. Usar escudo do clube como fallback visual (atual)
-        const imagem = null;
-
-        if (titulo && link) {
-            items.push({
-                titulo,
-                link,
-                fonte,
-                descricao: descricao.substring(0, 200),
-                publicadoEm: pubDate ? new Date(pubDate).toISOString() : null,
-                tempoRelativo: pubDate ? calcularTempoRelativo(new Date(pubDate)) : null,
-                imagem
-            });
-        }
-    }
-
-    return items;
-}
-
-/**
- * Extrai conteúdo de uma tag XML
- */
-function extrairTag(xml, tagName) {
-    // Tenta com CDATA primeiro
-    const cdataRegex = new RegExp(`<${tagName}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]></${tagName}>`, 'i');
-    const cdataMatch = xml.match(cdataRegex);
-    if (cdataMatch) return cdataMatch[1];
-
-    // Tenta sem CDATA
-    const regex = new RegExp(`<${tagName}[^>]*>([\\s\\S]*?)</${tagName}>`, 'i');
-    const match = xml.match(regex);
-    return match ? match[1] : '';
-}
-
-/**
- * Calcula tempo relativo (ex: "há 2h", "há 30min")
- */
-function calcularTempoRelativo(data) {
-    const agora = new Date();
-    const diff = agora - data;
-    const minutos = Math.floor(diff / 60000);
-    const horas = Math.floor(diff / 3600000);
-    const dias = Math.floor(diff / 86400000);
-
-    if (minutos < 1) return 'agora';
-    if (minutos < 60) return `há ${minutos}min`;
-    if (horas < 24) return `há ${horas}h`;
-    if (dias === 1) return 'ontem';
-    if (dias < 7) return `há ${dias} dias`;
-    return data.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
-}
+// Funções RSS (limparTexto, extrairTag, parseRSSItems, calcularTempoRelativo)
+// importadas de ../utils/rss-parser.js
 
 /**
  * Busca notícias do Google News RSS para um clube
@@ -225,6 +140,55 @@ async function buscarNoticiasLibertadores() {
 }
 
 /**
+ * Busca notícias da Copa do Brasil via Google News RSS
+ */
+async function buscarNoticiasCopaBrasil() {
+    // Verificar cache
+    if (cacheCopaBrasil && (Date.now() - cacheCopaBrasil.timestamp) < CACHE_TTL_COPABR) {
+        return { noticias: cacheCopaBrasil.noticias, cache: true };
+    }
+
+    try {
+        const query = encodeURIComponent('Copa do Brasil 2026');
+        const url = `https://news.google.com/rss/search?q=${query}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
+
+        console.log('[NOTICIAS] Buscando notícias da Copa do Brasil 2026...');
+
+        const response = await fetch(url, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (compatible; SuperCartolaManager/1.0)',
+                'Accept': 'application/rss+xml, application/xml, text/xml'
+            },
+            timeout: 10000
+        });
+
+        if (!response.ok) {
+            console.error(`[NOTICIAS] Erro HTTP ${response.status} ao buscar Copa do Brasil`);
+            if (cacheCopaBrasil) {
+                return { noticias: cacheCopaBrasil.noticias, cache: true, stale: true };
+            }
+            return { noticias: [], erro: 'Falha ao buscar notícias' };
+        }
+
+        const xml = await response.text();
+        const noticias = parseRSSItems(xml).slice(0, 6); // Máximo 6 notícias
+
+        console.log(`[NOTICIAS] ${noticias.length} notícias da Copa do Brasil encontradas`);
+
+        // Atualizar cache
+        cacheCopaBrasil = { noticias, timestamp: Date.now() };
+
+        return { noticias, cache: false };
+    } catch (error) {
+        console.error('[NOTICIAS] Erro ao buscar Copa do Brasil:', error.message);
+        if (cacheCopaBrasil) {
+            return { noticias: cacheCopaBrasil.noticias, cache: true, stale: true };
+        }
+        return { noticias: [], erro: error.message };
+    }
+}
+
+/**
  * Busca notícias da Copa do Nordeste via Google News RSS
  */
 async function buscarNoticiasCopaNordeste() {
@@ -326,6 +290,28 @@ router.get('/libertadores', async (req, res) => {
     } catch (error) {
         console.error('[NOTICIAS] Erro na rota libertadores:', error);
         res.status(500).json({ success: false, erro: 'Erro ao buscar notícias da Libertadores' });
+    }
+});
+
+/**
+ * GET /api/noticias/copa-brasil
+ * Retorna notícias da Copa do Brasil 2026 via Google News RSS
+ */
+router.get('/copa-brasil', async (req, res) => {
+    try {
+        const resultado = await buscarNoticiasCopaBrasil();
+
+        res.json({
+            success: true,
+            noticias: resultado.noticias,
+            total: resultado.noticias.length,
+            cache: resultado.cache || false,
+            stale: resultado.stale || false,
+            atualizadoEm: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('[NOTICIAS] Erro na rota copa-brasil:', error);
+        res.status(500).json({ success: false, erro: 'Erro ao buscar notícias da Copa do Brasil' });
     }
 });
 

@@ -68,6 +68,27 @@ const FASES_COPA_BRASIL = [
 ];
 
 // ═══════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function sanitizeUrl(url) {
+    if (!url) return '#';
+    const trimmed = url.trim();
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return '#';
+}
+
+// ═══════════════════════════════════════════════════
 // INICIALIZAÇÃO
 // ═══════════════════════════════════════════════════
 
@@ -235,14 +256,14 @@ async function carregarNoticias() {
 
         if (data.success && Array.isArray(data.noticias) && data.noticias.length > 0) {
             container.innerHTML = data.noticias.map(n => {
-                const link = (n.link || '').replace(/"/g, '&quot;');
-                const titulo = (n.titulo || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                const fonte = n.fonte || 'Notícia';
-                const tempo = n.tempoRelativo ? `<span class="copabr-noticia-tempo">${n.tempoRelativo}</span>` : '';
+                const link = sanitizeUrl(n.link);
+                const titulo = escapeHtml(n.titulo);
+                const fonte = escapeHtml(n.fonte || 'Notícia');
+                const tempo = n.tempoRelativo ? `<span class="copabr-noticia-tempo">${escapeHtml(n.tempoRelativo)}</span>` : '';
                 return `
-                <div class="copabr-noticia-card"
-                     onclick="window.open('${link}', '_blank')"
-                     role="link" tabindex="0">
+                <a href="${escapeHtml(link)}" target="_blank" rel="noopener"
+                   class="copabr-noticia-card"
+                   role="link" tabindex="0">
                     <div class="copabr-noticia-icon">
                         <span class="material-icons">article</span>
                     </div>
@@ -254,7 +275,7 @@ async function carregarNoticias() {
                         </div>
                     </div>
                     <span class="material-icons copabr-noticia-chevron">chevron_right</span>
-                </div>`;
+                </a>`;
             }).join('');
         } else {
             container.innerHTML = renderizarNoticiasFallback();

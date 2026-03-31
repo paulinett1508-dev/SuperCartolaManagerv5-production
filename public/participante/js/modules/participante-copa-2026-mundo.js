@@ -139,7 +139,7 @@ const SIGLAS = {
     'Belgica': 'BEL', 'Egito': 'EGI', 'Ira': 'IRA', 'Nova Zelandia': 'NZL',
     'Espanha': 'ESP', 'Uruguai': 'URU', 'Arabia Saudita': 'ARS', 'Cabo Verde': 'CPV',
     'Franca': 'FRA', 'Senegal': 'SEN', 'Noruega': 'NOR',
-    'Argentina': 'ARG', 'Argelia': 'ARG', 'Austria': 'AUT', 'Jordania': 'JOR',
+    'Argentina': 'ARG', 'Argelia': 'ALG', 'Austria': 'AUT', 'Jordania': 'JOR',
     'Portugal': 'POR', 'Colombia': 'COL', 'Uzbequistao': 'UZB',
     'Inglaterra': 'ING', 'Croacia': 'CRO', 'Gana': 'GAN', 'Panama': 'PAN',
 };
