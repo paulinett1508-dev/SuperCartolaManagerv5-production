@@ -76,6 +76,27 @@ const GRUPOS_LIBERTADORES = [
 ];
 
 // ═══════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function sanitizeUrl(url) {
+    if (!url) return '#';
+    const trimmed = url.trim();
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return '#';
+}
+
+// ═══════════════════════════════════════════════════
 // INICIALIZAÇÃO
 // ═══════════════════════════════════════════════════
 
@@ -163,17 +184,38 @@ function renderizarGrupos() {
     const container = document.getElementById('liberta-grupos-grid');
     if (!container) return;
 
+    // Preferir dados dinâmicos da API quando disponíveis (com classificação/pontos)
+    if (dadosAPILiberta?.grupos?.length > 0) {
+        container.innerHTML = dadosAPILiberta.grupos.map(grupo => {
+            const timesHtml = grupo.classificacao.map((t, i) => {
+                const cls = i < 2 ? 'liberta-grupo-time liberta-grupo-time--br' : 'liberta-grupo-time';
+                return `<div class="${cls}">
+                    <span class="liberta-grupo-pais">${escapeHtml(String(i + 1))}.</span>
+                    <span class="liberta-grupo-nome">${escapeHtml(t.time)}</span>
+                    <span class="liberta-grupo-pts" style="margin-left:auto;font-family:var(--app-font-mono);font-size:0.7rem;opacity:0.7">${t.pontos}pts</span>
+                </div>`;
+            }).join('');
+
+            return `<div class="liberta-grupo-card">
+                <div class="liberta-grupo-header">Grupo ${escapeHtml(grupo.nome)}</div>
+                <div class="liberta-grupo-times">${timesHtml}</div>
+            </div>`;
+        }).join('');
+        return;
+    }
+
+    // Fallback: dados estáticos do sorteio
     container.innerHTML = GRUPOS_LIBERTADORES.map(g => {
         const timesHtml = g.times.map(t => {
             const cls = t.brasileiro ? 'liberta-grupo-time liberta-grupo-time--br' : 'liberta-grupo-time';
             return `<div class="${cls}">
-                <span class="liberta-grupo-pais">${t.pais}</span>
-                <span class="liberta-grupo-nome">${t.nome}</span>
+                <span class="liberta-grupo-pais">${escapeHtml(t.pais)}</span>
+                <span class="liberta-grupo-nome">${escapeHtml(t.nome)}</span>
             </div>`;
         }).join('');
 
         return `<div class="liberta-grupo-card">
-            <div class="liberta-grupo-header">Grupo ${g.grupo}</div>
+            <div class="liberta-grupo-header">Grupo ${escapeHtml(g.grupo)}</div>
             <div class="liberta-grupo-times">${timesHtml}</div>
         </div>`;
     }).join('');
@@ -224,14 +266,14 @@ async function carregarNoticias() {
 
         if (data.success && Array.isArray(data.noticias) && data.noticias.length > 0) {
             container.innerHTML = data.noticias.map(n => {
-                const link = (n.link || '').replace(/"/g, '&quot;');
-                const titulo = (n.titulo || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                const fonte = n.fonte || 'Notícia';
-                const tempo = n.tempoRelativo ? `<span class="liberta-noticia-tempo">${n.tempoRelativo}</span>` : '';
+                const link = sanitizeUrl(n.link);
+                const titulo = escapeHtml(n.titulo);
+                const fonte = escapeHtml(n.fonte || 'Notícia');
+                const tempo = n.tempoRelativo ? `<span class="liberta-noticia-tempo">${escapeHtml(n.tempoRelativo)}</span>` : '';
                 return `
-                <div class="liberta-noticia-card"
-                     onclick="window.open('${link}', '_blank')"
-                     role="link" tabindex="0">
+                <a href="${escapeHtml(link)}" target="_blank" rel="noopener"
+                   class="liberta-noticia-card"
+                   role="link" tabindex="0">
                     <div class="liberta-noticia-icon">
                         <span class="material-icons">article</span>
                     </div>
@@ -243,7 +285,7 @@ async function carregarNoticias() {
                         </div>
                     </div>
                     <span class="material-icons liberta-noticia-chevron">chevron_right</span>
-                </div>`;
+                </a>`;
             }).join('');
         } else {
             container.innerHTML = renderizarNoticiasFallback();

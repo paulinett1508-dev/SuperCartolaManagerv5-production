@@ -46,6 +46,27 @@ const FASES_COPA_NORDESTE = [
     { fase: 'Grande Final',      info: '31 Mai + 7 Jun 2026',  times: 'Ida e volta',                 final: true  },
 ];
 
+// ═══════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function sanitizeUrl(url) {
+    if (!url) return '#';
+    const trimmed = url.trim();
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return '#';
+}
+
 // Dados dinâmicos da API (preenchidos após fetch)
 let dadosAPI = null;
 
@@ -56,6 +77,7 @@ let dadosAPI = null;
 let _pollingTimer = null;
 let _lastUpdateTs = null;
 let _isLive = false;
+let _visibilityHandler = null;
 const POLL_NORMAL_MS = 60_000;          // 60s sem jogos ao vivo
 const POLL_LIVE_MS = 30_000;            // 30s com jogos ao vivo
 const STALE_THRESHOLD_MS = 5 * 60_000;  // 5min = warning de dados desatualizados
@@ -110,6 +132,26 @@ function _iniciarPolling() {
     _pararPolling();
     const intervalo = _isLive ? POLL_LIVE_MS : POLL_NORMAL_MS;
     _pollingTimer = setInterval(_atualizarDados, intervalo);
+
+    // Parar polling quando aba fica inativa, retomar quando volta
+    if (!_visibilityHandler) {
+        _visibilityHandler = () => {
+            if (document.hidden) {
+                if (_pollingTimer) {
+                    clearInterval(_pollingTimer);
+                    _pollingTimer = null;
+                    if (window.Log) Log.debug('COPA-NORDESTE', 'Polling pausado (aba inativa)');
+                }
+            } else if (!_pollingTimer) {
+                const int = _isLive ? POLL_LIVE_MS : POLL_NORMAL_MS;
+                _pollingTimer = setInterval(_atualizarDados, int);
+                _atualizarDados(); // fetch imediato ao voltar
+                if (window.Log) Log.debug('COPA-NORDESTE', 'Polling retomado (aba ativa)');
+            }
+        };
+        document.addEventListener('visibilitychange', _visibilityHandler);
+    }
+
     if (window.Log) Log.info('COPA-NORDESTE', `Polling ativo: ${intervalo / 1000}s (${_isLive ? 'LIVE' : 'normal'})`);
 }
 
@@ -117,6 +159,10 @@ function _pararPolling() {
     if (_pollingTimer) {
         clearInterval(_pollingTimer);
         _pollingTimer = null;
+    }
+    if (_visibilityHandler) {
+        document.removeEventListener('visibilitychange', _visibilityHandler);
+        _visibilityHandler = null;
     }
 }
 
@@ -429,14 +475,14 @@ async function carregarNoticias() {
 
         if (data.success && Array.isArray(data.noticias) && data.noticias.length > 0) {
             container.innerHTML = data.noticias.map(n => {
-                const link = (n.link || '').replace(/"/g, '&quot;');
-                const titulo = (n.titulo || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                const fonte = n.fonte || 'Notícia';
-                const tempo = n.tempoRelativo ? `<span class="copane-noticia-tempo">${n.tempoRelativo}</span>` : '';
+                const link = sanitizeUrl(n.link);
+                const titulo = escapeHtml(n.titulo);
+                const fonte = escapeHtml(n.fonte || 'Notícia');
+                const tempo = n.tempoRelativo ? `<span class="copane-noticia-tempo">${escapeHtml(n.tempoRelativo)}</span>` : '';
                 return `
-                <div class="copane-noticia-card"
-                     onclick="window.open('${link}', '_blank')"
-                     role="link" tabindex="0">
+                <a href="${escapeHtml(link)}" target="_blank" rel="noopener"
+                   class="copane-noticia-card"
+                   role="link" tabindex="0">
                     <div class="copane-noticia-icon">
                         <span class="material-icons">article</span>
                     </div>
@@ -448,7 +494,7 @@ async function carregarNoticias() {
                         </div>
                     </div>
                     <span class="material-icons copane-noticia-chevron">chevron_right</span>
-                </div>`;
+                </a>`;
             }).join('');
         } else {
             container.innerHTML = renderizarNoticiasFallback();

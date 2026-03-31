@@ -6,6 +6,15 @@ if (window.Log) Log.info('BRASILEIRAO-LP', 'Carregando modulo v1.0...');
 
 export async function inicializarBrasileraoParticipante() {
     try {
+        // Lazy-load do BrasileiraoTabela se ainda não foi carregado
+        if (!window.BrasileiraoTabela) {
+            try {
+                await import('../brasileirao-tabela.js');
+            } catch (importErr) {
+                if (window.Log) Log.warn('BRASILEIRAO-LP', 'Falha no lazy-load:', importErr.message);
+            }
+        }
+
         if (!window.BrasileiraoTabela) {
             const container = document.getElementById('brasileirao-classificacao-container');
             if (container) {
