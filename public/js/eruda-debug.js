@@ -264,6 +264,19 @@
           '</div>'
         );
 
+        // Buscar elementos dentro do container do plugin Eruda (não document global)
+        var container = $el.get ? $el.get(0) : ($el[0] || null);
+        function qsel(id) {
+          if (container && container.querySelector) return container.querySelector('#' + id);
+          return document.getElementById(id);
+        }
+        var btnReport = qsel('eruda-copy-report');
+        var btnErrors = qsel('eruda-copy-errors');
+        var btnNetwork = qsel('eruda-copy-network');
+        var btnContext = qsel('eruda-copy-context');
+        var elStats = qsel('eruda-report-stats');
+        var elPreview = qsel('eruda-report-preview');
+
         function copyAndFeedback(btn, text) {
           navigator.clipboard.writeText(text).then(function() {
             var orig = btn.textContent;
@@ -273,30 +286,28 @@
         }
 
         function updateStats() {
-          var el = document.getElementById('eruda-report-stats');
-          if (!el) return;
+          if (!elStats) return;
           var errs = _logs.filter(function(l) { return l.type === 'error'; }).length;
           var warns = _logs.filter(function(l) { return l.type === 'warn'; }).length;
           var netFails = _networkLog.filter(function(n) { return !n.ok; }).length;
-          el.innerHTML = '<span style="color:#ef4444;">' + errs + ' errors</span> \u00b7 <span style="color:#f59e0b;">' + warns + ' warns</span> \u00b7 <span style="color:#3b82f6;">' + _networkLog.length + ' requests (' + netFails + ' failed)</span> \u00b7 <span>' + _logs.length + ' logs</span>';
+          elStats.innerHTML = '<span style="color:#ef4444;">' + errs + ' errors</span> \u00b7 <span style="color:#f59e0b;">' + warns + ' warns</span> \u00b7 <span style="color:#3b82f6;">' + _networkLog.length + ' requests (' + netFails + ' failed)</span> \u00b7 <span>' + _logs.length + ' logs</span>';
         }
         setInterval(updateStats, 2000);
         updateStats();
 
-        document.getElementById('eruda-copy-report').addEventListener('click', function() {
+        if (btnReport) btnReport.addEventListener('click', function() {
           var report = buildReport();
-          document.getElementById('eruda-report-preview').textContent = report;
-          document.getElementById('eruda-report-preview').style.display = 'block';
+          if (elPreview) { elPreview.textContent = report; elPreview.style.display = 'block'; }
           copyAndFeedback(this, report);
         });
-        document.getElementById('eruda-copy-errors').addEventListener('click', function() {
+        if (btnErrors) btnErrors.addEventListener('click', function() {
           var errs = _logs.filter(function(l) { return l.type === 'error'; });
           copyAndFeedback(this, errs.length ? errs.map(function(l) { return '[' + l.time + '] ' + l.msg; }).join('\n') : 'Nenhum erro.');
         });
-        document.getElementById('eruda-copy-network').addEventListener('click', function() {
+        if (btnNetwork) btnNetwork.addEventListener('click', function() {
           copyAndFeedback(this, _networkLog.length ? _networkLog.map(function(n) { return '[' + n.time + '] ' + n.method + ' ' + n.url + ' -> ' + n.status + ' (' + n.ms + 'ms)'; }).join('\n') : 'Nenhum request.');
         });
-        document.getElementById('eruda-copy-context').addEventListener('click', function() {
+        if (btnContext) btnContext.addEventListener('click', function() {
           var ctx = getAppContext();
           copyAndFeedback(this, Object.keys(ctx).map(function(k) { return k + ': ' + ctx[k]; }).join('\n'));
         });
