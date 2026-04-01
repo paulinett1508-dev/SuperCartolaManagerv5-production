@@ -14,7 +14,7 @@
     const API_BASE = '/api/admin/escalacao-ia';
     let cenarioAtual = null;
     let dadosCompletos = null;
-    let patrimonioAlteradoManualmente = false;
+    let _gerando = false; // Guard contra re-entrância
 
     // =====================================================================
     // HELPERS MODO PROFESSOR
@@ -67,10 +67,6 @@
         console.log('[ESCALACAO-IA] Inicializando módulo v2.0...');
         configurarTabs();
         configurarToggleProfessor();
-        // Rastrear alteração manual do patrimônio pelo usuário
-        document.getElementById('eia-patrimonio')?.addEventListener('change', () => {
-            patrimonioAlteradoManualmente = true;
-        });
         await carregarStatusFontes();
         await tentarAutoLoad();
     }
@@ -199,9 +195,13 @@
     // =====================================================================
 
     async function gerar() {
-        // Se o usuário não alterou manualmente, envia vazio → backend busca da conta real do admin
+        // Guard contra re-entrância (double-click)
+        if (_gerando) return;
+        _gerando = true;
+
+        // Sempre enviar o valor atual do input patrimônio ao backend
         const patrimonioEl = document.getElementById('eia-patrimonio');
-        const patrimonio = patrimonioAlteradoManualmente ? (patrimonioEl?.value || '') : '';
+        const patrimonio = patrimonioEl?.value || '';
         const esquemaId = document.getElementById('eia-esquema')?.value || 3;
 
         mostrarLoading(true);
@@ -229,10 +229,9 @@
 
             dadosCompletos = data;
 
-            // Atualizar input com patrimônio real retornado pelo backend
-            if (data.patrimonio && patrimonioEl) {
+            // Atualizar input com patrimônio real retornado pelo backend (só se vazio)
+            if (data.patrimonio && patrimonioEl && !patrimonioEl.value) {
                 patrimonioEl.value = data.patrimonio;
-                patrimonioAlteradoManualmente = false;
             }
 
             // Selecionar modo sugerido
@@ -251,6 +250,7 @@
             console.error('[ESCALACAO-IA] Erro ao gerar:', error);
             mostrarErro(error.message);
         } finally {
+            _gerando = false;
             mostrarLoading(false);
         }
     }
@@ -270,7 +270,7 @@
         if (!confirmar) return;
 
         const patrimonioEl = document.getElementById('eia-patrimonio');
-        const patrimonio = patrimonioAlteradoManualmente ? (patrimonioEl?.value || '') : '';
+        const patrimonio = patrimonioEl?.value || '';
         const esquemaId = document.getElementById('eia-esquema')?.value || 3;
 
         mostrarLoading(true);
@@ -294,11 +294,9 @@
 
             dadosCompletos = data;
 
-            // Atualizar input com patrimônio real retornado pelo backend
-            const patrimonioElR = document.getElementById('eia-patrimonio');
-            if (data.patrimonio && patrimonioElR) {
-                patrimonioElR.value = data.patrimonio;
-                patrimonioAlteradoManualmente = false;
+            // Atualizar input com patrimônio real retornado pelo backend (só se vazio)
+            if (data.patrimonio && patrimonioEl && !patrimonioEl.value) {
+                patrimonioEl.value = data.patrimonio;
             }
 
             const modoSugerido = data.modoSugerido?.modo || 'equilibrado';
