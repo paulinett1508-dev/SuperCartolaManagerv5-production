@@ -13,8 +13,10 @@
 let dadosCopa = null; // Cache local dos dados estáticos
 let countdownInterval = null;
 let statusInterval = null; // Interval para atualizar "Atualizado há X min"
+let autoRefreshInterval = null; // Auto-refresh silencioso de notícias
 let ultimaAtualizacao = null; // Timestamp da última carga de notícias
 let categoriaAtiva = 'geral'; // Categoria ativa no tab de notícias
+const AUTO_REFRESH_MS = 5 * 60 * 1000; // 5 minutos
 
 // ═══════════════════════════════════════════════════
 // INICIALIZAÇÃO
@@ -54,6 +56,9 @@ export async function inicializarCopa2026Mundo(params) {
         // 6. Auto-atualizar indicador "Atualizado há X min" a cada 60s
         statusInterval = setInterval(atualizarStatusTexto, 60000);
 
+        // 7. Auto-refresh silencioso de notícias a cada 5min (visibility-aware)
+        iniciarAutoRefreshNoticias();
+
         if (window.Log) Log.info('COPA-MUNDO', 'Hub renderizado com sucesso');
     } catch (erro) {
         console.error('[COPA-MUNDO] Erro na inicialização:', erro);
@@ -70,6 +75,7 @@ export function destruirCopa2026Mundo() {
         clearInterval(statusInterval);
         statusInterval = null;
     }
+    pararAutoRefreshNoticias();
     ultimaAtualizacao = null;
     categoriaAtiva = 'geral';
 }
@@ -375,6 +381,41 @@ function atualizarStatusTexto() {
     }
 
     statusEl.textContent = texto;
+}
+
+// ═══════════════════════════════════════════════════
+// AUTO-REFRESH SILENCIOSO — Visibility-aware
+// ═══════════════════════════════════════════════════
+
+let _visibilityHandler = null;
+
+function iniciarAutoRefreshNoticias() {
+    pararAutoRefreshNoticias();
+
+    autoRefreshInterval = setInterval(() => {
+        if (!document.hidden) {
+            carregarNoticias(categoriaAtiva);
+        }
+    }, AUTO_REFRESH_MS);
+
+    // Ao voltar pra tab, recarregar se ficou muito tempo fora
+    _visibilityHandler = () => {
+        if (!document.hidden && ultimaAtualizacao && (Date.now() - ultimaAtualizacao > AUTO_REFRESH_MS)) {
+            carregarNoticias(categoriaAtiva);
+        }
+    };
+    document.addEventListener('visibilitychange', _visibilityHandler);
+}
+
+function pararAutoRefreshNoticias() {
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+    }
+    if (_visibilityHandler) {
+        document.removeEventListener('visibilitychange', _visibilityHandler);
+        _visibilityHandler = null;
+    }
 }
 
 // ═══════════════════════════════════════════════════

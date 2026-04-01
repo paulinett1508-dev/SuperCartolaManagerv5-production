@@ -277,6 +277,10 @@ router.get('/time/:clubeId', async (req, res) => {
  */
 router.get('/libertadores', async (req, res) => {
     try {
+        if (req.query.force === '1') {
+            cacheLibertadores = null;
+            console.log('[NOTICIAS] Force refresh: cache Libertadores invalidado');
+        }
         const resultado = await buscarNoticiasLibertadores();
 
         res.json({
@@ -299,6 +303,10 @@ router.get('/libertadores', async (req, res) => {
  */
 router.get('/copa-brasil', async (req, res) => {
     try {
+        if (req.query.force === '1') {
+            cacheCopaBrasil = null;
+            console.log('[NOTICIAS] Force refresh: cache Copa do Brasil invalidado');
+        }
         const resultado = await buscarNoticiasCopaBrasil();
 
         res.json({
@@ -321,6 +329,10 @@ router.get('/copa-brasil', async (req, res) => {
  */
 router.get('/copa-nordeste', async (req, res) => {
     try {
+        if (req.query.force === '1') {
+            cacheCopaNordeste = null;
+            console.log('[NOTICIAS] Force refresh: cache Copa do Nordeste invalidado');
+        }
         const resultado = await buscarNoticiasCopaNordeste();
 
         res.json({

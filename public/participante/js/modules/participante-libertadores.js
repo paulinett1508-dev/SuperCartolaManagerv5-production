@@ -10,6 +10,11 @@
 
 let countdownInterval = null;
 let dadosAPILiberta = null;
+let _autoRefreshInterval = null;
+let _visibilityHandler = null;
+let _ultimaAtualizacao = null;
+let _statusInterval = null;
+const _AUTO_REFRESH_MS = 5 * 60 * 1000;
 
 // Data da Final da Libertadores 2026 — 28 Nov, Estádio Centenário, Montevidéu
 const FINAL_DATE = new Date('2026-11-28T21:00:00-03:00');
@@ -117,6 +122,9 @@ export async function inicializarLibertadoresParticipante(params) {
         renderizarFases();
 
         await carregarNoticias();
+        _setupRefreshButton();
+        _iniciarAutoRefresh();
+        _statusInterval = setInterval(_atualizarStatusTexto, 60000);
 
         if (window.Log) Log.info('LIBERTADORES', 'LP renderizada com sucesso');
     } catch (erro) {
@@ -125,10 +133,10 @@ export async function inicializarLibertadoresParticipante(params) {
 }
 
 export function destruirLibertadoresParticipante() {
-    if (countdownInterval) {
-        clearInterval(countdownInterval);
-        countdownInterval = null;
-    }
+    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+    _pararAutoRefresh();
+    if (_statusInterval) { clearInterval(_statusInterval); _statusInterval = null; }
+    _ultimaAtualizacao = null;
 }
 
 // ═══════════════════════════════════════════════════
@@ -255,12 +263,13 @@ function renderizarFases() {
 // NOTÍCIAS
 // ═══════════════════════════════════════════════════
 
-async function carregarNoticias() {
+async function carregarNoticias(force = false) {
     const container = document.getElementById('liberta-noticias-lista');
     if (!container) return;
 
     try {
-        const res = await fetch('/api/noticias/libertadores');
+        const forceParam = force ? '?force=1' : '';
+        const res = await fetch(`/api/noticias/libertadores${forceParam}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
@@ -290,10 +299,56 @@ async function carregarNoticias() {
         } else {
             container.innerHTML = renderizarNoticiasFallback();
         }
+        _ultimaAtualizacao = Date.now();
+        _atualizarStatusTexto();
     } catch (err) {
         if (window.Log) Log.warn('LIBERTADORES', 'Erro ao carregar notícias:', err);
         container.innerHTML = renderizarNoticiasFallback();
     }
+}
+
+// ═══════════════════════════════════════════════════
+// REFRESH BUTTON + AUTO-REFRESH — Organismo vivo
+// ═══════════════════════════════════════════════════
+
+function _setupRefreshButton() {
+    const btn = document.getElementById('liberta-noticias-refresh');
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+        const icon = btn.querySelector('.material-icons');
+        if (!icon || btn.disabled) return;
+        btn.disabled = true;
+        icon.classList.add('spinning');
+        try { await carregarNoticias(true); }
+        finally { icon.classList.remove('spinning'); btn.disabled = false; }
+    });
+}
+
+function _iniciarAutoRefresh() {
+    _pararAutoRefresh();
+    _autoRefreshInterval = setInterval(() => {
+        if (!document.hidden) carregarNoticias();
+    }, _AUTO_REFRESH_MS);
+    _visibilityHandler = () => {
+        if (!document.hidden && _ultimaAtualizacao && (Date.now() - _ultimaAtualizacao > _AUTO_REFRESH_MS)) {
+            carregarNoticias();
+        }
+    };
+    document.addEventListener('visibilitychange', _visibilityHandler);
+}
+
+function _pararAutoRefresh() {
+    if (_autoRefreshInterval) { clearInterval(_autoRefreshInterval); _autoRefreshInterval = null; }
+    if (_visibilityHandler) { document.removeEventListener('visibilitychange', _visibilityHandler); _visibilityHandler = null; }
+}
+
+function _atualizarStatusTexto() {
+    const el = document.getElementById('liberta-noticias-status');
+    if (!el || !_ultimaAtualizacao) { if (el) el.textContent = ''; return; }
+    const diffMin = Math.floor((Date.now() - _ultimaAtualizacao) / 60000);
+    if (diffMin < 1) el.textContent = 'Atualizado agora';
+    else if (diffMin < 60) el.textContent = `Atualizado há ${diffMin} min`;
+    else el.textContent = `Atualizado há ${Math.floor(diffMin / 60)}h`;
 }
 
 function renderizarNoticiasFallback() {

@@ -10,6 +10,11 @@
 
 // Dados dinâmicos da API
 let dadosAPICopaBR = null;
+let _autoRefreshInterval = null;
+let _visibilityHandler = null;
+let _ultimaAtualizacao = null;
+let _statusInterval = null;
+const _AUTO_REFRESH_MS = 5 * 60 * 1000; // 5 minutos
 
 
 // Confrontos da 5ª Fase — Sorteio realizado em 23/03/2026 na CBF
@@ -109,6 +114,9 @@ export async function inicializarCopaBrasilParticipante(params) {
         renderizarInfoHero();
         renderizarConfrontos5aFase();
         renderizarFases();
+        _setupRefreshButton();
+        _iniciarAutoRefresh();
+        _statusInterval = setInterval(_atualizarStatusTexto, 60000);
 
         if (window.Log) Log.info('COPA-BRASIL', dadosAPICopaBR ? 'LP com dados dinâmicos' : 'LP com dados estáticos');
     } catch (erro) {
@@ -117,7 +125,9 @@ export async function inicializarCopaBrasilParticipante(params) {
 }
 
 export function destruirCopaBrasilParticipante() {
-    // noop — sem intervalos ativos
+    _pararAutoRefresh();
+    if (_statusInterval) { clearInterval(_statusInterval); _statusInterval = null; }
+    _ultimaAtualizacao = null;
 }
 
 // ═══════════════════════════════════════════════════
@@ -245,12 +255,13 @@ function renderizarFases() {
 // NOTÍCIAS
 // ═══════════════════════════════════════════════════
 
-async function carregarNoticias() {
+async function carregarNoticias(force = false) {
     const container = document.getElementById('copabr-noticias-lista');
     if (!container) return;
 
     try {
-        const res = await fetch('/api/noticias/copa-brasil');
+        const forceParam = force ? '?force=1' : '';
+        const res = await fetch(`/api/noticias/copa-brasil${forceParam}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
@@ -280,10 +291,60 @@ async function carregarNoticias() {
         } else {
             container.innerHTML = renderizarNoticiasFallback();
         }
+        _ultimaAtualizacao = Date.now();
+        _atualizarStatusTexto();
     } catch (err) {
         if (window.Log) Log.warn('COPA-BRASIL', 'Erro ao carregar notícias:', err);
         container.innerHTML = renderizarNoticiasFallback();
     }
+}
+
+// ═══════════════════════════════════════════════════
+// REFRESH BUTTON + AUTO-REFRESH — Organismo vivo
+// ═══════════════════════════════════════════════════
+
+function _setupRefreshButton() {
+    const btn = document.getElementById('copabr-noticias-refresh');
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+        const icon = btn.querySelector('.material-icons');
+        if (!icon || btn.disabled) return;
+        btn.disabled = true;
+        icon.classList.add('spinning');
+        try {
+            await carregarNoticias(true);
+        } finally {
+            icon.classList.remove('spinning');
+            btn.disabled = false;
+        }
+    });
+}
+
+function _iniciarAutoRefresh() {
+    _pararAutoRefresh();
+    _autoRefreshInterval = setInterval(() => {
+        if (!document.hidden) carregarNoticias();
+    }, _AUTO_REFRESH_MS);
+    _visibilityHandler = () => {
+        if (!document.hidden && _ultimaAtualizacao && (Date.now() - _ultimaAtualizacao > _AUTO_REFRESH_MS)) {
+            carregarNoticias();
+        }
+    };
+    document.addEventListener('visibilitychange', _visibilityHandler);
+}
+
+function _pararAutoRefresh() {
+    if (_autoRefreshInterval) { clearInterval(_autoRefreshInterval); _autoRefreshInterval = null; }
+    if (_visibilityHandler) { document.removeEventListener('visibilitychange', _visibilityHandler); _visibilityHandler = null; }
+}
+
+function _atualizarStatusTexto() {
+    const el = document.getElementById('copabr-noticias-status');
+    if (!el || !_ultimaAtualizacao) { if (el) el.textContent = ''; return; }
+    const diffMin = Math.floor((Date.now() - _ultimaAtualizacao) / 60000);
+    if (diffMin < 1) el.textContent = 'Atualizado agora';
+    else if (diffMin < 60) el.textContent = `Atualizado há ${diffMin} min`;
+    else el.textContent = `Atualizado há ${Math.floor(diffMin / 60)}h`;
 }
 
 function renderizarNoticiasFallback() {

@@ -78,6 +78,10 @@ let _pollingTimer = null;
 let _lastUpdateTs = null;
 let _isLive = false;
 let _visibilityHandler = null;
+let _newsAutoRefreshInterval = null;
+let _newsLastUpdate = null;
+let _newsStatusInterval = null;
+const _NEWS_REFRESH_MS = 5 * 60_000; // 5 min
 const POLL_NORMAL_MS = 60_000;          // 60s sem jogos ao vivo
 const POLL_LIVE_MS = 30_000;            // 30s com jogos ao vivo
 const STALE_THRESHOLD_MS = 5 * 60_000;  // 5min = warning de dados desatualizados
@@ -108,8 +112,11 @@ export async function inicializarCopaNordesteParticipante(params) {
         renderizarFases();
         _atualizarStatsStrip();
 
-        // Iniciar polling adaptativo
+        // Iniciar polling adaptativo de dados + auto-refresh de notícias
         _iniciarPolling();
+        _setupNewsRefreshButton();
+        _iniciarNewsAutoRefresh();
+        _newsStatusInterval = setInterval(_atualizarNewsStatus, 60000);
 
         if (window.Log) Log.info('COPA-NORDESTE', dadosAPI ? 'LP com dados dinâmicos' : 'LP com dados estáticos (fallback)');
     } catch (erro) {
@@ -119,9 +126,12 @@ export async function inicializarCopaNordesteParticipante(params) {
 
 export function destruirCopaNordesteParticipante() {
     _pararPolling();
+    _pararNewsAutoRefresh();
+    if (_newsStatusInterval) { clearInterval(_newsStatusInterval); _newsStatusInterval = null; }
     dadosAPI = null;
     _lastUpdateTs = null;
     _isLive = false;
+    _newsLastUpdate = null;
 }
 
 // ═══════════════════════════════════════════════════
@@ -464,12 +474,13 @@ function renderizarFases() {
 // NOTÍCIAS
 // ═══════════════════════════════════════════════════
 
-async function carregarNoticias() {
+async function carregarNoticias(force = false) {
     const container = document.getElementById('copane-noticias-lista');
     if (!container) return;
 
     try {
-        const res = await fetch('/api/noticias/copa-nordeste');
+        const forceParam = force ? '?force=1' : '';
+        const res = await fetch(`/api/noticias/copa-nordeste${forceParam}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
@@ -499,10 +510,49 @@ async function carregarNoticias() {
         } else {
             container.innerHTML = renderizarNoticiasFallback();
         }
+        _newsLastUpdate = Date.now();
+        _atualizarNewsStatus();
     } catch (err) {
         if (window.Log) Log.warn('COPA-NORDESTE', 'Erro ao carregar notícias:', err);
         container.innerHTML = renderizarNoticiasFallback();
     }
+}
+
+// ═══════════════════════════════════════════════════
+// NEWS REFRESH BUTTON + AUTO-REFRESH
+// ═══════════════════════════════════════════════════
+
+function _setupNewsRefreshButton() {
+    const btn = document.getElementById('copane-noticias-refresh');
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+        const icon = btn.querySelector('.material-icons');
+        if (!icon || btn.disabled) return;
+        btn.disabled = true;
+        icon.classList.add('spinning');
+        try { await carregarNoticias(true); }
+        finally { icon.classList.remove('spinning'); btn.disabled = false; }
+    });
+}
+
+function _iniciarNewsAutoRefresh() {
+    _pararNewsAutoRefresh();
+    _newsAutoRefreshInterval = setInterval(() => {
+        if (!document.hidden) carregarNoticias();
+    }, _NEWS_REFRESH_MS);
+}
+
+function _pararNewsAutoRefresh() {
+    if (_newsAutoRefreshInterval) { clearInterval(_newsAutoRefreshInterval); _newsAutoRefreshInterval = null; }
+}
+
+function _atualizarNewsStatus() {
+    const el = document.getElementById('copane-noticias-status');
+    if (!el || !_newsLastUpdate) { if (el) el.textContent = ''; return; }
+    const diffMin = Math.floor((Date.now() - _newsLastUpdate) / 60000);
+    if (diffMin < 1) el.textContent = 'Atualizado agora';
+    else if (diffMin < 60) el.textContent = `Atualizado há ${diffMin} min`;
+    else el.textContent = `Atualizado há ${Math.floor(diffMin / 60)}h`;
 }
 
 function renderizarNoticiasFallback() {

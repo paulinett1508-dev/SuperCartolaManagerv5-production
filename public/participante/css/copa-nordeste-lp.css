@@ -412,6 +412,24 @@
     margin-top: 0.1rem;
 }
 
+/* Refresh button + status */
+.copane-noticias-refresh-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    background: rgba(230, 81, 0, 0.1); border: 1px solid rgba(230, 81, 0, 0.25);
+    color: var(--app-copane-accent, #E65100); cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+}
+.copane-noticias-refresh-btn:active { transform: scale(0.92); }
+.copane-noticias-refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.copane-noticias-refresh-btn .material-icons { font-size: 1.1rem; }
+.copane-noticias-refresh-btn .material-icons.spinning { animation: app-spin 1s linear infinite; }
+.copane-noticias-status {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.6rem; color: var(--app-text-muted, rgba(255, 255, 255, 0.4));
+    margin-bottom: 0.5rem; min-height: 0.85rem;
+}
+
 /* ═══════════════════════════════════════════════════
    FASES — Timeline vertical
    ═══════════════════════════════════════════════════ */
