@@ -226,6 +226,15 @@ Push para `main` dispara deploy automático via `.github/workflows/main.yml`:
 Sempre verificar aba Actions no GitHub após push para confirmar sucesso do pipeline.
 Após deploy, sugerir **Ctrl+Shift+R** no navegador para limpar cache do frontend.
 
+## Git Auto-Push Workflow
+
+Hook `PostToolUse` (`.claude/hooks/post-tool-use-autopush`) faz push automático após cada `git commit` via Bash tool.
+
+- **NÃO faça `git push` manual** — o hook cuida automaticamente
+- Deploy é via **GitHub Actions → VPS Docker** (não Vercel). Push para `main` = deploy automático
+- Retry com backoff exponencial (2s/4s/8s/16s, até 4 tentativas) em falha de rede
+- O hook só ativa quando `tool_name == Bash` e o comando contém `git commit`
+
 ## Critical Rules
 
 1. NEVER remove `gemini_audit.py`
