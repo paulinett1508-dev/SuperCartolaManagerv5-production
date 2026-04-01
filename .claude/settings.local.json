@@ -337,6 +337,17 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/post-tool-use-autopush",
+            "statusMessage": "Auto-pushing após commit..."
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
