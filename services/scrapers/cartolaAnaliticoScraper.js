@@ -277,10 +277,16 @@ async function buscarDadosCompletos() {
     return resultado;
 }
 
+function limparCache() {
+    cache.flushAll();
+    console.log(`${LOG_PREFIX} Cache limpo`);
+}
+
 export default {
     buscarProjecoes,
     buscarScoutsDetalhados,
     buscarDicasRodada,
     buscarDadosCompletos,
     verificarDisponibilidade,
+    limparCache,
 };

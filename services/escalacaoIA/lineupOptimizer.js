@@ -207,9 +207,9 @@ function montarEscalacao(atletasRankeados, esquemaId, patrimonio, modo) {
         if (idx !== -1) escalacao[idx].capitao = true;
     }
 
-    // Pontuacao esperada
+    // Pontuacao esperada (baseada no scoreFinal ponderado, consistente com a seleção)
     const pontuacaoBase = escalacao.reduce((sum, a) => {
-        const pts = a.scoreDetalhe?.base || a.media;
+        const pts = a.scoreFinal || a.scoreDetalhe?.base || a.media;
         return sum + (a.capitao ? pts * 1.5 : pts);
     }, 0);
 

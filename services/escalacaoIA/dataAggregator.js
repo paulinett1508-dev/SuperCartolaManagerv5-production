@@ -94,18 +94,28 @@ async function buscarGatoMestrePremium() {
             systemTokenService.fazerRequisicaoAutenticada('/auth/escalacao/sugestao'),
         ]);
 
+        const sugestoesRaw = sugestoes.status === 'fulfilled' && sugestoes.value?.success ? sugestoes.value.data : null;
+        const destaquesRaw = destaques.status === 'fulfilled' && destaques.value?.success ? destaques.value.data : null;
+        const escalacaoRaw = escalacao.status === 'fulfilled' && escalacao.value?.success ? escalacao.value.data : null;
+
+        // Normalizar sugestoes em mapa indexado por atleta_id
+        // A API pode retornar array, objeto com .atletas, ou mapa direto
+        const sugestoesMap = normalizarSugestoesGatoMestre(sugestoesRaw, destaquesRaw, escalacaoRaw);
+
         const resultado = {
-            sugestoes: sugestoes.status === 'fulfilled' && sugestoes.value?.success ? sugestoes.value.data : null,
-            destaques: destaques.status === 'fulfilled' && destaques.value?.success ? destaques.value.data : null,
-            escalacaoOficial: escalacao.status === 'fulfilled' && escalacao.value?.success ? escalacao.value.data : null,
+            sugestoes: sugestoesRaw,
+            sugestoesMap, // Mapa indexado por atleta_id para lookup rápido
+            destaques: destaquesRaw,
+            escalacaoOficial: escalacaoRaw,
             disponivel: false,
         };
 
-        resultado.disponivel = !!(resultado.sugestoes || resultado.destaques || resultado.escalacaoOficial);
+        resultado.disponivel = !!(sugestoesRaw || destaquesRaw || escalacaoRaw);
 
         if (resultado.disponivel) {
             cache.set(cacheKey, resultado);
-            console.log(`${LOG_PREFIX} GatoMestre Premium: dados obtidos`);
+            const totalMapeados = Object.keys(sugestoesMap).length;
+            console.log(`${LOG_PREFIX} GatoMestre Premium: dados obtidos (${totalMapeados} atletas mapeados)`);
         } else {
             console.log(`${LOG_PREFIX} GatoMestre Premium: nenhum endpoint retornou dados`);
         }
@@ -152,6 +162,77 @@ async function buscarCedidosPorClube() {
         console.warn(`${LOG_PREFIX} Cedidos falhou: ${error.message}`);
         return {};
     }
+}
+
+// =====================================================================
+// NORMALIZAR SUGESTOES GATOMESTRE EM MAPA POR ATLETA_ID
+// =====================================================================
+/**
+ * Normaliza dados do GatoMestre Premium em mapa { [atleta_id]: { score, projecao, ... } }.
+ * A API pode retornar formatos variados — tenta todos os formatos conhecidos.
+ */
+function normalizarSugestoesGatoMestre(sugestoesRaw, destaquesRaw, escalacaoRaw) {
+    const mapa = {};
+
+    function extrairAtletas(data) {
+        if (!data) return [];
+        // Array direto: [{ atleta_id, ... }]
+        if (Array.isArray(data)) return data;
+        // Objeto com .atletas: { atletas: [...] }
+        if (Array.isArray(data.atletas)) return data.atletas;
+        // Objeto com .jogadores: { jogadores: [...] }
+        if (Array.isArray(data.jogadores)) return data.jogadores;
+        // Objeto com .sugestoes: { sugestoes: [...] }
+        if (Array.isArray(data.sugestoes)) return data.sugestoes;
+        // Objeto com .data: { data: [...] }
+        if (Array.isArray(data.data)) return data.data;
+        // Mapa direto por ID: { "123": { ... } }
+        if (typeof data === 'object') {
+            const entries = Object.entries(data);
+            if (entries.length > 0 && typeof entries[0][1] === 'object') {
+                return entries.map(([id, obj]) => ({ atleta_id: parseInt(id), ...obj }));
+            }
+        }
+        return [];
+    }
+
+    // Processar sugestões
+    for (const atleta of extrairAtletas(sugestoesRaw)) {
+        const id = atleta.atleta_id || atleta.atletaId || atleta.id;
+        if (!id) continue;
+        mapa[id] = {
+            score: atleta.score || atleta.pontos_projetados || atleta.projecao || 0,
+            recomendado: true,
+            fonte: 'gatomestre-sugestoes',
+            ...(atleta.motivo && { motivo: atleta.motivo }),
+        };
+    }
+
+    // Processar destaques (complementar)
+    for (const atleta of extrairAtletas(destaquesRaw)) {
+        const id = atleta.atleta_id || atleta.atletaId || atleta.id;
+        if (!id) continue;
+        if (!mapa[id]) {
+            mapa[id] = { score: 0, recomendado: false, fonte: 'gatomestre-destaques' };
+        }
+        mapa[id].destaque = true;
+        if (atleta.score || atleta.pontos_projetados) {
+            mapa[id].score = Math.max(mapa[id].score, atleta.score || atleta.pontos_projetados || 0);
+        }
+    }
+
+    // Processar escalação oficial sugerida
+    for (const atleta of extrairAtletas(escalacaoRaw)) {
+        const id = atleta.atleta_id || atleta.atletaId || atleta.id;
+        if (!id) continue;
+        if (!mapa[id]) {
+            mapa[id] = { score: 0, recomendado: false, fonte: 'gatomestre-escalacao' };
+        }
+        mapa[id].naEscalacaoOficial = true;
+        mapa[id].recomendado = true;
+    }
+
+    return mapa;
 }
 
 // =====================================================================
@@ -205,39 +286,78 @@ async function agregarDados(options = {}) {
     if (webScraper?.totalDicas > 0) fontesAtivas.push('web-scraper');
     if (perplexity?.disponivel) fontesAtivas.push('perplexity');
 
-    // Criar mapa de jogadores mencionados por nome (web + perplexity)
-    const jogadoresRecomendadosWeb = new Set();
-    const jogadoresRiscoWeb = new Set();
+    // Criar listas de jogadores mencionados por nome (web + perplexity)
+    // Armazenar como arrays para matching fuzzy (apelidos vs nomes completos)
+    const nomesRecomendadosWeb = [];
+    const nomesRiscoWeb = [];
 
     if (webScraper?.jogadoresMencionados) {
         for (const nome of webScraper.jogadoresMencionados) {
-            jogadoresRecomendadosWeb.add(nome.toLowerCase());
+            nomesRecomendadosWeb.push(nome.toLowerCase());
         }
     }
     if (perplexity?.melhoresJogadores?.jogadores) {
         for (const j of perplexity.melhoresJogadores.jogadores) {
-            jogadoresRecomendadosWeb.add(j.nome.toLowerCase());
+            nomesRecomendadosWeb.push(j.nome.toLowerCase());
         }
     }
     if (perplexity?.jogadoresDuvida?.jogadoresRisco) {
         for (const j of perplexity.jogadoresDuvida.jogadoresRisco) {
-            jogadoresRiscoWeb.add(j.nome.toLowerCase());
+            nomesRiscoWeb.push(j.nome.toLowerCase());
         }
     }
 
-    // Mapa de disponibilidade real (Perplexity)
-    const mapaDisponibilidadeReal = {};
+    // Mapa de disponibilidade real (Perplexity) — array para matching fuzzy
+    const listaDisponibilidadeReal = [];
     if (perplexity?.disponibilidadeReal?.jogadores) {
         for (const j of perplexity.disponibilidadeReal.jogadores) {
             if (j.nome) {
-                mapaDisponibilidadeReal[j.nome.toLowerCase()] = {
-                    status: j.status, // 'confirmado', 'duvida', 'descartado', 'poupado'
+                listaDisponibilidadeReal.push({
+                    nomeOriginal: j.nome.toLowerCase(),
+                    status: j.status,
                     motivo: j.motivo || '',
                     fonte: j.fonte || '',
                     confianca: j.confianca || 0,
-                };
+                });
             }
         }
+    }
+
+    /**
+     * Matching fuzzy: verifica se o apelido do Cartola aparece em algum nome externo
+     * ou se algum nome externo contém o apelido.
+     * Ex: apelido "Veiga" matches "Raphael Veiga", "R. Veiga", "veiga"
+     *     apelido "Gabigol" matches "Gabriel Barbosa (Gabigol)", "gabigol"
+     * Exige match de pelo menos 4 chars para evitar falsos positivos.
+     */
+    function matchNomeFuzzy(apelidoNorm, listaNomes) {
+        if (!apelidoNorm || apelidoNorm.length < 3) return false;
+        for (const nomeExterno of listaNomes) {
+            // Match exato
+            if (nomeExterno === apelidoNorm) return true;
+            // Apelido contido no nome externo (ex: "veiga" em "raphael veiga")
+            if (apelidoNorm.length >= 4 && nomeExterno.includes(apelidoNorm)) return true;
+            // Nome externo contido no apelido (ex: raro mas possível)
+            if (nomeExterno.length >= 4 && apelidoNorm.includes(nomeExterno)) return true;
+            // Match por última palavra (ex: "raphael veiga" → "veiga")
+            const palavrasExterno = nomeExterno.split(/\s+/);
+            const ultimaPalavra = palavrasExterno[palavrasExterno.length - 1];
+            if (ultimaPalavra.length >= 4 && ultimaPalavra === apelidoNorm) return true;
+        }
+        return false;
+    }
+
+    function buscarDisponibilidadeRealFuzzy(apelidoNorm) {
+        if (!apelidoNorm || apelidoNorm.length < 3) return null;
+        for (const item of listaDisponibilidadeReal) {
+            if (item.nomeOriginal === apelidoNorm) return item;
+            if (apelidoNorm.length >= 4 && item.nomeOriginal.includes(apelidoNorm)) return item;
+            if (item.nomeOriginal.length >= 4 && apelidoNorm.includes(item.nomeOriginal)) return item;
+            const palavras = item.nomeOriginal.split(/\s+/);
+            const ultima = palavras[palavras.length - 1];
+            if (ultima.length >= 4 && ultima === apelidoNorm) return item;
+        }
+        return null;
     }
 
     // Criar mapa de projecoes do CartolaAnalitico
@@ -255,23 +375,34 @@ async function agregarDados(options = {}) {
                 ? cedidos[adversarioId][`pos${a.posicao_id}`] || 0
                 : 0;
 
-            // Checar se mencionado na web (match por apelido ou nome)
+            // Checar se mencionado na web (match fuzzy: apelido vs nome completo)
             const nomeNorm = (a.apelido || a.nome || '').toLowerCase();
-            const mencionadoWeb = jogadoresRecomendadosWeb.has(nomeNorm);
-            const riscoWeb = jogadoresRiscoWeb.has(nomeNorm);
+            const mencionadoWeb = matchNomeFuzzy(nomeNorm, nomesRecomendadosWeb);
+            const riscoWeb = matchNomeFuzzy(nomeNorm, nomesRiscoWeb);
 
-            // Disponibilidade real (Perplexity)
-            const disponibilidadeReal = mapaDisponibilidadeReal[nomeNorm] || null;
+            // Disponibilidade real (Perplexity) — match fuzzy
+            const disponibilidadeReal = buscarDisponibilidadeRealFuzzy(nomeNorm);
 
             // Projecao do CartolaAnalitico
             const projecaoAnalitico = projecoesAnalitico[a.atleta_id] || null;
 
-            // Contar fontes que recomendam este jogador
-            let fontesConfirmam = 1; // Cartola API sempre conta
-            if (a.gato_mestre?.media_mandante > 0 || a.gato_mestre?.media_visitante > 0) fontesConfirmam++;
-            if (cedidoAdv > 3) fontesConfirmam++; // Adversario cede > 3 pts na posicao
-            if (confronto.mandante) fontesConfirmam++;
+            // Contar fontes INDEPENDENTES que recomendam este jogador
+            // Critérios discriminantes: cada fonte deve trazer info DIFERENCIAL
+            let fontesConfirmam = 1; // Cartola API sempre conta (media > 0 = provável)
+            // GatoMestre público: só conta se media contextual acima da media geral
+            const gmPublico = a.gato_mestre;
+            if (gmPublico) {
+                const mediaGM = confronto.mandante ? (gmPublico.media_mandante || 0) : (gmPublico.media_visitante || 0);
+                if (mediaGM > (a.media_num || 0) * 1.1) fontesConfirmam++; // >10% acima = diferencial
+            }
+            // GatoMestre Premium: dados autenticados recomendam este jogador
+            const gmPremiumData = gatoMestre?.sugestoesMap?.[a.atleta_id];
+            if (gmPremiumData?.recomendado) fontesConfirmam++;
+            // Confronto favorável: adversário cede > 5 pts na posição (criterio alto)
+            if (cedidoAdv > 5) fontesConfirmam++;
+            // CartolaAnalitico: projeção significativa
             if (projecaoAnalitico?.projecao > 5) fontesConfirmam++;
+            // Fontes web (blogs + Perplexity): mencionado como recomendação
             if (mencionadoWeb) fontesConfirmam++;
 
             // Score de confianca (0-100)
@@ -310,7 +441,7 @@ async function agregarDados(options = {}) {
                         mencionado: mencionadoWeb,
                         emRisco: riscoWeb,
                     },
-                    gatoMestrePremium: gatoMestre?.sugestoes?.[a.atleta_id] || null,
+                    gatoMestrePremium: gatoMestre?.sugestoesMap?.[a.atleta_id] || null,
                 },
                 confianca,
                 fontesConfirmam,
@@ -401,7 +532,11 @@ async function buscarUltimoSnapshot(rodada) {
 // =====================================================================
 function limparCache() {
     cache.flushAll();
-    console.log(`${LOG_PREFIX} Cache limpo`);
+    // Limpar caches das sub-fontes (cada uma tem NodeCache próprio)
+    try { cartolaAnaliticoScraper.limparCache?.(); } catch { /* ignore */ }
+    try { cartolaWebScraper.limparCache?.(); } catch { /* ignore */ }
+    try { perplexityService.limparCache?.(); } catch { /* ignore */ }
+    console.log(`${LOG_PREFIX} Cache limpo (aggregator + sub-fontes)`);
 }
 
 export default {

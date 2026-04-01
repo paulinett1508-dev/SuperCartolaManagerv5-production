@@ -405,24 +405,41 @@ function parsearJogadoresDoTexto(texto) {
     const jogadores = [];
     const linhas = texto.split('\n');
 
-    // Padroes comuns: "Nome (Clube)" ou "Nome - Clube"
-    const padrao = /([A-Z][a-záéíóúãõâêô]+(?:\s+[A-Z]?[a-záéíóúãõâêô]+)*)\s*[\(\-–]\s*([A-Za-záéíóúãõâêô\s]+)\)?/g;
+    // Padrão 1: "Nome (Clube)" ou "Nome - Clube" (nomes compostos)
+    const padraoComposto = /([A-Z][a-záéíóúãõâêô]+(?:\s+[A-Z]?[a-záéíóúãõâêô]+)*)\s*[\(\-–]\s*([A-Za-záéíóúãõâêô\s]+)\)?/g;
+
+    // Padrão 2: Apelido de 1 palavra com clube entre parênteses (ex: "Veiga (Palmeiras)")
+    const padraoApelido = /\b([A-Z][a-záéíóúãõâêô]{3,})\s*[\(\-–]\s*([A-Za-záéíóúãõâêô\s]+)\)?/g;
+
+    // Padrão 3: Posição seguida de nome (ex: "GOL: John", "ATA - Gabigol")
+    const padraoPosicao = /(?:GOL|LAT|ZAG|MEI|ATA|TEC|Goleiro|Lateral|Zagueiro|Meia|Atacante|T[eé]cnico)\s*[-:]\s*([A-Z][a-záéíóúãõâêô]{3,}(?:\s+[A-Z]?[a-záéíóúãõâêô]+)*)/gi;
+
+    const stopWords = new Set([
+        'Cartola', 'Brasileirao', 'Rodada', 'Serie', 'Copa', 'Liga',
+        'Campeonato', 'Brasil', 'Mercado', 'Escalacao', 'Pontuacao',
+    ]);
+
+    function adicionarJogador(nome, clube, contexto) {
+        nome = nome.trim();
+        if (nome.length < 4 || nome.length > 30) return;
+        if (stopWords.has(nome)) return;
+        clube = clube ? clube.trim().replace(/\)$/, '') : '';
+        jogadores.push({ nome, clube, contexto: contexto.substring(0, 200) });
+    }
 
     for (const linha of linhas) {
         let match;
-        while ((match = padrao.exec(linha)) !== null) {
-            const nome = match[1].trim();
-            const clube = match[2].trim().replace(/\)$/, '');
 
-            // Filtrar falsos positivos
-            if (nome.length < 3 || nome.length > 30) continue;
-            if (['Cartola', 'Brasileirao', 'Rodada', 'Serie'].includes(nome)) continue;
+        while ((match = padraoComposto.exec(linha)) !== null) {
+            adicionarJogador(match[1], match[2], linha.trim());
+        }
 
-            jogadores.push({
-                nome,
-                clube,
-                contexto: linha.trim().substring(0, 200),
-            });
+        while ((match = padraoApelido.exec(linha)) !== null) {
+            adicionarJogador(match[1], match[2], linha.trim());
+        }
+
+        while ((match = padraoPosicao.exec(linha)) !== null) {
+            adicionarJogador(match[1], '', linha.trim());
         }
     }
 
@@ -484,6 +501,11 @@ async function gerarJustificativaEscalacao(escalacao, contexto) {
     return perguntarPerplexity(pergunta, { maxTokens: 3000 });
 }
 
+function limparCache() {
+    cache.flushAll();
+    console.log(`${LOG_PREFIX} Cache limpo`);
+}
+
 export default {
     isDisponivel,
     perguntarPerplexity,
@@ -495,4 +517,5 @@ export default {
     buscarConsensoEscalacao,
     pesquisaCompleta,
     gerarJustificativaEscalacao,
+    limparCache,
 };
