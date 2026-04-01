@@ -259,9 +259,12 @@ function normalizarSugestoesGatoMestre(sugestoesRaw, destaquesRaw, escalacaoRaw)
  * @returns {Object} Dados agregados normalizados
  */
 async function agregarDados(options = {}) {
-    // Sem cache no nível do aggregator — cada sub-fonte tem seu próprio cache
-    // (cartola API 15min, gatomestre 15min, cedidos 10min, etc.)
-    // Isso permite que cada clique em "Gerar" recalcule o ranking com patrimônio diferente
+    // Cache curto (2min) no aggregator para evitar timeout no nginx (502)
+    // O patrimônio NÃO afeta os dados dos atletas — só afeta o optimizer depois
+    // Sub-fontes têm caches próprios maiores (15min API, 30min scrapers)
+    const cacheKey = 'agg_completo';
+    const cached = cache.get(cacheKey);
+    if (cached) return cached;
 
     console.log(`${LOG_PREFIX} Iniciando agregacao multi-fonte...`);
     const inicio = Date.now();
@@ -474,6 +477,9 @@ async function agregarDados(options = {}) {
         tempoMs: Date.now() - inicio,
         geradoEm: new Date().toISOString(),
     };
+
+    // Cache curto (2min) — permite que botão "Gerar" seja rápido sem perder reatividade
+    cache.set(cacheKey, resultado, 120);
 
     // Salvar snapshot no MongoDB
     await salvarSnapshot(resultado);
