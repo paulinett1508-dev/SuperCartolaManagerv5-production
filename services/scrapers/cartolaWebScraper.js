@@ -155,11 +155,18 @@ async function scrapeSiteSSR(config) {
 function extrairJogadoresMencionados(texto) {
     if (!texto) return [];
 
-    // Posicoes comuns mencionadas junto com nomes
-    const padroesPosicao = /(?:goleiro|lateral|zagueiro|meia|atacante|tecnico|t[eé]cnico)\s*:?\s*([A-Z][a-záéíóúãõâêô]+(?:\s+[A-Z][a-záéíóúãõâêô]+)*)/gi;
+    // Posicoes comuns mencionadas junto com nomes (captura 1+ palavras)
+    const padroesPosicao = /(?:goleiro|lateral|zagueiro|meia|atacante|tecnico|t[eé]cnico)\s*:?\s*([A-Z][a-záéíóúãõâêô]+(?:\s+[A-Z]?[a-záéíóúãõâêô]+)*)/gi;
 
-    // Nomes proprios em contexto de futebol (2+ palavras maiusculas)
-    const padroesNome = /\b([A-Z][a-záéíóúãõâêô]+(?:\s+(?:de|da|do|dos|das)\s+)?[A-Z][a-záéíóúãõâêô]+)\b/g;
+    // Nomes compostos (2+ palavras maiusculas)
+    const padroesNomeComposto = /\b([A-Z][a-záéíóúãõâêô]+(?:\s+(?:de|da|do|dos|das)\s+)?[A-Z][a-záéíóúãõâêô]+)\b/g;
+
+    // Apelidos de 1 palavra em contexto de futebol (após indicadores)
+    // Ex: "escalar Veiga", "destaque: Gabigol", "recomendo Arrascaeta"
+    const padroesApelidoContextual = /(?:escalar|destaque|recomend[ao]|dica|sugest[aã]o|craque|aposta|mitar|pontua[rç])\s*:?\s*(?:o\s+)?([A-Z][a-záéíóúãõâêô]{3,})/gi;
+
+    // Nomes em negrito/strong (indicam destaque editorial)
+    const padroesNegrito = /<(?:strong|b)>([A-Z][a-záéíóúãõâêô]{3,}(?:\s+[A-Z]?[a-záéíóúãõâêô]+)*)<\/(?:strong|b)>/gi;
 
     const nomes = new Set();
 
@@ -170,8 +177,20 @@ function extrairJogadoresMencionados(texto) {
         }
     }
 
-    while ((match = padroesNome.exec(texto)) !== null) {
+    while ((match = padroesNomeComposto.exec(texto)) !== null) {
         if (match[1] && match[1].length > 3) {
+            nomes.add(match[1].trim());
+        }
+    }
+
+    while ((match = padroesApelidoContextual.exec(texto)) !== null) {
+        if (match[1] && match[1].length >= 4) {
+            nomes.add(match[1].trim());
+        }
+    }
+
+    while ((match = padroesNegrito.exec(texto)) !== null) {
+        if (match[1] && match[1].length >= 4) {
             nomes.add(match[1].trim());
         }
     }
@@ -181,9 +200,11 @@ function extrairJogadoresMencionados(texto) {
         'Cartola', 'Brasil', 'Brasileirao', 'Copa', 'Liga', 'Rodada',
         'Campeonato', 'Escalacao', 'Pontuacao', 'Serie', 'Final',
         'Para', 'Como', 'Mais', 'Melhor', 'Pior', 'Grande',
+        'Dicas', 'Destaque', 'Destaques', 'Resultados', 'Mercado',
+        'Mitou', 'Mandante', 'Visitante', 'Rodizio', 'Banco',
     ]);
 
-    return Array.from(nomes).filter(n => !stopWords.has(n)).slice(0, 30);
+    return Array.from(nomes).filter(n => !stopWords.has(n)).slice(0, 50);
 }
 
 // =====================================================================
@@ -258,9 +279,15 @@ async function verificarDisponibilidade() {
     return status;
 }
 
+function limparCache() {
+    cache.flushAll();
+    console.log(`${LOG_PREFIX} Cache limpo`);
+}
+
 export default {
     buscarTodosSites,
     scrapeSiteSSR,
     verificarDisponibilidade,
+    limparCache,
     SITES_CONFIG,
 };

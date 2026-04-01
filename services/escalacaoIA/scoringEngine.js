@@ -170,39 +170,26 @@ function calcularScoreFinal(atleta, modo = MODOS.EQUILIBRADO) {
     const scoreScrapers = calcularScoreScrapers(atleta);
     const scorePerplexity = calcularScorePerplexity(atleta);
 
-    // Ponderacao
+    // Ponderacao com redistribuicao proporcional de pesos
+    // Fontes com dados reais recebem peso extra das fontes indisponiveis
+    const fontesComDados = [
+        { score: scoreBase, peso: PESOS_FONTE.cartolaApi, ativa: true }, // sempre ativa
+        { score: scoreGM, peso: PESOS_FONTE.gatoMestre, ativa: scoreGM > 0 },
+        { score: scoreConfrontos, peso: PESOS_FONTE.confrontos, ativa: scoreConfrontos > 0 },
+        { score: scoreScrapers, peso: PESOS_FONTE.scrapers, ativa: scoreScrapers > 0 },
+        { score: scorePerplexity, peso: PESOS_FONTE.perplexity, ativa: scorePerplexity > 0 },
+    ];
+
+    const pesoAtivas = fontesComDados.filter(f => f.ativa).reduce((sum, f) => sum + f.peso, 0);
+    const fatorRedistribuicao = pesoAtivas > 0 ? 1 / pesoAtivas : 1;
+
     let scorePonderado = 0;
-
-    // Cartola API (media + scouts)
-    scorePonderado += scoreBase * PESOS_FONTE.cartolaApi;
-
-    // GatoMestre (usar score se disponivel, senao zero contribuicao)
-    if (scoreGM > 0) {
-        scorePonderado += scoreGM * PESOS_FONTE.gatoMestre;
-    } else {
-        // Redistribuir peso para Cartola API
-        scorePonderado += scoreBase * PESOS_FONTE.gatoMestre;
-    }
-
-    // Confrontos
-    if (scoreConfrontos > 0) {
-        scorePonderado += scoreConfrontos * PESOS_FONTE.confrontos;
-    } else {
-        scorePonderado += scoreBase * PESOS_FONTE.confrontos;
-    }
-
-    // Scrapers
-    if (scoreScrapers > 0) {
-        scorePonderado += scoreScrapers * PESOS_FONTE.scrapers;
-    } else {
-        scorePonderado += scoreBase * PESOS_FONTE.scrapers;
-    }
-
-    // Perplexity
-    if (scorePerplexity > 0) {
-        scorePonderado += scorePerplexity * PESOS_FONTE.perplexity;
-    } else {
-        scorePonderado += scoreBase * PESOS_FONTE.perplexity;
+    for (const fonte of fontesComDados) {
+        if (fonte.ativa) {
+            // Peso efetivo: peso original escalado proporcionalmente ao total ativo
+            scorePonderado += fonte.score * fonte.peso * fatorRedistribuicao;
+        }
+        // Fontes inativas simplesmente não contribuem — peso redistribuído automaticamente
     }
 
     // Aplicar fator valorizacao (para modo VALORIZAR, priorizar baratos com potencial)
