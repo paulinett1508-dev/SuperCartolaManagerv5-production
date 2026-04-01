@@ -479,6 +479,45 @@
     color: var(--app-text-muted, rgba(255, 255, 255, 0.4));
 }
 
+/* Botão Refresh Notícias */
+.copa-noticias-refresh-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    color: var(--app-copa-secondary, #D4AF37);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    flex-shrink: 0;
+}
+.copa-noticias-refresh-btn:active {
+    transform: scale(0.92);
+    background: rgba(212, 175, 55, 0.2);
+}
+.copa-noticias-refresh-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.copa-noticias-refresh-btn .material-icons {
+    font-size: 1.1rem;
+}
+.copa-noticias-refresh-btn .material-icons.spinning {
+    animation: app-spin 1s linear infinite;
+}
+
+/* Status de última atualização */
+.copa-noticias-status {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.6rem;
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.4));
+    margin-bottom: 0.5rem;
+    min-height: 0.85rem;
+}
+
 /* ═══════════════════════════════════════════════════
    GRUPOS — Cards com overlapping flags (Stitch-style)
    ═══════════════════════════════════════════════════ */

@@ -5,7 +5,7 @@
 //      para filtrar, exibir e categorizar jogos da Copa do Mundo.
 //
 // DADOS: Baseados no sorteio oficial FIFA (5/dez/2025, Washington D.C.)
-//        Alguns classificados via playoff (março 2026) marcados como TBD.
+//        Playoffs (março 2026) finalizados — todos os 48 classificados definidos.
 //
 // NOTA: Torneio expandido para 48 seleções em 12 grupos (A-L).
 //       Top 2 + 8 melhores terceiros avançam (32 na fase eliminatória).
@@ -71,12 +71,13 @@ const BANDEIRAS = {
   'England': '🏴󠁧󠁢󠁥󠁮󠁧󠁿', 'Inglaterra': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
   'Croatia': '🇭🇷', 'Croácia': '🇭🇷',
   'Ghana': '🇬🇭', 'Gana': '🇬🇭', 'Panama': '🇵🇦', 'Panamá': '🇵🇦',
-  // Playoffs (TBD março 2026) - principais candidatos
+  // Classificados via playoffs (março 2026)
   'Italy': '🇮🇹', 'Itália': '🇮🇹', 'Ukraine': '🇺🇦', 'Ucrânia': '🇺🇦',
   'Turkey': '🇹🇷', 'Turquia': '🇹🇷', 'Denmark': '🇩🇰', 'Dinamarca': '🇩🇰',
   'Poland': '🇵🇱', 'Polônia': '🇵🇱', 'Sweden': '🇸🇪', 'Suécia': '🇸🇪',
   'Wales': '🏴󠁧󠁢󠁷󠁬󠁳󠁿', 'País de Gales': '🏴󠁧󠁢󠁷󠁬󠁳󠁿',
   'Romania': '🇷🇴', 'Romênia': '🇷🇴', 'Czech Republic': '🇨🇿', 'República Tcheca': '🇨🇿',
+  'Bosnia and Herzegovina': '🇧🇦', 'Bósnia e Herzegovina': '🇧🇦',
   'DR Congo': '🇨🇩', 'RD Congo': '🇨🇩', 'Jamaica': '🇯🇲',
   'Bolivia': '🇧🇴', 'Bolívia': '🇧🇴', 'Iraq': '🇮🇶', 'Iraque': '🇮🇶',
   // Fallback
@@ -104,23 +105,26 @@ const NOMES_PT = {
   'Portugal': 'Portugal', 'Colombia': 'Colômbia', 'Uzbekistan': 'Uzbequistão',
   'England': 'Inglaterra', 'Croatia': 'Croácia', 'Ghana': 'Gana', 'Panama': 'Panamá',
   'Haiti': 'Haiti',
+  'Bosnia and Herzegovina': 'Bósnia e Herzegovina', 'Czechia': 'República Tcheca',
+  'Czech Republic': 'República Tcheca', 'Sweden': 'Suécia', 'Turkey': 'Turquia',
+  'DR Congo': 'RD Congo', 'Iraq': 'Iraque',
 };
 
 // ════════════════════════════════════════════════════════════════
 // GRUPOS (Sorteio 5/dez/2025)
 // ════════════════════════════════════════════════════════════════
 const GRUPOS = {
-  A: ['México', 'Coreia do Sul', 'África do Sul', 'TBD UEFA-D'],
-  B: ['Canadá', 'Suíça', 'Catar', 'TBD UEFA-A'],
+  A: ['México', 'Coreia do Sul', 'África do Sul', 'República Tcheca'],
+  B: ['Canadá', 'Suíça', 'Catar', 'Bósnia e Herzegovina'],
   C: ['Brasil', 'Marrocos', 'Haiti', 'Escócia'],
-  D: ['Estados Unidos', 'Paraguai', 'Austrália', 'TBD UEFA-C'],
+  D: ['Estados Unidos', 'Paraguai', 'Austrália', 'Turquia'],
   E: ['Alemanha', 'Costa do Marfim', 'Equador', 'Curaçao'],
-  F: ['Holanda', 'Japão', 'Tunísia', 'TBD UEFA-B'],
+  F: ['Holanda', 'Japão', 'Tunísia', 'Suécia'],
   G: ['Bélgica', 'Egito', 'Irã', 'Nova Zelândia'],
   H: ['Espanha', 'Uruguai', 'Arábia Saudita', 'Cabo Verde'],
-  I: ['França', 'Senegal', 'Noruega', 'TBD IC-2'],
+  I: ['França', 'Senegal', 'Noruega', 'Iraque'],
   J: ['Argentina', 'Argélia', 'Áustria', 'Jordânia'],
-  K: ['Portugal', 'Colômbia', 'Uzbequistão', 'TBD IC-1'],
+  K: ['Portugal', 'Colômbia', 'Uzbequistão', 'RD Congo'],
   L: ['Inglaterra', 'Croácia', 'Gana', 'Panamá'],
 };
 
@@ -200,19 +204,19 @@ const ESTADIOS = {
 const JOGOS_FASE_GRUPOS = [
   // ── GRUPO A ──
   { id: 'wc-a1', grupo: 'A', rodada: 1, data: '2026-06-11', horario: '13:00', mandante: 'México', visitante: 'África do Sul', estadio: 'Estadio Azteca', horarioBR: '14:00' },
-  { id: 'wc-a2', grupo: 'A', rodada: 1, data: '2026-06-11', horario: '16:00', mandante: 'Coreia do Sul', visitante: 'TBD UEFA-D', estadio: 'Estadio Akron', horarioBR: '17:00' },
+  { id: 'wc-a2', grupo: 'A', rodada: 1, data: '2026-06-11', horario: '16:00', mandante: 'Coreia do Sul', visitante: 'República Tcheca', estadio: 'Estadio Akron', horarioBR: '17:00' },
   { id: 'wc-a3', grupo: 'A', rodada: 2, data: '2026-06-18', horario: '13:00', mandante: 'México', visitante: 'Coreia do Sul', estadio: 'Estadio Akron', horarioBR: '14:00' },
-  { id: 'wc-a4', grupo: 'A', rodada: 2, data: '2026-06-18', horario: '16:00', mandante: 'TBD UEFA-D', visitante: 'África do Sul', estadio: 'Mercedes-Benz Stadium', horarioBR: '17:00' },
-  { id: 'wc-a5', grupo: 'A', rodada: 3, data: '2026-06-24', horario: '16:00', mandante: 'TBD UEFA-D', visitante: 'México', estadio: 'Estadio Azteca', horarioBR: '17:00' },
+  { id: 'wc-a4', grupo: 'A', rodada: 2, data: '2026-06-18', horario: '16:00', mandante: 'República Tcheca', visitante: 'África do Sul', estadio: 'Mercedes-Benz Stadium', horarioBR: '17:00' },
+  { id: 'wc-a5', grupo: 'A', rodada: 3, data: '2026-06-24', horario: '16:00', mandante: 'República Tcheca', visitante: 'México', estadio: 'Estadio Azteca', horarioBR: '17:00' },
   { id: 'wc-a6', grupo: 'A', rodada: 3, data: '2026-06-24', horario: '16:00', mandante: 'África do Sul', visitante: 'Coreia do Sul', estadio: 'Estadio BBVA', horarioBR: '17:00' },
 
   // ── GRUPO B ──
-  { id: 'wc-b1', grupo: 'B', rodada: 1, data: '2026-06-12', horario: '17:00', mandante: 'Canadá', visitante: 'TBD UEFA-A', estadio: 'BMO Field', horarioBR: '18:00' },
+  { id: 'wc-b1', grupo: 'B', rodada: 1, data: '2026-06-12', horario: '17:00', mandante: 'Canadá', visitante: 'Bósnia e Herzegovina', estadio: 'BMO Field', horarioBR: '18:00' },
   { id: 'wc-b2', grupo: 'B', rodada: 1, data: '2026-06-13', horario: '13:00', mandante: 'Catar', visitante: 'Suíça', estadio: "Levi's Stadium", horarioBR: '17:00' },
-  { id: 'wc-b3', grupo: 'B', rodada: 2, data: '2026-06-18', horario: '19:00', mandante: 'Suíça', visitante: 'TBD UEFA-A', estadio: 'SoFi Stadium', horarioBR: '23:00' },
+  { id: 'wc-b3', grupo: 'B', rodada: 2, data: '2026-06-18', horario: '19:00', mandante: 'Suíça', visitante: 'Bósnia e Herzegovina', estadio: 'SoFi Stadium', horarioBR: '23:00' },
   { id: 'wc-b4', grupo: 'B', rodada: 2, data: '2026-06-18', horario: '19:00', mandante: 'Canadá', visitante: 'Catar', estadio: 'BC Place', horarioBR: '23:00' },
   { id: 'wc-b5', grupo: 'B', rodada: 3, data: '2026-06-24', horario: '19:00', mandante: 'Suíça', visitante: 'Canadá', estadio: 'BC Place', horarioBR: '23:00' },
-  { id: 'wc-b6', grupo: 'B', rodada: 3, data: '2026-06-24', horario: '19:00', mandante: 'Catar', visitante: 'TBD UEFA-A', estadio: 'BMO Field', horarioBR: '23:00' },
+  { id: 'wc-b6', grupo: 'B', rodada: 3, data: '2026-06-24', horario: '19:00', mandante: 'Catar', visitante: 'Bósnia e Herzegovina', estadio: 'BMO Field', horarioBR: '23:00' },
 
   // ── GRUPO C (BRASIL) ──
   { id: 'wc-c1', grupo: 'C', rodada: 1, data: '2026-06-13', horario: '18:00', mandante: 'Brasil', visitante: 'Marrocos', estadio: 'MetLife Stadium', horarioBR: '19:00' },
@@ -224,10 +228,10 @@ const JOGOS_FASE_GRUPOS = [
 
   // ── GRUPO D ──
   { id: 'wc-d1', grupo: 'D', rodada: 1, data: '2026-06-12', horario: '21:00', mandante: 'Estados Unidos', visitante: 'Paraguai', estadio: 'SoFi Stadium', horarioBR: '01:00' },
-  { id: 'wc-d2', grupo: 'D', rodada: 1, data: '2026-06-13', horario: '19:00', mandante: 'Austrália', visitante: 'TBD UEFA-C', estadio: 'BC Place', horarioBR: '23:00' },
+  { id: 'wc-d2', grupo: 'D', rodada: 1, data: '2026-06-13', horario: '19:00', mandante: 'Austrália', visitante: 'Turquia', estadio: 'BC Place', horarioBR: '23:00' },
   { id: 'wc-d3', grupo: 'D', rodada: 2, data: '2026-06-19', horario: '19:00', mandante: 'Estados Unidos', visitante: 'Austrália', estadio: 'Lumen Field', horarioBR: '23:00' },
-  { id: 'wc-d4', grupo: 'D', rodada: 2, data: '2026-06-19', horario: '13:00', mandante: 'TBD UEFA-C', visitante: 'Paraguai', estadio: "Levi's Stadium", horarioBR: '17:00' },
-  { id: 'wc-d5', grupo: 'D', rodada: 3, data: '2026-06-25', horario: '21:00', mandante: 'TBD UEFA-C', visitante: 'Estados Unidos', estadio: 'SoFi Stadium', horarioBR: '01:00' },
+  { id: 'wc-d4', grupo: 'D', rodada: 2, data: '2026-06-19', horario: '13:00', mandante: 'Turquia', visitante: 'Paraguai', estadio: "Levi's Stadium", horarioBR: '17:00' },
+  { id: 'wc-d5', grupo: 'D', rodada: 3, data: '2026-06-25', horario: '21:00', mandante: 'Turquia', visitante: 'Estados Unidos', estadio: 'SoFi Stadium', horarioBR: '01:00' },
   { id: 'wc-d6', grupo: 'D', rodada: 3, data: '2026-06-25', horario: '13:00', mandante: 'Paraguai', visitante: 'Austrália', estadio: "Levi's Stadium", horarioBR: '17:00' },
 
   // ── GRUPO E ──
@@ -240,11 +244,11 @@ const JOGOS_FASE_GRUPOS = [
 
   // ── GRUPO F ──
   { id: 'wc-f1', grupo: 'F', rodada: 1, data: '2026-06-14', horario: '19:00', mandante: 'Holanda', visitante: 'Japão', estadio: 'AT&T Stadium', horarioBR: '21:00' },
-  { id: 'wc-f2', grupo: 'F', rodada: 1, data: '2026-06-14', horario: '21:00', mandante: 'TBD UEFA-B', visitante: 'Tunísia', estadio: 'NRG Stadium', horarioBR: '23:00' },
-  { id: 'wc-f3', grupo: 'F', rodada: 2, data: '2026-06-20', horario: '19:00', mandante: 'Holanda', visitante: 'TBD UEFA-B', estadio: 'NRG Stadium', horarioBR: '21:00' },
+  { id: 'wc-f2', grupo: 'F', rodada: 1, data: '2026-06-14', horario: '21:00', mandante: 'Suécia', visitante: 'Tunísia', estadio: 'NRG Stadium', horarioBR: '23:00' },
+  { id: 'wc-f3', grupo: 'F', rodada: 2, data: '2026-06-20', horario: '19:00', mandante: 'Holanda', visitante: 'Suécia', estadio: 'NRG Stadium', horarioBR: '21:00' },
   { id: 'wc-f4', grupo: 'F', rodada: 2, data: '2026-06-20', horario: '15:00', mandante: 'Tunísia', visitante: 'Japão', estadio: 'AT&T Stadium', horarioBR: '17:00' },
   { id: 'wc-f5', grupo: 'F', rodada: 3, data: '2026-06-25', horario: '19:00', mandante: 'Tunísia', visitante: 'Holanda', estadio: 'Arrowhead Stadium', horarioBR: '21:00' },
-  { id: 'wc-f6', grupo: 'F', rodada: 3, data: '2026-06-25', horario: '19:00', mandante: 'Japão', visitante: 'TBD UEFA-B', estadio: 'AT&T Stadium', horarioBR: '21:00' },
+  { id: 'wc-f6', grupo: 'F', rodada: 3, data: '2026-06-25', horario: '19:00', mandante: 'Japão', visitante: 'Suécia', estadio: 'AT&T Stadium', horarioBR: '21:00' },
 
   // ── GRUPO G ──
   { id: 'wc-g1', grupo: 'G', rodada: 1, data: '2026-06-15', horario: '13:00', mandante: 'Bélgica', visitante: 'Egito', estadio: 'Lumen Field', horarioBR: '17:00' },
@@ -264,11 +268,11 @@ const JOGOS_FASE_GRUPOS = [
 
   // ── GRUPO I ──
   { id: 'wc-i1', grupo: 'I', rodada: 1, data: '2026-06-16', horario: '18:00', mandante: 'França', visitante: 'Senegal', estadio: 'MetLife Stadium', horarioBR: '19:00' },
-  { id: 'wc-i2', grupo: 'I', rodada: 1, data: '2026-06-16', horario: '15:00', mandante: 'TBD IC-2', visitante: 'Noruega', estadio: 'Gillette Stadium', horarioBR: '16:00' },
-  { id: 'wc-i3', grupo: 'I', rodada: 2, data: '2026-06-22', horario: '15:00', mandante: 'França', visitante: 'TBD IC-2', estadio: 'Lincoln Financial Field', horarioBR: '16:00' },
+  { id: 'wc-i2', grupo: 'I', rodada: 1, data: '2026-06-16', horario: '15:00', mandante: 'Iraque', visitante: 'Noruega', estadio: 'Gillette Stadium', horarioBR: '16:00' },
+  { id: 'wc-i3', grupo: 'I', rodada: 2, data: '2026-06-22', horario: '15:00', mandante: 'França', visitante: 'Iraque', estadio: 'Lincoln Financial Field', horarioBR: '16:00' },
   { id: 'wc-i4', grupo: 'I', rodada: 2, data: '2026-06-22', horario: '18:00', mandante: 'Noruega', visitante: 'Senegal', estadio: 'MetLife Stadium', horarioBR: '19:00' },
   { id: 'wc-i5', grupo: 'I', rodada: 3, data: '2026-06-26', horario: '18:00', mandante: 'Noruega', visitante: 'França', estadio: 'Gillette Stadium', horarioBR: '19:00' },
-  { id: 'wc-i6', grupo: 'I', rodada: 3, data: '2026-06-26', horario: '18:00', mandante: 'Senegal', visitante: 'TBD IC-2', estadio: 'BMO Field', horarioBR: '19:00' },
+  { id: 'wc-i6', grupo: 'I', rodada: 3, data: '2026-06-26', horario: '18:00', mandante: 'Senegal', visitante: 'Iraque', estadio: 'BMO Field', horarioBR: '19:00' },
 
   // ── GRUPO J ──
   { id: 'wc-j1', grupo: 'J', rodada: 1, data: '2026-06-16', horario: '13:00', mandante: 'Argentina', visitante: 'Argélia', estadio: 'Arrowhead Stadium', horarioBR: '15:00' },
@@ -279,12 +283,12 @@ const JOGOS_FASE_GRUPOS = [
   { id: 'wc-j6', grupo: 'J', rodada: 3, data: '2026-06-27', horario: '13:00', mandante: 'Argélia', visitante: 'Áustria', estadio: 'Arrowhead Stadium', horarioBR: '15:00' },
 
   // ── GRUPO K ──
-  { id: 'wc-k1', grupo: 'K', rodada: 1, data: '2026-06-17', horario: '13:00', mandante: 'Portugal', visitante: 'TBD IC-1', estadio: 'NRG Stadium', horarioBR: '15:00' },
+  { id: 'wc-k1', grupo: 'K', rodada: 1, data: '2026-06-17', horario: '13:00', mandante: 'Portugal', visitante: 'RD Congo', estadio: 'NRG Stadium', horarioBR: '15:00' },
   { id: 'wc-k2', grupo: 'K', rodada: 1, data: '2026-06-17', horario: '13:00', mandante: 'Uzbequistão', visitante: 'Colômbia', estadio: 'Estadio Azteca', horarioBR: '15:00' },
   { id: 'wc-k3', grupo: 'K', rodada: 2, data: '2026-06-23', horario: '13:00', mandante: 'Portugal', visitante: 'Uzbequistão', estadio: 'NRG Stadium', horarioBR: '15:00' },
-  { id: 'wc-k4', grupo: 'K', rodada: 2, data: '2026-06-23', horario: '16:00', mandante: 'Colômbia', visitante: 'TBD IC-1', estadio: 'Estadio Akron', horarioBR: '18:00' },
+  { id: 'wc-k4', grupo: 'K', rodada: 2, data: '2026-06-23', horario: '16:00', mandante: 'Colômbia', visitante: 'RD Congo', estadio: 'Estadio Akron', horarioBR: '18:00' },
   { id: 'wc-k5', grupo: 'K', rodada: 3, data: '2026-06-27', horario: '18:00', mandante: 'Colômbia', visitante: 'Portugal', estadio: 'Hard Rock Stadium', horarioBR: '19:00' },
-  { id: 'wc-k6', grupo: 'K', rodada: 3, data: '2026-06-27', horario: '18:00', mandante: 'TBD IC-1', visitante: 'Uzbequistão', estadio: 'Mercedes-Benz Stadium', horarioBR: '19:00' },
+  { id: 'wc-k6', grupo: 'K', rodada: 3, data: '2026-06-27', horario: '18:00', mandante: 'RD Congo', visitante: 'Uzbequistão', estadio: 'Mercedes-Benz Stadium', horarioBR: '19:00' },
 
   // ── GRUPO L ──
   { id: 'wc-l1', grupo: 'L', rodada: 1, data: '2026-06-17', horario: '19:00', mandante: 'Inglaterra', visitante: 'Croácia', estadio: 'AT&T Stadium', horarioBR: '21:00' },

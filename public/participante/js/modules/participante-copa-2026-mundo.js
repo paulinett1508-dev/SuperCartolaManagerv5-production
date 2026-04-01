@@ -12,6 +12,9 @@
 
 let dadosCopa = null; // Cache local dos dados estáticos
 let countdownInterval = null;
+let statusInterval = null; // Interval para atualizar "Atualizado há X min"
+let ultimaAtualizacao = null; // Timestamp da última carga de notícias
+let categoriaAtiva = 'geral'; // Categoria ativa no tab de notícias
 
 // ═══════════════════════════════════════════════════
 // INICIALIZAÇÃO
@@ -43,9 +46,13 @@ export async function inicializarCopa2026Mundo(params) {
         // 4. Carregar noticias (assincrono, nao bloqueia render)
         carregarNoticias('geral');
 
-        // 5. Setup tabs de noticias e toggles
+        // 5. Setup tabs de noticias, toggles e refresh
         setupNoticiaTabs();
         setupGruposToggle();
+        setupRefreshButton();
+
+        // 6. Auto-atualizar indicador "Atualizado há X min" a cada 60s
+        statusInterval = setInterval(atualizarStatusTexto, 60000);
 
         if (window.Log) Log.info('COPA-MUNDO', 'Hub renderizado com sucesso');
     } catch (erro) {
@@ -59,6 +66,12 @@ export function destruirCopa2026Mundo() {
         clearInterval(countdownInterval);
         countdownInterval = null;
     }
+    if (statusInterval) {
+        clearInterval(statusInterval);
+        statusInterval = null;
+    }
+    ultimaAtualizacao = null;
+    categoriaAtiva = 'geral';
 }
 
 // ═══════════════════════════════════════════════════
@@ -142,6 +155,8 @@ const SIGLAS = {
     'Argentina': 'ARG', 'Argelia': 'ALG', 'Austria': 'AUT', 'Jordania': 'JOR',
     'Portugal': 'POR', 'Colombia': 'COL', 'Uzbequistao': 'UZB',
     'Inglaterra': 'ING', 'Croacia': 'CRO', 'Gana': 'GAN', 'Panama': 'PAN',
+    'Bosnia e Herzegovina': 'BOS', 'Republica Tcheca': 'TCH',
+    'Suecia': 'SUE', 'Turquia': 'TUR', 'RD Congo': 'RDC', 'Iraque': 'IRQ',
 };
 
 function getSigla(nome) {
@@ -213,8 +228,8 @@ function renderizarCalendarioJogos() {
     const jogos = dadosCopa.jogosFaseGrupos;
     const grupos = dadosCopa.grupos;
 
-    // Ordem: C (Brasil) primeiro, depois A, B, D (preview no pre-torneio)
-    const ordemGrupos = ['C', 'A', 'B', 'D'];
+    // Ordem: C (Brasil) primeiro, depois todos os grupos A-L
+    const ordemGrupos = ['C', 'A', 'B', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
 
     let html = '';
 
@@ -249,20 +264,25 @@ function renderizarCalendarioJogos() {
 // NOTÍCIAS
 // ═══════════════════════════════════════════════════
 
-async function carregarNoticias(categoria) {
+async function carregarNoticias(categoria, opts = {}) {
     const container = document.getElementById('copa-noticias-lista');
     if (!container) return;
+
+    const force = opts.force || false;
+    categoriaAtiva = categoria;
 
     container.innerHTML = '<div class="copa-loading-placeholder">Carregando notícias...</div>';
 
     try {
-        const resp = await fetch(`/api/copa-2026/noticias?categoria=${categoria}`);
+        const forceParam = force ? '&force=1' : '';
+        const resp = await fetch(`/api/copa-2026/noticias?categoria=${categoria}${forceParam}`);
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
         const data = await resp.json();
 
         if (!data.success || !data.noticias?.length) {
             container.innerHTML = '<div class="copa-loading-placeholder">Nenhuma notícia encontrada</div>';
+            atualizarStatusTexto();
             return;
         }
 
@@ -275,6 +295,10 @@ async function carregarNoticias(categoria) {
                 </div>
             </a>
         `).join('');
+
+        // Atualizar timestamp
+        ultimaAtualizacao = Date.now();
+        atualizarStatusTexto();
 
     } catch (erro) {
         console.error('[COPA-MUNDO] Erro ao carregar notícias:', erro);
@@ -300,6 +324,57 @@ function setupNoticiaTabs() {
         // Carregar notícias da categoria
         carregarNoticias(categoria);
     });
+}
+
+// ═══════════════════════════════════════════════════
+// REFRESH BUTTON — Organismo vivo de notícias
+// ═══════════════════════════════════════════════════
+
+function setupRefreshButton() {
+    const btn = document.getElementById('copa-noticias-refresh');
+    if (!btn) return;
+
+    btn.addEventListener('click', async () => {
+        const icon = btn.querySelector('.material-icons');
+        if (!icon || btn.disabled) return;
+
+        btn.disabled = true;
+        icon.classList.add('spinning');
+
+        try {
+            await carregarNoticias(categoriaAtiva, { force: true });
+        } finally {
+            icon.classList.remove('spinning');
+            btn.disabled = false;
+        }
+    });
+}
+
+function atualizarStatusTexto() {
+    const statusEl = document.getElementById('copa-noticias-status');
+    if (!statusEl) return;
+
+    if (!ultimaAtualizacao) {
+        statusEl.textContent = '';
+        return;
+    }
+
+    const diffMs = Date.now() - ultimaAtualizacao;
+    const diffMin = Math.floor(diffMs / 60000);
+
+    let texto;
+    if (diffMin < 1) {
+        texto = 'Atualizado agora';
+    } else if (diffMin === 1) {
+        texto = 'Atualizado há 1 min';
+    } else if (diffMin < 60) {
+        texto = `Atualizado há ${diffMin} min`;
+    } else {
+        const horas = Math.floor(diffMin / 60);
+        texto = `Atualizado há ${horas}h`;
+    }
+
+    statusEl.textContent = texto;
 }
 
 // ═══════════════════════════════════════════════════
@@ -439,11 +514,8 @@ function renderizarClassificacao() {
     const jogos = dadosCopa.jogosFaseGrupos || [];
     const status = getStatusGrupos();
 
-    // Mostrar apenas Brasil (C) e mais 2 grupos vizinhos no pre-torneio
-    // Na Copa ativa, mostrar todos
-    const gruposParaMostrar = status.fase === 'pre'
-        ? gruposOrdenados.filter(([l]) => ['A', 'B', 'C', 'D'].includes(l))
-        : gruposOrdenados;
+    // Todos os 48 classificados definidos — mostrar todos os 12 grupos
+    const gruposParaMostrar = gruposOrdenados;
 
     container.innerHTML = gruposParaMostrar.map(([letra, selecoes]) => {
         const classificacao = calcularClassificacaoGrupo(letra, selecoes, jogos);
@@ -522,13 +594,7 @@ function renderizarClassificacao() {
         </div>`;
     }).join('');
 
-    // Se pre-torneio e mostrando subconjunto, adicionar nota
-    if (status.fase === 'pre' && gruposParaMostrar.length < gruposOrdenados.length) {
-        container.innerHTML += `
-        <div class="copa-standings-pre-msg" style="padding:0.5rem 0;">
-            ${gruposOrdenados.length - gruposParaMostrar.length} grupos restantes disponiveis apos inicio da Copa
-        </div>`;
-    }
+    // Todos os 12 grupos exibidos — sem nota de subconjunto
 }
 
 // ═══════════════════════════════════════════════════

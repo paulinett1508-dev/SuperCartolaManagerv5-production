@@ -107,12 +107,18 @@ async function buscarNoticiasCopa(categoria) {
 router.get('/noticias', async (req, res) => {
     try {
         const categoria = req.query.categoria || 'geral';
+        const forceRefresh = req.query.force === '1';
 
         if (!CATEGORIAS[categoria]) {
             return res.status(400).json({
                 success: false,
                 erro: `Categoria inválida. Opções: ${Object.keys(CATEGORIAS).join(', ')}`
             });
+        }
+
+        if (forceRefresh) {
+            delete cacheNoticias[categoria];
+            console.log(`[COPA-NOTICIAS] Force refresh: cache de '${categoria}' invalidado`);
         }
 
         const resultado = await buscarNoticiasCopa(categoria);
