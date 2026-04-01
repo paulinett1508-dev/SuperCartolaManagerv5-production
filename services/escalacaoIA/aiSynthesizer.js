@@ -106,7 +106,8 @@ function gerarJustificativaLocal(jogador) {
  */
 async function gerarJustificativas(cenario, contexto = {}) {
     const modoProfessor = contexto.modoProfessor || false;
-    const cacheKey = `synth_${cenario.modo}_r${contexto.rodada}${modoProfessor ? '_prof' : ''}`;
+    const patrimonioKey = contexto.patrimonio ? `_p${Math.round(contexto.patrimonio)}` : '';
+    const cacheKey = `synth_${cenario.modo}_r${contexto.rodada}${patrimonioKey}${modoProfessor ? '_prof' : ''}`;
     const cached = cache.get(cacheKey);
     if (cached) return cached;
 

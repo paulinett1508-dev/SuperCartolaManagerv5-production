@@ -87,38 +87,52 @@ async function buscarGatoMestrePremium() {
             return null;
         }
 
-        // Tentar multiplos endpoints premium em paralelo
-        const [sugestoes, destaques, escalacao] = await Promise.allSettled([
-            systemTokenService.fazerRequisicaoAutenticada('/auth/dicas/sugestoes'),
-            systemTokenService.fazerRequisicaoAutenticada('/auth/mercado/destaques'),
-            systemTokenService.fazerRequisicaoAutenticada('/auth/escalacao/sugestao'),
-        ]);
+        // Usar endpoint REAL confirmado: /auth/time (retorna time do admin autenticado)
+        // Endpoints especulativos (/auth/dicas/sugestoes, /auth/mercado/destaques,
+        // /auth/escalacao/sugestao) NÃO existem na API oficial do Cartola
+        const authTimeResult = await systemTokenService.fazerRequisicaoAutenticada('/auth/time');
 
-        const sugestoesRaw = sugestoes.status === 'fulfilled' && sugestoes.value?.success ? sugestoes.value.data : null;
-        const destaquesRaw = destaques.status === 'fulfilled' && destaques.value?.success ? destaques.value.data : null;
-        const escalacaoRaw = escalacao.status === 'fulfilled' && escalacao.value?.success ? escalacao.value.data : null;
+        if (!authTimeResult.success || !authTimeResult.data) {
+            console.log(`${LOG_PREFIX} GatoMestre Premium: /auth/time falhou`);
+            return null;
+        }
 
-        // Normalizar sugestoes em mapa indexado por atleta_id
-        // A API pode retornar array, objeto com .atletas, ou mapa direto
-        const sugestoesMap = normalizarSugestoesGatoMestre(sugestoesRaw, destaquesRaw, escalacaoRaw);
+        const timeData = authTimeResult.data;
+        const timeInfo = timeData.time || timeData;
+
+        // Extrair dados úteis do time autenticado
+        const patrimonioReal = timeInfo.patrimonio || 0;
+        const esquemaIdReal = timeInfo.esquema_id || 3;
+
+        // Jogadores escalados pelo admin = sinal de preferência pessoal
+        // Se o admin escalou esses jogadores no Cartola real, eles recebem boost
+        const atletasEscalados = timeInfo.atletas || [];
+        const sugestoesMap = {};
+
+        for (const atleta of atletasEscalados) {
+            const id = atleta.atleta_id || atleta.id;
+            if (!id) continue;
+            sugestoesMap[id] = {
+                score: atleta.pontos_num || atleta.media_num || 0,
+                recomendado: true,
+                naEscalacaoOficial: true,
+                fonte: 'gatomestre-time-admin',
+            };
+        }
 
         const resultado = {
-            sugestoes: sugestoesRaw,
-            sugestoesMap, // Mapa indexado por atleta_id para lookup rápido
-            destaques: destaquesRaw,
-            escalacaoOficial: escalacaoRaw,
-            disponivel: false,
+            sugestoes: null,
+            sugestoesMap,
+            destaques: null,
+            escalacaoOficial: atletasEscalados,
+            patrimonioReal,
+            esquemaIdReal,
+            disponivel: true,
         };
 
-        resultado.disponivel = !!(sugestoesRaw || destaquesRaw || escalacaoRaw);
-
-        if (resultado.disponivel) {
-            cache.set(cacheKey, resultado);
-            const totalMapeados = Object.keys(sugestoesMap).length;
-            console.log(`${LOG_PREFIX} GatoMestre Premium: dados obtidos (${totalMapeados} atletas mapeados)`);
-        } else {
-            console.log(`${LOG_PREFIX} GatoMestre Premium: nenhum endpoint retornou dados`);
-        }
+        cache.set(cacheKey, resultado);
+        const totalMapeados = Object.keys(sugestoesMap).length;
+        console.log(`${LOG_PREFIX} GatoMestre Premium: dados reais obtidos (patrimonio=C$${patrimonioReal}, ${totalMapeados} jogadores escalados)`);
 
         return resultado;
     } catch (error) {
@@ -245,9 +259,9 @@ function normalizarSugestoesGatoMestre(sugestoesRaw, destaquesRaw, escalacaoRaw)
  * @returns {Object} Dados agregados normalizados
  */
 async function agregarDados(options = {}) {
-    const cacheKey = 'agg_completo';
-    const cached = cache.get(cacheKey);
-    if (cached) return cached;
+    // Sem cache no nível do aggregator — cada sub-fonte tem seu próprio cache
+    // (cartola API 15min, gatomestre 15min, cedidos 10min, etc.)
+    // Isso permite que cada clique em "Gerar" recalcule o ranking com patrimônio diferente
 
     console.log(`${LOG_PREFIX} Iniciando agregacao multi-fonte...`);
     const inicio = Date.now();
@@ -460,8 +474,6 @@ async function agregarDados(options = {}) {
         tempoMs: Date.now() - inicio,
         geradoEm: new Date().toISOString(),
     };
-
-    cache.set(cacheKey, resultado);
 
     // Salvar snapshot no MongoDB
     await salvarSnapshot(resultado);

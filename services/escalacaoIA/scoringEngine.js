@@ -192,10 +192,30 @@ function calcularScoreFinal(atleta, modo = MODOS.EQUILIBRADO) {
         // Fontes inativas simplesmente não contribuem — peso redistribuído automaticamente
     }
 
-    // Aplicar fator valorizacao (para modo VALORIZAR, priorizar baratos com potencial)
-    if (pesoValorizacao > 0 && atleta.variacao > 0) {
-        const fatorValorizacao = 1 + (atleta.variacao / 10) * (pesoValorizacao / 100);
-        scorePonderado *= fatorValorizacao;
+    // Aplicar fator de modo de estratégia (diferenciação agressiva entre MITAR e VALORIZAR)
+    if (pesoValorizacao > 0) {
+        const preco = atleta.preco || 1;
+        const media = atleta.media || 0;
+
+        // Custo-benefício: jogadores baratos com boa média recebem boost significativo
+        const custoBeneficio = media / Math.max(preco, 1);
+        // custoBeneficio típico: 0.5-3.0. Normalizar para fator multiplicador
+        // pesoValorizacao=100 (VALORIZAR): fator pode chegar a 1.6x para CB alto
+        // pesoValorizacao=50 (EQUILIBRADO): fator moderado ~1.2x
+        const fatorCB = 1 + (Math.min(custoBeneficio, 3) / 3) * (pesoValorizacao / 100) * 0.6;
+        scorePonderado *= fatorCB;
+
+        // Bonus adicional por variação positiva (jogador em alta)
+        if (atleta.variacao > 0) {
+            const fatorValorizacao = 1 + (atleta.variacao / 5) * (pesoValorizacao / 100) * 0.3;
+            scorePonderado *= fatorValorizacao;
+        }
+
+        // Penalidade para jogadores caros no modo VALORIZAR (desincentiva gastar muito)
+        if (pesoValorizacao >= 80 && preco > 15) {
+            const penalizaCaro = 1 - ((preco - 15) / 30) * 0.2; // Até -20% para preco=45+
+            scorePonderado *= Math.max(penalizaCaro, 0.8);
+        }
     }
 
     // Penalidades
