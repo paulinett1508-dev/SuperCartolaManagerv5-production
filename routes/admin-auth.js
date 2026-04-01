@@ -145,6 +145,27 @@ router.get("/cartola-token/status", async (req, res) => {
 });
 
 /**
+ * GET /api/admin/auth/cartola-token/reveal
+ * TEMPORÁRIO — Retorna o token completo do sistema para consulta pelo admin.
+ */
+router.get("/cartola-token/reveal", async (req, res) => {
+  if (!req.session?.admin) {
+    return res.status(401).json({ success: false, message: "Não autenticado como admin" });
+  }
+
+  try {
+    const token = await systemTokenService.obterTokenSistema();
+    if (!token) {
+      return res.json({ success: false, message: "Nenhum token de sistema configurado" });
+    }
+    res.json({ success: true, token });
+  } catch (err) {
+    console.error("[ADMIN-AUTH] Erro ao revelar token:", err.message);
+    res.status(500).json({ success: false, message: "Erro ao buscar token" });
+  }
+});
+
+/**
  * DELETE /api/admin/auth/cartola-token
  * Revoga o token de sistema Cartola.
  */
