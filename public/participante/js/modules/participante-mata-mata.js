@@ -1004,7 +1004,8 @@ async function carregarFase(edicao, fase) {
     if (faseIndex >= 0) {
       // ✅ Ler rodada do calendário fixo salvo no banco
       const rodadaDaFase = _getRodadaDaFase(edicaoConfig, fase);
-      if (estado.rodadaAtual <= rodadaDaFase) {
+      // ✅ FIX: Usar < (não <=) — quando rodadaAtual === rodadaDaFase, a fase está ativa
+      if (estado.rodadaAtual < rodadaDaFase) {
         const prevFase = faseIndex > 0 ? fasesAtivas[faseIndex - 1] : null;
         const prevRodada = prevFase ? _getRodadaDaFase(edicaoConfig, prevFase) : null;
         const faseAnteriorFeita = prevRodada && estado.rodadaAtual > prevRodada;
@@ -1082,7 +1083,8 @@ async function carregarFase(edicao, fase) {
       const edicaoCfg = EDICOES_MATA_MATA.find((e) => e.id === edicao);
       if (faseIdx > 0 && edicaoCfg && estado.rodadaAtual > 0) {
         const rodadaDaFase = edicaoCfg.rodadaInicial + faseIdx;
-        if (estado.rodadaAtual <= rodadaDaFase) {
+        // ✅ FIX: Usar < (não <=) — quando rodadaAtual === rodadaDaFase, a fase está ativa
+      if (estado.rodadaAtual < rodadaDaFase) {
           const fasePrev = fasesAtivas[faseIdx - 1];
           const confrontosPrev = estado.cacheConfrontos[`${edicao}-${fasePrev}`];
           if (confrontosPrev && confrontosPrev.length > 0) {
