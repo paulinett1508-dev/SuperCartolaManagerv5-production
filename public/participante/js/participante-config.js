@@ -28,22 +28,23 @@ const FEATURES = {
 };
 
 // Mapeamento de badges para exibição
+// icon: nome do Material Icon (renderizar com <span class="material-icons">)
 const BADGES_CONFIG = {
-    campeao: { icon: "🏆", nome: "Campeão", cor: "var(--app-gold)" },
-    campeao_2025: { icon: "🏆", nome: "Campeão", cor: "var(--app-gold)" },
-    vice: { icon: "🥈", nome: "Vice", cor: "var(--app-silver)" },
-    vice_2025: { icon: "🥈", nome: "Vice", cor: "var(--app-silver)" },
-    terceiro: { icon: "🥉", nome: "3º Lugar", cor: "var(--app-bronze)" },
-    terceiro_2025: { icon: "🥉", nome: "3º Lugar", cor: "var(--app-bronze)" },
-    top10_mito: { icon: "⭐", nome: "Top Mito", cor: "var(--app-success)" },
-    top10_mito_2025: { icon: "⭐", nome: "Top Mito", cor: "var(--app-success)" },
-    top10_mico: { icon: "💀", nome: "Top Mico", cor: "var(--app-danger)" },
-    top10_mico_2025: { icon: "💀", nome: "Top Mico", cor: "var(--app-danger)" },
-    artilheiro: { icon: "⚽", nome: "Artilheiro", cor: "var(--app-info)" },
-    luva_ouro: { icon: "🧤", nome: "Luva Ouro", cor: "var(--app-amber)" },
-    capitao_luxo: { icon: "🎖️", nome: "Capitão Luxo", cor: "var(--app-purple)" },
-    melhor_mes: { icon: "📅", nome: "Melhor Mês", cor: "var(--app-purple)" },
-    mata_mata_campeao: { icon: "⚔️", nome: "Mata-Mata", cor: "var(--app-pink)" },
+    campeao: { icon: "emoji_events", nome: "Campeão", cor: "var(--app-gold)" },
+    campeao_2025: { icon: "emoji_events", nome: "Campeão", cor: "var(--app-gold)" },
+    vice: { icon: "military_tech", nome: "Vice", cor: "var(--app-silver)" },
+    vice_2025: { icon: "military_tech", nome: "Vice", cor: "var(--app-silver)" },
+    terceiro: { icon: "workspace_premium", nome: "3º Lugar", cor: "var(--app-bronze)" },
+    terceiro_2025: { icon: "workspace_premium", nome: "3º Lugar", cor: "var(--app-bronze)" },
+    top10_mito: { icon: "star", nome: "Top Mito", cor: "var(--app-success)" },
+    top10_mito_2025: { icon: "star", nome: "Top Mito", cor: "var(--app-success)" },
+    top10_mico: { icon: "trending_down", nome: "Top Mico", cor: "var(--app-danger)" },
+    top10_mico_2025: { icon: "trending_down", nome: "Top Mico", cor: "var(--app-danger)" },
+    artilheiro: { icon: "sports_soccer", nome: "Artilheiro", cor: "var(--app-info)" },
+    luva_ouro: { icon: "sports_handball", nome: "Luva Ouro", cor: "var(--app-amber)" },
+    capitao_luxo: { icon: "stars", nome: "Capitão Luxo", cor: "var(--app-purple)" },
+    melhor_mes: { icon: "calendar_month", nome: "Melhor Mês", cor: "var(--app-purple)" },
+    mata_mata_campeao: { icon: "swords", nome: "Mata-Mata", cor: "var(--app-pink)" },
 };
 
 // Exportar para uso global
