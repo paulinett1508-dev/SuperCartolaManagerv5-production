@@ -197,6 +197,9 @@ import avisosParticipanteRoutes from "./routes/avisos-participante-routes.js";
 // 📊 Raio-X Analytics (análises internas via MongoDB)
 import raioXAnalyticsRoutes from "./routes/raioXAnalyticsRoutes.js";
 
+// 📊 Parciais unificados (substitui N+1 do frontend)
+import parciaisRoutes from "./routes/parciais-routes.js";
+
 // 📦 Versionamento do App
 import appVersionRoutes from "./routes/appVersionRoutes.js";
 
@@ -611,6 +614,7 @@ app.use('/api/capitao', capitaoRoutes);
 app.use("/api/jogos-hoje-globo", jogosHojeGloboRoutes); // NOVA ROTA
 app.use("/api/jogos-ao-vivo", jogosAoVivoRoutes); // API-Football
 app.use("/api/ligas", ligaRoutes);
+app.use("/api/parciais", parciaisRoutes);
 app.use("/api/cartola", cartolaRoutes);
 app.use("/api/cartola", cartolaProxyRoutes);
 app.use("/api/cartola-pro/oauth/login", authRateLimiter);

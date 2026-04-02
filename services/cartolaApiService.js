@@ -275,7 +275,7 @@ class CartolaApiService {
         temporadaId: response.data.temporada_id || null
       };
 
-      cache.set(cacheKey, data);
+      cache.set(cacheKey, data, 180); // TTL explícito: 3min para mercado_status
       CartolaLogger.info('Status do mercado obtido com sucesso', data);
       
       return data;

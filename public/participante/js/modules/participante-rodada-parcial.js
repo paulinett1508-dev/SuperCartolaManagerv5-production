@@ -1,34 +1,26 @@
 // =====================================================================
-// PARTICIPANTE-RODADA-PARCIAL.JS - v3.1
-// ✅ v3.1: PERF-003 - AbortController timeout (8s) em todos os fetches
-// ✅ v3.0: Dados enriquecidos (atletas, atletasEmCampo, capitao_id)
-//          Cache de escalação em memória (reduz requests por ciclo)
-// ✅ v2.2: Inativos aparecem em TODAS as rodadas
-// Exibe ranking parcial da rodada em andamento
-// CÁLCULO REAL: Busca atletas pontuados e calcula pontuação (igual admin)
+// PARTICIPANTE-RODADA-PARCIAL.JS - v4.0
+// ✅ v4.0: Endpoint unificado /api/parciais/:ligaId
+//          1 request por ciclo (era N+1 — 1 atletas + N escalações)
+//          Cálculo de pontos movido para o backend (parciaisController.js)
+//          Frozen layer: scouts definitivos persistidos no MongoDB
+// ✅ v3.1: AbortController timeout (8s)
 // =====================================================================
 
-if (window.Log) Log.info("[PARCIAIS] 📊 Carregando módulo v3.1...");
+if (window.Log) Log.info("[PARCIAIS] 📊 Carregando módulo v4.0...");
 
-// =====================================================================
-// FETCH COM TIMEOUT (AbortController) - PERF-003
-// =====================================================================
-const FETCH_TIMEOUT_MS = 8000; // 8s timeout para API Cartola
+const FETCH_TIMEOUT_MS = 10000; // 10s (backend pode levar mais que o antigo proxy direto)
 
 async function fetchComTimeout(url, options = {}, timeout = FETCH_TIMEOUT_MS) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
-
     try {
-        const response = await fetch(url, {
-            ...options,
-            signal: controller.signal,
-        });
+        const response = await fetch(url, { ...options, signal: controller.signal });
         clearTimeout(timeoutId);
         return response;
     } catch (error) {
         clearTimeout(timeoutId);
-        if (error.name === 'AbortError') {
+        if (error.name === "AbortError") {
             if (window.Log) Log.warn(`[PARCIAIS] ⏱️ Timeout (${timeout}ms) em: ${url}`);
             throw new Error(`Timeout após ${timeout}ms: ${url}`);
         }
@@ -36,20 +28,14 @@ async function fetchComTimeout(url, options = {}, timeout = FETCH_TIMEOUT_MS) {
     }
 }
 
-// Cache de escalações em memória (escalação não muda durante a rodada)
-const _escalacaoCache = new Map();
-
 // Estado do módulo
 let estadoParciais = {
     ligaId: null,
     timeId: null,
     rodadaAtual: null,
-    mercadoStatus: null,
-    timesLiga: [],
-    timesInativos: [],
+    mercadoDisponivel: false, // true = backend confirmou rodada em andamento
     dadosParciais: [],
     dadosInativos: [],
-    atletasPontuados: null,
     isCarregando: false,
     ultimaAtualizacao: null,
     autoRefresh: {
@@ -64,17 +50,16 @@ let estadoParciais = {
         cycles: 0,
         nextAt: null,
         onUpdate: null,
-        onStatus: null
+        onStatus: null,
     },
 };
 
 const AUTO_REFRESH_DEFAULTS = {
-    minMs: 30000,    // 30s mínimo (API Cartola tem rate limit)
+    minMs: 30000,
     maxMs: 120000,
-    baseMs: 30000,   // Base 30s para evitar 503
+    baseMs: 30000,
 };
 
-// Aplicar config global inicial (pode ser sobrescrito antes de iniciar)
 aplicarConfigAutoRefresh();
 
 function obterConfigAutoRefresh() {
@@ -82,14 +67,11 @@ function obterConfigAutoRefresh() {
     let min = Number(cfg.PARCIAIS_REFRESH_MIN_MS);
     let max = Number(cfg.PARCIAIS_REFRESH_MAX_MS);
     let base = Number(cfg.PARCIAIS_REFRESH_BASE_MS);
-
     if (!Number.isFinite(min) || min <= 0) min = AUTO_REFRESH_DEFAULTS.minMs;
     if (!Number.isFinite(max) || max <= 0) max = AUTO_REFRESH_DEFAULTS.maxMs;
     if (!Number.isFinite(base) || base <= 0) base = AUTO_REFRESH_DEFAULTS.baseMs;
-
     if (max < min) max = min;
     base = Math.min(Math.max(base, min), max);
-
     return { min, max, base };
 }
 
@@ -101,68 +83,46 @@ function aplicarConfigAutoRefresh() {
 }
 
 // =====================================================================
-// INICIALIZAÇÃO - Chamado pelo participante-rodadas.js
+// INICIALIZAÇÃO
 // =====================================================================
 export async function inicializarParciais(ligaId, timeId) {
-    if (window.Log) Log.info("[PARCIAIS] 🚀 Inicializando v3.0...", { ligaId, timeId });
-
-    // Limpar cache de escalações ao reiniciar (nova rodada)
-    _escalacaoCache.clear();
+    if (window.Log) Log.info("[PARCIAIS] 🚀 Inicializando v4.0...", { ligaId, timeId });
 
     estadoParciais.ligaId = ligaId;
     estadoParciais.timeId = timeId;
 
     try {
-        // 1. Buscar status do mercado
-        const status = await buscarStatusMercado();
-        if (!status) {
-            if (window.Log) Log.warn(
-                "[PARCIAIS] ⚠️ Não foi possível obter status do mercado",
-            );
-            return { disponivel: false, motivo: "status_indisponivel" };
+        // Primeira carga: chama o endpoint unificado para saber se há rodada em andamento
+        const dados = await _buscarParciais(ligaId);
+
+        if (!dados) {
+            return { disponivel: false, motivo: "erro" };
         }
 
-        estadoParciais.rodadaAtual = status.rodada_atual;
-        estadoParciais.mercadoStatus = status;
-
-        // 2. Verificar se há rodada em andamento
-        const rodadaEmAndamento =
-            status.status_mercado === 2 || status.bola_rolando;
-
-        if (!rodadaEmAndamento) {
-            if (window.Log) Log.info(
-                "[PARCIAIS] ℹ️ Mercado aberto, sem parciais disponíveis",
-            );
+        if (!dados.disponivel) {
             return {
                 disponivel: false,
-                motivo: "mercado_aberto",
-                rodada: status.rodada_atual,
+                motivo: dados.motivo || "mercado_aberto",
+                rodada: dados.rodada,
             };
         }
 
-        // 3. Buscar times da liga
-        const times = await buscarTimesLiga(ligaId);
-        if (!times || times.length === 0) {
-            if (window.Log) Log.warn("[PARCIAIS] ⚠️ Nenhum time encontrado na liga");
-            return { disponivel: false, motivo: "sem_times" };
-        }
-
-        // 4. Separar ativos e inativos
-        const { ativos, inativos } = separarTimesAtivosInativos(times);
-        estadoParciais.timesLiga = ativos;
-        estadoParciais.timesInativos = inativos;
-        estadoParciais.dadosInativos = mapearInativos(inativos);
+        estadoParciais.rodadaAtual = dados.rodada;
+        estadoParciais.mercadoDisponivel = true;
+        estadoParciais.dadosParciais = dados.participantes || [];
+        estadoParciais.dadosInativos = dados.inativos || [];
+        estadoParciais.ultimaAtualizacao = new Date();
 
         if (window.Log) Log.info(
-            `[PARCIAIS] ✅ Pronto: Rodada ${status.rodada_atual}, ${ativos.length} ativos, ${inativos.length} inativos`,
+            `[PARCIAIS] ✅ Pronto: Rodada ${dados.rodada}, ${dados.totalTimes} ativos, ${dados.totalInativos} inativos`,
         );
 
         return {
             disponivel: true,
-            rodada: status.rodada_atual,
-            totalTimes: ativos.length,
-            totalInativos: inativos.length,
-            bolaRolando: status.bola_rolando,
+            rodada: dados.rodada,
+            totalTimes: dados.totalTimes,
+            totalInativos: dados.totalInativos,
+            bolaRolando: true, // status_mercado===2 implica bola rolando
         };
     } catch (error) {
         if (window.Log) Log.error("[PARCIAIS] ❌ Erro na inicialização:", error);
@@ -171,122 +131,24 @@ export async function inicializarParciais(ligaId, timeId) {
 }
 
 // =====================================================================
-// SEPARAR TIMES ATIVOS E INATIVOS
+// BUSCAR PARCIAIS — 1 request ao endpoint unificado do backend
 // =====================================================================
-function separarTimesAtivosInativos(times) {
-    const ativos = [];
-    const inativos = [];
-
-    times.forEach((time) => {
-        const isAtivo = time.ativo !== false;
-
-        if (isAtivo) {
-            ativos.push(time);
-        } else {
-            inativos.push({
-                ...time,
-                rodada_desistencia: time.rodada_desistencia || null,
-            });
-        }
-    });
-
-    inativos.sort(
-        (a, b) => (b.rodada_desistencia || 0) - (a.rodada_desistencia || 0),
-    );
-
-    return { ativos, inativos };
-}
-
-// =====================================================================
-// BUSCAR STATUS DO MERCADO
-// =====================================================================
-async function buscarStatusMercado() {
+async function _buscarParciais(ligaId) {
     try {
-        const response = await fetchComTimeout("/api/cartola/mercado/status");
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const response = await fetchComTimeout(`/api/parciais/${ligaId}`);
+        if (!response.ok) {
+            if (window.Log) Log.warn(`[PARCIAIS] HTTP ${response.status} ao buscar parciais`);
+            return null;
+        }
         return await response.json();
     } catch (error) {
-        if (window.Log) Log.error("[PARCIAIS] Erro ao buscar status:", error);
+        if (window.Log) Log.error("[PARCIAIS] Erro ao buscar parciais:", error);
         return null;
     }
 }
 
 // =====================================================================
-// BUSCAR TIMES DA LIGA
-// =====================================================================
-async function buscarTimesLiga(ligaId) {
-    try {
-        const response = await fetchComTimeout(`/api/ligas/${ligaId}/times`);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
-
-        const times = Array.isArray(data)
-            ? data
-            : data.times || data.participantes || [];
-
-        if (window.Log) Log.info(`[PARCIAIS] 📋 Times da liga: ${times.length} total`);
-
-        return times;
-    } catch (error) {
-        if (window.Log) Log.error("[PARCIAIS] Erro ao buscar times:", error);
-        return [];
-    }
-}
-
-// =====================================================================
-// BUSCAR ATLETAS PONTUADOS (tempo real)
-// =====================================================================
-async function buscarAtletasPontuados() {
-    try {
-        const timestamp = Date.now();
-        const response = await fetchComTimeout(
-            `/api/cartola/atletas/pontuados?_t=${timestamp}`,
-            {
-                cache: "no-store",
-                headers: {
-                    "Cache-Control": "no-cache, no-store, must-revalidate",
-                    Pragma: "no-cache",
-                    Expires: "0",
-                },
-            },
-        );
-
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-        const data = await response.json();
-
-        if (!data.atletas) {
-            if (window.Log) Log.warn("[PARCIAIS] ⚠️ Sem atletas pontuados na resposta");
-            return {};
-        }
-
-        if (window.Log) Log.info(
-            `[PARCIAIS] 🔥 ${Object.keys(data.atletas).length} atletas pontuados`,
-        );
-        return data.atletas;
-    } catch (error) {
-        if (window.Log) Log.error("[PARCIAIS] Erro ao buscar atletas pontuados:", error);
-        return {};
-    }
-}
-
-// =====================================================================
-// MAPEAR INATIVOS (dados exibíveis)
-// =====================================================================
-function mapearInativos(timesInativos = []) {
-    return timesInativos.map((time) => ({
-        timeId: time.id || time.time_id,
-        nome_time: time.nome_time || time.nome || "N/D",
-        nome_cartola: time.nome_cartola || "N/D",
-        escudo: time.url_escudo_png || time.escudo || null,
-        clube_id: time.clube_id || null, // ✅ FIX: Escudo do time do coração
-        ativo: false,
-        rodada_desistencia: time.rodada_desistencia || null,
-    }));
-}
-
-// =====================================================================
-// CARREGAR PARCIAIS - Busca e calcula pontuação real
+// CARREGAR PARCIAIS (chamado pelo auto-refresh e pela inicialização)
 // =====================================================================
 export async function carregarParciais() {
     if (estadoParciais.isCarregando) {
@@ -294,73 +156,38 @@ export async function carregarParciais() {
         return null;
     }
 
-    if (!estadoParciais.timesLiga.length) {
-        if (window.Log) Log.warn("[PARCIAIS] ⚠️ Sem times ativos para buscar");
+    if (!estadoParciais.ligaId) {
+        if (window.Log) Log.warn("[PARCIAIS] ⚠️ ligaId não definido");
         return null;
     }
 
     estadoParciais.isCarregando = true;
-    if (window.Log) Log.info(
-        `[PARCIAIS] 🔄 Buscando parciais de ${estadoParciais.timesLiga.length} times ativos...`,
-    );
-
-    const rodada = estadoParciais.rodadaAtual;
 
     try {
-        // ✅ PASSO 1: Buscar TODOS os atletas pontuados (uma única requisição)
-        const atletasPontuados = await buscarAtletasPontuados();
-        estadoParciais.atletasPontuados = atletasPontuados;
+        const dados = await _buscarParciais(estadoParciais.ligaId);
 
-        if (Object.keys(atletasPontuados).length === 0) {
-            if (window.Log) Log.warn("[PARCIAIS] ⚠️ Nenhum atleta pontuado ainda");
+        if (!dados || !dados.disponivel) {
+            estadoParciais.mercadoDisponivel = false;
             estadoParciais.isCarregando = false;
-            if (!estadoParciais.dadosInativos?.length) {
-                estadoParciais.dadosInativos = mapearInativos(estadoParciais.timesInativos);
-            }
-            return {
-                rodada,
-                participantes: [],
-                inativos: estadoParciais.dadosInativos,
-                totalTimes: 0,
-                totalInativos: estadoParciais.timesInativos.length,
-                atualizadoEm: new Date(),
-            };
+            return dados || null;
         }
 
-        // ✅ PASSO 2: Buscar escalação de cada time e calcular pontos
-        const times = estadoParciais.timesLiga;
-        const MAX_CONCURRENT = 8;
-        const resultados = await processarTimesComLimite(
-            times,
-            rodada,
-            atletasPontuados,
-            MAX_CONCURRENT,
-        );
-
-        // Ordenar por pontos
-        resultados.sort((a, b) => (b.pontos || 0) - (a.pontos || 0));
-
-        // Adicionar posição
-        resultados.forEach((r, idx) => {
-            r.posicao = idx + 1;
-        });
-
-        estadoParciais.dadosParciais = resultados;
+        estadoParciais.rodadaAtual = dados.rodada;
+        estadoParciais.mercadoDisponivel = true;
+        estadoParciais.dadosParciais = dados.participantes || [];
+        estadoParciais.dadosInativos = dados.inativos || [];
         estadoParciais.ultimaAtualizacao = new Date();
 
-        // ✅ v2.2: TODOS os inativos aparecem (sem filtro por rodada)
-        estadoParciais.dadosInativos = mapearInativos(estadoParciais.timesInativos);
-
         if (window.Log) Log.info(
-            `[PARCIAIS] ✅ ${resultados.length} ativos, ${estadoParciais.dadosInativos.length} inativos`,
+            `[PARCIAIS] ✅ ${dados.totalTimes} ativos${dados._cache ? " (cache)" : ""}`,
         );
 
         return {
-            rodada,
-            participantes: resultados,
-            inativos: estadoParciais.dadosInativos,
-            totalTimes: resultados.length,
-            totalInativos: estadoParciais.dadosInativos.length,
+            rodada: dados.rodada,
+            participantes: dados.participantes,
+            inativos: dados.inativos,
+            totalTimes: dados.totalTimes,
+            totalInativos: dados.totalInativos,
             atualizadoEm: estadoParciais.ultimaAtualizacao,
         };
     } catch (error) {
@@ -369,331 +196,6 @@ export async function carregarParciais() {
     } finally {
         estadoParciais.isCarregando = false;
     }
-}
-
-// =====================================================================
-// BUSCAR ESCALAÇÃO E CALCULAR PONTUAÇÃO (mesma lógica do admin)
-// =====================================================================
-async function buscarECalcularPontuacao(time, rodada, atletasPontuados) {
-    const timeId = time.id || time.time_id || time.timeId;
-
-    if (!timeId) {
-        if (window.Log) Log.warn("[PARCIAIS] Time sem ID:", time);
-        return null;
-    }
-
-    try {
-        // ✅ v3.0: Cache de escalação (não muda durante a rodada)
-        const cacheKey = `${timeId}_${rodada}`;
-        let dadosEscalacao = _escalacaoCache.get(cacheKey);
-
-        if (!dadosEscalacao) {
-            const timestamp = Date.now();
-            const response = await fetchComTimeout(
-                `/api/cartola/time/id/${timeId}/${rodada}?_t=${timestamp}`,
-                {
-                    cache: "no-store",
-                    headers: {
-                        "Cache-Control": "no-cache, no-store, must-revalidate",
-                        Pragma: "no-cache",
-                    },
-                },
-            );
-
-            if (!response.ok) {
-                if (response.status === 404) {
-                    return {
-                        timeId,
-                        nome_time: time.nome_time || time.nome || "N/D",
-                        nome_cartola: time.nome_cartola || time.cartoleiro || "N/D",
-                        escudo: time.url_escudo_png || time.escudo || null,
-                        clube_id: time.clube_id || null, // ✅ FIX: Escudo do time do coração
-                        pontos: 0,
-                        atletasEmCampo: 0,
-                        totalAtletas: 0,
-                        rodadaNaoJogada: true,
-                        ativo: true,
-                    };
-                }
-                throw new Error(`HTTP ${response.status}`);
-            }
-
-            dadosEscalacao = await response.json();
-            _escalacaoCache.set(cacheKey, dadosEscalacao);
-        }
-
-        // ✅ CALCULAR PONTUAÇÃO (Regras oficiais Cartola FC 2025/2026)
-        // Capitão: 1.5x | Reserva comum: entra se titular ausente na posição
-        // Reserva de Luxo: substitui pior titular da posição se TODOS jogaram E luxo pontuou mais
-        let pontos = 0;
-        let atletasEmCampo = 0;
-        const atletasDetalhes = [];
-
-        // ── FASE 1: Processar TITULARES ──
-        const titularesProcessados = [];
-        if (dadosEscalacao.atletas && Array.isArray(dadosEscalacao.atletas)) {
-            dadosEscalacao.atletas.forEach((atleta) => {
-                const atletaPontuado = atletasPontuados[atleta.atleta_id];
-                const pontuacao = atletaPontuado?.pontuacao || 0;
-                const entrouEmCampo = atletaPontuado?.entrou_em_campo;
-                // Conservador: só ausente quando a API confirma explicitamente entrou_em_campo=false
-                // null/undefined = jogo não iniciado/desconhecido → não substituir prematuramente
-                const jogou = entrouEmCampo !== false || pontuacao !== 0;
-
-                if (entrouEmCampo === true) atletasEmCampo++;
-
-                const isCapitao = atleta.atleta_id === dadosEscalacao.capitao_id;
-                const pontosEfetivos = isCapitao ? pontuacao * 1.5 : pontuacao;
-                pontos += pontosEfetivos;
-
-                const info = {
-                    atleta_id: atleta.atleta_id,
-                    apelido: atleta.apelido || atletaPontuado?.apelido || '',
-                    posicao_id: atleta.posicao_id,
-                    clube_id: atleta.clube_id || atletaPontuado?.clube_id,
-                    pontos: pontuacao,
-                    pontos_efetivos: pontosEfetivos,
-                    entrou_em_campo: jogou,
-                    entrou_em_campo_real: entrouEmCampo === true,
-                    is_capitao: isCapitao,
-                    is_reserva: false,
-                    foto: atleta.foto || atletaPontuado?.foto || null,
-                    scout: atletaPontuado?.scout || {},
-                    substituido_por: null,
-                    substituido_por_luxo: false,
-                };
-                titularesProcessados.push(info);
-                atletasDetalhes.push(info);
-            });
-        }
-
-        // ── FASE 2: Mapear titulares ausentes por posição ──
-        const ausentesPorPosicao = {};
-        titularesProcessados.forEach(t => {
-            if (!t.entrou_em_campo) {
-                if (!ausentesPorPosicao[t.posicao_id]) ausentesPorPosicao[t.posicao_id] = [];
-                ausentesPorPosicao[t.posicao_id].push(t);
-            }
-        });
-
-        // ── FASE 3: Processar RESERVAS ──
-        if (dadosEscalacao.reservas && Array.isArray(dadosEscalacao.reservas)) {
-            const reservaLuxoId = dadosEscalacao.reserva_luxo_id;
-
-            // 3a. Reservas comuns (não-luxo)
-            dadosEscalacao.reservas.forEach((atleta) => {
-                if (atleta.atleta_id === reservaLuxoId) return;
-
-                const atletaPontuado = atletasPontuados[atleta.atleta_id];
-                const pontuacao = atletaPontuado?.pontuacao || 0;
-                const entrouEmCampo = atletaPontuado?.entrou_em_campo;
-                // ESTRITO para reservas: só entra quando confirmadamente jogou.
-                // null/undefined = jogo não iniciado → reserva NÃO ocupa slot de substituição
-                // (evita que reserva sem jogo iniciado "roube" o slot de outra que já pontuou)
-                const jogou = entrouEmCampo === true || pontuacao !== 0;
-                let pontosEfetivos = 0;
-                let contribuiu = false;
-                let substituiuApelido = null;
-
-                // Reserva entra se titular da mesma posição não jogou
-                if (jogou && ausentesPorPosicao[atleta.posicao_id]?.length > 0) {
-                    const titSub = ausentesPorPosicao[atleta.posicao_id].shift();
-                    pontosEfetivos = pontuacao;
-                    pontos += pontosEfetivos;
-                    atletasEmCampo++;
-                    contribuiu = true;
-                    substituiuApelido = titSub.apelido;
-                    titSub.substituido_por = atleta.apelido || 'Reserva';
-                }
-
-                atletasDetalhes.push({
-                    atleta_id: atleta.atleta_id,
-                    apelido: atleta.apelido || atletaPontuado?.apelido || '',
-                    posicao_id: atleta.posicao_id,
-                    clube_id: atleta.clube_id || atletaPontuado?.clube_id,
-                    pontos: pontuacao,
-                    pontos_efetivos: pontosEfetivos,
-                    entrou_em_campo: jogou,
-                    entrou_em_campo_real: entrouEmCampo === true,
-                    is_capitao: false,
-                    is_reserva: true,
-                    is_reserva_luxo: false,
-                    contribuiu,
-                    substituiu_apelido: substituiuApelido,
-                    foto: atleta.foto || atletaPontuado?.foto || null,
-                    scout: atletaPontuado?.scout || {},
-                });
-            });
-
-            // 3b. Reserva de Luxo (processado por último)
-            const luxoAtleta = dadosEscalacao.reservas.find(a => a.atleta_id === reservaLuxoId);
-            if (luxoAtleta) {
-                const atletaPontuado = atletasPontuados[luxoAtleta.atleta_id];
-                const pontuacao = atletaPontuado?.pontuacao || 0;
-                const entrouEmCampo = atletaPontuado?.entrou_em_campo;
-                // ESTRITO para reservas: luxo só ativa quando confirmadamente jogou
-                // null/undefined = jogo não iniciado → luxo não ativa (Cenário A nem B)
-                const jogou = entrouEmCampo === true || pontuacao !== 0;
-                let pontosEfetivos = 0;
-                let contribuiu = false;
-                let substituiuApelido = null;
-                let luxoAtivado = false;
-                let luxoHerdouCapitao = false;
-
-                // Cenário A: Luxo entra como reserva comum (titular ausente na posição)
-                if (jogou && ausentesPorPosicao[luxoAtleta.posicao_id]?.length > 0) {
-                    const titSub = ausentesPorPosicao[luxoAtleta.posicao_id].shift();
-                    pontosEfetivos = pontuacao;
-                    pontos += pontosEfetivos;
-                    atletasEmCampo++;
-                    contribuiu = true;
-                    substituiuApelido = titSub.apelido;
-                    titSub.substituido_por = luxoAtleta.apelido || 'Reserva de Luxo';
-                }
-                // Cenário B: Habilidade especial do Luxo
-                // Todos titulares da posição jogaram E luxo pontuou mais que o pior
-                // Só compara com titulares que CONFIRMADAMENTE jogaram (pontos > 0 ou entrou=true)
-                // para não trocar prematuramente com titular cujo jogo não iniciou (pontos=0)
-                else if (jogou) {
-                    const titularesDaPosicao = titularesProcessados.filter(
-                        t => t.posicao_id === luxoAtleta.posicao_id && (t.pontos > 0 || atletasPontuados[t.atleta_id]?.entrou_em_campo === true)
-                    );
-
-                    if (titularesDaPosicao.length > 0) {
-                        // Encontrar pior titular da posição (pontuação bruta)
-                        const piorTitular = titularesDaPosicao.reduce((pior, t) =>
-                            t.pontos < pior.pontos ? t : pior
-                        , titularesDaPosicao[0]);
-
-                        // Luxo substitui SE pontuou MAIS que o pior
-                        if (pontuacao > piorTitular.pontos) {
-                            // Remover contribuição efetiva do pior titular
-                            pontos -= piorTitular.pontos_efetivos;
-
-                            // Luxo herda multiplicador de capitão se substituir o capitão
-                            if (piorTitular.is_capitao) {
-                                pontosEfetivos = pontuacao * 1.5;
-                                luxoHerdouCapitao = true;
-                            } else {
-                                pontosEfetivos = pontuacao;
-                            }
-
-                            pontos += pontosEfetivos;
-                            contribuiu = true;
-                            luxoAtivado = true;
-                            substituiuApelido = piorTitular.apelido;
-                            piorTitular.substituido_por_luxo = true;
-                            piorTitular.substituido_por = luxoAtleta.apelido || 'Reserva de Luxo';
-                        }
-                    }
-                }
-
-                atletasDetalhes.push({
-                    atleta_id: luxoAtleta.atleta_id,
-                    apelido: luxoAtleta.apelido || atletaPontuado?.apelido || '',
-                    posicao_id: luxoAtleta.posicao_id,
-                    clube_id: luxoAtleta.clube_id || atletaPontuado?.clube_id,
-                    pontos: pontuacao,
-                    pontos_efetivos: pontosEfetivos,
-                    entrou_em_campo: jogou,
-                    entrou_em_campo_real: entrouEmCampo === true,
-                    is_capitao: luxoHerdouCapitao,
-                    is_reserva: true,
-                    is_reserva_luxo: true,
-                    contribuiu,
-                    luxo_ativado: luxoAtivado,
-                    luxo_herdou_capitao: luxoHerdouCapitao,
-                    substituiu_apelido: substituiuApelido,
-                    foto: luxoAtleta.foto || atletaPontuado?.foto || null,
-                    scout: atletaPontuado?.scout || {},
-                });
-            }
-        }
-
-        // Extrair dados do time
-        const nomeTime =
-            dadosEscalacao.time?.nome || time.nome_time || time.nome || "N/D";
-        const nomeCartola =
-            dadosEscalacao.time?.nome_cartola || time.nome_cartola || "N/D";
-        const escudo =
-            dadosEscalacao.time?.url_escudo_png ||
-            time.url_escudo_png ||
-            time.escudo ||
-            null;
-
-        const totalAtletas = (dadosEscalacao.atletas?.length || 0) +
-            (dadosEscalacao.reservas?.length || 0);
-
-        return {
-            timeId,
-            nome_time: nomeTime,
-            nome_cartola: nomeCartola,
-            escudo: escudo,
-            clube_id: time.clube_id || null, // ✅ FIX: Escudo do time do coração
-            pontos: pontos,
-            pontos_parcial: pontos,
-            patrimonio: dadosEscalacao.time?.patrimonio || 0,
-            rodadaNaoJogada:
-                !dadosEscalacao.atletas || dadosEscalacao.atletas.length === 0,
-            ativo: true,
-            // ✅ v3.0: Dados enriquecidos
-            atletasEmCampo,
-            totalAtletas,
-            capitao_id: dadosEscalacao.capitao_id || null,
-            reserva_luxo_id: dadosEscalacao.reserva_luxo_id || null,
-            atletas: atletasDetalhes,
-        };
-    } catch (error) {
-        if (window.Log) Log.warn(
-            `[PARCIAIS] Erro ao calcular time ${timeId}:`,
-            error.message,
-        );
-        return {
-            timeId,
-            nome_time: time.nome_time || time.nome || "N/D",
-            nome_cartola: time.nome_cartola || "N/D",
-            escudo: time.url_escudo_png || time.escudo || null,
-            clube_id: time.clube_id || null, // ✅ FIX: Escudo do time do coração
-            pontos: 0,
-            atletasEmCampo: 0,
-            totalAtletas: 0,
-            erro: true,
-            ativo: true,
-        };
-    }
-}
-
-// =====================================================================
-// PROCESSAR TIMES COM LIMITE DE CONCORRÊNCIA
-// =====================================================================
-async function processarTimesComLimite(times, rodada, atletasPontuados, limite = 4) {
-    const resultados = [];
-    let index = 0;
-    let ativos = 0;
-
-    return new Promise((resolve) => {
-        const iniciarProximo = () => {
-            while (ativos < limite && index < times.length) {
-                const time = times[index++];
-                ativos += 1;
-                buscarECalcularPontuacao(time, rodada, atletasPontuados)
-                    .then((res) => {
-                        if (res) resultados.push(res);
-                    })
-                    .catch(() => {})
-                    .finally(() => {
-                        ativos -= 1;
-                        if (index >= times.length && ativos === 0) {
-                            resolve(resultados);
-                        } else {
-                            iniciarProximo();
-                        }
-                    });
-            }
-        };
-
-        iniciarProximo();
-    });
 }
 
 // =====================================================================
@@ -707,11 +209,11 @@ function programarAutoRefresh() {
         executarAutoRefresh,
         estadoParciais.autoRefresh.intervalMs,
     );
-    emitirStatusAutoRefresh('schedule');
+    emitirStatusAutoRefresh("schedule");
 }
 
 function emitirStatusAutoRefresh(motivo) {
-    if (typeof estadoParciais.autoRefresh.onStatus !== 'function') return;
+    if (typeof estadoParciais.autoRefresh.onStatus !== "function") return;
     estadoParciais.autoRefresh.onStatus({
         ativo: estadoParciais.autoRefresh.ativo,
         intervalMs: estadoParciais.autoRefresh.intervalMs,
@@ -727,15 +229,6 @@ async function executarAutoRefresh() {
 
     try {
         estadoParciais.autoRefresh.cycles += 1;
-
-        // Atualizar status do mercado periodicamente
-        if (estadoParciais.autoRefresh.cycles % 5 === 0) {
-            const status = await buscarStatusMercado();
-            if (status) {
-                estadoParciais.mercadoStatus = status;
-                estadoParciais.rodadaAtual = status.rodada_atual;
-            }
-        }
 
         if (!parciaisDisponiveis()) {
             pararAutoRefresh();
@@ -762,7 +255,7 @@ async function executarAutoRefresh() {
             );
         }
 
-        if (typeof estadoParciais.autoRefresh.onUpdate === 'function') {
+        if (typeof estadoParciais.autoRefresh.onUpdate === "function") {
             estadoParciais.autoRefresh.onUpdate(dados);
         }
     } catch (error) {
@@ -786,12 +279,12 @@ export function iniciarAutoRefresh(onUpdate = null, onStatus = null) {
     estadoParciais.autoRefresh.failures = 0;
     estadoParciais.autoRefresh.cycles = 0;
     programarAutoRefresh();
-    emitirStatusAutoRefresh('start');
+    emitirStatusAutoRefresh("start");
 }
 
 export function pararAutoRefresh() {
     estadoParciais.autoRefresh.ativo = false;
-    emitirStatusAutoRefresh('stop');
+    emitirStatusAutoRefresh("stop");
     estadoParciais.autoRefresh.onUpdate = null;
     estadoParciais.autoRefresh.onStatus = null;
     estadoParciais.autoRefresh.nextAt = null;
@@ -802,7 +295,7 @@ export function pararAutoRefresh() {
 }
 
 // =====================================================================
-// OBTER DADOS ATUAIS (sem buscar novamente)
+// GETTERS DE ESTADO (interface pública mantida para compatibilidade)
 // =====================================================================
 export function obterDadosParciais() {
     return {
@@ -816,33 +309,36 @@ export function obterDadosParciais() {
     };
 }
 
-// =====================================================================
-// OBTER TIMES INATIVOS
-// =====================================================================
 export function obterTimesInativos() {
     return estadoParciais.dadosInativos || [];
 }
 
-// =====================================================================
-// OBTER ATLETAS PONTUADOS (scores ao vivo por atleta_id)
-// =====================================================================
 export function obterAtletasPontuados() {
-    return estadoParciais.atletasPontuados || {};
+    // v4.0: scouts agora vêm no payload de cada atleta dentro de participantes
+    // Mantido por compatibilidade — retorna mapa derivado dos dados atuais
+    const mapa = {};
+    for (const p of estadoParciais.dadosParciais) {
+        for (const a of p.atletas || []) {
+            if (a.atleta_id) {
+                mapa[a.atleta_id] = {
+                    pontuacao: a.pontos,
+                    entrou_em_campo: a.entrou_em_campo_real,
+                    apelido: a.apelido,
+                    clube_id: a.clube_id,
+                    scout: a.scout || {},
+                };
+            }
+        }
+    }
+    return mapa;
 }
 
-// =====================================================================
-// OBTER MINHA POSIÇÃO PARCIAL
-// =====================================================================
 export function obterMinhaPosicaoParcial() {
     const meuTimeId = estadoParciais.timeId;
     const dados = estadoParciais.dadosParciais;
-
     if (!meuTimeId || !dados.length) return null;
-
     const meuDado = dados.find((d) => String(d.timeId) === String(meuTimeId));
-
     if (!meuDado) return null;
-
     return {
         posicao: meuDado.posicao,
         pontos: meuDado.pontos,
@@ -852,38 +348,40 @@ export function obterMinhaPosicaoParcial() {
     };
 }
 
-// =====================================================================
-// VERIFICAR SE PARCIAIS ESTÃO DISPONÍVEIS
-// =====================================================================
 export function parciaisDisponiveis() {
-    return (
-        estadoParciais.mercadoStatus?.status_mercado === 2 ||
-        estadoParciais.mercadoStatus?.bola_rolando === true
-    );
+    return estadoParciais.mercadoDisponivel === true;
 }
 
-// =====================================================================
-// OBTER RODADA ATUAL
-// =====================================================================
 export function obterRodadaAtual() {
     return estadoParciais.rodadaAtual;
 }
 
-// =====================================================================
-// LIMPAR CACHE DE ESCALAÇÕES
-// =====================================================================
+// v4.0: escalações não ficam mais em cache local (estão no backend)
 export function limparCacheEscalacoes() {
-    _escalacaoCache.clear();
-    if (window.Log) Log.info("[PARCIAIS] 🗑️ Cache de escalações limpo");
+    if (window.Log) Log.info("[PARCIAIS] ℹ️ v4.0: escalações cacheadas no backend");
 }
 
-// =====================================================================
-// OBTER ESCALAÇÃO CACHEADA DE UM TIME (para modal "Curiosar")
-// =====================================================================
 export function obterEscalacaoCacheada(timeId) {
+    // v4.0: não disponível localmente — dados de atletas estão dentro de cada participante
     const rodada = estadoParciais.rodadaAtual;
-    const cacheKey = `${timeId}_${rodada}`;
-    return _escalacaoCache.get(cacheKey) || null;
+    const participante = estadoParciais.dadosParciais.find(
+        (p) => String(p.timeId) === String(timeId),
+    );
+    if (!participante) return null;
+    // Recompõe estrutura esperada pelo código legado (modal "Curiosar")
+    return {
+        atletas: (participante.atletas || []).filter((a) => !a.is_reserva),
+        reservas: (participante.atletas || []).filter((a) => a.is_reserva),
+        capitao_id: participante.capitao_id,
+        reserva_luxo_id: participante.reserva_luxo_id,
+        time: {
+            nome: participante.nome_time,
+            nome_cartola: participante.nome_cartola,
+            url_escudo_png: participante.escudo,
+            patrimonio: participante.patrimonio,
+        },
+        rodada,
+    };
 }
 
 // Expor no window para debug e compatibilidade
@@ -903,5 +401,5 @@ window.ParciaisModule = {
 };
 
 if (window.Log) Log.info(
-    "[PARCIAIS] ✅ Módulo v3.1 carregado (dados enriquecidos + cache escalação + AbortController timeout)",
+    "[PARCIAIS] ✅ Módulo v4.0 carregado (endpoint unificado + frozen layer backend)",
 );
