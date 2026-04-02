@@ -3,7 +3,7 @@
 <div id="home-container" class="relative min-h-screen pb-20">
 
     <!-- ========================================
-         QUICK ACTIONS (4 chips: Participantes, Cartola PRO, Info Meu Time, Jogos do Dia)
+         QUICK ACTIONS (5 chips: Participantes, Cartola PRO, Info Meu Time, Jogos do Dia, Big Cartola IA)
          ======================================== -->
     <section id="home-atalhos-section" class="home-actions-bar">
         <button class="home-action-chip" id="btn-participantes" onclick="window.abrirParticipantes2026 && window.abrirParticipantes2026()">
@@ -21,6 +21,10 @@
         <button class="home-action-chip" onclick="window.participanteNav && window.participanteNav.navegarPara('jogos-do-dia')">
             <span class="material-icons" style="color: var(--app-success-light)">today</span>
             <span class="home-action-chip-label">Jogos do Dia</span>
+        </button>
+        <button class="home-action-chip home-action-disabled" onclick="alert('Em breve Big Cartola IA')">
+            <span class="material-icons" style="color: var(--app-purple)">auto_awesome</span>
+            <span class="home-action-chip-label">Big Cartola IA</span>
         </button>
     </section>
 
@@ -449,7 +453,7 @@
    ══════════════════════════════════════════════════════ */
 .home-actions-bar {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 8px;
     padding: 12px 16px;
 }
