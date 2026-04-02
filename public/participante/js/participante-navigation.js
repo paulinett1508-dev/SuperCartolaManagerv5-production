@@ -379,19 +379,13 @@ class ParticipanteNavigation {
     }
 
     /**
-     * ✅ v4.9: Widget "O que tá rolando?" - Engajamento ao vivo
-     * Mostra disputas internas ativas nos módulos da liga
+     * ✅ v5.0: FAB "Big Cartola IA" - Coming soon
+     * Mostra FAB com ícone de IA e toast "Em breve"
      */
     async inicializarWhatsHappeningWidget() {
         // Só inicializar se não for liga aposentada
         if (window.isLigaAposentada) {
-            if (window.Log) Log.debug('PARTICIPANTE-NAV', '⏭️ Widget WH ignorado (liga aposentada)');
-            return;
-        }
-
-        // Verificar se módulo está ativo na liga
-        if (!this.verificarModuloAtivo('whatsHappening')) {
-            if (window.Log) Log.debug('PARTICIPANTE-NAV', '⏭️ Widget WH ignorado (módulo desativado)');
+            if (window.Log) Log.debug('PARTICIPANTE-NAV', '⏭️ FAB IA ignorado (liga aposentada)');
             return;
         }
 
@@ -399,23 +393,11 @@ class ParticipanteNavigation {
             const module = await import('/participante/js/widgets/whats-happening-widget.js?v=' + Date.now());
 
             if (module.initWhatsHappeningWidget) {
-                await module.initWhatsHappeningWidget({
-                    ligaId: this.participanteData?.ligaId,
-                    timeId: this.participanteData?.timeId,
-                    temporada: new Date().getFullYear(),
-                    modulosAtivos: {
-                        pontosCorridos: this.modulosAtivos?.pontosCorridos || false,
-                        mataMata: this.modulosAtivos?.mataMata || false,
-                        artilheiro: this.modulosAtivos?.artilheiro || false,
-                        luvaOuro: this.modulosAtivos?.luvaOuro || false,
-                        capitaoLuxo: this.modulosAtivos?.capitaoLuxo || false,
-                        restaUm: this.modulosAtivos?.restaUm || false,
-                    }
-                });
-                if (window.Log) Log.info('PARTICIPANTE-NAV', '🔥 Widget "O que tá rolando?" inicializado');
+                await module.initWhatsHappeningWidget();
+                if (window.Log) Log.info('PARTICIPANTE-NAV', 'FAB "Big Cartola IA" inicializado');
             }
         } catch (error) {
-            if (window.Log) Log.warn('PARTICIPANTE-NAV', '⚠️ Erro ao inicializar Widget WH:', error);
+            if (window.Log) Log.warn('PARTICIPANTE-NAV', '⚠️ Erro ao inicializar FAB IA:', error);
         }
     }
 
