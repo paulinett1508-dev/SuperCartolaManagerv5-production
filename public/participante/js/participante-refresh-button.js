@@ -595,7 +595,7 @@ const RefreshButton = {
         }
 
         // v3.1: Preferir slot .module-lp-strip-actions se disponível (strip do LP engine)
-        const stripActions = document.querySelector('.module-lp-strip-actions');
+        const stripActions = containerEl.querySelector('.module-lp-strip-actions');
         if (stripActions && !stripActions.querySelector('.refresh-button')) {
             stripActions.appendChild(this.createButton(options));
             return stripActions;

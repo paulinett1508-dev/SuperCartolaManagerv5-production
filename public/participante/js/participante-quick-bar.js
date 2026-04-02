@@ -474,12 +474,13 @@ class QuickAccessBar {
             }, { passive: true });
         }
 
-        // Keyboard support
-        document.addEventListener('keydown', (e) => {
+        // Keyboard support (ref stored for future cleanup)
+        this._keydownHandler = (e) => {
             if (e.key === 'Escape' && this.menuAberto) {
                 this.fecharMenu();
             }
-        });
+        };
+        document.addEventListener('keydown', this._keydownHandler);
 
         if (window.Log) Log.debug('QUICK-BAR', '✅ Eventos configurados');
     }

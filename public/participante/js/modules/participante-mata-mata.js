@@ -1090,9 +1090,10 @@ async function carregarFase(edicao, fase) {
       const faseIdx = fasesAtivas.indexOf(fase);
       const edicaoCfg = EDICOES_MATA_MATA.find((e) => e.id === edicao);
       if (faseIdx > 0 && edicaoCfg && estado.rodadaAtual > 0) {
-        const rodadaDaFase = edicaoCfg.rodadaInicial + faseIdx;
+        // ✅ Ler rodada do calendário fixo salvo no banco (igual à primeira ocorrência, linha 1007)
+        const rodadaDaFase = _getRodadaDaFase(edicaoCfg, fase);
         // ✅ FIX: Usar < (não <=) — quando rodadaAtual === rodadaDaFase, a fase está ativa
-      if (estado.rodadaAtual < rodadaDaFase) {
+        if (estado.rodadaAtual < rodadaDaFase) {
           const fasePrev = fasesAtivas[faseIdx - 1];
           const confrontosPrev = estado.cacheConfrontos[`${edicao}-${fasePrev}`];
           if (confrontosPrev && confrontosPrev.length > 0) {

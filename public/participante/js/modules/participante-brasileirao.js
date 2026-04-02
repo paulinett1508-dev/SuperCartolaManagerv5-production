@@ -340,10 +340,13 @@ function _renderizarFallbackCompleto() {
 function _setupRefreshButton() {
     const btn = document.getElementById('brasileirao-refresh');
     if (!btn) return;
-    btn.addEventListener('click', async () => {
-        const icon = btn.querySelector('.material-icons');
-        if (!icon || btn.disabled) return;
-        btn.disabled = true;
+    // cloneNode to clear stale listeners on SPA re-navigation
+    const fresh = btn.cloneNode(true);
+    btn.parentNode.replaceChild(fresh, btn);
+    fresh.addEventListener('click', async () => {
+        const icon = fresh.querySelector('.material-icons');
+        if (!icon || fresh.disabled) return;
+        fresh.disabled = true;
         icon.classList.add('spinning');
         try {
             const [apiClassificacao, apiResumo] = await Promise.all([
@@ -356,7 +359,7 @@ function _setupRefreshButton() {
             _atualizarStatus();
         } finally {
             icon.classList.remove('spinning');
-            btn.disabled = false;
+            fresh.disabled = false;
         }
     });
 }
