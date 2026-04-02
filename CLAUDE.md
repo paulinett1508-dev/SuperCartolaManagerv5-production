@@ -31,6 +31,7 @@ Node.js (Docker/VPS) · MongoDB (Native Driver) · HTML5/CSS3/Vanilla JS (ES6 Mo
 - Frontend admin: se arquivo carregado via `vImport()` → incrementar `ADMIN_JS_VERSION` em `detalhe-liga-orquestrador.js`
 - **Cache busting obrigatório:** ao criar ou modificar CSS significativamente, incrementar `?v=X` no `<link>` correspondente em `index.html`. CSS sem `?v=` em PROD = bug invisível (browser serve versão antiga)
 - **Seletores CSS descendentes + DOM injetado:** antes de usar `.parent .child {}`, verificar se o child está realmente dentro do parent na árvore DOM. Elementos injetados via JS (`insertBefore`, `prepend`) podem estar fora do container esperado — preferir toggle via JS direto
+- **NUNCA `alert()` nativo do browser** — usar toasts do design system: `window.ErrorToast.show(msg, { tipo, duracao })` (app participante) ou equivalente no admin. `alert()` é visual amador e quebra a experiência dark mode
 
 ## UI/UX (resumo)
 
