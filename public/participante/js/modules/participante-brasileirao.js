@@ -90,11 +90,11 @@ async function _fetchComTimeout(url) {
 // INICIALIZAÇÃO — Padrão resiliente (igual Copa-NE/Copa-BR/Libertadores)
 // ═══════════════════════════════════════════════════
 
-export async function inicializarBrasileraoParticipante() {
-    if (window.Log) Log.info('BRASILEIRAO-LP', 'Inicializando LP Brasileirão 2026 v2.0...');
+export async function inicializarBrasileiraoParticipante() {
+    if (window.Log) Log.info('BRASILEIRAO-LP', 'Inicializando LP Brasileirão 2026 v2.1...');
 
     // Registrar cleanup no window para o navigation poder chamar ao sair
-    window.destruirBrasileraoParticipante = destruirBrasileraoParticipante;
+    window.destruirBrasileiraoParticipante = destruirBrasileiraoParticipante;
 
     try {
         // Carregar dados dinâmicos em paralelo (com timeout defensivo)
@@ -120,7 +120,7 @@ export async function inicializarBrasileraoParticipante() {
     }
 }
 
-export function destruirBrasileraoParticipante() {
+export function destruirBrasileiraoParticipante() {
     _pararAutoRefresh();
     if (_statusInterval) { clearInterval(_statusInterval); _statusInterval = null; }
     _ultimaAtualizacao = null;

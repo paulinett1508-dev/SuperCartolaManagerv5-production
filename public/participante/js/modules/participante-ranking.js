@@ -24,6 +24,23 @@ async function inicializarRankingParticipante(payload) {
         colorClass:   'module-lp-ranking-geral',
     });
 
+    // Injetar share button no slot de ações da strip
+    const stripActions = document.querySelector('#ranking-geral-lp-wrapper .module-lp-strip-actions');
+    if (stripActions && !stripActions.querySelector('.btn-share')) {
+        const shareIcon = document.createElement('span');
+        shareIcon.className = 'material-icons';
+        shareIcon.textContent = 'share';
+        const shareBtn = document.createElement('button');
+        shareBtn.className = 'btn-share';
+        shareBtn.title = 'Compartilhar ranking';
+        shareBtn.setAttribute('aria-label', 'Compartilhar ranking');
+        shareBtn.appendChild(shareIcon);
+        shareBtn.addEventListener('click', () => {
+            if (typeof window.compartilharRanking === 'function') window.compartilharRanking();
+        });
+        stripActions.appendChild(shareBtn);
+    }
+
     try {
         // Importar módulo principal (com cache-busting)
         const moduloRanking = await import(`/participante/modules/ranking/ranking.js?v=${Date.now()}`);

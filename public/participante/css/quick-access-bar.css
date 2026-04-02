@@ -44,7 +44,7 @@
     gap: 4px;
     background: none;
     border: none;
-    color: var(--app-text-dim);
+    color: rgba(212, 175, 55, 0.5);
     cursor: pointer;
     padding: 8px 16px;
     border-radius: 12px;
@@ -63,7 +63,7 @@
 }
 
 .nav-item.active {
-    color: var(--app-primary);
+    color: var(--app-copa-secondary, #D4AF37);
 }
 
 .nav-icon {
@@ -90,7 +90,7 @@
     left: 50%;
     width: 32px;
     height: 3px;
-    background: var(--app-primary);
+    background: var(--app-copa-secondary, #D4AF37);
     border-radius: 0 0 3px 3px;
     transform: translateX(-50%) scaleX(0) translateZ(0);
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);

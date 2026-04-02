@@ -56,37 +56,33 @@ function _buildLPHtml(config) {
 
     const closeBtnHtml = '';
 
-    const comoFuncionaAccordionHtml = mostrarComoFunciona ? `
-  <div class="module-lp-accordion" id="${wrapperId}-acc-como">
-    <button class="module-lp-accordion-btn" aria-expanded="false">
-      <div class="module-lp-accordion-btn-inner">
-        <span class="material-icons">menu_book</span>
-        <span class="module-lp-accordion-btn-label">Como Funciona</span>
-      </div>
-      <span class="material-icons module-lp-accordion-chevron">expand_more</span>
-    </button>
-    <div class="module-lp-accordion-body" id="lp-regras-body-${moduloKey}">
-      <div class="module-lp-accordion-inner">
-        <div class="lp-loading"><span class="material-icons lp-loading-icon">hourglass_empty</span></div>
-      </div>
+    const pillsRowHtml = (mostrarComoFunciona || mostrarPremio) ? `
+  <div class="module-lp-pills-row">
+    ${mostrarComoFunciona ? `<button class="module-lp-pill-btn" data-body="lp-regras-body-${moduloKey}" aria-expanded="false">
+      <span class="material-icons">menu_book</span>
+      <span>Como Funciona</span>
+      <span class="material-icons module-lp-pill-chevron">expand_more</span>
+    </button>` : ''}
+    ${mostrarPremio ? `<button class="module-lp-pill-btn" data-body="lp-premiacoes-body-${moduloKey}" aria-expanded="false">
+      <span class="material-icons">emoji_events</span>
+      <span>${labelPremio}</span>
+      <span class="material-icons module-lp-pill-chevron">expand_more</span>
+    </button>` : ''}
+  </div>` : '';
+
+    const comoFuncionaBodyHtml = mostrarComoFunciona ? `
+  <div class="module-lp-accordion-body" id="lp-regras-body-${moduloKey}">
+    <div class="module-lp-accordion-inner">
+      <div class="lp-loading"><span class="material-icons lp-loading-icon">hourglass_empty</span></div>
     </div>
   </div>` : '';
 
-    const premiacaoAccordionHtml = mostrarPremio ? `
-    <div class="module-lp-accordion" id="${wrapperId}-acc-prem">
-      <button class="module-lp-accordion-btn" aria-expanded="false">
-        <div class="module-lp-accordion-btn-inner">
-          <span class="material-icons">emoji_events</span>
-          <span class="module-lp-accordion-btn-label">${labelPremio}</span>
-        </div>
-        <span class="material-icons module-lp-accordion-chevron">expand_more</span>
-      </button>
-      <div class="module-lp-accordion-body" id="lp-premiacoes-body-${moduloKey}">
-        <div class="module-lp-accordion-inner">
-          <div class="lp-loading"><span class="material-icons lp-loading-icon">hourglass_empty</span></div>
-        </div>
-      </div>
-    </div>` : '';
+    const premiacaoBodyHtml = mostrarPremio ? `
+  <div class="module-lp-accordion-body" id="lp-premiacoes-body-${moduloKey}">
+    <div class="module-lp-accordion-inner">
+      <div class="lp-loading"><span class="material-icons lp-loading-icon">hourglass_empty</span></div>
+    </div>
+  </div>` : '';
 
     return `
 <div id="${wrapperId}" class="module-lp ${colorClass}">
@@ -97,9 +93,11 @@ function _buildLPHtml(config) {
       <h1 class="module-lp-strip-title">${titulo}</h1>
       <p class="module-lp-strip-tagline">${tagline}</p>
     </div>
+    <div class="module-lp-strip-actions"></div>
   </div>
-  ${comoFuncionaAccordionHtml}
-  ${premiacaoAccordionHtml}
+  ${pillsRowHtml}
+  ${comoFuncionaBodyHtml}
+  ${premiacaoBodyHtml}
 </div>`;
 }
 
@@ -114,7 +112,7 @@ function _initLPAccordions(wrapperId) {
     const wrapper = document.getElementById(wrapperId);
     if (!wrapper) return;
 
-    wrapper.querySelectorAll('.module-lp-accordion-btn').forEach(btn => {
+    wrapper.querySelectorAll('.module-lp-pill-btn').forEach(btn => {
         // Clone to remove any previously attached listeners (SPA safety)
         const fresh = btn.cloneNode(true);
         btn.parentNode.replaceChild(fresh, btn);
@@ -122,6 +120,12 @@ function _initLPAccordions(wrapperId) {
         fresh.addEventListener('click', () => {
             const isOpen = fresh.getAttribute('aria-expanded') === 'true';
             fresh.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+
+            const bodyId = fresh.dataset.body;
+            if (bodyId) {
+                const body = document.getElementById(bodyId);
+                if (body) body.classList.toggle('module-lp-body-open', !isOpen);
+            }
         });
     });
 }

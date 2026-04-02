@@ -1,17 +1,7 @@
 <!-- PARTICIPANTE RANKING - Mobile-First Compacto v4.1 (strip via LP Engine) -->
 <div id="ranking-geral-content" class="ranking-participante-pro">
     <!-- Header removido (strip via LP Engine) -->
-    <!-- Ação share preservada inline -->
-    <div style="display: flex; justify-content: flex-end; padding: 8px 16px 0;">
-        <button
-            class="btn-share"
-            onclick="compartilharRanking()"
-            title="Compartilhar"
-            aria-label="Compartilhar ranking"
-        >
-            <span class="material-icons">share</span>
-        </button>
-    </div>
+    <!-- Share button injetado no .module-lp-strip-actions via participante-ranking.js -->
 
     <!-- Container da Tabela -->
     <div class="ranking-card-pro">
@@ -116,28 +106,34 @@
         flex-shrink: 0;
     }
 
-    /* Botão Share */
+    /* Botão Share — compacto para caber na strip (30px, igual ao refresh button) */
     .btn-share {
-        display: flex;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 44px;
-        height: 44px;
-        background: var(--rank-primary-alpha-15);
-        border: none;
-        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        background: rgba(255, 255, 255, 0.09);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 999px;
         cursor: pointer;
         transition: all 0.2s ease;
+        -webkit-tap-highlight-color: transparent;
     }
 
     .btn-share .material-icons {
-        font-size: 20px;
-        color: var(--rank-primary);
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .btn-share:hover {
+        background: rgba(255, 255, 255, 0.22);
+        border-color: rgba(255, 255, 255, 0.4);
     }
 
     .btn-share:active {
         transform: scale(0.95);
-        background: var(--rank-primary-alpha-25);
+        background: rgba(255, 255, 255, 0.28);
     }
 
     .btn-share.loading {

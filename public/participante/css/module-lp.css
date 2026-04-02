@@ -144,6 +144,15 @@
     flex: 1;
 }
 
+/* Slot de ações direito na strip (refresh + share) */
+.module-lp-strip-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
 .module-lp-strip-title {
     font-family: var(--app-font-brand, 'Russo One', sans-serif);
     font-size: var(--app-strip-title-size, 14px);
@@ -158,7 +167,6 @@
     text-overflow: ellipsis;
 }
 
-<<<<<<< HEAD
 .module-lp-strip-tagline {
     font-family: var(--app-font-base, 'Inter', sans-serif);
     font-size: var(--app-strip-tagline-size, 10px);
@@ -270,7 +278,7 @@
     text-overflow: ellipsis;
 }
 
-..module-lp-hero-tagline {
+.module-lp-hero-tagline {
     font-family: var(--app-font-base, 'Inter', sans-serif);
     font-size: var(--app-strip-tagline-size, 10px);
     color: var(--app-text-dim, rgba(255,255,255,0.45));
@@ -285,68 +293,63 @@
 }
 
 /* ============================================================
-   4. ACCORDION (Como Funciona + Premiações)
-   Flat, minimal, iOS settings style
+   4. PILLS ROW (Como Funciona + Premiações — compact pill design)
    ============================================================ */
 
-.module-lp-accordion {
-    margin: 0;
-    border-radius: 0;
-    border: none;
+.module-lp-pills-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px var(--app-space-5, 16px);
     border-bottom: 1px solid var(--app-border, #333);
-    overflow: hidden;
-    background: transparent;
 }
 
-.module-lp-accordion-btn {
-    width: 100%;
-    display: flex;
+.module-lp-pill-btn {
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
-    padding: var(--app-space-3, 10px) var(--app-space-5, 16px);
-    background: transparent;
-    border: none;
+    gap: 4px;
+    padding: 4px 10px 4px 8px;
+    border-radius: var(--app-radius-full, 9999px);
+    background: var(--lp-muted, rgba(255,255,255,0.04));
+    border: 1px solid var(--lp-border, rgba(255,255,255,0.12));
+    color: var(--app-text-muted, rgba(255,255,255,0.6));
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
     cursor: pointer;
-    color: var(--app-text-secondary, rgba(255,255,255,0.85));
-    text-align: left;
     -webkit-tap-highlight-color: transparent;
-    transition: background var(--app-transition-fast, 0.15s ease);
+    transition: background var(--app-duration-fast, 0.15s) ease,
+                color var(--app-duration-fast, 0.15s) ease;
 }
 
-.module-lp-accordion-btn:active {
-    background: var(--lp-muted, rgba(255,255,255,0.05));
-}
-
-.module-lp-accordion-btn-inner {
-    display: flex;
-    align-items: center;
-    gap: var(--app-space-2, 8px);
-}
-
-.module-lp-accordion-btn-inner .material-icons {
-    font-size: 16px;
+.module-lp-pill-btn .material-icons {
+    font-size: 13px;
     color: var(--lp-primary);
     flex-shrink: 0;
 }
 
-.module-lp-accordion-btn-label {
-    font-family: var(--app-font-base, 'Inter', sans-serif);
-    font-size: var(--app-font-sm, 11px);
-    color: var(--app-text-muted, rgba(255,255,255,0.6));
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 600;
+.module-lp-pill-btn[aria-expanded="true"] {
+    background: var(--lp-muted, rgba(255,255,255,0.08));
+    color: var(--app-text-primary, #fff);
+    border-color: var(--lp-primary);
 }
 
-.module-lp-accordion-chevron {
-    font-size: 18px;
-    color: var(--app-text-dim, rgba(255,255,255,0.45));
-    transition: transform var(--app-transition-normal, 0.25s ease);
+.module-lp-pill-chevron {
+    font-size: 13px;
+    color: var(--app-text-dim, rgba(255,255,255,0.4));
+    transition: transform var(--app-duration-fast, 0.15s) ease;
     flex-shrink: 0;
 }
 
-.module-lp-accordion-btn[aria-expanded="true"] .module-lp-accordion-chevron {
+.module-lp-pill-btn[aria-expanded="true"] .module-lp-pill-chevron {
     transform: rotate(180deg);
+    color: var(--lp-primary);
+}
+
+.module-lp-pill-btn:active {
+    transform: scale(0.96);
 }
 
 /* Accordion body — max-height transition */
@@ -354,15 +357,27 @@
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-bottom: 1px solid transparent;
 }
 
-.module-lp-accordion-btn[aria-expanded="true"] ~ .module-lp-accordion-body {
+.module-lp-accordion-body.module-lp-body-open {
     max-height: 1200px;
+    border-bottom-color: var(--app-border, #333);
 }
 
 .module-lp-accordion-inner {
     padding: 0 var(--app-space-5, 16px) var(--app-space-4, 12px);
     border-top: 1px solid var(--app-border, #333);
+}
+
+/* Legacy accordion classes (backward compat) */
+.module-lp-accordion {
+    margin: 0;
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid var(--app-border, #333);
+    overflow: hidden;
+    background: transparent;
 }
 
 /* ============================================================

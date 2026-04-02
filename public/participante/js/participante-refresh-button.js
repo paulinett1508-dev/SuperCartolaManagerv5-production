@@ -588,32 +588,25 @@ const RefreshButton = {
         }
 
         // v2.1: Evitar duplicação
-        const existingButton = containerEl.querySelector('.refresh-button-container');
+        const existingButton = containerEl.querySelector('.refresh-button-container, .refresh-button');
         if (existingButton) {
             if (window.Log) Log.debug('REFRESH-BUTTON', 'Botão já existe no container, ignorando duplicação');
             return existingButton;
         }
 
-        // Criar container para o botão
+        // v3.1: Preferir slot .module-lp-strip-actions se disponível (strip do LP engine)
+        const stripActions = document.querySelector('.module-lp-strip-actions');
+        if (stripActions && !stripActions.querySelector('.refresh-button')) {
+            stripActions.appendChild(this.createButton(options));
+            return stripActions;
+        }
+
+        // Criar container para o botão (fallback)
         const wrapper = document.createElement('div');
         wrapper.className = 'refresh-button-inline-wrapper';
         wrapper.appendChild(this.createButton(options));
 
-        // Tentar injetar em um elemento header/linha existente
-        const headerSlot = containerEl.querySelector('.flex.justify-between, .flex.items-center, .module-header, .section-heading, .text-center, h1, h2');
-        if (headerSlot && headerSlot !== containerEl) {
-            // Se o container pai for bloco, força linha com display:flex
-            const host = headerSlot.closest('.flex.justify-between, .flex.items-center') || headerSlot;
-            if (host && !(host.classList.contains('refresh-button-inline-wrapper'))) {
-                host.style.display = host.style.display || 'flex';
-                host.style.alignItems = host.style.alignItems || 'center';
-                host.style.justifyContent = host.style.justifyContent || 'space-between';
-                host.appendChild(wrapper);
-                return wrapper;
-            }
-        }
-
-        // Fallback tradicional: adiciona no topo (sem ocupar linha separada)
+        // Fallback: adiciona no topo do container
         containerEl.style.position = containerEl.style.position || 'relative';
         wrapper.style.position = 'absolute';
         wrapper.style.top = '12px';

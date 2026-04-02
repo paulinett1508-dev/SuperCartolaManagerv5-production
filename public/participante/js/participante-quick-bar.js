@@ -400,11 +400,12 @@ class QuickAccessBar {
                         <span class="home-module-card-label">Copa de Times SC</span>
                         <span class="home-badge-em-breve" style="background:rgba(255,215,0,0.2);color:var(--app-gold);border:1px solid var(--app-gold);">EM BREVE</span>
                     </div>
+                    ${isPremium ? `
                     <div class="home-module-card" data-module="tiro-certo">
                         <span class="material-icons" style="color: var(--app-primary);">gps_fixed</span>
                         <span class="home-module-card-label">Tiro Certo</span>
                         <span class="home-badge-em-breve" style="background:rgba(255,85,0,0.12);color:var(--app-primary);border:1px solid rgba(255,85,0,0.25);">EM BREVE</span>
-                    </div>
+                    </div>` : ''}
                     <div class="home-module-card" data-module="bolao-copa" data-action="em-breve" style="opacity:0.4">
                         <span class="material-icons">sports</span>
                         <span class="home-module-card-label">Bolão Copa</span>
@@ -550,6 +551,8 @@ class QuickAccessBar {
 
     navegarPara(modulo) {
         if (window.participanteNav) {
+            // Reset debounce para garantir que cliques explícitos na Quick Bar sempre navegam
+            window.participanteNav._ultimaNavegacao = 0;
             window.participanteNav.navegarPara(modulo);
             this.moduloAtual = modulo;
         }
