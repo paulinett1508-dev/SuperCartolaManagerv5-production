@@ -295,7 +295,19 @@
       "Bash(ssh-keygen:*)",
       "Read(//root/.ssh/**)",
       "Bash(gh run:*)",
-      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(k,''''→'''',v.get\\(''''description'''',''''''''\\)\\) for k,v in d.items\\(\\) if ''''mito'''' in k.lower\\(\\) or ''''modal'''' in k.lower\\(\\) or ''''celebr'''' in k.lower\\(\\)]\")"
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(k,''''→'''',v.get\\(''''description'''',''''''''\\)\\) for k,v in d.items\\(\\) if ''''mito'''' in k.lower\\(\\) or ''''modal'''' in k.lower\\(\\) or ''''celebr'''' in k.lower\\(\\)]\")",
+      "Bash(gh.exe run:*)",
+      "mcp__plugin_github_github__list_commits",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_snapshot",
+      "mcp__plugin_playwright_playwright__browser_take_screenshot",
+      "Bash(where gh:*)",
+      "Read(//usr/local/bin/**)",
+      "Read(//c/Program Files/GitHub CLI/**)",
+      "mcp__plugin_github_github__list_pull_requests",
+      "Bash(where.exe gh:*)",
+      "Read(//c/Users/**)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\")"
     ]
   },
   "enableAllProjectMcpServers": true,

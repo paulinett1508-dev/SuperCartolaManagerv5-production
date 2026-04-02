@@ -1,0 +1,22 @@
+- generic [ref=e2]:
+  - generic [ref=e4]: emoji_events
+  - heading "Super Cartola Manager" [level=1] [ref=e5]
+  - paragraph [ref=e6]: Gerencie sua liga de forma profissional
+  - generic [ref=e7]:
+    - link "admin_panel_settings Administrador Acesse o painel de gestão completo da liga com todas as ferramentas administrativas. login Entrar como Admin" [ref=e8] [cursor=pointer]:
+      - /url: /admin-login.html
+      - generic [ref=e10]: admin_panel_settings
+      - heading "Administrador" [level=2] [ref=e11]
+      - paragraph [ref=e12]: Acesse o painel de gestão completo da liga com todas as ferramentas administrativas.
+      - generic [ref=e13]:
+        - generic [ref=e14]: login
+        - text: Entrar como Admin
+    - link "person Participante Acesse seu painel pessoal para acompanhar seu desempenho, extrato e posição na liga. login Entrar com Senha" [ref=e15] [cursor=pointer]:
+      - /url: /participante-login.html
+      - generic [ref=e17]: person
+      - heading "Participante" [level=2] [ref=e18]
+      - paragraph [ref=e19]: Acesse seu painel pessoal para acompanhar seu desempenho, extrato e posição na liga.
+      - generic [ref=e20]:
+        - generic [ref=e21]: login
+        - text: Entrar com Senha
+  - paragraph [ref=e23]: © 2026 Super Cartola Manager

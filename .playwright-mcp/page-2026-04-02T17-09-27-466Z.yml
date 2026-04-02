@@ -1,0 +1,887 @@
+- generic [ref=e2]:
+  - region
+  - generic [ref=e3]:
+    - link "Skip to content" [ref=e4] [cursor=pointer]:
+      - /url: "#start-of-content"
+    - banner [ref=e6]:
+      - heading "Navigation Menu" [level=2] [ref=e7]
+      - generic [ref=e9]:
+        - button "Toggle navigation" [ref=e11] [cursor=pointer]
+        - link "Homepage" [ref=e17] [cursor=pointer]:
+          - /url: /
+          - img [ref=e18]
+        - generic [ref=e20]:
+          - link "Sign in" [ref=e21] [cursor=pointer]:
+            - /url: /login?return_to=https%3A%2F%2Fgithub.com%2Fpaulinett1508-dev%2FSuperCartolaManagerv5-production%2Factions
+          - button "Appearance settings" [disabled] [ref=e24]:
+            - img
+  - main [ref=e28]:
+    - generic [ref=e29]:
+      - generic [ref=e30]:
+        - generic [ref=e32]:
+          - img [ref=e33]
+          - link "paulinett1508-dev" [ref=e36] [cursor=pointer]:
+            - /url: /paulinett1508-dev
+          - generic [ref=e37]: /
+          - strong [ref=e38]:
+            - link "SuperCartolaManagerv5-production" [ref=e39] [cursor=pointer]:
+              - /url: /paulinett1508-dev/SuperCartolaManagerv5-production
+          - generic [ref=e40]: Public
+        - generic [ref=e41]:
+          - list:
+            - listitem [ref=e42]:
+              - link "You must be signed in to change notification settings" [ref=e43] [cursor=pointer]:
+                - /url: /login?return_to=%2Fpaulinett1508-dev%2FSuperCartolaManagerv5-production
+                - img [ref=e44]
+                - text: Notifications
+            - listitem [ref=e46]:
+              - link "Fork 0" [ref=e47] [cursor=pointer]:
+                - /url: /login?return_to=%2Fpaulinett1508-dev%2FSuperCartolaManagerv5-production
+                - img [ref=e48]
+                - text: Fork
+                - generic "0" [ref=e50]
+            - listitem [ref=e51]:
+              - link "You must be signed in to star a repository" [ref=e53] [cursor=pointer]:
+                - /url: /login?return_to=%2Fpaulinett1508-dev%2FSuperCartolaManagerv5-production
+                - img [ref=e54]
+                - text: Star
+                - generic "0 users starred this repository" [ref=e56]: "0"
+      - navigation "Repository" [ref=e57]:
+        - list [ref=e58]:
+          - listitem [ref=e59]:
+            - link "Code" [ref=e60] [cursor=pointer]:
+              - /url: /paulinett1508-dev/SuperCartolaManagerv5-production
+              - img [ref=e61]
+              - generic [ref=e63]: Code
+          - listitem [ref=e64]:
+            - link "Issues 1" [ref=e65] [cursor=pointer]:
+              - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/issues
+              - img [ref=e66]
+              - generic [ref=e69]: Issues
+              - generic "1" [ref=e70]
+          - listitem [ref=e71]:
+            - link "Pull requests" [ref=e72] [cursor=pointer]:
+              - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/pulls
+              - img [ref=e73]
+              - generic [ref=e75]: Pull requests
+          - listitem [ref=e76]:
+            - link "Actions" [ref=e77] [cursor=pointer]:
+              - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions
+              - img [ref=e78]
+              - generic [ref=e80]: Actions
+          - listitem [ref=e81]:
+            - link "Projects" [ref=e82] [cursor=pointer]:
+              - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/projects
+              - img [ref=e83]
+              - generic [ref=e85]: Projects
+          - listitem [ref=e86]:
+            - link "Security and quality" [ref=e87] [cursor=pointer]:
+              - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/security
+              - img [ref=e88]
+              - generic [ref=e90]: Security and quality
+          - listitem [ref=e91]:
+            - link "Insights" [ref=e92] [cursor=pointer]:
+              - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/pulse
+              - img [ref=e93]
+              - generic [ref=e95]: Insights
+    - generic [ref=e97]:
+      - 'heading "Actions: paulinett1508-dev/SuperCartolaManagerv5-production" [level=1] [ref=e98]'
+      - generic [ref=e101]:
+        - generic [ref=e102]:
+          - heading "Actions" [level=2] [ref=e104]
+          - navigation "Actions Workflows" [ref=e108]:
+            - list [ref=e110]:
+              - listitem [ref=e111]:
+                - link "All workflows" [ref=e112] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions
+                  - generic [ref=e113]: All workflows
+              - listitem [ref=e114]
+              - listitem [ref=e115]:
+                - list "Workflows" [ref=e119]:
+                  - listitem [ref=e120]:
+                    - link "Deploy Production" [ref=e121] [cursor=pointer]:
+                      - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/workflows/deploy-production.yml
+                      - generic [ref=e122]: Deploy Production
+                  - listitem [ref=e123]:
+                    - link "Deploy Staging" [ref=e124] [cursor=pointer]:
+                      - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/workflows/deploy-staging.yml
+                      - generic [ref=e125]: Deploy Staging
+                  - listitem [ref=e126]:
+                    - link "supercartolamanagerv5" [ref=e127] [cursor=pointer]:
+                      - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/workflows/main.yml
+                      - generic [ref=e128]: supercartolamanagerv5
+              - listitem [ref=e129]
+              - listitem [ref=e130]:
+                - generic [ref=e133]:
+                  - heading "Management" [level=3] [ref=e135]
+                  - list "Management" [ref=e136]:
+                    - listitem [ref=e137]:
+                      - link "Caches" [ref=e138] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/caches
+                        - generic:
+                          - img
+                        - generic [ref=e139]: Caches
+                    - listitem [ref=e140]:
+                      - link "Deployments" [ref=e141] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/deployments
+                        - generic:
+                          - img
+                        - generic [ref=e142]: Deployments
+                        - generic:
+                          - img
+        - generic [ref=e145]:
+          - generic [ref=e146]:
+            - generic [ref=e147]:
+              - heading "All workflows" [level=2] [ref=e149]:
+                - generic [ref=e151]: All workflows
+              - search [ref=e155]:
+                - combobox "Filter workflow runs" [ref=e156]
+                - img
+            - generic [ref=e157]: Showing runs from all workflows
+          - strong [ref=e160]: 200 workflow runs
+          - generic [ref=e161]:
+            - generic [ref=e163]:
+              - button "Event" [ref=e166] [cursor=pointer]:
+                - generic [ref=e168]: Event
+                - generic:
+                  - img
+              - button "Status" [ref=e171] [cursor=pointer]:
+                - generic [ref=e173]: Status
+                - generic:
+                  - img
+              - button "Branch" [ref=e176] [cursor=pointer]:
+                - generic [ref=e178]: Branch
+                - generic:
+                  - img
+              - button "Actor" [ref=e181] [cursor=pointer]:
+                - generic [ref=e183]: Actor
+                - generic:
+                  - img
+            - generic [ref=e184]:
+              - generic [ref=e186]:
+                - generic [ref=e187]:
+                  - 'link "completed successfully: Run 143 of supercartolamanagerv5. feat: simplify refresh button to icon-only + remove module close X su…" [ref=e188] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23912360071
+                    - img "completed successfully:" [ref=e190]
+                    - generic [ref=e192]: "feat: simplify refresh button to icon-only + remove module close X su…"
+                  - generic [ref=e193]:
+                    - text: "supercartolamanagerv5 #143:"
+                    - generic [ref=e194]:
+                      - text: Commit
+                      - link "ca8feeb" [ref=e195] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/commit/ca8feeb63e60895457796eb9931ce5c61ad980da
+                      - text: pushed by
+                      - link "paulinett1508-dev" [ref=e196] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "main" [ref=e198] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/main
+                - generic [ref=e200]:
+                  - generic [ref=e201]:
+                    - generic [ref=e202]:
+                      - img [ref=e204]
+                      - generic "Apr 2, 2026, 2:06 PM GMT-3" [ref=e206]: 3 minutes ago
+                    - generic [ref=e207]:
+                      - img "Run duration" [ref=e208]
+                      - text: 1m 50s
+                  - group [ref=e211]:
+                    - generic "Show options" [ref=e212] [cursor=pointer]:
+                      - img "Show options" [ref=e213]
+              - generic [ref=e216]:
+                - generic [ref=e217]:
+                  - 'link "completed successfully: Run 142 of supercartolamanagerv5. Redesign v2.0: Slim Strip headers + Light Mode + Flat Accordions" [ref=e218] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23910233360
+                    - img "completed successfully:" [ref=e220]
+                    - generic [ref=e222]: "Redesign v2.0: Slim Strip headers + Light Mode + Flat Accordions"
+                  - generic [ref=e223]:
+                    - text: "supercartolamanagerv5 #142:"
+                    - generic [ref=e224]:
+                      - text: Commit
+                      - link "efed871" [ref=e225] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/commit/efed871eeaa2f8f7e744d6599a8a8310c21873c9
+                      - text: pushed by
+                      - link "paulinett1508-dev" [ref=e226] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "main" [ref=e228] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/main
+                - generic [ref=e230]:
+                  - generic [ref=e231]:
+                    - generic [ref=e232]:
+                      - img [ref=e234]
+                      - generic "Apr 2, 2026, 1:14 PM GMT-3" [ref=e236]: 54 minutes ago
+                    - generic [ref=e237]:
+                      - img "Run duration" [ref=e238]
+                      - text: 3m 4s
+                  - group [ref=e241]:
+                    - generic "Show options" [ref=e242] [cursor=pointer]:
+                      - img "Show options" [ref=e243]
+              - generic [ref=e246]:
+                - generic [ref=e247]:
+                  - 'link "completed successfully: Run 141 of supercartolamanagerv5. fix: corrigir 401 em verificarStatusRenovacao e 404 em cache miss top10" [ref=e248] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23910216842
+                    - img "completed successfully:" [ref=e250]
+                    - generic [ref=e252]: "fix: corrigir 401 em verificarStatusRenovacao e 404 em cache miss top10"
+                  - generic [ref=e253]:
+                    - text: "supercartolamanagerv5 #141:"
+                    - generic [ref=e254]:
+                      - text: Commit
+                      - link "2e548b0" [ref=e255] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/commit/2e548b016b0b916012f68888a8cb537fc82dd36e
+                      - text: pushed by
+                      - link "paulinett1508-dev" [ref=e256] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "main" [ref=e258] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/main
+                - generic [ref=e260]:
+                  - generic [ref=e261]:
+                    - generic [ref=e262]:
+                      - img [ref=e264]
+                      - generic "Apr 2, 2026, 1:14 PM GMT-3" [ref=e266]: 54 minutes ago
+                    - generic [ref=e267]:
+                      - img "Run duration" [ref=e268]
+                      - text: 3m 25s
+                  - group [ref=e271]:
+                    - generic "Show options" [ref=e272] [cursor=pointer]:
+                      - img "Show options" [ref=e273]
+              - generic [ref=e276]:
+                - generic [ref=e277]:
+                  - 'link "completed successfully: Run 140 of supercartolamanagerv5. fix(mata-mata): desbloquear fase atual no app participante (#41)" [ref=e278] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23899800443
+                    - img "completed successfully:" [ref=e280]
+                    - generic [ref=e282]: "fix(mata-mata): desbloquear fase atual no app participante (#41)"
+                  - generic [ref=e283]:
+                    - text: "supercartolamanagerv5 #140:"
+                    - generic [ref=e284]:
+                      - text: Commit
+                      - link "50ba7a8" [ref=e285] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/commit/50ba7a807cee6aea9697e64554aed2eb88df4005
+                      - text: pushed by
+                      - link "paulinett1508-dev" [ref=e286] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "main" [ref=e288] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/main
+                - generic [ref=e290]:
+                  - generic [ref=e291]:
+                    - generic [ref=e292]:
+                      - img [ref=e294]
+                      - generic "Apr 2, 2026, 9:13 AM GMT-3" [ref=e296]: Today at 9:13 AM
+                    - generic [ref=e297]:
+                      - img "Run duration" [ref=e298]
+                      - text: 1m 46s
+                  - group [ref=e301]:
+                    - generic "Show options" [ref=e302] [cursor=pointer]:
+                      - img "Show options" [ref=e303]
+              - generic [ref=e306]:
+                - generic [ref=e307]:
+                  - 'link "completed successfully: Run 139 of supercartolamanagerv5. fix(mata-mata): desbloquear fase atual no app participante" [ref=e308] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23899798124
+                    - img "completed successfully:" [ref=e310]
+                    - generic [ref=e312]: "fix(mata-mata): desbloquear fase atual no app participante"
+                  - generic [ref=e313]:
+                    - text: "supercartolamanagerv5 #139:"
+                    - generic [ref=e314]:
+                      - text: Pull request
+                      - link "#41" [ref=e315] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/pull/41
+                      - text: synchronize by
+                      - link "paulinett1508-dev" [ref=e316] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "claude/audit-matamata-module-6BzuP" [ref=e318] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/claude/audit-matamata-module-6BzuP
+                - generic [ref=e320]:
+                  - generic [ref=e321]:
+                    - generic [ref=e322]:
+                      - img [ref=e324]
+                      - generic "Apr 2, 2026, 9:13 AM GMT-3" [ref=e326]: Today at 9:13 AM
+                    - generic [ref=e327]:
+                      - img "Run duration" [ref=e328]
+                      - text: 16s
+                  - group [ref=e331]:
+                    - generic "Show options" [ref=e332] [cursor=pointer]:
+                      - img "Show options" [ref=e333]
+              - generic [ref=e336]:
+                - generic [ref=e337]:
+                  - 'link "completed successfully: Run 138 of supercartolamanagerv5. fix(mata-mata): auditoria completa — 4 bugs + calendário fixo (#40)" [ref=e338] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23899113131
+                    - img "completed successfully:" [ref=e340]
+                    - generic [ref=e342]: "fix(mata-mata): auditoria completa — 4 bugs + calendário fixo (#40)"
+                  - generic [ref=e343]:
+                    - text: "supercartolamanagerv5 #138:"
+                    - generic [ref=e344]:
+                      - text: Commit
+                      - link "394bd78" [ref=e345] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/commit/394bd78d9573d2fb7b8699f6fe475c33063a3d24
+                      - text: pushed by
+                      - link "paulinett1508-dev" [ref=e346] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "main" [ref=e348] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/main
+                - generic [ref=e350]:
+                  - generic [ref=e351]:
+                    - generic [ref=e352]:
+                      - img [ref=e354]
+                      - generic "Apr 2, 2026, 8:54 AM GMT-3" [ref=e356]: Today at 8:54 AM
+                    - generic [ref=e357]:
+                      - img "Run duration" [ref=e358]
+                      - text: 1m 56s
+                  - group [ref=e361]:
+                    - generic "Show options" [ref=e362] [cursor=pointer]:
+                      - img "Show options" [ref=e363]
+              - generic [ref=e366]:
+                - generic [ref=e367]:
+                  - 'link "completed successfully: Run 137 of supercartolamanagerv5. fix(mata-mata): auditoria completa — 4 bugs + calendário fixo" [ref=e368] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23899098123
+                    - img "completed successfully:" [ref=e370]
+                    - generic [ref=e372]: "fix(mata-mata): auditoria completa — 4 bugs + calendário fixo"
+                  - generic [ref=e373]:
+                    - text: "supercartolamanagerv5 #137:"
+                    - generic [ref=e374]:
+                      - text: Pull request
+                      - link "#40" [ref=e375] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/pull/40
+                      - text: synchronize by
+                      - link "paulinett1508-dev" [ref=e376] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "claude/audit-matamata-module-6BzuP" [ref=e378] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/claude/audit-matamata-module-6BzuP
+                - generic [ref=e380]:
+                  - generic [ref=e381]:
+                    - generic [ref=e382]:
+                      - img [ref=e384]
+                      - generic "Apr 2, 2026, 8:54 AM GMT-3" [ref=e386]: Today at 8:54 AM
+                    - generic [ref=e387]:
+                      - img "Run duration" [ref=e388]
+                      - text: 15s
+                  - group [ref=e391]:
+                    - generic "Show options" [ref=e392] [cursor=pointer]:
+                      - img "Show options" [ref=e393]
+              - generic [ref=e396]:
+                - generic [ref=e397]:
+                  - 'link "completed successfully: Run 136 of supercartolamanagerv5. fix(mata-mata): auditoria completa do módulo — 4 bugs corrigidos (#39)" [ref=e398] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23898340631
+                    - img "completed successfully:" [ref=e400]
+                    - generic [ref=e402]: "fix(mata-mata): auditoria completa do módulo — 4 bugs corrigidos (#39)"
+                  - generic [ref=e403]:
+                    - text: "supercartolamanagerv5 #136:"
+                    - generic [ref=e404]:
+                      - text: Commit
+                      - link "8599bbf" [ref=e405] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/commit/8599bbf79a1e6bb873b38198b27340ac136a2f7e
+                      - text: pushed by
+                      - link "paulinett1508-dev" [ref=e406] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "main" [ref=e408] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/main
+                - generic [ref=e410]:
+                  - generic [ref=e411]:
+                    - generic [ref=e412]:
+                      - img [ref=e414]
+                      - generic "Apr 2, 2026, 8:32 AM GMT-3" [ref=e416]: Today at 8:32 AM
+                    - generic [ref=e417]:
+                      - img "Run duration" [ref=e418]
+                      - text: 2m 37s
+                  - group [ref=e421]:
+                    - generic "Show options" [ref=e422] [cursor=pointer]:
+                      - img "Show options" [ref=e423]
+              - generic [ref=e426]:
+                - generic [ref=e427]:
+                  - 'link "completed successfully: Run 135 of supercartolamanagerv5. fix(mata-mata): auditoria completa do módulo — 4 bugs corrigidos" [ref=e428] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23898335421
+                    - img "completed successfully:" [ref=e430]
+                    - generic [ref=e432]: "fix(mata-mata): auditoria completa do módulo — 4 bugs corrigidos"
+                  - generic [ref=e433]:
+                    - text: "supercartolamanagerv5 #135:"
+                    - generic [ref=e434]:
+                      - text: Pull request
+                      - link "#39" [ref=e435] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/pull/39
+                      - text: opened by
+                      - link "paulinett1508-dev" [ref=e436] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "claude/audit-matamata-module-6BzuP" [ref=e438] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/claude/audit-matamata-module-6BzuP
+                - generic [ref=e440]:
+                  - generic [ref=e441]:
+                    - generic [ref=e442]:
+                      - img [ref=e444]
+                      - generic "Apr 2, 2026, 8:32 AM GMT-3" [ref=e446]: Today at 8:32 AM
+                    - generic [ref=e447]:
+                      - img "Run duration" [ref=e448]
+                      - text: 20s
+                  - group [ref=e451]:
+                    - generic "Show options" [ref=e452] [cursor=pointer]:
+                      - img "Show options" [ref=e453]
+              - generic [ref=e456]:
+                - generic [ref=e457]:
+                  - 'link "completed successfully: Run 134 of supercartolamanagerv5. fix(brasileirao-lp): corrigir loading infinito na opção Especial (#37)" [ref=e458] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23894281955
+                    - img "completed successfully:" [ref=e460]
+                    - generic [ref=e462]: "fix(brasileirao-lp): corrigir loading infinito na opção Especial (#37)"
+                  - generic [ref=e463]:
+                    - text: "supercartolamanagerv5 #134:"
+                    - generic [ref=e464]:
+                      - text: Commit
+                      - link "7644e11" [ref=e465] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/commit/7644e113d1dcce19ad7b19d7925e2aba62f18f6e
+                      - text: pushed by
+                      - link "paulinett1508-dev" [ref=e466] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "main" [ref=e468] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/main
+                - generic [ref=e470]:
+                  - generic [ref=e471]:
+                    - generic [ref=e472]:
+                      - img [ref=e474]
+                      - generic "Apr 2, 2026, 6:41 AM GMT-3" [ref=e476]: Today at 6:41 AM
+                    - generic [ref=e477]:
+                      - img "Run duration" [ref=e478]
+                      - text: 1m 33s
+                  - group [ref=e481]:
+                    - generic "Show options" [ref=e482] [cursor=pointer]:
+                      - img "Show options" [ref=e483]
+              - generic [ref=e486]:
+                - generic [ref=e487]:
+                  - 'link "completed successfully: Run 133 of supercartolamanagerv5. fix(brasileirao-lp): corrigir loading infinito na opção Especial" [ref=e488] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23894241747
+                    - img "completed successfully:" [ref=e490]
+                    - generic [ref=e492]: "fix(brasileirao-lp): corrigir loading infinito na opção Especial"
+                  - generic [ref=e493]:
+                    - text: "supercartolamanagerv5 #133:"
+                    - generic [ref=e494]:
+                      - text: Pull request
+                      - link "#37" [ref=e495] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/pull/37
+                      - text: synchronize by
+                      - link "paulinett1508-dev" [ref=e496] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "claude/fix-especial-loading-bug-2Z2I5" [ref=e498] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/claude/fix-especial-loading-bug-2Z2I5
+                - generic [ref=e500]:
+                  - generic [ref=e501]:
+                    - generic [ref=e502]:
+                      - img [ref=e504]
+                      - generic "Apr 2, 2026, 6:40 AM GMT-3" [ref=e506]: Today at 6:40 AM
+                    - generic [ref=e507]:
+                      - img "Run duration" [ref=e508]
+                      - text: 21s
+                  - group [ref=e511]:
+                    - generic "Show options" [ref=e512] [cursor=pointer]:
+                      - img "Show options" [ref=e513]
+              - generic [ref=e516]:
+                - generic [ref=e517]:
+                  - 'link "completed successfully: Run 132 of supercartolamanagerv5. fix(brasileirao-lp): corrigir loading infinito na opção Especial" [ref=e518] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23894194556
+                    - img "completed successfully:" [ref=e520]
+                    - generic [ref=e522]: "fix(brasileirao-lp): corrigir loading infinito na opção Especial"
+                  - generic [ref=e523]:
+                    - text: "supercartolamanagerv5 #132:"
+                    - generic [ref=e524]:
+                      - text: Pull request
+                      - link "#37" [ref=e525] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/pull/37
+                      - text: opened by
+                      - link "paulinett1508-dev" [ref=e526] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "claude/fix-especial-loading-bug-2Z2I5" [ref=e528] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/claude/fix-especial-loading-bug-2Z2I5
+                - generic [ref=e530]:
+                  - generic [ref=e531]:
+                    - generic [ref=e532]:
+                      - img [ref=e534]
+                      - generic "Apr 2, 2026, 6:39 AM GMT-3" [ref=e536]: Today at 6:39 AM
+                    - generic [ref=e537]:
+                      - img "Run duration" [ref=e538]
+                      - text: 17s
+                  - group [ref=e541]:
+                    - generic "Show options" [ref=e542] [cursor=pointer]:
+                      - img "Show options" [ref=e543]
+              - generic [ref=e546]:
+                - generic [ref=e547]:
+                  - 'link "completed successfully: Run 131 of supercartolamanagerv5. fix(brasileirao-lp): corrigir loading infinito na opção Especial → Br…" [ref=e548] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23894125902
+                    - img "completed successfully:" [ref=e550]
+                    - generic [ref=e552]: "fix(brasileirao-lp): corrigir loading infinito na opção Especial → Br…"
+                  - generic [ref=e553]:
+                    - text: "supercartolamanagerv5 #131:"
+                    - generic [ref=e554]:
+                      - text: Commit
+                      - link "ec69b46" [ref=e555] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/commit/ec69b46eaf8f0853ca4669aebae2e4275b87cba5
+                      - text: pushed by
+                      - link "paulinett1508-dev" [ref=e556] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "main" [ref=e558] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/main
+                - generic [ref=e560]:
+                  - generic [ref=e561]:
+                    - generic [ref=e562]:
+                      - img [ref=e564]
+                      - generic "Apr 2, 2026, 6:37 AM GMT-3" [ref=e566]: Today at 6:37 AM
+                    - generic [ref=e567]:
+                      - img "Run duration" [ref=e568]
+                      - text: 2m 51s
+                  - group [ref=e571]:
+                    - generic "Show options" [ref=e572] [cursor=pointer]:
+                      - img "Show options" [ref=e573]
+              - generic [ref=e576]:
+                - generic [ref=e577]:
+                  - 'link "completed successfully: Run 130 of supercartolamanagerv5. fix(brasileirao-lp): corrigir loading infinito na opção Especial → Brasileirão" [ref=e578] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23894117486
+                    - img "completed successfully:" [ref=e580]
+                    - generic [ref=e582]: "fix(brasileirao-lp): corrigir loading infinito na opção Especial → Brasileirão"
+                  - generic [ref=e583]:
+                    - text: "supercartolamanagerv5 #130:"
+                    - generic [ref=e584]:
+                      - text: Pull request
+                      - link "#36" [ref=e585] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/pull/36
+                      - text: opened by
+                      - link "paulinett1508-dev" [ref=e586] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "claude/fix-especial-loading-bug-2Z2I5" [ref=e588] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/claude/fix-especial-loading-bug-2Z2I5
+                - generic [ref=e590]:
+                  - generic [ref=e591]:
+                    - generic [ref=e592]:
+                      - img [ref=e594]
+                      - generic "Apr 2, 2026, 6:36 AM GMT-3" [ref=e596]: Today at 6:36 AM
+                    - generic [ref=e597]:
+                      - img "Run duration" [ref=e598]
+                      - text: 25s
+                  - group [ref=e601]:
+                    - generic "Show options" [ref=e602] [cursor=pointer]:
+                      - img "Show options" [ref=e603]
+              - generic [ref=e606]:
+                - generic [ref=e607]:
+                  - 'link "completed successfully: Run 129 of supercartolamanagerv5. docs: regra NUNCA alert() — usar ErrorToast do design system" [ref=e608] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23880096570
+                    - img "completed successfully:" [ref=e610]
+                    - generic [ref=e612]: "docs: regra NUNCA alert() — usar ErrorToast do design system"
+                  - generic [ref=e613]:
+                    - text: "supercartolamanagerv5 #129:"
+                    - generic [ref=e614]:
+                      - text: Commit
+                      - link "902d146" [ref=e615] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/commit/902d14660cdf7da0785012cbf4e4c7d88eccf1e2
+                      - text: pushed by
+                      - link "paulinett1508-dev" [ref=e616] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "main" [ref=e618] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/main
+                - generic [ref=e620]:
+                  - generic [ref=e621]:
+                    - generic [ref=e622]:
+                      - img [ref=e624]
+                      - generic "Apr 1, 2026, 11:02 PM GMT-3" [ref=e626]: Today at 11:02 PM
+                    - generic [ref=e627]:
+                      - img "Run duration" [ref=e628]
+                      - text: 1m 31s
+                  - group [ref=e631]:
+                    - generic "Show options" [ref=e632] [cursor=pointer]:
+                      - img "Show options" [ref=e633]
+              - generic [ref=e636]:
+                - generic [ref=e637]:
+                  - 'link "completed successfully: Run 128 of supercartolamanagerv5. fix: trocar alert() nativo por ErrorToast no chip Big Cartola IA" [ref=e638] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23880059824
+                    - img "completed successfully:" [ref=e640]
+                    - generic [ref=e642]: "fix: trocar alert() nativo por ErrorToast no chip Big Cartola IA"
+                  - generic [ref=e643]:
+                    - text: "supercartolamanagerv5 #128:"
+                    - generic [ref=e644]:
+                      - text: Commit
+                      - link "4d5129a" [ref=e645] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/commit/4d5129a6e8608f569abf677f6d04bb5232b6d1a5
+                      - text: pushed by
+                      - link "paulinett1508-dev" [ref=e646] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "main" [ref=e648] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/main
+                - generic [ref=e650]:
+                  - generic [ref=e651]:
+                    - generic [ref=e652]:
+                      - img [ref=e654]
+                      - generic "Apr 1, 2026, 11:01 PM GMT-3" [ref=e656]: Today at 11:01 PM
+                    - generic [ref=e657]:
+                      - img "Run duration" [ref=e658]
+                      - text: 2m 4s
+                  - group [ref=e661]:
+                    - generic "Show options" [ref=e662] [cursor=pointer]:
+                      - img "Show options" [ref=e663]
+              - generic [ref=e666]:
+                - generic [ref=e667]:
+                  - 'link "completed successfully: Run 127 of supercartolamanagerv5. fix: resolve infinite loading spinner on Brasileirão Série A landing …" [ref=e668] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23879830393
+                    - img "completed successfully:" [ref=e670]
+                    - generic [ref=e672]: "fix: resolve infinite loading spinner on Brasileirão Série A landing …"
+                  - generic [ref=e673]:
+                    - text: "supercartolamanagerv5 #127:"
+                    - generic [ref=e674]:
+                      - text: Commit
+                      - link "83ff90c" [ref=e675] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/commit/83ff90c8da0ea14613102589f648bbef75927d32
+                      - text: pushed by
+                      - link "paulinett1508-dev" [ref=e676] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "main" [ref=e678] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/main
+                - generic [ref=e680]:
+                  - generic [ref=e681]:
+                    - generic [ref=e682]:
+                      - img [ref=e684]
+                      - generic "Apr 1, 2026, 10:52 PM GMT-3" [ref=e686]: Today at 10:52 PM
+                    - generic [ref=e687]:
+                      - img "Run duration" [ref=e688]
+                      - text: 1m 32s
+                  - group [ref=e691]:
+                    - generic "Show options" [ref=e692] [cursor=pointer]:
+                      - img "Show options" [ref=e693]
+              - generic [ref=e696]:
+                - generic [ref=e697]:
+                  - 'link "completed successfully: Run 126 of supercartolamanagerv5. fix: resolve infinite loading spinner on Brasileirão Série A landing page" [ref=e698] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23879826233
+                    - img "completed successfully:" [ref=e700]
+                    - generic [ref=e702]: "fix: resolve infinite loading spinner on Brasileirão Série A landing page"
+                  - generic [ref=e703]:
+                    - text: "supercartolamanagerv5 #126:"
+                    - generic [ref=e704]:
+                      - text: Pull request
+                      - link "#35" [ref=e705] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/pull/35
+                      - text: opened by
+                      - link "paulinett1508-dev" [ref=e706] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "claude/audit-debug-code-S3nsy" [ref=e708] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/claude/audit-debug-code-S3nsy
+                - generic [ref=e710]:
+                  - generic [ref=e711]:
+                    - generic [ref=e712]:
+                      - img [ref=e714]
+                      - generic "Apr 1, 2026, 10:52 PM GMT-3" [ref=e716]: Today at 10:52 PM
+                    - generic [ref=e717]:
+                      - img "Run duration" [ref=e718]
+                      - text: 22s
+                  - group [ref=e721]:
+                    - generic "Show options" [ref=e722] [cursor=pointer]:
+                      - img "Show options" [ref=e723]
+              - generic [ref=e726]:
+                - generic [ref=e727]:
+                  - 'link "completed successfully: Run 125 of supercartolamanagerv5. refactor: trocar FAB flutuante por chip ''Big Cartola IA'' na Home" [ref=e728] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23879729848
+                    - img "completed successfully:" [ref=e730]
+                    - generic [ref=e732]: "refactor: trocar FAB flutuante por chip 'Big Cartola IA' na Home"
+                  - generic [ref=e733]:
+                    - text: "supercartolamanagerv5 #125:"
+                    - generic [ref=e734]:
+                      - text: Commit
+                      - link "fcefdc3" [ref=e735] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/commit/fcefdc384000692c397c62cc8e373a7583c7735b
+                      - text: pushed by
+                      - link "paulinett1508-dev" [ref=e736] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "main" [ref=e738] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/main
+                - generic [ref=e740]:
+                  - generic [ref=e741]:
+                    - generic [ref=e742]:
+                      - img [ref=e744]
+                      - generic "Apr 1, 2026, 10:48 PM GMT-3" [ref=e746]: Today at 10:48 PM
+                    - generic [ref=e747]:
+                      - img "Run duration" [ref=e748]
+                      - text: 1m 33s
+                  - group [ref=e751]:
+                    - generic "Show options" [ref=e752] [cursor=pointer]:
+                      - img "Show options" [ref=e753]
+              - generic [ref=e756]:
+                - generic [ref=e757]:
+                  - 'link "completed successfully: Run 124 of supercartolamanagerv5. fix: toast toggle — 1 clique abre, 2o clique fecha" [ref=e758] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23879315354
+                    - img "completed successfully:" [ref=e760]
+                    - generic [ref=e762]: "fix: toast toggle — 1 clique abre, 2o clique fecha"
+                  - generic [ref=e763]:
+                    - text: "supercartolamanagerv5 #124:"
+                    - generic [ref=e764]:
+                      - text: Commit
+                      - link "018379c" [ref=e765] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/commit/018379c74b809cd2f7963c89b639ed1a08eaeed8
+                      - text: pushed by
+                      - link "paulinett1508-dev" [ref=e766] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "main" [ref=e768] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/main
+                - generic [ref=e770]:
+                  - generic [ref=e771]:
+                    - generic [ref=e772]:
+                      - img [ref=e774]
+                      - generic "Apr 1, 2026, 10:33 PM GMT-3" [ref=e776]: Today at 10:33 PM
+                    - generic [ref=e777]:
+                      - img "Run duration" [ref=e778]
+                      - text: 1m 44s
+                  - group [ref=e781]:
+                    - generic "Show options" [ref=e782] [cursor=pointer]:
+                      - img "Show options" [ref=e783]
+              - generic [ref=e786]:
+                - generic [ref=e787]:
+                  - 'link "completed successfully: Run 123 of supercartolamanagerv5. fix: posicionar toast próximo ao FAB (acompanha drag)" [ref=e788] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23879288958
+                    - img "completed successfully:" [ref=e790]
+                    - generic [ref=e792]: "fix: posicionar toast próximo ao FAB (acompanha drag)"
+                  - generic [ref=e793]:
+                    - text: "supercartolamanagerv5 #123:"
+                    - generic [ref=e794]:
+                      - text: Commit
+                      - link "461d902" [ref=e795] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/commit/461d9021ccacafa52c5d337386100d87f0db967e
+                      - text: pushed by
+                      - link "paulinett1508-dev" [ref=e796] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "main" [ref=e798] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/main
+                - generic [ref=e800]:
+                  - generic [ref=e801]:
+                    - generic [ref=e802]:
+                      - img [ref=e804]
+                      - generic "Apr 1, 2026, 10:32 PM GMT-3" [ref=e806]: Today at 10:32 PM
+                    - generic [ref=e807]:
+                      - img "Run duration" [ref=e808]
+                      - text: 2m 0s
+                  - group [ref=e811]:
+                    - generic "Show options" [ref=e812] [cursor=pointer]:
+                      - img "Show options" [ref=e813]
+              - generic [ref=e816]:
+                - generic [ref=e817]:
+                  - 'link "completed successfully: Run 122 of supercartolamanagerv5. feat: substituir FAB fogo por FAB Big Cartola IA (#34)" [ref=e818] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23879152294
+                    - img "completed successfully:" [ref=e820]
+                    - generic [ref=e822]: "feat: substituir FAB fogo por FAB Big Cartola IA (#34)"
+                  - generic [ref=e823]:
+                    - text: "supercartolamanagerv5 #122:"
+                    - generic [ref=e824]:
+                      - text: Commit
+                      - link "ef589cc" [ref=e825] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/commit/ef589cc5c6482423e09294a3e89a805f31ebd258
+                      - text: pushed by
+                      - link "paulinett1508-dev" [ref=e826] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "main" [ref=e828] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/main
+                - generic [ref=e830]:
+                  - generic [ref=e831]:
+                    - generic [ref=e832]:
+                      - img [ref=e834]
+                      - generic "Apr 1, 2026, 10:27 PM GMT-3" [ref=e836]: Today at 10:27 PM
+                    - generic [ref=e837]:
+                      - img "Run duration" [ref=e838]
+                      - text: 1m 42s
+                  - group [ref=e841]:
+                    - generic "Show options" [ref=e842] [cursor=pointer]:
+                      - img "Show options" [ref=e843]
+              - generic [ref=e846]:
+                - generic [ref=e847]:
+                  - 'link "completed successfully: Run 121 of supercartolamanagerv5. feat: substituir FAB fogo por FAB Big Cartola IA" [ref=e848] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23879151034
+                    - img "completed successfully:" [ref=e850]
+                    - generic [ref=e852]: "feat: substituir FAB fogo por FAB Big Cartola IA"
+                  - generic [ref=e853]:
+                    - text: "supercartolamanagerv5 #121:"
+                    - generic [ref=e854]:
+                      - text: Pull request
+                      - link "#34" [ref=e855] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/pull/34
+                      - text: synchronize by
+                      - link "paulinett1508-dev" [ref=e856] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "claude/update-fab-ai-icon-8c4gM" [ref=e858] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/claude/update-fab-ai-icon-8c4gM
+                - generic [ref=e860]:
+                  - generic [ref=e861]:
+                    - generic [ref=e862]:
+                      - img [ref=e864]
+                      - generic "Apr 1, 2026, 10:27 PM GMT-3" [ref=e866]: Today at 10:27 PM
+                    - generic [ref=e867]:
+                      - img "Run duration" [ref=e868]
+                      - text: 23s
+                  - group [ref=e871]:
+                    - generic "Show options" [ref=e872] [cursor=pointer]:
+                      - img "Show options" [ref=e873]
+              - generic [ref=e876]:
+                - generic [ref=e877]:
+                  - 'link "completed successfully: Run 120 of supercartolamanagerv5. feat: substituir FAB fogo por FAB Big Cartola IA" [ref=e878] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23878714585
+                    - img "completed successfully:" [ref=e880]
+                    - generic [ref=e882]: "feat: substituir FAB fogo por FAB Big Cartola IA"
+                  - generic [ref=e883]:
+                    - text: "supercartolamanagerv5 #120:"
+                    - generic [ref=e884]:
+                      - text: Pull request
+                      - link "#34" [ref=e885] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/pull/34
+                      - text: opened by
+                      - link "paulinett1508-dev" [ref=e886] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "claude/update-fab-ai-icon-8c4gM" [ref=e888] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/claude/update-fab-ai-icon-8c4gM
+                - generic [ref=e890]:
+                  - generic [ref=e891]:
+                    - generic [ref=e892]:
+                      - img [ref=e894]
+                      - generic "Apr 1, 2026, 10:10 PM GMT-3" [ref=e896]: Today at 10:10 PM
+                    - generic [ref=e897]:
+                      - img "Run duration" [ref=e898]
+                      - text: 17s
+                  - group [ref=e901]:
+                    - generic "Show options" [ref=e902] [cursor=pointer]:
+                      - img "Show options" [ref=e903]
+              - generic [ref=e906]:
+                - generic [ref=e907]:
+                  - 'link "completed successfully: Run 119 of supercartolamanagerv5. feat: substituir FAB ''O que tá rolando?'' por FAB ''Big Cartola IA'' (#33)" [ref=e908] [cursor=pointer]':
+                    - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions/runs/23878644795
+                    - img "completed successfully:" [ref=e910]
+                    - generic [ref=e912]: "feat: substituir FAB 'O que tá rolando?' por FAB 'Big Cartola IA' (#33)"
+                  - generic [ref=e913]:
+                    - text: "supercartolamanagerv5 #119:"
+                    - generic [ref=e914]:
+                      - text: Commit
+                      - link "d38488d" [ref=e915] [cursor=pointer]:
+                        - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/commit/d38488d3be0968b899ec1c3d961c738ef5adcf29
+                      - text: pushed by
+                      - link "paulinett1508-dev" [ref=e916] [cursor=pointer]:
+                        - /url: /paulinett1508-dev
+                - link "main" [ref=e918] [cursor=pointer]:
+                  - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/tree/refs/heads/main
+                - generic [ref=e920]:
+                  - generic [ref=e921]:
+                    - generic [ref=e922]:
+                      - img [ref=e924]
+                      - generic "Apr 1, 2026, 10:07 PM GMT-3" [ref=e926]: Today at 10:07 PM
+                    - generic [ref=e927]:
+                      - img "Run duration" [ref=e928]
+                      - text: 2m 27s
+                  - group [ref=e931]:
+                    - generic "Show options" [ref=e932] [cursor=pointer]:
+                      - img "Show options" [ref=e933]
+          - navigation "Pagination" [ref=e937]:
+            - generic "Previous page" [ref=e938]: Previous
+            - emphasis [ref=e939] [cursor=pointer]: "1"
+            - link "Page 2" [ref=e940] [cursor=pointer]:
+              - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions?page=2
+              - text: "2"
+            - link "Page 3" [ref=e941] [cursor=pointer]:
+              - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions?page=3
+              - text: "3"
+            - link "Page 4" [ref=e942] [cursor=pointer]:
+              - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions?page=4
+              - text: "4"
+            - link "Page 5" [ref=e943] [cursor=pointer]:
+              - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions?page=5
+              - text: "5"
+            - link "Page 6" [ref=e944] [cursor=pointer]:
+              - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions?page=6
+              - text: "6"
+            - link "Page 7" [ref=e945] [cursor=pointer]:
+              - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions?page=7
+              - text: "7"
+            - link "Page 8" [ref=e946] [cursor=pointer]:
+              - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions?page=8
+              - text: "8"
+            - link "Next page" [ref=e947] [cursor=pointer]:
+              - /url: /paulinett1508-dev/SuperCartolaManagerv5-production/actions?page=2
+              - text: Next

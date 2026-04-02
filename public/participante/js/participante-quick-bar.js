@@ -526,6 +526,7 @@ class QuickAccessBar {
             if (menuOverlay) menuOverlay.classList.add('visible');
             if (menuSheet) menuSheet.classList.add('visible');
             this.menuAberto = true;
+            this.atualizarNavAtivo('menu');
 
             setTimeout(() => {
                 this._isAnimating = false;
@@ -543,6 +544,7 @@ class QuickAccessBar {
             if (menuOverlay) menuOverlay.classList.remove('visible');
             if (menuSheet) menuSheet.classList.remove('visible');
             this.menuAberto = false;
+            this.atualizarNavAtivo(this.moduloAtual);
 
             setTimeout(() => {
                 this._isAnimating = false;
