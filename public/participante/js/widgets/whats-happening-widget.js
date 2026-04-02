@@ -125,7 +125,7 @@ function initFabDrag(fab) {
             saveFabPosition();
         } else if (e.type === "touchend" && touchDuration < 300) {
             // TAP detectado no mobile
-            setTimeout(() => showAiToast(), 10);
+            setTimeout(() => toggleAiToast(), 10);
         }
 
         hasMoved = false;
@@ -135,14 +135,18 @@ function initFabDrag(fab) {
 // ============================================
 // TOAST "EM BREVE"
 // ============================================
-function showAiToast() {
-    // Remover toast existente se houver
+function toggleAiToast() {
     const existing = document.getElementById("wh-ai-toast");
+
+    // Se já existe e está visível → fechar
     if (existing) {
-        existing.remove();
         clearTimeout(WHState.toastTimeout);
+        existing.classList.remove("wh-ai-toast--visible");
+        setTimeout(() => existing.remove(), 300);
+        return;
     }
 
+    // Criar toast
     const toast = document.createElement("div");
     toast.id = "wh-ai-toast";
     toast.className = "wh-ai-toast";
@@ -159,10 +163,8 @@ function showAiToast() {
         const toastRect = toast.getBoundingClientRect();
         const fabCenterX = fabRect.left + fabRect.width / 2;
 
-        // Posicionar acima do FAB
         toast.style.bottom = (window.innerHeight - fabRect.top + 8) + "px";
 
-        // Centralizar horizontalmente no FAB, mas manter dentro da tela
         let left = fabCenterX - toastRect.width / 2;
         left = Math.max(8, Math.min(left, window.innerWidth - toastRect.width - 8));
         toast.style.left = left + "px";
@@ -173,12 +175,6 @@ function showAiToast() {
     requestAnimationFrame(() => {
         toast.classList.add("wh-ai-toast--visible");
     });
-
-    // Auto-fechar após 3s
-    WHState.toastTimeout = setTimeout(() => {
-        toast.classList.remove("wh-ai-toast--visible");
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
 }
 
 // ============================================
@@ -210,7 +206,7 @@ function createWidgetElements() {
             e.stopPropagation();
             return;
         }
-        showAiToast();
+        toggleAiToast();
     });
 
     document.body.appendChild(fab);
