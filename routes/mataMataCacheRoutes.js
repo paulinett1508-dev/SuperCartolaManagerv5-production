@@ -100,12 +100,14 @@ router.get("/cache/:ligaId/edicoes", validarLigaIdParam, async (req, res) => {
 
         // 2. Buscar calendario_efetivo da ModuleConfig (fonte de verdade do admin)
         let edicoesCalendario = [];
+        let wizardTotalTimes = null;
         try {
             const moduleConfig = await ModuleConfig.findOne({
                 liga_id: ligaId,
                 modulo: 'mata_mata',
                 temporada: temporadaFiltro
             }).lean();
+            wizardTotalTimes = moduleConfig?.wizard_respostas?.total_times ? Number(moduleConfig.wizard_respostas.total_times) : null;
 
             if (moduleConfig?.calendario_override?.length > 0) {
                 edicoesCalendario = moduleConfig.calendario_override;
@@ -141,14 +143,80 @@ router.get("/cache/:ligaId/edicoes", validarLigaIdParam, async (req, res) => {
             console.warn(`[MATA-CACHE] ⚠️ Erro ao buscar calendario_efetivo:`, err.message);
         }
 
-        // 3. Mesclar: todas as edições do calendário, enriquecidas com dados do cache
+        // 3. Determinar rodada atual para calcular fase_atual e status de cada edição
+        let rodadaAtualGlobal = null;
+        try {
+            const cartolaApiService = (await import("../services/cartolaApiService.js")).default;
+            const mercado = await cartolaApiService.obterStatusMercado();
+            rodadaAtualGlobal = mercado?.rodada_atual || mercado?.rodadaAtual || null;
+        } catch (err) {
+            console.warn(`[MATA-CACHE] ⚠️ Não foi possível obter rodada atual:`, err.message);
+        }
+
+        // Helper: calcular fases para tamanho do torneio
+        function getFasesParaTamanho(tamanho) {
+            if (tamanho >= 32) return ["primeira", "oitavas", "quartas", "semis", "final"];
+            if (tamanho >= 16) return ["oitavas", "quartas", "semis", "final"];
+            if (tamanho >= 8) return ["quartas", "semis", "final"];
+            return [];
+        }
+
+        // Determinar tamanho do torneio (reusa wizard_respostas do bloco 2)
+        const tamanhoTorneio = (wizardTotalTimes && [8, 16, 32].includes(wizardTotalTimes)) ? wizardTotalTimes : 32;
+
+        const fasesDoTorneio = getFasesParaTamanho(tamanhoTorneio);
+        const FASE_LABELS = { primeira: "1ª FASE", oitavas: "OITAVAS", quartas: "QUARTAS", semis: "SEMIS", final: "FINAL" };
+
+        // 4. Mesclar: todas as edições do calendário, com calendário + rodada classificação + fase atual
         let resumo;
         if (edicoesCalendario.length > 0) {
             resumo = edicoesCalendario.map(cal => {
                 const edicaoNum = cal.edicao;
                 const cached = cacheMap.get(edicaoNum);
+
+                // Normalizar campos (calendario_override usa snake_case, JSON usa camelCase)
+                const rodadaInicial = cal.rodada_inicial || cal.rodadaInicial;
+                const rodadaFinal = cal.rodada_final || cal.rodadaFinal;
+                const rodadaDefinicao = cal.rodada_definicao || cal.rodadaDefinicao;
+
+                // Calcular fase_atual e status baseado na rodada global
+                let fase_atual = null;
+                let status_edicao = "pendente";
+                if (rodadaAtualGlobal !== null) {
+                    if (rodadaAtualGlobal < rodadaDefinicao) {
+                        status_edicao = "pendente";
+                    } else if (rodadaAtualGlobal === rodadaDefinicao) {
+                        status_edicao = "classificacao";
+                        fase_atual = "classificacao";
+                    } else if (rodadaAtualGlobal >= rodadaInicial && rodadaAtualGlobal <= rodadaFinal) {
+                        status_edicao = "em_andamento";
+                        const idxFase = Math.min(rodadaAtualGlobal - rodadaInicial, fasesDoTorneio.length - 1);
+                        fase_atual = fasesDoTorneio[idxFase] || null;
+                    } else if (rodadaAtualGlobal > rodadaFinal) {
+                        status_edicao = "encerrada";
+                        fase_atual = "final";
+                    }
+                }
+
                 return {
                     edicao: edicaoNum,
+                    nome: cal.nome || `${edicaoNum}ª Edição`,
+                    // Calendário completo
+                    calendario: {
+                        rodada_definicao: rodadaDefinicao,
+                        rodada_inicial: rodadaInicial,
+                        rodada_final: rodadaFinal,
+                        fases: fasesDoTorneio.map((f, idx) => ({
+                            fase: f,
+                            label: FASE_LABELS[f],
+                            rodada: rodadaInicial + idx
+                        }))
+                    },
+                    // Status atual
+                    status_edicao,
+                    fase_atual,
+                    fase_atual_label: fase_atual ? (FASE_LABELS[fase_atual] || fase_atual.toUpperCase()) : null,
+                    // Cache
                     rodada_salva: cached?.rodada_atual || null,
                     ultima_atualizacao: cached?.ultima_atualizacao || null,
                     cache_id: cached?._id || null,
@@ -159,6 +227,11 @@ router.get("/cache/:ligaId/edicoes", validarLigaIdParam, async (req, res) => {
             // Fallback: retornar apenas edições do cache (sem ModuleConfig)
             resumo = edicoesCache.map(ed => ({
                 edicao: ed.edicao,
+                nome: `${ed.edicao}ª Edição`,
+                calendario: null,
+                status_edicao: "desconhecido",
+                fase_atual: null,
+                fase_atual_label: null,
                 rodada_salva: ed.rodada_atual,
                 ultima_atualizacao: ed.ultima_atualizacao,
                 cache_id: ed._id,
@@ -171,15 +244,19 @@ router.get("/cache/:ligaId/edicoes", validarLigaIdParam, async (req, res) => {
                 liga_id: ligaId,
                 total: 0,
                 edicoes: [],
+                rodada_atual: rodadaAtualGlobal,
+                tamanho_torneio: tamanhoTorneio,
                 mensagem: "Nenhuma edição encontrada",
             });
         }
 
-        console.log(`[MATA-CACHE] ✅ ${resumo.length} edições (${edicoesCache.length} com cache, ${edicoesCalendario.length} no calendário)`);
+        console.log(`[MATA-CACHE] ✅ ${resumo.length} edições (${edicoesCache.length} com cache, ${edicoesCalendario.length} no calendário, rodada=${rodadaAtualGlobal})`);
 
         res.json({
             liga_id: ligaId,
             total: resumo.length,
+            rodada_atual: rodadaAtualGlobal,
+            tamanho_torneio: tamanhoTorneio,
             edicoes: resumo,
         });
     } catch (error) {
