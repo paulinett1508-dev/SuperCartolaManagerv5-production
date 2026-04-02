@@ -46,6 +46,27 @@ export async function inicializarBrasileraoParticipante() {
         _statusInterval = setInterval(_atualizarStatus, 60000);
     } catch (err) {
         if (window.Log) Log.warn('BRASILEIRAO-LP', 'Erro ao renderizar:', err);
+
+        // Limpar spinners que ficaram presos
+        const classContainer = document.getElementById('brasileirao-classificacao-container');
+        if (classContainer && classContainer.querySelector('[role="status"]')) {
+            classContainer.innerHTML = `
+                <div class="text-center py-6">
+                    <span class="material-icons text-2xl" style="color: var(--app-danger);">error_outline</span>
+                    <p class="text-gray-500 mt-2 text-xs">Erro ao carregar dados</p>
+                </div>
+            `;
+        }
+
+        const tabelaContainer = document.getElementById('brasileirao-tabela-container');
+        if (tabelaContainer && !tabelaContainer.innerHTML.trim()) {
+            tabelaContainer.innerHTML = `
+                <div class="text-center py-6">
+                    <span class="material-icons text-2xl" style="color: var(--app-danger);">error_outline</span>
+                    <p class="text-gray-500 mt-2 text-xs">Erro ao carregar jogos</p>
+                </div>
+            `;
+        }
     }
 }
 
