@@ -66,7 +66,9 @@ function validarEdicaoParam(req, res, next) {
 }
 
 // ============================================================================
-// 📋 ROTA PARA LISTAR TODAS AS EDIÇÕES DISPONÍVEIS NO CACHE
+// 📋 ROTA PARA LISTAR TODAS AS EDIÇÕES DISPONÍVEIS
+// ✅ FIX: Cruza MataMataCache com calendario_efetivo da ModuleConfig
+//    para que edições sem cache (ainda não consolidadas) apareçam no dropdown
 // ⚠️ IMPORTANTE: Esta rota DEVE vir ANTES da rota com parâmetro :edicao
 // ============================================================================
 router.get("/cache/:ligaId/edicoes", validarLigaIdParam, async (req, res) => {
@@ -76,14 +78,15 @@ router.get("/cache/:ligaId/edicoes", validarLigaIdParam, async (req, res) => {
         const temporadaFiltro = temporada ? parseInt(temporada) : CURRENT_SEASON;
 
         console.log(
-            `[MATA-CACHE] 📋 Listando edições disponíveis para liga ${ligaId}, temporada ${temporadaFiltro}`,
+            `[MATA-CACHE] 📋 Listando edições para liga ${ligaId}, temporada ${temporadaFiltro}`,
         );
 
         const MataMataCache = (await import("../models/MataMataCache.js"))
             .default;
+        const ModuleConfig = (await import("../models/ModuleConfig.js")).default;
 
-        // Buscar edições APENAS da temporada especificada
-        const edicoes = await MataMataCache.find({
+        // 1. Buscar edições existentes no cache
+        const edicoesCache = await MataMataCache.find({
             liga_id: ligaId,
             temporada: temporadaFiltro
         })
@@ -91,28 +94,92 @@ router.get("/cache/:ligaId/edicoes", validarLigaIdParam, async (req, res) => {
             .sort({ edicao: 1 })
             .lean();
 
-        if (edicoes.length === 0) {
+        // Mapa de edições com cache para lookup rápido
+        const cacheMap = new Map();
+        edicoesCache.forEach(ed => cacheMap.set(ed.edicao, ed));
+
+        // 2. Buscar calendario_efetivo da ModuleConfig (fonte de verdade do admin)
+        let edicoesCalendario = [];
+        try {
+            const moduleConfig = await ModuleConfig.findOne({
+                liga_id: ligaId,
+                modulo: 'mata_mata',
+                temporada: temporadaFiltro
+            }).lean();
+
+            if (moduleConfig?.calendario_override?.length > 0) {
+                edicoesCalendario = moduleConfig.calendario_override;
+            } else if (moduleConfig?.wizard_respostas?.total_times && moduleConfig?.wizard_respostas?.qtd_edicoes) {
+                // Gerar dinamicamente (mesmo algoritmo de module-config-routes.js)
+                const totalTimes = Number(moduleConfig.wizard_respostas.total_times);
+                const qtdEdicoes = Number(moduleConfig.wizard_respostas.qtd_edicoes);
+                let numFases;
+                if (totalTimes >= 32) numFases = 5;
+                else if (totalTimes >= 16) numFases = 4;
+                else if (totalTimes >= 8) numFases = 3;
+                else numFases = 0;
+
+                if (numFases > 0) {
+                    let rodadaAtual = 2;
+                    for (let i = 0; i < qtdEdicoes; i++) {
+                        const rodadaDefinicao = rodadaAtual;
+                        const rodadaInicial = rodadaDefinicao + 1;
+                        const rodadaFinal = rodadaInicial + numFases - 1;
+                        if (rodadaFinal > 38) break;
+                        edicoesCalendario.push({
+                            edicao: i + 1,
+                            nome: `${i + 1}ª Edição`,
+                            rodada_inicial: rodadaInicial,
+                            rodada_final: rodadaFinal,
+                            rodada_definicao: rodadaDefinicao
+                        });
+                        rodadaAtual = rodadaFinal + 1;
+                    }
+                }
+            }
+        } catch (err) {
+            console.warn(`[MATA-CACHE] ⚠️ Erro ao buscar calendario_efetivo:`, err.message);
+        }
+
+        // 3. Mesclar: todas as edições do calendário, enriquecidas com dados do cache
+        let resumo;
+        if (edicoesCalendario.length > 0) {
+            resumo = edicoesCalendario.map(cal => {
+                const edicaoNum = cal.edicao;
+                const cached = cacheMap.get(edicaoNum);
+                return {
+                    edicao: edicaoNum,
+                    rodada_salva: cached?.rodada_atual || null,
+                    ultima_atualizacao: cached?.ultima_atualizacao || null,
+                    cache_id: cached?._id || null,
+                    cache_disponivel: !!cached,
+                };
+            });
+        } else {
+            // Fallback: retornar apenas edições do cache (sem ModuleConfig)
+            resumo = edicoesCache.map(ed => ({
+                edicao: ed.edicao,
+                rodada_salva: ed.rodada_atual,
+                ultima_atualizacao: ed.ultima_atualizacao,
+                cache_id: ed._id,
+                cache_disponivel: true,
+            }));
+        }
+
+        if (resumo.length === 0) {
             return res.json({
                 liga_id: ligaId,
                 total: 0,
                 edicoes: [],
-                mensagem: "Nenhuma edição encontrada no cache",
+                mensagem: "Nenhuma edição encontrada",
             });
         }
 
-        // Formatar resposta
-        const resumo = edicoes.map((ed) => ({
-            edicao: ed.edicao,
-            rodada_salva: ed.rodada_atual,
-            ultima_atualizacao: ed.ultima_atualizacao,
-            cache_id: ed._id,
-        }));
-
-        console.log(`[MATA-CACHE] ✅ Encontradas ${edicoes.length} edições`);
+        console.log(`[MATA-CACHE] ✅ ${resumo.length} edições (${edicoesCache.length} com cache, ${edicoesCalendario.length} no calendário)`);
 
         res.json({
             liga_id: ligaId,
-            total: edicoes.length,
+            total: resumo.length,
             edicoes: resumo,
         });
     } catch (error) {

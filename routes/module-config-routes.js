@@ -556,6 +556,16 @@ router.put('/liga/:ligaId/modulos/:modulo/config', verificarAdmin, async (req, r
                     );
                     console.log(`[MODULE-CONFIG] calendario_override gerado para mata_mata: ${calendarioGerado.length} edições (${wizard_respostas.total_times} times)`);
                 }
+
+                // ✅ FIX: Invalidar MataMataCache ao reconfigurar wizard
+                // Caches antigos podem ter dados baseados em rodadas de calendário anterior
+                const MataMataCache = (await import('../models/MataMataCache.js')).default;
+                const ligaIdQuery = mongoose.Types.ObjectId.isValid(ligaId) ? new mongoose.Types.ObjectId(ligaId) : ligaId;
+                const mmDeleted = await MataMataCache.deleteMany({
+                    liga_id: String(ligaIdQuery),
+                    temporada: Number(temporada)
+                });
+                console.log(`[MODULE-CONFIG] MataMataCache invalidado para liga ${ligaId}: ${mmDeleted.deletedCount} entradas removidas`);
             }
 
             // ✅ v11.0: Invalidar cache do melhor_mes quando edições são reconfiguradas
