@@ -147,7 +147,7 @@ function showAiToast() {
     toast.id = "wh-ai-toast";
     toast.className = "wh-ai-toast";
     toast.innerHTML = `
-        <span class="material-icons wh-ai-toast-icon">smart_toy</span>
+        <span class="material-icons wh-ai-toast-icon">auto_awesome</span>
         <span class="wh-ai-toast-text">Em breve <strong>Big Cartola IA</strong></span>
     `;
     document.body.appendChild(toast);
@@ -180,7 +180,7 @@ function createWidgetElements() {
     fab.id = "wh-fab";
     fab.className = "wh-fab wh-fab--ai";
     fab.innerHTML = `
-        <span class="material-icons wh-fab-icon">smart_toy</span>
+        <span class="material-icons wh-fab-icon">auto_awesome</span>
     `;
 
     // Aplicar posição salva
