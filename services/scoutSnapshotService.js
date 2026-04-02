@@ -1,14 +1,18 @@
 // services/scoutSnapshotService.js
+// ✅ v1.1: Fonte de calendário trocada: CalendarioBrasileirao (sync automático 2h/6h)
+//          em vez de CalendarioRodada (alimentação manual)
 // ✅ v1.0: Gerencia persistência e congelamento de scouts de atletas
 //
 // Fluxo:
 //   1. salvarScouts()        → upsert bulk de todos os atletas pontuados da rodada
-//   2. detectarClubesCongelados() → clubes cujas partidas encerraram há 12h+ (CalendarioRodada)
+//   2. detectarClubesCongelados() → clubes cujas partidas encerraram há 12h+
+//                                   Fonte: CalendarioBrasileirao (sync-brasileirao.js, automático)
+//                                   Campos: mandante_id / visitante_id (IDs Cartola)
 //   3. congelarAtletasDeClubes() → marca frozen=true para esses atletas no banco
 //   4. buscarScoutsFrozen()  → retorna mapa { atletaId → dados } para atletas congelados
 
 import ScoutSnapshot from "../models/ScoutSnapshot.js";
-import CalendarioRodada from "../models/CalendarioRodada.js";
+import CalendarioBrasileirao from "../models/CalendarioBrasileirao.js";
 
 // Janela de segurança: só congela após 12h do término estimado do jogo
 const FREEZE_THRESHOLD_MS = 12 * 60 * 60 * 1000;
@@ -17,29 +21,41 @@ const MATCH_DURATION_MS = 2 * 60 * 60 * 1000;
 
 /**
  * Detecta IDs de clubes cujas partidas encerraram há ≥12h na rodada informada.
- * Usa CalendarioRodada (status='encerrado' + data/horario do jogo).
- * @returns {Set<number>} clubeIds congelados
+ *
+ * Fonte: CalendarioBrasileirao — sincronizado automaticamente pelo sync-brasileirao.js:
+ *   • Sync completo: 1x/dia às 06:00 BRT (ESPN + Cartola)
+ *   • Mini-sync: a cada 2h em dias com jogos (atualiza status ao vivo → encerrado)
+ *
+ * Campos usados: partida.mandante_id / partida.visitante_id (IDs Cartola, iguais a clube_id)
+ *
+ * @param {number} rodada   - número da rodada atual (vem do mercado/status da Cartola)
+ * @param {number} temporada
+ * @returns {Set<number>} clubeIds cujos atletas devem ser congelados
  */
 async function detectarClubesCongelados(rodada, temporada) {
   try {
-    const calendario = await CalendarioRodada.findOne({ rodada, temporada }).lean();
+    const calendario = await CalendarioBrasileirao.findOne({ temporada }).lean();
     if (!calendario?.partidas?.length) return new Set();
 
     const agora = Date.now();
     const clubesCongelados = new Set();
 
-    for (const partida of calendario.partidas) {
+    // Filtrar apenas as partidas da rodada atual
+    const partidasRodada = calendario.partidas.filter((p) => p.rodada === rodada);
+
+    for (const partida of partidasRodada) {
       if (partida.status !== "encerrado") continue;
       if (!partida.data || !partida.horario) continue;
 
       // Horário de início em Brasília (UTC-3)
       const inicio = new Date(`${partida.data}T${partida.horario}:00-03:00`);
-      // Estimativa de término: início + 2h
+      // Estimativa de término: início + 2h (margem conservadora)
       const estimativaTermino = new Date(inicio.getTime() + MATCH_DURATION_MS);
 
       if (agora - estimativaTermino.getTime() >= FREEZE_THRESHOLD_MS) {
-        if (partida.clube_casa_id) clubesCongelados.add(partida.clube_casa_id);
-        if (partida.clube_fora_id) clubesCongelados.add(partida.clube_fora_id);
+        // mandante_id / visitante_id = IDs Cartola (mesmo campo clube_id nos atletas)
+        if (partida.mandante_id) clubesCongelados.add(partida.mandante_id);
+        if (partida.visitante_id) clubesCongelados.add(partida.visitante_id);
       }
     }
 
