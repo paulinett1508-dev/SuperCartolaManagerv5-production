@@ -59,7 +59,7 @@ export async function inicializarMelhorMesParticipante({
         ligaId,
         moduloKey:    'melhor_mes',
         titulo:       'Melhor do Mês',
-        tagline:      'Competição mensal — uma nova chance a cada mês',
+        tagline:      'Competição mensal',
         icon:         'calendar_month',
         colorClass:   'module-lp-melhor-mes',
     });

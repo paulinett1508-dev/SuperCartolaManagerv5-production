@@ -119,7 +119,7 @@ export async function inicializarRodadasParticipante({
         ligaId,
         moduloKey:               'banco',
         titulo:                  'Ranking da Rodada',
-        tagline:                 'Ganhe e perca baseado na sua posição a cada rodada',
+        tagline:                 'Desempenho por rodada',
         icon:                    'event',
         colorClass:              'module-lp-ranking-rodada',
         premiacaoLabel:          'Premiação por Rodada',

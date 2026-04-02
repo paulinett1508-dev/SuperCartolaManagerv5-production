@@ -203,7 +203,7 @@ export async function inicializarMataMata(params) {
       ligaId:       estado.ligaId,
       moduloKey:    'mata_mata',
       titulo:       'Mata-Mata',
-      tagline:      'Eliminação direta — perca e esteja fora',
+      tagline:      'Eliminação direta',
       icon:         'sports_kabaddi',
       colorClass:   'module-lp-mata-mata',
   });

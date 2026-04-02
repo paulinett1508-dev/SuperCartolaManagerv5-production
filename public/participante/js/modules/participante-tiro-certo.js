@@ -67,7 +67,7 @@ export async function inicializarTiroCertoParticipante({ participante, ligaId, t
         ligaId,
         moduloKey:    'tiro_certo',
         titulo:       'Tiro Certo',
-        tagline:      'Modo Survival — escolha o vencedor ou seja eliminado',
+        tagline:      'Modo Survival',
         icon:         'gps_fixed',
         colorClass:   'module-lp-tiro-certo',
     });

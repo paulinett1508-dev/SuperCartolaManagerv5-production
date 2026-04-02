@@ -19,7 +19,7 @@ async function inicializarRankingParticipante(payload) {
         ligaId,
         moduloKey:    'ranking_geral',
         titulo:       'Ranking Geral',
-        tagline:      'Classificação acumulada de toda a temporada',
+        tagline:      'Classificação da temporada',
         icon:         'leaderboard',
         colorClass:   'module-lp-ranking-geral',
     });

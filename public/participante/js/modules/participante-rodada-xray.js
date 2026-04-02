@@ -33,7 +33,7 @@ export async function inicializarRodadaXrayParticipante(payload) {
             ligaId:                    _ligaId,
             moduloKey:                 'raio_x',
             titulo:                    'Raio-X da Rodada',
-            tagline:                   'Análise completa após cada rodada',
+            tagline:                   'Análise pós-rodada',
             icon:                      'sensors',
             colorClass:                'module-lp-raio-x',
             showComoFuncionaAccordion: false,

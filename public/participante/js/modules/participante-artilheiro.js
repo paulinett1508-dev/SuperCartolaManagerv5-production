@@ -72,7 +72,7 @@ export async function inicializarArtilheiroParticipante({
         ligaId,
         moduloKey:    'artilheiro',
         titulo:       'Artilheiro',
-        tagline:      'Quem vai marcar mais gols na temporada?',
+        tagline:      'Gols da temporada',
         icon:         'sports_soccer',
         colorClass:   'module-lp-artilheiro',
         premiacaoLabel: 'Premiação',

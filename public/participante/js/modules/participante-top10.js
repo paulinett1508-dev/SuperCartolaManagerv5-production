@@ -149,7 +149,7 @@ export async function inicializarTop10Participante({
         ligaId,
         moduloKey:    'top10',
         titulo:       'TOP 10',
-        tagline:      'Melhores e piores pontuações da liga',
+        tagline:      'Mitos e micos da liga',
         icon:         'military_tech',
         colorClass:   'module-lp-top10',
     });
