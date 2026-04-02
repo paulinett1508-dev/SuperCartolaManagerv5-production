@@ -82,7 +82,8 @@ function getFaseAtual(edicaoId) {
 
   let ultimaLiberada = null;
   for (let idx = 0; idx < fasesAtivas.length; idx++) {
-    if (estado.rodadaAtual >= config.rodadaInicial + idx) {
+    const rodadaDaFase = _getRodadaDaFase(config, fasesAtivas[idx]);
+    if (estado.rodadaAtual >= rodadaDaFase) {
       ultimaLiberada = fasesAtivas[idx];
     }
   }
@@ -356,14 +357,24 @@ function isParciaisAoVivo() {
   return estado.rodadaAtual >= faseAtiva.rodadaInicial && estado.rodadaAtual <= faseAtiva.rodadaPontos;
 }
 
+// ✅ Helper: obter rodada de uma fase — lê do calendário fixo salvo no banco
+// Fallback: calcula rodadaInicial + idx (para dados antigos sem campo fases)
+function _getRodadaDaFase(config, faseKey) {
+  if (config.fases && config.fases[faseKey] != null) {
+    return config.fases[faseKey];
+  }
+  const fasesAtivas = getFasesAtuais();
+  const idx = fasesAtivas.indexOf(faseKey);
+  if (idx < 0) return 0;
+  return config.rodadaInicial + idx;
+}
+
 // Retorna info da rodada de pontos para a fase selecionada
 function getFaseRodada(edicao, fase) {
   const config = EDICOES_MATA_MATA.find(e => e.id === edicao);
   if (!config) return null;
-  const fasesAtivas = getFasesAtuais();
-  const faseIndex = fasesAtivas.indexOf(fase);
-  if (faseIndex < 0) return null;
-  const rodadaPontos = config.rodadaInicial + faseIndex;
+  const rodadaPontos = _getRodadaDaFase(config, fase);
+  if (!rodadaPontos) return null;
   return { rodadaInicial: config.rodadaInicial, rodadaPontos };
 }
 
@@ -810,7 +821,8 @@ function atualizarNavegacaoFases() {
       // ✅ Verificar se a rodada desta fase já chegou
       let isDisabled = false;
       if (edicaoConfig && estado.rodadaAtual > 0) {
-        const rodadaDaFase = edicaoConfig.rodadaInicial + idx;
+        // ✅ Ler rodada do calendário fixo salvo no banco
+        const rodadaDaFase = _getRodadaDaFase(edicaoConfig, fase);
         isDisabled = estado.rodadaAtual < rodadaDaFase;
       }
       const disabledClass = isDisabled ? ' disabled' : '';
@@ -826,7 +838,7 @@ function atualizarNavegacaoFases() {
   // Definir primeira fase como selecionada se não houver ou se está bloqueada
   const fasesLiberadas = fasesAtivas.filter((fase, idx) => {
     if (!edicaoConfig || estado.rodadaAtual <= 0) return true;
-    return estado.rodadaAtual >= edicaoConfig.rodadaInicial + idx;
+    return estado.rodadaAtual >= _getRodadaDaFase(edicaoConfig, fase);
   });
 
   if (!estado.faseSelecionada || !fasesLiberadas.includes(estado.faseSelecionada)) {
@@ -990,9 +1002,11 @@ async function carregarFase(edicao, fase) {
     const fasesAtivas = getFasesAtuais();
     const faseIndex = fasesAtivas.indexOf(fase);
     if (faseIndex >= 0) {
-      const rodadaDaFase = edicaoConfig.rodadaInicial + faseIndex;
+      // ✅ Ler rodada do calendário fixo salvo no banco
+      const rodadaDaFase = _getRodadaDaFase(edicaoConfig, fase);
       if (estado.rodadaAtual <= rodadaDaFase) {
-        const prevRodada = faseIndex > 0 ? edicaoConfig.rodadaInicial + faseIndex - 1 : null;
+        const prevFase = faseIndex > 0 ? fasesAtivas[faseIndex - 1] : null;
+        const prevRodada = prevFase ? _getRodadaDaFase(edicaoConfig, prevFase) : null;
         const faseAnteriorFeita = prevRodada && estado.rodadaAtual > prevRodada;
         if (!faseAnteriorFeita) {
           if (window.Log) Log.info(`[MATA-MATA] 🔒 Fase ${fase} bloqueada - Rodada ${rodadaDaFase} não aconteceu (atual: ${estado.rodadaAtual})`);

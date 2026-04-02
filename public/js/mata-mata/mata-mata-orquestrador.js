@@ -15,6 +15,7 @@ import {
   getRodadaPontosText,
   getEdicaoMataMata,
   getFasesParaTamanho,
+  getRodadaDaFase,
   TAMANHO_TORNEIO_DEFAULT,
   FASE_LABELS,
   FASE_NUM_JOGOS,
@@ -814,8 +815,8 @@ function atualizarNavegacaoFases(fasesAtivas) {
       // ✅ Verificar se a rodada desta fase já chegou
       let isDisabled = false;
       if (edicaoSelecionada && rodadaAtualGlobal > 0) {
-        const rodadaDaFase = edicaoSelecionada.rodadaInicial + idx;
-        // ✅ FIX: Usar < (não <=) para permitir clique na fase da rodada atual (ao vivo)
+        // ✅ Ler rodada do calendário fixo salvo no banco (não recalcular)
+        const rodadaDaFase = getRodadaDaFase(edicaoSelecionada, fase, tamanhoTorneio);
         isDisabled = rodadaAtualGlobal < rodadaDaFase;
       }
       const disabledClass = isDisabled ? " disabled" : "";
