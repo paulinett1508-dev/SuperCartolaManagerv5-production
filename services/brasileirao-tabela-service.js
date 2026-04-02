@@ -229,34 +229,78 @@ function inferirRodadas(partidas) {
  * @returns {Promise<Array|null>} Array de partidas formatadas
  */
 async function buscarViaEspn(temporada) {
-    console.log(`[BRASILEIRAO-SERVICE] Buscando temporada ${temporada} via ESPN...`);
+    console.log(`[BRASILEIRAO-SERVICE] Buscando temporada ${temporada} via ESPN (chamadas mensais)...`);
 
-    try {
+    // ESPN scoreboard não suporta ranges longos confiávelmente.
+    // Brasileirão vai de março a dezembro — buscar mês a mês e mesclar.
+    const MESES_TEMPORADA = ['03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+
+    /**
+     * Busca jogos de um mês específico via ESPN scoreboard.
+     * Retorna array de events (pode ser vazio).
+     */
+    async function fetchMes(mes) {
+        const inicio = `${temporada}${mes}01`;
+        // Último dia do mês: usar próximo mês dia 00 = último dia do mês atual
+        const mesNum = parseInt(mes, 10);
+        const anoFim = mesNum === 12 ? temporada + 1 : temporada;
+        const mesFim = String(mesNum === 12 ? 1 : mesNum + 1).padStart(2, '0');
+        const fim = `${anoFim}${mesFim}01`;
+
+        // ESPN interpreta "fim" como exclusivo, então usar o primeiro dia do próximo mês
         const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/bra.1/scoreboard` +
-            `?limit=500&dates=${temporada}0101-${temporada}1130`;
+            `?limit=200&dates=${inicio}-${fim}`;
 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), CONFIG.REQUEST_TIMEOUT_MS);
 
-        const response = await fetch(url, {
-            signal: controller.signal,
-            headers: { 'User-Agent': 'SuperCartolaManager/1.0' },
-        });
-        clearTimeout(timeoutId);
+        try {
+            const response = await fetch(url, {
+                signal: controller.signal,
+                headers: { 'User-Agent': 'SuperCartolaManager/1.0' },
+            });
+            clearTimeout(timeoutId);
 
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            if (!response.ok) {
+                console.warn(`[BRASILEIRAO-SERVICE] ESPN ${mes}/${temporada}: HTTP ${response.status}`);
+                return [];
+            }
 
-        const data = await response.json();
-        const events = data.events || [];
+            const data = await response.json();
+            return data.events || [];
+        } catch (err) {
+            clearTimeout(timeoutId);
+            console.warn(`[BRASILEIRAO-SERVICE] ESPN ${mes}/${temporada}: ${err.message}`);
+            return [];
+        }
+    }
 
-        if (!events.length) {
-            console.warn('[BRASILEIRAO-SERVICE] ESPN retornou 0 jogos');
+    try {
+        // Chamadas mensais em paralelo (sem sobrecarregar ESPN — máx 5 paralelas)
+        const allEvents = [];
+        const idsVistos = new Set();
+
+        for (let i = 0; i < MESES_TEMPORADA.length; i += 5) {
+            const lote = MESES_TEMPORADA.slice(i, i + 5);
+            const resultados = await Promise.all(lote.map(mes => fetchMes(mes)));
+            for (const events of resultados) {
+                for (const ev of events) {
+                    if (!idsVistos.has(ev.id)) {
+                        idsVistos.add(ev.id);
+                        allEvents.push(ev);
+                    }
+                }
+            }
+        }
+
+        if (!allEvents.length) {
+            console.warn('[BRASILEIRAO-SERVICE] ESPN retornou 0 jogos em todas as chamadas mensais');
             return null;
         }
 
-        console.log(`[BRASILEIRAO-SERVICE] ESPN retornou ${events.length} jogos`);
+        console.log(`[BRASILEIRAO-SERVICE] ESPN retornou ${allEvents.length} jogos (total mensal)`);
 
-        const partidas = events.filter(event => {
+        const partidas = allEvents.filter(event => {
             const comp = event.competitions?.[0];
             return comp && Array.isArray(comp.competitors) && comp.competitors.length >= 2;
         }).map(event => {

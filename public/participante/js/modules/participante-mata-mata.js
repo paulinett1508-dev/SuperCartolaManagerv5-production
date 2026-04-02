@@ -233,7 +233,8 @@ export async function inicializarMataMata(params) {
           nome: e.nome,
           rodadaInicial: Number(e.rodadaInicial),
           rodadaFinal: Number(e.rodadaFinal),
-          rodadaDefinicao: Number(e.rodadaDefinicao)
+          rodadaDefinicao: Number(e.rodadaDefinicao),
+          fases: e.fases || null
         }));
         if (window.Log) Log.info(`[MATA-MATA] 📅 ${EDICOES_MATA_MATA.length} edições carregadas do admin config`);
       } else {
@@ -552,9 +553,9 @@ async function carregarEdicoesDisponiveis(usouCache = false) {
     }
 
     if (estado.edicoesDisponiveis.length > 0) {
-      // Carregar histórico de TODAS as edições
+      // Carregar histórico apenas das edições com cache disponível (evita 404s desnecessários)
       for (const ed of estado.edicoesDisponiveis) {
-        await carregarTodasFases(ed.edicao);
+        if (ed.cache_disponivel) await carregarTodasFases(ed.edicao);
       }
 
       // ✅ v6.7: Salvar no IndexedDB para próxima visita
@@ -1046,26 +1047,33 @@ async function carregarFase(edicao, fase) {
       const res = await fetch(
         `/api/mata-mata/cache/${estado.ligaId}/${edicao}?temporada=${temporada}`,
       );
-      if (!res.ok) throw new Error("Erro ao buscar dados");
-
-      const data = await res.json();
-      if (window.Log)
-        Log.info("[MATA-MATA] 📦 Resposta carregarFase:", Object.keys(data));
-
-      const dadosFases = data.dados || data.dados_torneio || data;
-
-      if (!dadosFases || typeof dadosFases !== "object") {
-        throw new Error("Dados não encontrados");
-      }
-
-      // ✅ FIX: Iterar apenas fases válidas para o tamanho do torneio (ignora stale)
-      getFasesAtuais().forEach((f) => {
-        if (dadosFases[f]) {
-          estado.cacheConfrontos[`${edicao}-${f}`] = dadosFases[f];
+      if (!res.ok) {
+        if (res.status === 404) {
+          // Sem bracket salvo ainda — tratar como fase sem dados (não é erro)
+          confrontos = null;
+        } else {
+          throw new Error("Erro ao buscar dados");
         }
-      });
+      } else {
+        const data = await res.json();
+        if (window.Log)
+          Log.info("[MATA-MATA] 📦 Resposta carregarFase:", Object.keys(data));
 
-      confrontos = dadosFases[fase];
+        const dadosFases = data.dados || data.dados_torneio || data;
+
+        if (!dadosFases || typeof dadosFases !== "object") {
+          throw new Error("Dados não encontrados");
+        }
+
+        // ✅ FIX: Iterar apenas fases válidas para o tamanho do torneio (ignora stale)
+        getFasesAtuais().forEach((f) => {
+          if (dadosFases[f]) {
+            estado.cacheConfrontos[`${edicao}-${f}`] = dadosFases[f];
+          }
+        });
+
+        confrontos = dadosFases[fase];
+      }
     }
 
     if (!confrontos || confrontos.length === 0) {
