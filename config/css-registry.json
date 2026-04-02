@@ -256,7 +256,8 @@
       {
         "path": "public/participante/css/_app-tokens.css",
         "loadedBy": ["participante/index.html"],
-        "description": "Tokens centrais do app mobile (OLED-safe)"
+        "description": "Tokens centrais do app mobile (OLED-safe dark + light mode via [data-theme='light'])",
+        "sections": ["cores-primarias", "superficies", "status", "posicoes", "texto", "tipografia", "espacamento", "sombras-suaves", "wave-dividers", "blob-decorations", "module-strip", "light-mode"]
       },
       {
         "path": "public/participante/css/tailwind.css",
@@ -370,8 +371,8 @@
       {
         "path": "public/participante/css/module-lp.css",
         "loadedBy": ["participante/index.html"],
-        "description": "Landing pages de modulos (Hero, Stats, Accordions). Suporta hero com imagem via --hero-bg-url",
-        "features": ["hero-background-image", "per-module-color-scoping", "accordions"]
+        "description": "Module slim strip 56px + flat accordions. Per-module color scoping via --lp-primary. Light mode support.",
+        "features": ["slim-strip-header", "per-module-color-scoping", "accordions", "light-mode-support"]
       },
       {
         "path": "public/participante/css/copa-mundo-2026.css",
