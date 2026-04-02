@@ -476,45 +476,36 @@ echo "Execute: git checkout main && git merge $FEATURE_BRANCH"
 
 ---
 
-#### 5.5 PM2 Restart Automático (VPS)
+#### 5.5 Verificar Deploy via GitHub Actions
 
-Após o push bem-sucedido, verificar se algum arquivo de **backend** foi modificado:
+Este projeto usa **Docker + GitHub Actions** — não PM2. Push para `main` dispara deploy automático:
 
-```bash
-# Arquivos que exigem restart do PM2
-BACKEND_PATHS="routes/ controllers/ index.js middleware/ config/ utils/ models/ services/"
+```
+push main → GitHub Actions (main.yml) → SSH VPS → docker compose build scm-prod → docker compose up -d
+```
 
-# Verificar se o commit tocou backend
-bash git diff HEAD~1 --name-only | grep -E "^(routes|controllers|middleware|config|utils|models|services)/|^index\.js$"
+Após o push, informar o usuário:
+
+```
+✅ Push realizado. Deploy automático iniciado via GitHub Actions.
+Verifique o progresso em: GitHub → aba Actions → workflow mais recente
 ```
 
 **Regra de decisão:**
 
-| Arquivos modificados | Ação |
+| Situação | Ação |
 |---|---|
-| `routes/`, `controllers/`, `index.js`, `middleware/`, `config/`, `utils/`, `models/`, `services/` | `pm2 restart cartola` |
-| Apenas `public/`, `*.md`, `.claude/`, `docs/` | Skip — estáticos, já live |
+| Push para `main` | Deploy automático — só verificar aba Actions |
+| Push para `develop` | Deploy staging automático (`deploy-staging.yml`) |
+| Tag `v*` | Deploy production alternativo (`deploy-production.yml`) |
+| Feature branch | Sem deploy — aguardar merge para main |
 
-```bash
-# Se backend modificado → restart automático
-bash pm2 restart cartola
+**O que verificar na aba Actions:**
+- Status `✅ success` = deploy concluído na VPS
+- Status `❌ failure` = reportar ao usuário com link do log
+- Após deploy bem-sucedido: sugerir **Ctrl+Shift+R** no browser para limpar cache do frontend
 
-# Confirmar que subiu
-bash pm2 status cartola
-```
-
-**Output esperado após restart:**
-```
-[PM2] Restarting 'cartola' ...
-[PM2] Done.
-┌─────┬──────────┬─────────────┬─────────┬─────────┬──────────┐
-│ id  │ name     │ status      │ cpu     │ mem     │ uptime   │
-├─────┼──────────┼─────────────┼─────────┼─────────┼──────────┤
-│ 0   │ cartola  │ online      │ 0%      │ ~80mb   │ 0s       │
-└─────┴──────────┴─────────────┴─────────┴─────────┴──────────┘
-```
-
-> Se `pm2 restart` falhar ou status não for `online`, reportar ao usuário antes de continuar.
+> Não tente executar `pm2` ou `docker` manualmente — o pipeline cuida de tudo.
 
 ---
 
@@ -544,7 +535,7 @@ Para ver o custo desta sessão, execute /usage no Claude Code.
 **Commit:** [hash] - [mensagem]
 **Arquivos:** [quantidade] modificados
 **Branch:** [nome da branch] → origin/[branch]
-**PM2:** ♻️ Reiniciado (backend alterado) | ⏭️ Skipped (só estáticos)
+**Deploy:** 🚀 GitHub Actions iniciado (push para main) | ⏭️ Sem deploy (feature branch)
 
 **Resumo:**
 - [módulo 1]: [descrição]
@@ -691,6 +682,12 @@ bash git diff | grep "console\.log" && echo "⚠️ Remova debug code"
 - [ ] main pushada com sucesso
 - [ ] Status limpo (working tree clean)
 
+### Deploy (Pós-Push para main)
+- [ ] Informar usuário que GitHub Actions foi disparado
+- [ ] Indicar aba Actions para acompanhar progresso
+- [ ] Se Actions falhar → reportar com link do log
+- [ ] Sugerir Ctrl+Shift+R após deploy bem-sucedido
+
 ### Custo (Pós-Push)
 - [ ] Executar /usage para capturar métricas
 - [ ] Exibir tokens input/output
@@ -734,9 +731,9 @@ bash git diff | grep "console\.log" && echo "⚠️ Remova debug code"
           ↓
    conflitos? → resolver como tarefa → continuar
           ↓
-♻️ FASE 5.5: PM2 RESTART
-   backend alterado? → pm2 restart cartola
-   só estáticos?    → skip
+🐳 FASE 5.5: DEPLOY STATUS
+   push main? → GitHub Actions disparado → verificar aba Actions
+   feature branch? → skip (sem deploy automático)
           ↓
 💰 FASE 6: USAGE REPORT
    /usage → capturar métricas da sessão
