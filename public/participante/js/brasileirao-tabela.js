@@ -7,6 +7,24 @@
 
 // RODADA_FINAL_CAMPEONATO disponível via participante-cache-manager.js (global)
 
+const _BRASILEIRAO_FETCH_TIMEOUT = 10000; // 10s
+
+async function _fetchComTimeout(url, options = {}, timeout = _BRASILEIRAO_FETCH_TIMEOUT) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    try {
+        const response = await fetch(url, { ...options, signal: controller.signal });
+        clearTimeout(timeoutId);
+        return response;
+    } catch (error) {
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') {
+            throw new Error(`Timeout após ${timeout}ms: ${url}`);
+        }
+        throw error;
+    }
+}
+
 const BrasileiraoTabela = {
     _containerId: null,
     _temporada: null,
@@ -39,7 +57,7 @@ const BrasileiraoTabela = {
                 ? `/api/brasileirao/ao-vivo/${this._temporada}`
                 : `/api/brasileirao/resumo/${this._temporada}`;
 
-            const response = await fetch(endpoint);
+            const response = await _fetchComTimeout(endpoint);
             const data = await response.json();
 
             if (!data.success) {
@@ -67,7 +85,7 @@ const BrasileiraoTabela = {
      */
     async _verificarMatchdayStatus() {
         try {
-            const response = await fetch('/api/matchday/status');
+            const response = await _fetchComTimeout('/api/matchday/status');
             const data = await response.json();
 
             if (data.success) {
@@ -302,7 +320,7 @@ const BrasileiraoTabela = {
 
         try {
             const temporada = this._temporada || new Date().getFullYear();
-            const response = await fetch(`/api/brasileirao/classificacao/${temporada}`);
+            const response = await _fetchComTimeout(`/api/brasileirao/classificacao/${temporada}`);
             const data = await response.json();
 
             if (!data.success || !data.classificacao || data.classificacao.length === 0) {
@@ -323,6 +341,16 @@ const BrasileiraoTabela = {
             container.innerHTML = this._renderClassificacao(data.classificacao, data.rodada_atual, meuClubeId);
         } catch (err) {
             console.warn('[BRASILEIRAO-TABELA] Erro classificação:', err);
+            container.innerHTML = `
+                <div class="brasileirao-class-vazio">
+                    <span class="material-icons" style="color: var(--app-danger);">error_outline</span>
+                    <p>Erro ao carregar classificação</p>
+                    <button onclick="window.BrasileiraoTabela && window.BrasileiraoTabela.renderizarClassificacao('${containerId}')"
+                            style="margin-top: 8px; padding: 4px 12px; font-size: 12px; border: 1px solid var(--app-border); border-radius: 6px; background: transparent; color: var(--app-text-dim); cursor: pointer;">
+                        <span class="material-icons" style="font-size: 14px; vertical-align: middle;">refresh</span> Tentar novamente
+                    </button>
+                </div>
+            `;
         }
     },
 
@@ -553,7 +581,7 @@ const BrasileiraoTabela = {
     async _fetchTabelaCompleta(overlay) {
         const contentEl = overlay.querySelector('#brasileirao-lp-content');
         try {
-            const response = await fetch(`/api/brasileirao/completo/${this._temporada}`);
+            const response = await _fetchComTimeout(`/api/brasileirao/completo/${this._temporada}`);
             const data = await response.json();
 
             if (data.success) {
@@ -777,7 +805,7 @@ const BrasileiraoTabela = {
         this._autoRefreshTimer = setInterval(async () => {
             try {
                 // Sempre usar /ao-vivo durante refresh (dados frescos com placares)
-                const response = await fetch(`/api/brasileirao/ao-vivo/${this._temporada}`);
+                const response = await _fetchComTimeout(`/api/brasileirao/ao-vivo/${this._temporada}`);
                 const data = await response.json();
 
                 if (data.success) {
