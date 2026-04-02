@@ -210,89 +210,6 @@
 }
 
 /* ============================================================
-   LEGACY: Keep .module-lp-hero as alias for backward compat
-   (redirects to strip visuals)
-   ============================================================ */
-
-.module-lp-hero {
-    display: flex;
-    align-items: center;
-    gap: var(--app-space-3, 10px);
-    height: var(--app-strip-height, 56px);
-    padding: 0 var(--app-space-5, 16px);
-    background: var(--app-surface, #1a1a1a);
-    border-left: var(--app-strip-accent-width, 3px) solid var(--lp-primary);
-    border-bottom: 1px solid var(--app-border, #333);
-    position: relative;
-    animation: app-fade-in var(--app-duration-fast, 0.2s) ease-out;
-    overflow: visible;
-    text-align: left;
-    margin: 0;
-    box-shadow: none;
-}
-
-/* Disable old pseudo-element overlays */
-.module-lp-hero::before,
-.module-lp-hero::after {
-    display: none;
-}
-
-.module-lp-hero > * {
-    position: relative;
-    z-index: 1;
-}
-
-/* Icon: inline, no circle wrap */
-.module-lp-hero-icon-wrap {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: auto;
-    height: auto;
-    border-radius: 0;
-    background: none;
-    border: none;
-    margin-bottom: 0;
-    box-shadow: none;
-    animation: none;
-    flex-shrink: 0;
-}
-
-.module-lp-hero-icon-wrap .material-icons {
-    font-size: var(--app-strip-icon-size, 20px);
-    color: var(--lp-primary);
-}
-
-.module-lp-hero-title {
-    font-family: var(--app-font-brand, 'Russo One', sans-serif);
-    font-size: var(--app-strip-title-size, 14px);
-    font-weight: 400;
-    color: var(--app-text-primary, #fff);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    line-height: 1.2;
-    margin: 0;
-    text-shadow: none;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.module-lp-hero-tagline {
-    font-family: var(--app-font-base, 'Inter', sans-serif);
-    font-size: var(--app-strip-tagline-size, 10px);
-    color: var(--app-text-dim, rgba(255,255,255,0.45));
-    opacity: 1;
-    text-transform: none;
-    letter-spacing: normal;
-    margin: 0;
-    line-height: 1.3;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* ============================================================
    4. PILLS ROW (Como Funciona + Premiações — compact pill design)
    ============================================================ */
 
@@ -656,8 +573,7 @@
    LIGHT MODE ADJUSTMENTS
    ============================================================ */
 
-[data-theme="light"] .module-lp-strip,
-[data-theme="light"] .module-lp-hero {
+[data-theme="light"] .module-lp-strip {
     background: var(--app-surface);
     border-bottom-color: var(--app-border);
 }

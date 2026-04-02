@@ -24,16 +24,19 @@ async function inicializarRankingParticipante(payload) {
         colorClass:   'module-lp-ranking-geral',
     });
 
-    // Injetar share button no slot de ações da strip
+    // Injetar share button no slot de ações da strip (desabilitado até import concluir)
+    let shareBtn = null;
     const stripActions = document.querySelector('#ranking-geral-lp-wrapper .module-lp-strip-actions');
     if (stripActions && !stripActions.querySelector('.btn-share')) {
         const shareIcon = document.createElement('span');
         shareIcon.className = 'material-icons';
         shareIcon.textContent = 'share';
-        const shareBtn = document.createElement('button');
+        shareBtn = document.createElement('button');
         shareBtn.className = 'btn-share';
         shareBtn.title = 'Compartilhar ranking';
         shareBtn.setAttribute('aria-label', 'Compartilhar ranking');
+        shareBtn.disabled = true;
+        shareBtn.style.opacity = '0.4';
         shareBtn.appendChild(shareIcon);
         shareBtn.addEventListener('click', () => {
             if (typeof window.compartilharRanking === 'function') window.compartilharRanking();
@@ -57,6 +60,7 @@ async function inicializarRankingParticipante(payload) {
         // Inicializar módulo
         if (moduloRanking.initRanking) {
             await moduloRanking.initRanking();
+            if (shareBtn) { shareBtn.disabled = false; shareBtn.style.opacity = ''; }
             if (window.Log) Log.info('PARTICIPANTE-RANKING', '✅ Módulo v4.0 inicializado com sucesso');
         } else {
             throw new Error('Função initRanking não encontrada no módulo');
