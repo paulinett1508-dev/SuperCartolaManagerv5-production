@@ -33,11 +33,9 @@ import logger from '../utils/logger.js';
  * Retorna array com id, nome, rodadaInicial, rodadaFinal, rodadaDefinicao.
  */
 function _gerarCalendarioBackend(totalTimes, qtdEdicoes, rodadaFinalCampeonato = 38) {
-    let numFases;
-    if (totalTimes >= 32) numFases = 5;
-    else if (totalTimes >= 16) numFases = 4;
-    else if (totalTimes >= 8) numFases = 3;
-    else return [];
+    const fasesNomes = getFasesParaTamanho(totalTimes);
+    const numFases = fasesNomes.length;
+    if (numFases === 0) return [];
 
     const edicoes = [];
     let rodadaAtual = 2; // Rodada 1 é aquecimento; definição começa na rodada 2
@@ -49,12 +47,19 @@ function _gerarCalendarioBackend(totalTimes, qtdEdicoes, rodadaFinalCampeonato =
 
         if (rodadaFinal > rodadaFinalCampeonato) break;
 
+        // ✅ Mapeamento fixo fase→rodada (fonte de verdade salva no banco)
+        const fases = {};
+        fasesNomes.forEach((fase, idx) => {
+            fases[fase] = rodadaInicial + idx;
+        });
+
         edicoes.push({
             id: i + 1,
             nome: `${i + 1}ª Edição`,
             rodadaInicial,
             rodadaFinal,
-            rodadaDefinicao
+            rodadaDefinicao,
+            fases
         });
 
         rodadaAtual = rodadaFinal + 1;
@@ -893,8 +898,14 @@ export async function calcularBracketParaConsolidacao(ligaId, rodadaAtual) {
             }
 
             const fases = getFasesParaTamanho(tamanhoTorneio);
+            // ✅ Ler mapeamento fixo fase→rodada do calendário salvo no banco
             const rodadasFases = {};
-            fases.forEach((fase, idx) => { rodadasFases[fase] = edicao.rodadaInicial + idx; });
+            if (edicao.fases && typeof edicao.fases === 'object') {
+                Object.assign(rodadasFases, edicao.fases);
+            } else {
+                // Fallback: calcular (retrocompatibilidade com dados antigos)
+                fases.forEach((fase, idx) => { rodadasFases[fase] = edicao.rodadaInicial + idx; });
+            }
 
             // Iniciar com dados existentes do cache (preservar fases já calculadas)
             const dadosTorneio = cacheExistente?.dados_torneio

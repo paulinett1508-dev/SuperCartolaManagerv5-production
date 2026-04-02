@@ -74,12 +74,25 @@ export function getFasesParaTamanho(tamanho) {
   return [];
 }
 
-// Função para obter texto da rodada de pontos (dinâmico por tamanho)
+// ✅ Helper: obter rodada de uma fase — lê do calendário fixo (fases salvas no banco)
+// Fallback: calcula rodadaInicial + idx (para dados antigos sem campo fases)
+export function getRodadaDaFase(edicaoSelecionada, faseKey, tamanhoTorneio) {
+  // Prioridade 1: campo fases salvo no banco (fonte de verdade)
+  if (edicaoSelecionada.fases && edicaoSelecionada.fases[faseKey] != null) {
+    return edicaoSelecionada.fases[faseKey];
+  }
+  // Fallback: calcular dinamicamente (retrocompatibilidade)
+  const fasesArr = getFasesParaTamanho(tamanhoTorneio);
+  const idx = fasesArr.indexOf(faseKey);
+  if (idx === -1) return 0;
+  return edicaoSelecionada.rodadaInicial + idx;
+}
+
+// Função para obter texto da rodada de pontos
 export function getRodadaPontosText(faseLabel, edicao, tamanhoTorneio = TAMANHO_TORNEIO_DEFAULT) {
   const edicaoSelecionada = edicoes.find((e) => e.id === edicao);
   if (!edicaoSelecionada) return "";
 
-  const fases = getFasesParaTamanho(tamanhoTorneio);
   // Mapear label para key
   const labelToKey = {};
   for (const key of Object.keys(FASE_LABELS)) {
@@ -88,22 +101,16 @@ export function getRodadaPontosText(faseLabel, edicao, tamanhoTorneio = TAMANHO_
   const faseKey = labelToKey[faseLabel.toUpperCase()];
   if (!faseKey) return "";
 
-  const idx = fases.indexOf(faseKey);
-  if (idx === -1) return "";
-
-  return `Pontuação da Rodada ${edicaoSelecionada.rodadaInicial + idx}`;
+  const rodada = getRodadaDaFase(edicaoSelecionada, faseKey, tamanhoTorneio);
+  return rodada ? `Pontuação da Rodada ${rodada}` : "";
 }
 
-// Função para obter número da rodada de pontos (dinâmico por tamanho)
+// Função para obter número da rodada de pontos
 export function getRodadaPontosNum(fase, edicao, tamanhoTorneio = TAMANHO_TORNEIO_DEFAULT) {
   const edicaoSelecionada = edicoes.find((e) => e.id === edicao);
   if (!edicaoSelecionada) return 0;
 
-  const fases = getFasesParaTamanho(tamanhoTorneio);
-  const idx = fases.indexOf(fase.toLowerCase());
-  if (idx === -1) return 0;
-
-  return edicaoSelecionada.rodadaInicial + idx;
+  return getRodadaDaFase(edicaoSelecionada, fase.toLowerCase(), tamanhoTorneio);
 }
 
 // Função para obter nome da edição
@@ -125,17 +132,21 @@ export function gerarTextoConfronto(faseLabel) {
   return `Confronto da ${faseLabel}`;
 }
 
-// Função para gerar informações das fases (dinâmico por tamanho)
+// Função para gerar informações das fases — lê do calendário fixo salvo no banco
 export function getFaseInfo(edicaoAtual, edicaoSelecionada, tamanhoTorneio = TAMANHO_TORNEIO_DEFAULT) {
   const fasesAtivas = getFasesParaTamanho(tamanhoTorneio);
   const resultado = {};
 
   fasesAtivas.forEach((fase, idx) => {
+    const rodada = getRodadaDaFase(edicaoSelecionada, fase, tamanhoTorneio);
+    const prevFase = idx > 0 ? fasesAtivas[idx - 1] : null;
+    const prevRodada = prevFase ? getRodadaDaFase(edicaoSelecionada, prevFase, tamanhoTorneio) : null;
+
     resultado[fase] = {
       label: FASE_LABELS[fase],
-      pontosRodada: edicaoSelecionada.rodadaInicial + idx,
+      pontosRodada: rodada,
       numJogos: FASE_NUM_JOGOS[fase],
-      prevFaseRodada: idx > 0 ? edicaoSelecionada.rodadaInicial + idx - 1 : null,
+      prevFaseRodada: prevRodada,
     };
   });
 

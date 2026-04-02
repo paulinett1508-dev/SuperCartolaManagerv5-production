@@ -32,17 +32,22 @@ const router = express.Router();
  * @param {number} rodadaFinalCampeonato - Última rodada do campeonato (default: 38)
  * @returns {Array} Array de edições com rodada_inicial, rodada_final, rodada_definicao
  */
+/**
+ * Retorna nomes das fases para o tamanho do torneio.
+ */
+function getFasesParaTamanho(totalTimes) {
+    if (totalTimes >= 32) return ['primeira', 'oitavas', 'quartas', 'semis', 'final'];
+    if (totalTimes >= 16) return ['oitavas', 'quartas', 'semis', 'final'];
+    if (totalTimes >= 8)  return ['quartas', 'semis', 'final'];
+    return [];
+}
+
 function gerarCalendarioMataMata(totalTimes, qtdEdicoes, rodadaFinalCampeonato = 38) {
-    // Calcular número de fases baseado no tamanho do torneio
-    let numFases;
-    if (totalTimes >= 32) numFases = 5; // primeira, oitavas, quartas, semis, final
-    else if (totalTimes >= 16) numFases = 4; // oitavas, quartas, semis, final
-    else if (totalTimes >= 8) numFases = 3; // quartas, semis, final
-    else return [];
+    const fasesNomes = getFasesParaTamanho(totalTimes);
+    const numFases = fasesNomes.length;
+    if (numFases === 0) return [];
 
     // Cada edição precisa: 1 rodada de definição + N rodadas de fases
-    // Espaçamento: sem gap entre edições (consistente com o JSON original onde
-    // rodadaDefinicao da próxima = rodadaFinal da anterior, ex: ed4 final=R26, ed5 def=R26)
     const calendario = [];
     let rodadaAtual = 2; // Rodada 1 é aquecimento; definição começa na rodada 2
 
@@ -57,12 +62,19 @@ function gerarCalendarioMataMata(totalTimes, qtdEdicoes, rodadaFinalCampeonato =
             break;
         }
 
+        // ✅ Mapeamento fixo fase→rodada (salvo no banco como fonte de verdade)
+        const fases = {};
+        fasesNomes.forEach((fase, idx) => {
+            fases[fase] = rodadaInicial + idx;
+        });
+
         calendario.push({
             edicao: i + 1,
             nome: `${i + 1}ª Edição`,
             rodada_inicial: rodadaInicial,
             rodada_final: rodadaFinal,
-            rodada_definicao: rodadaDefinicao
+            rodada_definicao: rodadaDefinicao,
+            fases
         });
 
         // Próxima edição: definição começa na rodada seguinte ao final
@@ -304,7 +316,8 @@ router.get('/liga/:ligaId/modulos/:modulo', async (req, res) => {
                 nome: e.nome,
                 rodadaInicial: e.rodada_inicial,
                 rodadaFinal: e.rodada_final,
-                rodadaDefinicao: e.rodada_definicao
+                rodadaDefinicao: e.rodada_definicao,
+                fases: e.fases || null  // ✅ Mapeamento fixo fase→rodada salvo no banco
             }));
         } else if (modulo === 'mata_mata' && configDb?.wizard_respostas?.total_times && configDb?.wizard_respostas?.qtd_edicoes) {
             // Gerar dinamicamente quando calendario_override está vazio mas wizard foi configurado
@@ -318,7 +331,8 @@ router.get('/liga/:ligaId/modulos/:modulo', async (req, res) => {
                     nome: e.nome,
                     rodadaInicial: e.rodada_inicial,
                     rodadaFinal: e.rodada_final,
-                    rodadaDefinicao: e.rodada_definicao
+                    rodadaDefinicao: e.rodada_definicao,
+                    fases: e.fases || null  // ✅ Mapeamento fixo fase→rodada
                 }));
                 console.log(`[MODULE-CONFIG] calendario_efetivo gerado de wizard_respostas: ${gerado.length} edições (${configDb.wizard_respostas.total_times} times)`);
             }

@@ -190,8 +190,18 @@ router.get("/cache/:ligaId/edicoes", validarLigaIdParam, async (req, res) => {
                         fase_atual = "classificacao";
                     } else if (rodadaAtualGlobal >= rodadaInicial && rodadaAtualGlobal <= rodadaFinal) {
                         status_edicao = "em_andamento";
-                        const idxFase = Math.min(rodadaAtualGlobal - rodadaInicial, fasesDoTorneio.length - 1);
-                        fase_atual = fasesDoTorneio[idxFase] || null;
+                        // ✅ Determinar fase atual usando mapeamento fixo do banco
+                        if (cal.fases) {
+                            for (const f of [...fasesDoTorneio].reverse()) {
+                                if (cal.fases[f] && rodadaAtualGlobal >= cal.fases[f]) {
+                                    fase_atual = f;
+                                    break;
+                                }
+                            }
+                        } else {
+                            const idxFase = Math.min(rodadaAtualGlobal - rodadaInicial, fasesDoTorneio.length - 1);
+                            fase_atual = fasesDoTorneio[idxFase] || null;
+                        }
                     } else if (rodadaAtualGlobal > rodadaFinal) {
                         status_edicao = "encerrada";
                         fase_atual = "final";
@@ -201,16 +211,22 @@ router.get("/cache/:ligaId/edicoes", validarLigaIdParam, async (req, res) => {
                 return {
                     edicao: edicaoNum,
                     nome: cal.nome || `${edicaoNum}ª Edição`,
-                    // Calendário completo
+                    // Calendário completo — usa fases salvas no banco (fonte de verdade)
                     calendario: {
                         rodada_definicao: rodadaDefinicao,
                         rodada_inicial: rodadaInicial,
                         rodada_final: rodadaFinal,
-                        fases: fasesDoTorneio.map((f, idx) => ({
-                            fase: f,
-                            label: FASE_LABELS[f],
-                            rodada: rodadaInicial + idx
-                        }))
+                        fases: cal.fases
+                            ? fasesDoTorneio.map(f => ({
+                                fase: f,
+                                label: FASE_LABELS[f],
+                                rodada: cal.fases[f] || (rodadaInicial + fasesDoTorneio.indexOf(f))
+                            }))
+                            : fasesDoTorneio.map((f, idx) => ({
+                                fase: f,
+                                label: FASE_LABELS[f],
+                                rodada: rodadaInicial + idx
+                            }))
                     },
                     // Status atual
                     status_edicao,
