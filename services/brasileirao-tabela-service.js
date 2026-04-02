@@ -152,26 +152,30 @@ function formatarHora(dataISO) {
 // FONTE 1: ESPN (gratuita, sem autenticação, calendário completo)
 // =====================================================================
 
-// Mapeamento ESPN displayName → ID Cartola
+// Mapeamento ESPN displayName → ID Cartola (Série A 2026 — 20 times)
 const TIMES_ESPN_MAP = {
     'Athletico-PR':       293,
+    'Athletico Paranaense': 293,
     'Atlético-MG':        282,
+    'Atlético Mineiro':   282,
     'Bahia':              265,
     'Botafogo':           263,
-    'Chapecoense':        315,
     'Corinthians':        264,
-    'Coritiba':           270,
     'Cruzeiro':           283,
     'Flamengo':           262,
     'Fluminense':         266,
+    'Fortaleza':          356,
     'Grêmio':             284,
     'Internacional':      285,
+    'Juventude':          286,
     'Mirassol':           2305,
     'Palmeiras':          275,
     'Red Bull Bragantino': 280,
-    'Remo':               1044,
+    'RB Bragantino':      280,
     'Santos':             277,
     'São Paulo':          276,
+    'Sport':              292,
+    'Sport Recife':       292,
     'Vasco da Gama':      267,
     'Vitória':            287,
 };
@@ -784,9 +788,13 @@ async function obterResumoAoVivo(temporada) {
 
     try {
         // Buscar jogos ao vivo internamente (via fetch local)
+        // node-fetch v3 não suporta 'timeout' — usar AbortController
+        const aoVivoController = new AbortController();
+        const aoVivoTimeoutId = setTimeout(() => aoVivoController.abort(), 10000);
         const response = await fetch(`http://localhost:${process.env.PORT || 3000}/api/jogos-ao-vivo`, {
-            timeout: 10000,
+            signal: aoVivoController.signal,
         });
+        clearTimeout(aoVivoTimeoutId);
 
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);

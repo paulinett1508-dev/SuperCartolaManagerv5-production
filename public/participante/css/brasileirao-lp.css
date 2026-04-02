@@ -148,3 +148,169 @@
     font-family: var(--app-font-base, 'Inter', sans-serif);
     font-size: 0.6rem; color: var(--app-text-muted, rgba(255, 255, 255, 0.4));
 }
+
+/* ═══════════════════════════════════════════════════
+   CLASSIFICAÇÃO — Tabela inline na LP
+   ═══════════════════════════════════════════════════ */
+.brasileirao-class-card {
+    background: var(--app-surface, #1a1a1a);
+    border: 1px solid var(--app-border, rgba(255,255,255,0.08));
+    border-radius: 0.75rem;
+    overflow: hidden;
+    margin: 0.5rem 0;
+}
+.brasileirao-class-header {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--app-border, rgba(255,255,255,0.06));
+}
+.brasileirao-class-title {
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 0.85rem; color: var(--app-text-primary, #fff); margin: 0;
+}
+.brasileirao-class-sub {
+    font-size: 0.6rem; color: var(--app-text-muted, rgba(255,255,255,0.45));
+    margin: 0; font-family: var(--app-font-base, 'Inter', sans-serif);
+}
+.brasileirao-class-table-wrap { overflow-x: auto; }
+.brasileirao-class-table {
+    width: 100%; border-collapse: collapse;
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.75rem;
+}
+.brasileirao-class-table thead tr {
+    background: rgba(255,255,255,0.03);
+}
+.brasileirao-class-table th {
+    padding: 6px 8px; text-align: center;
+    font-weight: 500; font-size: 0.6rem; text-transform: uppercase;
+    color: var(--app-text-dim, rgba(255,255,255,0.35));
+    letter-spacing: 0.05em;
+}
+.brasileirao-class-table th:nth-child(2) { text-align: left; }
+.brasileirao-class-table td {
+    padding: 7px 8px; text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--app-text-secondary, rgba(255,255,255,0.7));
+}
+.brasileirao-pos {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-weight: 600; font-size: 0.7rem; width: 28px;
+}
+.brasileirao-time { text-align: left !important; font-weight: 500; }
+.brasileirao-pts {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-weight: 700; color: var(--app-text-primary, #fff);
+}
+.brasileirao-j, .brasileirao-sg {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.7rem; opacity: 0.7;
+}
+
+/* Zonas */
+.brasileirao-zona-liberta td:first-child { color: var(--app-info, #2196F3); font-weight: 700; }
+.brasileirao-zona-pre-liberta td:first-child { color: var(--app-info-light, #64B5F6); font-weight: 600; }
+.brasileirao-zona-sula td:first-child { color: var(--app-warning, #FF9800); font-weight: 600; }
+.brasileirao-zona-rebaixa td:first-child { color: var(--app-danger, #f44336); font-weight: 700; }
+.brasileirao-zona-rebaixa { background: rgba(244,67,54,0.05); }
+
+/* Meu time destaque */
+.brasileirao-row-meu {
+    background: rgba(16,185,129,0.08) !important;
+}
+.brasileirao-row-meu .brasileirao-time {
+    color: var(--app-success-light, #4CAF50); font-weight: 600;
+}
+
+/* Legenda zonas */
+.brasileirao-class-legenda {
+    display: flex; flex-wrap: wrap; gap: 0.75rem;
+    padding: 0.5rem 1rem 0.75rem; border-top: 1px solid rgba(255,255,255,0.04);
+}
+.brasileirao-leg-item {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 0.55rem; color: var(--app-text-dim, rgba(255,255,255,0.4));
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+}
+.brasileirao-leg-dot {
+    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════
+   JOGOS DA RODADA — Cards
+   ═══════════════════════════════════════════════════ */
+.brasileirao-rodada-card, .brasileirao-info-card {
+    background: var(--app-surface, #1a1a1a);
+    border: 1px solid var(--app-border, rgba(255,255,255,0.08));
+    border-radius: 0.75rem; overflow: hidden; margin: 0.75rem 0;
+}
+.brasileirao-rodada-header, .brasileirao-info-header {
+    display: flex; align-items: center; gap: 0.4rem;
+    padding: 0.65rem 1rem; font-size: 0.8rem; font-weight: 600;
+    color: var(--app-text-primary, #fff);
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    border-bottom: 1px solid var(--app-border, rgba(255,255,255,0.06));
+}
+.brasileirao-jogos-lista {
+    padding: 0.5rem;
+    display: flex; flex-direction: column; gap: 0.35rem;
+}
+.brasileirao-jogo-card {
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    padding: 0.6rem 0.75rem; border-radius: 0.5rem;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+    position: relative;
+}
+.brasileirao-jogo-card--live {
+    border-color: rgba(239,68,68,0.3);
+    background: rgba(239,68,68,0.06);
+}
+.brasileirao-jogo-time {
+    font-size: 0.75rem; font-weight: 500; min-width: 90px;
+    color: var(--app-text-secondary, rgba(255,255,255,0.8));
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+}
+.brasileirao-jogo-time:first-of-type { text-align: right; }
+.brasileirao-jogo-time:last-of-type { text-align: left; }
+.brasileirao-jogo-placar {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.8rem; font-weight: 700; min-width: 50px; text-align: center;
+    color: var(--app-text-primary, #fff);
+}
+.brasileirao-live-dot {
+    position: absolute; top: 6px; right: 6px;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--app-danger, #ef4444);
+    animation: brasileirao-lp-pulse 1.5s infinite;
+}
+@keyframes brasileirao-lp-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* ═══════════════════════════════════════════════════
+   INFO CAMPEONATO — Fallback cards
+   ═══════════════════════════════════════════════════ */
+.brasileirao-info-items {
+    padding: 0.5rem 0.75rem;
+    display: flex; flex-direction: column; gap: 0.25rem;
+}
+.brasileirao-info-item {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.6rem 0.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.brasileirao-info-item:last-child { border-bottom: none; }
+.brasileirao-info-item .material-icons {
+    font-size: 1.1rem; color: var(--app-success-light, #4CAF50); flex-shrink: 0;
+}
+.brasileirao-info-label {
+    font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--app-text-dim, rgba(255,255,255,0.35)); margin: 0;
+    font-family: var(--app-font-base, 'Inter', sans-serif); font-weight: 500;
+}
+.brasileirao-info-value {
+    font-size: 0.75rem; color: var(--app-text-secondary, rgba(255,255,255,0.75));
+    margin: 2px 0 0; font-family: var(--app-font-base, 'Inter', sans-serif);
+}
