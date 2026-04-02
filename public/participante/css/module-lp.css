@@ -158,6 +158,7 @@
     text-overflow: ellipsis;
 }
 
+<<<<<<< HEAD
 .module-lp-strip-tagline {
     font-family: var(--app-font-base, 'Inter', sans-serif);
     font-size: var(--app-strip-tagline-size, 10px);
@@ -269,7 +270,7 @@
     text-overflow: ellipsis;
 }
 
-.module-lp-hero-tagline {
+..module-lp-hero-tagline {
     font-family: var(--app-font-base, 'Inter', sans-serif);
     font-size: var(--app-strip-tagline-size, 10px);
     color: var(--app-text-dim, rgba(255,255,255,0.45));

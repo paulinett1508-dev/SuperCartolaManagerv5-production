@@ -28,7 +28,7 @@
  * @property {Function} [premiacaoModuleConfigFn]   - async (ligaId) => htmlString, used when premiacaoSource='moduleconfig'
  * @property {boolean}  [showPremiacaoAccordion]    - Default true. Pass false to hide the premiacao accordion (e.g. Extrato)
  * @property {boolean}  [showComoFuncionaAccordion] - Default true. Pass false to hide the "Como Funciona" accordion (e.g. Raio-X)
- * @property {boolean}  [showCloseBtn]              - Default true. Pass false to hide the close (X) button in the hero.
+ * @property {boolean}  [showCloseBtn]              - Default false. Pass true to show the close (X) button in the hero (not recommended).
  */
 
 /**
@@ -53,11 +53,8 @@ function _buildLPHtml(config) {
     const labelPremio = premiacaoLabel || 'Premiação';
     const mostrarPremio = showPremiacaoAccordion !== false;
     const mostrarComoFunciona = showComoFuncionaAccordion !== false;
-    const mostrarClose = showCloseBtn !== false;
 
-    const closeBtnHtml = mostrarClose
-        ? `<button class="module-lp-close-btn" aria-label="Fechar"><span class="material-icons">close</span></button>`
-        : '';
+    const closeBtnHtml = '';
 
     const comoFuncionaAccordionHtml = mostrarComoFunciona ? `
   <div class="module-lp-accordion" id="${wrapperId}-acc-como">
@@ -277,20 +274,6 @@ export function injectModuleLP(config) {
 
     // --- Init accordion click listeners ---
     _initLPAccordions(wrapperId);
-
-    // --- Init close button ---
-    var wrapper = document.getElementById(wrapperId);
-    var closeBtn = wrapper ? wrapper.querySelector('.module-lp-close-btn') : null;
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function () {
-            if (wrapper) wrapper.style.display = 'none';
-            // Hide the sibling divider (immediately follows the wrapper)
-            var divider = wrapper && wrapper.nextElementSibling;
-            if (divider && divider.classList.contains('module-lp-divider')) {
-                divider.style.display = 'none';
-            }
-        });
-    }
 
     // --- Eager data fetch: Como Funciona ---
     if (showComoFuncionaAccordion) {

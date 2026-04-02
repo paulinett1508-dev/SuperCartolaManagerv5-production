@@ -47,41 +47,48 @@ const RefreshButton = {
         .refresh-button {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 8px 14px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 8px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 12px;
-            font-weight: 500;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            gap: 0;
+            background: rgba(255, 255, 255, 0.09);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 999px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0;
+            font-weight: 600;
+            min-width: 30px;
+            line-height: 1;
             cursor: pointer;
             transition: all 0.2s ease;
             -webkit-tap-highlight-color: transparent;
         }
 
         .refresh-button:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.25);
-            color: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.22);
+            border-color: rgba(255, 255, 255, 0.40);
+            color: rgba(255, 255, 255, 1);
+            transform: scale(1.05);
         }
 
         .refresh-button:active {
             transform: scale(0.95);
-            background: rgba(255, 69, 0, 0.2);
-            border-color: rgba(255, 69, 0, 0.4);
+            background: rgba(255, 255, 255, 0.28);
+            border-color: rgba(255, 255, 255, 0.50);
         }
 
         .refresh-button .material-symbols-outlined {
             font-size: 18px;
         }
 
-        /* Container do botão no topo do módulo */
-        .refresh-button-container {
-            display: flex;
-            justify-content: flex-end;
-            padding: 4px 4px 0 4px;
-            margin-bottom: 4px;
+        .refresh-button-container,
+        .refresh-button-inline-wrapper {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: auto;
+            padding: 0;
         }
 
         /* ============================================
@@ -543,14 +550,19 @@ const RefreshButton = {
     createButton(options = {}) {
         this.init();
 
-        const text = options.text || 'Atualizar App';
+        const text = options.text || '';
         const showIcon = options.showIcon !== false;
 
         const button = document.createElement('button');
         button.className = 'refresh-button';
+        if (!text.trim()) {
+            button.setAttribute('aria-label', options.ariaLabel || 'Atualizar dados');
+            button.setAttribute('title', options.title || 'Atualizar dados');
+        }
+
         button.innerHTML = `
             ${showIcon ? '<span class="material-symbols-outlined">refresh</span>' : ''}
-            ${text}
+            ${text ? `<span class="refresh-button-text" style="display:inline-block;font-size:12px;margin-left:4px;">${text}</span>` : ''}
         `;
 
         button.addEventListener('click', () => {
@@ -584,10 +596,29 @@ const RefreshButton = {
 
         // Criar container para o botão
         const wrapper = document.createElement('div');
-        wrapper.className = 'refresh-button-container';
+        wrapper.className = 'refresh-button-inline-wrapper';
         wrapper.appendChild(this.createButton(options));
 
-        // Inserir no início do container
+        // Tentar injetar em um elemento header/linha existente
+        const headerSlot = containerEl.querySelector('.flex.justify-between, .flex.items-center, .module-header, .section-heading, .text-center, h1, h2');
+        if (headerSlot && headerSlot !== containerEl) {
+            // Se o container pai for bloco, força linha com display:flex
+            const host = headerSlot.closest('.flex.justify-between, .flex.items-center') || headerSlot;
+            if (host && !(host.classList.contains('refresh-button-inline-wrapper'))) {
+                host.style.display = host.style.display || 'flex';
+                host.style.alignItems = host.style.alignItems || 'center';
+                host.style.justifyContent = host.style.justifyContent || 'space-between';
+                host.appendChild(wrapper);
+                return wrapper;
+            }
+        }
+
+        // Fallback tradicional: adiciona no topo (sem ocupar linha separada)
+        containerEl.style.position = containerEl.style.position || 'relative';
+        wrapper.style.position = 'absolute';
+        wrapper.style.top = '12px';
+        wrapper.style.right = '12px';
+        wrapper.style.zIndex = '10';
         containerEl.insertBefore(wrapper, containerEl.firstChild);
 
         return wrapper;

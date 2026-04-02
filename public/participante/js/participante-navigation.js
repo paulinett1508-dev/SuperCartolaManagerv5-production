@@ -968,8 +968,9 @@ class ParticipanteNavigation {
             if (window.Log) Log.info('PARTICIPANTE-NAV', `✅ Módulo ${moduloId} carregado`);
 
             // ✅ v2.4: Adicionar botão de atualização manual (temporada encerrada)
+            // Versão simplificada: ícone único, não ocupa linha inteira (discreto no header)
             if (moduloId !== 'home' && window.RefreshButton?.shouldShow()) {
-                window.RefreshButton.addTo(container, { text: 'Atualizar Dados' });
+                window.RefreshButton.addTo(container, { text: '', ariaLabel: 'Atualizar dados' });
             }
 
         } catch (error) {
