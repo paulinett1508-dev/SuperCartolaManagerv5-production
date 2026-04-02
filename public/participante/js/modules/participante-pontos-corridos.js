@@ -187,7 +187,7 @@ export async function inicializarPontosCorridosParticipante(params = {}) {
         ligaId:       estadoPC.ligaId,
         moduloKey:    'pontos_corridos',
         titulo:       'Pontos Corridos',
-        tagline:      'Campeonato interno estilo Brasileirão',
+        tagline:      'Liga interna todos contra todos',
         icon:         'format_list_numbered',
         colorClass:   'module-lp-pontos-corridos',
     });

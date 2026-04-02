@@ -1,175 +1,107 @@
 /**
- * MODULE LP — Landing Page Template
- * ===================================
- * Shared styles for module landing pages (Artilheiro, Capitão de Luxo,
- * Luva de Ouro, Resta Um). Provides Hero, Accordions, Premiações grid
- * and Divider sections.
+ * MODULE LP — Slim Strip + Accordions
+ * =====================================
+ * Redesign v2.0: Hero card substituído por faixa strip 56px profissional.
+ * Accordions flat estilo iOS settings.
  *
  * Depends on: _app-tokens.css
  * Anti-Frank: /public/participante/css/module-lp.css
- * Author: auto-generated (claude/add-module-landing-pages-ffev8)
  */
 
 /* ============================================================
    1. PER-MODULE COLOR SCOPING
-   Each class scopes --lp-* variables. All other styles consume these.
-   Zero hardcoded hex values — only var(--app-*) with fallbacks.
+   Simplificado: apenas --lp-primary, --lp-muted, --lp-border.
+   Removidos: --lp-gradient-hero, --lp-glow, --lp-muted-strong.
    ============================================================ */
 
 .module-lp-artilheiro {
     --lp-primary: var(--app-success-light, #22c55e);
     --lp-muted: rgba(34, 197, 94, 0.12);
-    --lp-muted-strong: rgba(34, 197, 94, 0.22);
     --lp-border: rgba(34, 197, 94, 0.25);
-    --lp-gradient-hero:
-        linear-gradient(145deg, rgba(34, 197, 94, 0.22) 0%, rgba(16, 185, 129, 0.06) 55%, transparent 90%),
-        radial-gradient(ellipse 55% 40% at 85% 90%, rgba(34, 197, 94, 0.10), transparent);
-    --lp-gradient-card: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(34, 197, 94, 0.03));
-    --lp-glow: 0 0 20px rgba(34, 197, 94, 0.22), 0 0 48px rgba(34, 197, 94, 0.08);
 }
 
 .module-lp-capitao {
     --lp-primary: var(--app-purple, #8b5cf6);
     --lp-muted: rgba(139, 92, 246, 0.12);
-    --lp-muted-strong: rgba(139, 92, 246, 0.22);
     --lp-border: rgba(139, 92, 246, 0.25);
-    --lp-gradient-hero:
-        linear-gradient(145deg, rgba(139, 92, 246, 0.22) 0%, rgba(99, 102, 241, 0.06) 55%, transparent 90%),
-        radial-gradient(ellipse 55% 40% at 85% 90%, rgba(139, 92, 246, 0.10), transparent);
-    --lp-gradient-card: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(139, 92, 246, 0.03));
-    --lp-glow: 0 0 20px rgba(139, 92, 246, 0.22), 0 0 48px rgba(139, 92, 246, 0.08);
 }
 
 .module-lp-luva {
     --lp-primary: var(--app-gold, #ffd700);
     --lp-muted: rgba(255, 215, 0, 0.12);
-    --lp-muted-strong: rgba(255, 215, 0, 0.24);
     --lp-border: rgba(255, 215, 0, 0.28);
-    --lp-gradient-hero:
-        linear-gradient(145deg, rgba(255, 215, 0, 0.20) 0%, rgba(245, 158, 11, 0.06) 55%, transparent 90%),
-        radial-gradient(ellipse 50% 35% at 80% 90%, rgba(255, 215, 0, 0.10), transparent);
-    --lp-gradient-card: linear-gradient(135deg, rgba(255, 215, 0, 0.08), rgba(255, 215, 0, 0.03));
-    --lp-glow: 0 0 20px rgba(255, 215, 0, 0.24), 0 0 48px rgba(255, 215, 0, 0.08);
 }
 
 .module-lp-resta-um {
     --lp-primary: var(--app-restaum-primary, #f43f5e);
     --lp-muted: rgba(244, 63, 94, 0.10);
-    --lp-muted-strong: rgba(244, 63, 94, 0.22);
     --lp-border: rgba(244, 63, 94, 0.25);
-    --lp-gradient-hero:
-        linear-gradient(135deg, rgba(244, 63, 94, 0.26) 0%, rgba(239, 68, 68, 0.08) 50%, transparent 85%),
-        radial-gradient(ellipse 60% 45% at 12% 60%, rgba(244, 63, 94, 0.14), transparent);
-    --lp-gradient-card: linear-gradient(135deg, rgba(244, 63, 94, 0.08), rgba(244, 63, 94, 0.03));
-    --lp-glow: 0 0 20px rgba(244, 63, 94, 0.26), 0 0 48px rgba(244, 63, 94, 0.10);
 }
 
 .module-lp-ranking-geral {
     --lp-primary: var(--app-purple, #8b5cf6);
     --lp-muted: rgba(139, 92, 246, 0.12);
-    --lp-muted-strong: rgba(139, 92, 246, 0.22);
     --lp-border: rgba(139, 92, 246, 0.25);
-    --lp-gradient-hero:
-        linear-gradient(145deg, rgba(139, 92, 246, 0.22) 0%, rgba(99, 102, 241, 0.06) 55%, transparent 90%),
-        radial-gradient(ellipse 55% 40% at 85% 90%, rgba(139, 92, 246, 0.10), transparent);
-    --lp-gradient-card: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(139, 92, 246, 0.03));
-    --lp-glow: 0 0 20px rgba(139, 92, 246, 0.22), 0 0 48px rgba(139, 92, 246, 0.08);
 }
 
 .module-lp-ranking-rodada {
     --lp-primary: var(--app-success-light, #22c55e);
     --lp-muted: rgba(34, 197, 94, 0.12);
-    --lp-muted-strong: rgba(34, 197, 94, 0.22);
     --lp-border: rgba(34, 197, 94, 0.25);
-    --lp-gradient-hero:
-        linear-gradient(145deg, rgba(34, 197, 94, 0.22) 0%, rgba(16, 185, 129, 0.08) 55%, transparent 90%),
-        radial-gradient(ellipse 55% 40% at 15% 85%, rgba(34, 197, 94, 0.10), transparent);
-    --lp-gradient-card: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(34, 197, 94, 0.03));
-    --lp-glow: 0 0 20px rgba(34, 197, 94, 0.22), 0 0 48px rgba(34, 197, 94, 0.08);
 }
 
 .module-lp-top10 {
     --lp-primary: var(--app-warning, #f59e0b);
     --lp-muted: rgba(245, 158, 11, 0.12);
-    --lp-muted-strong: rgba(245, 158, 11, 0.22);
     --lp-border: rgba(245, 158, 11, 0.25);
-    --lp-gradient-hero:
-        linear-gradient(145deg, rgba(245, 158, 11, 0.22) 0%, rgba(234, 179, 8, 0.06) 55%, transparent 90%),
-        radial-gradient(ellipse 55% 40% at 85% 90%, rgba(245, 158, 11, 0.10), transparent);
-    --lp-gradient-card: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(245, 158, 11, 0.03));
-    --lp-glow: 0 0 20px rgba(245, 158, 11, 0.22), 0 0 48px rgba(245, 158, 11, 0.08);
 }
 
 .module-lp-melhor-mes {
     --lp-primary: var(--app-info, #06b6d4);
     --lp-muted: rgba(6, 182, 212, 0.12);
-    --lp-muted-strong: rgba(6, 182, 212, 0.22);
     --lp-border: rgba(6, 182, 212, 0.25);
-    --lp-gradient-hero:
-        linear-gradient(145deg, rgba(6, 182, 212, 0.22) 0%, rgba(14, 165, 233, 0.06) 55%, transparent 90%),
-        radial-gradient(ellipse 55% 40% at 85% 90%, rgba(6, 182, 212, 0.10), transparent);
-    --lp-gradient-card: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(6, 182, 212, 0.03));
-    --lp-glow: 0 0 20px rgba(6, 182, 212, 0.22), 0 0 48px rgba(6, 182, 212, 0.08);
 }
 
 .module-lp-pontos-corridos {
     --lp-primary: var(--app-success-light, #22c55e);
     --lp-muted: rgba(34, 197, 94, 0.10);
-    --lp-muted-strong: rgba(34, 197, 94, 0.20);
     --lp-border: rgba(34, 197, 94, 0.22);
-    --lp-gradient-hero:
-        linear-gradient(145deg, rgba(34, 197, 94, 0.20) 0%, rgba(16, 185, 129, 0.06) 55%, transparent 90%),
-        radial-gradient(ellipse 55% 40% at 85% 90%, rgba(34, 197, 94, 0.08), transparent);
-    --lp-gradient-card: linear-gradient(135deg, rgba(34, 197, 94, 0.07), rgba(34, 197, 94, 0.02));
-    --lp-glow: 0 0 20px rgba(34, 197, 94, 0.20), 0 0 48px rgba(34, 197, 94, 0.07);
 }
 
 .module-lp-mata-mata {
     --lp-primary: var(--app-danger, #ef4444);
     --lp-muted: rgba(239, 68, 68, 0.12);
-    --lp-muted-strong: rgba(239, 68, 68, 0.22);
     --lp-border: rgba(239, 68, 68, 0.25);
-    --lp-gradient-hero:
-        linear-gradient(145deg, rgba(239, 68, 68, 0.22) 0%, rgba(220, 38, 38, 0.06) 55%, transparent 90%),
-        radial-gradient(ellipse 55% 40% at 85% 90%, rgba(239, 68, 68, 0.10), transparent);
-    --lp-gradient-card: linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(239, 68, 68, 0.03));
-    --lp-glow: 0 0 20px rgba(239, 68, 68, 0.22), 0 0 48px rgba(239, 68, 68, 0.08);
 }
 
 .module-lp-tiro-certo {
     --lp-primary: var(--app-warning-orange, #f97316);
     --lp-muted: rgba(249, 115, 22, 0.12);
-    --lp-muted-strong: rgba(249, 115, 22, 0.22);
     --lp-border: rgba(249, 115, 22, 0.25);
-    --lp-gradient-hero:
-        linear-gradient(145deg, rgba(249, 115, 22, 0.22) 0%, rgba(234, 88, 12, 0.06) 55%, transparent 90%),
-        radial-gradient(ellipse 55% 40% at 85% 90%, rgba(249, 115, 22, 0.10), transparent);
-    --lp-gradient-card: linear-gradient(135deg, rgba(249, 115, 22, 0.08), rgba(249, 115, 22, 0.03));
-    --lp-glow: 0 0 20px rgba(249, 115, 22, 0.22), 0 0 48px rgba(249, 115, 22, 0.08);
 }
 
 .module-lp-raio-x {
     --lp-primary: var(--app-cyan, #06b6d4);
     --lp-muted: rgba(6, 182, 212, 0.12);
-    --lp-muted-strong: rgba(6, 182, 212, 0.22);
     --lp-border: rgba(6, 182, 212, 0.25);
-    --lp-gradient-hero:
-        linear-gradient(145deg, rgba(6, 182, 212, 0.22) 0%, rgba(8, 145, 178, 0.06) 55%, transparent 90%),
-        radial-gradient(ellipse 55% 40% at 85% 90%, rgba(6, 182, 212, 0.10), transparent);
-    --lp-gradient-card: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(6, 182, 212, 0.03));
-    --lp-glow: 0 0 20px rgba(6, 182, 212, 0.22), 0 0 48px rgba(6, 182, 212, 0.08);
 }
 
 .module-lp-campinho {
     --lp-primary: var(--app-success, #10b981);
     --lp-muted: rgba(16, 185, 129, 0.12);
-    --lp-muted-strong: rgba(16, 185, 129, 0.22);
     --lp-border: rgba(16, 185, 129, 0.25);
-    --lp-gradient-hero:
-        linear-gradient(145deg, rgba(16, 185, 129, 0.22) 0%, rgba(5, 150, 105, 0.06) 55%, transparent 90%),
-        radial-gradient(ellipse 55% 40% at 85% 90%, rgba(16, 185, 129, 0.10), transparent);
-    --lp-gradient-card: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(16, 185, 129, 0.03));
-    --lp-glow: 0 0 20px rgba(16, 185, 129, 0.22), 0 0 48px rgba(16, 185, 129, 0.08);
+}
+
+.module-lp-extrato {
+    --lp-primary: var(--app-primary, #FF5500);
+    --lp-muted: rgba(255, 85, 0, 0.10);
+    --lp-border: rgba(255, 85, 0, 0.20);
+}
+
+.module-lp-historico {
+    --lp-primary: var(--app-gold, #ffd700);
+    --lp-muted: rgba(255, 215, 0, 0.10);
+    --lp-border: rgba(255, 215, 0, 0.25);
 }
 
 /* ============================================================
@@ -177,139 +109,192 @@
    ============================================================ */
 
 .module-lp {
-    padding: 0 0 var(--app-space-4) 0;
+    padding: 0;
 }
 
 /* ============================================================
-   3. HERO SECTION
+   3. SLIM STRIP (replaces hero card)
+   Professional sports app style: 56px horizontal bar
    ============================================================ */
 
-.module-lp-hero {
-    position: relative;
-    overflow: hidden;
-    padding: var(--app-space-8) var(--app-space-5);
-    margin: 0 -1px;  /* Flush with viewport on mobile */
-    text-align: center;
-    background: var(--lp-gradient-hero);
-    border-bottom: 1px solid var(--lp-border);
-    box-shadow: 0 12px 40px -12px var(--lp-muted-strong);
-    animation: app-fade-in-up var(--app-duration-normal) ease-out;
-}
-
-/* Dual-radial burst overlay: top center + bottom-right accent */
-.module-lp-hero::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-        radial-gradient(ellipse 72% 60% at 50% -5%, var(--lp-muted-strong), transparent 65%),
-        radial-gradient(ellipse 40% 30% at 90% 108%, var(--lp-muted), transparent 65%);
-    pointer-events: none;
-}
-
-/* Dot-grid texture — depth sem imagem */
-.module-lp-hero::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(circle, var(--lp-muted) 1px, transparent 1px);
-    background-size: 28px 28px;
-    opacity: 0.5;
-    pointer-events: none;
-}
-
-/* Garantir que conteúdo fique acima dos overlays */
-.module-lp-hero > * {
-    position: relative;
-    z-index: 1;
-}
-
-.module-lp-hero-icon-wrap {
-    display: inline-flex;
+.module-lp-strip {
+    display: flex;
     align-items: center;
-    justify-content: center;
-    width: 64px;
-    height: 64px;
-    border-radius: var(--app-radius-xl);
-    background: var(--lp-muted-strong);
-    border: 1px solid var(--lp-border);
-    margin-bottom: var(--app-space-4);
+    gap: var(--app-space-3, 10px);
+    height: var(--app-strip-height, 56px);
+    padding: 0 var(--app-space-5, 16px);
+    background: var(--app-surface, #1a1a1a);
+    border-left: var(--app-strip-accent-width, 3px) solid var(--lp-primary);
+    border-bottom: 1px solid var(--app-border, #333);
     position: relative;
-    box-shadow: var(--lp-glow);
-    animation: lp-icon-pulse 3.5s ease-in-out infinite;
+    animation: app-fade-in var(--app-duration-fast, 0.2s) ease-out;
 }
 
-@keyframes lp-icon-pulse {
-    0%, 100% { box-shadow: var(--lp-glow); }
-    50%       { box-shadow: 0 0 32px rgba(255,255,255,0.04), var(--lp-glow); transform: scale(1.04); }
-}
-
-.module-lp-hero-icon-wrap .material-icons {
-    font-size: 32px;
+.module-lp-strip-icon {
+    font-size: var(--app-strip-icon-size, 20px);
     color: var(--lp-primary);
+    flex-shrink: 0;
+    line-height: 1;
 }
 
-.module-lp-hero-title {
-    font-family: var(--app-font-brand);
-    font-size: var(--app-font-2xl);
+.module-lp-strip-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+
+.module-lp-strip-title {
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: var(--app-strip-title-size, 14px);
     font-weight: 400;
-    color: var(--app-text-primary);
-    letter-spacing: 0.5px;
-    line-height: var(--app-leading-tight);
-    margin: 0 0 var(--app-space-2) 0;
-    position: relative;
-    text-shadow: 0 2px 24px var(--lp-muted-strong);
-}
-
-.module-lp-hero-tagline {
-    font-family: var(--app-font-base);
-    font-size: var(--app-font-sm);
-    color: var(--lp-primary);
-    opacity: 0.85;
+    color: var(--app-text-primary, #fff);
     text-transform: uppercase;
-    letter-spacing: 1.5px;
+    letter-spacing: 0.8px;
+    line-height: 1.2;
     margin: 0;
-    position: relative;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* Close button — absolute, top-right of hero */
+.module-lp-strip-tagline {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: var(--app-strip-tagline-size, 10px);
+    color: var(--app-text-dim, rgba(255,255,255,0.45));
+    margin: 0;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Close button — absolute right inside strip */
 .module-lp-close-btn {
     position: absolute;
-    top: var(--app-space-3);
-    right: var(--app-space-3);
+    top: 50%;
+    right: var(--app-space-3, 10px);
+    transform: translateY(-50%);
     z-index: 2;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--app-radius-full);
-    background: var(--app-surface-elevated, rgba(255,255,255,0.06));
-    border: 1px solid var(--lp-border);
-    color: var(--app-text-muted);
+    width: 28px;
+    height: 28px;
+    border-radius: var(--app-radius-full, 9999px);
+    background: transparent;
+    border: 1px solid var(--app-border, #333);
+    color: var(--app-text-muted, rgba(255,255,255,0.6));
     cursor: pointer;
-    transition: color var(--app-duration-fast) ease, background var(--app-duration-fast) ease;
+    transition: color var(--app-duration-fast, 0.2s) ease, background var(--app-duration-fast, 0.2s) ease;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.module-lp-close-btn:hover {
+.module-lp-close-btn:hover,
+.module-lp-close-btn:active {
     color: var(--lp-primary);
     background: var(--lp-muted);
 }
 
 .module-lp-close-btn .material-icons {
-    font-size: 18px;
+    font-size: 16px;
+}
+
+/* ============================================================
+   LEGACY: Keep .module-lp-hero as alias for backward compat
+   (redirects to strip visuals)
+   ============================================================ */
+
+.module-lp-hero {
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-3, 10px);
+    height: var(--app-strip-height, 56px);
+    padding: 0 var(--app-space-5, 16px);
+    background: var(--app-surface, #1a1a1a);
+    border-left: var(--app-strip-accent-width, 3px) solid var(--lp-primary);
+    border-bottom: 1px solid var(--app-border, #333);
+    position: relative;
+    animation: app-fade-in var(--app-duration-fast, 0.2s) ease-out;
+    overflow: visible;
+    text-align: left;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* Disable old pseudo-element overlays */
+.module-lp-hero::before,
+.module-lp-hero::after {
+    display: none;
+}
+
+.module-lp-hero > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Icon: inline, no circle wrap */
+.module-lp-hero-icon-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    background: none;
+    border: none;
+    margin-bottom: 0;
+    box-shadow: none;
+    animation: none;
+    flex-shrink: 0;
+}
+
+.module-lp-hero-icon-wrap .material-icons {
+    font-size: var(--app-strip-icon-size, 20px);
+    color: var(--lp-primary);
+}
+
+.module-lp-hero-title {
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: var(--app-strip-title-size, 14px);
+    font-weight: 400;
+    color: var(--app-text-primary, #fff);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    line-height: 1.2;
+    margin: 0;
+    text-shadow: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.module-lp-hero-tagline {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: var(--app-strip-tagline-size, 10px);
+    color: var(--app-text-dim, rgba(255,255,255,0.45));
+    opacity: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    margin: 0;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* ============================================================
    4. ACCORDION (Como Funciona + Premiações)
+   Flat, minimal, iOS settings style
    ============================================================ */
 
 .module-lp-accordion {
-    margin: var(--app-space-4) var(--app-space-5) 0;
-    border-radius: var(--app-radius-lg);
-    border: 1px solid var(--app-border, #333);
+    margin: 0;
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid var(--app-border, #333);
     overflow: hidden;
-    background: var(--app-surface, #1a1a1a);
+    background: transparent;
 }
 
 .module-lp-accordion-btn {
@@ -317,43 +302,45 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--app-space-4) var(--app-space-5);
+    padding: var(--app-space-3, 10px) var(--app-space-5, 16px);
     background: transparent;
     border: none;
     cursor: pointer;
-    color: var(--app-text-secondary);
+    color: var(--app-text-secondary, rgba(255,255,255,0.85));
     text-align: left;
     -webkit-tap-highlight-color: transparent;
-    transition: background var(--app-transition-fast);
+    transition: background var(--app-transition-fast, 0.15s ease);
 }
 
 .module-lp-accordion-btn:active {
-    background: var(--app-surface-hover, #333);
+    background: var(--lp-muted, rgba(255,255,255,0.05));
 }
 
 .module-lp-accordion-btn-inner {
     display: flex;
     align-items: center;
-    gap: var(--app-space-3);
+    gap: var(--app-space-2, 8px);
 }
 
 .module-lp-accordion-btn-inner .material-icons {
-    font-size: 18px;
+    font-size: 16px;
     color: var(--lp-primary);
     flex-shrink: 0;
 }
 
 .module-lp-accordion-btn-label {
-    font-family: var(--app-font-brand);
-    font-size: var(--app-font-md);
-    color: var(--app-text-secondary);
-    letter-spacing: 0.2px;
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: var(--app-font-sm, 11px);
+    color: var(--app-text-muted, rgba(255,255,255,0.6));
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
 }
 
 .module-lp-accordion-chevron {
-    font-size: 20px;
-    color: var(--app-text-dim);
-    transition: transform var(--app-transition-normal);
+    font-size: 18px;
+    color: var(--app-text-dim, rgba(255,255,255,0.45));
+    transition: transform var(--app-transition-normal, 0.25s ease);
     flex-shrink: 0;
 }
 
@@ -361,7 +348,7 @@
     transform: rotate(180deg);
 }
 
-/* Accordion body — max-height transition for CSS-driven animation */
+/* Accordion body — max-height transition */
 .module-lp-accordion-body {
     max-height: 0;
     overflow: hidden;
@@ -373,7 +360,7 @@
 }
 
 .module-lp-accordion-inner {
-    padding: 0 var(--app-space-5) var(--app-space-5);
+    padding: 0 var(--app-space-5, 16px) var(--app-space-4, 12px);
     border-top: 1px solid var(--app-border, #333);
 }
 
@@ -383,25 +370,25 @@
 
 .module-lp-regras-list {
     list-style: none;
-    margin: var(--app-space-4) 0 0;
+    margin: var(--app-space-3, 10px) 0 0;
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--app-space-3);
+    gap: var(--app-space-2, 8px);
 }
 
 .module-lp-regras-item {
     display: flex;
     align-items: flex-start;
-    gap: var(--app-space-3);
-    font-family: var(--app-font-base);
-    font-size: var(--app-font-md);
-    color: var(--app-text-secondary);
-    line-height: var(--app-leading-relaxed);
+    gap: var(--app-space-2, 8px);
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: var(--app-font-sm, 11px);
+    color: var(--app-text-secondary, rgba(255,255,255,0.85));
+    line-height: var(--app-leading-relaxed, 1.6);
 }
 
 .module-lp-regras-item .material-icons {
-    font-size: 16px;
+    font-size: 14px;
     color: var(--lp-primary);
     flex-shrink: 0;
     margin-top: 2px;
@@ -409,22 +396,22 @@
 
 /* Conteúdo dinâmico de regras (via API regras-modulos) */
 .module-lp-regras-dynamic {
-    padding: var(--app-space-2) 0;
+    padding: var(--app-space-2, 8px) 0;
 }
 
 .module-lp-regras-content {
-    font-family: var(--app-font-base);
-    font-size: var(--app-font-md);
-    color: var(--app-text-secondary);
-    line-height: var(--app-leading-relaxed);
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: var(--app-font-sm, 11px);
+    color: var(--app-text-secondary, rgba(255,255,255,0.85));
+    line-height: var(--app-leading-relaxed, 1.6);
 }
 
 .module-lp-regras-content h3,
 .module-lp-regras-content h4 {
-    font-family: var(--app-font-brand);
-    font-size: var(--app-font-md);
-    color: var(--app-text-primary);
-    margin: var(--app-space-4) 0 var(--app-space-2) 0;
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: var(--app-font-sm, 11px);
+    color: var(--app-text-primary, #fff);
+    margin: var(--app-space-3, 10px) 0 var(--app-space-1, 4px) 0;
 }
 
 .module-lp-regras-content h3:first-child {
@@ -432,17 +419,17 @@
 }
 
 .module-lp-regras-content p {
-    margin: 0 0 var(--app-space-3) 0;
+    margin: 0 0 var(--app-space-2, 8px) 0;
 }
 
 .module-lp-regras-content ul,
 .module-lp-regras-content ol {
-    margin: 0 0 var(--app-space-3) 0;
-    padding-left: var(--app-space-5);
+    margin: 0 0 var(--app-space-2, 8px) 0;
+    padding-left: var(--app-space-5, 16px);
 }
 
 .module-lp-regras-content li {
-    margin-bottom: var(--app-space-2);
+    margin-bottom: var(--app-space-1, 4px);
 }
 
 .module-lp-regras-content em {
@@ -451,27 +438,27 @@
 }
 
 .module-lp-regras-content strong {
-    color: var(--app-text-primary);
+    color: var(--app-text-primary, #fff);
 }
 
-/* Conteúdo dinâmico de premiações (via API regras-modulos, análogo ao regras-content) */
+/* Conteúdo dinâmico de premiações */
 .module-lp-premiacoes-dynamic {
-    padding: var(--app-space-2) 0;
+    padding: var(--app-space-2, 8px) 0;
 }
 
 .module-lp-premiacoes-content {
-    font-family: var(--app-font-base);
-    font-size: var(--app-font-md);
-    color: var(--app-text-secondary);
-    line-height: var(--app-leading-relaxed);
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: var(--app-font-sm, 11px);
+    color: var(--app-text-secondary, rgba(255,255,255,0.85));
+    line-height: var(--app-leading-relaxed, 1.6);
 }
 
 .module-lp-premiacoes-content h3,
 .module-lp-premiacoes-content h4 {
-    font-family: var(--app-font-brand);
-    font-size: var(--app-font-md);
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: var(--app-font-sm, 11px);
     color: var(--lp-primary);
-    margin: var(--app-space-4) 0 var(--app-space-2) 0;
+    margin: var(--app-space-3, 10px) 0 var(--app-space-1, 4px) 0;
 }
 
 .module-lp-premiacoes-content h3:first-child,
@@ -480,17 +467,17 @@
 }
 
 .module-lp-premiacoes-content p {
-    margin: 0 0 var(--app-space-3) 0;
+    margin: 0 0 var(--app-space-2, 8px) 0;
 }
 
 .module-lp-premiacoes-content ul,
 .module-lp-premiacoes-content ol {
-    margin: 0 0 var(--app-space-3) 0;
-    padding-left: var(--app-space-5);
+    margin: 0 0 var(--app-space-2, 8px) 0;
+    padding-left: var(--app-space-5, 16px);
 }
 
 .module-lp-premiacoes-content li {
-    margin-bottom: var(--app-space-2);
+    margin-bottom: var(--app-space-1, 4px);
 }
 
 .module-lp-premiacoes-content em {
@@ -499,34 +486,34 @@
 }
 
 .module-lp-premiacoes-content strong {
-    color: var(--app-text-primary);
+    color: var(--app-text-primary, #fff);
 }
 
 /* ============================================================
-   6. PREMIAÇÕES CONTENT (inside accordion)
+   6. PREMIAÇÕES GRID (inside accordion)
    ============================================================ */
 
 .module-lp-premiacoes-grid {
     display: flex;
     flex-direction: column;
-    gap: var(--app-space-2);
-    margin-top: var(--app-space-4);
+    gap: var(--app-space-1, 4px);
+    margin-top: var(--app-space-3, 10px);
 }
 
 .module-lp-premiacoes-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--app-space-3) var(--app-space-4);
-    border-radius: var(--app-radius-md);
-    background: var(--lp-gradient-card);
-    border: 1px solid var(--lp-border);
+    padding: var(--app-space-2, 8px) var(--app-space-3, 10px);
+    border-radius: var(--app-radius-sm, 6px);
+    background: var(--lp-muted, rgba(255,255,255,0.03));
+    border: none;
 }
 
 .module-lp-premiacoes-pos {
-    font-family: var(--app-font-base);
-    font-size: var(--app-font-md);
-    color: var(--app-text-secondary);
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: var(--app-font-sm, 11px);
+    color: var(--app-text-secondary, rgba(255,255,255,0.85));
 }
 
 .module-lp-premiacoes-pos.pos-1 { color: var(--app-gold, #ffd700); font-weight: 700; }
@@ -534,50 +521,26 @@
 .module-lp-premiacoes-pos.pos-3 { color: var(--app-bronze, #cd7f32); }
 
 .module-lp-premiacoes-val {
-    font-family: var(--app-font-mono);
-    font-size: var(--app-font-md);
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--app-font-sm, 11px);
     font-weight: 700;
     color: var(--lp-primary);
 }
 
 /* ============================================================
-   7. DIVIDER
+   7. DIVIDER (simplified — thin line only, no circle)
    ============================================================ */
 
 .module-lp-divider {
-    margin: var(--app-space-6) var(--app-space-5);
+    margin: var(--app-space-3, 10px) var(--app-space-5, 16px);
     height: 1px;
-    background: linear-gradient(
-        to right,
-        transparent,
-        var(--lp-border, rgba(255, 255, 255, 0.08)),
-        var(--lp-border, rgba(255, 255, 255, 0.08)),
-        transparent
-    );
+    background: var(--app-border, #333);
     position: relative;
 }
 
+/* Remove legacy circle */
 .module-lp-divider::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: var(--app-surface, #1a1a1a);
-    border: 1px solid var(--lp-border, rgba(255, 255, 255, 0.08));
-}
-
-/* ============================================================
-   10. RESPONSIVE — Mobile-First (already designed for 360px+)
-   ============================================================ */
-
-@media (max-width: 360px) {
-    .module-lp-hero {
-        padding: var(--app-space-6) var(--app-space-4);
-    }
+    display: none;
 }
 
 /* ============================================================
@@ -585,7 +548,7 @@
    ============================================================ */
 
 .lp-loading-icon {
-    font-size: var(--app-font-md, 16px);
+    font-size: var(--app-font-md, 14px);
     vertical-align: middle;
     opacity: 0.4;
 }
@@ -594,81 +557,99 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--app-space-4, 16px) 0;
-    color: var(--app-text-dim);
+    padding: var(--app-space-3, 10px) 0;
+    color: var(--app-text-dim, rgba(255,255,255,0.45));
 }
 
 .lp-premiacao-placeholder {
     display: flex;
     align-items: center;
     gap: var(--app-space-2, 8px);
-    color: var(--app-text-muted);
-    font-size: var(--app-font-sm);
+    color: var(--app-text-muted, rgba(255,255,255,0.6));
+    font-size: var(--app-font-xs, 10px);
     padding: var(--app-space-1, 4px) 0;
 }
 
 .lp-premiacao-placeholder-icon {
-    font-size: var(--app-font-lg, 18px);
+    font-size: var(--app-font-md, 14px);
     opacity: 0.6;
 }
 
 /* ============================================================
-   BONUS/ÔNUS TABLE (Ranking da Rodada)
+   BONUS/ONUS TABLE (Ranking da Rodada)
    ============================================================ */
 
 .lp-bonus-table {
     width: 100%;
-    border-radius: var(--app-radius-md);
+    border-radius: var(--app-radius-sm, 6px);
     overflow: hidden;
-    border: 1px solid var(--app-border);
-    background: var(--app-bg);
+    border: 1px solid var(--app-border, #333);
+    background: var(--app-bg, #0a0a0a);
 }
 
 .lp-bonus-table-header {
     display: grid;
     grid-template-columns: 2fr 1fr 1fr;
-    padding: var(--app-space-2) var(--app-space-4);
-    background: var(--app-surface);
-    font-size: var(--app-font-xs);
+    padding: var(--app-space-2, 8px) var(--app-space-3, 10px);
+    background: var(--app-surface, #1a1a1a);
+    font-size: var(--app-font-xs, 10px);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: var(--app-text-dim);
+    color: var(--app-text-dim, rgba(255,255,255,0.45));
 }
 
 .lp-bonus-row {
     display: grid;
     grid-template-columns: 2fr 1fr 1fr;
-    padding: var(--app-space-2) var(--app-space-4);
-    border-top: 1px solid var(--app-border);
-    font-size: var(--app-font-sm);
+    padding: var(--app-space-2, 8px) var(--app-space-3, 10px);
+    border-top: 1px solid var(--app-border, #333);
+    font-size: var(--app-font-xs, 10px);
     align-items: center;
 }
 
 .lp-bonus-row .lp-bonus-pos {
-    color: var(--app-text-secondary);
+    color: var(--app-text-secondary, rgba(255,255,255,0.85));
 }
 
 .lp-bonus-val {
-    font-family: var(--app-font-mono);
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
     font-weight: 600;
 }
 
 .lp-bonus-val.ganho {
-    color: var(--app-success-light);
+    color: var(--app-success-light, #22c55e);
 }
 
 .lp-bonus-val.perda {
-    color: var(--app-danger);
+    color: var(--app-danger, #ef4444);
 }
 
 .lp-bonus-val.neutro {
-    color: var(--app-text-dim);
+    color: var(--app-text-dim, rgba(255,255,255,0.45));
 }
 
 .lp-bonus-nota {
-    margin-top: var(--app-space-3);
-    font-size: var(--app-font-xs);
-    color: var(--app-text-dim);
+    margin-top: var(--app-space-2, 8px);
+    font-size: var(--app-font-xs, 10px);
+    color: var(--app-text-dim, rgba(255,255,255,0.45));
     font-style: italic;
+}
+
+/* ============================================================
+   LIGHT MODE ADJUSTMENTS
+   ============================================================ */
+
+[data-theme="light"] .module-lp-strip,
+[data-theme="light"] .module-lp-hero {
+    background: var(--app-surface);
+    border-bottom-color: var(--app-border);
+}
+
+[data-theme="light"] .module-lp-accordion {
+    border-bottom-color: var(--app-border);
+}
+
+[data-theme="light"] .module-lp-premiacoes-item {
+    background: rgba(0, 0, 0, 0.03);
 }

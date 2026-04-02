@@ -45,7 +45,7 @@ export async function inicializarRestaUmParticipante({ participante, ligaId, tim
         ligaId,
         moduloKey:    'resta_um',
         titulo:       'Resta Um',
-        tagline:      'Sobreviva cada rodada ou seja eliminado',
+        tagline:      'Eliminação progressiva',
         icon:         'warning',
         colorClass:   'module-lp-resta-um',
     });

@@ -93,18 +93,17 @@ function _buildLPHtml(config) {
 
     return `
 <div id="${wrapperId}" class="module-lp ${colorClass}">
-  <div class="module-lp-hero">
+  <div class="module-lp-strip">
     ${closeBtnHtml}
-    <div class="module-lp-hero-icon-wrap">
-      <span class="material-icons">${icon}</span>
+    <span class="material-icons module-lp-strip-icon">${icon}</span>
+    <div class="module-lp-strip-text">
+      <h1 class="module-lp-strip-title">${titulo}</h1>
+      <p class="module-lp-strip-tagline">${tagline}</p>
     </div>
-    <h1 class="module-lp-hero-title">${titulo}</h1>
-    <p class="module-lp-hero-tagline">${tagline}</p>
   </div>
   ${comoFuncionaAccordionHtml}
   ${premiacaoAccordionHtml}
-</div>
-<div class="module-lp-divider ${colorClass}"></div>`;
+</div>`;
 }
 
 /**

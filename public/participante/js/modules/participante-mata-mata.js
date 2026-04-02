@@ -203,7 +203,7 @@ export async function inicializarMataMata(params) {
       ligaId:       estado.ligaId,
       moduloKey:    'mata_mata',
       titulo:       'Mata-Mata',
-      tagline:      'Eliminação direta — perca e esteja fora',
+      tagline:      'Eliminação direta',
       icon:         'sports_kabaddi',
       colorClass:   'module-lp-mata-mata',
   });
@@ -1390,7 +1390,7 @@ function renderConfrontosListaCards(confrontos, meuTimeId, fase, aoVivo = false)
 
       html += `
         <div class="mm-campeao-card ${souCampeao ? "sou-eu" : ""}">
-          <div class="mm-campeao-trofeu">🏆</div>
+          <div class="mm-campeao-trofeu"><span class="material-symbols-outlined" style="font-size:48px;color:var(--app-gold)">emoji_events</span></div>
           <p class="mm-campeao-titulo">${souCampeao ? "Você é o Campeão!" : "Campeão"}</p>
           <div class="mm-campeao-time">
             <img class="mm-campeao-escudo" src="${getEscudoUrl(campeao)}" alt="" onerror="this.onerror=null;this.src='${ESCUDO_PLACEHOLDER}'">

@@ -69,7 +69,7 @@ export async function inicializarLuvaOuroParticipante({
         ligaId,
         moduloKey:    'luva_ouro',
         titulo:       'Luva de Ouro',
-        tagline:      'O melhor goleiro da liga',
+        tagline:      'Ranking de goleiros',
         icon:         'sports_handball',
         colorClass:   'module-lp-luva',
     });

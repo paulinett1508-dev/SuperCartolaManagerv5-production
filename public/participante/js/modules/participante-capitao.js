@@ -57,7 +57,7 @@ export async function inicializarCapitaoParticipante(params) {
         ligaId:       params.ligaId,
         moduloKey:    'capitao_luxo',
         titulo:       'Capitão de Luxo',
-        tagline:      'Quem vai liderar seu time à vitória?',
+        tagline:      'Pontuação dos capitães',
         icon:         'stars',
         colorClass:   'module-lp-capitao',
     });

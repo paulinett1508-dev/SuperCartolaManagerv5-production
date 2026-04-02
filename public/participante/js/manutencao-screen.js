@@ -532,7 +532,7 @@ const ManutencaoScreen = {
             html += `
             <div style="text-align:center;margin-bottom:12px;">
                 <span style="font-size:0.78rem;color:${cor};background:${bgCor};padding:5px 14px;border-radius:999px;font-family:'Inter',sans-serif;line-height:1.5;">
-                    ⚽ ${mensagem}
+                    <span class="material-icons" style="font-size:12px;vertical-align:middle">sports_soccer</span> ${mensagem}
                 </span>
             </div>`;
         }
@@ -555,7 +555,7 @@ const ManutencaoScreen = {
                             <tr style="background:#111827;">
                                 <th style="padding:10px 6px;text-align:center;color:#9ca3af;font-weight:600;width:36px;">#</th>
                                 <th style="padding:10px 6px;text-align:left;color:#9ca3af;font-weight:600;">Participante</th>
-                                <th style="padding:10px 6px;text-align:center;color:#9ca3af;font-weight:600;width:30px;" title="Escalou">⚽</th>
+                                <th style="padding:10px 6px;text-align:center;color:#9ca3af;font-weight:600;width:30px;" title="Escalou"><span class="material-icons" style="font-size:14px">sports_soccer</span></th>
                                 <th style="padding:10px 6px;text-align:right;color:#9ca3af;font-weight:600;width:65px;">Pts</th>
                             </tr>
                         </thead>
@@ -576,9 +576,9 @@ const ManutencaoScreen = {
             const textColor = isUser ? '#fbbf24' : '#e5e7eb';
 
             let posDisplay = pos;
-            if (pos === 1) posDisplay = '🥇';
-            else if (pos === 2) posDisplay = '🥈';
-            else if (pos === 3) posDisplay = '🥉';
+            if (pos === 1) posDisplay = '<span class="material-icons" style="font-size:16px;color:#ffd700">emoji_events</span>';
+            else if (pos === 2) posDisplay = '<span class="material-icons" style="font-size:16px;color:#c0c0c0">military_tech</span>';
+            else if (pos === 3) posDisplay = '<span class="material-icons" style="font-size:16px;color:#cd7f32">workspace_premium</span>';
 
             const escudoHtml = clubeId
                 ? `<img src="/escudos/${clubeId}.png" alt="" style="width:20px;height:20px;object-fit:contain;border-radius:4px;flex-shrink:0;" onerror="this.style.display='none'">`
@@ -718,7 +718,7 @@ const ManutencaoScreen = {
         dinoContainer.innerHTML = `
             <div style="text-align:center;margin-bottom:16px;">
                 <h3 style="font-family:'Russo One',sans-serif;font-size:1.1rem;color:var(--app-pos-gol-light);margin:0 0 8px;">
-                    ⚽ Jogo de Pênaltis
+                    <span class="material-icons" style="font-size:18px;vertical-align:middle">sports_soccer</span> Jogo de Pênaltis
                 </h3>
                 <p style="font-size:0.75rem;color:#9ca3af;margin:0;">
                     Escolha seu modo de jogo
@@ -726,11 +726,11 @@ const ManutencaoScreen = {
             </div>
             <div style="display:flex;flex-direction:column;gap:12px;max-width:320px;margin:0 auto;">
                 <button id="btnModoStriker" style="background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;padding:16px;border-radius:12px;font-family:'Russo One',sans-serif;font-size:0.95rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:10px;">
-                    <span style="font-size:1.5rem;">⚽</span>
+                    <span class="material-icons" style="font-size:1.5rem;">sports_soccer</span>
                     <span>COBRAR PÊNALTIS</span>
                 </button>
                 <button id="btnModoKeeper" style="background:linear-gradient(135deg,var(--app-pos-gol),#ea580c);color:white;border:none;padding:16px;border-radius:12px;font-family:'Russo One',sans-serif;font-size:0.95rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:10px;">
-                    <span style="font-size:1.5rem;">🧤</span>
+                    <span class="material-icons" style="font-size:1.5rem;">sports_handball</span>
                     <span>SER GOLEIRO</span>
                 </button>
             </div>
@@ -762,7 +762,7 @@ const ManutencaoScreen = {
         dinoContainer.innerHTML = `
             <div style="text-align:center;margin-bottom:16px;">
                 <h3 style="font-family:'Russo One',sans-serif;font-size:1.1rem;color:var(--app-pos-gol-light);margin:0 0 4px;">
-                    ${this._gameMode === 'striker' ? '⚽' : '🧤'} ${modoTexto}
+                    <span class="material-icons" style="font-size:18px;vertical-align:middle">${this._gameMode === 'striker' ? 'sports_soccer' : 'sports_handball'}</span> ${modoTexto}
                 </h3>
                 <p style="font-size:0.75rem;color:#9ca3af;margin:0;">
                     Escolha a dificuldade
@@ -832,7 +832,7 @@ const ManutencaoScreen = {
         dinoContainer.innerHTML = `
             <div style="text-align:center;margin-bottom:12px;">
                 <h3 style="font-family:'Russo One',sans-serif;font-size:1rem;color:var(--app-pos-gol-light);margin:0 0 4px;">
-                    ${this._gameMode === 'striker' ? '⚽' : '🧤'} ${modoTexto}
+                    <span class="material-icons" style="font-size:18px;vertical-align:middle">${this._gameMode === 'striker' ? 'sports_soccer' : 'sports_handball'}</span> ${modoTexto}
                 </h3>
                 <p style="font-size:0.7rem;color:#9ca3af;margin:0;">
                     ${diffEmoji[this._gameDifficulty]} ${diffTexto[this._gameDifficulty]} | ${this._gameMode === 'striker' ? 'Clique na zona do gol' : 'Defenda o pênalti!'}
@@ -841,7 +841,7 @@ const ManutencaoScreen = {
             <canvas id="penaltyCanvas" width="360" height="240"
                 style="display:block;margin:0 auto;background:#0f172a;border-radius:12px;border:1px solid #374151;max-width:100%;touch-action:none;"></canvas>
             <div id="penaltyScore" style="text-align:center;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:0.85rem;color:#fbbf24;">
-                ${this._gameMode === 'striker' ? '⚽ 0 gols' : '🧤 0 defesas'} | ${this._gameMode === 'striker' ? 'Cobrança' : 'Pênalti'} 1
+                ${this._gameMode === 'striker' ? '0 gols' : '0 defesas'} | ${this._gameMode === 'striker' ? 'Cobrança' : 'Pênalti'} 1
             </div>
             <div style="text-align:center;margin-top:6px;font-size:0.68rem;color:#6b7280;font-family:'Inter',sans-serif;">
                 💡 Use teclado: Q/W/E (altura) + A/S/D (canto) ou clique no gol
@@ -1302,7 +1302,7 @@ const ManutencaoScreen = {
 
                 // Rating por desempenho
                 let rating, ratingColor;
-                if (gols === 5) { rating = 'CRAQUE! ⭐'; ratingColor = '#fbbf24'; }
+                if (gols === 5) { rating = 'CRAQUE!'; ratingColor = '#fbbf24'; }
                 else if (gols === 4) { rating = 'Muito bom!'; ratingColor = 'var(--app-success-light)'; }
                 else if (gols === 3) { rating = 'Bom!'; ratingColor = '#34d399'; }
                 else if (gols === 2) { rating = 'Precisa treinar...'; ratingColor = 'var(--app-amber)'; }
@@ -1334,7 +1334,7 @@ const ManutencaoScreen = {
                 ctx.font = "bold 10px 'JetBrains Mono', monospace";
                 ctx.fillStyle = 'var(--app-success-light)';
                 ctx.textAlign = 'left';
-                ctx.fillText(`⚽ ${gols}`, 8, 13);
+                ctx.fillText(`${gols} gols`, 8, 13);
 
                 // Round dots (filled = played, hollow = remaining)
                 ctx.textAlign = 'center';
@@ -1371,8 +1371,8 @@ const ManutencaoScreen = {
             if (scoreEl) {
                 const atual = cobradas + (state === 'aiming' ? 1 : 0);
                 scoreEl.textContent = state === 'gameover'
-                    ? `⚽ ${gols} de ${totalCobradas} gols`
-                    : `⚽ ${gols} gols | Cobrança ${atual} de ${totalCobradas}`;
+                    ? `${gols} de ${totalCobradas} gols`
+                    : `${gols} gols | Cobrança ${atual} de ${totalCobradas}`;
             }
 
             this._penaltyAnimFrame = requestAnimationFrame(loop);
@@ -1619,9 +1619,9 @@ const ManutencaoScreen = {
 
             let posDisplay = pos;
             if (!todosZerados) {
-                if (pos === 1) posDisplay = '🥇';
-                else if (pos === 2) posDisplay = '🥈';
-                else if (pos === 3) posDisplay = '🥉';
+                if (pos === 1) posDisplay = '<span class="material-icons" style="font-size:16px;color:#ffd700">emoji_events</span>';
+                else if (pos === 2) posDisplay = '<span class="material-icons" style="font-size:16px;color:#c0c0c0">military_tech</span>';
+                else if (pos === 3) posDisplay = '<span class="material-icons" style="font-size:16px;color:#cd7f32">workspace_premium</span>';
             }
 
             const escudoHtml = clubeId

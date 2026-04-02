@@ -406,6 +406,154 @@
     --gold: var(--app-gold);
     --silver: var(--app-silver);
     --bronze: var(--app-bronze);
+
+    /* ========================================
+       16. MODULE STRIP (Slim Header)
+       ======================================== */
+    --app-strip-height: 56px;
+    --app-strip-icon-size: 20px;
+    --app-strip-title-size: var(--app-font-md);
+    --app-strip-tagline-size: var(--app-font-xs);
+    --app-strip-accent-width: 3px;
+}
+
+/* ========================================
+   LIGHT MODE TOKENS
+   ========================================
+   Ativado via [data-theme="light"] no <html>
+   ou automaticamente via prefers-color-scheme
+   ======================================== */
+
+[data-theme="light"] {
+    /* Superfícies */
+    --app-bg: #f5f5f5;
+    --app-bg-dark: #e5e5e5;
+    --app-surface: #ffffff;
+    --app-surface-elevated: #ffffff;
+    --app-surface-hover: #f0f0f0;
+    --app-surface-overlay: rgba(255, 255, 255, 0.95);
+    --app-border: #e0e0e0;
+
+    /* Backgrounds semânticos */
+    --app-bg-success: #ecfdf5;
+    --app-bg-danger: #fef2f2;
+
+    /* Toast */
+    --app-toast-bg: #ffffff;
+    --app-toast-border: #e2e8f0;
+
+    /* Gradiente card */
+    --app-gradient-card: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 245, 245, 0.9) 100%);
+
+    /* Texto */
+    --app-text-primary: #111111;
+    --app-text-white: #111111;
+    --app-text-light: rgba(0, 0, 0, 0.85);
+    --app-text-secondary: rgba(0, 0, 0, 0.75);
+    --app-text-muted: rgba(0, 0, 0, 0.55);
+    --app-text-dim: rgba(0, 0, 0, 0.38);
+    --app-text-disabled: rgba(0, 0, 0, 0.25);
+    --app-text-inverse: #ffffff;
+
+    /* Sombras (mais suaves em light) */
+    --app-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --app-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --app-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --app-shadow-glow: 0 1px 4px rgba(255, 85, 0, 0.12);
+    --app-shadow-glow-lg: 0 2px 8px rgba(255, 85, 0, 0.18);
+    --app-shadow-smooth-sm:
+        0 1px 2px rgba(0, 0, 0, 0.06),
+        0 2px 4px rgba(0, 0, 0, 0.04);
+    --app-shadow-smooth-md:
+        0 1px 2px rgba(0, 0, 0, 0.05),
+        0 2px 4px rgba(0, 0, 0, 0.04),
+        0 4px 8px rgba(0, 0, 0, 0.03);
+    --app-shadow-smooth-lg:
+        0 1px 2px rgba(0, 0, 0, 0.04),
+        0 3px 6px rgba(0, 0, 0, 0.03),
+        0 8px 14px rgba(0, 0, 0, 0.02);
+    --app-shadow-smooth-primary:
+        0 1px 2px rgba(255, 85, 0, 0.06),
+        0 2px 4px rgba(255, 85, 0, 0.04);
+
+    /* Bordas */
+    --app-border-subtle: 1px solid rgba(0, 0, 0, 0.06);
+    --app-border-default: 1px solid rgba(0, 0, 0, 0.1);
+
+    /* Header / Nav */
+    --app-header-bg: rgba(255, 255, 255, 0.9);
+    --app-bottom-nav-bg: linear-gradient(to top, rgba(255, 255, 255, 0.98), rgba(245, 245, 245, 0.95));
+
+    /* Glass effect */
+    --app-glass-bg: rgba(0, 0, 0, 0.02);
+    --app-glass-border: rgba(0, 0, 0, 0.06);
+    --app-glass-hover: rgba(0, 0, 0, 0.04);
+    --app-glass-elevated: rgba(0, 0, 0, 0.03);
+
+    /* Skeleton */
+    --app-skeleton-from: rgba(0, 0, 0, 0.04);
+    --app-skeleton-via: rgba(0, 0, 0, 0.08);
+
+    /* Timeline */
+    --app-timeline-line: rgba(0, 0, 0, 0.08);
+
+    /* Aliases de compatibilidade */
+    --participante-card: var(--app-surface);
+    --participante-surface: var(--app-surface-elevated);
+    --participante-bg: var(--app-bg);
+    --participante-border: rgba(0, 0, 0, 0.1);
+    --participante-text: var(--app-text-primary);
+    --participante-text-muted: var(--app-text-muted);
+    --participante-text-secondary: var(--app-text-secondary);
+
+    /* Gradientes Bank/Extrato */
+    --app-gradient-positive: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.02) 100%);
+    --app-gradient-negative: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(239, 68, 68, 0.02) 100%);
+    --app-gradient-neutral: linear-gradient(135deg, rgba(107, 114, 128, 0.08) 0%, rgba(107, 114, 128, 0.02) 100%);
+
+    /* Primary muted (para backgrounds) */
+    --app-primary-muted: rgba(255, 85, 0, 0.08);
+    --app-primary-border: rgba(255, 85, 0, 0.15);
+    --app-success-muted: rgba(16, 185, 129, 0.1);
+    --app-danger-muted: rgba(239, 68, 68, 0.1);
+    --app-warning-muted: rgba(234, 179, 8, 0.1);
+    --app-info-muted: rgba(59, 130, 246, 0.1);
+    --app-purple-muted: rgba(139, 92, 246, 0.1);
+    --app-gold-muted: rgba(255, 215, 0, 0.12);
+}
+
+/* Auto-detect: aplica light quando sistema prefere e usuário não forçou dark */
+@media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+        --app-bg: #f5f5f5;
+        --app-surface: #ffffff;
+        --app-surface-elevated: #ffffff;
+        --app-surface-hover: #f0f0f0;
+        --app-surface-overlay: rgba(255, 255, 255, 0.95);
+        --app-border: #e0e0e0;
+        --app-text-primary: #111111;
+        --app-text-white: #111111;
+        --app-text-light: rgba(0, 0, 0, 0.85);
+        --app-text-secondary: rgba(0, 0, 0, 0.75);
+        --app-text-muted: rgba(0, 0, 0, 0.55);
+        --app-text-dim: rgba(0, 0, 0, 0.38);
+        --app-text-disabled: rgba(0, 0, 0, 0.25);
+        --app-header-bg: rgba(255, 255, 255, 0.9);
+        --app-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+        --app-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+        --app-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
+        --app-border-subtle: 1px solid rgba(0, 0, 0, 0.06);
+        --app-border-default: 1px solid rgba(0, 0, 0, 0.1);
+        --app-glass-bg: rgba(0, 0, 0, 0.02);
+        --app-glass-border: rgba(0, 0, 0, 0.06);
+        --app-skeleton-from: rgba(0, 0, 0, 0.04);
+        --app-skeleton-via: rgba(0, 0, 0, 0.08);
+        --app-bottom-nav-bg: linear-gradient(to top, rgba(255, 255, 255, 0.98), rgba(245, 245, 245, 0.95));
+        --participante-card: var(--app-surface);
+        --participante-border: rgba(0, 0, 0, 0.1);
+        --app-primary-muted: rgba(255, 85, 0, 0.08);
+        --app-primary-border: rgba(255, 85, 0, 0.15);
+    }
 }
 
 /* ========================================

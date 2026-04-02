@@ -1,11 +1,20 @@
-# UI/UX Guidelines (Dark Mode First)
+# UI/UX Guidelines (Dark + Light Mode)
 
 ## Theme
-- Strict Dark Mode (`bg-gray-900`, `bg-slate-900`)
-- Text: Primary `text-white`/`text-gray-100`, Muted `text-gray-400`
-- Cards: `bg-gray-800 rounded-lg shadow-lg`
+- **Dark Mode** (default): OLED-safe `#0a0a0a` bg, `#1a1a1a` surface
+- **Light Mode** (v2.0): `#f5f5f5` bg, `#ffffff` surface — ativado via toggle em Configuracoes
+- Toggle: `[data-theme="light"]` no `<html>`, persistido em `localStorage('scm-theme')`
+- Auto-detect: `@media (prefers-color-scheme: light)` quando sem preferencia salva
+- Text: Primary `var(--app-text-primary)`, Muted `var(--app-text-muted)`
+- Cards: `var(--app-surface)` com `var(--app-border)`
 - Buttons: Explicit feedback (hover/active states)
-- Inputs: `bg-gray-700 text-white border-gray-600`
+
+## Module Strip (Header Padrao v2.0)
+- **Slim strip 56px** para todos os modulos (substitui hero card grande)
+- Accent border-left 3px na cor do modulo (`--lp-primary`)
+- Icone Material 20px + Titulo Russo One 14px uppercase + Tagline Inter 10px
+- Accordions flat estilo iOS (sem card, sem border-radius)
+- Detalhes: [`docs/references/redesign-modulos-v2.md`](redesign-modulos-v2.md)
 
 ## Tipografia
 

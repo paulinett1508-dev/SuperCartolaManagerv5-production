@@ -1,10 +1,12 @@
 <div id="historicoParticipante" class="hall-premium">
 
-    <!-- Header Premium (centralizado como no modelo) -->
-    <div class="header">
-        <div class="material-icons trophy-icon">emoji_events</div>
-        <h1>Hall da Fama</h1>
-        <div class="subtitle" id="headerSubtitle">Carregando...</div>
+    <!-- Strip Header (padrão profissional) -->
+    <div class="hall-strip">
+        <span class="material-icons hall-strip-icon">emoji_events</span>
+        <div class="hall-strip-text">
+            <h1 class="hall-strip-title">Hall da Fama</h1>
+            <p class="hall-strip-tagline" id="headerSubtitle">Carregando...</p>
+        </div>
     </div>
 
     <!-- Seletor de Temporadas (liga vem do header do app) -->
@@ -56,19 +58,46 @@
     margin: 0 auto;
 }
 
-/* Header Centralizado */
-.header {
-    text-align: center;
-    padding: 30px 20px;
-    border-bottom: 1px solid rgba(255, 69, 0, 0.2);
-    margin-bottom: 30px;
+/* Strip Header (padrão profissional) */
+.hall-strip {
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-3, 10px);
+    height: var(--app-strip-height, 56px);
+    padding: 0 var(--app-space-5, 16px);
+    background: var(--app-surface, #1a1a1a);
+    border-left: 3px solid var(--hall-gold, #fbbf24);
+    border-bottom: 1px solid var(--app-border, #333);
+    margin: -20px -20px 20px -20px;
 }
 
-.trophy-icon {
-    font-size: 64px;
-    color: var(--hall-primary);
-    margin-bottom: 15px;
-    text-shadow: 0 0 20px rgba(255, 69, 0, 0.3);
+.hall-strip-icon {
+    font-size: 20px;
+    color: var(--hall-gold, #fbbf24);
+    flex-shrink: 0;
+}
+
+.hall-strip-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.hall-strip-title {
+    font-family: var(--hall-font-brand);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--app-text-primary, #fff);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin: 0;
+}
+
+.hall-strip-tagline {
+    font-family: var(--hall-font-body);
+    font-size: 10px;
+    color: var(--app-text-dim);
+    margin: 0;
 }
 
 .header h1 {
