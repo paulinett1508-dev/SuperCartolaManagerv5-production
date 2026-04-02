@@ -9,7 +9,7 @@
  */
 
 import express from "express";
-import { verificarAdmin } from "../middleware/auth.js";
+import { verificarAdmin, verificarAdminOuDono } from "../middleware/auth.js";
 import InscricaoTemporada from "../models/InscricaoTemporada.js";
 import LigaRules from "../models/LigaRules.js";
 import Liga from "../models/Liga.js";
@@ -122,7 +122,7 @@ router.get("/:ligaId/:temporada/estatisticas", verificarAdmin, async (req, res) 
 // GET /api/inscricoes/:ligaId/:temporada/:timeId
 // 🔒 SEC-FIX: Apenas admin
 // =============================================================================
-router.get("/:ligaId/:temporada/:timeId", verificarAdmin, async (req, res) => {
+router.get("/:ligaId/:temporada/:timeId", verificarAdminOuDono, async (req, res) => {
     try {
         const { ligaId, temporada, timeId } = req.params;
 

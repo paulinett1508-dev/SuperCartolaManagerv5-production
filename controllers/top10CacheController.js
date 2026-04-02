@@ -53,7 +53,7 @@ export const lerCacheTop10 = async (req, res) => {
             rodada_consolidada: -1,
         });
         if (!cache) {
-            return res.status(404).json({ cached: false });
+            return res.status(200).json({ cached: false });
         }
         res.json({
             cached: true,
