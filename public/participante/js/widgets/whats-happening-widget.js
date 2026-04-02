@@ -152,6 +152,23 @@ function showAiToast() {
     `;
     document.body.appendChild(toast);
 
+    // Posicionar o toast próximo ao FAB
+    const fab = document.getElementById("wh-fab");
+    if (fab) {
+        const fabRect = fab.getBoundingClientRect();
+        const toastRect = toast.getBoundingClientRect();
+        const fabCenterX = fabRect.left + fabRect.width / 2;
+
+        // Posicionar acima do FAB
+        toast.style.bottom = (window.innerHeight - fabRect.top + 8) + "px";
+
+        // Centralizar horizontalmente no FAB, mas manter dentro da tela
+        let left = fabCenterX - toastRect.width / 2;
+        left = Math.max(8, Math.min(left, window.innerWidth - toastRect.width - 8));
+        toast.style.left = left + "px";
+        toast.style.transform = "translateY(10px)";
+    }
+
     // Animar entrada
     requestAnimationFrame(() => {
         toast.classList.add("wh-ai-toast--visible");
