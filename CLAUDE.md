@@ -35,9 +35,10 @@ Node.js (Docker/VPS) · MongoDB (Native Driver) · HTML5/CSS3/Vanilla JS (ES6 Mo
 
 ## UI/UX (resumo)
 
-Dark mode estrito. Fontes: Russo One (títulos), Inter (corpo), JetBrains Mono (números).
-Cores de módulos via variáveis CSS de `_admin-tokens.css` — NUNCA hardcoded.
+Dark + Light mode (toggle em Configurações, `[data-theme="light"]`). Fontes: Russo One (títulos), Inter (corpo), JetBrains Mono (números).
+Cores de módulos via variáveis CSS de `_admin-tokens.css` (admin) e `_app-tokens.css` (app) — NUNCA hardcoded.
 Material Icons — NUNCA emojis no código.
+**Module Strip 56px** — header padrão de todos os módulos do app participante (accent border + icon + título). Detalhes: [`docs/references/redesign-modulos-v2.md`](docs/references/redesign-modulos-v2.md)
 Design visual: skill `frontend-design` tem autoridade estética máxima.
 Detalhes completos: [`docs/references/ui-ux-guidelines.md`](docs/references/ui-ux-guidelines.md)
 
