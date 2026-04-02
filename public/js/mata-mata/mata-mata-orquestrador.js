@@ -453,7 +453,8 @@ export async function carregarMataMata() {
       const mercadoAberto = data.status_mercado === 1;
       const temporadaAPI = data.temporada || new Date().getFullYear();
       const anoAtual = new Date().getFullYear();
-      const RODADA_FINAL_CAMPEONATO = data.rodada_final || RODADA_FINAL_CAMPEONATO;
+      // ✅ FIX: Usar nome diferente para evitar TDZ (const local não pode referenciar a si mesma)
+      const rodadaFinalCamp = data.rodada_final || RODADA_FINAL_CAMPEONATO;
 
       // v1.4: Detecção dinâmica de temporada com verificação do ano
       if (rodadaAtual === 1 && mercadoAberto) {
@@ -468,7 +469,7 @@ export async function carregarMataMata() {
         }
         // Pré-temporada real: usar rodada 38 da anterior
         console.log("[MATA-ORQUESTRADOR] Pré-temporada - usando rodada 38 da temporada anterior");
-        rodadaAtual = RODADA_FINAL_CAMPEONATO;
+        rodadaAtual = rodadaFinalCamp;
       }
 
       // ✅ Guardar rodada atual global para bloqueio de fases futuras
@@ -814,7 +815,8 @@ function atualizarNavegacaoFases(fasesAtivas) {
       let isDisabled = false;
       if (edicaoSelecionada && rodadaAtualGlobal > 0) {
         const rodadaDaFase = edicaoSelecionada.rodadaInicial + idx;
-        isDisabled = rodadaAtualGlobal <= rodadaDaFase;
+        // ✅ FIX: Usar < (não <=) para permitir clique na fase da rodada atual (ao vivo)
+        isDisabled = rodadaAtualGlobal < rodadaDaFase;
       }
       const disabledClass = isDisabled ? " disabled" : "";
       const lockIcon = isDisabled ? ' 🔒' : '';
@@ -928,7 +930,8 @@ async function carregarFase(fase, ligaId) {
         statusMercadoGlobal = data.status_mercado; // ✅ v2.2: Capturar para detecção isLive
         const temporadaAPI = data.temporada || new Date().getFullYear();
         const anoAtual = new Date().getFullYear();
-        const RODADA_FINAL_CAMPEONATO = data.rodada_final || RODADA_FINAL_CAMPEONATO;
+        // ✅ FIX: Usar nome diferente para evitar TDZ (const local não pode referenciar a si mesma)
+        const rodadaFinalCamp = data.rodada_final || RODADA_FINAL_CAMPEONATO;
 
         // v1.4: Detecção dinâmica de temporada com verificação do ano
         if (rodada_atual === 1 && mercadoAberto) {
@@ -938,7 +941,7 @@ async function carregarFase(fase, ligaId) {
             isTemporadaAnterior = false;
           } else {
             console.log("[MATA-ORQUESTRADOR] Pré-temporada - usando rodada 38 para cálculo de fases");
-            rodada_atual = RODADA_FINAL_CAMPEONATO;
+            rodada_atual = rodadaFinalCamp;
             isTemporadaAnterior = true;
           }
         }
