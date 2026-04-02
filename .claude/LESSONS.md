@@ -39,6 +39,7 @@
 | 2026-03-16 | PROCESSO | Phosphor Icons bloqueado por CSP em PROD — `unpkg.com` estava em `style-src` e `connect-src` mas NÃO em `font-src`. 18 font requests bloqueados por page load causando lentidão extrema reportada por usuários. | **Ao adicionar dependência CDN externa, atualizar TODAS as diretivas CSP relevantes** (script/style/font/connect). Libs de ícones carregam sub-recursos (fontes) de domínios diferentes do script principal. Testar com DevTools Console aberto em PROD. Comentários inline adicionados ao CSP documentando cada domínio. | Sim — comentários de blindagem no CSP |
 | 2026-03-15 | PROCESSO | App do participante fazia 7-9 fetches a cada acesso (cold/warm start). 3 sistemas de cache sobrepostos (ParticipanteCacheDB, SuperCartolaOffline, ParticipanteCacheManager) causavam inconsistências. Dados imutáveis (rodadas consolidadas) eram re-buscados desnecessariamente. | **Super Cache Inteligente implementado.** Backend envia `cacheHint` (ttl, imutavel, versao) em todo response. Frontend unificado (L1 memória + L2 IndexedDB) com SWR inteligente. Imutáveis NUNCA revalidam. Warm start: 0-3 requests (vs 7-9). Navegação SPA: 0 re-fetches. Referência: `docs/superpowers/specs/2026-03-15-super-cache-inteligente-design.md` | Não |
 | 2026-04-02 | FRONTEND | Chip "Big Cartola IA" usava `alert('Em breve Big Cartola IA')` — dialog nativo do browser, visual amador, fora do design system dark mode. | **NUNCA usar `alert()` nativo do browser.** Usar `window.ErrorToast.show(msg, { tipo: 'info', duracao: 2500 })` (app participante) ou `mostrarAguarde(nomeCard)` para features bloqueadas. `alert()` quebra a experiência dark mode e parece amador. | Sim — regra "NUNCA alert()" em Coding Standards |
+| 2026-04-02 | FRONTEND | LP "Brasileirão" (menu Especial) ficava em loading infinito. Módulo delegava 100% ao `BrasileiraoTabela` (componente da HOME) que dependia de cadeia de APIs externas (ESPN+Cartola+matchday) sem fallback. Os outros 3 módulos Especial (Libertadores, Copa-BR, Copa-NE) funcionam porque têm dados estáticos hardcoded. Também: `TIMES_ESPN_MAP` com times errados (Chapecoense, Coritiba, Remo) e faltando reais (Fortaleza, Sport, Juventude). E `node-fetch` v3 ignora silenciosamente opção `timeout`. | **Módulos de LP tipo "Especial" DEVEM ter dados estáticos de fallback** — NUNCA depender 100% de API externa. Padrão provado: fetch API → se falha → renderizar fallback estático → SEMPRE mostra algo. Também: `node-fetch` v3 não suporta `timeout` — usar `AbortController` com `setTimeout`. Também: mapas de times (`TIMES_ESPN_MAP`) devem ser atualizados a cada temporada. | Não |
 
 ### PROCESSO — CSP desatualizada ao adicionar dependência externa (1 ocorrência)
 - Phosphor Icons adicionado via `cdn.jsdelivr.net` (script) + `unpkg.com` (fonts), mas `font-src` não incluía `unpkg.com` (2026-03-16)
@@ -82,6 +83,15 @@
 
 ---
 
+### FRONTEND — Módulo sem fallback estático = loading infinito (1 ocorrência, padrão preventivo)
+- LP Brasileirão: 100% dependente de APIs externas, sem dados estáticos. Os 3 módulos irmãos (Libertadores, Copa-BR, Copa-NE) tinham fallback e funcionavam. (2026-04-02)
+
+**Padrão:** Módulos que renderizam conteúdo externo (competições, tabelas, classificações) ficam em loading infinito quando a cadeia de APIs falha. Fallback estático é obrigatório.
+
+**Regra:** Todo módulo LP em "Especial" DEVE ter: (1) dados estáticos hardcoded (times, fases, datas), (2) fetch com timeout defensivo (AbortController, 8s), (3) se API falha → renderizar fallback → NUNCA spinner infinito. Ao criar novo módulo Especial, copiar padrão de `participante-copa-nordeste.js`.
+
+---
+
 ### FRONTEND — `escapeHtml` não definida localmente (3 ocorrências)
 - `top10.js` (2026-02-28)
 - `capitao-luxo.js` (2026-02-28)
@@ -112,3 +122,4 @@ function escapeHtml(str) {
 | 2026-03-15 | Skill antes de ação — SEMPRE. Bug→systematic-debugging, CSS→anti-frank, Visual→frontend-design | Seção "Skills & Commands" | 3 ocorrências de skill ignorada (padrão recorrente PROCESSO) |
 | 2026-03-16 | CSP: ao adicionar CDN externo, atualizar TODAS as diretivas (script/style/font/connect) | Comentários inline em `middleware/security.js` | Phosphor Icons bloqueado em font-src, 18 requests falhando |
 | 2026-04-02 | NUNCA usar `alert()` nativo — usar `ErrorToast.show()` ou toast do design system | Seção "Coding Standards" | Chip "Big Cartola IA" com alert() ficou visual amador, fora do dark mode |
+| 2026-04-02 | Módulos LP Especial DEVEM ter fallback estático; `node-fetch` v3 não suporta `timeout`; `TIMES_ESPN_MAP` atualizar por temporada | Padrão Recorrente FRONTEND (preventivo) | LP Brasileirão loading infinito — sem fallback, ESPN map errado, timeout ignorado |
