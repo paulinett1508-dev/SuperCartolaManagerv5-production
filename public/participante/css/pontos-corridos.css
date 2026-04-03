@@ -269,7 +269,7 @@
 .pc-meu-jogo-badge {
     position: absolute;
     top: 5px;
-    right: 62px;       /* evita sobreposição com coluna Diferença (w-14 = 56px + margem) */
+    right: 56px;       /* evita sobreposição com coluna Diferença (w-12 = 48px + margem) */
     font-family: var(--app-font-base);
     font-size: 8px;
     font-weight: var(--app-font-bold);

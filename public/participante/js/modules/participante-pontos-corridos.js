@@ -1111,10 +1111,10 @@ function buildLinhaConfronto(confronto, meuTimeId) {
         '<div class="flex items-center min-w-0 flex-1' + (vencedor === 2 ? " opacity-60" : "") + '">',
         '<img src="' + esc1 + '" class="w-9 h-9 rounded-full mr-2.5 shrink-0 bg-zinc-700 object-cover" onerror="this.onerror=null;this.src=\'/escudos/default.png\'">',
         '<div class="min-w-0 flex-1">',
-        '<p class="font-semibold text-[13px] truncate leading-tight ' + corNome1 + '">' + escapeHtml(nome1) + '</p>',
-        '<p class="text-[10px] text-gray-500 truncate leading-none mt-0.5">' + escapeHtml(cartoleiro1) + '</p>',
-        '<div class="flex items-center space-x-1.5 mt-1">',
-        '<p class="text-[13px] font-bold font-mono ' + cor1 + '">' + p1Str + '</p>',
+        '<p class="font-semibold text-[11px] truncate leading-tight ' + corNome1 + '">' + escapeHtml(nome1) + '</p>',
+        '<p class="text-[9px] text-gray-500 truncate leading-none mt-0.5">' + escapeHtml(cartoleiro1) + '</p>',
+        '<div class="flex items-center space-x-1.5 mt-0.5">',
+        '<p class="text-[11px] font-bold font-mono ' + cor1 + '">' + p1Str + '</p>',
         modal1,
         '</div>',
         '</div>',
@@ -1122,17 +1122,17 @@ function buildLinhaConfronto(confronto, meuTimeId) {
         '<span class="text-xs text-white/20 mx-1.5 shrink-0">×</span>',
         '<div class="flex items-center min-w-0 flex-1 justify-end' + (vencedor === 1 ? " opacity-60" : "") + '">',
         '<div class="min-w-0 flex-1 text-right">',
-        '<p class="font-semibold text-[13px] truncate leading-tight ' + corNome2 + '">' + escapeHtml(nome2) + '</p>',
-        '<p class="text-[10px] text-gray-500 truncate leading-none mt-0.5">' + escapeHtml(cartoleiro2) + '</p>',
-        '<div class="flex items-center justify-end space-x-1.5 mt-1">',
-        '<p class="text-[13px] font-bold font-mono ' + cor2 + '">' + p2Str + '</p>',
+        '<p class="font-semibold text-[11px] truncate leading-tight ' + corNome2 + '">' + escapeHtml(nome2) + '</p>',
+        '<p class="text-[9px] text-gray-500 truncate leading-none mt-0.5">' + escapeHtml(cartoleiro2) + '</p>',
+        '<div class="flex items-center justify-end space-x-1.5 mt-0.5">',
+        '<p class="text-[11px] font-bold font-mono ' + cor2 + '">' + p2Str + '</p>',
         modal2,
         '</div>',
         '</div>',
         '<img src="' + esc2 + '" class="w-9 h-9 rounded-full ml-2.5 shrink-0 bg-zinc-700 object-cover" onerror="this.onerror=null;this.src=\'/escudos/default.png\'">',
         '</div>',
-        '<div class="w-14 text-right ml-1.5 shrink-0">',
-        '<p class="font-bold text-[13px] font-mono text-white">' + difStr + '</p>',
+        '<div class="w-12 text-right ml-1.5 shrink-0">',
+        '<p class="font-bold text-[11px] font-mono text-white">' + difStr + '</p>',
         '</div>',
         '</div>',
     ];
@@ -1284,23 +1284,13 @@ function mostrarSemDados(msg) {
 }
 
 function scrollParaRodadaSelecionada() {
+    // ✅ v5.8: scrollIntoView inline:center — garante foco na rodada atual sem cálculos manuais
     setTimeout(() => {
-        const container = document.querySelector(
-            "#pc-seletor-rodadas",
-        )?.parentElement;
-        const selecionado = document.querySelector(
-            "#pc-seletor-rodadas .scale-105",
-        );
-        if (container && selecionado) {
-            const cRect = container.getBoundingClientRect();
-            const sRect = selecionado.getBoundingClientRect();
-            container.scrollBy({
-                left:
-                    sRect.left - cRect.left - cRect.width / 2 + sRect.width / 2,
-                behavior: "smooth",
-            });
+        const selecionado = document.querySelector("#pc-seletor-rodadas .scale-105");
+        if (selecionado) {
+            selecionado.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
         }
-    }, 100);
+    }, 120);
 }
 
 function selecionarRodada(rodada) {
