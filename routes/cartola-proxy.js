@@ -8,8 +8,8 @@ import cartolaApiService from "../services/cartolaApiService.js";
 // Cache de escalações — não mudam durante a rodada (TTL 5min, max 500 entries)
 const escalacaoProxyCache = new NodeCache({ stdTTL: 300, maxKeys: 500 });
 
-// Cache do status do mercado — reduz chamadas externas à API Cartola (TTL 3min)
-const mercadoStatusCache = new NodeCache({ stdTTL: 180, maxKeys: 1 });
+// Cache do status do mercado — TTL 30s para detectar transições status=1→2 rapidamente
+const mercadoStatusCache = new NodeCache({ stdTTL: 30, maxKeys: 1 });
 
 const router = express.Router();
 const CARTOLA_API_BASE = "https://api.cartola.globo.com";
