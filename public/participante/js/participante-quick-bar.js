@@ -623,8 +623,9 @@ class QuickAccessBar {
 
         // v4.7: Aplicar/remover visual de manutenção nos botões da bottom nav
         // ✅ v4.10: Premium bypass - sem visual de manutenção para premium
+        // ✅ v4.11: 'ranking' removido — Ranking Geral é navegação fundamental (como Início), nunca bloqueável na Quick Bar
         const isPremiumNav = window.participanteNav?._isPremium === true;
-        const modulosBase = ['extrato', 'ranking', 'rodadas'];
+        const modulosBase = ['extrato', 'rodadas'];
         modulosBase.forEach(key => {
             const btn = document.querySelector(`.nav-item[data-page="${key}"]`);
             if (!btn) return;
@@ -654,7 +655,8 @@ class QuickAccessBar {
         if (isPremiumNav) return;
 
         // IDs da bottom nav (kebab ou direto) que mapeiam para módulos base
-        const modulosBase = ['extrato', 'ranking', 'rodadas'];
+        // 'ranking' removido — Ranking Geral é navegação fundamental, nunca bloqueável na Quick Bar
+        const modulosBase = ['extrato', 'rodadas'];
         modulosBase.forEach(key => {
             const btn = document.querySelector(`.nav-item[data-page="${key}"]`);
             if (!btn) return;

@@ -39,7 +39,9 @@
                 <span class="home-hero-market-title" id="home-aviso-titulo">MERCADO ABERTO</span>
                 <span class="home-hero-market-sep">&bull;</span>
                 <span class="home-hero-market-sub" id="home-aviso-subtitulo">Rodada 2 &bull; Fecha em 2d 14h</span>
-                <span class="material-icons home-hero-market-chevron">chevron_right</span>
+                <button class="home-hero-market-refresh" onclick="event.stopPropagation(); window.RefreshButton?.showModal()" aria-label="Atualizar dados" title="Atualizar dados">
+                    <span class="material-icons">refresh</span>
+                </button>
             </div>
 
             <!-- Hero: Pontos da Rodada -->
@@ -148,7 +150,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 14px;
+    padding: 8px 36px 8px 14px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     position: relative;
     z-index: 1;
@@ -187,10 +189,27 @@
     text-overflow: ellipsis;
 }
 
-.home-hero-market-chevron {
+.home-hero-market-refresh {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    border-radius: 50%;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.15s ease;
+}
+.home-hero-market-refresh:active {
+    color: rgba(255, 255, 255, 0.6);
+}
+.home-hero-market-refresh .material-icons {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.2);
-    flex-shrink: 0;
 }
 
 /* Market variants */

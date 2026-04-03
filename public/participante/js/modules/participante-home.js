@@ -368,10 +368,7 @@ async function carregarDadosERenderizar(ligaId, timeId, participante) {
     // ✅ v2.0: Renderizar grid de módulos inline na home (movido do Menu sheet)
     renderizarModulosInline();
 
-    // ✅ v3.0: Botão "Atualizar App" — sempre disponível na home
-    if (window.RefreshButton) {
-        RefreshButton.addTo('#home-container');
-    }
+    // ✅ v3.1: Botão refresh movido para home-hero-market row (home.html) — evita position:absolute sobre chips
 }
 
 // =====================================================================
