@@ -669,7 +669,6 @@ router.get("/:id/top10", async (req, res) => {
         .sort(
           (a, b) => (parseFloat(b.pontos) || 0) - (parseFloat(a.pontos) || 0),
         )
-        .slice(0, 10)
         .map((time, index) => ({
           posicao: index + 1,
           timeId: time.timeId,
