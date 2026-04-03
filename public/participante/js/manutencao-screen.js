@@ -70,12 +70,18 @@ const ManutencaoScreen = {
         if (container) container.style.cssText = 'display:none !important;';
         if (bottomNav) bottomNav.style.cssText = 'display:none !important;';
 
+        // Esconder FAB widget (bolinha Raio-X)
+        const rxrayFab = document.getElementById('rxrayFab');
+        if (rxrayFab) rxrayFab.style.cssText = 'display:none !important;';
+
         // Esconder quick bar (pode já existir ou não)
         this._esconderQuickBar();
 
-        // Observer para capturar Quick Bar se for renderizada DEPOIS
+        // Observer para capturar Quick Bar e FAB se forem renderizados DEPOIS
         this._observer = new MutationObserver(() => {
             this._esconderQuickBar();
+            const fab = document.getElementById('rxrayFab');
+            if (fab) fab.style.cssText = 'display:none !important;';
         });
         this._observer.observe(document.body, { childList: true, subtree: false });
 
@@ -707,8 +713,9 @@ const ManutencaoScreen = {
         this._painelAtivo = 'dino';
         dinoContainer.style.display = 'block';
 
-        // Mostrar tela de seleção de modo
-        this._mostrarSelecaoModo();
+        // Modo fixo: sempre striker (opção goleiro removida)
+        this._gameMode = 'striker';
+        this._mostrarSelecaoDificuldade();
     },
 
     _mostrarSelecaoModo() {
@@ -787,9 +794,9 @@ const ManutencaoScreen = {
                 </button>
             </div>
             <div style="text-align:center;margin-top:16px;">
-                <button onclick="window.ManutencaoScreen && ManutencaoScreen._mostrarSelecaoModo()"
+                <button onclick="window.ManutencaoScreen && ManutencaoScreen.abrirPenaltyGame()"
                     style="background:none;border:none;color:#6b7280;font-size:0.75rem;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:underline;">
-                    ← Voltar
+                    Voltar
                 </button>
             </div>
         `;
