@@ -1,0 +1,22 @@
+# ===========================
+# MCP MongoDB HTTP Server
+# Dockerfile separado — não usa o build multi-stage do app principal
+# ===========================
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Instalar apenas dependências necessárias
+COPY package.json package-lock.json* ./
+RUN npm ci --omit=dev
+
+# Copiar apenas o servidor MCP
+COPY mongo-server-http.js ./
+
+ENV NODE_ENV=production
+ENV MCP_PORT=3099
+
+EXPOSE 3099
+
+CMD ["node", "mongo-server-http.js"]

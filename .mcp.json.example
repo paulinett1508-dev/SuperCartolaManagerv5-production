@@ -8,6 +8,13 @@
         "NODE_ENV": "production"
       }
     },
+    "mongo-remote": {
+      "type": "http",
+      "url": "https://SEU_DOMINIO/mcp-mongo/mcp",
+      "headers": {
+        "x-mcp-token": "SEU_MCP_SECRET_TOKEN_AQUI"
+      }
+    },
     "perplexity": {
       "command": "npx",
       "args": ["-y", "@perplexity-ai/mcp-server"],
