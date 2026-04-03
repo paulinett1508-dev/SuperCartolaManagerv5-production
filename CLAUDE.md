@@ -191,6 +191,12 @@ Commands: `/liste-pr-github` (filtro por período), `/security-review` (diff con
 Context7 (docs), Perplexity (pesquisa web), Mongo MCP (queries DB), Stitch MCP (design-to-code).
 Detalhes: [`docs/skills/03-utilities/project-reference.md`](docs/skills/03-utilities/project-reference.md)
 
+**Mongo MCP Remoto (Claude Code Web):**
+No CCW, o Mongo MCP está disponível como conector HTTP em `https://supercartolamanager.com.br/mcp-mongo/mcp`.
+Ferramentas: `list_collections`, `find_documents`, `get_collection_schema`, `insert_document`.
+Container: `scm-mcp` (Docker, porta 3099 interna). Antes de qualquer código que toque dados → consultar este MCP.
+Token e URL completa: ver `MCP_SECRET_TOKEN` no `.env.prod` da VPS.
+
 ## Pontos Corridos (REGRA CRÍTICA)
 
 Liga com número **ímpar** de times usa sistema de BYE: um time folga por rodada, rotacionando deterministicamente. Time com BYE: `jogos` NÃO é incrementado, pontos/financeiro não alteram.
