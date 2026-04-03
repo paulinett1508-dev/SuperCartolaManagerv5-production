@@ -809,8 +809,8 @@ async function carregarConfrontosParciais(contentElement, ligaId, edicaoId, edic
     contentElement.insertAdjacentHTML("afterbegin", `
       <div class="parciais-header">
         <span class="parciais-live-badge">AO VIVO</span>
-        <h4>Confrontos da ${faseLabel} — ${_escapeHtml(edicaoSelecionada.nome || "Edição " + edicaoId)}</h4>
-        <p>Baseado nas parciais da Rodada ${data.rodada}. Sujeito a alteração.</p>
+        <h4>Confrontos da ${faseLabel} — ${_escapeHtml(edicaoSelecionada.nome || "Edição " + edicaoId)} (Rodada ${edicaoSelecionada.rodadaInicial})</h4>
+        <p>Projeção baseada nas parciais da Rodada ${data.rodada} (classificatória). Sujeito a alteração.</p>
       </div>
     `);
 

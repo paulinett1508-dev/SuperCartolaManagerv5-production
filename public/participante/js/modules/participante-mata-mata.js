@@ -1923,9 +1923,9 @@ async function carregarConfrontosParciais(container, edicao) {
       <div class="mm-parciais-live-header">
         <span class="mm-live-dot"></span>
         <span class="mm-live-text">AO VIVO</span>
-        <span class="mm-live-info">Confrontos da 1ª Fase — ${edicaoNome} (Rodada ${data.rodada})</span>
+        <span class="mm-live-info">Confrontos da 1ª Fase — ${edicaoNome} (Rodada ${edicaoConfig?.rodadaInicial ?? data.rodada})</span>
       </div>
-      <p class="mm-parciais-sub">Baseado nas parciais. Sujeito a alteração.</p>`;
+      <p class="mm-parciais-sub">Projeção baseada nas parciais da Rodada ${data.rodada} (classificatória). Sujeito a alteração.</p>`;
 
     html += `
       <div class="mm-outros-header">
