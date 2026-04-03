@@ -3,7 +3,6 @@
     "mongo": {
       "command": "node",
       "args": ["mongo-server.js"],
-      "cwd": "/var/www/cartola",
       "env": {
         "MONGO_URI": "mongodb+srv://USER:PASS@cluster0.XXXXX.mongodb.net/cartola-manager?retryWrites=true&w=majority",
         "NODE_ENV": "production"

@@ -307,7 +307,22 @@
       "mcp__plugin_github_github__list_pull_requests",
       "Bash(where.exe gh:*)",
       "Read(//c/Users/**)",
-      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\")"
+      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\")",
+      "mcp__plugin_playwright_playwright__browser_evaluate",
+      "Bash(C:/Users/Windows10/AppData/Local/GitHubCLI/bin/gh.exe run:*)",
+      "Bash([ -f \"/c/PROJETOS/SuperCartolaManagerv5-production/$f\" ])",
+      "Bash(ssh hostinger-vps:*)",
+      "Bash(scp:*)",
+      "Bash(gh repo:*)",
+      "Bash(nslookup cluster0.fjcat.mongodb.net)",
+      "Bash(nslookup:*)",
+      "Bash(Test-NetConnection -ComputerName cluster0-shard-00-00.fjcat.mongodb.net -Port 27017)",
+      "WebFetch(domain:site.api.espn.com)",
+      "Skill(commit-commands:commit)",
+      "Bash(export PATH=\"$PATH:/c/Users/Windows10/AppData/Local/GitHubCLI/bin\")",
+      "Bash(ssh:*)",
+      "Bash(sshpass:*)",
+      "Bash(expect:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

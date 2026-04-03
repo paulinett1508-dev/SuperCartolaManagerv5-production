@@ -28,3 +28,7 @@ credentials.json
 credentials.json
 *.bak
 bun.lock.worktrees/
+
+# Playwright MCP snapshots
+.playwright-mcp/*.yml
+.playwright-mcp/console-*.log
