@@ -1080,6 +1080,25 @@ async function carregarFase(edicao, fase) {
       // ✅ v7.2: Se é a primeira fase, mostrar opções de parciais
       const primeiraFaseValida = getFasesAtuais()[0] || "primeira";
       if (fase === primeiraFaseValida) {
+        // ✅ FIX: Só mostrar tela de classificação se ainda estamos NA rodada de definição.
+        // Se rodadaAtual > rodadaDefinicao, a 1ª fase já começou mas o bracket ainda não foi
+        // consolidado pelo admin → mostrar aviso em vez de "Rodada de Classificação" (incorreto).
+        const edicaoCfg = EDICOES_MATA_MATA.find(e => e.id === edicao);
+        const rodadaDef = edicaoCfg?.rodadaDefinicao || 0;
+        if (estado.rodadaAtual > 0 && rodadaDef > 0 && estado.rodadaAtual > rodadaDef) {
+          const div = document.createElement('div');
+          div.className = 'mm-vazio';
+          const icon = document.createElement('span');
+          icon.className = 'material-symbols-outlined';
+          icon.textContent = 'pending';
+          const h3 = document.createElement('h3');
+          h3.textContent = 'Chaveamento em andamento';
+          const p = document.createElement('p');
+          p.textContent = 'Os confrontos da 1ª Fase serão exibidos em breve.';
+          div.append(icon, h3, p);
+          container.replaceChildren(div);
+          return;
+        }
         renderParciaisOptionsApp(container, edicao);
         return;
       }

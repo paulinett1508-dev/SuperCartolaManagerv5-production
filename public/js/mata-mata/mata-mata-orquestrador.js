@@ -220,7 +220,75 @@ async function getPontosDaRodadaCached(ligaId, rodada) {
   return pontos;
 }
 
-// ✅ FUNÇÃO PARA OBTER RANKING BASE COM CACHE LOCAL  
+// ============================================================================
+// BOTÃO CLASSIFICADOS — Admin
+// Exibe o ranking da rodadaDefinicao da edição selecionada
+// ============================================================================
+async function mostrarClassificadosAdmin(ligaId) {
+  const edicaoId = parseInt(document.getElementById('edicao-select')?.value);
+  const edicaoSel = edicoes.find(e => e.id === edicaoId);
+  const content = document.getElementById('mataMataContent');
+  if (!edicaoSel || !content) return;
+
+  const loading = document.createElement('div');
+  loading.className = 'loading-state';
+  const spinner = document.createElement('div');
+  spinner.className = 'spinner';
+  const loadingTxt = document.createElement('p');
+  loadingTxt.textContent = 'Carregando classificados...';
+  loading.append(spinner, loadingTxt);
+  content.replaceChildren(loading);
+
+  try {
+    const ranking = await getRankingBaseCached(ligaId, edicaoSel.rodadaDefinicao);
+    if (!ranking || ranking.length === 0) {
+      const msg = document.createElement('p');
+      msg.style.cssText = 'text-align:center;padding:24px;color:var(--text-secondary,#aaa)';
+      msg.textContent = `Sem dados para a Rodada ${edicaoSel.rodadaDefinicao}.`;
+      content.replaceChildren(msg);
+      return;
+    }
+
+    const classificados = ranking.slice(0, tamanhoTorneio);
+
+    const titulo = document.createElement('h3');
+    titulo.style.cssText = 'text-align:center;margin-bottom:16px;color:var(--text-primary,#fff)';
+    titulo.textContent = `Classificados — ${edicaoSel.nome} (R${edicaoSel.rodadaDefinicao})`;
+
+    const subtitulo = document.createElement('p');
+    subtitulo.style.cssText = 'text-align:center;font-size:0.85rem;color:var(--text-secondary,#aaa);margin-bottom:16px';
+    subtitulo.textContent = `${classificados.length} de ${ranking.length} participantes classificados`;
+
+    const ol = document.createElement('ol');
+    ol.style.cssText = 'max-width:480px;margin:0 auto;padding:0 16px;list-style:none';
+
+    classificados.forEach((t, idx) => {
+      const li = document.createElement('li');
+      li.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-color,rgba(255,255,255,0.1))';
+
+      const nome = document.createElement('span');
+      nome.textContent = `${idx + 1}. ${t.nome_time || t.nome || '—'}`;
+
+      const pts = document.createElement('span');
+      pts.style.cssText = 'font-family:var(--font-mono,"JetBrains Mono",monospace);color:var(--text-secondary,#aaa);font-size:0.85rem';
+      const v = t.pontos ?? 0;
+      pts.textContent = `${(Math.trunc(v * 100) / 100).toFixed(2).replace('.', ',')} pts`;
+
+      li.append(nome, pts);
+      ol.appendChild(li);
+    });
+
+    content.replaceChildren(titulo, subtitulo, ol);
+  } catch (e) {
+    console.error('[MATA-ORQUESTRADOR] Erro ao carregar classificados:', e.message);
+    const msg = document.createElement('p');
+    msg.style.cssText = 'text-align:center;padding:24px;';
+    msg.textContent = 'Erro ao carregar classificados.';
+    content.replaceChildren(msg);
+  }
+}
+
+// ✅ FUNÇÃO PARA OBTER RANKING BASE COM CACHE LOCAL
 async function getRankingBaseCached(ligaId, rodadaDefinicao) {
   const cacheKey = `${ligaId}_base_${rodadaDefinicao}`;
 
@@ -499,6 +567,10 @@ export async function carregarMataMata() {
 
   const fasesAtivas = getFasesParaTamanho(tamanhoTorneio);
   renderizarInterface(container, ligaId, handleEdicaoChange, handleFaseClick, fasesAtivas);
+
+  // Wiring do botão Classificados do admin (injetado por renderizarInterface)
+  document.getElementById('btnClassificadosAdmin')
+    ?.addEventListener('click', () => mostrarClassificadosAdmin(ligaId));
 }
 
 // v1.4: Renderizar UI de aguardando dados
@@ -772,11 +844,15 @@ async function carregarConfrontosParciais(contentElement, ligaId, edicaoId, edic
 }
 
 // Handler para mudança de edição
-async function handleEdicaoChange(novaEdicao, fase, ligaId) {
+async function handleEdicaoChange(novaEdicao, _faseIgnorada, ligaId) {
   edicaoAtual = novaEdicao;
   // ✅ Limpar caches locais ao trocar de edição
   pontosRodadaCache.clear();
   rankingBaseCache.clear();
+
+  // Mostrar botão Classificados ao selecionar uma edição
+  const btnClassif = document.getElementById('btnClassificadosAdmin');
+  if (btnClassif) btnClassif.style.display = '';
 
   // ✅ v1.5: Calcular tamanho ANTES de carregar fase para atualizar navegação
   const tamanhoCalculado = await getTamanhoTorneioCached(ligaId, novaEdicao);
@@ -784,18 +860,28 @@ async function handleEdicaoChange(novaEdicao, fase, ligaId) {
   if (tamanhoCalculado > 0 && tamanhoCalculado !== tamanhoTorneio) {
     console.log(`[MATA-ORQUESTRADOR] Tamanho mudou: ${tamanhoTorneio} → ${tamanhoCalculado}`);
     tamanhoTorneio = tamanhoCalculado;
-
-    // Re-renderizar navegação com fases corretas
-    const fasesReais = getFasesParaTamanho(tamanhoTorneio);
-    atualizarNavegacaoFases(fasesReais);
-
-    // Usar primeira fase válida se a fase atual não existe
-    if (!fasesReais.includes(fase.toLowerCase())) {
-      fase = fasesReais[0];
-      console.log(`[MATA-ORQUESTRADOR] Fase ajustada para: ${fase}`);
-    }
   }
 
+  // ✅ FIX: Sempre atualizar nav com disabled states corretos para a nova edição.
+  // Antes: só atualizava se tamanho mudasse → fase vinda do UI era calculada com nav desatualizado.
+  const fasesReais = getFasesParaTamanho(tamanhoTorneio);
+  atualizarNavegacaoFases(fasesReais);
+
+  // ✅ FIX: Recomputar fase a partir do nav já atualizado (não usar _faseIgnorada do UI).
+  // _faseIgnorada foi calculada antes do update → poderia ser "final" mesmo estando em rodada 9.
+  const faseNav = document.querySelector('.fase-nav');
+  const botoesDisponiveis = faseNav
+    ? Array.from(faseNav.querySelectorAll('.fase-btn:not(.disabled)'))
+    : [];
+  const fase = botoesDisponiveis.length > 0
+    ? botoesDisponiveis[botoesDisponiveis.length - 1].getAttribute('data-fase')
+    : (fasesReais[0] || 'primeira');
+
+  // Marcar botão ativo
+  faseNav?.querySelectorAll('.fase-btn').forEach(b => b.classList.remove('active'));
+  faseNav?.querySelector(`.fase-btn[data-fase="${fase}"]`)?.classList.add('active');
+
+  console.log(`[MATA-ORQUESTRADOR] Edição ${novaEdicao}: carregando fase=${fase} (rodadaAtual=${rodadaAtualGlobal})`);
   carregarFase(fase, ligaId);
 }
 

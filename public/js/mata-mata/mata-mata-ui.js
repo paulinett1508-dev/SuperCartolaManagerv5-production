@@ -42,6 +42,10 @@ export function renderizarInterface(
           )
           .join("")}
       </select>
+      <button id="btnClassificadosAdmin" class="fase-btn" style="display:none;margin-left:8px;" title="Ver classificados desta edição">
+        <span class="material-icons" style="font-size:14px;vertical-align:middle;">format_list_numbered</span>
+        Classificados
+      </button>
     </div>
   `;
 
