@@ -127,6 +127,9 @@ calendarioBrasileiraoSchema.methods.obterRodadaAtual = function() {
         const todosEncerrados = jogosRodada.every(p => p.status === 'encerrado');
         if (todosEncerrados) continue;
 
+        // Jogos ao vivo? Retornar imediatamente, independente da data
+        if (jogosRodada.some(p => p.status === 'ao_vivo')) return r;
+
         // Última data da rodada
         const datas = jogosRodada.map(p => p.data).filter(Boolean).sort();
         const dataFimRodada = datas.length > 0 ? datas[datas.length - 1] : null;

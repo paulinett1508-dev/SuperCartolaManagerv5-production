@@ -338,7 +338,27 @@ async function buscarViaEspn(temporada) {
         inferirRodadas(partidas);
 
         // Filtrar rodadas válidas (1-38)
-        return partidas.filter(p => p.rodada >= 1 && p.rodada <= 38);
+        const validas = partidas.filter(p => p.rodada >= 1 && p.rodada <= 38);
+
+        // Desduplicar: mesmo par mandante_id+visitante_id pode aparecer 2x
+        // (jogo original adiado + remarcado, cada um com ID diferente no ESPN)
+        // Prioridade: ao_vivo > encerrado > agendado; entre iguais, manter data mais recente
+        const statusPrioridade = { ao_vivo: 3, encerrado: 2, agendado: 1, a_definir: 1, adiado: 0, cancelado: 0 };
+        const dedupMap = new Map();
+        for (const p of validas) {
+            const chave = `${p.mandante_id}-${p.visitante_id}`;
+            const existente = dedupMap.get(chave);
+            if (!existente) {
+                dedupMap.set(chave, p);
+                continue;
+            }
+            const prioNova = statusPrioridade[p.status] ?? 0;
+            const prioExist = statusPrioridade[existente.status] ?? 0;
+            if (prioNova > prioExist || (prioNova === prioExist && p.data > existente.data)) {
+                dedupMap.set(chave, p);
+            }
+        }
+        return [...dedupMap.values()];
 
     } catch (error) {
         console.error('[BRASILEIRAO-SERVICE] Erro ESPN:', error.message);
