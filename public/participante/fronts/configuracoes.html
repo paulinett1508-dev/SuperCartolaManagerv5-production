@@ -16,23 +16,6 @@
         </div>
     </div>
 
-    <!-- Seção Aparência -->
-    <div class="config-container about-section" style="margin-bottom: 16px;">
-        <h3 class="config-section-title">Aparência</h3>
-        <div class="about-item" style="cursor: pointer; -webkit-tap-highlight-color: transparent;" id="themeToggleRow">
-            <span class="material-symbols-outlined" id="themeToggleIcon">dark_mode</span>
-            <div class="about-text" style="flex: 1;">
-                <span class="about-label">Tema</span>
-                <span class="about-value" id="themeToggleLabel">Escuro</span>
-            </div>
-            <div style="position: relative; width: 44px; height: 24px; flex-shrink: 0;">
-                <input type="checkbox" id="themeToggleSwitch" style="position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; z-index: 1; margin: 0;">
-                <div id="themeToggleTrack" style="width: 44px; height: 24px; border-radius: 12px; background: var(--app-primary-muted); border: 1px solid var(--app-border); transition: background 0.2s;"></div>
-                <div id="themeToggleThumb" style="position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--app-primary); transition: transform 0.2s; pointer-events: none;"></div>
-            </div>
-        </div>
-    </div>
-
     <!-- Seção Sobre o App -->
     <div class="config-container about-section">
         <h3 class="config-section-title">Sobre o App</h3>
@@ -585,54 +568,3 @@
 
 <!-- Script movido para participante-notifications.js v1.2 (script inline não executa em SPA) -->
 
-<!-- Theme Toggle Script (executado pelo módulo de configurações) -->
-<script type="module">
-// Theme Toggle — Dark/Light mode
-(function initThemeToggle() {
-    const toggle = document.getElementById('themeToggleSwitch');
-    const icon = document.getElementById('themeToggleIcon');
-    const label = document.getElementById('themeToggleLabel');
-    const thumb = document.getElementById('themeToggleThumb');
-    const track = document.getElementById('themeToggleTrack');
-    const row = document.getElementById('themeToggleRow');
-    if (!toggle) return;
-
-    const STORAGE_KEY = 'scm-theme';
-
-    function applyTheme(theme) {
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem(STORAGE_KEY, theme);
-
-        // Update meta theme-color
-        const meta = document.querySelector('meta[name="theme-color"]');
-        if (meta) meta.content = theme === 'light' ? '#f5f5f5' : '#0a0a0a';
-
-        // Update toggle UI
-        const isLight = theme === 'light';
-        toggle.checked = isLight;
-        if (icon) icon.textContent = isLight ? 'light_mode' : 'dark_mode';
-        if (label) label.textContent = isLight ? 'Claro' : 'Escuro';
-        if (thumb) thumb.style.transform = isLight ? 'translateX(20px)' : 'translateX(0)';
-        if (track) track.style.background = isLight ? 'var(--app-primary)' : 'var(--app-primary-muted)';
-    }
-
-    // Init: read stored preference
-    const stored = localStorage.getItem(STORAGE_KEY);
-    const current = stored || (document.documentElement.getAttribute('data-theme') || 'dark');
-    applyTheme(current);
-
-    // Toggle handler
-    toggle.addEventListener('change', () => {
-        applyTheme(toggle.checked ? 'light' : 'dark');
-    });
-
-    // Row click (tap on the row itself)
-    if (row) {
-        row.addEventListener('click', (e) => {
-            if (e.target === toggle) return; // already handled by change
-            toggle.checked = !toggle.checked;
-            applyTheme(toggle.checked ? 'light' : 'dark');
-        });
-    }
-})();
-</script>

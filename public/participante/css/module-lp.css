@@ -569,19 +569,3 @@
     font-style: italic;
 }
 
-/* ============================================================
-   LIGHT MODE ADJUSTMENTS
-   ============================================================ */
-
-[data-theme="light"] .module-lp-strip {
-    background: var(--app-surface);
-    border-bottom-color: var(--app-border);
-}
-
-[data-theme="light"] .module-lp-accordion {
-    border-bottom-color: var(--app-border);
-}
-
-[data-theme="light"] .module-lp-premiacoes-item {
-    background: rgba(0, 0, 0, 0.03);
-}
