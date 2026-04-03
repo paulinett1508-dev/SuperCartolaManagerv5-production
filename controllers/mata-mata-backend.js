@@ -818,12 +818,14 @@ export async function calcularBracketParaConsolidacao(ligaId, rodadaAtual) {
             const indiceFaseAtual = rodadaAtual - edicao.rodadaInicial;
             const faseEsperada = fasesDaEdicao[Math.min(indiceFaseAtual, fasesDaEdicao.length - 1)];
 
-            // ✅ v1.4: Verificar se a fase tem confrontos COM pontos reais (não null)
-            // Confrontos salvos durante rodada ao vivo podem ter pts null — não são "calculados"
+            // ✅ v1.5: Verificar se a fase tem confrontos COM pontos reais (não null e não zero)
+            // Confrontos salvos antes da rodada ser populada chegam com pontos=0 — não são "calculados"
+            // pontos=null (rodada ao vivo) e pontos=0 (pré-população) são igualmente inválidos
             const confrontosFaseEsperada = cacheExistente?.dados_torneio?.[faseEsperada];
             const faseTemPontosReais = Array.isArray(confrontosFaseEsperada) && confrontosFaseEsperada.length > 0 &&
                 confrontosFaseEsperada.every(c =>
-                    typeof c.timeA?.pontos === 'number' && typeof c.timeB?.pontos === 'number'
+                    typeof c.timeA?.pontos === 'number' && c.timeA.pontos !== 0 &&
+                    typeof c.timeB?.pontos === 'number' && c.timeB.pontos !== 0
                 );
 
             if (faseTemPontosReais) {
@@ -927,11 +929,13 @@ export async function calcularBracketParaConsolidacao(ligaId, rodadaAtual) {
                 }
 
                 // Se fase já existe no cache COM pontos reais, usar dados existentes para avançar vencedores
-                // ✅ v1.4: Não reutilizar confrontos com pontos null (salvos durante rodada ao vivo)
+                // ✅ v1.5: Não reutilizar confrontos com pontos null ou pontos=0
+                // pontos=0 pode ocorrer quando a consolidação roda antes da população da rodada finalizar
                 const confrontosCacheFase = dadosTorneio[fase];
                 const cacheFaseTemPontos = Array.isArray(confrontosCacheFase) && confrontosCacheFase.length > 0 &&
                     confrontosCacheFase.every(c =>
-                        typeof c.timeA?.pontos === 'number' && typeof c.timeB?.pontos === 'number'
+                        typeof c.timeA?.pontos === 'number' && c.timeA.pontos !== 0 &&
+                        typeof c.timeB?.pontos === 'number' && c.timeB.pontos !== 0
                     );
 
                 if (cacheFaseTemPontos) {
@@ -1020,4 +1024,4 @@ export async function calcularBracketParaConsolidacao(ligaId, rodadaAtual) {
     return resultados;
 }
 
-logger.log("[MATA-BACKEND] ✅ Módulo v1.3 carregado (consolidação automática de bracket)");
+logger.log("[MATA-BACKEND] ✅ Módulo v1.5 carregado (pontos=0 inválido no cache, fix race condition pré-população)");
