@@ -137,6 +137,11 @@ async function _buscarParciais(ligaId) {
     try {
         const response = await fetchComTimeout(`/api/parciais/${ligaId}`);
         if (!response.ok) {
+            if (response.status === 401) {
+                // ✅ v5.8: Sessão expirada — retornar motivo para que caller possa agir
+                if (window.Log) Log.warn("[PARCIAIS] 🔒 Sessão expirada (401) — parciais indisponíveis");
+                return { disponivel: false, motivo: "sessao_expirada" };
+            }
             if (window.Log) Log.warn(`[PARCIAIS] HTTP ${response.status} ao buscar parciais`);
             return null;
         }

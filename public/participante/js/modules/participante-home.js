@@ -1455,7 +1455,12 @@ async function inicializarParciaisHome(ligaId, timeId, dadosRender) {
         const statusParciais = await ParciaisModule.inicializarParciais(ligaId, timeId);
 
         if (!statusParciais?.disponivel) {
-            if (window.Log) Log.debug("PARTICIPANTE-HOME", "Parciais indisponíveis:", statusParciais?.motivo);
+            // ✅ v5.8: Log diferenciado para sessão expirada vs mercado aberto
+            if (statusParciais?.motivo === "sessao_expirada") {
+                if (window.Log) Log.warn("PARTICIPANTE-HOME", "🔒 Parciais indisponíveis: sessão expirada (401) — relogin necessário para ver parciais ao vivo");
+            } else {
+                if (window.Log) Log.debug("PARTICIPANTE-HOME", "Parciais indisponíveis:", statusParciais?.motivo);
+            }
             parciaisAtivos = false;
             return;
         }

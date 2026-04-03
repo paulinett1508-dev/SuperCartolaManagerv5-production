@@ -84,6 +84,7 @@ class ParticipanteNavigation {
         this._ultimaNavegacao = 0;
         this._debounceMs = 100; // ✅ v3.0: Reduzido para 100ms (super responsivo)
         this._navegacaoEmAndamento = null; // ID da navegação atual (para cancelar se necessário)
+        this._carregandoModulo = null; // ✅ v5.8: Módulo em carregamento ativo (previne double-init)
         this._campinhoTarget = null;
     }
 
@@ -831,9 +832,16 @@ class ParticipanteNavigation {
             return;
         }
 
+        // ✅ v5.8: Prevenir double-init — ignorar se o mesmo módulo já está carregando
+        if (this._carregandoModulo === moduloId && !forcarReload) {
+            if (window.Log) Log.debug('PARTICIPANTE-NAV', `⏸️ Double-init bloqueado: ${moduloId} já em carregamento`);
+            return;
+        }
+
         // Registrar esta navegação
         this._ultimaNavegacao = agora;
         this._navegacaoEmAndamento = navegacaoId;
+        this._carregandoModulo = moduloId;
 
         // ✅ v4.11: Verificação fresca de manutenção para módulos base (fecha gap de 45s do polling)
         // Evita que o participante carregue um módulo bloqueado durante o gap entre ciclos de polling
@@ -981,6 +989,11 @@ class ParticipanteNavigation {
 
             this.mostrarErroCarregamento(container, moduloId, error);
         } finally {
+            // ✅ v5.8: Liberar guard de double-init ao terminar (sucesso ou erro)
+            if (this._carregandoModulo === moduloId) {
+                this._carregandoModulo = null;
+            }
+
             // ✅ v4.2: SEMPRE restaurar opacity e esconder overlays (evita UI travada)
             // ✅ v4.3: Restaurar com transição suave de entrada
             container.style.transition = 'opacity 0.2s ease-out, transform 0.2s ease-out';
