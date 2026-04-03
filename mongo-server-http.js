@@ -230,12 +230,13 @@ function createServer() {
 const app = express();
 app.use(express.json());
 
-// Auth middleware — Bearer token ou header X-MCP-Token
+// Auth middleware — Bearer token, header X-MCP-Token ou query param ?token=
 app.use('/mcp', (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const tokenHeader = req.headers['x-mcp-token'];
+  const tokenQuery = req.query.token;
   const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
-  const token = bearerToken || tokenHeader;
+  const token = bearerToken || tokenHeader || tokenQuery;
 
   if (token !== MCP_SECRET_TOKEN) {
     return res.status(401).json({ error: 'Unauthorized' });
