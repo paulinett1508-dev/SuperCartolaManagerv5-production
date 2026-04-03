@@ -234,10 +234,14 @@ export async function carregarDadosRodada(rodadaSelecionada) {
     mostrarLoading(true);
     limparExportContainer();
 
-    // ✅ v3.1 FIX: Rodada atual com mercado fechado = PARCIAIS (prioridade máxima)
-    // Deve buscar dados ao vivo da API Cartola, não dados históricos do DB
-    if (rodadaSelecionada === rodada_atual && !mercadoAberto) {
-      console.log(`[RODADAS-ORQUESTRADOR] 🔴 Rodada ${rodadaSelecionada} em andamento — carregando parciais`);
+    // ✅ v3.2 FIX: Parciais SOMENTE quando status_mercado === 2 (jogos em andamento)
+    // ou 3 (Cartola processando — DB ainda não tem dado consolidado).
+    // Status 4 (aguardando próxima rodada) = rodada finalizada → usar dados do banco.
+    // Antes: !mercadoAberto capturava status 4 → chamava /atletas/pontuados do Cartola
+    // que retorna vazio/errado após o fim da rodada → "alucinação" de pontos 0.
+    const rodadaAoVivo = status_mercado === 2 || status_mercado === 3;
+    if (rodadaSelecionada === rodada_atual && rodadaAoVivo) {
+      console.log(`[RODADAS-ORQUESTRADOR] 🔴 Rodada ${rodadaSelecionada} em andamento (status=${status_mercado}) — carregando parciais`);
       await carregarRodadaParciais(rodadaSelecionada);
     } else if (rodadaSelecionada === rodada_atual && mercadoAberto) {
       mostrarMensagemRodada(

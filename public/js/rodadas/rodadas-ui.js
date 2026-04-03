@@ -207,10 +207,16 @@ export async function renderizarMiniCardsRodadas() {
         statusClass = "encerrada";
         statusText = "Encerrada";
         isDisabled = false;
-      } else {
-        // Mercado fechado mas jogos em andamento = Parciais
+      } else if (status_mercado === 2 || status_mercado === 3) {
+        // Status 2 = jogos em andamento | Status 3 = Cartola processando
         statusClass = "parcial";
         statusText = "Parciais";
+        isDisabled = false;
+      } else {
+        // Status 4+ = rodada finalizada, aguardando próxima → mostrar como encerrada
+        // Antes: qualquer !mercadoAberto mostrava "Parciais", incluindo status 4
+        statusClass = "encerrada";
+        statusText = "Encerrada";
         isDisabled = false;
       }
     } else {
