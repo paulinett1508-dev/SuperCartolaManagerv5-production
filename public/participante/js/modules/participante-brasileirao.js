@@ -22,31 +22,39 @@ let _visibilityHandler = null;
 const _AUTO_REFRESH_MS = 5 * 60 * 1000; // 5 min
 const _FETCH_TIMEOUT_MS = 8000; // 8s (< 10s do BrasileiraoTabela, < 15s do nav timeout)
 
+// Navegação de rodadas
+let _rodadaExibida = null;   // rodada atualmente visível no card
+let _rodadaAtualRef = null;  // rodada "atual" da temporada (âncora para nav)
+let _temporadaAtual = null;  // temporada carregada
+
 // ═══════════════════════════════════════════════════
 // DADOS ESTÁTICOS — FALLBACK (Série A 2026 — 20 times)
 // ═══════════════════════════════════════════════════
 
+// ATENÇÃO: atualizar a cada temporada conforme promoções/rebaixamentos
+// 2026: Fortaleza, Juventude e Sport foram rebaixados.
+//       Chapecoense, Coritiba e Remo foram promovidos.
 const TIMES_SERIE_A_2026 = [
-    { posicao: 1,  time: 'Palmeiras',           time_id: 275,  sigla: 'PAL' },
-    { posicao: 2,  time: 'Botafogo',            time_id: 263,  sigla: 'BOT' },
-    { posicao: 3,  time: 'Flamengo',            time_id: 262,  sigla: 'FLA' },
-    { posicao: 4,  time: 'Fortaleza',           time_id: 356,  sigla: 'FOR' },
-    { posicao: 5,  time: 'Internacional',        time_id: 285,  sigla: 'INT' },
-    { posicao: 6,  time: 'São Paulo',            time_id: 276,  sigla: 'SAO' },
-    { posicao: 7,  time: 'Bahia',               time_id: 265,  sigla: 'BAH' },
-    { posicao: 8,  time: 'Cruzeiro',            time_id: 283,  sigla: 'CRU' },
-    { posicao: 9,  time: 'Atlético-MG',         time_id: 282,  sigla: 'CAM' },
-    { posicao: 10, time: 'Corinthians',          time_id: 264,  sigla: 'COR' },
-    { posicao: 11, time: 'Vasco da Gama',        time_id: 267,  sigla: 'VAS' },
-    { posicao: 12, time: 'Grêmio',              time_id: 284,  sigla: 'GRE' },
-    { posicao: 13, time: 'Vitória',              time_id: 287,  sigla: 'VIT' },
-    { posicao: 14, time: 'Fluminense',           time_id: 266,  sigla: 'FLU' },
-    { posicao: 15, time: 'Athletico-PR',         time_id: 293,  sigla: 'CAP' },
-    { posicao: 16, time: 'Red Bull Bragantino',  time_id: 280,  sigla: 'RBB' },
-    { posicao: 17, time: 'Juventude',            time_id: 286,  sigla: 'JUV' },
-    { posicao: 18, time: 'Santos',               time_id: 277,  sigla: 'SAN' },
-    { posicao: 19, time: 'Sport',                time_id: 292,  sigla: 'SPT' },
-    { posicao: 20, time: 'Mirassol',             time_id: 2305, sigla: 'MIR' },
+    { posicao: 1,  time: 'Athletico-PR',         time_id: 293,  sigla: 'CAP' },
+    { posicao: 2,  time: 'Atlético-MG',          time_id: 282,  sigla: 'CAM' },
+    { posicao: 3,  time: 'Bahia',                time_id: 265,  sigla: 'BAH' },
+    { posicao: 4,  time: 'Botafogo',             time_id: 263,  sigla: 'BOT' },
+    { posicao: 5,  time: 'Chapecoense',          time_id: 315,  sigla: 'CHA' },
+    { posicao: 6,  time: 'Corinthians',          time_id: 264,  sigla: 'COR' },
+    { posicao: 7,  time: 'Coritiba',             time_id: 294,  sigla: 'CFC' },
+    { posicao: 8,  time: 'Cruzeiro',             time_id: 283,  sigla: 'CRU' },
+    { posicao: 9,  time: 'Flamengo',             time_id: 262,  sigla: 'FLA' },
+    { posicao: 10, time: 'Fluminense',           time_id: 266,  sigla: 'FLU' },
+    { posicao: 11, time: 'Grêmio',              time_id: 284,  sigla: 'GRE' },
+    { posicao: 12, time: 'Internacional',        time_id: 285,  sigla: 'INT' },
+    { posicao: 13, time: 'Mirassol',             time_id: 2305, sigla: 'MIR' },
+    { posicao: 14, time: 'Palmeiras',            time_id: 275,  sigla: 'PAL' },
+    { posicao: 15, time: 'Red Bull Bragantino',  time_id: 280,  sigla: 'RBB' },
+    { posicao: 16, time: 'Remo',                 time_id: 364,  sigla: 'REM' },
+    { posicao: 17, time: 'Santos',               time_id: 277,  sigla: 'SAN' },
+    { posicao: 18, time: 'São Paulo',            time_id: 276,  sigla: 'SAO' },
+    { posicao: 19, time: 'Vasco da Gama',        time_id: 267,  sigla: 'VAS' },
+    { posicao: 20, time: 'Vitória',              time_id: 287,  sigla: 'VIT' },
 ];
 
 const INFO_CAMPEONATO = {
@@ -97,11 +105,19 @@ export async function inicializarBrasileiraoParticipante() {
     window.destruirBrasileiraoParticipante = destruirBrasileiraoParticipante;
 
     try {
+        _temporadaAtual = new Date().getFullYear();
+
         // Carregar dados dinâmicos em paralelo (com timeout defensivo)
         const [apiClassificacao, apiResumo] = await Promise.all([
             _carregarClassificacao(),
             _carregarResumo(),
         ]);
+
+        // Guardar referência da rodada atual para nav prev/next
+        if (apiResumo?.rodada_atual) {
+            _rodadaAtualRef = apiResumo.rodada_atual;
+            _rodadaExibida = apiResumo.rodada_atual;
+        }
 
         // Renderizar — usa fallback se API retornou null
         _renderizarClassificacao(apiClassificacao);
@@ -124,6 +140,9 @@ export function destruirBrasileiraoParticipante() {
     _pararAutoRefresh();
     if (_statusInterval) { clearInterval(_statusInterval); _statusInterval = null; }
     _ultimaAtualizacao = null;
+    _rodadaExibida = null;
+    _rodadaAtualRef = null;
+    _temporadaAtual = null;
 }
 
 // ═══════════════════════════════════════════════════
@@ -247,77 +266,150 @@ function _renderizarClassificacao(apiData) {
 // RENDERIZAÇÃO — JOGOS DA RODADA (dinâmico ou fallback info)
 // ═══════════════════════════════════════════════════
 
+// Constrói HTML de jogos — nomes de times passam por escapeHtml(), placares são números
+function _buildJogosHtml(jogos) {
+    return jogos.map(j => {
+        const statusClass = j.status === 'ao_vivo' ? ' brasileirao-jogo--live' : '';
+        const liveDot = j.status === 'ao_vivo' ? '<span class="brasileirao-live-dot"></span>' : '';
+        const gm = Number.isInteger(j.placar_mandante) ? j.placar_mandante : null;
+        const gv = Number.isInteger(j.placar_visitante) ? j.placar_visitante : null;
+        const placar = (gm !== null && gv !== null)
+            ? `${gm} x ${gv}`
+            : escapeHtml(j.horario || 'A definir');
+        return `<div class="brasileirao-jogo-card${statusClass}">
+            ${liveDot}
+            <span class="brasileirao-jogo-time">${escapeHtml(j.mandante || '')}</span>
+            <span class="brasileirao-jogo-placar">${placar}</span>
+            <span class="brasileirao-jogo-time">${escapeHtml(j.visitante || '')}</span>
+        </div>`;
+    }).join('');
+}
+
+// Constrói card de rodada com navegação prev/next
+function _buildRodadaCard(rodada, jogos, isAtual) {
+    const rodadaNum = Number(rodada) || 1;
+    const todosEncerrados = jogos.length > 0 && jogos.every(j => j.status === 'encerrado');
+    const temAoVivo = jogos.some(j => j.status === 'ao_vivo');
+
+    let badgeClass, badgeLabel;
+    if (temAoVivo) {
+        badgeClass = 'brasileirao-rodada-status-badge--atual';
+        badgeLabel = 'AO VIVO';
+    } else if (todosEncerrados) {
+        badgeClass = 'brasileirao-rodada-status-badge--encerrada';
+        badgeLabel = 'ENCERRADA';
+    } else if (isAtual) {
+        badgeClass = 'brasileirao-rodada-status-badge--atual';
+        badgeLabel = 'ATUAL';
+    } else {
+        badgeClass = 'brasileirao-rodada-status-badge--futura';
+        badgeLabel = 'PRÓXIMA';
+    }
+
+    const prevDisabled = rodadaNum <= 1 ? 'disabled' : '';
+    const nextDisabled = rodadaNum >= 38 ? 'disabled' : '';
+
+    return `<div class="brasileirao-rodada-card">
+        <div class="brasileirao-rodada-header">
+            <span class="material-icons" style="color: var(--app-success-light); font-size: 1rem;">sports_soccer</span>
+            <div class="brasileirao-rodada-nav">
+                <button class="brasileirao-rodada-nav-btn" id="brasileirao-nav-prev" aria-label="Rodada anterior" ${prevDisabled}>
+                    <span class="material-icons">chevron_left</span>
+                </button>
+                <span class="brasileirao-rodada-nav-label">
+                    Rodada ${rodadaNum}
+                    <span class="brasileirao-rodada-status-badge ${badgeClass}">${badgeLabel}</span>
+                </span>
+                <button class="brasileirao-rodada-nav-btn" id="brasileirao-nav-next" aria-label="Pr\u00f3xima rodada" ${nextDisabled}>
+                    <span class="material-icons">chevron_right</span>
+                </button>
+            </div>
+        </div>
+        <div class="brasileirao-jogos-lista">${_buildJogosHtml(jogos)}</div>
+    </div>`;
+}
+
+function _setupNavButtons() {
+    const btnPrev = document.getElementById('brasileirao-nav-prev');
+    const btnNext = document.getElementById('brasileirao-nav-next');
+    if (btnPrev) btnPrev.addEventListener('click', () => _navegarRodada((_rodadaExibida || 1) - 1));
+    if (btnNext) btnNext.addEventListener('click', () => _navegarRodada((_rodadaExibida || 1) + 1));
+}
+
+async function _navegarRodada(novaRodada) {
+    if (!_temporadaAtual || novaRodada < 1 || novaRodada > 38) return;
+    const container = document.getElementById('brasileirao-tabela-container');
+    if (!container) return;
+
+    const btnPrev = document.getElementById('brasileirao-nav-prev');
+    const btnNext = document.getElementById('brasileirao-nav-next');
+    if (btnPrev) btnPrev.disabled = true;
+    if (btnNext) btnNext.disabled = true;
+
+    try {
+        const res = await _fetchComTimeout(`/api/brasileirao/rodada/${_temporadaAtual}/${novaRodada}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (!data.success || !data.rodada) throw new Error('sem dados');
+
+        _rodadaExibida = novaRodada;
+        const jogos = data.rodada.partidas || [];
+        const isAtual = novaRodada === _rodadaAtualRef;
+        container.innerHTML = _buildRodadaCard(novaRodada, jogos, isAtual);
+        _setupNavButtons();
+    } catch (err) {
+        if (window.Log) Log.warn('BRASILEIRAO-LP', `Erro ao navegar rodada ${novaRodada}:`, err.message);
+        if (btnPrev) btnPrev.disabled = novaRodada <= 1;
+        if (btnNext) btnNext.disabled = novaRodada >= 38;
+    }
+}
+
 function _renderizarJogosRodada(apiData) {
     const container = document.getElementById('brasileirao-tabela-container');
     if (!container) return;
 
     if (apiData && apiData.jogos_rodada_atual && apiData.jogos_rodada_atual.length > 0) {
-        // Renderizar jogos reais
-        const rodada = apiData.rodada_atual || '?';
-        const jogosHtml = apiData.jogos_rodada_atual.map(j => {
-            const statusClass = j.status === 'ao_vivo' ? ' brasileirao-jogo--live' : '';
-            const liveDot = j.status === 'ao_vivo' ? '<span class="brasileirao-live-dot"></span>' : '';
-            const placar = j.placar_mandante !== null && j.placar_mandante !== undefined
-                ? `${j.placar_mandante} x ${j.placar_visitante}`
-                : j.horario || 'A definir';
-
-            return `<div class="brasileirao-jogo-card${statusClass}">
-                ${liveDot}
-                <span class="brasileirao-jogo-time">${escapeHtml(j.mandante)}</span>
-                <span class="brasileirao-jogo-placar">${placar}</span>
-                <span class="brasileirao-jogo-time">${escapeHtml(j.visitante)}</span>
-            </div>`;
-        }).join('');
-
-        container.innerHTML = `
-            <div class="brasileirao-rodada-card">
-                <div class="brasileirao-rodada-header">
-                    <span class="material-icons" style="color: var(--app-success-light); font-size: 1rem;">sports_soccer</span>
-                    <span>Rodada ${rodada}</span>
-                </div>
-                <div class="brasileirao-jogos-lista">${jogosHtml}</div>
-            </div>
-        `;
+        const rodada = apiData.rodada_atual || 1;
+        container.innerHTML = _buildRodadaCard(rodada, apiData.jogos_rodada_atual, true);
+        _setupNavButtons();
     } else {
-        // Fallback: info do campeonato (mesmo padrão das fases do Copa-NE/Copa-BR)
-        container.innerHTML = `
-            <div class="brasileirao-info-card">
-                <div class="brasileirao-info-header">
-                    <span class="material-icons" style="color: var(--app-success-light); font-size: 1rem;">info</span>
-                    <span>Sobre o Campeonato</span>
+        // Fallback: info do campeonato
+        container.innerHTML = `<div class="brasileirao-info-card">
+            <div class="brasileirao-info-header">
+                <span class="material-icons" style="color: var(--app-success-light); font-size: 1rem;">info</span>
+                <span>Sobre o Campeonato</span>
+            </div>
+            <div class="brasileirao-info-items">
+                <div class="brasileirao-info-item">
+                    <span class="material-icons">calendar_month</span>
+                    <div>
+                        <p class="brasileirao-info-label">Per\u00edodo</p>
+                        <p class="brasileirao-info-value">${escapeHtml(INFO_CAMPEONATO.inicio)} a ${escapeHtml(INFO_CAMPEONATO.termino)}</p>
+                    </div>
                 </div>
-                <div class="brasileirao-info-items">
-                    <div class="brasileirao-info-item">
-                        <span class="material-icons">calendar_month</span>
-                        <div>
-                            <p class="brasileirao-info-label">Período</p>
-                            <p class="brasileirao-info-value">${INFO_CAMPEONATO.inicio} a ${INFO_CAMPEONATO.termino}</p>
-                        </div>
+                <div class="brasileirao-info-item">
+                    <span class="material-icons">format_list_numbered</span>
+                    <div>
+                        <p class="brasileirao-info-label">Formato</p>
+                        <p class="brasileirao-info-value">${escapeHtml(INFO_CAMPEONATO.formato)}</p>
                     </div>
-                    <div class="brasileirao-info-item">
-                        <span class="material-icons">format_list_numbered</span>
-                        <div>
-                            <p class="brasileirao-info-label">Formato</p>
-                            <p class="brasileirao-info-value">${INFO_CAMPEONATO.formato}</p>
-                        </div>
+                </div>
+                <div class="brasileirao-info-item">
+                    <span class="material-icons">emoji_events</span>
+                    <div>
+                        <p class="brasileirao-info-label">Libertadores</p>
+                        <p class="brasileirao-info-value">${escapeHtml(INFO_CAMPEONATO.vagas_liberta)}</p>
                     </div>
-                    <div class="brasileirao-info-item">
-                        <span class="material-icons">emoji_events</span>
-                        <div>
-                            <p class="brasileirao-info-label">Libertadores</p>
-                            <p class="brasileirao-info-value">${INFO_CAMPEONATO.vagas_liberta}</p>
-                        </div>
-                    </div>
-                    <div class="brasileirao-info-item">
-                        <span class="material-icons">trending_down</span>
-                        <div>
-                            <p class="brasileirao-info-label">Rebaixamento</p>
-                            <p class="brasileirao-info-value">${INFO_CAMPEONATO.rebaixamento}</p>
-                        </div>
+                </div>
+                <div class="brasileirao-info-item">
+                    <span class="material-icons">trending_down</span>
+                    <div>
+                        <p class="brasileirao-info-label">Rebaixamento</p>
+                        <p class="brasileirao-info-value">${escapeHtml(INFO_CAMPEONATO.rebaixamento)}</p>
                     </div>
                 </div>
             </div>
-        `;
+        </div>`;
     }
 }
 
@@ -353,6 +445,10 @@ function _setupRefreshButton() {
                 _carregarClassificacao(),
                 _carregarResumo(),
             ]);
+            if (apiResumo?.rodada_atual) {
+                _rodadaAtualRef = apiResumo.rodada_atual;
+                _rodadaExibida = apiResumo.rodada_atual;
+            }
             _renderizarClassificacao(apiClassificacao);
             _renderizarJogosRodada(apiResumo);
             _ultimaAtualizacao = Date.now();
@@ -389,7 +485,14 @@ async function _atualizarDados() {
             _carregarResumo(),
         ]);
         if (apiClassificacao) _renderizarClassificacao(apiClassificacao);
-        if (apiResumo) _renderizarJogosRodada(apiResumo);
+        // Só atualiza a rodada visível se o usuário estiver na rodada atual
+        if (apiResumo) {
+            if (apiResumo.rodada_atual) _rodadaAtualRef = apiResumo.rodada_atual;
+            if (_rodadaExibida === _rodadaAtualRef || _rodadaExibida === null) {
+                if (apiResumo.rodada_atual) _rodadaExibida = apiResumo.rodada_atual;
+                _renderizarJogosRodada(apiResumo);
+            }
+        }
         _ultimaAtualizacao = Date.now();
         _atualizarStatus();
     } catch (err) {

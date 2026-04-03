@@ -409,6 +409,12 @@
         "description": "Landing Page da Copa do Brasil 2026 — hero, countdown, notícias, timeline de fases. Namespace copabr-*. Usa tokens --app-copabr-*"
       },
       {
+        "path": "public/participante/css/brasileirao-lp.css",
+        "loadedBy": ["participante/fronts/brasileirao.html (inline <link>)"],
+        "description": "Landing Page do Brasileirão Série A — hero, classificação, navegação de rodadas (prev/next). Namespace .brasileirao-lp-*, .brasileirao-class-*, .brasileirao-rodada-*, .brasileirao-jogo-*, .brasileirao-rodada-nav-*. Usa tokens --app-success-*, --app-surface, --app-border, --app-text-*",
+        "moduleColor": "--app-success (verde-campo)"
+      },
+      {
         "path": "public/participante/css/brasileirao-tabela.css",
         "loadedBy": ["participante/index.html"],
         "description": "Faixa Tabela do Brasileirão colapsável (Landing Page style). Namespace .brasileirao-*",

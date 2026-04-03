@@ -314,3 +314,48 @@
     font-size: 0.75rem; color: var(--app-text-secondary, rgba(255,255,255,0.75));
     margin: 2px 0 0; font-family: var(--app-font-base, 'Inter', sans-serif);
 }
+
+/* ═══════════════════════════════════════════════════
+   NAVEGAÇÃO ENTRE RODADAS
+   ═══════════════════════════════════════════════════ */
+.brasileirao-rodada-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    flex: 1;
+}
+.brasileirao-rodada-nav-btn {
+    background: none; border: none; padding: 0.2rem 0.35rem;
+    cursor: pointer; color: var(--app-text-dim, rgba(255,255,255,0.4));
+    border-radius: var(--app-radius-sm, 4px); transition: color 0.15s, background 0.15s;
+    display: flex; align-items: center;
+}
+.brasileirao-rodada-nav-btn:hover:not(:disabled) {
+    color: var(--app-success-light, #22c55e);
+    background: var(--app-success-muted, rgba(16,185,129,0.1));
+}
+.brasileirao-rodada-nav-btn:disabled {
+    opacity: 0.25; cursor: default;
+}
+.brasileirao-rodada-nav-btn .material-icons { font-size: 1rem; }
+.brasileirao-rodada-nav-label {
+    font-size: 0.8rem; font-weight: 600;
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    color: var(--app-text-primary, #fff);
+}
+.brasileirao-rodada-status-badge {
+    font-size: 0.55rem; font-weight: 600; letter-spacing: 0.05em;
+    padding: 1px 6px; border-radius: 99px; margin-left: 0.4rem;
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    vertical-align: middle;
+}
+.brasileirao-rodada-status-badge--encerrada {
+    background: rgba(255,255,255,0.07);
+    color: var(--app-text-dim, rgba(255,255,255,0.4));
+}
+.brasileirao-rodada-status-badge--atual {
+    background: var(--app-success-muted, rgba(16,185,129,0.15));
+    color: var(--app-success-light, #22c55e);
+}
+.brasileirao-rodada-status-badge--futura {
+    background: var(--app-info-muted, rgba(59,130,246,0.12));
+    color: var(--app-info-light, #60a5fa);
+}

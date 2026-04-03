@@ -57,10 +57,12 @@ const TIMES_CARTOLA_MAP = {
     'cuiaba': 1371,
     'cuiabá': 1371,
     'mirassol': 2305,
-    'coritiba': 270,
+    'coritiba': 294,
     'america mineiro': 273,
     'américa-mg': 273,
-    'chapecoense': 274,
+    'chapecoense': 315,
+    'clube do remo': 364,
+    'remo': 364,
     'novorizontino': 315,
 };
 
@@ -153,31 +155,31 @@ function formatarHora(dataISO) {
 // =====================================================================
 
 // Mapeamento ESPN displayName → ID Cartola (Série A 2026 — 20 times)
+// ATENÇÃO: atualizar a cada temporada conforme promoções/rebaixamentos
 const TIMES_ESPN_MAP = {
-    'Athletico-PR':       293,
-    'Athletico Paranaense': 293,
-    'Atlético-MG':        282,
-    'Atlético Mineiro':   282,
-    'Bahia':              265,
-    'Botafogo':           263,
-    'Corinthians':        264,
-    'Cruzeiro':           283,
-    'Flamengo':           262,
-    'Fluminense':         266,
-    'Fortaleza':          356,
-    'Grêmio':             284,
-    'Internacional':      285,
-    'Juventude':          286,
-    'Mirassol':           2305,
-    'Palmeiras':          275,
-    'Red Bull Bragantino': 280,
-    'RB Bragantino':      280,
-    'Santos':             277,
-    'São Paulo':          276,
-    'Sport':              292,
-    'Sport Recife':       292,
-    'Vasco da Gama':      267,
-    'Vitória':            287,
+    'Athletico-PR':          293,
+    'Athletico Paranaense':  293,
+    'Atlético-MG':           282,
+    'Atlético Mineiro':      282,
+    'Bahia':                 265,
+    'Botafogo':              263,
+    'Chapecoense':           315, // promovido para Série A 2026
+    'Corinthians':           264,
+    'Coritiba':              294, // promovido para Série A 2026
+    'Cruzeiro':              283,
+    'Flamengo':              262,
+    'Fluminense':            266,
+    'Grêmio':                284,
+    'Internacional':         285,
+    'Mirassol':              2305,
+    'Palmeiras':             275,
+    'Red Bull Bragantino':   280,
+    'RB Bragantino':         280,
+    'Remo':                  364, // promovido para Série A 2026
+    'Santos':                277,
+    'São Paulo':             276,
+    'Vasco da Gama':         267,
+    'Vitória':               287,
 };
 
 /**
