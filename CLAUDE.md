@@ -213,6 +213,11 @@ Detalhes: [`docs/references/resta-um.md`](docs/references/resta-um.md)
 - **Renovação Temporada:** [`docs/SISTEMA-RENOVACAO-TEMPORADA.md`](docs/SISTEMA-RENOVACAO-TEMPORADA.md)
 - **Pré-Temporada:** detectar com `temporadaSelecionada > mercadoData.temporada`
 
+## Setup & Clone
+
+Após qualquer clone: `npm run setup` → preencher `.env` e `.mcp.json` → `npm run dev`.
+Detalhes completos: [`docs/references/setup-clone.md`](docs/references/setup-clone.md)
+
 ## Deploy (GitHub Actions → VPS)
 
 Push para `main` dispara deploy automático via `.github/workflows/main.yml`:
