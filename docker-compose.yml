@@ -58,9 +58,6 @@ services:
       dockerfile: Dockerfile.mcp
     container_name: scm-mcp
     env_file: .env.prod
-    environment:
-      MCP_SECRET_TOKEN: "${MCP_SECRET_TOKEN}"
-      MCP_PORT: "3099"
     ports:
       - "127.0.0.1:3099:3099"
     restart: unless-stopped
