@@ -529,7 +529,18 @@ async function calcularRodadaComParciais(
         // PRIORIDADE 1: Usar bracket extraído do cache salvo pelo admin (fonte da verdade absoluta).
         // PRIORIDADE 2: Fallback para liga.participantes APENAS se não há nenhum cache anterior.
         let jogosDaRodada;
-        const listaIdsDoCache = extrairOrdemDoCache(dadosExistentes);
+        let listaIdsDoCache = extrairOrdemDoCache(dadosExistentes);
+
+        // ✅ Detecção de divergência: participante adicionado após bracket gerado
+        if (listaIdsDoCache) {
+            const idsAtivos = new Set(times.filter(t => t.ativo !== false).map(t => String(t.time_id)));
+            const idsDoBracket = new Set(listaIdsDoCache.map(String));
+            const ausentes = [...idsAtivos].filter(id => !idsDoBracket.has(id));
+            if (ausentes.length > 0) {
+                logger.warn(`[PONTOS-CORRIDOS] ⚠️ BRACKET DESATUALIZADO: ${ausentes.length} participante(s) ativo(s) ausente(s) no bracket cacheado. IDs: [${ausentes.join(', ')}]. Forçando regeneração a partir de liga.participantes.`);
+                listaIdsDoCache = null; // Invalida cache → fallback para gerarConfrontos
+            }
+        }
 
         if (listaIdsDoCache) {
             // ✅ Usa o bracket do admin — garante que os confrontos do app = confrontos do admin
@@ -751,9 +762,20 @@ async function reconstruirCacheDeRodadas(ligaId, temporada, config, timesMap) {
             .sort({ rodada_consolidada: 1 })
             .lean();
 
-        const listaIdsDoCache = extrairOrdemDoCache(
+        let listaIdsDoCache = extrairOrdemDoCache(
             cachesExistentes.map(c => ({ rodada: c.rodada_consolidada, confrontos: c.confrontos }))
         );
+
+        // ✅ Detecção de divergência: participante adicionado após bracket gerado
+        if (listaIdsDoCache) {
+            const idsAtivos = new Set(times.filter(t => t.ativo !== false).map(t => String(t.time_id)));
+            const idsDoBracket = new Set(listaIdsDoCache.map(String));
+            const ausentes = [...idsAtivos].filter(id => !idsDoBracket.has(id));
+            if (ausentes.length > 0) {
+                logger.warn(`[PONTOS-CORRIDOS] ⚠️ BRACKET DESATUALIZADO (reconstrução): ${ausentes.length} participante(s) ausente(s). IDs: [${ausentes.join(', ')}]. Forçando regeneração.`);
+                listaIdsDoCache = null;
+            }
+        }
 
         let confrontosBase;
         if (listaIdsDoCache) {
