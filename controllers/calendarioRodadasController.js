@@ -332,10 +332,154 @@ export const importarDoAPI = async (req, res) => {
     }
 };
 
+// =====================================================================
+// GET /api/calendario-rodadas/status-atual
+// Fonte canônica de rodada_atual + status_mercado baseada no calendário
+// Substitui dependência direta do campo status_mercado da API Cartola
+// =====================================================================
+export const statusAtual = async (req, res) => {
+    try {
+        const temporada = req.query.temporada || new Date().getFullYear();
+        const status = await CalendarioRodada.obterStatusAtual(Number(temporada));
+
+        if (!status) {
+            return res.json({
+                success: false,
+                disponivel: false,
+                mensagem: 'Calendário não populado para esta temporada',
+                temporada: Number(temporada)
+            });
+        }
+
+        res.json({
+            success: true,
+            disponivel: true,
+            rodada_atual: status.rodada_atual,
+            status_mercado: status.status_mercado,
+            fonte: status.fonte,
+            temporada: Number(temporada)
+        });
+    } catch (error) {
+        console.error('[CALENDARIO-CONTROLLER] Erro ao obter status atual:', error);
+        res.status(500).json({
+            success: false,
+            mensagem: 'Erro ao obter status atual',
+            error: error.message
+        });
+    }
+};
+
+// =====================================================================
+// POST /api/calendario-rodadas/importar-temporada/:temporada
+// Importa TODAS as rodadas da temporada via API-Football (admin)
+// Rodadas já existentes são atualizadas (upsert)
+// =====================================================================
+export const importarTemporada = async (req, res) => {
+    try {
+        const { temporada } = req.params;
+        const liga = parseInt(req.query.liga) || 71; // 71 = Brasileirão A
+        const rodadaInicio = parseInt(req.query.inicio) || 1;
+        const rodadaFim = parseInt(req.query.fim) || 38;
+
+        const quotaInfo = apiFootball.getQuotaInfo();
+        if (!quotaInfo.enabled) {
+            return res.status(503).json({
+                success: false,
+                mensagem: 'API-Football não configurada. Configure a variável API_FOOTBALL_KEY.'
+            });
+        }
+
+        const resultados = [];
+        let importadas = 0;
+        let erros = 0;
+
+        for (let rodada = rodadaInicio; rodada <= rodadaFim; rodada++) {
+            try {
+                const resultado = await apiFootball.buscarFixturesPorRodada(rodada, liga);
+
+                if (!resultado?.success || !Array.isArray(resultado.data?.response)) {
+                    resultados.push({ rodada, status: 'sem_dados' });
+                    continue;
+                }
+
+                const fixtures = resultado.data.response;
+                if (!fixtures.length) {
+                    resultados.push({ rodada, status: 'sem_partidas' });
+                    continue;
+                }
+
+                const partidas = fixtures.map(f => {
+                    const dataISO = f.fixture?.date;
+                    let data = '', horario = '';
+                    if (dataISO) {
+                        const dt = new Date(dataISO);
+                        data = dt.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+                        horario = dt.toLocaleTimeString('pt-BR', {
+                            timeZone: 'America/Sao_Paulo',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                    }
+                    const statusShort = f.fixture?.status?.short || 'NS';
+                    let status = 'agendado';
+                    if (['1H','2H','HT','ET','P','BT','LIVE'].includes(statusShort)) status = 'ao_vivo';
+                    else if (['FT','AET','PEN'].includes(statusShort)) status = 'encerrado';
+                    else if (['PST','CANC','ABD','WO'].includes(statusShort)) status = 'cancelado';
+                    return {
+                        data, horario,
+                        time_casa: f.teams?.home?.name || 'TBD',
+                        time_fora: f.teams?.away?.name || 'TBD',
+                        clube_casa_id: f.teams?.home?.id || null,
+                        clube_fora_id: f.teams?.away?.id || null,
+                        status,
+                        fonte: 'api-football'
+                    };
+                }).filter(p => p.data && p.horario);
+
+                if (!partidas.length) {
+                    resultados.push({ rodada, status: 'sem_data_valida' });
+                    continue;
+                }
+
+                await CalendarioRodada.findOneAndUpdate(
+                    { temporada: Number(temporada), rodada },
+                    { temporada: Number(temporada), rodada, partidas, fonte_principal: 'api-football', atualizado_em: new Date() },
+                    { upsert: true, new: true }
+                );
+
+                resultados.push({ rodada, status: 'importada', partidas: partidas.length });
+                importadas++;
+            } catch (err) {
+                resultados.push({ rodada, status: 'erro', erro: err.message });
+                erros++;
+            }
+        }
+
+        res.json({
+            success: true,
+            temporada: Number(temporada),
+            liga,
+            importadas,
+            erros,
+            total: rodadaFim - rodadaInicio + 1,
+            resultados
+        });
+    } catch (error) {
+        console.error('[CALENDARIO-CONTROLLER] Erro ao importar temporada:', error);
+        res.status(500).json({
+            success: false,
+            mensagem: 'Erro ao importar temporada',
+            error: error.message
+        });
+    }
+};
+
 export default {
     buscarCalendario,
     verificarStatus,
     salvarCalendario,
     atualizarStatusPartida,
-    importarDoAPI
+    importarDoAPI,
+    statusAtual,
+    importarTemporada
 };

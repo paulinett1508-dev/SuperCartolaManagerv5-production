@@ -6,6 +6,8 @@
 import express from 'express';
 import calendarioController from '../controllers/calendarioRodadasController.js';
 import { verificarAdmin } from '../middleware/auth.js';
+// statusAtual e importarTemporada exportados nomeadamente no controller
+import { statusAtual, importarTemporada } from '../controllers/calendarioRodadasController.js';
 
 const router = express.Router();
 
@@ -45,5 +47,15 @@ router.post(
     verificarAdmin,
     calendarioController.importarDoAPI
 );
+
+// GET /api/calendario-rodadas/status-atual
+// Fonte canônica de rodada_atual + status_mercado baseada no calendário
+// Query param opcional: ?temporada=2026
+router.get('/status-atual', statusAtual);
+
+// POST /api/calendario-rodadas/importar-temporada/:temporada
+// Importa todas as rodadas da temporada via API-Football (admin)
+// Query params opcionais: ?liga=71&inicio=1&fim=38
+router.post('/importar-temporada/:temporada', verificarAdmin, importarTemporada);
 
 export default router;

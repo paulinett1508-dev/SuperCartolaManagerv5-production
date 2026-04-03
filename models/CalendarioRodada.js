@@ -151,6 +151,64 @@ calendarioRodadaSchema.methods.calcularProximoDisparo = function() {
     return dataDisparo;
 };
 
+// =====================================================================
+// STATIC: Determinar rodada atual e status_mercado a partir do calendário
+// Substitui a dependência do campo status_mercado da API Cartola
+//
+// Retorna: { rodada_atual, status_mercado, fonte: 'calendario' } ou null
+//
+// Lógica de status_mercado (espelha a convenção Cartola FC):
+//   1 = mercado aberto     (antes do primeiro jogo da rodada)
+//   2 = rodada em andamento (entre o primeiro e o último jogo + 2h30)
+//   4 = rodada encerrada   (após o último jogo + 2h30)
+// =====================================================================
+calendarioRodadaSchema.statics.obterStatusAtual = async function(temporada) {
+    const agora = new Date();
+    const MARGEM_MS = 150 * 60 * 1000; // 2h30 após o último jogo
+
+    const rodadas = await this.find({ temporada: Number(temporada) })
+        .sort({ rodada: 1 })
+        .lean();
+
+    if (!rodadas.length) return null;
+
+    // Para cada rodada, calcular janela [inicioJanela, fimJanela]
+    const janelas = rodadas
+        .map(r => {
+            const dts = r.partidas
+                .filter(p => p.status !== 'cancelado' && p.status !== 'adiado')
+                .map(p => new Date(`${p.data}T${p.horario}:00-03:00`))
+                .filter(d => !isNaN(d));
+
+            if (!dts.length) return null;
+
+            return {
+                rodada: r.rodada,
+                inicio: new Date(Math.min(...dts)),
+                fim:    new Date(Math.max(...dts) + MARGEM_MS),
+            };
+        })
+        .filter(Boolean);
+
+    if (!janelas.length) return null;
+
+    // 1. Rodada em andamento agora?
+    const emAndamento = janelas.find(j => agora >= j.inicio && agora <= j.fim);
+    if (emAndamento) {
+        return { rodada_atual: emAndamento.rodada, status_mercado: 2, fonte: 'calendario' };
+    }
+
+    // 2. Próxima rodada futura?
+    const proximas = janelas.filter(j => agora < j.inicio).sort((a, b) => a.inicio - b.inicio);
+    if (proximas.length) {
+        return { rodada_atual: proximas[0].rodada, status_mercado: 1, fonte: 'calendario' };
+    }
+
+    // 3. Todas encerradas → retorna a última
+    const ultima = janelas[janelas.length - 1];
+    return { rodada_atual: ultima.rodada, status_mercado: 4, fonte: 'calendario' };
+};
+
 const CalendarioRodada = mongoose.model('CalendarioRodada', calendarioRodadaSchema);
 
 export default CalendarioRodada;
