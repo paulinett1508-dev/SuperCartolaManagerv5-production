@@ -369,6 +369,12 @@
         "moduleColor": "--app-restaum-*"
       },
       {
+        "path": "public/participante/css/pontos-corridos.css",
+        "loadedBy": ["participante/index.html"],
+        "description": "Modulo Pontos Corridos — card Seu Desempenho collapsible, destaque jogo do participante (.pc-meu-jogo), BYE banner (.pc-bye-banner)",
+        "features": ["collapsible-card", "participant-game-highlight", "bye-banner"]
+      },
+      {
         "path": "public/participante/css/module-lp.css",
         "loadedBy": ["participante/index.html"],
         "description": "Module slim strip 56px + flat accordions. Per-module color scoping via --lp-primary. Light mode support.",

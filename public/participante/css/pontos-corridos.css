@@ -1,0 +1,352 @@
+/**
+ * pontos-corridos.css — CSS Module
+ * Módulo Pontos Corridos — App Participante (Mobile PWA)
+ * Inclui: card "Seu Desempenho" collapsible, destaque do jogo do
+ *         participante, BYE banner de folga.
+ * Dependência: _app-tokens.css (carregado antes)
+ * Carregado por: public/participante/index.html
+ */
+
+/* ============================================================
+   CARD "SEU DESEMPENHO" — COLLAPSIBLE
+   ============================================================ */
+
+.pc-card-desempenho-wrap {
+    background: var(--app-surface);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--app-radius-lg);
+    overflow: hidden;
+}
+
+/* Header clicável — pill strip */
+.pc-desempenho-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 14px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    border-left: 3px solid var(--app-primary);
+    transition: background var(--app-transition-fast);
+}
+
+.pc-desempenho-header:active {
+    background: var(--app-primary-muted);
+}
+
+/* Lado esquerdo do header */
+.pc-desempenho-header-left {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.pc-desempenho-header-icon {
+    font-size: 17px !important;
+    color: var(--app-primary);
+    flex-shrink: 0;
+}
+
+.pc-desempenho-header-title {
+    font-family: var(--app-font-base);
+    font-size: var(--app-font-sm);   /* 11px */
+    font-weight: var(--app-font-semibold);
+    color: var(--app-text-primary);
+    letter-spacing: 0.2px;
+}
+
+/* Lado direito do header — pills de resumo */
+.pc-desempenho-header-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pc-desempenho-pos-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 42px;
+    padding: 2px 7px;
+    border-radius: var(--app-radius-full);
+    font-family: var(--app-font-base);
+    font-size: 10px;
+    font-weight: var(--app-font-bold);
+    letter-spacing: 0.3px;
+    line-height: 1.6;
+}
+
+.pc-desempenho-pos-badge.pos-1  { background: rgba(255, 215, 0, 0.18); color: var(--app-gold); border: 1px solid rgba(255, 215, 0, 0.3); }
+.pc-desempenho-pos-badge.pos-top3 { background: rgba(16, 185, 129, 0.15); color: var(--app-success); border: 1px solid rgba(16, 185, 129, 0.25); }
+.pc-desempenho-pos-badge.pos-mid  { background: rgba(59, 130, 246, 0.15); color: var(--app-info); border: 1px solid rgba(59, 130, 246, 0.25); }
+.pc-desempenho-pos-badge.pos-low  { background: rgba(255, 255, 255, 0.07); color: var(--app-text-muted); border: 1px solid rgba(255, 255, 255, 0.1); }
+
+.pc-desempenho-ved-summary {
+    font-family: var(--app-font-base);
+    font-size: 10px;
+    font-weight: var(--app-font-medium);
+    color: var(--app-text-dim);
+    white-space: nowrap;
+}
+
+.pc-desempenho-ved-summary .v { color: var(--app-success); font-weight: var(--app-font-bold); }
+.pc-desempenho-ved-summary .e { color: var(--app-warning); font-weight: var(--app-font-bold); }
+.pc-desempenho-ved-summary .d { color: var(--app-danger); font-weight: var(--app-font-bold); }
+
+.pc-desempenho-chevron {
+    font-size: 18px !important;
+    color: var(--app-text-dim);
+    transition: transform var(--app-transition-bounce);
+    flex-shrink: 0;
+}
+
+.pc-desempenho-chevron.expanded {
+    transform: rotate(180deg);
+}
+
+/* ---- Corpo colapsável ---- */
+.pc-desempenho-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 320ms cubic-bezier(0.4, 0, 0.2, 1);
+    border-top: 0px solid transparent;
+    transition: max-height 320ms cubic-bezier(0.4, 0, 0.2, 1),
+                border-top-width 320ms ease;
+}
+
+.pc-desempenho-body.expanded {
+    max-height: 360px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Stats grid 4-colunas dentro do body */
+.pc-desempenho-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.pc-desempenho-stat-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 6px 10px;
+    position: relative;
+}
+
+.pc-desempenho-stat-cell + .pc-desempenho-stat-cell::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 20%;
+    height: 60%;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.pc-desempenho-stat-icon {
+    font-size: 16px !important;
+    margin-bottom: 3px;
+}
+
+.pc-desempenho-stat-value {
+    font-family: var(--app-font-mono);
+    font-size: var(--app-font-lg);   /* 16px */
+    font-weight: var(--app-font-bold);
+    color: var(--app-text-primary);
+    line-height: 1.1;
+}
+
+.pc-desempenho-stat-label {
+    font-family: var(--app-font-base);
+    font-size: 8px;
+    font-weight: var(--app-font-semibold);
+    color: var(--app-text-disabled);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+}
+
+/* Progress bar aproveitamento */
+.pc-desempenho-progress-area {
+    padding: 10px 14px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.pc-desempenho-progress-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pc-desempenho-progress-label {
+    font-family: var(--app-font-base);
+    font-size: 10px;
+    font-weight: var(--app-font-semibold);
+    color: var(--app-text-dim);
+    white-space: nowrap;
+    min-width: 72px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pc-desempenho-progress-label .mat-icon {
+    font-size: 13px !important;
+}
+
+.pc-desempenho-bar-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: var(--app-radius-full);
+    overflow: hidden;
+}
+
+.pc-desempenho-bar-fill {
+    height: 100%;
+    border-radius: var(--app-radius-full);
+    background: linear-gradient(90deg, var(--app-success) 0%, var(--app-success-light) 100%);
+    transition: width 600ms cubic-bezier(0.4, 0, 0.2, 1) 80ms;
+}
+
+.pc-desempenho-progress-pct {
+    font-family: var(--app-font-mono);
+    font-size: 10px;
+    font-weight: var(--app-font-bold);
+    color: var(--app-success);
+    min-width: 32px;
+    text-align: right;
+}
+
+/* Footer saldo */
+.pc-desempenho-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+}
+
+.pc-desempenho-footer-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--app-font-base);
+    font-size: 10px;
+    color: var(--app-text-disabled);
+}
+
+.pc-desempenho-footer-label .mat-icon {
+    font-size: 13px !important;
+}
+
+.pc-desempenho-saldo {
+    font-family: var(--app-font-mono);
+    font-size: var(--app-font-sm);
+    font-weight: var(--app-font-bold);
+}
+
+.pc-desempenho-saldo.positivo { color: var(--app-success); }
+.pc-desempenho-saldo.negativo { color: var(--app-danger); }
+
+
+/* ============================================================
+   CONFRONTO — DESTAQUE JOGO DO PARTICIPANTE
+   ============================================================ */
+
+.pc-meu-jogo {
+    border-left: 3px solid var(--app-primary) !important;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 85, 0, 0.07) 0%,
+        transparent 70%
+    ) !important;
+    position: relative;
+}
+
+.pc-meu-jogo-badge {
+    position: absolute;
+    top: 5px;
+    right: 62px;       /* evita sobreposição com coluna Diferença (w-14 = 56px + margem) */
+    font-family: var(--app-font-base);
+    font-size: 8px;
+    font-weight: var(--app-font-bold);
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--app-primary);
+    background: rgba(255, 85, 0, 0.12);
+    border: 1px solid rgba(255, 85, 0, 0.22);
+    padding: 2px 5px;
+    border-radius: var(--app-radius-sm);
+    line-height: 1.4;
+    pointer-events: none;
+}
+
+
+/* ============================================================
+   BYE BANNER — VOCÊ DESCANSA ESSA RODADA
+   ============================================================ */
+
+.pc-bye-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: rgba(245, 158, 11, 0.07);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-left: 3px solid var(--app-amber);
+    border-radius: var(--app-radius-lg);
+    padding: 13px 14px;
+    margin-bottom: 14px;
+}
+
+.pc-bye-banner-icon {
+    font-size: 26px !important;
+    color: var(--app-amber);
+    flex-shrink: 0;
+    margin-top: 1px;
+    opacity: 0.9;
+}
+
+.pc-bye-banner-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.pc-bye-banner-title {
+    font-family: var(--app-font-base);
+    font-size: var(--app-font-base);  /* 13px */
+    font-weight: var(--app-font-bold);
+    color: var(--app-text-primary);
+    margin-bottom: 3px;
+    line-height: var(--app-leading-tight);
+}
+
+.pc-bye-banner-desc {
+    font-family: var(--app-font-base);
+    font-size: var(--app-font-xs);    /* 10px */
+    color: var(--app-text-dim);
+    line-height: var(--app-leading-relaxed);
+}
+
+.pc-bye-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-top: 7px;
+    padding: 3px 8px;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: var(--app-radius-full);
+    font-family: var(--app-font-base);
+    font-size: 9px;
+    font-weight: var(--app-font-bold);
+    color: var(--app-amber);
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+.pc-bye-pill .mat-icon {
+    font-size: 11px !important;
+}

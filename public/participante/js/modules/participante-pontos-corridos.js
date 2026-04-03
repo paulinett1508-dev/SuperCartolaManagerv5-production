@@ -32,6 +32,7 @@ const estadoPC = {
     rodadaInicial: 2, // ✅ v5.3: Default 2026, será atualizado pela config API
     _refreshInterval: null, // ✅ v5.5: Timer do auto-refresh de parciais
     _refreshAtivo: false,
+    desempenhoExpanded: false, // ✅ v5.8: Card Seu Desempenho começa colapsado
 };
 
 // ============================================
@@ -493,16 +494,24 @@ function renderizarInterface() {
 }
 
 // ============================================
-// CARD SEU DESEMPENHO - v5.0 (com posição na liga)
+// CARD SEU DESEMPENHO - v5.8 (compact + collapsible)
 // ============================================
+
+window.toggleDesempenhoPC = function () {
+    estadoPC.desempenhoExpanded = !estadoPC.desempenhoExpanded;
+    const body = document.getElementById("pc-desempenho-body");
+    const chevron = document.getElementById("pc-desempenho-chevron");
+    if (body) body.classList.toggle("expanded", estadoPC.desempenhoExpanded);
+    if (chevron) chevron.classList.toggle("expanded", estadoPC.desempenhoExpanded);
+};
 
 function renderizarCardDesempenho() {
     const cardEl = document.getElementById("pc-card-desempenho");
     if (!cardEl) return;
 
-    const { dados, timeId, totalRodadas, ligaEncerrou } = estadoPC;
+    const { dados, timeId, ligaEncerrou } = estadoPC;
 
-    // Calcular posição atual na liga
+    // Posição atual na liga
     let posicaoAtual = "-";
     let totalParticipantes = 0;
     const ultimaRodadaComDados = [...dados]
@@ -517,23 +526,16 @@ function renderizarCardDesempenho() {
         const meuTime = classificacaoAtivos.find(
             (t) => String(t.timeId || t.time_id || t.id) === String(timeId),
         );
-        if (meuTime) {
-            posicaoAtual = classificacaoAtivos.indexOf(meuTime) + 1;
-        }
+        if (meuTime) posicaoAtual = classificacaoAtivos.indexOf(meuTime) + 1;
     }
 
-    // Calcular estatísticas do usuário
-    let vitorias = 0,
-        empates = 0,
-        derrotas = 0,
-        goleadasDadas = 0,
-        goleadasSofridas = 0;
+    // Estatísticas acumuladas
+    let vitorias = 0, empates = 0, derrotas = 0, goleadasDadas = 0, goleadasSofridas = 0;
     let totalConfrontos = 0;
     let saldoFinanceiro = 0;
 
     dados.forEach((rodadaData) => {
         if (!rodadaData.confrontos?.length) return;
-
         const confrontos = processarConfrontos(rodadaData);
         confrontos.forEach((confronto) => {
             const { time1, time2 } = confronto;
@@ -541,42 +543,30 @@ function renderizarCardDesempenho() {
             const t2Id = time2.id || time2.timeId || time2.time_id;
             const isMeu1 = String(t1Id) === String(timeId);
             const isMeu2 = String(t2Id) === String(timeId);
-
             if (!isMeu1 && !isMeu2) return;
 
             const p1 = time1.pontos ?? null;
             const p2 = time2.pontos ?? null;
-
             if (p1 === null || p2 === null) return;
 
             totalConfrontos++;
-
             const diff = Math.abs(p1 - p2);
             const isGoleada = diff >= 50;
             const isEmpate = diff <= 0.3;
-
-            let meusPontos = isMeu1 ? p1 : p2;
-            let pontosAdversario = isMeu1 ? p2 : p1;
+            const meusPontos = isMeu1 ? p1 : p2;
+            const pontosAdv = isMeu1 ? p2 : p1;
 
             if (isEmpate) {
                 empates++;
-                saldoFinanceiro += 3; // Empate = R$3
-            } else if (meusPontos > pontosAdversario) {
+                saldoFinanceiro += 3;
+            } else if (meusPontos > pontosAdv) {
                 vitorias++;
-                if (isGoleada) {
-                    goleadasDadas++;
-                    saldoFinanceiro += 7; // Goleada = R$7
-                } else {
-                    saldoFinanceiro += 5; // Vitória = R$5
-                }
+                if (isGoleada) { goleadasDadas++; saldoFinanceiro += 7; }
+                else { saldoFinanceiro += 5; }
             } else {
                 derrotas++;
-                if (isGoleada) {
-                    goleadasSofridas++;
-                    saldoFinanceiro -= 7;
-                } else {
-                    saldoFinanceiro -= 5;
-                }
+                if (isGoleada) { goleadasSofridas++; saldoFinanceiro -= 7; }
+                else { saldoFinanceiro -= 5; }
             }
         });
     });
@@ -586,126 +576,101 @@ function renderizarCardDesempenho() {
         return;
     }
 
-    // Calcular percentuais
-    const aproveitamento =
-        totalConfrontos > 0
-            ? Math.round((vitorias / totalConfrontos) * 100)
-            : 0;
-    const percentDerrotas =
-        totalConfrontos > 0
-            ? Math.round((derrotas / totalConfrontos) * 100)
-            : 0;
+    const aproveitamento = Math.round((vitorias / totalConfrontos) * 100);
 
     // Saldo formatado
     const saldoAbs = Math.abs(saldoFinanceiro);
-    const saldoTexto =
-        saldoFinanceiro >= 0
-            ? `+R$ ${saldoAbs.toFixed(2)}`
-            : `-R$ ${saldoAbs.toFixed(2)}`;
-    const saldoClass = saldoFinanceiro >= 0 ? "text-green-400" : "text-red-400";
+    const saldoTexto = saldoFinanceiro >= 0
+        ? `+R$ ${saldoAbs.toFixed(2)}`
+        : `-R$ ${saldoAbs.toFixed(2)}`;
+    const saldoClass = saldoFinanceiro >= 0 ? "positivo" : "negativo";
 
-    // Posição badge com cor
+    // Badge de posição
     const isCampeao = ligaEncerrou && posicaoAtual === 1;
-    const posicaoBadgeColor =
-        posicaoAtual === 1
-            ? "bg-yellow-500"
-            : posicaoAtual <= 3
-              ? "bg-green-500"
-              : posicaoAtual <= 10
-                ? "bg-blue-500"
-                : "bg-zinc-600";
+    let posBadgeClass = "pos-low";
+    if (posicaoAtual === 1) posBadgeClass = "pos-1";
+    else if (posicaoAtual !== "-" && posicaoAtual <= 3) posBadgeClass = "pos-top3";
+    else if (posicaoAtual !== "-" && posicaoAtual <= 10) posBadgeClass = "pos-mid";
 
-    cardEl.innerHTML = `
-        <div class="card-desempenho-pc bg-surface-dark rounded-2xl overflow-hidden border border-zinc-800">
-            <!-- Header com Posição -->
-            <div class="flex items-center justify-between px-4 py-3 bg-white/[0.02] border-b border-zinc-800">
-                <div class="flex items-center gap-2.5">
-                    <span class="material-symbols-outlined text-primary" style="font-size: 22px;">analytics</span>
-                    <span class="text-sm font-semibold text-white">Seu Desempenho</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="text-[10px] font-semibold text-gray-400 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">${totalConfrontos} CONFRONTOS</span>
-                </div>
-            </div>
+    const posTexto = isCampeao
+        ? '<span class="material-symbols-outlined" style="font-size:12px;vertical-align:middle">emoji_events</span> Campeão'
+        : posicaoAtual + "º de " + totalParticipantes;
 
-            <!-- Posição na Liga -->
-            <div class="flex items-center justify-center gap-4 px-4 py-4 bg-gradient-to-r from-white/[0.02] to-transparent">
-                <div class="flex items-center gap-3">
-                    ${
-                        isCampeao
-                            ? `<span class="material-symbols-outlined text-yellow-400 animate-pulse" style="font-size: 36px;">emoji_events</span>`
-                            : `<div class="w-12 h-12 ${posicaoBadgeColor} rounded-full flex items-center justify-center shadow-lg">
-                            <span class="text-lg font-bold text-white">${posicaoAtual}º</span>
-                          </div>`
-                    }
-                    <div>
-                        <div class="text-xs text-gray-400">${isCampeao ? "Você é o" : "Posição na Liga"}</div>
-                        <div class="text-base font-bold ${isCampeao ? "text-yellow-400" : "text-white"}">${isCampeao ? "CAMPEÃO!" : `${posicaoAtual}º de ${totalParticipantes}`}</div>
-                    </div>
-                </div>
-            </div>
+    const bodyExpandedClass = estadoPC.desempenhoExpanded ? " expanded" : "";
+    const chevronExpandedClass = estadoPC.desempenhoExpanded ? " expanded" : "";
 
-            <!-- Stats Grid -->
-            <div class="grid grid-cols-4 gap-px bg-zinc-800">
-                <div class="bg-surface-dark py-4 text-center">
-                    <span class="material-symbols-outlined text-green-500" style="font-size: 24px;">check_circle</span>
-                    <div class="text-2xl font-bold text-white mt-1">${vitorias}</div>
-                    <div class="text-[9px] font-semibold text-gray-500 uppercase tracking-wide">Vitórias</div>
-                </div>
-                <div class="bg-surface-dark py-4 text-center">
-                    <span class="material-symbols-outlined text-yellow-500" style="font-size: 24px;">drag_handle</span>
-                    <div class="text-2xl font-bold text-white mt-1">${empates}</div>
-                    <div class="text-[9px] font-semibold text-gray-500 uppercase tracking-wide">Empates</div>
-                </div>
-                <div class="bg-surface-dark py-4 text-center">
-                    <span class="material-symbols-outlined text-red-500" style="font-size: 24px;">cancel</span>
-                    <div class="text-2xl font-bold text-white mt-1">${derrotas}</div>
-                    <div class="text-[9px] font-semibold text-gray-500 uppercase tracking-wide">Derrotas</div>
-                </div>
-                <div class="bg-surface-dark py-4 text-center">
-                    <span class="material-symbols-outlined text-orange-500" style="font-size: 24px;">local_fire_department</span>
-                    <div class="text-2xl font-bold text-white mt-1">${goleadasDadas}</div>
-                    <div class="text-[9px] font-semibold text-gray-500 uppercase tracking-wide">Goleadas</div>
-                </div>
-            </div>
+    // Monta HTML do card compacto e colapsável
+    const partsHeader = [
+        '<div class="pc-card-desempenho-wrap">',
+        '<div class="pc-desempenho-header" onclick="window.toggleDesempenhoPC()">',
+        '<div class="pc-desempenho-header-left">',
+        '<span class="material-symbols-outlined pc-desempenho-header-icon">analytics</span>',
+        '<span class="pc-desempenho-header-title">Seu Desempenho</span>',
+        '</div>',
+        '<div class="pc-desempenho-header-right">',
+        '<span class="pc-desempenho-pos-badge ' + posBadgeClass + '">' + posTexto + '</span>',
+        '<span class="pc-desempenho-ved-summary">',
+        '<span class="v">' + vitorias + 'V</span> &middot; ',
+        '<span class="e">' + empates + 'E</span> &middot; ',
+        '<span class="d">' + derrotas + 'D</span>',
+        '</span>',
+        '<span class="material-symbols-outlined pc-desempenho-chevron' + chevronExpandedClass + '" id="pc-desempenho-chevron">expand_more</span>',
+        '</div>',
+        '</div>',
+    ];
 
-            <!-- Progress Bars -->
-            <div class="px-4 py-4 space-y-3">
-                <div class="flex items-center gap-3">
-                    <div class="flex items-center gap-1.5 min-w-[90px]">
-                        <span class="material-symbols-outlined text-green-500" style="font-size: 18px;">trending_up</span>
-                        <span class="text-[11px] font-semibold text-gray-400">Aproveit.</span>
-                    </div>
-                    <div class="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
-                        <div class="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full" style="width: ${aproveitamento}%;"></div>
-                    </div>
-                    <span class="text-xs font-bold text-green-500 min-w-[40px] text-right">${aproveitamento}%</span>
-                </div>
-                <div class="flex items-center gap-3">
-                    <div class="flex items-center gap-1.5 min-w-[90px]">
-                        <span class="material-symbols-outlined text-red-500" style="font-size: 18px;">trending_down</span>
-                        <span class="text-[11px] font-semibold text-gray-400">Derrotas</span>
-                    </div>
-                    <div class="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
-                        <div class="h-full bg-gradient-to-r from-red-500 to-red-600 rounded-full" style="width: ${percentDerrotas}%;"></div>
-                    </div>
-                    <span class="text-xs font-bold text-red-500 min-w-[40px] text-right">${percentDerrotas}%</span>
-                </div>
-            </div>
+    const partsBody = [
+        '<div class="pc-desempenho-body' + bodyExpandedClass + '" id="pc-desempenho-body">',
+        '<div class="pc-desempenho-stats-grid">',
+        '<div class="pc-desempenho-stat-cell">',
+        '<span class="material-symbols-outlined pc-desempenho-stat-icon" style="color:var(--app-success)">check_circle</span>',
+        '<span class="pc-desempenho-stat-value">' + vitorias + '</span>',
+        '<span class="pc-desempenho-stat-label">Vit\u00f3rias</span>',
+        '</div>',
+        '<div class="pc-desempenho-stat-cell">',
+        '<span class="material-symbols-outlined pc-desempenho-stat-icon" style="color:var(--app-warning)">drag_handle</span>',
+        '<span class="pc-desempenho-stat-value">' + empates + '</span>',
+        '<span class="pc-desempenho-stat-label">Empates</span>',
+        '</div>',
+        '<div class="pc-desempenho-stat-cell">',
+        '<span class="material-symbols-outlined pc-desempenho-stat-icon" style="color:var(--app-danger)">cancel</span>',
+        '<span class="pc-desempenho-stat-value">' + derrotas + '</span>',
+        '<span class="pc-desempenho-stat-label">Derrotas</span>',
+        '</div>',
+        '<div class="pc-desempenho-stat-cell">',
+        '<span class="material-symbols-outlined pc-desempenho-stat-icon" style="color:var(--app-primary)">local_fire_department</span>',
+        '<span class="pc-desempenho-stat-value">' + goleadasDadas + '</span>',
+        '<span class="pc-desempenho-stat-label">Goleadas</span>',
+        '</div>',
+        '</div>',
+        '<div class="pc-desempenho-progress-area">',
+        '<div class="pc-desempenho-progress-row">',
+        '<span class="pc-desempenho-progress-label">',
+        '<span class="material-symbols-outlined mat-icon" style="color:var(--app-success)">trending_up</span>',
+        'Aproveit.',
+        '</span>',
+        '<div class="pc-desempenho-bar-track">',
+        '<div class="pc-desempenho-bar-fill" style="width:' + aproveitamento + '%"></div>',
+        '</div>',
+        '<span class="pc-desempenho-progress-pct">' + aproveitamento + '%</span>',
+        '</div>',
+        '</div>',
+        '<div class="pc-desempenho-footer">',
+        '<span class="pc-desempenho-footer-label">',
+        '<span class="material-symbols-outlined mat-icon">account_balance_wallet</span>',
+        'Saldo confrontos',
+        '</span>',
+        '<span class="pc-desempenho-saldo ' + saldoClass + '">' + saldoTexto + '</span>',
+        '</div>',
+        '</div>',
+        '</div>',
+    ];
 
-            <!-- Footer Saldo -->
-            <div class="px-4 py-3 bg-white/[0.02] border-t border-zinc-800 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-gray-500" style="font-size: 18px;">account_balance_wallet</span>
-                    <span class="text-[11px] text-gray-500">Saldo Confrontos:</span>
-                </div>
-                <span class="text-sm font-bold ${saldoClass}">${saldoTexto}</span>
-            </div>
-        </div>
-    `;
+    // eslint-disable-next-line no-unsanitized/property -- dados numéricos + strings controladas, sem input do usuário
+    cardEl.innerHTML = partsHeader.concat(partsBody).join("");
 
     if (window.Log) Log.info(
-        `[PONTOS-CORRIDOS] 📊 Desempenho: ${vitorias}V ${empates}E ${derrotas}D em ${totalConfrontos} confrontos | Posição: ${posicaoAtual}º`,
+        "[PONTOS-CORRIDOS] Desempenho: " + vitorias + "V " + empates + "E " + derrotas + "D em " + totalConfrontos + " confrontos | Posição: " + posicaoAtual + "º",
     );
 }
 
@@ -1000,7 +965,7 @@ function renderizarConfrontos() {
         }
     }
 
-    // ✅ v5.7: BYE notice — aviso quando o participante logado está de folga nesta rodada
+    // ✅ v5.8: BYE notice — banner âmbar quando o participante está de folga
     let byeNoticeHTML = '';
     if (timeId) {
         const teamsInRound = new Set();
@@ -1012,15 +977,19 @@ function renderizarConfrontos() {
         const isOddLeague = totalTimes > 0 && totalTimes % 2 !== 0;
         const isUserBye = isOddLeague && !teamsInRound.has(String(timeId));
         if (isUserBye) {
-            byeNoticeHTML = `
-                <div class="flex items-start gap-3 bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-4" style="border-left: 4px solid #3b82f6;">
-                    <span class="material-symbols-outlined text-blue-400" style="font-size: 22px; flex-shrink: 0; margin-top: 1px;">event_busy</span>
-                    <div>
-                        <p class="font-semibold text-sm text-white mb-1">Você está de folga nessa rodada!</p>
-                        <p class="text-xs text-gray-400">Para entender melhor o motivo, procure o admin do sistema.</p>
-                    </div>
-                </div>
-            `;
+            byeNoticeHTML = [
+                '<div class="pc-bye-banner">',
+                '<span class="material-symbols-outlined pc-bye-banner-icon">self_improvement</span>',
+                '<div class="pc-bye-banner-content">',
+                '<p class="pc-bye-banner-title">Voc\u00ea descansa nessa rodada</p>',
+                '<p class="pc-bye-banner-desc">Sua liga tem n\u00famero \u00edmpar de times \u2014 um time folga por rodada, em rota\u00e7\u00e3o autom\u00e1tica. Os outros confrontos seguem normalmente.</p>',
+                '<span class="pc-bye-pill">',
+                '<span class="material-symbols-outlined mat-icon">schedule</span>',
+                'Rodada sem jogo para voc\u00ea',
+                '</span>',
+                '</div>',
+                '</div>',
+            ].join("");
         }
     }
 
@@ -1109,7 +1078,7 @@ function buildLinhaConfronto(confronto, meuTimeId) {
     const temScoresReais = (p1 !== null && p2 !== null) && !(p1 === 0 && p2 === 0);
     const corNome1 = temScoresReais ? cor1 : (isMeu1 ? "text-primary" : "text-white");
     const corNome2 = temScoresReais ? cor2 : (isMeu2 ? "text-primary" : "text-white");
-    const bg = isMeu1 || isMeu2 ? "bg-primary/5" : "";
+    const isMeuJogo = isMeu1 || isMeu2;
 
     const label1 =
         vencedor === 1 ? "Crédito" : vencedor === 2 ? "Débito" : "Empate";
@@ -1127,28 +1096,48 @@ function buildLinhaConfronto(confronto, meuTimeId) {
             ? `<div class="group relative inline-flex"><button class="material-symbols-outlined text-base ${cor2}/80" style="font-size:16px">monetization_on</button><div class="modal hidden opacity-0 transition-opacity absolute bottom-full right-1/2 translate-x-1/2 mb-2 w-max bg-primary text-white text-xs font-bold px-2.5 py-1.5 rounded-md shadow-lg z-20"><span class="font-normal">${label2}:</span> ${sinal2}R$ ${valorFinanceiro.toFixed(2)}<div class="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-primary"></div></div></div>`
             : "";
 
-    return `
-        <div class="py-3 px-3 flex items-center justify-between ${bg}">
-            <div class="flex items-center min-w-0 flex-1 ${vencedor === 2 ? "opacity-60" : ""}">
-                <img src="${esc1}" class="w-10 h-10 rounded-full mr-3 shrink-0 bg-zinc-700 object-cover" onerror="this.onerror=null;this.src='/escudos/default.png'">
-                <div class="min-w-0 flex-1">
-                    <p class="font-semibold text-sm truncate ${corNome1}">${escapeHtml(nome1)}</p>
-                    <p class="text-[10px] text-gray-500 truncate">${escapeHtml(cartoleiro1)}</p>
-                    <div class="flex items-center space-x-1.5 mt-0.5"><p class="text-sm font-bold ${cor1}">${p1 !== null ? p1.toFixed(1) : "-"}</p>${modal1}</div>
-                </div>
-            </div>
-            <span class="text-sm text-white/30 mx-2 shrink-0">x</span>
-            <div class="flex items-center min-w-0 flex-1 justify-end ${vencedor === 1 ? "opacity-60" : ""}">
-                <div class="min-w-0 flex-1 text-right">
-                    <p class="font-semibold text-sm truncate ${corNome2}">${escapeHtml(nome2)}</p>
-                    <p class="text-[10px] text-gray-500 truncate">${escapeHtml(cartoleiro2)}</p>
-                    <div class="flex items-center justify-end space-x-1.5 mt-0.5"><p class="text-sm font-bold ${cor2}">${p2 !== null ? p2.toFixed(1) : "-"}</p>${modal2}</div>
-                </div>
-                <img src="${esc2}" class="w-10 h-10 rounded-full ml-3 shrink-0 bg-zinc-700 object-cover" onerror="this.onerror=null;this.src='/escudos/default.png'">
-            </div>
-            <div class="w-14 text-right ml-2 shrink-0"><p class="font-bold text-sm text-white">${diferenca != null ? diferenca.toFixed(1) : "-"}</p></div>
-        </div>
-    `;
+    const outerClass = "py-2.5 px-3 flex items-center justify-between relative" + (isMeuJogo ? " pc-meu-jogo" : "");
+    const meuJogoBadge = isMeuJogo
+        ? '<span class="pc-meu-jogo-badge">Seu jogo</span>'
+        : "";
+
+    const p1Str = p1 !== null ? p1.toFixed(1) : "-";
+    const p2Str = p2 !== null ? p2.toFixed(1) : "-";
+    const difStr = diferenca != null ? diferenca.toFixed(1) : "-";
+
+    const partsA = [
+        '<div class="' + outerClass + '">',
+        meuJogoBadge,
+        '<div class="flex items-center min-w-0 flex-1' + (vencedor === 2 ? " opacity-60" : "") + '">',
+        '<img src="' + esc1 + '" class="w-9 h-9 rounded-full mr-2.5 shrink-0 bg-zinc-700 object-cover" onerror="this.onerror=null;this.src=\'/escudos/default.png\'">',
+        '<div class="min-w-0 flex-1">',
+        '<p class="font-semibold text-[13px] truncate leading-tight ' + corNome1 + '">' + escapeHtml(nome1) + '</p>',
+        '<p class="text-[10px] text-gray-500 truncate leading-none mt-0.5">' + escapeHtml(cartoleiro1) + '</p>',
+        '<div class="flex items-center space-x-1.5 mt-1">',
+        '<p class="text-[13px] font-bold font-mono ' + cor1 + '">' + p1Str + '</p>',
+        modal1,
+        '</div>',
+        '</div>',
+        '</div>',
+        '<span class="text-xs text-white/20 mx-1.5 shrink-0">×</span>',
+        '<div class="flex items-center min-w-0 flex-1 justify-end' + (vencedor === 1 ? " opacity-60" : "") + '">',
+        '<div class="min-w-0 flex-1 text-right">',
+        '<p class="font-semibold text-[13px] truncate leading-tight ' + corNome2 + '">' + escapeHtml(nome2) + '</p>',
+        '<p class="text-[10px] text-gray-500 truncate leading-none mt-0.5">' + escapeHtml(cartoleiro2) + '</p>',
+        '<div class="flex items-center justify-end space-x-1.5 mt-1">',
+        '<p class="text-[13px] font-bold font-mono ' + cor2 + '">' + p2Str + '</p>',
+        modal2,
+        '</div>',
+        '</div>',
+        '<img src="' + esc2 + '" class="w-9 h-9 rounded-full ml-2.5 shrink-0 bg-zinc-700 object-cover" onerror="this.onerror=null;this.src=\'/escudos/default.png\'">',
+        '</div>',
+        '<div class="w-14 text-right ml-1.5 shrink-0">',
+        '<p class="font-bold text-[13px] font-mono text-white">' + difStr + '</p>',
+        '</div>',
+        '</div>',
+    ];
+
+    return partsA.join("");
 }
 
 // ============================================
