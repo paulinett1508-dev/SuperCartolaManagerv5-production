@@ -3,9 +3,9 @@
     "mongo": {
       "command": "node",
       "args": ["mongo-server.js"],
-      "cwd": "/home/runner/workspace",
+      "cwd": "/var/www/cartola",
       "env": {
-        "MONGO_URI": "SUA_MONGO_URI_AQUI",
+        "MONGO_URI": "mongodb+srv://USER:PASS@cluster0.XXXXX.mongodb.net/cartola-manager?retryWrites=true&w=majority",
         "NODE_ENV": "production"
       }
     },
@@ -13,7 +13,7 @@
       "command": "npx",
       "args": ["-y", "@perplexity-ai/mcp-server"],
       "env": {
-        "PERPLEXITY_API_KEY": "SUA_PERPLEXITY_KEY_AQUI"
+        "PERPLEXITY_API_KEY": "pplx-sua_chave_aqui"
       }
     },
     "context7": {
@@ -21,13 +21,6 @@
       "args": ["-y", "@upstash/context7-mcp@latest"],
       "env": {
         "NODE_ENV": "production"
-      }
-    },
-    "stitch": {
-      "command": "npx",
-      "args": ["-y", "@_davideast/stitch-mcp", "proxy"],
-      "env": {
-        "STITCH_API_KEY": "SUA_GOOGLE_AI_KEY_AQUI"
       }
     }
   }
