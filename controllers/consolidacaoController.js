@@ -357,6 +357,7 @@ export const consolidarRodada = async (req, res) => {
 
         const mitos = rankingRodada.slice(0, 10).map((t, i) => ({
             ...t,
+            pontos: t.pontos_rodada,
             premio: configTop10.mitos[i + 1] || configTop10.mitos[String(i + 1)] || 0
         }));
 
@@ -365,6 +366,7 @@ export const consolidarRodada = async (req, res) => {
             .slice(0, 10)
             .map((t, i) => ({
                 ...t,
+                pontos: t.pontos_rodada,
                 posicao: rankingRodada.length - i,
                 multa: configTop10.micos[i + 1] || configTop10.micos[String(i + 1)] || 0
             }));
