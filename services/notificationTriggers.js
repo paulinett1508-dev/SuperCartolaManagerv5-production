@@ -172,7 +172,7 @@ export async function triggerMitoMico(ligaId, rodadaNum, top10Data) {
 
         const payloadMito = {
           title: '🏆 VOCE E O MITO DA RODADA!',
-          body: `Parabens! Voce fez ${formatarPontos(mito.pontos_rodada)} pontos na R${rodadaNum}${premioText}`,
+          body: `Parabens! Voce fez ${formatarPontos(mito.pontos)} pontos na R${rodadaNum}${premioText}`,
           url: '/participante/rodadas',
           tag: `mito-${rodadaNum}`,
           icon: '/participante/icons/icon-192x192.png',
@@ -181,7 +181,7 @@ export async function triggerMitoMico(ligaId, rodadaNum, top10Data) {
             tipo: 'mito',
             ligaId,
             rodada: rodadaNum,
-            pontos: mito.pontos_rodada,
+            pontos: mito.pontos,
             premio: mito.premio || 0,
             timestamp: Date.now()
           }
@@ -210,7 +210,7 @@ export async function triggerMitoMico(ligaId, rodadaNum, top10Data) {
 
         const payloadMico = {
           title: '😬 Voce foi o Mico da Rodada',
-          body: `Voce fez ${formatarPontos(mico.pontos_rodada)} pontos na R${rodadaNum}.${multaText}`,
+          body: `Voce fez ${formatarPontos(mico.pontos)} pontos na R${rodadaNum}.${multaText}`,
           url: '/participante/rodadas',
           tag: `mico-${rodadaNum}`,
           icon: '/participante/icons/icon-192x192.png',
@@ -219,7 +219,7 @@ export async function triggerMitoMico(ligaId, rodadaNum, top10Data) {
             tipo: 'mico',
             ligaId,
             rodada: rodadaNum,
-            pontos: mico.pontos_rodada,
+            pontos: mico.pontos,
             multa: mico.multa || 0,
             timestamp: Date.now()
           }
