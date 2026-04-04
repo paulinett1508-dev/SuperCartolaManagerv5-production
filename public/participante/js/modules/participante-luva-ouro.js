@@ -476,7 +476,7 @@ function _resumoRodadasGoleiro(rodadas) {
         .map(r => ({
             rodada: r.rodada,
             goleiro: escapeHtml(_nomeCompacto(r.goleiroNome)),
-            pontos: Math.trunc((r.pontos || 0) * 10) / 10,
+            pontos: Math.trunc((r.pontos || 0) * 100) / 100, // ✅ Fix A2: 2 decimais (era 1)
         }));
 }
 
