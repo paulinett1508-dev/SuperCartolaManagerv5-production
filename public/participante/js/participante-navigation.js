@@ -85,6 +85,7 @@ class ParticipanteNavigation {
         this._debounceMs = 100; // ✅ v3.0: Reduzido para 100ms (super responsivo)
         this._navegacaoEmAndamento = null; // ID da navegação atual (para cancelar se necessário)
         this._carregandoModulo = null; // ✅ v5.8: Módulo em carregamento ativo (previne double-init)
+        this._abortController = null; // ✅ v5.9: AbortController para cancelar fetch de navegação anterior
         this._campinhoTarget = null;
     }
 
@@ -861,6 +862,7 @@ class ParticipanteNavigation {
                     // Bloquear se ainda em manutenção
                     if (this.isModuloEmManutencao(moduloId)) {
                         if (window.Log) Log.info('PARTICIPANTE-NAV', `[CHECK-FRESCO] ${moduloId} em manutencao — bloqueando`);
+                        this._carregandoModulo = null; // ✅ v5.9: Liberar guard antes de early return
                         this.mostrarModalManutencaoModulo(moduloId);
                         return;
                     }
@@ -886,12 +888,15 @@ class ParticipanteNavigation {
         // container já foi obtido acima para verificar isFirstLoad
         if (!container) {
             if (window.Log) Log.error('PARTICIPANTE-NAV', '❌ Container não encontrado');
+            this._carregandoModulo = null; // ✅ v5.9: Liberar guard antes de early return
             return;
         }
 
         // ✅ CORREÇÃO: Timeout de segurança para evitar tela preta
         const timeoutId = setTimeout(() => {
             if (window.Log) Log.warn('PARTICIPANTE-NAV', '⏱️ Timeout de carregamento atingido');
+            this._carregandoModulo = null; // ✅ v5.9: Liberar guard no timeout
+            if (window.LoadingOverlay) window.LoadingOverlay.hide(); // ✅ v5.9: Esconder overlay no timeout
             this.mostrarErroCarregamento(container, moduloId, 'Timeout de carregamento');
         }, 15000); // 15 segundos
 
@@ -924,13 +929,20 @@ class ParticipanteNavigation {
         // Isso causava tela em branco e necessidade de clique duplo
         // O conteúdo antigo permanece visível até o novo ser carregado
 
+        // ✅ v5.9: Cancelar fetch anterior se houver navegação em andamento
+        if (this._abortController) {
+            this._abortController.abort();
+        }
+        this._abortController = new AbortController();
+        const signal = this._abortController.signal;
+
         try {
             const htmlPath = this.modulos[moduloId];
             if (!htmlPath) {
                 throw new Error(`Módulo "${moduloId}" não encontrado`);
             }
 
-            const response = await fetch(htmlPath);
+            const response = await fetch(htmlPath, { signal });
             if (!response.ok) {
                 if (response.status === 404) {
                     throw new Error(`O módulo "${nomeModulo}" ainda não está disponível`);
@@ -939,6 +951,13 @@ class ParticipanteNavigation {
             }
 
             const html = await response.text();
+
+            // ✅ v5.9: Descartar resposta se outra navegação já começou (stale response)
+            if (this._navegacaoEmAndamento !== navegacaoId) {
+                if (window.Log) Log.debug('PARTICIPANTE-NAV', `⏸️ Resposta stale descartada: ${moduloId} (navegação mudou)`);
+                clearTimeout(timeoutId);
+                return;
+            }
 
             // ✅ CORREÇÃO: Limpar timeout de segurança
             clearTimeout(timeoutId);
@@ -984,6 +1003,12 @@ class ParticipanteNavigation {
         } catch (error) {
             // ✅ CORREÇÃO: Limpar timeout de segurança
             clearTimeout(timeoutId);
+
+            // ✅ v5.9: Ignorar AbortError — navegação foi cancelada intencionalmente
+            if (error.name === 'AbortError') {
+                if (window.Log) Log.debug('PARTICIPANTE-NAV', `⏸️ Fetch cancelado (navegação mudou): ${moduloId}`);
+                return;
+            }
 
             if (window.Log) Log.error('PARTICIPANTE-NAV', `❌ Erro ao carregar ${moduloId}:`, error);
 
