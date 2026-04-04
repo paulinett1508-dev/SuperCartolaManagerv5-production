@@ -270,7 +270,6 @@ export async function buscarRankingParcial(ligaId) {
         }
 
         // 2. Buscar atletas pontuados + frozen scouts em paralelo
-        const temporada = statusMercado.temporada || CURRENT_SEASON;
         const [dadosApi, scoutsFrozen] = await Promise.all([
             buscarAtletasPontuados(),
             scoutSnapshotService.buscarScoutsFrozen(rodadaAtual),
@@ -283,15 +282,6 @@ export async function buscarRankingParcial(ligaId) {
 
         console.debug(`${LOG_PREFIX} Atletas pontuados: ${numAtletasPontuados} (${numFrozen} frozen)`);
         console.debug(`${LOG_PREFIX} Partidas da rodada: ${Object.keys(partidasInfo).length}`);
-
-        // Persistência assíncrona (não bloqueia resposta)
-        if (Object.keys(dadosApi.atletas).length > 0) {
-            scoutSnapshotService.salvarScouts(rodadaAtual, temporada, dadosApi.atletas).catch(() => {});
-            scoutSnapshotService
-                .detectarClubesCongelados(rodadaAtual, temporada)
-                .then(clubes => scoutSnapshotService.congelarAtletasDeClubes(rodadaAtual, clubes))
-                .catch(() => {});
-        }
 
         if (numAtletasPontuados === 0) {
             console.debug(`${LOG_PREFIX} Nenhum atleta pontuado ainda`);
