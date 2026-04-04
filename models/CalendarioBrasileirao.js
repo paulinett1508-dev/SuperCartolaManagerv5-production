@@ -409,22 +409,41 @@ calendarioBrasileiraoSchema.statics.importarPartidas = async function(temporada,
     const calendario = await this.obterOuCriar(temporada);
 
     for (const nova of partidasNovas) {
-        // Buscar partida existente por rodada + times
-        const idx = calendario.partidas.findIndex(p =>
-            p.rodada === nova.rodada &&
-            p.mandante.toLowerCase() === nova.mandante.toLowerCase() &&
-            p.visitante.toLowerCase() === nova.visitante.toLowerCase()
-        );
+        // v1.1: Match primário por mandante_id + visitante_id (mais robusto que rodada + nomes).
+        // Cada par mandante×visitante aparece exatamente 1x no turno e 1x no returno (invertido).
+        // Isso evita duplicatas quando ESPN infere rodada diferente do seed.
+        let idx = -1;
+
+        if (nova.mandante_id && nova.visitante_id) {
+            idx = calendario.partidas.findIndex(p =>
+                p.mandante_id === nova.mandante_id &&
+                p.visitante_id === nova.visitante_id
+            );
+        }
+
+        // Fallback: match por rodada + nomes (caso IDs não estejam disponíveis)
+        if (idx < 0 && nova.rodada) {
+            idx = calendario.partidas.findIndex(p =>
+                p.rodada === nova.rodada &&
+                p.mandante.toLowerCase() === nova.mandante.toLowerCase() &&
+                p.visitante.toLowerCase() === nova.visitante.toLowerCase()
+            );
+        }
 
         if (idx >= 0) {
             // Atualizar partida existente (preservar dados que já temos)
             const existente = calendario.partidas[idx];
+            const existenteObj = existente.toObject ? existente.toObject() : existente;
             calendario.partidas[idx] = {
-                ...existente.toObject ? existente.toObject() : existente,
+                ...existenteObj,
                 ...nova,
                 // Preservar IDs do Cartola se já temos
                 mandante_id: nova.mandante_id || existente.mandante_id,
                 visitante_id: nova.visitante_id || existente.visitante_id,
+                // Preservar rodada do MongoDB se nova é 0 (inferência falhou)
+                rodada: (nova.rodada >= 1 && nova.rodada <= 38)
+                    ? nova.rodada
+                    : (existenteObj.rodada || nova.rodada),
             };
         } else {
             // Nova partida
