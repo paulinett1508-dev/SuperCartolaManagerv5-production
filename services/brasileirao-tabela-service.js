@@ -196,7 +196,9 @@ function converterStatusEspn(stateStr, completed) {
  * cada time só pode jogar uma vez por rodada.
  * Jogos são processados em ordem cronológica; o primeiro round disponível
  * onde ambos os times ainda não jogaram é atribuído.
- * Isso garante atribuição correta mesmo com jogos adiados/remarcados.
+ *
+ * v1.1: Preserva rodadas já definidas (vindas da ESPN notes ou do MongoDB).
+ *       Só infere para partidas com rodada === 0 ou ausente.
  */
 function inferirRodadas(partidas) {
     if (!partidas.length) return partidas;
@@ -206,7 +208,19 @@ function inferirRodadas(partidas) {
     // rodada -> Set de IDs de times que já jogaram nessa rodada
     const timesPorRodada = {};
 
+    // 1) Registrar partidas que JÁ possuem rodada válida (preserve-first)
     for (const p of partidas) {
+        if (p.rodada && p.rodada >= 1 && p.rodada <= 38) {
+            if (!timesPorRodada[p.rodada]) timesPorRodada[p.rodada] = new Set();
+            timesPorRodada[p.rodada].add(p.mandante_id);
+            timesPorRodada[p.rodada].add(p.visitante_id);
+        }
+    }
+
+    // 2) Inferir apenas para partidas sem rodada definida
+    for (const p of partidas) {
+        if (p.rodada && p.rodada >= 1 && p.rodada <= 38) continue; // já tem rodada
+
         let rodada = 1;
         while (true) {
             if (!timesPorRodada[rodada]) timesPorRodada[rodada] = new Set();
@@ -317,9 +331,27 @@ async function buscarViaEspn(temporada) {
             const visitante = away.team?.displayName || '';
             const dataISO = event.date || comp.date || '';
 
+            // Tentar extrair rodada dos dados ESPN (notes, season.slug, week)
+            // ESPN costuma incluir "Matchday X" ou "Regular Season - X" em notes
+            let rodadaEspn = 0;
+            const notes = comp.notes || event.notes || [];
+            for (const note of notes) {
+                const headline = note?.headline || note?.text || '';
+                if (headline) {
+                    rodadaEspn = extrairRodada(headline);
+                    if (rodadaEspn >= 1 && rodadaEspn <= 38) break;
+                    rodadaEspn = 0;
+                }
+            }
+            // Fallback: week.number (usado em algumas ligas ESPN)
+            if (!rodadaEspn && event.week?.number) {
+                const wk = parseInt(event.week.number, 10);
+                if (wk >= 1 && wk <= 38) rodadaEspn = wk;
+            }
+
             return {
                 id_externo: `espn_${event.id}`,
-                rodada: 0, // será inferido por inferirRodadas()
+                rodada: rodadaEspn, // 0 = será inferido por inferirRodadas()
                 data: formatarData(dataISO),
                 horario: formatarHora(dataISO),
                 mandante,
@@ -464,12 +496,24 @@ async function sincronizarTabela(temporada, forcar = false) {
     partidas = await buscarViaEspn(temporada);
     if (partidas && partidas.length > 0) {
         fonte = 'espn';
-        // ESPN traz o calendário completo — limpar jogos não-encerrados antes do import
-        // para evitar duplicatas com dados antigos do seed algorítmico
+        // v1.1: Preservar rodadas do MongoDB para partidas ESPN sem rodada definida.
+        // Antes deletava todos não-encerrados e perdia rodadas corretas do seed.
+        // Agora: para cada partida ESPN com rodada 0, tentar herdar rodada do MongoDB.
         const cal = await CalendarioBrasileirao.findOne({ temporada });
         if (cal) {
-            cal.partidas = cal.partidas.filter(p => p.status === 'encerrado');
-            await cal.save();
+            for (const p of partidas) {
+                // Se ESPN não trouxe rodada, buscar no MongoDB por mandante_id + visitante_id
+                if (!p.rodada || p.rodada === 0) {
+                    const existente = cal.partidas.find(e =>
+                        e.mandante_id === p.mandante_id &&
+                        e.visitante_id === p.visitante_id &&
+                        e.rodada >= 1 && e.rodada <= 38
+                    );
+                    if (existente) {
+                        p.rodada = existente.rodada;
+                    }
+                }
+            }
         }
     }
 

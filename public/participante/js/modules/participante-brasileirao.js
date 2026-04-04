@@ -1,4 +1,4 @@
-// PARTICIPANTE-BRASILEIRAO.JS - v2.0
+// PARTICIPANTE-BRASILEIRAO.JS - v2.2
 // Controller da Landing Page "Brasileirão Série A 2026"
 // v2.0: Padrão resiliente com fallback estático (alinhado com Libertadores/Copa-BR/Copa-NE)
 //       Fetch API direto com timeout defensivo. Renderização própria no DOM.
@@ -99,7 +99,7 @@ async function _fetchComTimeout(url) {
 // ═══════════════════════════════════════════════════
 
 export async function inicializarBrasileiraoParticipante() {
-    if (window.Log) Log.info('BRASILEIRAO-LP', 'Inicializando LP Brasileirão 2026 v2.1...');
+    if (window.Log) Log.info('BRASILEIRAO-LP', 'Inicializando LP Brasileirão 2026 v2.2...');
 
     // Registrar cleanup no window para o navigation poder chamar ao sair
     window.destruirBrasileiraoParticipante = destruirBrasileiraoParticipante;
@@ -266,23 +266,114 @@ function _renderizarClassificacao(apiData) {
 // RENDERIZAÇÃO — JOGOS DA RODADA (dinâmico ou fallback info)
 // ═══════════════════════════════════════════════════
 
-// Constrói HTML de jogos — nomes de times passam por escapeHtml(), placares são números
+/**
+ * Formata data YYYY-MM-DD para exibição curta: "Qua, 28 Jan"
+ */
+function _formatarDataCurta(dataStr) {
+    if (!dataStr) return '';
+    const [ano, mes, dia] = dataStr.split('-').map(Number);
+    const date = new Date(ano, mes - 1, dia);
+    const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    return `${diasSemana[date.getDay()]}, ${dia} ${meses[mes - 1]}`;
+}
+
+/**
+ * Renderiza badge de status do jogo
+ */
+function _buildStatusBadge(j) {
+    if (j.status === 'ao_vivo') {
+        return `<span class="brasileirao-badge brasileirao-badge--live">
+            <span class="brasileirao-live-dot"></span>AO VIVO
+        </span>`;
+    }
+    if (j.status === 'encerrado') {
+        return `<span class="brasileirao-badge brasileirao-badge--enc">Encerrado</span>`;
+    }
+    // agendado / a_definir
+    return `<span class="brasileirao-badge brasileirao-badge--agd">${escapeHtml(j.horario || 'A definir')}</span>`;
+}
+
+/**
+ * Renderiza area de placar central
+ */
+function _buildPlacar(j) {
+    const gm = Number.isInteger(j.placar_mandante) ? j.placar_mandante : null;
+    const gv = Number.isInteger(j.placar_visitante) ? j.placar_visitante : null;
+
+    if (gm !== null && gv !== null) {
+        const placarClass = j.status === 'ao_vivo' ? 'brasileirao-placar--live' : '';
+        return `<span class="brasileirao-placar ${placarClass}">${gm} <span class="brasileirao-placar-x">-</span> ${gv}</span>`;
+    }
+    return `<span class="brasileirao-placar brasileirao-placar--vs">vs</span>`;
+}
+
+/**
+ * Constrói HTML de jogos — v2.0: cards profissionais com escudos, agrupados por data
+ * Escudos via /escudos/{cartola_id}.png, badges de status, estádio, data/hora
+ */
 function _buildJogosHtml(jogos) {
-    return jogos.map(j => {
-        const statusClass = j.status === 'ao_vivo' ? ' brasileirao-jogo--live' : '';
-        const liveDot = j.status === 'ao_vivo' ? '<span class="brasileirao-live-dot"></span>' : '';
-        const gm = Number.isInteger(j.placar_mandante) ? j.placar_mandante : null;
-        const gv = Number.isInteger(j.placar_visitante) ? j.placar_visitante : null;
-        const placar = (gm !== null && gv !== null)
-            ? `${gm} x ${gv}`
-            : escapeHtml(j.horario || 'A definir');
-        return `<div class="brasileirao-jogo-card${statusClass}">
-            ${liveDot}
-            <span class="brasileirao-jogo-time">${escapeHtml(j.mandante || '')}</span>
-            <span class="brasileirao-jogo-placar">${placar}</span>
-            <span class="brasileirao-jogo-time">${escapeHtml(j.visitante || '')}</span>
-        </div>`;
-    }).join('');
+    if (!jogos.length) return '<div class="brasileirao-jogos-vazio">Nenhum jogo encontrado</div>';
+
+    // Agrupar jogos por data
+    const porData = {};
+    for (const j of jogos) {
+        const dt = j.data || 'sem-data';
+        if (!porData[dt]) porData[dt] = [];
+        porData[dt].push(j);
+    }
+
+    // Ordenar datas e jogos dentro de cada data por horário
+    const datasOrdenadas = Object.keys(porData).sort();
+
+    let html = '';
+    for (const dt of datasOrdenadas) {
+        const jogosData = porData[dt].sort((a, b) => (a.horario || '').localeCompare(b.horario || ''));
+
+        // Separador de data (só se tiver mais de 1 data na rodada)
+        if (datasOrdenadas.length > 1 && dt !== 'sem-data') {
+            html += `<div class="brasileirao-data-sep">
+                <span class="material-icons" style="font-size: 0.7rem;">calendar_today</span>
+                ${escapeHtml(_formatarDataCurta(dt))}
+            </div>`;
+        }
+
+        for (const j of jogosData) {
+            const aoVivo = j.status === 'ao_vivo';
+            const encerrado = j.status === 'encerrado';
+            const statusMod = aoVivo ? ' brasileirao-jogo--live' : encerrado ? ' brasileirao-jogo--enc' : '';
+            const mandanteId = j.mandante_id || 0;
+            const visitanteId = j.visitante_id || 0;
+
+            html += `<div class="brasileirao-jogo-card${statusMod}">
+                <div class="brasileirao-jogo-header">
+                    <span class="brasileirao-jogo-hora">${escapeHtml(j.horario || '')}</span>
+                    ${_buildStatusBadge(j)}
+                </div>
+                <div class="brasileirao-jogo-main">
+                    <div class="brasileirao-jogo-team brasileirao-jogo-team--home">
+                        <span class="brasileirao-jogo-nome">${escapeHtml(j.mandante || '')}</span>
+                        <img src="/escudos/${mandanteId}.png" alt="" class="brasileirao-jogo-escudo"
+                             onerror="this.src='/escudos/default.png'">
+                    </div>
+                    <div class="brasileirao-jogo-centro">
+                        ${_buildPlacar(j)}
+                    </div>
+                    <div class="brasileirao-jogo-team brasileirao-jogo-team--away">
+                        <img src="/escudos/${visitanteId}.png" alt="" class="brasileirao-jogo-escudo"
+                             onerror="this.src='/escudos/default.png'">
+                        <span class="brasileirao-jogo-nome">${escapeHtml(j.visitante || '')}</span>
+                    </div>
+                </div>
+                ${j.estadio ? `<div class="brasileirao-jogo-footer">
+                    <span class="material-icons" style="font-size: 0.6rem;">stadium</span>
+                    ${escapeHtml(j.estadio)}${j.cidade ? `, ${escapeHtml(j.cidade)}` : ''}
+                </div>` : ''}
+            </div>`;
+        }
+    }
+
+    return html;
 }
 
 // Constrói card de rodada com navegação prev/next

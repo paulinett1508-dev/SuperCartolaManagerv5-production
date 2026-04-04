@@ -237,7 +237,7 @@
 }
 
 /* ═══════════════════════════════════════════════════
-   JOGOS DA RODADA — Cards
+   JOGOS DA RODADA — Cards v2.0
    ═══════════════════════════════════════════════════ */
 .brasileirao-rodada-card, .brasileirao-info-card {
     background: var(--app-surface, #1a1a1a);
@@ -253,36 +253,142 @@
 }
 .brasileirao-jogos-lista {
     padding: 0.5rem;
-    display: flex; flex-direction: column; gap: 0.35rem;
+    display: flex; flex-direction: column; gap: 0.4rem;
 }
-.brasileirao-jogo-card {
-    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-    padding: 0.6rem 0.75rem; border-radius: 0.5rem;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.04);
-    position: relative;
-}
-.brasileirao-jogo-card--live {
-    border-color: rgba(239,68,68,0.3);
-    background: rgba(239,68,68,0.06);
-}
-.brasileirao-jogo-time {
-    font-size: 0.75rem; font-weight: 500; min-width: 90px;
-    color: var(--app-text-secondary, rgba(255,255,255,0.8));
+.brasileirao-jogos-vazio {
+    text-align: center; padding: 1.5rem 0.75rem;
+    font-size: 0.75rem; color: var(--app-text-dim, rgba(255,255,255,0.35));
     font-family: var(--app-font-base, 'Inter', sans-serif);
 }
-.brasileirao-jogo-time:first-of-type { text-align: right; }
-.brasileirao-jogo-time:last-of-type { text-align: left; }
-.brasileirao-jogo-placar {
-    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
-    font-size: 0.8rem; font-weight: 700; min-width: 50px; text-align: center;
-    color: var(--app-text-primary, #fff);
+
+/* Separador de data */
+.brasileirao-data-sep {
+    display: flex; align-items: center; gap: 0.35rem;
+    padding: 0.45rem 0.5rem 0.2rem;
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.6rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--app-text-dim, rgba(255,255,255,0.4));
 }
+
+/* Card de jogo — v2.0 profissional */
+.brasileirao-jogo-card {
+    display: flex; flex-direction: column;
+    padding: 0.55rem 0.65rem; border-radius: 0.5rem;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: border-color 0.2s, background 0.2s;
+}
+.brasileirao-jogo--live {
+    border-color: var(--app-success-light, rgba(34,197,94,0.35));
+    background: linear-gradient(135deg, rgba(34,197,94,0.06) 0%, transparent 70%);
+    border-left: 3px solid var(--app-success-light, #22c55e);
+}
+.brasileirao-jogo--enc {
+    opacity: 0.75;
+}
+
+/* Header: hora + badge */
+.brasileirao-jogo-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 0.4rem;
+}
+.brasileirao-jogo-hora {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.55rem; font-weight: 500;
+    color: var(--app-text-dim, rgba(255,255,255,0.35));
+}
+
+/* Badge de status */
+.brasileirao-badge {
+    display: inline-flex; align-items: center; gap: 0.25rem;
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.5rem; font-weight: 600; letter-spacing: 0.04em;
+    padding: 2px 6px; border-radius: 99px; text-transform: uppercase;
+}
+.brasileirao-badge--live {
+    background: var(--app-success-muted, rgba(16,185,129,0.15));
+    color: var(--app-success-light, #22c55e);
+}
+.brasileirao-badge--enc {
+    background: rgba(255,255,255,0.06);
+    color: var(--app-text-dim, rgba(255,255,255,0.4));
+}
+.brasileirao-badge--agd {
+    background: var(--app-info-muted, rgba(59,130,246,0.1));
+    color: var(--app-info-light, #60a5fa);
+}
+
+/* Linha principal: [nome escudo] placar [escudo nome] */
+.brasileirao-jogo-main {
+    display: flex; align-items: center; gap: 0;
+}
+
+/* Time (mandante/visitante) */
+.brasileirao-jogo-team {
+    display: flex; align-items: center; gap: 0.4rem;
+    flex: 1; min-width: 0;
+}
+.brasileirao-jogo-team--home {
+    justify-content: flex-end;
+}
+.brasileirao-jogo-team--away {
+    justify-content: flex-start;
+}
+.brasileirao-jogo-nome {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.72rem; font-weight: 600;
+    color: var(--app-text-secondary, rgba(255,255,255,0.85));
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.brasileirao-jogo-team--home .brasileirao-jogo-nome { text-align: right; }
+.brasileirao-jogo-team--away .brasileirao-jogo-nome { text-align: left; }
+
+/* Escudo */
+.brasileirao-jogo-escudo {
+    width: 26px; height: 26px; object-fit: contain; flex-shrink: 0;
+}
+
+/* Centro — placar ou vs */
+.brasileirao-jogo-centro {
+    display: flex; align-items: center; justify-content: center;
+    min-width: 56px; flex-shrink: 0;
+    padding: 0 0.35rem;
+}
+.brasileirao-placar {
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 1rem; font-weight: 400; line-height: 1;
+    color: var(--app-text-primary, #fff);
+    display: flex; align-items: center; gap: 0.2rem;
+}
+.brasileirao-placar--live {
+    color: var(--app-success-light, #22c55e);
+}
+.brasileirao-placar--vs {
+    font-size: 0.7rem;
+    color: var(--app-text-dim, rgba(255,255,255,0.3));
+}
+.brasileirao-placar-x {
+    font-size: 0.6rem;
+    color: var(--app-text-dim, rgba(255,255,255,0.3));
+    margin: 0 0.1rem;
+}
+
+/* Footer: estádio */
+.brasileirao-jogo-footer {
+    display: flex; align-items: center; justify-content: center; gap: 0.25rem;
+    margin-top: 0.35rem;
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.5rem;
+    color: var(--app-text-dim, rgba(255,255,255,0.25));
+}
+
+/* Live dot (dentro do badge) */
 .brasileirao-live-dot {
-    position: absolute; top: 6px; right: 6px;
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--app-danger, #ef4444);
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--app-success-light, #22c55e);
     animation: brasileirao-lp-pulse 1.5s infinite;
+    flex-shrink: 0;
 }
 @keyframes brasileirao-lp-pulse {
     0%, 100% { opacity: 1; }
