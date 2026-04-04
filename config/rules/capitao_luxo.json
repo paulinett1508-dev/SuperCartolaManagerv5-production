@@ -17,8 +17,8 @@
       "metodo": "soma_pontuacao_capitao",
       "fonte_dados": "API Cartola (time/id/{timeId}/{rodada})",
       "identificacao_capitao": "campo capitao_id na escalação",
-      "pontuacao": "pontuacao_atleta * 2 (já aplicado pela API)",
-      "nota": "A API Cartola retorna a pontuação do capitão já dobrada. NÃO multiplicar novamente."
+      "pontuacao": "pontos_num (bruto) * 1.5 (multiplicado pelo sistema)",
+      "nota": "A API Cartola retorna pontos_num BRUTO. O sistema multiplica por 1.5 em capitaoService.js. Confirmado: Cartola FC 2026 usa 1.5x (LESSONS.md 2026-02-26)."
     },
 
     "coleta": {

@@ -51,7 +51,8 @@ export async function buscarCapitaoRodada(timeId, rodada, pontuadosMap = null) {
     }
 
     // pontos_num da API é o valor BRUTO → multiplicar por 1.5 (bônus capitão)
-    let pontuacao = (capitao.pontos || 0) * 1.5;
+    // ✅ Fix A3: Truncar resultado para evitar drift de float na acumulação
+    let pontuacao = Math.trunc(((capitao.pontos || 0) * 1.5) * 100) / 100;
     let nome = capitao.nome;
     let jogou = null; // null = rodada finalizada, true/false = parcial
 
@@ -60,7 +61,8 @@ export async function buscarCapitaoRodada(timeId, rodada, pontuadosMap = null) {
       const pontuado = pontuadosMap[String(capitaoId)];
       if (pontuado) {
         // Capitão já jogou - pontuação bruta x1.5 (bônus capitão)
-        pontuacao = (pontuado.pontuacao || 0) * 1.5;
+        // ✅ Fix A3: Truncar resultado para evitar drift de float
+        pontuacao = Math.trunc(((pontuado.pontuacao || 0) * 1.5) * 100) / 100;
         nome = pontuado.apelido || nome;
         jogou = true;
       } else {
@@ -148,7 +150,7 @@ export async function calcularEstatisticasCapitao(ligaId, temporada, timeId, rod
 
   estatisticas.capitaes_distintos = capitaesUsados.size;
   estatisticas.media_capitao = estatisticas.rodadas_jogadas > 0
-    ? estatisticas.pontuacao_total / estatisticas.rodadas_jogadas
+    ? Math.trunc((estatisticas.pontuacao_total / estatisticas.rodadas_jogadas) * 100) / 100
     : 0;
 
   return estatisticas;
@@ -216,9 +218,21 @@ export async function consolidarRankingCapitao(ligaId, temporada, rodadaFinal = 
   // Ordenar por pontuação (descendente)
   dadosCapitaes.sort((a, b) => b.pontuacao_total - a.pontuacao_total);
 
-  // Atribuir posições e premiações
-  const config = await import('../config/rules/capitao_luxo.json', { assert: { type: 'json' } });
-  const premiacoes = config.default.premiacao;
+  // ✅ Fix A5: Premiação dinâmica via ModuleConfig (wizard admin), fallback para JSON
+  let premiacoes;
+  try {
+    const ModuleConfig = (await import('../models/ModuleConfig.js')).default;
+    const moduleConfig = await ModuleConfig.buscarConfig(ligaId, 'capitao_luxo', temporada);
+    if (moduleConfig?.wizard_respostas?.premiacao) {
+      premiacoes = moduleConfig.wizard_respostas.premiacao;
+    }
+  } catch (e) {
+    console.warn(`${LOG_PREFIX} Erro ao buscar ModuleConfig, usando JSON padrão:`, e.message);
+  }
+  if (!premiacoes) {
+    const config = await import('../config/rules/capitao_luxo.json', { assert: { type: 'json' } });
+    premiacoes = config.default.premiacao;
+  }
 
   dadosCapitaes.forEach((dado, index) => {
     dado.posicao_final = index + 1;

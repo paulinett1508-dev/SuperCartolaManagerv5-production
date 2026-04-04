@@ -1197,6 +1197,10 @@ class ArtilheiroCampeaoController {
                 }
             }
 
+            // ✅ v5.4: Fix C1 — Determinar se é parcial baseado em atletasPontuados
+            // Se atletasPontuados foi passado, a rodada está em andamento → marcar como parcial
+            const isParcial = atletasPontuados != null;
+
             // ✅ v5.2: Inclui temporada no upsert
             await GolsConsolidados.findOneAndUpdate(
                 { ligaId, timeId, rodada, temporada: CURRENT_SEASON },
@@ -1209,13 +1213,13 @@ class ArtilheiroCampeaoController {
                     golsContra,
                     saldo: golsPro - golsContra,
                     jogadores,
-                    parcial: false,
+                    parcial: isParcial, // ✅ v5.4: Fix — era hardcoded false, agora reflete estado real
                     dataColeta: new Date(),
                 },
                 { upsert: true, new: true },
             );
 
-            return { golsPro, golsContra, jogadores, salvo: true };
+            return { golsPro, golsContra, jogadores, salvo: true, parcial: isParcial };
         } catch (error) {
             throw error;
         }

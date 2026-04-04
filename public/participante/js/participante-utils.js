@@ -56,7 +56,8 @@ function parseMoedaBR(valor) {
 function truncarPontos(valor) {
     const num = parseFloat(valor) || 0;
     // Trunca para 2 casas decimais (não arredonda)
-    const truncado = Math.floor(num * 100) / 100;
+    // ✅ Fix: Math.trunc (não Math.floor) — Math.floor trunca errado para negativos (-3.456 → -3.46)
+    const truncado = Math.trunc(num * 100) / 100;
     return truncado.toLocaleString("pt-BR", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,

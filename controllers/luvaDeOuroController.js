@@ -266,26 +266,26 @@ class LuvaDeOuroController {
       const Goleiros = (await import("../models/Goleiros.js")).default;
 
       // Buscar dados no MongoDB
-      const totalRegistros = await Goleiros.countDocuments({ ligaId });
+      const filtroBase = { ligaId, temporada: CURRENT_SEASON };
+      const totalRegistros = await Goleiros.countDocuments(filtroBase);
       const registrosComGoleiro = await Goleiros.countDocuments({
-        ligaId,
-        goleiroNome: { $ne: null, $ne: "Sem goleiro" },
+        ...filtroBase,
+        goleiroNome: { $nin: [null, "Sem goleiro"] }, // ✅ v3.1: Fix $ne duplicado → $nin
       });
       const registrosComPontos = await Goleiros.countDocuments({
-        ligaId,
+        ...filtroBase,
         pontos: { $gt: 0 },
       });
 
-      const rodadasDisponiveis = await Goleiros.distinct("rodada", { ligaId });
-      const participantes = await Goleiros.distinct("participanteId", {
-        ligaId,
-      });
+      const rodadasDisponiveis = await Goleiros.distinct("rodada", filtroBase);
+      const participantes = await Goleiros.distinct("participanteId", filtroBase);
 
       // Buscar alguns exemplos
-      const exemplos = await Goleiros.find({ ligaId })
+      const exemplos = await Goleiros.find(filtroBase)
         .limit(5)
         .sort({ rodada: -1 })
-        .select("participanteNome rodada goleiroNome pontos dataColeta");
+        .select("participanteNome rodada goleiroNome pontos dataColeta")
+        .lean();
 
       const diagnostico = {
         ligaId,
@@ -733,11 +733,12 @@ class LuvaDeOuroController {
       // Buscar dados do participante
       const dadosParticipante = await Goleiros.find({
         ligaId,
+        temporada: CURRENT_SEASON, // ✅ v3.1: Filtro temporada obrigatório
         participanteId: timeId,
         rodada: { $gte: rodadaInicio, $lte: rodadaFim },
       })
         .sort({ rodada: 1 })
-        .exec();
+        .lean();
 
       if (dadosParticipante.length === 0) {
         return res.json({
@@ -775,13 +776,14 @@ class LuvaDeOuroController {
       const rodadasComGoleiro = rodadas.filter(
         (r) => r.goleiroNome && r.goleiroNome !== "Sem goleiro",
       ).length;
-      const pontosValidos = rodadas
-        .filter((r) => r.pontos > 0)
+      // ✅ v3.1: Fix C2 — Incluir pontos negativos no cálculo (goleiros frequentemente têm pontos < 0)
+      const pontosComGoleiro = rodadas
+        .filter((r) => r.goleiroNome && r.goleiroNome !== "Sem goleiro")
         .map((r) => r.pontos);
 
       const estatisticas = {
-        melhorRodada: pontosValidos.length > 0 ? Math.max(...pontosValidos) : 0,
-        piorRodada: pontosValidos.length > 0 ? Math.min(...pontosValidos) : 0,
+        melhorRodada: pontosComGoleiro.length > 0 ? Math.max(...pontosComGoleiro) : 0,
+        piorRodada: pontosComGoleiro.length > 0 ? Math.min(...pontosComGoleiro) : 0,
         mediaPontos: rodadas.length > 0 ? totalPontos / rodadas.length : 0,
         rodadasComGoleiro,
       };

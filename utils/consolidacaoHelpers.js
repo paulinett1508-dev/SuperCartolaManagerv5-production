@@ -119,6 +119,7 @@ export async function getRankingArtilheiroCampeao(ligaId, rodadaNum) {
         }).lean();
 
         // Agrupar por time
+        // ✅ Fix: Campos corrigidos para corresponder ao schema Gols.js (nome, gols, timeId)
         const golsPorTime = {};
         gols.forEach((g) => {
             const timeId = g.timeId;
@@ -131,13 +132,13 @@ export async function getRankingArtilheiroCampeao(ligaId, rodadaNum) {
                     jogadores: {},
                 };
             }
-            golsPorTime[timeId].gols += g.quantidade || 1;
+            golsPorTime[timeId].gols += g.gols || 1; // ✅ Fix: era "quantidade" (inexistente) → "gols"
 
             // Contar por jogador
-            const jogador = g.jogadorNome || "Desconhecido";
+            const jogador = g.nome || "Desconhecido"; // ✅ Fix: era "jogadorNome" (inexistente) → "nome"
             golsPorTime[timeId].jogadores[jogador] =
                 (golsPorTime[timeId].jogadores[jogador] || 0) +
-                (g.quantidade || 1);
+                (g.gols || 1); // ✅ Fix: era "quantidade" → "gols"
         });
 
         // Converter para array e ordenar

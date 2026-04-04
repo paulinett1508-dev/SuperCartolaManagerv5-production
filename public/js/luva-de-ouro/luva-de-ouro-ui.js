@@ -566,7 +566,7 @@ function renderizarEstatisticas(ranking, rodadasExibir, dados) {
       <div class="stat-card">
         <span class="stat-icon"><span class="material-symbols-outlined" style="color: #ffd700;">star</span></span>
         <span class="stat-label">Melhor Goleiro</span>
-        <span class="stat-value">${melhorPontuacao.toFixed(2)} pts</span>
+        <span class="stat-value">${(Math.trunc(melhorPontuacao * 100) / 100).toFixed(2)} pts</span>
         <span class="stat-detail">${escapeHtml(melhorCartoleiro)} (R${melhorRodada})</span>
       </div>
       <div class="stat-card">
