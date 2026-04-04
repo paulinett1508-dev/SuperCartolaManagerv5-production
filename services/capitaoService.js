@@ -149,6 +149,8 @@ export async function calcularEstatisticasCapitao(ligaId, temporada, timeId, rod
   }
 
   estatisticas.capitaes_distintos = capitaesUsados.size;
+  // ✅ Fix: Truncar total acumulado para eliminar float drift após N rodadas
+  estatisticas.pontuacao_total = Math.trunc(estatisticas.pontuacao_total * 100) / 100;
   estatisticas.media_capitao = estatisticas.rodadas_jogadas > 0
     ? Math.trunc((estatisticas.pontuacao_total / estatisticas.rodadas_jogadas) * 100) / 100
     : 0;

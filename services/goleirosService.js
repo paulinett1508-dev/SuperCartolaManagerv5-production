@@ -939,7 +939,7 @@ async function obterDetalhesParticipante(
       participanteId: participanteId,
       rodada: { $gte: rodadaInicio, $lte: rodadaFimEfetiva }, // ✅ Limitado
       rodadaConcluida: true,
-    }).sort({ rodada: 1 });
+    }).sort({ rodada: 1 }).lean();
 
     if (dadosParticipante.length === 0) {
       throw new Error(
@@ -963,7 +963,7 @@ async function obterDetalhesParticipante(
         rodada: item.rodada,
         goleiroNome: item.goleiroNome || "Sem goleiro",
         goleiroClube: item.goleiroClube || "N/A",
-        pontos: Math.floor(pontos * 100) / 100,
+        pontos: Math.trunc(pontos * 100) / 100,
       });
     });
 
@@ -977,14 +977,14 @@ async function obterDetalhesParticipante(
         `Participante ${participanteId}`,
       rodadaInicio,
       rodadaFim: rodadaFimEfetiva,
-      totalPontos: Math.floor(totalPontos * 100) / 100,
+      totalPontos: Math.trunc(totalPontos * 100) / 100,
       totalRodadas,
       rodadas,
       estatisticas: {
-        melhorRodada: Math.floor(melhorRodada * 100) / 100,
+        melhorRodada: Math.trunc(melhorRodada * 100) / 100,
         piorRodada:
-          piorRodada === Infinity ? 0 : Math.floor(piorRodada * 100) / 100,
-        mediaPontos: Math.floor(mediaPontos * 100) / 100,
+          piorRodada === Infinity ? 0 : Math.trunc(piorRodada * 100) / 100,
+        mediaPontos: Math.trunc(mediaPontos * 100) / 100,
       },
       // ✅ NOVO: Status do participante
       ativo: isAtivo,

@@ -106,7 +106,7 @@ const LuvaDeOuroUtils = {
           '<td style="padding: 8px; text-align: center; font-weight: bold; color: ' +
           corPontos +
           ';">' +
-          Math.floor(rodada.pontos * 100) / 100 +
+          Math.trunc(rodada.pontos * 100) / 100 +
           "</td>" +
           "</tr>"
         );
@@ -131,7 +131,7 @@ const LuvaDeOuroUtils = {
       '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px;">' +
       '<div style="background: #27ae60; color: white; padding: 12px; border-radius: 8px; text-align: center;">' +
       '<div style="font-size: 20px; font-weight: bold;">' +
-      Math.floor(dados.totalPontos * 100) / 100 +
+      Math.trunc(dados.totalPontos * 100) / 100 +
       "</div>" +
       '<div style="font-size: 12px; opacity: 0.9;">Total de Pontos</div>' +
       "</div>" +
@@ -143,13 +143,13 @@ const LuvaDeOuroUtils = {
       "</div>" +
       '<div style="background: #f39c12; color: white; padding: 12px; border-radius: 8px; text-align: center;">' +
       '<div style="font-size: 20px; font-weight: bold;">' +
-      Math.floor(dados.estatisticas.melhorRodada * 100) / 100 +
+      Math.trunc(dados.estatisticas.melhorRodada * 100) / 100 +
       "</div>" +
       '<div style="font-size: 12px; opacity: 0.9;">Melhor Rodada</div>' +
       "</div>" +
       '<div style="background: #e74c3c; color: white; padding: 12px; border-radius: 8px; text-align: center;">' +
       '<div style="font-size: 20px; font-weight: bold;">' +
-      Math.floor(dados.estatisticas.mediaPontos * 100) / 100 +
+      Math.trunc(dados.estatisticas.mediaPontos * 100) / 100 +
       "</div>" +
       '<div style="font-size: 12px; opacity: 0.9;">Média por Rodada</div>' +
       "</div>" +
@@ -458,7 +458,7 @@ const LuvaDeOuroUtils = {
     const topN = dados.ranking.slice(0, 15);
     const lider = topN[0] || {};
     const pontosLider = lider.pontosTotais
-      ? Math.floor(lider.pontosTotais * 100) / 100
+      ? Math.trunc(lider.pontosTotais * 100) / 100
       : 0;
     const nomeLider = lider.participanteNome || "-";
 
@@ -489,14 +489,14 @@ const LuvaDeOuroUtils = {
         
         // ✅ Pontos da última rodada com cor condicional
         const pontosUltimaRodada = item.ultimaRodada && item.ultimaRodada.pontos
-          ? Math.floor(item.ultimaRodada.pontos * 100) / 100
+          ? Math.trunc(item.ultimaRodada.pontos * 100) / 100
           : 0;
         const corPontosRodada = pontosUltimaRodada >= 0 ? "#4CAF50" : "#e74c3c";
         const goleiroPontos = pontosUltimaRodada !== 0
           ? '<span style="color: ' + corPontosRodada + ';">' + pontosUltimaRodada + "pts</span>"
           : "";
 
-        const pontosTotal = Math.floor(item.pontosTotais * 100) / 100;
+        const pontosTotal = Math.trunc(item.pontosTotais * 100) / 100;
 
         return (
           '<tr style="background: ' +
@@ -628,7 +628,7 @@ const LuvaDeOuroUtils = {
           '<td style="padding: 10px 6px; text-align: center; font: 700 14px Inter; color: ' +
           pontosCor +
           ';">' +
-          Math.floor(rodada.pontos * 100) / 100 +
+          Math.trunc(rodada.pontos * 100) / 100 +
           "</td>" +
           "</tr>"
         );
@@ -649,7 +649,7 @@ const LuvaDeOuroUtils = {
       '<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px;">' +
       '<div style="background: linear-gradient(135deg, #27ae60, #2ecc71); padding: 12px; border-radius: 6px; text-align: center; color: white;">' +
       '<div style="font: 700 18px Inter;">' +
-      Math.floor(dados.totalPontos * 100) / 100 +
+      Math.trunc(dados.totalPontos * 100) / 100 +
       "</div>" +
       '<div style="font: 600 9px Inter; margin-top: 2px; opacity: 0.9;">TOTAL</div>' +
       "</div>" +
@@ -661,13 +661,13 @@ const LuvaDeOuroUtils = {
       "</div>" +
       '<div style="background: linear-gradient(135deg, #f39c12, #e67e22); padding: 12px; border-radius: 6px; text-align: center; color: white;">' +
       '<div style="font: 700 18px Inter;">' +
-      Math.floor(dados.estatisticas.melhorRodada * 100) / 100 +
+      Math.trunc(dados.estatisticas.melhorRodada * 100) / 100 +
       "</div>" +
       '<div style="font: 600 9px Inter; margin-top: 2px; opacity: 0.9;">MELHOR</div>' +
       "</div>" +
       '<div style="background: linear-gradient(135deg, #e74c3c, #c0392b); padding: 12px; border-radius: 6px; text-align: center; color: white;">' +
       '<div style="font: 700 18px Inter;">' +
-      Math.floor(dados.estatisticas.mediaPontos * 100) / 100 +
+      Math.trunc(dados.estatisticas.mediaPontos * 100) / 100 +
       "</div>" +
       '<div style="font: 600 9px Inter; margin-top: 2px; opacity: 0.9;">MÉDIA</div>' +
       "</div>" +
@@ -693,7 +693,7 @@ const LuvaDeOuroUtils = {
       '<div style="font: 700 11px Inter; color: #FFD700;">⭐ MELHOR RODADA: R' +
       numeroRodadaMelhor +
       " com " +
-      Math.floor(dados.estatisticas.melhorRodada * 100) / 100 +
+      Math.trunc(dados.estatisticas.melhorRodada * 100) / 100 +
       " pontos</div>" +
       "</div>"
     );
