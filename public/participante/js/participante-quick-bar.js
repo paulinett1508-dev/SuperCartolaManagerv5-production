@@ -554,8 +554,11 @@ class QuickAccessBar {
 
     navegarPara(modulo) {
         if (window.participanteNav) {
-            // Reset debounce para garantir que cliques explícitos na Quick Bar sempre navegam
-            window.participanteNav._ultimaNavegacao = 0;
+            // ✅ v5.9: Respeitar double-init guard — se já está carregando este módulo, ignorar
+            if (window.participanteNav._carregandoModulo === modulo) {
+                if (window.Log) Log.debug('QUICK-BAR', `⏸️ Módulo ${modulo} já em carregamento, ignorando`);
+                return;
+            }
             window.participanteNav.navegarPara(modulo);
             this.moduloAtual = modulo;
         }
