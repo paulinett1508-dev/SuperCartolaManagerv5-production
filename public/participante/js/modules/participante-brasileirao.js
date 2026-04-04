@@ -290,8 +290,11 @@ function _buildStatusBadge(j) {
     if (j.status === 'encerrado') {
         return `<span class="brasileirao-badge brasileirao-badge--enc">Encerrado</span>`;
     }
-    // agendado / a_definir
-    return `<span class="brasileirao-badge brasileirao-badge--agd">${escapeHtml(j.horario || 'A definir')}</span>`;
+    // agendado / a_definir — horário já aparece no header, badge mostra só status
+    if (j.status === 'adiado') {
+        return `<span class="brasileirao-badge brasileirao-badge--enc">Adiado</span>`;
+    }
+    return `<span class="brasileirao-badge brasileirao-badge--agd">${j.horario ? 'Agendado' : 'A definir'}</span>`;
 }
 
 /**
