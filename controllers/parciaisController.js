@@ -13,6 +13,7 @@ import Liga from "../models/Liga.js";
 import Time from "../models/Time.js";
 import scoutSnapshotService from "../services/scoutSnapshotService.js";
 import { CURRENT_SEASON } from "../config/seasons.js";
+import { truncarPontosNum } from "../utils/type-helpers.js";
 
 const CARTOLA_API_BASE = "https://api.cartola.globo.com";
 const TIMEOUT_MS = 10_000;
@@ -250,8 +251,8 @@ function calcularPontuacao(dadosEscalacao, atletasPontuados, time) {
     nome_cartola: dadosEscalacao.time?.nome_cartola || time.nome_cartola || "N/D",
     escudo: dadosEscalacao.time?.url_escudo_png || time.escudo || null,
     clube_id: time.clube_id || null,
-    pontos,
-    pontos_parcial: pontos,
+    pontos: truncarPontosNum(pontos),
+    pontos_parcial: truncarPontosNum(pontos),
     patrimonio: dadosEscalacao.time?.patrimonio || 0,
     rodadaNaoJogada: false,
     ativo: true,
