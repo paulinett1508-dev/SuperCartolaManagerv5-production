@@ -398,12 +398,9 @@ function iniciarAutoRefresh() {
         }
 
         try {
-            if (window.Log) Log.info("[PONTOS-CORRIDOS] 🔄 Atualizando parciais...");
-
-            // Buscar status do mercado (pode ter mudado para aberto)
-            await buscarStatusMercado();
-            if (estadoPC.mercadoAberto) {
-                if (window.Log) Log.info("[PONTOS-CORRIDOS] ✅ Mercado abriu, parando auto-refresh");
+            // ✅ v2.0: Usar MatchdayService para checar fim de rodada (elimina req duplicada)
+            const MS = window.MatchdayService;
+            if (MS && !MS.isActive) {
                 pararAutoRefresh();
                 return;
             }
@@ -421,14 +418,11 @@ function iniciarAutoRefresh() {
                     } catch (e) { /* ignore */ }
                 }
 
-                // Re-renderizar apenas as views (sem resetar seletor/header)
                 renderizarView();
                 renderizarCardDesempenho();
-
-                if (window.Log) Log.info("[PONTOS-CORRIDOS] ✅ Parciais atualizadas");
             }
         } catch (e) {
-            if (window.Log) Log.warn("[PONTOS-CORRIDOS] ⚠️ Erro no auto-refresh:", e.message);
+            if (window.Log) Log.warn("[PONTOS-CORRIDOS] Erro no auto-refresh:", e.message);
         }
     }, REFRESH_INTERVAL_MS);
 }

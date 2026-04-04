@@ -21,7 +21,7 @@ let _refreshInterval = null;
 let _wasLanterna = false;
 let _isLiveMode = false;
 const REFRESH_INTERVAL_MS = 60_000;    // 60s normal
-const REFRESH_INTERVAL_LIVE_MS = 30_000; // 30s ao vivo
+const REFRESH_INTERVAL_LIVE_MS = 45_000; // 45s ao vivo (reduzido de 30s para diminuir carga)
 
 // =====================================================================
 // FUNÇÃO PRINCIPAL - EXPORTADA PARA NAVIGATION
