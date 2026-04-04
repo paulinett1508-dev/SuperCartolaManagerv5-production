@@ -389,7 +389,7 @@ function renderizarRanking(ranking) {
                 html += `<div class="capitao-collapse-rodada">
                     <span class="capitao-collapse-rodada-badge" style="color:${cor};">R${r.rodada}</span>
                     <span class="capitao-collapse-rodada-info">${r.capitao}</span>
-                    <span class="capitao-collapse-rodada-pts" style="color:${corPts};">${r.pontos.toFixed(2)}</span>
+                    <span class="capitao-collapse-rodada-pts" style="color:${corPts};">${(Math.trunc((r.pontos || 0) * 100) / 100).toFixed(2)}</span>
                 </div>`;
             });
         } else {
@@ -629,7 +629,8 @@ window._abrirHistoricoCapitao = function(participante) {
         window.CapitaoHistoricoModal.abrir(participante);
     } else {
         console.error('❌ [PARTICIPANTE-CAPITAO] Modal de histórico não carregado');
-        alert('Erro ao carregar histórico. Atualize a página.');
+        if (window.ErrorToast) window.ErrorToast.show('Erro ao carregar histórico. Atualize a página.', { tipo: 'erro' });
+        else console.error('Erro ao carregar histórico do capitão');
     }
 };
 

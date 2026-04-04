@@ -129,19 +129,28 @@ export const extrairGolsDaRodada = async function (req, res) {
           const atletaId = atleta.atleta_id;
           const apelido = atleta.apelido;
 
-          // Melhorar a conversão do campo G para número
+          // Melhorar a conversão dos campos G e GC para número
           let G = 0;
+          let GC = 0; // ✅ Fix: Coletar golsContra (GC) que estava sendo ignorado
           try {
             // Verificação mais robusta para o campo G
             if (atleta.scout && atleta.scout.G !== undefined) {
-              // Garantir que G seja sempre um número válido
               G = Number(atleta.scout.G);
-              // Se a conversão resultar em NaN, definir como 0
               if (isNaN(G)) {
                 logger.warn(
                   `[Time ${timeId}] Valor inválido para gols do atleta ${apelido}: ${atleta.scout.G}, definindo como 0`,
                 );
                 G = 0;
+              }
+            }
+            // ✅ Fix: Coletar GC (golsContra)
+            if (atleta.scout && atleta.scout.GC !== undefined) {
+              GC = Number(atleta.scout.GC);
+              if (isNaN(GC)) {
+                logger.warn(
+                  `[Time ${timeId}] Valor inválido para golsContra do atleta ${apelido}: ${atleta.scout.GC}, definindo como 0`,
+                );
+                GC = 0;
               }
             }
           } catch (convErr) {
@@ -150,18 +159,20 @@ export const extrairGolsDaRodada = async function (req, res) {
               convErr.message,
             );
             G = 0;
+            GC = 0;
           }
 
           logger.log(
             `[Time ${timeId}] Atleta ${apelido} (ID: ${atletaId}) - Gols: ${G} (${typeof G})`,
           );
 
-          if (G > 0) {
+          if (G > 0 || GC > 0) { // ✅ Fix: Também registrar atletas com golsContra
             atletasComGolNoTime++;
             atletasComGols.push({
               atletaId,
               apelido,
               G,
+              GC, // ✅ Fix: Incluir GC
               timeId,
               rodada,
               nome_cartola: nomeCartola,
@@ -206,6 +217,8 @@ export const extrairGolsDaRodada = async function (req, res) {
                     },
                     {
                       gols: G,
+                      golsContra: GC, // ✅ Fix: Salvar GC
+                      golsLiquidos: G - GC, // ✅ Fix: Calcular saldo
                       nome: apelido,
                       timeId: timeId,
                       pontos: atleta.pontos_num || 0,
@@ -246,7 +259,8 @@ export const extrairGolsDaRodada = async function (req, res) {
                     nome: apelido,
                     timeId: timeId,
                     gols: G,
-                    golsContra: 0,
+                    golsContra: GC, // ✅ Fix: Salvar GC (era hardcoded 0)
+                    golsLiquidos: G - GC, // ✅ Fix: Calcular saldo
                     pontos: atleta.pontos_num || 0,
                     posicao: atleta.posicao_id,
                     clube: atleta.clube_id,

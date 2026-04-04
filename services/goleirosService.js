@@ -1,4 +1,5 @@
-// ✅ services/goleirosService.js v3.0
+// ✅ services/goleirosService.js v3.1
+// v3.1: FIX CRÍTICO - Adicionado filtro temporada em TODAS queries Goleiros (auditoria 2026-04-04)
 // v3.0: Participantes dinâmicos via Liga model, filtro temporada, desempate, sem hardcode
 // v2.0: Fix API 2025 + Suporte a inativos
 
@@ -383,8 +384,9 @@ export async function coletarDadosGoleiros(ligaId, rodadaInicio, rodadaFim) {
       const registrosExistentes = await Goleiros.find({
         ligaId,
         rodada,
+        temporada: CURRENT_SEASON, // ✅ v3.1: Filtro temporada obrigatório
         rodadaConcluida: true, // ✅ Só considera concluídas
-      }).exec();
+      }).lean();
 
       // ✅ CORREÇÃO: Só pular se TODOS os participantes foram processados E têm dados válidos E rodada concluída
       const participantesProcessados = registrosExistentes.filter(
@@ -457,7 +459,7 @@ export async function coletarDadosGoleiros(ligaId, rodadaInicio, rodadaFim) {
             };
 
             const resultado = await Goleiros.findOneAndUpdate(
-              { ligaId, participanteId: participante.id, rodada },
+              { ligaId, participanteId: participante.id, rodada, temporada: CURRENT_SEASON },
               registro,
               { upsert: true, new: true },
             );
@@ -511,6 +513,7 @@ async function gerarRankingGoleiros(ligaId, rodadaInicio, rodadaFim) {
     // Buscar todos os dados da faixa de rodadas
     const dados = await Goleiros.find({
       ligaId,
+      temporada: CURRENT_SEASON, // ✅ v3.1: Filtro temporada obrigatório
       rodada: { $gte: rodadaInicio, $lte: rodadaFim },
       rodadaConcluida: true,
     }).lean();
@@ -659,6 +662,7 @@ export async function obterRankingGoleiros(
     // Verificar dados existentes (incluindo parciais)
     const registrosExistentes = await Goleiros.find({
       ligaId,
+      temporada: CURRENT_SEASON, // ✅ v3.1: Filtro temporada obrigatório
       rodada: { $gte: rodadaInicio, $lte: rodadaFim },
       // ✅ Buscar todos, não só concluídos
     }).lean();
@@ -743,9 +747,11 @@ export async function obterRankingGoleiros(
       // Buscar dados do participante (limitado para inativos)
       const dadosParticipante = await Goleiros.find({
         ligaId,
+        temporada: CURRENT_SEASON, // ✅ v3.1: Filtro temporada obrigatório
         participanteId: timeId,
         rodada: { $gte: rodadaInicio, $lte: rodadaFimParticipante }, // ✅ Limitado
-      }).sort({ rodada: 1 });
+        rodadaConcluida: true, // ✅ v3.1: Fix S2 — Não misturar parciais com consolidados
+      }).sort({ rodada: 1 }).lean();
 
       // Calcular estatísticas
       const pontosTotais = dadosParticipante.reduce(
@@ -929,6 +935,7 @@ async function obterDetalhesParticipante(
     // Buscar dados do participante
     const dadosParticipante = await Goleiros.find({
       ligaId: ligaId,
+      temporada: CURRENT_SEASON, // ✅ v3.1: Filtro temporada obrigatório
       participanteId: participanteId,
       rodada: { $gte: rodadaInicio, $lte: rodadaFimEfetiva }, // ✅ Limitado
       rodadaConcluida: true,
@@ -998,7 +1005,7 @@ export async function consolidarRodada(ligaId, rodada) {
 
   try {
     const resultado = await Goleiros.updateMany(
-      { ligaId, rodada: parseInt(rodada, 10), rodadaConcluida: false },
+      { ligaId, temporada: CURRENT_SEASON, rodada: parseInt(rodada, 10), rodadaConcluida: false },
       { $set: { rodadaConcluida: true } },
     );
 

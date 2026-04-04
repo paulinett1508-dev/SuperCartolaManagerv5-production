@@ -20,6 +20,7 @@
  * onMarketClose e onLiveUpdate rodam em background para não bloquear o orchestrator.
  */
 import mongoose from 'mongoose';
+import fetch from 'node-fetch';
 import BaseManager from './BaseManager.js';
 import ArtilheiroCampeaoController from '../../../controllers/artilheiroCampeaoController.js';
 import Liga from '../../../models/Liga.js';
@@ -43,20 +44,33 @@ export default class ArtilheiroManager extends BaseManager {
     }
 
     // Busca participantes ativos da liga (para iteração de coleta)
+    // ✅ Fix A10: Suportar tanto liga.participantes quanto liga.times (consistência com controller)
     async _getParticipantes(ligaId) {
         const liga = await Liga.findById(ligaId).lean();
-        if (!liga || !liga.participantes) return [];
-        return liga.participantes.filter(p => p.ativo !== false);
+        if (!liga) return [];
+
+        // Prioridade: liga.participantes (contém nome, time_id, etc.)
+        if (liga.participantes && liga.participantes.length > 0) {
+            return liga.participantes.filter(p => p.ativo !== false);
+        }
+
+        // Fallback: liga.times (array de IDs) — mapear para formato compatível
+        if (liga.times && liga.times.length > 0) {
+            return liga.times.map(id => ({ time_id: id, ativo: true }));
+        }
+
+        return [];
     }
 
     // Dispara coleta de gols para todos os participantes em background
-    _dispararColeta(ligaId, rodada) {
+    // ✅ v5.4: Fix C3 — Aceita atletasPontuados para coleta live correta
+    _dispararColeta(ligaId, rodada, atletasPontuados = null) {
         return this._getParticipantes(ligaId)
             .then(async participantes => {
-                console.log(`[ARTILHEIRO-MANAGER] Coletando R${rodada}: ${participantes.length} participantes`);
+                console.log(`[ARTILHEIRO-MANAGER] Coletando R${rodada}: ${participantes.length} participantes${atletasPontuados ? ' (com scouts live)' : ''}`);
                 for (const p of participantes) {
                     try {
-                        await ArtilheiroCampeaoController.coletarDadosRodada(ligaId, p.time_id, rodada);
+                        await ArtilheiroCampeaoController.coletarDadosRodada(ligaId, p.time_id, rodada, atletasPontuados);
                     } catch (err) {
                         console.error(`[ARTILHEIRO-MANAGER] Erro coleta ${p.nome || p.time_id} R${rodada}:`, err.message);
                     }
@@ -70,6 +84,22 @@ export default class ArtilheiroManager extends BaseManager {
             });
     }
 
+    // ✅ v5.4: Buscar pontuados para coleta live
+    async _buscarPontuados() {
+        try {
+            const resp = await fetch('https://api.cartola.globo.com/atletas/pontuados', {
+                headers: { 'User-Agent': 'Super-Cartola-Manager/1.0', 'Accept': 'application/json' },
+                timeout: 10000,
+            });
+            if (!resp.ok) return null;
+            const data = await resp.json();
+            return data.atletas || null;
+        } catch (err) {
+            console.warn(`[ARTILHEIRO-MANAGER] Erro ao buscar pontuados:`, err.message);
+            return null;
+        }
+    }
+
     // Mercado fechou: inicia coleta em background
     async onMarketClose(ctx) {
         this._coletaAtiva = true;
@@ -77,7 +107,9 @@ export default class ArtilheiroManager extends BaseManager {
 
         console.log(`[ARTILHEIRO-MANAGER] onMarketClose: iniciando coleta R${rodada} liga ${ligaId}`);
 
-        this._coletaPromise = this._dispararColeta(ligaId, rodada);
+        // ✅ v5.4: Fix C3 — Buscar pontuados para coleta live correta
+        const atletasPontuados = await this._buscarPontuados();
+        this._coletaPromise = this._dispararColeta(ligaId, rodada, atletasPontuados);
 
         return { coletaIniciada: true, rodada };
     }
@@ -94,7 +126,9 @@ export default class ArtilheiroManager extends BaseManager {
         const { ligaId, rodada } = ctx;
         console.log(`[ARTILHEIRO-MANAGER] onLiveUpdate: atualizando parciais R${rodada}`);
 
-        this._coletaPromise = this._dispararColeta(ligaId, rodada);
+        // ✅ v5.4: Fix C3 — Buscar pontuados para coleta live correta
+        const atletasPontuados = await this._buscarPontuados();
+        this._coletaPromise = this._dispararColeta(ligaId, rodada, atletasPontuados);
 
         return { coletando: true, rodada };
     }
