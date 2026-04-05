@@ -1286,6 +1286,11 @@ async function selecionarRodada(numeroRodada, isParcial = false) {
         Log.info(`[PARTICIPANTE-RODADAS] 📊 Cache: ${todasRodadasCache.length} rodadas em cache`);
 
     rodadaSelecionada = numeroRodada;
+
+    // ✅ FIX: Atualizar título EAGERLY — garante "Rodada N" em TODOS os paths (sucesso e erro)
+    const tituloEl = document.getElementById("rodadaTitulo");
+    if (tituloEl) tituloEl.textContent = `Rodada ${numeroRodada}`;
+
     ParciaisModule.pararAutoRefresh?.();
     PollingInteligenteModule.parar?.();
     atualizarIndicadorAutoRefresh({ ativo: false });
@@ -1300,7 +1305,7 @@ async function selecionarRodada(numeroRodada, isParcial = false) {
         rankingContainer.innerHTML = `
             <div style="text-align: center; padding: 40px;">
                 <div class="loading-spinner-rodadas"></div>
-                <p style="color: #9ca3af; margin-top: 16px;">Carregando...</p>
+                <p style="color: var(--app-text-muted); margin-top: 16px;">Carregando...</p>
             </div>
         `;
     }
@@ -1353,9 +1358,13 @@ async function selecionarRodada(numeroRodada, isParcial = false) {
 
                 if (rankingContainer) {
                     rankingContainer.innerHTML = `
-                        <div style="text-align: center; padding: 40px; color: #6b7280;">
+                        <div style="text-align: center; padding: 40px; color: var(--app-text-muted);">
                             <span class="material-icons" style="font-size: 48px; margin-bottom: 16px;">inbox</span>
                             <p>Dados desta rodada não disponíveis</p>
+                            <button onclick="selecionarRodada(${numeroRodada}, false)"
+                                    style="margin-top: 16px; padding: 10px 20px; background: var(--app-primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                Tentar Novamente
+                            </button>
                         </div>
                     `;
                 }
@@ -1413,7 +1422,7 @@ async function carregarERenderizarParciais(numeroRodada) {
                     <span class="material-icons" style="font-size: 48px; margin-bottom: 16px;">error_outline</span>
                     <p>Erro ao carregar parciais</p>
                     <button onclick="selecionarRodada(${numeroRodada}, true)"
-                            style="margin-top: 16px; padding: 10px 20px; background: #E65100; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            style="margin-top: 16px; padding: 10px 20px; background: var(--app-primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
                         Tentar Novamente
                     </button>
                 </div>
