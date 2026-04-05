@@ -1239,7 +1239,7 @@ async function carregarFase(fase, ligaId) {
       typeof c.timeA?.pontos === 'number' && typeof c.timeB?.pontos === 'number'
     );
 
-    if (confrontosTemPontosReais && !isLive) {
+    if (confrontosTemPontosReais && !isLive && statusMercadoGlobal !== null) {
       await salvarFaseNoMongoDB(
         ligaId,
         edicaoAtual,
@@ -1248,7 +1248,7 @@ async function carregarFase(fase, ligaId) {
         rodada_atual,
       );
     } else {
-      console.warn(`[MATA-ORQUESTRADOR] ⚠️ Fase ${fase} com pontos null — NÃO salvando no MongoDB (evita cache stale)`);
+      console.warn(`[MATA-ORQUESTRADOR] ⚠️ Fase ${fase} não salva — pontos null, isLive ou statusMercado desconhecido`);
     }
 
     // Calcular valores dos confrontos (isPending ou isLive → valores=0)

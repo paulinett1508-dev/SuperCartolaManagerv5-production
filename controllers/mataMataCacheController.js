@@ -79,8 +79,58 @@ export const lerCacheMataMata = async (req, res) => {
             return res.status(404).json({ cached: false });
         }
 
-        // ── SISTEMA VIVO: enriquecer fase ao vivo com parciais em tempo real ──
+        // ── AUTO-CORREÇÃO DE BRACKET ──
         let dadosTorneio = cache.dados_torneio || {};
+        try {
+            const tamanhoTorneioCached = cache.tamanhoTorneio || 32;
+            const fasesOrdem = getFasesParaTamanho(tamanhoTorneioCached);
+            let precisaAtualizar = false;
+
+            for (let i = 1; i < fasesOrdem.length; i++) {
+                const fasePrev = fasesOrdem[i - 1];
+                const faseAtual = fasesOrdem[i];
+                const confrontosPrev = dadosTorneio[fasePrev];
+                const confrontosAtual = dadosTorneio[faseAtual];
+                if (!confrontosPrev?.length || !confrontosAtual?.length) break;
+                const prevTemPontosFinais = confrontosPrev.every(c =>
+                    typeof c.timeA?.pontos === 'number' && typeof c.timeB?.pontos === 'number'
+                );
+                if (!prevTemPontosFinais) break;
+                const vencedoresEsperados = [...confrontosPrev]
+                    .sort((a, b) => (a.jogo || 0) - (b.jogo || 0))
+                    .map((c, idx) => {
+                        const { vencedor } = determinarVencedor(c);
+                        return vencedor ? { ...vencedor, jogoAnterior: c.jogo || idx + 1 } : null;
+                    })
+                    .filter(Boolean);
+                const participantesNoFaseAtual = new Set(
+                    confrontosAtual.flatMap(c => [
+                        String(c.timeA?.timeId || c.timeA?.id || ''),
+                        String(c.timeB?.timeId || c.timeB?.id || '')
+                    ])
+                );
+                const inconsistente = vencedoresEsperados.some(v =>
+                    !participantesNoFaseAtual.has(String(v.timeId))
+                );
+                if (inconsistente) {
+                    logger.warn(`[CACHE-MATA] ⚠️ Ed.${edicao} fase "${faseAtual}": participantes incompatíveis com vencedores de "${fasePrev}". Auto-corrigindo...`);
+                    const numJogos = Math.floor(vencedoresEsperados.length / 2);
+                    dadosTorneio[faseAtual] = montarConfrontosFase(vencedoresEsperados, {}, numJogos, tamanhoTorneioCached);
+                    precisaAtualizar = true;
+                }
+            }
+            if (precisaAtualizar) {
+                logger.log(`[CACHE-MATA] 🔧 Persistindo bracket corrigido — Liga ${ligaId} Ed.${edicao}`);
+                await MataMataCache.findOneAndUpdate(
+                    { liga_id: ligaId, edicao: Number(edicao), temporada: temporadaFiltro },
+                    { $set: { dados_torneio: dadosTorneio, ultima_atualizacao: new Date() } }
+                );
+            }
+        } catch (correctionErr) {
+            logger.warn('[CACHE-MATA] ⚠️ Erro na auto-correção de bracket:', correctionErr.message);
+        }
+
+        // ── SISTEMA VIVO: enriquecer fase ao vivo com parciais em tempo real ──
         let aoVivo = false;
         let rodadaResposta = cache.rodada_atual;
 
