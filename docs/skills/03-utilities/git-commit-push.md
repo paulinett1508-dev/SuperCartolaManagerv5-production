@@ -1,6 +1,6 @@
 ---
 name: Git-Commit-Push
-description: Skill para commits e pushes automatizados no GitHub. Analisa mudanças, gera mensagens descritivas seguindo convenções, valida código e executa git push com segurança. Acionado por "faça um git push" ou "commite tudo". Visão full-stack senior dev.
+description: Skill para commits, pushes e sync total (local = remote = VPS Docker). Analisa mudanças, gera mensagens descritivas, valida código, executa push e verifica sincronização end-to-end dos 3 ambientes. Acionado por "faça um git push", "commite tudo" ou "sync total". Visão full-stack senior dev.
 ---
 
 # 🚀 GIT COMMIT & PUSH PROTOCOL
@@ -42,6 +42,18 @@ Automatizar commits e pushes com mensagens descritivas, validações de código 
 - "commitar"
 - "pushar"
 
+**Sync Total (verificação end-to-end):**
+- "sync total"
+- "full sync"
+- "sincronizar tudo"
+- "sincroniza tudo"
+- "sync ambientes"
+- "verifica sync"
+- "local = remoto = docker"
+- "tá tudo sincronizado?"
+- "verifica se tá atualizado"
+- "sync all environments"
+
 **Variações Curtas:**
 - "push isso"
 - "commita"
@@ -74,7 +86,18 @@ Automatizar commits e pushes com mensagens descritivas, validações de código 
 /^(antes\s*[\.,]?\s*)?(git\s*(e\s*)?)?((push|commit|commita|commitar|pushar|suba|subir|envie?|manda|versiona|sobe))/i
 /(push|commit|github|repo|git)\s*(isso|tudo|mudanças|alterações)?$/i
 /(só\s*falta|pode|agora|fecha\s*com)\s*(o\s*)?(push|commit)/i
+/(sync\s*(total|tudo|ambientes|all)|full\s*sync|sincroniza(r)?\s*tudo|verifica(r)?\s*sync)/i
+/(local\s*=\s*remoto|tá\s*tudo\s*sincronizado|tudo\s*atualizado)/i
 ```
+
+**Detecção de Flags:**
+```regex
+/--sync\b/i          → Ativa PHASE 5.6 completa (sync verification após push)
+/--verify-only\b/i   → Pula commit/push, executa APENAS PHASE 5.6 (check estado dos 3 ambientes)
+```
+Frases que implicam `--verify-only` automaticamente:
+- "tá tudo sincronizado?", "verifica sync", "verifica se tá atualizado"
+- Qualquer frase de sync SEM mudanças pendentes no git
 
 ### Quando Usar
 - Após implementar funcionalidade completa
@@ -509,6 +532,138 @@ Verifique o progresso em: GitHub → aba Actions → workflow mais recente
 
 ---
 
+#### 5.6 VERIFICAÇÃO DE SYNC TOTAL (Local = Remote = VPS Docker)
+
+**Quando executar:**
+- Flag `--sync` presente → executar automaticamente após push/merge
+- Flag `--verify-only` presente → executar SEM commit/push (apenas verificação)
+- Frases de sync detectadas (ex: "sync total", "tá sincronizado?") → inferir flag adequado
+- Sem flag e sem frase de sync → PULAR esta fase (comportamento legado)
+
+**IMPORTANTE:** Esta fase fecha o loop que antes terminava em 5.5. Garante que os 3 ambientes estão de fato alinhados no mesmo commit.
+
+##### 5.6.1 Verificar paridade LOCAL ↔ REMOTE
+
+```bash
+# Atualizar referências remotas
+git fetch origin main
+
+# Comparar commits
+LOCAL_HEAD=$(git rev-parse HEAD)
+REMOTE_HEAD=$(git rev-parse origin/main)
+
+if [[ "$LOCAL_HEAD" == "$REMOTE_HEAD" ]]; then
+    echo "✅ LOCAL = REMOTE ($LOCAL_HEAD)"
+else
+    echo "❌ DIVERGÊNCIA: Local ($LOCAL_HEAD) ≠ Remote ($REMOTE_HEAD)"
+    # Verificar quem está à frente
+    git log --oneline origin/main..HEAD  # commits locais não pushados
+    git log --oneline HEAD..origin/main  # commits remotos não puxados
+fi
+```
+
+##### 5.6.2 Aguardar conclusão do GitHub Actions
+
+Após push para `main`, o deploy é disparado automaticamente. Aguardar conclusão:
+
+```
+ESTRATÉGIA:
+1. Anotar timestamp do push
+2. Consultar GitHub MCP (list_commits) para confirmar que o commit chegou
+3. Aguardar até 3 minutos (builds típicos: 1-2min)
+   - Poll a cada 20s via GitHub MCP (verificar status do workflow run)
+   - Se Actions reportar ❌ failure → ABORTAR com link para o run
+   - Se Actions reportar ✅ success → Continuar para 5.6.3
+4. Timeout (3min) → Reportar PARTIAL SYNC (Actions ainda em andamento)
+```
+
+**Consulta de status via GitHub MCP:**
+```
+Usar mcp__github__list_commits para verificar se o commit está em main
+Verificar aba Actions manualmente se MCP não tiver tool de workflow runs
+```
+
+##### 5.6.3 Health Check VPS Docker
+
+Após Actions concluir com sucesso, verificar se o container está rodando o código novo:
+
+```bash
+# Aguardar startup do container (Express.js leva ~5-10s)
+sleep 10
+
+# Health check via endpoint de versão
+HEALTH_RESPONSE=$(curl -s --max-time 10 https://supercartolamanager.com.br/api/app/check-version)
+
+# Extrair dados relevantes
+# Response contém: version, serverBoot, serverUptimeSec, timestamp
+```
+
+**Validações:**
+```
+1. Resposta HTTP 200? → Container está respondendo
+2. serverUptimeSec < 120? → Container reiniciou recentemente (pós-deploy)
+3. serverBoot posterior ao timestamp do push? → Código novo está ativo
+4. Endpoint responde em < 5s? → Container saudável (não está em startup lento)
+```
+
+**Retry em caso de falha:**
+```
+- Tentativa 1: imediata
+- Tentativa 2: após 5s
+- Tentativa 3: após 10s
+- Se 3 falhas → Reportar OUT OF SYNC (container pode não ter subido)
+```
+
+**Verificação completa (opcional, com --sync):**
+```bash
+# Status completo do sistema
+SYSTEM_STATUS=$(curl -s --max-time 10 https://supercartolamanager.com.br/api/app/system-status)
+
+# Verifica: mercado, cache, versão, uptime
+# Detecta anomalias pós-deploy (cache stale, erros de conexão)
+```
+
+##### 5.6.4 Relatório de Sync
+
+Exibir tabela consolidada ao final:
+
+```markdown
+## 🔄 SYNC STATUS REPORT
+
+| Ambiente     | Commit/Versão           | Status     |
+|-------------|-------------------------|------------|
+| Local        | abc1234 (main)          | ✅ OK      |
+| Remote       | abc1234 (origin/main)   | ✅ OK      |
+| VPS Docker   | v05.04.26.1430 (uptime: 15s) | ✅ Sync |
+
+**Status Geral: ✅ FULL SYNC**
+Todos os ambientes estão sincronizados no mesmo commit.
+```
+
+**Estados possíveis:**
+
+| Status | Significado | Ação Recomendada |
+|--------|-------------|------------------|
+| ✅ **FULL SYNC** | Local = Remote = Docker, container saudável | Nenhuma — tudo OK |
+| ⚠️ **PARTIAL SYNC** | Local = Remote, mas Docker ainda atualizando | Aguardar Actions concluir, re-verificar em 2min |
+| ❌ **OUT OF SYNC** | Divergência detectada entre ambientes | Investigar: Actions falhou? Container não subiu? Conflito de merge? |
+| 🔴 **VPS UNREACHABLE** | Endpoint não responde | Verificar: container down? Rede? DNS? Usar `restart-server` skill |
+
+**Template de output para --verify-only:**
+```markdown
+**🔄 ENVIRONMENT SYNC CHECK**
+
+| Ambiente     | Commit         | Versão          | Uptime   | Status |
+|-------------|----------------|-----------------|----------|--------|
+| Local        | abc1234        | —               | —        | ✅     |
+| Remote       | abc1234        | —               | —        | ✅     |
+| VPS Docker   | —              | v05.04.26.1430  | 2h 15m   | ✅     |
+
+**Resultado: ✅ FULL SYNC** — Nenhuma ação necessária.
+```
+
+---
+
 ### FASE 6: LEMBRETE DE CUSTO DA SESSÃO
 
 **Limitação:** `/usage` é um slash command interno do Claude Code. Não pode ser executado via bash nem capturado programaticamente. Qualquer tentativa de `bash claude usage` falha silenciosamente.
@@ -688,6 +843,14 @@ bash git diff | grep "console\.log" && echo "⚠️ Remova debug code"
 - [ ] Se Actions falhar → reportar com link do log
 - [ ] Sugerir Ctrl+Shift+R após deploy bem-sucedido
 
+### Sync Verification (--sync ou --verify-only)
+- [ ] Local HEAD == origin/main HEAD
+- [ ] GitHub Actions concluiu com sucesso
+- [ ] VPS Docker respondendo (HTTP 200 em /api/app/check-version)
+- [ ] serverUptimeSec < 120 (container reiniciou pós-deploy)
+- [ ] serverBoot posterior ao timestamp do push
+- [ ] Relatório FULL SYNC / PARTIAL / OUT OF SYNC exibido
+
 ### Custo (Pós-Push)
 - [ ] Executar /usage para capturar métricas
 - [ ] Exibir tokens input/output
@@ -735,11 +898,17 @@ bash git diff | grep "console\.log" && echo "⚠️ Remova debug code"
    push main? → GitHub Actions disparado → verificar aba Actions
    feature branch? → skip (sem deploy automático)
           ↓
+🔄 FASE 5.6: SYNC VERIFICATION (--sync ou --verify-only)
+   5.6.1 Local HEAD == Remote HEAD?
+   5.6.2 GitHub Actions concluiu? (poll até 3min)
+   5.6.3 VPS Docker respondendo? (curl /api/app/check-version)
+   5.6.4 Relatório: FULL SYNC / PARTIAL / OUT OF SYNC
+          ↓
 💰 FASE 6: USAGE REPORT
    /usage → capturar métricas da sessão
           ↓
 ✅ CONCLUSÃO
-   Confirmar sucesso + resumo + custo
+   Confirmar sucesso + resumo + sync status + custo
 ```
 
 ---
@@ -868,8 +1037,8 @@ bash grep -q "node_modules" .gitignore || echo "⚠️ Adicione node_modules ao 
 
 ---
 
-**STATUS:** 🚀 GIT COMMIT & PUSH PROTOCOL - AUTOMATED, SMART & COST-AWARE
+**STATUS:** 🚀 GIT COMMIT & PUSH PROTOCOL - AUTOMATED, SMART, COST-AWARE & SYNC-VERIFIED
 
-**Versão:** 1.1 (Senior Full-Stack Edition + Usage Tracking)
+**Versão:** 2.0 (Senior Full-Stack Edition + Usage Tracking + Full Environment Sync)
 
-**Última atualização:** 2026-02-14
+**Última atualização:** 2026-04-05

@@ -204,9 +204,10 @@ Sistema de ativação inteligente de skills baseado em palavras-chave contextuai
 #### git-commit-push
 | Tipo | Keywords |
 |------|----------|
-| **Primárias** | `git push`, `git commit`, `push`, `commit`, `versionar`, `commitar` |
-| **Frases PT-BR** | "faça um push", "commite tudo", "suba as mudanças", "versione isso", "manda pro GitHub", "git e push", "salve no repositório" |
-| **Contexto** | Após terminar implementação, salvar trabalho no Git |
+| **Primárias** | `git push`, `git commit`, `push`, `commit`, `versionar`, `commitar`, `sync total`, `full sync`, `sincronizar tudo` |
+| **Frases PT-BR** | "faça um push", "commite tudo", "suba as mudanças", "versione isso", "manda pro GitHub", "git e push", "salve no repositório", "sync total", "tá tudo sincronizado?", "verifica sync", "sincroniza tudo", "local = remoto = docker" |
+| **Flags** | `--sync` (push + verificação end-to-end), `--verify-only` (apenas checar estado dos 3 ambientes) |
+| **Contexto** | Após terminar implementação, salvar trabalho no Git, verificar sincronização local/remote/VPS Docker |
 | **Localização** | `docs/skills/03-utilities/git-commit-push.md` |
 
 #### restart-server
@@ -682,6 +683,7 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | "limpe os dados antigos" | `db-guardian` | Operação no banco |
 | "revise esse controller" | `code-inspector` | Code review |
 | "faça um push" | `git-commit-push` | Versionamento |
+| "sync total" / "tá sincronizado?" | `git-commit-push --verify-only` | Verificação de ambientes |
 | "reinicie o servidor" | `restart-server` | Operação de infra |
 | "salve o contexto" | `newsession` | Handover de sessão |
 | "tem certeza disso?" | `fact-checker` | Validação de fatos |
@@ -816,6 +818,8 @@ Consulta rápida: "o usuário disse X → qual skill usar?"
 | Review arquitetural | `architecture-reviewer` → `code-inspector` → `performance-audit` |
 | Documentação | `system-scribe` |
 | Deploy completo | `git-commit-push` → `deploy` |
+| Deploy + sync verificado | `git-commit-push --sync` (commit → push → merge → Actions → health check VPS) |
+| Verificar sync sem push | `git-commit-push --verify-only` (checar local = remote = Docker) |
 | Consulta API Cartola | `cartola-api` → `fact-checker` |
 | Diagnóstico context-mode | `/ctx-doctor` → `/ctx-stats` → `/ctx-upgrade` (se necessário) |
 | Análise de output grande | `context-mode` (ctx_batch_execute ou ctx_execute_file) → `ctx_search` (follow-up) |
