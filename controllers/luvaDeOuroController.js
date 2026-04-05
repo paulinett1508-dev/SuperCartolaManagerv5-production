@@ -518,7 +518,7 @@ class LuvaDeOuroController {
             goleiro_nome: goleiroVivo.goleiro_nome,
             goleiro_clube: goleiroVivo.goleiro_clube,
             goleiro_jogou: goleiroVivo.jogou,
-            rodadasJogadas: (cached.rodadasJogadas || 0) + (goleiroVivo.jogou !== false ? 1 : 0),
+            rodadasJogadas: (cached.rodadasJogadas || 0) + (goleiroVivo.jogou === true ? 1 : 0), // ✅ Fix: era !== false (true para null)
             rodadas: [
               ...(cached.rodadas || []),
               {

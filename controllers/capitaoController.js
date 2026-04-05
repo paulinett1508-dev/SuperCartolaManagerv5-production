@@ -6,6 +6,7 @@ import { buscarCapitaoRodada } from '../services/capitaoService.js';
 import CapitaoCaches from '../models/CapitaoCaches.js';
 import cartolaApiService from '../services/cartolaApiService.js';
 import { CURRENT_SEASON } from '../config/seasons.js';
+import { truncarPontosNum } from '../utils/type-helpers.js';
 
 /**
  * GET /api/capitao/:ligaId/ranking
@@ -98,7 +99,7 @@ export async function getRankingCapitaoLive(req, res) {
           pontos_capitao_rodada: capitaoVivo.pontuacao,
           capitao_nome: capitaoVivo.capitao_nome,
           capitao_jogou: capitaoVivo.jogou,
-          pontuacao_total: cached.pontuacao_total + capitaoVivo.pontuacao,
+          pontuacao_total: truncarPontosNum(cached.pontuacao_total + capitaoVivo.pontuacao),
           media_capitao: cached.media_capitao,
         };
       })

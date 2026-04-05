@@ -384,6 +384,8 @@ function renderizarMiniCards(inicio, fim, rodadasMap) {
         const temDados = rodada && rodada.participantes.length > 0;
         const jogou = rodada?.jogou || false;
         const valorFinanceiro = rodada?.valorFinanceiro;
+        // ✅ Fix: Rodada atual sem dados não é "futuro" — é "atual" (aguardando)
+        const isAtual = !isParcial && i === rodadaAtualCartola && !isFuturo;
 
         // ✅ v4.0: Usar cache pré-calculado (sem sort dentro do loop)
         const posicao = posicoesCache.get(i) || rodada?.posicaoFinanceira;
@@ -393,6 +395,8 @@ function renderizarMiniCards(inicio, fim, rodadasMap) {
 
             if (isParcial) {
                 classes.push('parcial');
+            } else if (isAtual && !temDados) {
+                classes.push('atual'); // ✅ Fix: visível com estilo diferenciado
             } else if (isFuturo || (!temDados && !isParcial)) {
                 classes.push('futuro');
             } else if (jogou) {
@@ -416,6 +420,7 @@ function renderizarMiniCards(inicio, fim, rodadasMap) {
         // Formatar posição (em vez de pontos)
         let chipTexto = '';
         if (isParcial) chipTexto = '⏳';
+        else if (isAtual && !temDados) chipTexto = '●'; // ✅ Fix: indicador visual na rodada atual
         else if (temDados && jogou && posicao) chipTexto = `${posicao}º`;
         else if (temDados && !jogou) chipTexto = 'N/J';
 

@@ -1031,8 +1031,14 @@ async function _recarregarRanking() {
 export function destruirLuvaOuroParticipante() {
     if (window.Log) Log.info('[PARTICIPANTE-LUVA-OURO]', 'Destruindo módulo (cleanup)');
 
-    // Reset estado (MatchdayService não expõe .off(); handlers antigos
-    // short-circuitam via "if (!ligaId) return" após o estado ser limpo)
+    // ✅ Fix: Remover listeners do MatchdayService para evitar memory leak
+    // (MatchdayService EXPÕE .off() — matchday-service.js:71)
+    if (window.MatchdayService && estadoLuva._onParciais) {
+        window.MatchdayService.off('data:parciais', estadoLuva._onParciais);
+    }
+    if (window.MatchdayService && estadoLuva._onMatchdayStop) {
+        window.MatchdayService.off('matchday:stop', estadoLuva._onMatchdayStop);
+    }
     estadoLuva.modeLive = false;
     estadoLuva.ligaId = null;
     estadoLuva.timeId = null;

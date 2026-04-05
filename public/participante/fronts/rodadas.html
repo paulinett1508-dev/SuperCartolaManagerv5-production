@@ -151,6 +151,19 @@
     background: rgba(255, 69, 0, 0.12);
 }
 
+/* ✅ Fix: Rodada atual aguardando dados — visível com destaque sutil */
+.rodada-mini-card.atual {
+    opacity: 0.75;
+    border: 1px solid var(--app-warning, #eab308);
+    cursor: pointer;
+    animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+@keyframes pulse-subtle {
+    0%, 100% { opacity: 0.75; }
+    50% { opacity: 1; }
+}
+
 .rodada-mini-card.futuro {
     opacity: 0.3;
     cursor: not-allowed;

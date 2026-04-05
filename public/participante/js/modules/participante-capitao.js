@@ -496,7 +496,7 @@ function renderizarCardDesempenho(ranking) {
 const MAX_CHIPS_VISIBLE = 5;
 
 function _renderChipHtml(r) {
-    const pts = (Math.trunc((r.pontuacao || 0) * 10) / 10).toFixed(1);
+    const pts = (Math.trunc((r.pontuacao || 0) * 100) / 100).toFixed(2); // ✅ Fix: 2 decimais (era 1)
     const isParcial = r.parcial === true;
     const corPts = r.pontuacao >= 10 ? 'var(--app-success-light)' : r.pontuacao >= 5 ? '#fbbf24' : r.pontuacao < 0 ? 'var(--app-danger)' : '#9ca3af';
 
