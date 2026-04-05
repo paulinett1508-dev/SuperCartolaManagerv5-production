@@ -352,19 +352,30 @@ calendarioBrasileiraoSchema.methods.calcularClassificacao = function() {
     }
 
     // Ordenar: pontos DESC → vitórias → saldo → gols_pro
-    const classificacao = Object.values(tabela)
+    const sorted = Object.values(tabela)
         .sort((a, b) =>
             b.pontos - a.pontos ||
             b.vitorias - a.vitorias ||
             b.saldo - a.saldo ||
             b.gols_pro - a.gols_pro
-        )
-        .map((t, i) => ({
-            posicao: i + 1,
-            ...t,
-            aproveitamento: t.jogos > 0 ? Math.floor((t.pontos / (t.jogos * 3)) * 1000) / 10 : 0,
-            ultimos5: t.ultimos5.slice(-5)
-        }));
+        );
+
+    // Zonas baseadas na posição final (Brasileirão 2026 — fonte ESPN)
+    // Libertadores: 1º–5º | Sul-Americana: 6º–10º | Rebaixamento: 18º–20º
+    const _zona = (pos) => {
+        if (pos <= 5) return 'libertadores';
+        if (pos <= 10) return 'sul-americana';
+        if (pos >= 18) return 'rebaixamento';
+        return '';
+    };
+
+    const classificacao = sorted.map((t, i) => ({
+        posicao: i + 1,
+        zona: _zona(i + 1),
+        ...t,
+        aproveitamento: t.jogos > 0 ? Math.floor((t.pontos / (t.jogos * 3)) * 1000) / 10 : 0,
+        ultimos5: t.ultimos5.slice(-5)
+    }));
 
     return classificacao;
 };

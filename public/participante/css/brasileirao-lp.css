@@ -207,9 +207,8 @@
     font-size: 0.7rem; opacity: 0.7;
 }
 
-/* Zonas */
-.brasileirao-zona-liberta td:first-child { color: var(--app-info, #2196F3); font-weight: 700; }
-.brasileirao-zona-pre-liberta td:first-child { color: var(--app-info-light, #64B5F6); font-weight: 600; }
+/* Zonas — Libertadores (verde), Sul-Americana (laranja), Rebaixamento (vermelho) */
+.brasileirao-zona-liberta td:first-child { color: var(--app-success-light, #4CAF50); font-weight: 700; }
 .brasileirao-zona-sula td:first-child { color: var(--app-warning, #FF9800); font-weight: 600; }
 .brasileirao-zona-rebaixa td:first-child { color: var(--app-danger, #f44336); font-weight: 700; }
 .brasileirao-zona-rebaixa { background: rgba(244,67,54,0.05); }

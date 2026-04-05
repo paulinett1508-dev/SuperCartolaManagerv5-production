@@ -32,8 +32,8 @@ let _temporadaAtual = null;  // temporada carregada
 // ═══════════════════════════════════════════════════
 
 // ATENÇÃO: atualizar a cada temporada conforme promoções/rebaixamentos
-// 2026: Fortaleza, Juventude e Sport foram rebaixados.
-//       Chapecoense, Coritiba e Remo foram promovidos.
+// 2026: Fortaleza, Juventude, Sport e Ceará foram rebaixados.
+//       Coritiba (1º), Athletico-PR (2º), Chapecoense (3º) e Remo (4º) foram promovidos da Série B 2025.
 const TIMES_SERIE_A_2026 = [
     { posicao: 1,  time: 'Athletico-PR',         time_id: 293,  sigla: 'CAP' },
     { posicao: 2,  time: 'Atlético-MG',          time_id: 282,  sigla: 'CAM' },
@@ -59,13 +59,13 @@ const TIMES_SERIE_A_2026 = [
 
 const INFO_CAMPEONATO = {
     formato: '38 rodadas — pontos corridos (turno e returno)',
-    inicio: 'Março 2026',
+    inicio: 'Abril 2026',
     termino: 'Dezembro 2026',
     times: 20,
     jogos_total: 380,
-    vagas_liberta: '4 primeiros → Libertadores 2027',
-    vagas_sula: '5º ao 12º → Sul-Americana 2027',
-    rebaixamento: '17º ao 20º → Série B 2027',
+    vagas_liberta: '1º ao 5º → Libertadores 2027',
+    vagas_sula: '6º ao 10º → Sul-Americana 2027',
+    rebaixamento: '18º ao 20º → Série B 2027',
 };
 
 // ═══════════════════════════════════════════════════
@@ -192,12 +192,17 @@ function _renderizarClassificacao(apiData) {
                     || window.participanteAuth?.participante?.clube_id
                     || null;
 
-    const zonaClass = (pos) => {
-        if (pos <= 4) return 'brasileirao-zona-liberta';
-        if (pos <= 6) return 'brasileirao-zona-pre-liberta';
-        if (pos <= 12) return 'brasileirao-zona-sula';
-        if (pos <= 16) return '';
-        return 'brasileirao-zona-rebaixa';
+    // Zona vem do backend quando API disponível; fallback por posição (thresholds ESPN 2026)
+    const zonaClass = (pos, zonaApi) => {
+        const z = zonaApi || (
+            pos <= 5 ? 'libertadores' :
+            pos <= 10 ? 'sul-americana' :
+            pos >= 18 ? 'rebaixamento' : ''
+        );
+        if (z === 'libertadores') return 'brasileirao-zona-liberta';
+        if (z === 'sul-americana') return 'brasileirao-zona-sula';
+        if (z === 'rebaixamento') return 'brasileirao-zona-rebaixa';
+        return '';
     };
 
     const headerSub = isFallback
@@ -207,16 +212,16 @@ function _renderizarClassificacao(apiData) {
     const rows = classificacao.map(t => {
         const pos = t.posicao;
         const isMeu = meuClubeId && Number(t.time_id) === Number(meuClubeId);
-        const zona = zonaClass(pos);
+        const zona = zonaClass(pos, t.zona);
         const meuClass = isMeu ? ' brasileirao-row-meu' : '';
 
         if (isFallback) {
             return `<tr class="${zona}${meuClass}">
                 <td class="brasileirao-pos">${pos}</td>
                 <td class="brasileirao-time">${escapeHtml(t.time)}</td>
-                <td class="brasileirao-pts" style="opacity:0.4">-</td>
-                <td class="brasileirao-j" style="opacity:0.4">-</td>
-                <td class="brasileirao-sg" style="opacity:0.4">-</td>
+                <td class="brasileirao-pts" style="opacity:0.4">—</td>
+                <td class="brasileirao-j" style="opacity:0.4">—</td>
+                <td class="brasileirao-sg" style="opacity:0.4">—</td>
             </tr>`;
         }
 
@@ -253,10 +258,9 @@ function _renderizarClassificacao(apiData) {
                 </table>
             </div>
             <div class="brasileirao-class-legenda">
-                <span class="brasileirao-leg-item"><span class="brasileirao-leg-dot" style="background:#1B5E20;"></span>Libertadores</span>
-                <span class="brasileirao-leg-item"><span class="brasileirao-leg-dot" style="background:#2E7D32;"></span>Pré-Libertadores</span>
-                <span class="brasileirao-leg-item"><span class="brasileirao-leg-dot" style="background:#FF9800;"></span>Sul-Americana</span>
-                <span class="brasileirao-leg-item"><span class="brasileirao-leg-dot" style="background:#c62828;"></span>Rebaixamento</span>
+                <span class="brasileirao-leg-item"><span class="brasileirao-leg-dot" style="background:var(--app-success-light,#4CAF50);"></span>Libertadores (1º–5º)</span>
+                <span class="brasileirao-leg-item"><span class="brasileirao-leg-dot" style="background:var(--app-warning,#FF9800);"></span>Sul-Americana (6º–10º)</span>
+                <span class="brasileirao-leg-item"><span class="brasileirao-leg-dot" style="background:var(--app-danger,#f44336);"></span>Rebaixamento (18º–20º)</span>
             </div>
         </div>
     `;
