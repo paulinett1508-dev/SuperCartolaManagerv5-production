@@ -1,5 +1,6 @@
 // =====================================================================
-// PARTICIPANTE MATA-MATA v8.1 (Resultados em Tempo Real)
+// PARTICIPANTE MATA-MATA v9.2 (Resultados em Tempo Real)
+// ✅ v9.2: FIX - IndexedDB stale de temporada anterior não bloqueia "sem edições" da temporada atual
 // ✅ v8.1: FIX - Auto-refresh inicia sempre que fase está em andamento (corrige bug de parciais não atualizando)
 // ✅ v8.0: FEAT - Auto-polling 60s com parciais AO VIVO nas fases ativas
 // ✅ v8.0: FEAT - Badge AO VIVO + indicador de última atualização
@@ -597,11 +598,18 @@ async function carregarEdicoesDisponiveis(usouCache = false) {
         if (window.Log) Log.info("[MATA-MATA] 🔄 Re-renderizado com dados frescos");
       }
     } else {
-      // ✅ v7.4: Tratar caso de zero edições disponíveis
-      if (!usouCache) {
-        const temporada = window.participanteAuth?.temporadaSelecionada || CURRENT_SEASON;
-        renderSemEdicoes(temporada);
+      // v7.4: Sem edições na temporada → mostrar mensagem correta
+      // ✅ v9.2: FIX — remover guard `!usouCache`: quando a API confirma 0 edições para a temporada,
+      //   o IndexedDB stale (dados de temporada anterior, ex: 2025) NÃO deve permanecer visível.
+      //   Antes: participantes viam brackets finalizados de 2025 em vez de "sem edições 2026".
+      if (usouCache && window.OfflineCache) {
+        try {
+          await window.OfflineCache.delete('mataMata', estado.ligaId);
+          if (window.Log) Log.info("[MATA-MATA] 🗑️ IndexedDB invalidado: API confirmou 0 edições para esta temporada");
+        } catch (e) { /* silent — não bloquear a renderização por erro de cache */ }
       }
+      const temporada = window.participanteAuth?.temporadaSelecionada || CURRENT_SEASON;
+      renderSemEdicoes(temporada);
     }
   } catch (error) {
     if (window.Log) Log.error("[MATA-MATA] Erro ao carregar edições:", error);
@@ -2045,4 +2053,4 @@ function truncate(str, len) {
   return str.length > len ? str.substring(0, len) + "..." : str;
 }
 
-if (window.Log) Log.info("[MATA-MATA] ✅ Módulo v8.0 carregado (Tempo Real + Auto-Polling)");
+if (window.Log) Log.info("[MATA-MATA] ✅ Módulo v9.2 carregado (Tempo Real + Auto-Polling)");
