@@ -115,8 +115,8 @@ export async function inicializarLibertadoresParticipante(params) {
         // Carregar dados dinâmicos em paralelo
         dadosAPILiberta = await carregarDadosAPILiberta();
 
-        renderizarCountdown();
-        countdownInterval = setInterval(renderizarCountdown, 60000);
+        renderizarStatusHero();
+        countdownInterval = setInterval(renderizarStatusHero, 60000);
 
         renderizarGrupos();
         renderizarFases();
@@ -157,32 +157,48 @@ async function carregarDadosAPILiberta() {
 }
 
 // ═══════════════════════════════════════════════════
-// COUNTDOWN
+// STATUS CONTEXTUAL DO HERO
 // ═══════════════════════════════════════════════════
 
-function renderizarCountdown() {
+// Datas-chave das fases (início)
+const DATAS_FASES = [
+    { fase: 'Fase de Grupos',   inicio: new Date('2026-04-07T00:00:00-03:00'), fim: new Date('2026-05-28T23:59:59-03:00') },
+    { fase: 'Oitavas de Final', inicio: new Date('2026-07-01T00:00:00-03:00'), fim: new Date('2026-07-31T23:59:59-03:00') },
+    { fase: 'Quartas de Final', inicio: new Date('2026-09-01T00:00:00-03:00'), fim: new Date('2026-09-30T23:59:59-03:00') },
+    { fase: 'Semifinais',       inicio: new Date('2026-10-01T00:00:00-03:00'), fim: new Date('2026-10-31T23:59:59-03:00') },
+    { fase: 'Grande Final',     inicio: FINAL_DATE,                             fim: FINAL_DATE },
+];
+
+function renderizarStatusHero() {
+    const el = document.getElementById('liberta-hero-status');
+    if (!el) return;
+
     const agora = new Date();
-    const diff = FINAL_DATE - agora;
 
-    const elDias = document.getElementById('liberta-countdown-dias');
-    const elHoras = document.getElementById('liberta-countdown-horas');
-    const elMin = document.getElementById('liberta-countdown-min');
-    if (!elDias || !elHoras || !elMin) return;
-
-    if (diff <= 0) {
-        elDias.textContent = '0';
-        elHoras.textContent = '00';
-        elMin.textContent = '00';
+    // Competição encerrada
+    if (agora > FINAL_DATE) {
+        el.innerHTML = '<span class="liberta-hero-status-text">Competição encerrada</span>';
         return;
     }
 
-    const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const horas = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    // Verificar se alguma fase está em andamento
+    for (const f of DATAS_FASES) {
+        if (agora >= f.inicio && agora <= f.fim) {
+            el.innerHTML = `<span class="liberta-hero-status-badge liberta-hero-status-badge--active"><span class="material-icons">play_circle</span>${escapeHtml(f.fase)} em andamento</span>`;
+            return;
+        }
+    }
 
-    elDias.textContent = dias;
-    elHoras.textContent = String(horas).padStart(2, '0');
-    elMin.textContent = String(mins).padStart(2, '0');
+    // Encontrar a próxima fase
+    for (const f of DATAS_FASES) {
+        if (agora < f.inicio) {
+            const diff = f.inicio - agora;
+            const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const label = dias === 1 ? 'dia' : 'dias';
+            el.innerHTML = `<span class="liberta-hero-status-badge"><span class="material-icons">schedule</span>${escapeHtml(f.fase)} em <strong>${dias}</strong> ${label}</span>`;
+            return;
+        }
+    }
 }
 
 // ═══════════════════════════════════════════════════
@@ -261,11 +277,8 @@ function renderizarFases() {
 }
 
 // ═══════════════════════════════════════════════════
-// TABELA DE JOGOS
+// TABELA DE JOGOS — Lista unificada
 // ═══════════════════════════════════════════════════
-
-// Aba ativa no momento
-let _abaAtiva = 'proximos';
 
 function _formatarDataCurta(dataStr) {
     if (!dataStr) return '';
@@ -344,7 +357,7 @@ function _buildListaJogos(jogos) {
     return partes.join('');
 }
 
-function _renderizarAba(aba) {
+function renderizarJogos() {
     const container = document.getElementById('liberta-jogos-container');
     if (!container) return;
 
@@ -353,41 +366,19 @@ function _renderizarAba(aba) {
         return;
     }
 
-    const jogosAoVivo   = dadosAPILiberta.jogos_ao_vivo     || [];
-    const proximosJogos = dadosAPILiberta.proximos_jogos     || [];
-    const resultados    = dadosAPILiberta.ultimos_resultados || [];
+    // Mesclar todos os jogos em uma lista única, ordenada por data
+    const jogosAoVivo   = (dadosAPILiberta.jogos_ao_vivo     || []).map(j => ({ ...j, status: j.status || 'ao_vivo' }));
+    const resultados    = (dadosAPILiberta.ultimos_resultados || []).map(j => ({ ...j, status: j.status || 'encerrado' }));
+    const proximosJogos = (dadosAPILiberta.proximos_jogos     || []).map(j => ({ ...j, status: j.status || 'agendado' }));
 
-    if (aba === 'ao-vivo') {
-        container.innerHTML = _buildListaJogos(jogosAoVivo);
-    } else if (aba === 'resultados') {
-        container.innerHTML = _buildListaJogos(resultados);
-    } else {
-        container.innerHTML = _buildListaJogos(proximosJogos);
+    const todosJogos = [...resultados, ...jogosAoVivo, ...proximosJogos];
+
+    if (todosJogos.length === 0) {
+        container.innerHTML = '<div class="liberta-jogos-vazio"><span class="material-icons">sports_soccer</span><p>Nenhum jogo disponível</p></div>';
+        return;
     }
-}
 
-function renderizarJogos() {
-    const temAoVivo = dadosAPILiberta?.jogos_ao_vivo?.length > 0;
-    if (temAoVivo) _abaAtiva = 'ao-vivo';
-
-    const tabs = document.querySelectorAll('.liberta-jogos-tab');
-    tabs.forEach(btn => {
-        const isAtiva = btn.dataset.tab === _abaAtiva;
-        btn.classList.toggle('liberta-jogos-tab--active', isAtiva);
-        btn.setAttribute('aria-selected', String(isAtiva));
-
-        btn.addEventListener('click', () => {
-            _abaAtiva = btn.dataset.tab;
-            tabs.forEach(t => {
-                const ativa = t.dataset.tab === _abaAtiva;
-                t.classList.toggle('liberta-jogos-tab--active', ativa);
-                t.setAttribute('aria-selected', String(ativa));
-            });
-            _renderizarAba(_abaAtiva);
-        });
-    });
-
-    _renderizarAba(_abaAtiva);
+    container.innerHTML = _buildListaJogos(todosJogos);
 }
 
 // ═══════════════════════════════════════════════════

@@ -25,21 +25,8 @@
             <p class="liberta-hero-subtitle">2026</p>
             <p class="liberta-hero-local">CONMEBOL Libertadores da América</p>
 
-            <!-- Countdown para a Final -->
-            <div class="liberta-countdown">
-                <div class="liberta-countdown-item">
-                    <span id="liberta-countdown-dias" class="liberta-countdown-value">---</span>
-                    <span class="liberta-countdown-label">Dias</span>
-                </div>
-                <div class="liberta-countdown-item">
-                    <span id="liberta-countdown-horas" class="liberta-countdown-value">--</span>
-                    <span class="liberta-countdown-label">Horas</span>
-                </div>
-                <div class="liberta-countdown-item">
-                    <span id="liberta-countdown-min" class="liberta-countdown-value">--</span>
-                    <span class="liberta-countdown-label">Mins</span>
-                </div>
-            </div>
+            <!-- Status dinâmico da fase atual -->
+            <div id="liberta-hero-status" class="liberta-hero-status"></div>
 
             <p class="liberta-hero-info">
                 <span class="material-icons">stadium</span>
@@ -110,13 +97,6 @@
             <span class="liberta-section-icon"><span class="material-icons">sports_soccer</span></span>
             <h2 class="liberta-section-title">Jogos</h2>
         </div>
-        <div class="liberta-jogos-tabs" role="tablist" aria-label="Jogos da Libertadores">
-            <button class="liberta-jogos-tab liberta-jogos-tab--active" data-tab="proximos" role="tab" aria-selected="true">Próximos</button>
-            <button class="liberta-jogos-tab" data-tab="ao-vivo" role="tab" aria-selected="false">
-                <span class="liberta-jogos-live-dot"></span>Ao Vivo
-            </button>
-            <button class="liberta-jogos-tab" data-tab="resultados" role="tab" aria-selected="false">Resultados</button>
-        </div>
         <div id="liberta-jogos-container" class="liberta-jogos-container">
             <div class="liberta-loading-placeholder">Carregando jogos...</div>
         </div>
@@ -140,4 +120,4 @@
     <div class="pb-24"></div>
 </div>
 
-<link rel="stylesheet" href="/participante/css/libertadores-lp.css?v=3">
+<link rel="stylesheet" href="/participante/css/libertadores-lp.css?v=4">
