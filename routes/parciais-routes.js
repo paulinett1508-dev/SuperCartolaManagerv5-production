@@ -9,7 +9,7 @@ const router = express.Router();
 
 // Middleware: valida sessão do participante
 function verificarSessao(req, res, next) {
-  if (!req.session?.usuario) {
+  if (!req.session?.participante) {
     return res.status(401).json({ erro: "Não autenticado" });
   }
   next();
