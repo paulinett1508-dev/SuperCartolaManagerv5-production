@@ -476,7 +476,7 @@ function _resumoRodadasGoleiro(rodadas) {
         .map(r => ({
             rodada: r.rodada,
             goleiro: escapeHtml(_nomeCompacto(r.goleiroNome)),
-            pontos: Math.trunc((r.pontos || 0) * 10) / 10,
+            pontos: Math.trunc((r.pontos || 0) * 100) / 100, // ✅ Fix A2: 2 decimais (era 1)
         }));
 }
 
@@ -1031,8 +1031,14 @@ async function _recarregarRanking() {
 export function destruirLuvaOuroParticipante() {
     if (window.Log) Log.info('[PARTICIPANTE-LUVA-OURO]', 'Destruindo módulo (cleanup)');
 
-    // Reset estado (MatchdayService não expõe .off(); handlers antigos
-    // short-circuitam via "if (!ligaId) return" após o estado ser limpo)
+    // ✅ Fix: Remover listeners do MatchdayService para evitar memory leak
+    // (MatchdayService EXPÕE .off() — matchday-service.js:71)
+    if (window.MatchdayService && estadoLuva._onParciais) {
+        window.MatchdayService.off('data:parciais', estadoLuva._onParciais);
+    }
+    if (window.MatchdayService && estadoLuva._onMatchdayStop) {
+        window.MatchdayService.off('matchday:stop', estadoLuva._onMatchdayStop);
+    }
     estadoLuva.modeLive = false;
     estadoLuva.ligaId = null;
     estadoLuva.timeId = null;

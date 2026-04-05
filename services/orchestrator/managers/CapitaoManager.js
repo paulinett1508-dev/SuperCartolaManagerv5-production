@@ -60,19 +60,11 @@ export default class CapitaoManager extends BaseManager {
         }
     }
 
-    // Consolida ranking definitivo da rodada
+    // ✅ Fix LIVE-02: onConsolidate não re-consolida (onRoundFinalize já fez)
+    // Evita 2x 760 API calls redundantes por rodada
     async onConsolidate(ctx) {
-        const { ligaId, rodada } = ctx;
-
-        console.log(`[CAPITAO-MANAGER] onConsolidate: consolidando ranking definitivo R${rodada} liga ${ligaId}`);
-
-        try {
-            await consolidarRankingCapitao(ligaId, CURRENT_SEASON, rodada);
-            console.log(`[CAPITAO-MANAGER] Consolidação definitiva R${rodada} concluída`);
-            return { consolidado: true, rodada };
-        } catch (err) {
-            console.error(`[CAPITAO-MANAGER] Erro na consolidação definitiva R${rodada}:`, err.message);
-            return { consolidado: false, erro: err.message };
-        }
+        const { rodada } = ctx;
+        console.log(`[CAPITAO-MANAGER] onConsolidate: R${rodada} já consolidado em onRoundFinalize, skip`);
+        return { consolidado: true, rodada, skipped: true };
     }
 }

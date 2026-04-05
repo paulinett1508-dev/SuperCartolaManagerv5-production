@@ -1311,6 +1311,13 @@ export function destruirArtilheiroParticipante() {
     document.getElementById('art-pull-indicator')?.remove();
 
     // ✅ v4.3: Reset live state
+    // ✅ Fix: Remover listeners do MatchdayService para evitar memory leak
+    if (window.MatchdayService && _matchdayParciaisHandler) {
+        window.MatchdayService.off('data:parciais', _matchdayParciaisHandler);
+    }
+    if (window.MatchdayService && _matchdayStopHandler) {
+        window.MatchdayService.off('matchday:stop', _matchdayStopHandler);
+    }
     estadoArtilheiro.modeLive = false;
     _matchdayParciaisHandler = null;
     _matchdayStopHandler = null;

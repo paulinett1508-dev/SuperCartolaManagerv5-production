@@ -414,6 +414,26 @@
     window.addEventListener('offline', _onOffline);
     window.addEventListener('online', _onOnline);
 
+    // ─── Visibility change (battery saver) ─────────────────────────
+    // ✅ Fix LIVE-01: Pausar polling quando tab/app está em background
+    document.addEventListener('visibilitychange', function () {
+        if (document.hidden) {
+            // Tab em background — pausar polling para economizar bateria
+            if (_parciaisTimer) {
+                clearInterval(_parciaisTimer);
+                _parciaisTimer = null;
+                if (window.Log) Log.info('[MatchdayService] Polling pausado (tab hidden)');
+            }
+        } else {
+            // Tab visível novamente — refresh imediato + reiniciar polling
+            if (_isActive && !_parciaisTimer) {
+                if (window.Log) Log.info('[MatchdayService] Polling retomado (tab visible)');
+                _fetchParciais(); // refresh imediato ao voltar
+                _startParciaisPolling();
+            }
+        }
+    });
+
     // Verificar estado inicial
     if (!navigator.onLine) {
         _onOffline();

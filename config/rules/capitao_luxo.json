@@ -30,7 +30,7 @@
         "capitao_nome": "Apelido do atleta (atletas[capitao_id].apelido)",
         "capitao_clube": "Clube do atleta (atletas[capitao_id].clube_id)",
         "pontuacao_base": "Pontuação sem bônus",
-        "pontuacao_capitao": "Pontuação com bônus x2 (campo pontos do atleta)"
+        "pontuacao_capitao": "Pontuação com bônus x1.5 (pontos_num bruto * 1.5, calculado pelo sistema)"
       },
       "parciais_tempo_real": {
         "endpoint": "/atletas/pontuados",
