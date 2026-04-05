@@ -1286,6 +1286,11 @@ async function selecionarRodada(numeroRodada, isParcial = false) {
         Log.info(`[PARTICIPANTE-RODADAS] 📊 Cache: ${todasRodadasCache.length} rodadas em cache`);
 
     rodadaSelecionada = numeroRodada;
+
+    // ✅ FIX: Atualizar título EAGERLY — garante "Rodada N" em TODOS os paths (sucesso e erro)
+    const tituloEl = document.getElementById("rodadaTitulo");
+    if (tituloEl) tituloEl.textContent = `Rodada ${numeroRodada}`;
+
     ParciaisModule.pararAutoRefresh?.();
     PollingInteligenteModule.parar?.();
     atualizarIndicadorAutoRefresh({ ativo: false });
@@ -1300,7 +1305,7 @@ async function selecionarRodada(numeroRodada, isParcial = false) {
         rankingContainer.innerHTML = `
             <div style="text-align: center; padding: 40px;">
                 <div class="loading-spinner-rodadas"></div>
-                <p style="color: #9ca3af; margin-top: 16px;">Carregando...</p>
+                <p style="color: var(--app-text-muted); margin-top: 16px;">Carregando...</p>
             </div>
         `;
     }
@@ -1323,6 +1328,43 @@ async function selecionarRodada(numeroRodada, isParcial = false) {
                 },
                 onStatus: atualizarIndicadorAutoRefresh
             });
+        } else if (numeroRodada === rodadaAtualCartola && statusMercadoAtual === 2) {
+            // ✅ FIX: Rodada ao vivo mas parciais não inicializou — tentar agora
+            if (window.Log) Log.warn(`[PARTICIPANTE-RODADAS] ⚠️ Rodada ${numeroRodada} ao vivo mas parciaisInfo indisponível — tentando fallback`);
+            try {
+                await carregarERenderizarParciais(numeroRodada);
+
+                // Atualizar parciaisInfo para que próximos clicks não precisem do fallback
+                parciaisInfo = { disponivel: true, rodada: numeroRodada, bolaRolando: true };
+
+                // Iniciar polling normalmente
+                PollingInteligenteModule.inicializar({
+                    temporada: TEMPORADA_ATUAL,
+                    rodada: numeroRodada,
+                    ligaId: ligaId,
+                    timeId: meuTimeId,
+                    onUpdate: (dados) => {
+                        if (rodadaSelecionada !== numeroRodada) return;
+                        renderizarParciaisDados(numeroRodada, dados);
+                    },
+                    onStatus: atualizarIndicadorAutoRefresh
+                });
+            } catch (parcErr) {
+                if (window.Log) Log.error(`[PARTICIPANTE-RODADAS] ❌ Fallback de parciais falhou:`, parcErr);
+                if (rankingContainer) {
+                    rankingContainer.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: var(--app-danger);">
+                            <span class="material-icons" style="font-size: 48px; margin-bottom: 16px;">sync_problem</span>
+                            <p>Parciais temporariamente indisponíveis</p>
+                            <p style="color: var(--app-text-muted); font-size: 0.85rem; margin-top: 8px;">A rodada está ao vivo mas não foi possível carregar as pontuações</p>
+                            <button onclick="selecionarRodada(${numeroRodada}, true)"
+                                    style="margin-top: 16px; padding: 10px 20px; background: var(--app-primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                Tentar Novamente
+                            </button>
+                        </div>
+                    `;
+                }
+            }
         } else {
             const rodadaData = todasRodadasCache.find((r) => r.numero === numeroRodada);
             if (window.Log)
@@ -1353,9 +1395,13 @@ async function selecionarRodada(numeroRodada, isParcial = false) {
 
                 if (rankingContainer) {
                     rankingContainer.innerHTML = `
-                        <div style="text-align: center; padding: 40px; color: #6b7280;">
+                        <div style="text-align: center; padding: 40px; color: var(--app-text-muted);">
                             <span class="material-icons" style="font-size: 48px; margin-bottom: 16px;">inbox</span>
                             <p>Dados desta rodada não disponíveis</p>
+                            <button onclick="selecionarRodada(${numeroRodada}, false)"
+                                    style="margin-top: 16px; padding: 10px 20px; background: var(--app-primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                Tentar Novamente
+                            </button>
                         </div>
                     `;
                 }
@@ -1413,7 +1459,7 @@ async function carregarERenderizarParciais(numeroRodada) {
                     <span class="material-icons" style="font-size: 48px; margin-bottom: 16px;">error_outline</span>
                     <p>Erro ao carregar parciais</p>
                     <button onclick="selecionarRodada(${numeroRodada}, true)"
-                            style="margin-top: 16px; padding: 10px 20px; background: #E65100; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            style="margin-top: 16px; padding: 10px 20px; background: var(--app-primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
                         Tentar Novamente
                     </button>
                 </div>
