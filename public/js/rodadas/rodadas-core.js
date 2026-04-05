@@ -534,8 +534,24 @@ export async function calcularPontosParciais(liga, rodada) {
 
       if (!resTime.ok) {
         console.warn(
-          `[RODADAS-CORE] Erro ${resTime.status} ao buscar escalação do time ${timeId} para rodada ${rodada}`,
+          `[RODADAS-CORE] Erro ${resTime.status} ao buscar escalação do time ${timeId} para rodada ${rodada} — usando placeholder`,
         );
+        // Fallback: mostrar time com 0 pontos em vez de pular silenciosamente
+        const nomeCartolaFb = timeCompleto?.nome_cartoleiro || timeCompleto?.cartola || "N/D";
+        const nomeTimeFb = timeCompleto?.nome_time || timeCompleto?.nome || "N/D";
+        const statusFb = timesStatus[String(timeId)];
+        rankingsParciais.push({
+          time_id: timeId,
+          nome_cartola: nomeCartolaFb,
+          nome_time: nomeTimeFb,
+          clube_id: timeCompleto?.clube_id || null,
+          escudo_url: timeCompleto?.url_escudo_png || "",
+          pontos: 0,
+          totalPontos: 0,
+          ativo: statusFb ? statusFb.ativo : true,
+          rodada_desistencia: statusFb ? statusFb.rodada_desistencia : null,
+          escalacao_indisponivel: true,
+        });
         continue;
       }
 
@@ -589,9 +605,13 @@ export async function calcularPontosParciais(liga, rodada) {
     }
   }
 
+  const comEscalacao = rankingsParciais.filter(r => !r.escalacao_indisponivel).length;
   console.log(
-    `[RODADAS-CORE] ${rankingsParciais.length} times processados com parciais`,
+    `[RODADAS-CORE] ${rankingsParciais.length} times processados com parciais (${comEscalacao} com escalação, ${rankingsParciais.length - comEscalacao} sem)`,
   );
+  if (times.length > 0 && comEscalacao === 0) {
+    console.error(`[RODADAS-CORE] ALERTA: ${times.length} times na liga mas 0 escalações obtidas. API Cartola pode estar indisponível.`);
+  }
   return rankingsParciais;
 }
 

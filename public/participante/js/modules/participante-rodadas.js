@@ -1310,6 +1310,10 @@ async function selecionarRodada(numeroRodada, isParcial = false) {
         `;
     }
 
+    // Limpar escalação anterior para evitar dados stale de outro round
+    const escalacaoContainer = document.getElementById('minhaEscalacaoContainer');
+    if (escalacaoContainer) escalacaoContainer.innerHTML = '';
+
     const isRodadaParcial = parciaisInfo?.disponivel && numeroRodada === parciaisInfo.rodada;
 
     try {
@@ -1483,11 +1487,31 @@ function renderizarParciaisDados(numeroRodada, dados) {
 
     if (!dados || !Array.isArray(participantes) || participantes.length === 0) {
         if (rankingContainer) {
+            const diagnostico = dados?.diagnostico;
+            let mensagemDetalhe = 'Os dados aparecerão quando os jogos começarem';
+            let icone = 'hourglass_empty';
+
+            if (diagnostico) {
+                if (diagnostico.timesNaLiga === 0) {
+                    mensagemDetalhe = 'Nenhum time cadastrado na liga';
+                    icone = 'group_off';
+                } else if (diagnostico.timesEncontrados === 0) {
+                    mensagemDetalhe = 'Times da liga não encontrados no banco de dados';
+                    icone = 'search_off';
+                } else if (diagnostico.timesAtivos === 0) {
+                    mensagemDetalhe = 'Todos os times estão inativos';
+                    icone = 'person_off';
+                } else if (diagnostico.atletasPontuados === 0) {
+                    mensagemDetalhe = 'Nenhum atleta pontuado ainda — jogos podem não ter iniciado';
+                    icone = 'sports_soccer';
+                }
+            }
+
             let html = `
                 <div style="text-align: center; padding: 40px; color: #6b7280;">
-                    <span class="material-icons" style="font-size: 48px; margin-bottom: 16px;">hourglass_empty</span>
+                    <span class="material-icons" style="font-size: 48px; margin-bottom: 16px;">${icone}</span>
                     <p>Aguardando pontuações...</p>
-                    <p style="font-size: 12px; margin-top: 8px;">Os dados aparecerão quando os jogos começarem</p>
+                    <p style="font-size: 12px; margin-top: 8px;">${mensagemDetalhe}</p>
                 </div>
             `;
             if (inativos.length > 0) {
@@ -1495,6 +1519,10 @@ function renderizarParciaisDados(numeroRodada, dados) {
             }
             rankingContainer.innerHTML = html;
         }
+
+        // Limpar escalação quando não há dados
+        const escContainer = document.getElementById('minhaEscalacaoContainer');
+        if (escContainer) escContainer.innerHTML = '';
 
         if (resumo) {
             const infoInativos = inativos.length > 0 ? ` • ${inativos.length} inativo${inativos.length > 1 ? "s" : ""}` : "";
