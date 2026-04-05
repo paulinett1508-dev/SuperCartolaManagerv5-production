@@ -100,7 +100,7 @@ async function buscarNoticiasLibertadores() {
     }
 
     try {
-        const query = encodeURIComponent('CONMEBOL Libertadores 2026');
+        const query = encodeURIComponent('Libertadores 2026 futebol');
         const url = `https://news.google.com/rss/search?q=${query}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
 
         console.log('[NOTICIAS] Buscando notícias da Libertadores 2026...');

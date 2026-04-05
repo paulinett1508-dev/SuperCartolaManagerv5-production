@@ -114,39 +114,51 @@
     font-weight: 500;
 }
 
-/* Countdown — grid boxes */
-.liberta-countdown {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 0.5rem;
+/* Status contextual da fase atual */
+.liberta-hero-status {
     margin-bottom: 1.25rem;
-    padding: 0 0.5rem;
+    text-align: center;
 }
 
-.liberta-countdown-item {
-    display: flex;
-    flex-direction: column;
+.liberta-hero-status-badge {
+    display: inline-flex;
     align-items: center;
+    gap: 0.4rem;
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--app-liberta-secondary, #D4AF37);
     background: var(--app-liberta-muted, rgba(27, 94, 32, 0.15));
     border: 1px solid var(--app-liberta-border, rgba(27, 94, 32, 0.35));
-    border-radius: 0.5rem;
-    padding: 0.75rem 0.5rem;
+    border-radius: 999px;
+    padding: 0.5rem 1rem;
 }
 
-.liberta-countdown-value {
+.liberta-hero-status-badge .material-icons {
+    font-size: 1rem;
+    color: var(--app-liberta-accent, #2E7D32);
+}
+
+.liberta-hero-status-badge strong {
     font-family: var(--app-font-brand, 'Russo One', sans-serif);
-    font-size: 1.75rem;
-    font-weight: 400;
+    font-size: 1.1rem;
     color: var(--app-liberta-secondary, #D4AF37);
-    line-height: 1.2;
 }
 
-.liberta-countdown-label {
-    font-size: 0.55rem;
+.liberta-hero-status-badge--active {
+    color: var(--app-liberta-accent, #2E7D32);
+    border-color: rgba(46, 125, 50, 0.4);
+    background: rgba(46, 125, 50, 0.12);
+}
+
+.liberta-hero-status-badge--active .material-icons {
+    animation: app-pulse 2s ease-in-out infinite;
+}
+
+.liberta-hero-status-text {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.8rem;
     color: var(--app-text-muted, rgba(255, 255, 255, 0.5));
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    margin-top: 0.15rem;
 }
 
 .liberta-hero-info {
@@ -553,54 +565,6 @@
 /* ═══════════════════════════════════════════════════
    TABELA DE JOGOS — Tabs + Cards
    ═══════════════════════════════════════════════════ */
-
-/* --- Tabs --- */
-.liberta-jogos-tabs {
-    display: flex;
-    gap: 0.35rem;
-    margin-bottom: 0.85rem;
-    background: var(--app-surface, #1a1a1a);
-    border: 1px solid var(--app-border, #333);
-    border-radius: 0.65rem;
-    padding: 0.25rem;
-}
-
-.liberta-jogos-tab {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.3rem;
-    padding: 0.45rem 0.25rem;
-    border: none;
-    border-radius: 0.4rem;
-    background: transparent;
-    color: var(--app-text-muted, rgba(255,255,255,0.45));
-    font-family: var(--app-font-base, 'Inter', sans-serif);
-    font-size: 0.72rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s;
-    -webkit-tap-highlight-color: transparent;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-
-.liberta-jogos-tab--active {
-    background: var(--app-liberta-muted, rgba(27, 94, 32, 0.15));
-    color: var(--app-liberta-secondary, #D4AF37);
-    border: 1px solid var(--app-liberta-border, rgba(27, 94, 32, 0.35));
-}
-
-/* Dot pulsante na aba Ao Vivo */
-.liberta-jogos-live-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--app-success-light, #22c55e);
-    flex-shrink: 0;
-    animation: app-pulse 1.8s ease-in-out infinite;
-}
 
 /* --- Container de jogos --- */
 .liberta-jogos-container {
