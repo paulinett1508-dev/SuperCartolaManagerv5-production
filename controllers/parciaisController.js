@@ -333,6 +333,8 @@ export async function getParciais(req, res) {
       ? await Time.find({ id: { $in: liga.times } }).lean()
       : [];
 
+    console.log(`[PARCIAIS-CTRL] Liga ${ligaId}: liga.times=${liga.times?.length || 0}, timesRaw=${timesRaw.length}`);
+
     // Mapa clube_id a partir de liga.participantes
     const clubeIdMap = {};
     (liga.participantes || []).forEach((p) => {
@@ -372,6 +374,8 @@ export async function getParciais(req, res) {
         timesAtivos.push(entry);
       }
     });
+
+    console.log(`[PARCIAIS-CTRL] Liga ${ligaId}: ativos=${timesAtivos.length}, inativos=${timesInativosArr.length}`);
 
     // 3. Scouts: frozen (MongoDB) + live (API Cartola)
     const [scoutsFrozen, atletasLive] = await Promise.all([
@@ -430,17 +434,40 @@ export async function getParciais(req, res) {
         rodada_desistencia: t.rodada_desistencia,
       }));
 
+    const temResultados = resultados.length > 0;
+
+    if (!temResultados) {
+      console.warn(`[PARCIAIS-CTRL] 0 resultados para liga ${ligaId}. ` +
+        `liga.times: ${liga.times?.length || 0}, timesRaw: ${timesRaw.length}, ` +
+        `timesAtivos: ${timesAtivos.length}, timesInativos: ${timesInativosArr.length}, ` +
+        `atletasLive: ${Object.keys(atletasLive).length}`);
+    }
+
     const payload = {
-      disponivel: true,
+      disponivel: temResultados,
       rodada: rodadaAtual,
       participantes: resultados,
       inativos,
       totalTimes: resultados.length,
       totalInativos: inativos.length,
       atualizadoEm: new Date(),
+      // Diagnóstico quando vazio — ajuda frontend a mostrar mensagem útil
+      ...(!temResultados && {
+        motivo: "sem_dados_parciais",
+        diagnostico: {
+          timesNaLiga: liga.times?.length || 0,
+          timesEncontrados: timesRaw.length,
+          timesAtivos: timesAtivos.length,
+          timesInativos: timesInativosArr.length,
+          atletasPontuados: Object.keys(atletasLive).length,
+        },
+      }),
     };
 
-    parciaisCache.set(cacheKey, payload);
+    // Não cachear resposta vazia — evitar cache poisoning
+    if (temResultados) {
+      parciaisCache.set(cacheKey, payload);
+    }
     return res.json(payload);
   } catch (err) {
     console.error("[PARCIAIS-CTRL] Erro:", err.message);
