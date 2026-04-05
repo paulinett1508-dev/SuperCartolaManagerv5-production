@@ -315,10 +315,13 @@ export async function getParciais(req, res) {
       return res.status(503).json({ erro: "API Cartola indisponível" });
     }
 
-    if (statusMercado !== 2) {
+    // Status 2 = rodada em andamento | Status 3 = desbloqueado (jogos parcialmente encerrados,
+    // mercado parcialmente reaberto — dados live ainda válidos). Status 4+ = round finalizado.
+    const rodadaAoVivo = statusMercado === 2 || statusMercado === 3;
+    if (!rodadaAoVivo) {
       return res.json({
         disponivel: false,
-        motivo: "mercado_aberto",
+        motivo: statusMercado === 4 ? "rodada_encerrada" : "mercado_aberto",
         rodada: rodadaAtual,
         participantes: [],
         inativos: [],

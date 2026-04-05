@@ -260,7 +260,10 @@ async function executarAutoRefresh() {
             );
         }
 
-        if (typeof estadoParciais.autoRefresh.onUpdate === "function") {
+        // Só atualiza o display se os dados são válidos — evita sobrescrever
+        // a pontuação correta com "Aguardando pontuações" quando o backend
+        // retorna disponivel:false (ex: status_mercado=3 transitório).
+        if (typeof estadoParciais.autoRefresh.onUpdate === "function" && dados && dados.disponivel !== false) {
             estadoParciais.autoRefresh.onUpdate(dados);
         }
     } catch (error) {
