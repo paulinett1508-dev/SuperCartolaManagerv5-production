@@ -44,9 +44,10 @@ const ID_FIX_MAP = {
 // Data de início real do Brasileirão por temporada.
 // Jogos ANTERIORES a essa data são Copa do Brasil / Supercopa / Libertadores
 // e devem ser removidos do CalendarioBrasileirao.
+// 2026: adiantado por causa da Copa do Mundo 2026 (jun-jul) — início em janeiro.
 const BRASILEIRAO_INICIO = {
     2025: '2025-04-12',
-    2026: '2026-04-01',
+    2026: '2026-01-01',
 };
 
 const STATUS_PRIORIDADE = { ao_vivo: 3, encerrado: 2, agendado: 1, a_definir: 1, adiado: 0, cancelado: 0 };

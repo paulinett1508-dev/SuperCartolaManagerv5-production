@@ -158,9 +158,10 @@ function formatarHora(dataISO) {
 // Jogos ANTERIORES a essa data são de outras competições (Copa do Brasil,
 // Supercopa, Libertadores preliminar) e devem ser ignorados.
 // ATENÇÃO: atualizar a cada temporada.
+// 2026: temporada adiantada por causa da Copa do Mundo 2026 (jun-jul) — início em janeiro.
 const BRASILEIRAO_INICIO = {
     2025: '2025-04-12',
-    2026: '2026-04-01', // Primeiro jogo: 2026-04-01
+    2026: '2026-01-01', // Brasileirão 2026 adiantado — Copa do Mundo em junho/julho
 };
 
 // Mapeamento ESPN displayName → ID Cartola (Série A 2026 — 20 times)
