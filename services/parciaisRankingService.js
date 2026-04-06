@@ -135,7 +135,7 @@ function calcularPontuacaoTime(escalacao, atletasPontuados) {
     let atletasEmCampo = 0;
     const capitaoId = escalacao.capitao_id;
     const reservaLuxoId = escalacao.reserva_luxo_id;
-    const totalAtletas = (escalacao.atletas?.length || 0) + (escalacao.reservas?.length || 0);
+    const totalAtletas = escalacao.atletas?.length || 0;
 
     // ── FASE 1: Titulares ──
     const titularesProcessados = [];

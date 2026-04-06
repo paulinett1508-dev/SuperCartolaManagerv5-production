@@ -242,8 +242,7 @@ function calcularPontuacao(dadosEscalacao, atletasPontuados, time) {
     }
   }
 
-  const totalAtletas =
-    (dadosEscalacao.atletas?.length || 0) + (dadosEscalacao.reservas?.length || 0);
+  const totalAtletas = dadosEscalacao.atletas?.length || 0;
 
   return {
     timeId: time.timeId,
