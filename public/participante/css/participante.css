@@ -638,8 +638,7 @@ body {
 @media (max-width: 767px) {
     /* Prevenir conteúdo fora da viewport */
     .participante-container {
-        max-height: 100vh;
-        overflow: hidden;
+        overflow-x: hidden;
         display: flex;
         flex-direction: column;
     }

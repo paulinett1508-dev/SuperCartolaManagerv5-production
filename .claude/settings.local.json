@@ -322,7 +322,18 @@
       "Bash(export PATH=\"$PATH:/c/Users/Windows10/AppData/Local/GitHubCLI/bin\")",
       "Bash(ssh:*)",
       "Bash(sshpass:*)",
-      "Bash(expect:*)"
+      "Bash(expect:*)",
+      "WebFetch(domain:pt.wikipedia.org)",
+      "WebFetch(domain:www.cbf.com.br)",
+      "WebFetch(domain:sportv.globo.com)",
+      "WebFetch(domain:www.espn.com.br)",
+      "WebFetch(domain:ogol.com.br)",
+      "Skill(code-review:code-review)",
+      "Bash(MONGO_URI=\"mongodb+srv://admin:Acesso2026@cluster0.fjcat.mongodb.net/cartola-manager?retryWrites=true&w=majority\" node --experimental-vm-modules scripts/regenerar-bracket-pontos-corridos.js --all --dry-run)",
+      "Bash(MONGO_URI=\"mongodb+srv://admin:Acesso2026@cluster0.fjcat.mongodb.net/cartola-manager?retryWrites=true&w=majority\" node scripts/regenerar-bracket-pontos-corridos.js --liga-id 684cb1c8af923da7c7df51de --force)",
+      "WebFetch(domain:www.elgrafico.com.ar)",
+      "WebFetch(domain:www.turistafc.com.br)",
+      "WebFetch(domain:www.flashscore.com.br)"
     ]
   },
   "enableAllProjectMcpServers": true,
