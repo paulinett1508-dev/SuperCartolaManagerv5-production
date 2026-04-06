@@ -261,7 +261,10 @@ async function buscarViaEspn(temporada) {
 
     // ESPN scoreboard não suporta ranges longos confiávelmente.
     // Brasileirão vai de março a dezembro — buscar mês a mês e mesclar.
-    const MESES_TEMPORADA = ['03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+    // Meses dinâmicos baseados em BRASILEIRAO_INICIO (2026 começa em janeiro por causa da Copa do Mundo)
+    const mesInicio = parseInt((BRASILEIRAO_INICIO[temporada] || '').substring(5, 7) || '04', 10);
+    const MESES_TEMPORADA = [];
+    for (let m = mesInicio; m <= 12; m++) MESES_TEMPORADA.push(String(m).padStart(2, '0'));
 
     /**
      * Busca jogos de um mês específico via ESPN scoreboard.
@@ -700,13 +703,17 @@ async function sincronizarTabela(temporada, forcar = false) {
 
     // Se conseguiu dados, salvar
     if (partidas && partidas.length > 0) {
-        const calendario = await CalendarioBrasileirao.importarPartidas(temporada, partidas, fonte);
+        // Full sync: replaceMode elimina lixo de seeds/syncs antigos
+        const calendario = await CalendarioBrasileirao.importarPartidas(temporada, partidas, fonte, { replaceMode: true });
 
         state.ultimoSync = new Date();
         state.fonteAtual = fonte;
         state.erro = null;
         state.stats.syncCount++;
         state.stats.lastSuccess = { fonte, jogos: partidas.length, data: new Date() };
+
+        // Invalidar cache de classificação — dados mudaram
+        _classificacaoCache.ts = 0;
 
         console.log(`[BRASILEIRAO-SERVICE] ✅ Sync completo: ${partidas.length} jogos via ${fonte}`);
 
