@@ -335,7 +335,10 @@
       "WebFetch(domain:www.turistafc.com.br)",
       "WebFetch(domain:www.flashscore.com.br)",
       "Bash(do echo:*)",
-      "Bash(python3 -c \":*)"
+      "Bash(python3 -c \":*)",
+      "mcp__claude_ai_MCP_MongoDB__find_documents",
+      "mcp__claude_ai_MCP_MongoDB__get_collection_schema",
+      "mcp__claude_ai_MCP_MongoDB__list_collections"
     ]
   },
   "enableAllProjectMcpServers": true,
