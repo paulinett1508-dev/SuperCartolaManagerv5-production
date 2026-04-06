@@ -119,7 +119,10 @@ calendarioBrasileiraoSchema.methods.obterRodada = function(numeroRodada) {
 calendarioBrasileiraoSchema.methods.obterRodadaAtual = function() {
     const hoje = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
 
-    // Encontrar rodada atual usando datas + status
+    // Última rodada que "passou" com jogos não totalmente encerrados
+    // (sync parcial: rodada jogada mas status não atualizado)
+    let ultimaRodadaPassada = 0;
+
     for (let r = 1; r <= 38; r++) {
         const jogosRodada = this.partidas.filter(p => p.rodada === r);
         if (jogosRodada.length === 0) continue;
@@ -134,13 +137,19 @@ calendarioBrasileiraoSchema.methods.obterRodadaAtual = function() {
         const datas = jogosRodada.map(p => p.data).filter(Boolean).sort();
         const dataFimRodada = datas.length > 0 ? datas[datas.length - 1] : null;
 
-        // Rodada já passou? Pular (encerrada com ressalvas)
-        if (dataFimRodada && dataFimRodada < hoje) continue;
+        // Rodada já passou mas não está totalmente encerrada (sync pendente)
+        // → guardar como candidata, continuar procurando rodada futura
+        if (dataFimRodada && dataFimRodada < hoje) {
+            ultimaRodadaPassada = r;
+            continue;
+        }
 
         return r;
     }
 
-    return 38; // Todas encerradas
+    // Nenhuma rodada futura encontrada: retornar a última rodada passada
+    // com jogos pendentes (sync incompleto), ou 38 se tudo encerrado
+    return ultimaRodadaPassada || 38;
 };
 
 /**
@@ -254,6 +263,8 @@ calendarioBrasileiraoSchema.methods.atualizarStats = function() {
     let rodadaAtual = 0;
     let ultimaCompleta = 0;
 
+    let ultimaRodadaPassada = 0;
+
     for (let r = 1; r <= 38; r++) {
         const jogosRodada = this.partidas.filter(p => p.rodada === r);
         if (jogosRodada.length === 0) continue;
@@ -268,9 +279,10 @@ calendarioBrasileiraoSchema.methods.atualizarStats = function() {
         const datas = jogosRodada.map(p => p.data).filter(Boolean).sort();
         const dataFimRodada = datas.length > 0 ? datas[datas.length - 1] : null;
 
-        // Rodada já passou no calendário? Considerar encerrada mesmo com jogos pendentes
+        // Rodada passou mas sync incompleto → guardar como candidata
         if (dataFimRodada && dataFimRodada < hoje) {
-            continue; // Pular — rodada passada (jogos adiados/não realizados)
+            ultimaRodadaPassada = r;
+            continue;
         }
 
         // Tem jogos ao vivo ou agendados com datas futuras → esta é a rodada atual
@@ -279,9 +291,9 @@ calendarioBrasileiraoSchema.methods.atualizarStats = function() {
         }
     }
 
-    // Fallback: se nenhuma rodada ativa, próxima após a última completa
+    // Fallback: rodada passada com sync incompleto, ou próxima após última completa
     if (!rodadaAtual) {
-        rodadaAtual = Math.min(ultimaCompleta + 1, 38);
+        rodadaAtual = ultimaRodadaPassada || Math.min(ultimaCompleta + 1, 38);
     }
 
     this.stats = {

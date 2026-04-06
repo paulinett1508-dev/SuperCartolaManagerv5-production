@@ -671,11 +671,12 @@ const BrasileiraoTabela = {
             const rodada = rodadas[r];
             if (!rodada) continue;
 
-            // Status baseado em datas + estado real dos jogos
+            // Status baseado no estado real dos jogos (não inferir por data)
+            // rodadaPassou é só auxiliar para "em andamento" — não marca ENCERRADA
             const temAoVivo = rodada.jogos_ao_vivo > 0;
             const todosEncerrados = rodada.jogos_encerrados === rodada.total_jogos && rodada.total_jogos > 0;
             const rodadaPassou = rodada.data_fim && rodada.data_fim < hoje;
-            const isEncerrada = todosEncerrados || (rodadaPassou && !temAoVivo);
+            const isEncerrada = todosEncerrados;
             const isAtual = temAoVivo || (r === rodadaAtual && !isEncerrada);
             const isFutura = !isEncerrada && !isAtual;
 

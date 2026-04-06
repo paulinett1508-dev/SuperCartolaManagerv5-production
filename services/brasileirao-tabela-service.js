@@ -154,6 +154,15 @@ function formatarHora(dataISO) {
 // FONTE 1: ESPN (gratuita, sem autenticação, calendário completo)
 // =====================================================================
 
+// Data de início do Brasileirão por temporada.
+// Jogos ANTERIORES a essa data são de outras competições (Copa do Brasil,
+// Supercopa, Libertadores preliminar) e devem ser ignorados.
+// ATENÇÃO: atualizar a cada temporada.
+const BRASILEIRAO_INICIO = {
+    2025: '2025-04-12',
+    2026: '2026-04-01', // Primeiro jogo: 2026-04-01
+};
+
 // Mapeamento ESPN displayName → ID Cartola (Série A 2026 — 20 times)
 // ATENÇÃO: atualizar a cada temporada conforme promoções/rebaixamentos
 const TIMES_ESPN_MAP = {
@@ -364,13 +373,46 @@ async function buscarViaEspn(temporada) {
                 estadio: venue.fullName || null,
                 cidade: venue.address?.city || null,
             };
-        }).filter(p => p.mandante_id && p.visitante_id && p.data);
+        });
 
-        // Inferir rodadas por clusters de data
-        inferirRodadas(partidas);
+        // Log de diagnóstico: times não encontrados no mapa (nome diferente do esperado)
+        const semId = partidas.filter(p => !p.mandante_id || !p.visitante_id);
+        if (semId.length > 0) {
+            const timesDesconhecidos = new Set();
+            semId.forEach(p => {
+                if (!p.mandante_id) timesDesconhecidos.add(p.mandante);
+                if (!p.visitante_id) timesDesconhecidos.add(p.visitante);
+            });
+            console.warn(`[BRASILEIRAO-SERVICE] ⚠️ ${semId.length} jogos ignorados — times não mapeados: ${[...timesDesconhecidos].join(', ')}`);
+        }
+
+        // Filtrar por data de início do Brasileirão.
+        // ESPN retorna jogos de Copa do Brasil, Supercopa e Libertadores
+        // preliminar nos mesmos resultados — todos anteriores ao início da Série A.
+        const dataInicio = BRASILEIRAO_INICIO[temporada] || `${temporada}-04-01`;
+        const totalBruto = partidas.length;
+        const partidasFiltradas = partidas.filter(p => p.mandante_id && p.visitante_id && p.data && p.data >= dataInicio);
+        const descartados = totalBruto - partidasFiltradas.length;
+        if (descartados > 0) {
+            console.log(`[BRASILEIRAO-SERVICE] ESPN: ${descartados} jogos descartados (antes de ${dataInicio} — Copa do Brasil/Supercopa)`);
+        }
+
+        // Inferir rodadas por clusters de data (só para jogos sem rodada ESPN)
+        inferirRodadas(partidasFiltradas);
 
         // Filtrar rodadas válidas (1-38)
-        const validas = partidas.filter(p => p.rodada >= 1 && p.rodada <= 38);
+        const validas = partidasFiltradas.filter(p => p.rodada >= 1 && p.rodada <= 38);
+
+        // Sanidade: avisar se alguma rodada tem > 12 jogos (sinal de contaminação residual)
+        const jogosParaRodada = {};
+        for (const p of validas) {
+            jogosParaRodada[p.rodada] = (jogosParaRodada[p.rodada] || 0) + 1;
+        }
+        for (const [r, count] of Object.entries(jogosParaRodada)) {
+            if (count > 12) {
+                console.warn(`[BRASILEIRAO-SERVICE] ESPN: Rodada ${r} com ${count} jogos (esperado ≤ 10) — possível contaminação residual`);
+            }
+        }
 
         // Desduplicar: mesmo par mandante_id+visitante_id pode aparecer 2x
         // (jogo original adiado + remarcado, cada um com ID diferente no ESPN)
@@ -969,7 +1011,9 @@ async function obterClassificacao(temporada) {
         }
 
         const classificacao = calendario.calcularClassificacao();
-        const rodadaAtual = calendario.stats?.rodada_atual || calendario.obterRodadaAtual();
+        let rodadaAtual = calendario.obterRodadaAtual();
+        const rodadaCartola = await obterRodadaCartola();
+        if (rodadaCartola) rodadaAtual = rodadaCartola;
 
         const resultado = {
             success: true,
