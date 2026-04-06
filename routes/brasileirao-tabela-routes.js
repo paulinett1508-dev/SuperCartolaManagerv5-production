@@ -200,6 +200,73 @@ router.get('/classificacao/:temporada', async (req, res) => {
     }
 });
 
+/**
+ * POST /api/brasileirao/refresh/:temporada
+ * Rebusca dados das fontes externas (API-Football → ESPN), substitui no banco
+ * e retorna classificação + jogos da rodada atual — dados 100% frescos.
+ * Rate limit: 1 req/2min por IP (proteger quota API-Football)
+ */
+const _refreshTimestamps = new Map(); // IP → timestamp do último refresh
+const REFRESH_COOLDOWN_MS = 2 * 60 * 1000; // 2 minutos
+
+router.post('/refresh/:temporada', async (req, res) => {
+    try {
+        const temporada = parseInt(req.params.temporada, 10);
+
+        if (isNaN(temporada) || temporada < 2020 || temporada > 2030) {
+            return res.status(400).json({
+                success: false,
+                erro: 'Temporada inválida',
+            });
+        }
+
+        // Rate limit por IP
+        const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+        const ultimoRefresh = _refreshTimestamps.get(ip) || 0;
+        const agora = Date.now();
+
+        if (agora - ultimoRefresh < REFRESH_COOLDOWN_MS) {
+            const restante = Math.ceil((REFRESH_COOLDOWN_MS - (agora - ultimoRefresh)) / 1000);
+            return res.status(429).json({
+                success: false,
+                erro: `Aguarde ${restante}s para atualizar novamente`,
+            });
+        }
+
+        _refreshTimestamps.set(ip, agora);
+
+        // Force sync: rebusca das fontes externas com replaceMode
+        const syncResult = await brasileiraoService.sincronizarTabela(temporada, true);
+
+        if (!syncResult.success) {
+            return res.status(503).json(syncResult);
+        }
+
+        // Retornar dados frescos: classificação + jogos da rodada atual
+        const [classificacao, resumo] = await Promise.all([
+            brasileiraoService.obterClassificacao(temporada),
+            brasileiraoService.obterResumoParaExibicao(temporada),
+        ]);
+
+        res.json({
+            success: true,
+            fonte: syncResult.fonte,
+            jogosImportados: syncResult.jogosImportados,
+            classificacao: classificacao.classificacao || [],
+            rodada_atual: resumo.rodada_atual,
+            jogos_rodada_atual: resumo.jogos_rodada_atual || [],
+            ultima_atualizacao: new Date(),
+        });
+
+    } catch (error) {
+        console.error('[BRASILEIRAO-ROUTES] Erro refresh:', error);
+        res.status(500).json({
+            success: false,
+            erro: 'Erro ao atualizar dados do Brasileirão',
+        });
+    }
+});
+
 // =====================================================================
 // ENDPOINTS ADMIN (Requer autenticação)
 // =====================================================================

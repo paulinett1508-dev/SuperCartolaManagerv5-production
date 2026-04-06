@@ -451,11 +451,98 @@ calendarioBrasileiraoSchema.statics.obterOuCriar = async function(temporada) {
  * Semáforo simples para prevenir race condition entre syncs simultâneos
  */
 let _importLock = false;
-calendarioBrasileiraoSchema.statics.importarPartidas = async function(temporada, partidasNovas, fonte) {
+calendarioBrasileiraoSchema.statics.importarPartidas = async function(temporada, partidasNovas, fonte, options = {}) {
     if (_importLock) throw new Error('importarPartidas já em andamento — aguarde conclusão');
     _importLock = true;
     try {
+    const { replaceMode = false } = options;
     const calendario = await this.obterOuCriar(temporada);
+
+    // ── REPLACE MODE ──────────────────────────────────────────────
+    // Substitui TODAS as partidas pelo array novo (remove lixo de seed/syncs antigos).
+    // Preserva data_original/horario_original/rodada_original de partidas existentes
+    // para manter tracking de remarcações.
+    if (replaceMode) {
+        // Mapa de partidas existentes: chave = mandante_id-visitante_id
+        const existentesMap = new Map();
+        for (const p of calendario.partidas) {
+            if (p.mandante_id && p.visitante_id) {
+                const obj = p.toObject ? p.toObject() : p;
+                existentesMap.set(`${p.mandante_id}-${p.visitante_id}`, obj);
+            }
+        }
+
+        const novasPartidas = [];
+        for (const nova of partidasNovas) {
+            const chave = (nova.mandante_id && nova.visitante_id)
+                ? `${nova.mandante_id}-${nova.visitante_id}`
+                : null;
+            const existente = chave ? existentesMap.get(chave) : null;
+
+            if (existente) {
+                // Detectar remarcação comparando existente vs novo
+                const statusAtivo = existente.status !== 'encerrado' && existente.status !== 'cancelado';
+                const dataMudou = nova.data && nova.data !== existente.data;
+                const horarioMudou = nova.horario && nova.horario !== existente.horario && nova.horario !== '00:00';
+
+                if (statusAtivo && (dataMudou || horarioMudou)) {
+                    if (!calendario.remarcacoes) calendario.remarcacoes = [];
+                    calendario.remarcacoes.push({
+                        mandante_id: existente.mandante_id,
+                        visitante_id: existente.visitante_id,
+                        mandante: existente.mandante,
+                        visitante: existente.visitante,
+                        rodada_original: existente.rodada_original || existente.rodada,
+                        data_original: existente.data_original || existente.data,
+                        horario_original: existente.horario_original || existente.horario,
+                        data_nova: nova.data,
+                        horario_novo: nova.horario,
+                        rodada_nova: nova.rodada,
+                        detectado_em: new Date(),
+                        fonte,
+                        resolvido: false,
+                        resolvido_em: null,
+                    });
+                }
+
+                // Resolver remarcações pendentes se jogo encerrou
+                if (nova.status === 'encerrado' && calendario.remarcacoes?.length > 0) {
+                    const rodadaFinal = (nova.rodada >= 1 && nova.rodada <= 38) ? nova.rodada : existente.rodada;
+                    for (const rem of calendario.remarcacoes) {
+                        if (rem.resolvido) continue;
+                        if (rem.mandante_id === existente.mandante_id && rem.visitante_id === existente.visitante_id) {
+                            if (rodadaFinal === rem.rodada_original) {
+                                rem.resolvido = true;
+                                rem.resolvido_em = new Date();
+                            }
+                        }
+                    }
+                }
+
+                // Montar partida preservando originais do existente
+                novasPartidas.push({
+                    ...nova,
+                    data_original: existente.data_original || existente.data,
+                    horario_original: existente.horario_original || existente.horario,
+                    rodada_original: existente.rodada_original || existente.rodada,
+                });
+            } else {
+                // Partida totalmente nova
+                novasPartidas.push({
+                    ...nova,
+                    data_original: nova.data,
+                    horario_original: nova.horario,
+                    rodada_original: nova.rodada,
+                });
+            }
+        }
+
+        // Substituir array inteiro — elimina todo lixo de seeds/syncs antigos
+        calendario.partidas = novasPartidas;
+        console.log(`[BRASILEIRAO] replaceMode: ${novasPartidas.length} partidas (anterior: ${existentesMap.size})`);
+
+    } else {
+    // ── MERGE MODE (comportamento original) ───────────────────────
 
     for (const nova of partidasNovas) {
         // v1.1: Match primário por mandante_id + visitante_id (mais robusto que rodada + nomes).
@@ -485,14 +572,11 @@ calendarioBrasileiraoSchema.statics.importarPartidas = async function(temporada,
             const existenteObj = existente.toObject ? existente.toObject() : existente;
 
             // ── DETECÇÃO DE REMARCAÇÃO ─────────────────────────────────
-            // Comparar data/horario novos com existentes.
-            // Só detecta se o jogo ainda não aconteceu (não encerrado/cancelado).
             const statusAtivo = existenteObj.status !== 'encerrado' && existenteObj.status !== 'cancelado';
             const dataExistente = existenteObj.data;
             const horarioExistente = existenteObj.horario;
             const dataMudou = nova.data && nova.data !== dataExistente;
             const horarioMudou = nova.horario && nova.horario !== horarioExistente && nova.horario !== '00:00';
-            const rodadaMudou = nova.rodada >= 1 && nova.rodada <= 38 && nova.rodada !== existenteObj.rodada;
 
             if (statusAtivo && (dataMudou || horarioMudou)) {
                 const remarcacao = {
@@ -517,7 +601,6 @@ calendarioBrasileiraoSchema.statics.importarPartidas = async function(temporada,
             }
 
             // ── RESOLUÇÃO DE REMARCAÇÃO ───────────────────────────────
-            // Se jogo virou encerrado E está na rodada original → resolver remarcações pendentes
             if (nova.status === 'encerrado' && calendario.remarcacoes?.length > 0) {
                 const rodadaFinal = (nova.rodada >= 1 && nova.rodada <= 38) ? nova.rodada : existenteObj.rodada;
                 for (const rem of calendario.remarcacoes) {
@@ -528,7 +611,6 @@ calendarioBrasileiraoSchema.statics.importarPartidas = async function(temporada,
                             rem.resolvido_em = new Date();
                             console.log(`[BRASILEIRAO] ✅ Remarcação resolvida: ${existenteObj.mandante} x ${existenteObj.visitante} (jogou na R${rodadaFinal})`);
                         }
-                        // Se rodada diferente: permanece resolvido=false como histórico permanente
                     }
                 }
             }
@@ -541,12 +623,9 @@ calendarioBrasileiraoSchema.statics.importarPartidas = async function(temporada,
             calendario.partidas[idx] = {
                 ...existenteObj,
                 ...nova,
-                // Preservar IDs do Cartola se já temos
                 mandante_id: nova.mandante_id || existente.mandante_id,
                 visitante_id: nova.visitante_id || existente.visitante_id,
-                // Preservar rodada do MongoDB se nova é 0 (inferência falhou)
                 rodada: rodadaFinal,
-                // Definir data_original/horario_original/rodada_original apenas no primeiro sync
                 data_original: existenteObj.data_original || dataExistente,
                 horario_original: existenteObj.horario_original || horarioExistente,
                 rodada_original: existenteObj.rodada_original || existenteObj.rodada,
@@ -561,6 +640,8 @@ calendarioBrasileiraoSchema.statics.importarPartidas = async function(temporada,
             });
         }
     }
+
+    } // fim merge mode
 
     calendario.ultima_atualizacao = new Date();
     calendario.fonte = fonte;

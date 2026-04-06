@@ -81,11 +81,11 @@ function escapeHtml(str) {
         .replace(/"/g, '&quot;');
 }
 
-async function _fetchComTimeout(url) {
+async function _fetchComTimeout(url, opts = {}) {
     const controller = new AbortController();
     const t = setTimeout(() => controller.abort(), _FETCH_TIMEOUT_MS);
     try {
-        const res = await fetch(url, { signal: controller.signal });
+        const res = await fetch(url, { ...opts, signal: controller.signal });
         clearTimeout(t);
         return res;
     } catch (err) {
@@ -536,6 +536,38 @@ function _setupRefreshButton() {
         fresh.disabled = true;
         icon.classList.add('spinning');
         try {
+            // Rebuscar tudo das fontes externas (API-Football → ESPN)
+            // O /refresh força sync real — não lê apenas cache
+            const temporada = _temporadaAtual || new Date().getFullYear();
+            const refreshRes = await _fetchComTimeout(`/api/brasileirao/refresh/${temporada}`, { method: 'POST' });
+
+            if (refreshRes.ok) {
+                const data = await refreshRes.json();
+                if (data.success) {
+                    // Dados frescos do refresh — renderizar direto
+                    if (data.rodada_atual) {
+                        _rodadaAtualRef = data.rodada_atual;
+                        _rodadaExibida = data.rodada_atual;
+                    }
+                    _renderizarClassificacao({
+                        classificacao: data.classificacao,
+                        rodada_atual: data.rodada_atual,
+                        success: true,
+                    });
+                    _renderizarJogosRodada({
+                        jogos_rodada_atual: data.jogos_rodada_atual,
+                        rodada_atual: data.rodada_atual,
+                        success: true,
+                    });
+                    _ultimaAtualizacao = Date.now();
+                    _atualizarStatus();
+                    if (window.Log) Log.info('BRASILEIRAO-LP', `Refresh: ${data.jogosImportados} jogos via ${data.fonte}`);
+                    return;
+                }
+            }
+
+            // Fallback: se refresh falhou (rate limit, erro), ler do cache normalmente
+            if (window.Log) Log.warn('BRASILEIRAO-LP', 'Refresh falhou, usando cache');
             const [apiClassificacao, apiResumo] = await Promise.all([
                 _carregarClassificacao(),
                 _carregarResumo(),
