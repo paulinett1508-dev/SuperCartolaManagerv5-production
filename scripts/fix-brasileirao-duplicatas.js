@@ -25,9 +25,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const DRY_RUN = !process.argv.includes('--force');
+const RESET_TIMESTAMP = process.argv.includes('--reset-timestamp');
 
 if (DRY_RUN) {
     console.log('⚠️  DRY-RUN — nenhuma alteração será feita. Use --force para aplicar.\n');
+} else if (RESET_TIMESTAMP) {
+    console.log('🕐 MODO RESET-TIMESTAMP — apenas reset da ultima_atualizacao para forçar sync.\n');
 } else {
     console.log('🚀 MODO FORCE — alterações serão aplicadas ao banco.\n');
 }
@@ -54,6 +57,25 @@ const STATUS_PRIORIDADE = { ao_vivo: 3, encerrado: 2, agendado: 1, a_definir: 1,
 
 await mongoose.connect(MONGO_URI);
 console.log('✅ Conectado ao MongoDB\n');
+
+// ─────────────────────────────────────────────────────────────
+// MODO RESET-TIMESTAMP: apenas zera ultima_atualizacao para
+// forçar background sync na próxima requisição à LP do Brasileirão.
+// Use após corrigir BRASILEIRAO_INICIO para restaurar dados deletados.
+// ─────────────────────────────────────────────────────────────
+if (RESET_TIMESTAMP) {
+    const db = mongoose.connection.db;
+    const col = db.collection('calendariobrasileiraos');
+    const seteAtras = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // 7 dias atrás
+    await col.updateOne(
+        { temporada: 2026 },
+        { $set: { ultima_atualizacao: seteAtras } }
+    );
+    console.log(`✅ ultima_atualizacao zerada para ${seteAtras.toISOString()}`);
+    console.log('   O background sync será disparado na próxima requisição à LP do Brasileirão.');
+    await mongoose.disconnect();
+    process.exit(0);
+}
 
 try {
     const db = mongoose.connection.db;
