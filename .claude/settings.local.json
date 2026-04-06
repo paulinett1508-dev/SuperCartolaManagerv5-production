@@ -333,7 +333,9 @@
       "Bash(MONGO_URI=\"mongodb+srv://admin:Acesso2026@cluster0.fjcat.mongodb.net/cartola-manager?retryWrites=true&w=majority\" node scripts/regenerar-bracket-pontos-corridos.js --liga-id 684cb1c8af923da7c7df51de --force)",
       "WebFetch(domain:www.elgrafico.com.ar)",
       "WebFetch(domain:www.turistafc.com.br)",
-      "WebFetch(domain:www.flashscore.com.br)"
+      "WebFetch(domain:www.flashscore.com.br)",
+      "Bash(do echo:*)",
+      "Bash(python3 -c \":*)"
     ]
   },
   "enableAllProjectMcpServers": true,
