@@ -8,6 +8,7 @@
 
 import fetch from 'node-fetch';
 import CalendarioBrasileirao from '../models/CalendarioBrasileirao.js';
+import apiFootball from './api-football-service.js';
 
 // =====================================================================
 // CONFIGURAÇÃO
@@ -461,130 +462,119 @@ function extrairRodada(roundString) {
 
 /**
  * Busca calendário completo do Brasileirão via API-Football v3.
- * Retorna null se a chave não estiver configurada (fallback para ESPN).
+ * Delega ao api-football-service (quota tracker, circuit breaker, rate limit).
+ * Retorna null se chave não configurada ou circuit breaker aberto → fallback ESPN.
+ * Custo: 1 request por sync diário (toda a temporada de uma vez).
  * @param {number} temporada - Ano da temporada
  * @returns {Promise<Array|null>}
  */
 async function buscarViaApiFootball(temporada) {
-    const apiKey = process.env.API_FOOTBALL_KEY;
-    if (!apiKey) {
+    const status = apiFootball.getStatus();
+
+    if (!status.configurado) {
         console.log('[BRASILEIRAO-SERVICE] API_FOOTBALL_KEY não configurada — pulando API-Football');
+        return null;
+    }
+
+    // Inicialização lazy sem MongoDB (sem quota persistence, mas funcional).
+    // Se já foi inicializado pelo app com MongoDB, este bloco é ignorado.
+    if (!status.habilitado) {
+        await apiFootball.init(null);
+        const statusPosInit = apiFootball.getStatus();
+        if (!statusPosInit.habilitado) {
+            console.warn('[BRASILEIRAO-SERVICE] API-Football desabilitada (circuit breaker?) — pulando');
+            return null;
+        }
+    }
+
+    if (status.quota?.circuitOpen) {
+        console.warn(`[BRASILEIRAO-SERVICE] API-Football circuit breaker aberto: ${status.quota.circuitReason}`);
         return null;
     }
 
     console.log(`[BRASILEIRAO-SERVICE] Buscando temporada ${temporada} via API-Football (fonte da verdade)...`);
 
-    const url = `https://v3.football.api-sports.io/fixtures?league=${CONFIG.API_FOOTBALL_LEAGUE_ID}&season=${temporada}`;
+    // 1 request para toda a temporada — muito mais eficiente que busca por rodada
+    const resultado = await apiFootball.request('/fixtures', {
+        league: CONFIG.API_FOOTBALL_LEAGUE_ID,
+        season: temporada,
+    }, { priority: 'normal' });
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), CONFIG.REQUEST_TIMEOUT_MS);
-
-    try {
-        const response = await fetch(url, {
-            signal: controller.signal,
-            headers: {
-                'x-apisports-key': apiKey,
-                'User-Agent': 'SuperCartolaManager/1.0',
-            },
-        });
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-            console.warn(`[BRASILEIRAO-SERVICE] API-Football HTTP ${response.status}`);
-            return null;
-        }
-
-        const data = await response.json();
-
-        // Checar erros da API (ex: chave inválida, limite excedido)
-        if (data.errors && Object.keys(data.errors).length > 0) {
-            const erros = JSON.stringify(data.errors);
-            console.warn(`[BRASILEIRAO-SERVICE] API-Football erros: ${erros}`);
-            return null;
-        }
-
-        const fixtures = data.response;
-        if (!Array.isArray(fixtures) || fixtures.length === 0) {
-            console.warn('[BRASILEIRAO-SERVICE] API-Football retornou 0 fixtures');
-            return null;
-        }
-
-        console.log(`[BRASILEIRAO-SERVICE] API-Football retornou ${fixtures.length} fixtures`);
-
-        const dataInicio = BRASILEIRAO_INICIO[temporada] || `${temporada}-04-01`;
-
-        const partidas = fixtures.map(f => {
-            const fixture = f.fixture || {};
-            const league = f.league || {};
-            const teams = f.teams || {};
-            const goals = f.goals || {};
-
-            const mandante = teams.home?.name || '';
-            const visitante = teams.away?.name || '';
-            const mandante_id = getCartolaId(mandante);
-            const visitante_id = getCartolaId(visitante);
-            const data = formatarData(fixture.date);
-            const horario = formatarHora(fixture.date);
-            const status = converterStatusApiFootball(fixture.status?.short || 'NS');
-            const rodada = extrairRodada(league.round || '');
-
-            const isEncerrado = status === 'encerrado';
-            const placar_mandante = isEncerrado ? (goals.home ?? null) : null;
-            const placar_visitante = isEncerrado ? (goals.away ?? null) : null;
-
-            return {
-                id_externo: `apifootball_${fixture.id}`,
-                rodada,
-                data,
-                horario,
-                mandante,
-                visitante,
-                mandante_id,
-                visitante_id,
-                placar_mandante,
-                placar_visitante,
-                status,
-                estadio: fixture.venue?.name || null,
-                cidade: fixture.venue?.city || null,
-            };
-        });
-
-        // Log de times sem mapeamento
-        const semId = partidas.filter(p => !p.mandante_id || !p.visitante_id);
-        if (semId.length > 0) {
-            const desconhecidos = new Set();
-            semId.forEach(p => {
-                if (!p.mandante_id) desconhecidos.add(p.mandante);
-                if (!p.visitante_id) desconhecidos.add(p.visitante);
-            });
-            console.warn(`[BRASILEIRAO-SERVICE] API-Football: ${semId.length} jogos sem mapeamento — times: ${[...desconhecidos].join(', ')}`);
-        }
-
-        // Filtrar apenas Brasileirão (rodadas 1-38, após data de início)
-        const validas = partidas.filter(p =>
-            p.mandante_id && p.visitante_id &&
-            p.data && p.data >= dataInicio &&
-            p.rodada >= 1 && p.rodada <= 38
-        );
-
-        const descartados = partidas.length - validas.length;
-        if (descartados > 0) {
-            console.log(`[BRASILEIRAO-SERVICE] API-Football: ${descartados} fixtures descartados (sem ID, fora de data ou rodada inválida)`);
-        }
-
-        console.log(`[BRASILEIRAO-SERVICE] API-Football: ${validas.length} partidas válidas para importar`);
-        return validas;
-
-    } catch (error) {
-        clearTimeout(timeoutId);
-        if (error.name === 'AbortError') {
-            console.warn('[BRASILEIRAO-SERVICE] API-Football timeout (30s)');
-        } else {
-            console.error('[BRASILEIRAO-SERVICE] Erro API-Football:', error.message);
-        }
-        state.stats.lastError = { fonte: 'api-football', erro: error.message, data: new Date() };
+    if (!resultado.success) {
+        console.warn(`[BRASILEIRAO-SERVICE] API-Football falhou: ${resultado.error}`);
+        state.stats.lastError = { fonte: 'api-football', erro: resultado.error, data: new Date() };
         return null;
     }
+
+    const fixtures = resultado.data;
+    if (!Array.isArray(fixtures) || fixtures.length === 0) {
+        console.warn('[BRASILEIRAO-SERVICE] API-Football retornou 0 fixtures');
+        return null;
+    }
+
+    console.log(`[BRASILEIRAO-SERVICE] API-Football retornou ${fixtures.length} fixtures`);
+
+    const dataInicio = BRASILEIRAO_INICIO[temporada] || `${temporada}-04-01`;
+
+    const partidas = fixtures.map(f => {
+        const fixture = f.fixture || {};
+        const league = f.league || {};
+        const teams = f.teams || {};
+        const goals = f.goals || {};
+
+        const mandante = teams.home?.name || '';
+        const visitante = teams.away?.name || '';
+        const mandante_id = getCartolaId(mandante);
+        const visitante_id = getCartolaId(visitante);
+        const data = formatarData(fixture.date);
+        const horario = formatarHora(fixture.date);
+        const statusPartida = converterStatusApiFootball(fixture.status?.short || 'NS');
+        const rodada = extrairRodada(league.round || '');
+
+        const isEncerrado = statusPartida === 'encerrado';
+
+        return {
+            id_externo: `apifootball_${fixture.id}`,
+            rodada,
+            data,
+            horario,
+            mandante,
+            visitante,
+            mandante_id,
+            visitante_id,
+            placar_mandante: isEncerrado ? (goals.home ?? null) : null,
+            placar_visitante: isEncerrado ? (goals.away ?? null) : null,
+            status: statusPartida,
+            estadio: fixture.venue?.name || null,
+            cidade: fixture.venue?.city || null,
+        };
+    });
+
+    // Log de times sem mapeamento
+    const semId = partidas.filter(p => !p.mandante_id || !p.visitante_id);
+    if (semId.length > 0) {
+        const desconhecidos = new Set();
+        semId.forEach(p => {
+            if (!p.mandante_id) desconhecidos.add(p.mandante);
+            if (!p.visitante_id) desconhecidos.add(p.visitante);
+        });
+        console.warn(`[BRASILEIRAO-SERVICE] API-Football: ${semId.length} jogos sem mapeamento — times: ${[...desconhecidos].join(', ')}`);
+    }
+
+    // Filtrar: apenas Brasileirão real (rodadas 1-38, a partir da data de início)
+    const validas = partidas.filter(p =>
+        p.mandante_id && p.visitante_id &&
+        p.data && p.data >= dataInicio &&
+        p.rodada >= 1 && p.rodada <= 38
+    );
+
+    const descartados = partidas.length - validas.length;
+    if (descartados > 0) {
+        console.log(`[BRASILEIRAO-SERVICE] API-Football: ${descartados} fixtures descartados (sem ID, fora de data ou rodada inválida)`);
+    }
+
+    console.log(`[BRASILEIRAO-SERVICE] API-Football: ${validas.length} partidas válidas (quota restante: ${resultado.quotaInfo?.remaining ?? '?'})`);
+    return validas;
 }
 
 // =====================================================================
