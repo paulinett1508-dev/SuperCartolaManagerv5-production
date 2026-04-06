@@ -817,6 +817,45 @@ async function obterCalendarioCompleto(temporada, forcarSync = false) {
 }
 
 /**
+ * Enriquece um array de jogos com flags de remarcação ativas.
+ * Adiciona remarcado=true + data_original/horario_original/rodada_original
+ * em jogos que possuem remarcações pendentes (resolvido=false).
+ * @param {Array} jogos - partidas do calendário
+ * @param {Array} remarcacoes - array de remarcacoes do documento
+ * @returns {Array} jogos enriquecidos (novos objetos, sem mutação)
+ */
+function enriquecerComRemarcacoes(jogos, remarcacoes) {
+    if (!remarcacoes || remarcacoes.length === 0) return jogos;
+
+    // Índice de remarcações ativas por mandante_id+visitante_id
+    const ativas = new Map();
+    for (const rem of remarcacoes) {
+        if (rem.resolvido) continue;
+        const chave = `${rem.mandante_id}-${rem.visitante_id}`;
+        // Guardar apenas a mais recente (último detectado_em)
+        const existente = ativas.get(chave);
+        if (!existente || rem.detectado_em > existente.detectado_em) {
+            ativas.set(chave, rem);
+        }
+    }
+
+    if (ativas.size === 0) return jogos;
+
+    return jogos.map(jogo => {
+        const chave = `${jogo.mandante_id}-${jogo.visitante_id}`;
+        const rem = ativas.get(chave);
+        if (!rem) return jogo;
+        return {
+            ...jogo,
+            remarcado: true,
+            data_original: rem.data_original,
+            horario_original: rem.horario_original,
+            rodada_original: rem.rodada_original,
+        };
+    });
+}
+
+/**
  * Obtém resumo para exibição (rodada atual + próximas)
  */
 async function obterResumoParaExibicao(temporada) {
@@ -847,8 +886,12 @@ async function obterResumoParaExibicao(temporada) {
     const proximoJogo = calendario.obterProximoJogo();
     const temAoVivo = calendario.temJogosAoVivo();
 
-    // Pegar jogos da rodada atual
-    const jogosRodadaAtual = calendario.obterRodada(rodadaAtual);
+    // Pegar jogos da rodada atual (enriquecidos com remarcações)
+    const remarcacoes = calendario.remarcacoes || [];
+    const jogosRodadaAtual = enriquecerComRemarcacoes(
+        calendario.obterRodada(rodadaAtual),
+        remarcacoes
+    );
 
     // Pegar próximas 3 rodadas
     const proximasRodadas = [];
@@ -865,6 +908,9 @@ async function obterResumoParaExibicao(temporada) {
         }
     }
 
+    // Remarcações ativas (para exibição na LP)
+    const remarcacoesAtivas = remarcacoes.filter(r => !r.resolvido);
+
     return {
         success: true,
         temporada,
@@ -873,6 +919,7 @@ async function obterResumoParaExibicao(temporada) {
         proximo_jogo: proximoJogo,
         jogos_rodada_atual: jogosRodadaAtual,
         proximas_rodadas: proximasRodadas,
+        remarcacoes_ativas: remarcacoesAtivas,
         stats: calendario.stats,
         ultima_atualizacao: calendario.ultima_atualizacao,
     };
@@ -907,7 +954,17 @@ async function obterTodasRodadas(temporada) {
         };
     }
 
-    const rodadas = calendario.agruparPorRodada();
+    const remarcacoesTodas = calendario.remarcacoes || [];
+
+    // Enriquecer partidas de cada rodada com flags de remarcação
+    const rodasBruto = calendario.agruparPorRodada();
+    const rodadas = {};
+    for (const [num, rodada] of Object.entries(rodasBruto)) {
+        rodadas[num] = {
+            ...rodada,
+            partidas: enriquecerComRemarcacoes(rodada.partidas, remarcacoesTodas),
+        };
+    }
 
     // Recalcular rodada_atual dinamicamente (stats do MongoDB podem estar stale)
     // NOTA: ...calendario.stats não funciona em subdocumento Mongoose — extrair explicitamente
@@ -922,6 +979,7 @@ async function obterTodasRodadas(temporada) {
         temporada,
         total_rodadas: Object.keys(rodadas).length,
         rodadas,
+        remarcacoes_ativas: remarcacoesTodas.filter(r => !r.resolvido),
         stats: {
             total_jogos:           s.total_jogos,
             jogos_realizados:      s.jogos_realizados,

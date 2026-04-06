@@ -62,7 +62,32 @@ const partidaBrasileiraoSchema = new mongoose.Schema({
     cidade: {
         type: String,
         required: false
-    }
+    },
+    // Agendamento original — definido no primeiro sync, nunca sobrescrito.
+    // Permite detectar remarcações comparando com dados futuros.
+    data_original: { type: String, default: null },
+    horario_original: { type: String, default: null },
+    rodada_original: { type: Number, default: null },
+}, { _id: false });
+
+// Schema de uma remarcação detectada
+const remarcacaoSchema = new mongoose.Schema({
+    mandante_id: Number,
+    visitante_id: Number,
+    mandante: String,
+    visitante: String,
+    rodada_original: Number,   // rodada em que o jogo estava previsto originalmente
+    data_original: String,     // data original (YYYY-MM-DD)
+    horario_original: String,  // horário original (HH:MM)
+    data_nova: String,         // nova data após remarcação
+    horario_novo: String,      // novo horário
+    rodada_nova: Number,       // nova rodada (pode ser diferente da original)
+    detectado_em: { type: Date, default: Date.now },
+    fonte: String,             // qual fonte detectou (api-football, espn…)
+    resolvido: { type: Boolean, default: false },
+    resolvido_em: { type: Date, default: null },
+    // Resolvido = jogo encerrado na rodada_original (ficou na rodada prevista)
+    // Se jogou em rodada diferente, resolvido=false permanece como histórico
 }, { _id: false });
 
 // Schema principal - uma entrada por temporada
@@ -77,6 +102,7 @@ const calendarioBrasileiraoSchema = new mongoose.Schema({
         default: 71 // Brasileirão Série A no API-Football
     },
     partidas: [partidaBrasileiraoSchema],
+    remarcacoes: { type: [remarcacaoSchema], default: [] },
     ultima_atualizacao: {
         type: Date,
         default: Date.now
@@ -457,6 +483,61 @@ calendarioBrasileiraoSchema.statics.importarPartidas = async function(temporada,
             // Atualizar partida existente (preservar dados que já temos)
             const existente = calendario.partidas[idx];
             const existenteObj = existente.toObject ? existente.toObject() : existente;
+
+            // ── DETECÇÃO DE REMARCAÇÃO ─────────────────────────────────
+            // Comparar data/horario novos com existentes.
+            // Só detecta se o jogo ainda não aconteceu (não encerrado/cancelado).
+            const statusAtivo = existenteObj.status !== 'encerrado' && existenteObj.status !== 'cancelado';
+            const dataExistente = existenteObj.data;
+            const horarioExistente = existenteObj.horario;
+            const dataMudou = nova.data && nova.data !== dataExistente;
+            const horarioMudou = nova.horario && nova.horario !== horarioExistente && nova.horario !== '00:00';
+            const rodadaMudou = nova.rodada >= 1 && nova.rodada <= 38 && nova.rodada !== existenteObj.rodada;
+
+            if (statusAtivo && (dataMudou || horarioMudou)) {
+                const remarcacao = {
+                    mandante_id: existenteObj.mandante_id,
+                    visitante_id: existenteObj.visitante_id,
+                    mandante: existenteObj.mandante,
+                    visitante: existenteObj.visitante,
+                    rodada_original: existenteObj.rodada_original || existenteObj.rodada,
+                    data_original: existenteObj.data_original || dataExistente,
+                    horario_original: existenteObj.horario_original || horarioExistente,
+                    data_nova: nova.data,
+                    horario_novo: nova.horario,
+                    rodada_nova: nova.rodada,
+                    detectado_em: new Date(),
+                    fonte,
+                    resolvido: false,
+                    resolvido_em: null,
+                };
+                if (!calendario.remarcacoes) calendario.remarcacoes = [];
+                calendario.remarcacoes.push(remarcacao);
+                console.log(`[BRASILEIRAO] 📅 Remarcação detectada: ${existenteObj.mandante} x ${existenteObj.visitante} | ${dataExistente} ${horarioExistente} → ${nova.data} ${nova.horario}`);
+            }
+
+            // ── RESOLUÇÃO DE REMARCAÇÃO ───────────────────────────────
+            // Se jogo virou encerrado E está na rodada original → resolver remarcações pendentes
+            if (nova.status === 'encerrado' && calendario.remarcacoes?.length > 0) {
+                const rodadaFinal = (nova.rodada >= 1 && nova.rodada <= 38) ? nova.rodada : existenteObj.rodada;
+                for (const rem of calendario.remarcacoes) {
+                    if (rem.resolvido) continue;
+                    if (rem.mandante_id === existenteObj.mandante_id && rem.visitante_id === existenteObj.visitante_id) {
+                        if (rodadaFinal === rem.rodada_original) {
+                            rem.resolvido = true;
+                            rem.resolvido_em = new Date();
+                            console.log(`[BRASILEIRAO] ✅ Remarcação resolvida: ${existenteObj.mandante} x ${existenteObj.visitante} (jogou na R${rodadaFinal})`);
+                        }
+                        // Se rodada diferente: permanece resolvido=false como histórico permanente
+                    }
+                }
+            }
+
+            // ── MERGE ─────────────────────────────────────────────────
+            const rodadaFinal = (nova.rodada >= 1 && nova.rodada <= 38)
+                ? nova.rodada
+                : (existenteObj.rodada || nova.rodada);
+
             calendario.partidas[idx] = {
                 ...existenteObj,
                 ...nova,
@@ -464,13 +545,20 @@ calendarioBrasileiraoSchema.statics.importarPartidas = async function(temporada,
                 mandante_id: nova.mandante_id || existente.mandante_id,
                 visitante_id: nova.visitante_id || existente.visitante_id,
                 // Preservar rodada do MongoDB se nova é 0 (inferência falhou)
-                rodada: (nova.rodada >= 1 && nova.rodada <= 38)
-                    ? nova.rodada
-                    : (existenteObj.rodada || nova.rodada),
+                rodada: rodadaFinal,
+                // Definir data_original/horario_original/rodada_original apenas no primeiro sync
+                data_original: existenteObj.data_original || dataExistente,
+                horario_original: existenteObj.horario_original || horarioExistente,
+                rodada_original: existenteObj.rodada_original || existenteObj.rodada,
             };
         } else {
-            // Nova partida
-            calendario.partidas.push(nova);
+            // Nova partida — registrar agendamento original
+            calendario.partidas.push({
+                ...nova,
+                data_original: nova.data,
+                horario_original: nova.horario,
+                rodada_original: nova.rodada,
+            });
         }
     }
 

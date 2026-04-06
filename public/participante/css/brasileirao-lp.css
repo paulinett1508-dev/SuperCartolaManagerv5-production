@@ -464,3 +464,27 @@
     background: var(--app-info-muted, rgba(59,130,246,0.12));
     color: var(--app-info-light, #60a5fa);
 }
+
+/* ── BADGE REMARCADO ───────────────────────────────────────── */
+.brasileirao-remarcado-info {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 3px 8px 4px;
+    border-top: 1px solid var(--app-warning-muted, rgba(234,179,8,0.15));
+}
+.brasileirao-remarcado-badge {
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 1px 5px;
+    border-radius: 99px;
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    background: var(--app-warning-muted, rgba(234,179,8,0.15));
+    color: var(--app-warning, #eab308);
+}
+.brasileirao-remarcado-original {
+    font-size: 0.65rem;
+    color: var(--app-text-dim, rgba(255,255,255,0.4));
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+}

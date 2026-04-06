@@ -244,6 +244,13 @@ const BrasileiraoTabela = {
             infoContent = `<span class="brasileirao-jogo-data">${dataFormatada}</span><span class="brasileirao-horario">${jogo.horario || 'A definir'}</span>`;
         }
 
+        const remarcadoHtml = jogo.remarcado
+            ? `<div class="brasileirao-remarcado-info">
+                   <span class="brasileirao-remarcado-badge">REMARCADO</span>
+                   <span class="brasileirao-remarcado-original">era ${this._formatarDataCurta(jogo.data_original)}</span>
+               </div>`
+            : '';
+
         return `
             <div class="brasileirao-jogo ${statusClass}">
                 <div class="brasileirao-jogo-linha">
@@ -259,6 +266,7 @@ const BrasileiraoTabela = {
                 <div class="brasileirao-jogo-info">
                     ${infoContent}
                 </div>
+                ${remarcadoHtml}
             </div>
         `;
     },
@@ -778,6 +786,13 @@ const BrasileiraoTabela = {
                 infoContent = `<span class="brasileirao-lp-data">${dataFormatada}</span><span class="brasileirao-lp-horario">${jogo.horario || 'A definir'}</span>`;
             }
 
+            const remarcadoHtml = jogo.remarcado
+                ? `<div class="brasileirao-remarcado-info">
+                       <span class="brasileirao-remarcado-badge">REMARCADO</span>
+                       <span class="brasileirao-remarcado-original">era ${this._formatarDataCurta(jogo.data_original)}</span>
+                   </div>`
+                : '';
+
             return `
                 <div class="brasileirao-lp-jogo ${statusClass}">
                     <div class="brasileirao-lp-jogo-linha">
@@ -793,6 +808,7 @@ const BrasileiraoTabela = {
                     <div class="brasileirao-lp-jogo-info">
                         ${infoContent}
                     </div>
+                    ${remarcadoHtml}
                 </div>
             `;
         }).join('');
