@@ -149,7 +149,7 @@ async function carregarDadosAPILiberta() {
         const res = await fetch('/api/competicao/libertadores/resumo');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        return (data.success && (data.grupos?.length > 0 || data.ultimos_resultados?.length > 0)) ? data : null;
+        return (data.success && (data.grupos?.length > 0 || data.ultimos_resultados?.length > 0 || data.proximos_jogos?.length > 0)) ? data : null;
     } catch (err) {
         if (window.Log) Log.warn('LIBERTADORES', 'API indisponível, usando fallback:', err.message);
         return null;
@@ -362,7 +362,21 @@ function renderizarJogos() {
     if (!container) return;
 
     if (!dadosAPILiberta) {
-        container.innerHTML = '<div class="liberta-jogos-vazio"><span class="material-icons">sports_soccer</span><p>Fase de Grupos começa em <strong>7 de Abril</strong></p><p class="liberta-jogos-vazio-sub">32 clubes · 8 grupos · 10 países</p></div>';
+        const _diffMs = DATAS_FASES[0].inicio - new Date();
+        const _dias = Math.ceil(_diffMs / (1000 * 60 * 60 * 24));
+        const _labelDias = _dias <= 0 ? 'em andamento' : _dias === 1 ? 'começa amanhã' : 'começa em ' + _dias + ' dias';
+        const _vazio = document.createElement('div');
+        _vazio.className = 'liberta-jogos-vazio';
+        _vazio.innerHTML = '<span class="material-icons">sports_soccer</span>';
+        const _p1 = document.createElement('p');
+        _p1.textContent = 'Fase de Grupos ' + _labelDias;
+        const _p2 = document.createElement('p');
+        _p2.className = 'liberta-jogos-vazio-sub';
+        _p2.textContent = '32 clubes · 8 grupos · 10 países';
+        _vazio.appendChild(_p1);
+        _vazio.appendChild(_p2);
+        container.innerHTML = '';
+        container.appendChild(_vazio);
         return;
     }
 
