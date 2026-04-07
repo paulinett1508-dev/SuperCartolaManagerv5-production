@@ -274,29 +274,33 @@ async function main() {
     // APLICAR CORREÇÕES
     // ══════════════════════════════════════════════════════════════════════════
 
-    // 1. Atualizar participantes
-    for (const u of atualizacoes) {
-        const p = edicao.participantes.find(x => x.timeId === u.timeId);
-        if (!p) continue;
-        p.status             = u.status_novo;
-        p.rodadaEliminacao   = u.rodadaEliminacao_nova;
-        p.pontosAcumulados   = u.pontosAcumulados_novo;
-        p.rodadasSobrevividas = u.rodadasSobrevividas_novo;
-        p.pontosRodada       = u.pontosRodada_novo;
-    }
+    // 1. Montar participantes atualizados (merge com array original)
+    const participantesAtualizados = edicao.participantes.map(p => {
+        const u = atualizacoes.find(x => x.timeId === p.timeId);
+        if (!u) return p.toObject ? p.toObject() : p;
+        return {
+            ...(p.toObject ? p.toObject() : p),
+            status:              u.status_novo,
+            rodadaEliminacao:    u.rodadaEliminacao_nova,
+            pontosAcumulados:    u.pontosAcumulados_novo,
+            rodadasSobrevividas: u.rodadasSobrevividas_novo,
+            pontosRodada:        u.pontosRodada_novo,
+        };
+    });
 
-    // 2. Substituir historicoEliminacoes
-    edicao.historicoEliminacoes = novoHistorico;
-
-    // 3. Atualizar metadados
-    edicao.rodadaAtual       = 10;
-    edicao.debitosLancados   = novoDebitosLancados;
-    edicao.ultima_atualizacao = new Date();
-
-    edicao.markModified('participantes');
-    edicao.markModified('historicoEliminacoes');
-    edicao.markModified('debitosLancados');
-    await edicao.save();
+    // 2. Aplicar via updateOne com $set (evita problema de schema vazio + strict:false)
+    await RestaUmCache.updateOne(
+        { _id: edicao._id },
+        {
+            $set: {
+                participantes:        participantesAtualizados,
+                historicoEliminacoes: novoHistorico,
+                rodadaAtual:          10,
+                debitosLancados:      novoDebitosLancados,
+                ultima_atualizacao:   new Date(),
+            },
+        }
+    );
     console.log('[FIX] ✅ Edição salva (participantes, historicoEliminacoes, debitosLancados)');
 
     // 4. Lançar débitos financeiros
