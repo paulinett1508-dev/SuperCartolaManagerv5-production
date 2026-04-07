@@ -1,0 +1,142 @@
+name: Métricas de Frontend
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  metricas:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Instalar dependências
+        run: npm ci --ignore-scripts
+
+      # ─── CSS ────────────────────────────────────────────────────────────────
+
+      - name: Métricas de CSS
+        run: |
+          echo "## 📊 Métricas de Frontend — SICEFSUS" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🎨 CSS" >> $GITHUB_STEP_SUMMARY
+
+          TOTAL=$(find src public -name "*.css" \
+            -not -path "*/node_modules/*" 2>/dev/null \
+            | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}')
+          echo "Total de linhas CSS: **${TOTAL:-0}**" >> $GITHUB_STEP_SUMMARY
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "#### Top 5 maiores" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          find src public -name "*.css" \
+            -not -path "*/node_modules/*" 2>/dev/null \
+            | xargs wc -l 2>/dev/null \
+            | sort -rn | grep -v total | head -5 \
+            >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      # ─── COMPONENTES JSX/TSX ────────────────────────────────────────────────
+
+      - name: Métricas de Componentes React
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ⚛️ Componentes React" >> $GITHUB_STEP_SUMMARY
+
+          TOTAL_COMP=$(find src -name "*.jsx" -o -name "*.tsx" 2>/dev/null | wc -l)
+          echo "Total de componentes: **${TOTAL_COMP}**" >> $GITHUB_STEP_SUMMARY
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "#### Top 5 maiores" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          find src -name "*.jsx" -o -name "*.tsx" 2>/dev/null \
+            | xargs wc -l 2>/dev/null \
+            | sort -rn | grep -v total | head -5 \
+            >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      # ─── STUBS / COMPONENTES VAZIOS ─────────────────────────────────────────
+
+      - name: Componentes suspeitos (menos de 10 linhas)
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "#### ⚠️ Componentes com menos de 10 linhas (candidatos a fusão/remoção)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+          RESULT=$(find src -name "*.jsx" -o -name "*.tsx" 2>/dev/null \
+            | xargs wc -l 2>/dev/null \
+            | awk '$1 < 10 && $2 != "total"' | sort)
+
+          if [ -z "$RESULT" ]; then
+            echo "Nenhum componente suspeito ✅" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "$RESULT" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      # ─── ALERTAS DE TAMANHO ─────────────────────────────────────────────────
+
+      - name: Arquivos acima de 300 linhas
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ⚠️ Arquivos acima de 300 linhas (candidatos à auditoria)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+          RESULT=$(find src public -name "*.jsx" -o -name "*.tsx" \
+            -o -name "*.js" -o -name "*.ts" -o -name "*.css" 2>/dev/null \
+            | grep -v node_modules \
+            | xargs wc -l 2>/dev/null \
+            | awk '$1 > 300 && $2 != "total"' | sort -rn)
+
+          if [ -z "$RESULT" ]; then
+            echo "Nenhum arquivo acima de 300 linhas ✅" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "$RESULT" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      # ─── BUILD SIZE (VITE) ──────────────────────────────────────────────────
+
+      - name: Build Vite + tamanho do bundle
+        run: |
+          npm run build 2>/dev/null || echo "Build falhou — verifique .env"
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Bundle (dist/)" >> $GITHUB_STEP_SUMMARY
+
+          if [ -d "dist" ]; then
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            find dist -name "*.js" -o -name "*.css" 2>/dev/null \
+              | xargs wc -c 2>/dev/null \
+              | awk '{printf "%.1f KB\t%s\n", $1/1024, $2}' \
+              | sort -rn | grep -v total | head -10 \
+              >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+
+            TOTAL_DIST=$(find dist -name "*.js" -o -name "*.css" 2>/dev/null \
+              | xargs wc -c 2>/dev/null | tail -1 | awk '{printf "%.1f KB", $1/1024}')
+            echo "**Total do bundle: ${TOTAL_DIST}**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "_Build não disponível (variáveis de ambiente ausentes no CI)_" >> $GITHUB_STEP_SUMMARY
+          fi
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY || 'placeholder' }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID || 'placeholder' }}
+          NODE_ENV: production
+
+      # ─── RODAPÉ ─────────────────────────────────────────────────────────────
+
+      - name: Referência de auditoria
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "📋 **Protocolo:** [menos-e-mais](https://github.com/paulinett1508-dev/agnostic-core/blob/main/skills/frontend/menos-e-mais.md) | [navegacao-sem-redundancia](https://github.com/paulinett1508-dev/agnostic-core/blob/main/skills/ux-ui/navegacao-sem-redundancia.md)" >> $GITHUB_STEP_SUMMARY
