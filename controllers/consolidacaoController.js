@@ -575,27 +575,28 @@ export const consolidarRodada = async (req, res) => {
 export const verificarStatusConsolidacao = async (req, res) => {
     try {
         const { ligaId } = req.params;
-        
-        const total = await RodadaSnapshot.countDocuments({ liga_id: ligaId });
-        const consolidadas = await RodadaSnapshot.countDocuments({ 
-            liga_id: ligaId, 
-            status: "consolidada" 
+        const baseFilter = { liga_id: ligaId, temporada: CURRENT_SEASON };
+
+        const total = await RodadaSnapshot.countDocuments(baseFilter);
+        const consolidadas = await RodadaSnapshot.countDocuments({
+            ...baseFilter,
+            status: "consolidada"
         });
-        const abertas = await RodadaSnapshot.countDocuments({ 
-            liga_id: ligaId, 
-            status: "aberta" 
+        const abertas = await RodadaSnapshot.countDocuments({
+            ...baseFilter,
+            status: "aberta"
         });
-        
+
         // Contar versões
         const versaoV2 = await RodadaSnapshot.countDocuments({
-            liga_id: ligaId,
+            ...baseFilter,
             status: "consolidada",
             versao_schema: { $gte: 2 }
         });
         const versaoV1 = consolidadas - versaoV2;
-        
+
         // Buscar detalhes das rodadas
-        const snapshots = await RodadaSnapshot.find({ liga_id: ligaId })
+        const snapshots = await RodadaSnapshot.find(baseFilter)
             .select('rodada status versao_schema data_consolidacao')
             .sort({ rodada: 1 })
             .lean();
