@@ -338,7 +338,8 @@
       "Bash(python3 -c \":*)",
       "mcp__claude_ai_MCP_MongoDB__find_documents",
       "mcp__claude_ai_MCP_MongoDB__get_collection_schema",
-      "mcp__claude_ai_MCP_MongoDB__list_collections"
+      "mcp__claude_ai_MCP_MongoDB__list_collections",
+      "Bash(NODE_PATH=\"./node_modules\" node scripts/fix-resta-um-r8-r9-r10.js --dry-run)"
     ]
   },
   "enableAllProjectMcpServers": true,
