@@ -339,7 +339,17 @@
       "mcp__claude_ai_MCP_MongoDB__find_documents",
       "mcp__claude_ai_MCP_MongoDB__get_collection_schema",
       "mcp__claude_ai_MCP_MongoDB__list_collections",
-      "Bash(NODE_PATH=\"./node_modules\" node scripts/fix-resta-um-r8-r9-r10.js --dry-run)"
+      "Bash(NODE_PATH=\"./node_modules\" node scripts/fix-resta-um-r8-r9-r10.js --dry-run)",
+      "Bash(mkdir -p ~/.ssh)",
+      "Bash(cp /c/Users/pmiranda/.ssh/id_ed25519 ~/.ssh/id_ed25519)",
+      "Bash(/c/Windows/System32/OpenSSH/ssh.exe -V)",
+      "Bash(ssh.exe -i \"C:/Users/pmiranda/.ssh/id_ed25519\" -o StrictHostKeyChecking=accept-new root@195.200.5.145 'echo CONECTADO && hostname')",
+      "Bash(wait)",
+      "Bash(ssh-add -l)",
+      "Bash(cmd.exe:*)",
+      "Bash(powershell.exe:*)",
+      "Bash(ssh.exe:*)",
+      "Bash(/c/Windows/System32/OpenSSH/ssh.exe:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

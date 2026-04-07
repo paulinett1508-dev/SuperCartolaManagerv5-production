@@ -1,5 +1,14 @@
 # SUPER CARTOLA MANAGER - PROJECT RULES
 
+## Auditoria de Interface — Protocolo Menos é Mais
+
+Antes de revisar qualquer frontend, carregar:
+
+@https://raw.githubusercontent.com/paulinett1508-dev/agnostic-core/main/skills/ux-ui/navegacao-sem-redundancia.md
+@https://raw.githubusercontent.com/paulinett1508-dev/agnostic-core/main/skills/frontend/menos-e-mais.md
+
+Aplicar sempre que: componente novo, PR de frontend, reclamação de "tela poluída".
+
 ## Protocolo de Planejamento Obrigatório
 
 NUNCA programe sem ANTES: planejar, listar tarefas (TaskCreate), questionar o usuário, aguardar aprovação.
