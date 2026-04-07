@@ -304,8 +304,9 @@ async function inicializarModuloRodadas() {
 // ==============================
 
 // FUNÇÃO GLOBAL PARA SELEÇÃO DE RODADA (Compatibilidade)
-if (isFrontend) {
-  window.selecionarRodada = async function (rodada) {
+// Só define se ainda não existe uma versão funcional do orquestrador registrada
+if (isFrontend && (!window.selecionarRodada || window.selecionarRodada._isLegada)) {
+  const _legadaFn = async function (rodada) {
     console.log(`[RODADAS] selecionarRodada(${rodada}) - interface legada`);
 
     if (!carregarDadosRodadaOrquestrador) {
@@ -313,17 +314,17 @@ if (isFrontend) {
     }
 
     if (carregarDadosRodadaOrquestrador) {
-      // Usar nova implementação
-      const { selecionarRodadaDebounced } = await import(
+      // selecionarRodada é o export nomeado do orquestrador (alias de selecionarRodadaWrapper)
+      const { selecionarRodada: selecionarRodadaOrquestrador } = await import(
         "./rodadas/rodadas-orquestrador.js"
       );
-      if (selecionarRodadaDebounced) {
-        await selecionarRodadaDebounced(rodada);
+      if (selecionarRodadaOrquestrador) {
+        await selecionarRodadaOrquestrador(rodada);
         return;
       }
     }
 
-    // Fallback básico
+    // Fallback básico (só CSS, sem carregar dados)
     console.warn("[RODADAS] Usando seleção básica de rodada");
     const cards = document.querySelectorAll(".rodada-mini-card");
     cards.forEach((card) => card.classList.remove("selected"));
@@ -333,6 +334,8 @@ if (isFrontend) {
       cardSelecionado.classList.add("selected");
     }
   };
+  _legadaFn._isLegada = true;
+  window.selecionarRodada = _legadaFn;
 }
 
 // ==============================
