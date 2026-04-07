@@ -1,57 +1,40 @@
 # Tarefas Pendentes
 
-> Última atualização: 2026-03-18 — Bug de saldo divergente resolvido e commitado
+> Última atualização: 2026-04-06 — Correções Resta Um R8/R9/R10 concluídas
 
 ---
 
 ## ✅ CONCLUÍDO — Bug de 3 saldos diferentes (Antonio Luis / FloriMengo FC)
 
 **Commit:** `46ca751` — `fix(extrato): porta v7.2 FIX para verificarCacheValido`
-**Branch:** `main`
 
-### Causa Raiz
-`verificarCacheValido` não tinha o v7.2 FIX que `getExtratoCache` já possuía.
-Quando `INSCRICAO_TEMPORADA` não está no cache, o admin extrato ignorava a taxa
-de inscrição (−R$180), retornando saldo incorreto.
-
-### Fix Aplicado
-`controllers/extratoFinanceiroCacheController.js:1516` — após
-`adicionarLancamentosIniciaisAoResumo`, verifica se inscrição está no cache;
-se não, busca `InscricaoTemporada` via Mongoose e aplica taxa/transferido/dívida.
-
-### Resultado
-- Admin extrato: **−R$151** (antes: +R$29 — bug)
-- App participante: **−R$151** (inalterado)
-- Admin tabela: **−R$151** (inalterado)
+Causa raiz: `verificarCacheValido` ignorava taxa de inscrição quando `INSCRICAO_TEMPORADA` não estava no cache. Fix aplicado em `extratoFinanceiroCacheController.js:1516`. Saldo convergiu para −R$151 nas 3 telas.
 
 ---
 
-## 🔲 PENDENTE — Validação visual (usuário)
+## ✅ CONCLUÍDO — Validação visual e decisão de ajustes inativos
 
-Confirmar nas 3 telas que os saldos convergem para −R$151:
-- [ ] Admin tabela (coluna Saldo)
-- [ ] Admin "Ver Extrato" (modal)
-- [ ] App participante
+Validação confirmada pelo usuário. Ajustes com `ativo: false` tratados como testes descartados — saldo −R$151 considerado correto.
 
 ---
 
-## 🔲 DECISÃO DE NEGÓCIO — Ajustes financeiros inativos
+## ✅ CONCLUÍDO — Eliminações Resta Um R8, R9, R10 (liga 684cb1c8af923da7c7df51de)
 
-Existem 3 ajustes com `ativo: false` para Antonio Luis / liga `684cb1c8af923da7c7df51de`:
+**Commits:** `0d00d124`, `c94b60d3`
 
-| Ajuste | Valor | ativo |
-|--------|-------|-------|
-| Entrada Inscrição 2026 | +R$60 | false |
-| Teste ajuste via API | −R$25 | false |
-| Teste ajuste via API | −R$25 | false |
+**Causa raiz:** `onConsolidate` usava `Rodada` records com scores parciais da fase live (populate step pula registros existentes sem `repopular: true`). Resultado: R8 e R10 não processados; R9 eliminou Chamex com score parcial (28.5 live vs 79.24 final).
 
-Se o ajuste de +R$60 for um pagamento parcial legítimo da inscrição,
-deve ser reativado no admin → saldo seria −R$91.
-Se foram testes descartados, saldo de −R$151 está correto.
+**Correções aplicadas:**
+- R8 → Chamex F.C. (8188312) — 28.50 pts ✅
+- R9 → BarrosB (1113367) — 63.58 pts ✅
+- R10 → Invictus Patamar S.A.F. (25324292) — 64.86 pts ✅
+
+`historicoEliminacoes` (7 entradas), `debitosLancados` ([8,9,10]) e `rodadaAtual: 10` salvos via `updateOne + $set`.
+
+**Causa raiz pendente (código):** `rodadaController.js processarRodada()` deve passar `repopular: true` na consolidação final para evitar recorrência. A corrigir em sessão futura.
 
 ---
 
-## 🔲 OPCIONAL — Fase 5: Consolidar saldo-calculator.js
+## 🔲 OPCIONAL — Consolidar saldo-calculator.js
 
-Refatoração maior: unificar os 3 paths de cálculo em `saldo-calculator.js`.
-Não urgente. Abordar em sessão futura quando houver espaço.
+Refatoração maior: unificar os 3 paths de cálculo em `saldo-calculator.js`. Não urgente. Abordar em sessão futura quando houver espaço.
