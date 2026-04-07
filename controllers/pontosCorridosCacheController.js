@@ -920,16 +920,11 @@ async function atualizarCachesComScoresReais(dadosPorRodada, ligaId, temporada, 
         // Calcular rodada BR correspondente
         const rodadaBR = d.rodada + config.rodadaInicial - 1;
 
-        // Só atualizar se a rodada BR já foi jogada (antes da atual)
-        if (rodadaBR >= rodadaAtualBrasileirao) continue;
-
-        // Verificar se algum confronto tem score zerado
-        const temScoreZerado = (d.confrontos || []).some(
-            c => (Number(c.time1?.pontos) || 0) === 0 || (Number(c.time2?.pontos) || 0) === 0
-        );
-        if (!temScoreZerado) continue;
+        // Só atualizar se a rodada BR não é futura (permite corrigir inclusive a rodada atual)
+        if (rodadaBR > rodadaAtualBrasileirao) continue;
 
         // Buscar scores reais da coleção rodadas para esta rodada BR
+        // (verifica divergência mesmo quando os scores no cache são não-zero)
         let rodadasBR;
         try {
             rodadasBR = await Rodada.find({
@@ -944,7 +939,7 @@ async function atualizarCachesComScoresReais(dadosPorRodada, ligaId, temporada, 
 
         if (!rodadasBR || rodadasBR.length === 0) continue;
 
-        // Verificar se existem scores não-zero
+        // Verificar se existem scores não-zero na fonte
         const temScoresReais = rodadasBR.some(r => (r.pontos || 0) > 0);
         if (!temScoresReais) continue;
 
@@ -954,16 +949,27 @@ async function atualizarCachesComScoresReais(dadosPorRodada, ligaId, temporada, 
             scoresMap[String(r.timeId)] = r.pontos || 0;
         });
 
-        // Atualizar confrontos: preencher scores zerados com dados reais
+        // Verificar divergência: scores zerados OU scores de rodada errada
+        const temDivergencia = (d.confrontos || []).some(c => {
+            const tid1 = String(c.time1?.id || c.time1?.timeId || '');
+            const tid2 = String(c.time2?.id || c.time2?.timeId || '');
+            const p1Real = scoresMap[tid1] != null ? truncarPontosNum(scoresMap[tid1]) : null;
+            const p2Real = scoresMap[tid2] != null ? truncarPontosNum(scoresMap[tid2]) : null;
+            return (p1Real != null && p1Real !== (Number(c.time1?.pontos) || 0)) ||
+                   (p2Real != null && p2Real !== (Number(c.time2?.pontos) || 0));
+        });
+        if (!temDivergencia) continue;
+
+        // Atualizar confrontos: substituir qualquer score divergente do valor real
         const confrontosAtualizados = d.confrontos.map(c => {
             const tid1 = String(c.time1?.id || c.time1?.timeId || '');
             const tid2 = String(c.time2?.id || c.time2?.timeId || '');
             const p1Atual = Number(c.time1?.pontos) || 0;
             const p2Atual = Number(c.time2?.pontos) || 0;
 
-            // Preservar scores já preenchidos; só substituir os zerados
-            const novoP1 = p1Atual === 0 && scoresMap[tid1] != null ? scoresMap[tid1] : p1Atual;
-            const novoP2 = p2Atual === 0 && scoresMap[tid2] != null ? scoresMap[tid2] : p2Atual;
+            // Usar score real se disponível; preservar apenas se não há dado na fonte
+            const novoP1 = scoresMap[tid1] != null ? scoresMap[tid1] : p1Atual;
+            const novoP2 = scoresMap[tid2] != null ? scoresMap[tid2] : p2Atual;
 
             if (novoP1 === p1Atual && novoP2 === p2Atual) return c;
 
@@ -987,7 +993,7 @@ async function atualizarCachesComScoresReais(dadosPorRodada, ligaId, temporada, 
         );
         if (!houveMudanca) continue;
 
-        logger.log(`[PONTOS-CORRIDOS] 🔄 Atualizando cache permanente R${d.rodada} (BR R${rodadaBR}) com scores reais (${rodadasBR.length} times encontrados)`);
+        logger.log(`[PONTOS-CORRIDOS] 🔄 Atualizando cache permanente R${d.rodada} (BR R${rodadaBR}) — scores divergentes detectados, corrigindo com dados reais (${rodadasBR.length} times encontrados)`);
 
         // Recalcular classificação acumulada com os novos scores
         const liga = await Liga.findById(ligaId).lean();
@@ -1031,7 +1037,7 @@ async function atualizarCachesComScoresReais(dadosPorRodada, ligaId, temporada, 
     }
 
     if (houveAtualizacao) {
-        logger.log(`[PONTOS-CORRIDOS] ✅ Scores zerados em caches permanentes foram corrigidos com dados reais da coleção rodadas`);
+        logger.log(`[PONTOS-CORRIDOS] ✅ Scores divergentes em caches permanentes foram corrigidos com dados reais da coleção rodadas`);
     }
 
     return resultado;
