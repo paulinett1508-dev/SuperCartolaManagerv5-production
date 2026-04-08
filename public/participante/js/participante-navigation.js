@@ -77,6 +77,7 @@ class ParticipanteNavigation {
             "libertadores": "/participante/fronts/libertadores.html",
             "copa-brasil": "/participante/fronts/copa-brasil.html",
             "copa-nordeste": "/participante/fronts/copa-nordeste.html",
+            chatbot: "/participante/fronts/chatbot.html",
         };
 
         // ✅ v3.0: Controles simplificados (apenas debounce por tempo)
@@ -1154,6 +1155,7 @@ class ParticipanteNavigation {
             "brasileirao": "/participante/js/modules/participante-brasileirao.js",
             "jogos-do-dia": "/participante/js/modules/participante-jogos-do-dia.js",
             "info-meu-time": "/participante/js/modules/participante-info-meu-time.js",
+            chatbot: "/participante/js/modules/participante-chatbot.js",
         };
 
         const jsPath = modulosPaths[modulo];

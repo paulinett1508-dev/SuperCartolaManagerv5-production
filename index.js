@@ -176,6 +176,9 @@ import assistenteEscalacaoRoutes from "./routes/assistente-escalacao-routes.js";
 // 📰 Notícias personalizadas do time do coração
 import noticiasTimeRoutes from "./routes/noticias-time-routes.js";
 
+// 🤖 Big Cartola IA — RAG Chatbot
+import chatbotRoutes from "./routes/chatbot-routes.js";
+
 // 🏆 Copa do Mundo 2026 - Notícias e dados
 import copa2026NoticiasRoutes from "./routes/copa-2026-noticias-routes.js";
 
@@ -710,6 +713,10 @@ console.log("[SERVER] 🤖 Rotas do Assistente de Escalação registradas em /ap
 // 📰 Notícias do Time do Coração
 app.use("/api/noticias", noticiasTimeRoutes);
 console.log("[SERVER] 📰 Rotas de notícias personalizadas registradas em /api/noticias");
+
+// 🤖 Big Cartola IA — RAG Chatbot
+app.use("/api/chatbot", chatbotRoutes);
+console.log("[SERVER] 🤖 Rotas do Big Cartola IA registradas em /api/chatbot");
 
 // 🏆 Copa do Mundo 2026
 app.use("/api/copa-2026", copa2026NoticiasRoutes);

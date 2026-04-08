@@ -426,6 +426,13 @@
         "description": "Componente TurnoGroup colapsável — agrupa rodadas em 1º/2º Turno com subtotais. Inclui trend-indicator (.trend-up/down/flat). Reutilizável por todos os módulos premium.",
         "features": ["turno-collapse", "module-color-overrides", "trend-indicator"],
         "moduleColor": "Per-module via .capitao/.artilheiro/.luva/.restaum/.tirocerto overrides"
+      },
+      {
+        "path": "public/participante/css/chatbot.css",
+        "loadedBy": ["participante/index.html"],
+        "description": "Big Cartola IA — chat UI com header strip roxo, bolhas de mensagem, input area e sugestoes rapidas. Namespace .chatbot-*",
+        "tokens": ["--app-purple", "--app-purple-muted", "--app-surface", "--app-bg", "--app-border", "--app-text-primary", "--app-text-secondary"],
+        "keyframes": ["chatbot-fade-in", "chatbot-typing-bounce"]
       }
     ]
   },
