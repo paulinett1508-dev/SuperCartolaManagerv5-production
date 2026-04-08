@@ -18,7 +18,6 @@ import aiSynthesizer from '../../services/escalacaoIA/aiSynthesizer.js';
 import { MODOS } from '../../services/estrategia-sugestao.js';
 import marketGate from '../../utils/marketGate.js';
 import systemTokenService from '../../services/systemTokenService.js';
-import cartolaProService from '../../services/cartolaProService.js';
 import perplexityService from '../../services/perplexityAnalysisService.js';
 import cartolaAnaliticoScraper from '../../services/scrapers/cartolaAnaliticoScraper.js';
 import cartolaWebScraper from '../../services/scrapers/cartolaWebScraper.js';

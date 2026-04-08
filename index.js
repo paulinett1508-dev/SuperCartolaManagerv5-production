@@ -79,9 +79,8 @@ if (IS_PRODUCTION) {
 // ⚡ USAR CONEXÃO OTIMIZADA
 import connectDB from "./config/database.js";
 
-// 🔐 AUTH (Google OAuth + Cartola/Globo OIDC)
+// 🔐 AUTH (Google OAuth)
 import passport, { setupGoogleAuthRoutes } from "./config/google-oauth.js";
-import { setupAdminGloboOAuthRoutes } from "./config/globo-oauth.js";
 
 // 🛡️ SEGURANÇA
 import { setupSecurity, authRateLimiter, getRateLimitCleanupIntervalId } from "./middleware/security.js";
@@ -161,9 +160,6 @@ import regrasModulosRoutes from "./routes/regras-modulos-routes.js";
 
 // 📦 DATA LAKE dos Participantes
 import dataLakeRoutes from "./routes/data-lake-routes.js";
-
-// ⚡ Cartola PRO (Escalação Automática)
-import cartolaProRoutes from "./routes/cartola-pro-routes.js";
 
 // 🔔 Push Notifications
 import notificationsRoutes from "./routes/notifications-routes.js";
@@ -538,10 +534,6 @@ app.use(passport.session());
 setupGoogleAuthRoutes(app);
 console.log("[SERVER] Google OAuth ativado");
 
-// Setup Cartola/Globo OIDC routes (primary admin auth)
-setupAdminGloboOAuthRoutes(app);
-console.log("[SERVER] Cartola/Globo OIDC Admin ativado");
-
 // 🔐 Rotas de autenticação admin (Google OAuth) - ANTES do protegerRotas
 app.use("/api/admin/auth", adminAuthRoutes);
 
@@ -617,9 +609,6 @@ app.use("/api/ligas", ligaRoutes);
 app.use("/api/parciais", parciaisRoutes);
 app.use("/api/cartola", cartolaRoutes);
 app.use("/api/cartola", cartolaProxyRoutes);
-app.use("/api/cartola-pro/oauth/login", authRateLimiter);
-app.use("/api/cartola-pro/oauth/callback", authRateLimiter);
-app.use("/api/cartola-pro", cartolaProRoutes);
 app.use("/api/times", timesRoutes);
 app.use("/api/time", timesRoutes);
 app.use("/api/rodadas", rodadasRoutes);

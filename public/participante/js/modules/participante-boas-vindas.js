@@ -482,26 +482,6 @@ async function verificarStatusRenovacao(ligaId, timeId) {
 }
 
 // =====================================================================
-// ✅ v11.1: VERIFICAR SE PARTICIPANTE É PRO (PREMIUM)
-// =====================================================================
-async function verificarStatusPremium() {
-    try {
-        const response = await fetch('/api/cartola-pro/verificar-premium', {
-            credentials: 'include'
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            participantePremium = data.premium === true;
-            if (window.Log) Log.info("PARTICIPANTE-BOAS-VINDAS", `✅ Status PRO: premium=${participantePremium}`);
-        }
-    } catch (error) {
-        if (window.Log) Log.warn("PARTICIPANTE-BOAS-VINDAS", "⚠️ Erro ao verificar PRO:", error);
-        participantePremium = false;
-    }
-}
-
-// =====================================================================
 // ✅ v12.1: BUSCAR STATUS DO MERCADO (para cálculo correto de rodada)
 // =====================================================================
 async function buscarStatusMercado() {
@@ -1084,26 +1064,6 @@ function renderizarBoasVindas(container, data, ligaRules) {
     }
 }
 
-// =====================================================================
-// ✅ v11.1: FUNÇÃO GLOBAL PARA ABRIR CARTOLA PRO
-// =====================================================================
-// Define globalmente para funcionar de qualquer tela
-window.abrirCartolaPro = function() {
-    if (window.CartolaProModule) {
-        window.CartolaProModule.abrirModal();
-    } else {
-        // Carregar módulo dinamicamente
-        import('./participante-cartola-pro.js')
-            .then(module => {
-                window.CartolaProModule = module;
-                module.abrirModal();
-            })
-            .catch(err => {
-                console.error('[CARTOLA-PRO] Erro ao carregar módulo:', err);
-                SuperModal.toast.error('Erro ao carregar Cartola PRO. Tente novamente.');
-            });
-    }
-};
 
 if (window.Log)
     Log.info("PARTICIPANTE-BOAS-VINDAS", "Modulo v12.1 carregado (Correção Rodada Disputada)");

@@ -748,18 +748,6 @@ async function verificarStatusRenovacao(ligaId, timeId) {
     }
 }
 
-async function verificarStatusPremium() {
-    try {
-        const response = await fetch('/api/cartola-pro/verificar-premium', { credentials: 'include' });
-        if (response.ok && !_homeRenderCancelado) {
-            const data = await response.json();
-            participantePremium = data.premium === true;
-        }
-    } catch (error) {
-        participantePremium = false;
-    }
-}
-
 async function buscarStatusMercado() {
     try {
         // ✅ PERFORMANCE: Usar CacheV2 (IndexedDB + memória) com TTL 2min
@@ -1144,18 +1132,6 @@ function renderizarHome(container, data, ligaId) {
         if (perfStatusEl) perfStatusEl.innerHTML = '';
     }
 
-    // === BOTOES DE ATALHOS (Premium) ===
-    const btnCartolaPro = document.getElementById('btn-cartola-pro');
-
-    if (!isPremium) {
-        [btnCartolaPro].forEach(btn => {
-            if (btn) {
-                btn.classList.add('home-action-disabled');
-                btn.onclick = () => window.mostrarAguarde && window.mostrarAguarde('Funcao Premium');
-            }
-        });
-    }
-
     // === JOGUINHOS (exclusivo premium) ===
     const btnJoguinhos = document.getElementById('btn-joguinhos');
     if (btnJoguinhos) {
@@ -1167,7 +1143,6 @@ function renderizarHome(container, data, ligaId) {
     const isParticipantePremium = window.participanteNav?._isPremium === true;
     const atalhoMap = {
         'btn-participantes': 'participantes',
-        'btn-cartola-pro': 'cartolaPro',
     };
     for (const [btnId, moduloKey] of Object.entries(atalhoMap)) {
         if (modulosAtivos[moduloKey] === false) {
