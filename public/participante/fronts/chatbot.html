@@ -1,0 +1,47 @@
+<!-- BIG CARTOLA IA — Chatbot RAG v1.0 -->
+<div id="chatbot-container" class="chatbot-container">
+
+    <!-- Header Strip -->
+    <div class="chatbot-header">
+        <span class="material-icons chatbot-header-icon">auto_awesome</span>
+        <div class="chatbot-header-text">
+            <h1 class="chatbot-header-title">Big Cartola IA</h1>
+            <p class="chatbot-header-status" id="chatbot-status">Pronto para ajudar</p>
+        </div>
+    </div>
+
+    <!-- Mensagens -->
+    <div class="chatbot-messages" id="chatbot-messages">
+        <!-- Mensagem de boas-vindas -->
+        <div class="chatbot-msg chatbot-msg-bot">
+            <span class="material-icons chatbot-msg-avatar">smart_toy</span>
+            <div class="chatbot-msg-content">
+                <p>Ola! Sou o Big Cartola IA, seu assistente do Super Cartola Manager.</p>
+                <p>Pergunte sobre regras, modulos, financeiro, rankings e mais.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sugestoes rapidas -->
+    <div class="chatbot-suggestions" id="chatbot-suggestions">
+        <button class="chatbot-suggestion-chip" data-pergunta="Como funciona o ranking geral?">Ranking Geral</button>
+        <button class="chatbot-suggestion-chip" data-pergunta="Como funciona o mata-mata?">Mata-Mata</button>
+        <button class="chatbot-suggestion-chip" data-pergunta="Quais modulos estao ativos na minha liga?">Modulos Ativos</button>
+        <button class="chatbot-suggestion-chip" data-pergunta="Em qual rodada estamos?">Rodada Atual</button>
+    </div>
+
+    <!-- Input area -->
+    <div class="chatbot-input-area">
+        <input
+            type="text"
+            id="chatbot-input"
+            class="chatbot-input"
+            placeholder="Pergunte algo sobre o app..."
+            maxlength="500"
+            autocomplete="off"
+        >
+        <button id="chatbot-send" class="chatbot-send-btn" aria-label="Enviar pergunta">
+            <span class="material-icons">send</span>
+        </button>
+    </div>
+</div>

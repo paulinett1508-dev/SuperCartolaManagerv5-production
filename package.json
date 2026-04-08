@@ -35,6 +35,10 @@
   "author": "Super Cartola Team",
   "license": "MIT",
   "dependencies": {
+    "@langchain/core": "^1.1.39",
+    "@langchain/mongodb": "^1.1.0",
+    "@langchain/openai": "^1.4.3",
+    "@langchain/textsplitters": "^1.0.1",
     "@modelcontextprotocol/sdk": "^1.24.3",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
