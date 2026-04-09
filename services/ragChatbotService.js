@@ -285,6 +285,308 @@ async function indexarDocumentos(options = {}) {
 // =====================================================================
 
 /**
+ * Retorna as fases do mata-mata para o tamanho do torneio.
+ * Espelho da funcao getFasesParaTamanho em mata-mata-backend.js.
+ */
+function _getFasesMataMata(totalTimes) {
+    if (totalTimes >= 32) return ['primeira', 'oitavas', 'quartas', 'semis', 'final'];
+    if (totalTimes >= 16) return ['oitavas', 'quartas', 'semis', 'final'];
+    if (totalTimes >= 8)  return ['quartas', 'semis', 'final'];
+    return ['semis', 'final'];
+}
+
+const _FASE_LABEL = {
+    primeira: 'Primeira Fase',
+    oitavas:  'Oitavas de Final',
+    quartas:  'Quartas de Final',
+    semis:    'Semifinal',
+    final:    'Final',
+};
+
+/**
+ * Busca contexto especifico do modulo Mata-Mata para a liga.
+ * @param {string} ligaId
+ * @param {number|null} rodadaAtual - numero da rodada atual do mercado
+ * @param {number} temporada
+ * @param {Object} db
+ * @returns {string}
+ */
+async function buscarContextoMataMata(ligaId, rodadaAtual, temporada, db) {
+    try {
+        const { ObjectId } = await import('mongodb');
+        const config = await db.collection('moduleconfigs').findOne(
+            { liga_id: new ObjectId(ligaId), modulo: 'mata_mata', temporada },
+            { projection: { calendario_override: 1, regras_override: 1 } }
+        );
+
+        if (!config || !Array.isArray(config.calendario_override) || config.calendario_override.length === 0) {
+            return '';
+        }
+
+        const totalTimes = config.regras_override?.total_times || 16;
+        const fases = _getFasesMataMata(totalTimes);
+
+        const linhas = [`MATA-MATA (${totalTimes} times, ${fases.length} fases):`];
+
+        for (const ed of config.calendario_override) {
+            const { edicao, nome, rodada_inicial: ri, rodada_final: rf } = ed;
+            if (!ri || !rf) continue;
+
+            let statusEdicao;
+            if (!rodadaAtual || rodadaAtual < ri) {
+                statusEdicao = `aguardando inicio (começa na R${ri})`;
+            } else if (rodadaAtual > rf) {
+                statusEdicao = 'encerrada';
+            } else {
+                const indice = rodadaAtual - ri;
+                const faseAtual = fases[Math.min(indice, fases.length - 1)];
+                statusEdicao = `EM ANDAMENTO — fase atual: ${_FASE_LABEL[faseAtual] || faseAtual} (R${rodadaAtual} de R${ri}-R${rf})`;
+            }
+
+            linhas.push(`- Edicao ${edicao}${nome ? ` "${nome}"` : ''}: ${statusEdicao}`);
+        }
+
+        return linhas.join('\n');
+    } catch {
+        return '';
+    }
+}
+
+// -- HELPERS DE MODULOS (um por modulo, chamados em paralelo) --
+
+async function buscarContextoRankingGeral(ligaId, temporada, db) {
+    try {
+        const { ObjectId } = await import('mongodb');
+        const cache = await db.collection('rankinggeralcaches').findOne(
+            { ligaId: new ObjectId(ligaId), temporada },
+            { projection: { ranking: { $slice: 3 }, rodadaFinal: 1 } }
+        );
+        if (!cache || !Array.isArray(cache.ranking) || cache.ranking.length === 0) return '';
+
+        const linhas = [`RANKING GERAL (ate R${cache.rodadaFinal || '?'}):`];
+        cache.ranking.slice(0, 3).forEach((t, i) => {
+            linhas.push(`- ${i + 1}o ${t.nome_cartola || t.nome_time}: ${t.pontos_totais} pts`);
+        });
+        return linhas.join('\n');
+    } catch { return ''; }
+}
+
+async function buscarContextoRankingRodada(ligaId, rodadaAtual, temporada, db) {
+    try {
+        if (!rodadaAtual) return '';
+        const { ObjectId } = await import('mongodb');
+        const docs = await db.collection('rodadas').find(
+            { ligaId: new ObjectId(ligaId), rodada: rodadaAtual, temporada },
+            { projection: { timeId: 1, nome_cartola: 1, pontos: 1, posicao: 1 } }
+        ).sort({ posicao: 1 }).limit(3).toArray();
+
+        if (!docs.length) return '';
+        const linhas = [`RANKING RODADA ${rodadaAtual} (top 3):`];
+        docs.forEach(t => {
+            linhas.push(`- ${t.posicao}o ${t.nome_cartola}: ${t.pontos} pts`);
+        });
+        return linhas.join('\n');
+    } catch { return ''; }
+}
+
+async function buscarContextoPontosCorridos(ligaId, temporada, db) {
+    try {
+        const cache = await db.collection('pontoscorridoscaches').findOne(
+            { liga_id: ligaId, temporada },
+            { projection: { classificacao: { $slice: 3 }, rodada_consolidada: 1 } }
+        );
+        if (!cache || !Array.isArray(cache.classificacao) || cache.classificacao.length === 0) return '';
+
+        const linhas = [`PONTOS CORRIDOS (ate R${cache.rodada_consolidada || '?'}):`];
+        cache.classificacao.slice(0, 3).forEach(t => {
+            linhas.push(`- ${t.posicao}o ${t.nome_cartola || t.nome}: ${t.pontos} pts (${t.vitorias}V ${t.empates}E ${t.derrotas}D)`);
+        });
+        return linhas.join('\n');
+    } catch { return ''; }
+}
+
+async function buscarContextoTop10(ligaId, temporada, db) {
+    try {
+        const cache = await db.collection('top10caches').findOne(
+            { liga_id: ligaId, temporada },
+            { projection: { mitos: 1, micos: 1, rodada_consolidada: 1 } }
+        );
+        if (!cache) return '';
+
+        const linhas = [`TOP 10 (R${cache.rodada_consolidada || '?'}):`];
+        if (Array.isArray(cache.mitos) && cache.mitos.length > 0) {
+            const top = cache.mitos[0];
+            linhas.push(`- Mito #1: ${top.nome_cartola || top.nome_time} — ${top.pontos} pts (R${top.rodada})`);
+        }
+        if (Array.isArray(cache.micos) && cache.micos.length > 0) {
+            const last = cache.micos[cache.micos.length - 1];
+            linhas.push(`- Mico #10: ${last.nome_cartola || last.nome_time} — ${last.pontos} pts (R${last.rodada})`);
+        }
+        return linhas.join('\n');
+    } catch { return ''; }
+}
+
+async function buscarContextoMelhorMes(ligaId, temporada, db) {
+    try {
+        const { ObjectId } = await import('mongodb');
+        const cache = await db.collection('melhor_mes_cache').findOne(
+            { ligaId: new ObjectId(ligaId), temporada },
+            { projection: { edicoes: 1 } }
+        );
+        if (!cache || !Array.isArray(cache.edicoes) || cache.edicoes.length === 0) return '';
+
+        const linhas = ['MELHOR MES:'];
+        for (const ed of cache.edicoes) {
+            if (ed.status === 'em_andamento') {
+                const lider = Array.isArray(ed.ranking) && ed.ranking[0];
+                linhas.push(`- ${ed.nome || `Edicao ${ed.id}`}: EM ANDAMENTO (R${ed.inicio}-R${ed.fim})${lider ? ` — Lider: ${lider.nome_cartola || lider.nome_time} (${lider.pontos_total} pts)` : ''}`);
+            } else if (ed.status === 'consolidado' && ed.campeao) {
+                linhas.push(`- ${ed.nome || `Edicao ${ed.id}`}: Encerrada — Campeao: ${ed.campeao.nome_cartola || ed.campeao.nome_time}`);
+            }
+        }
+        return linhas.length > 1 ? linhas.join('\n') : '';
+    } catch { return ''; }
+}
+
+async function buscarContextoTurnoReturno(ligaId, temporada, db) {
+    try {
+        const { ObjectId } = await import('mongodb');
+        const turnos = await db.collection('rankingturnos').find(
+            { ligaId: new ObjectId(ligaId), temporada, turno: { $in: ['1', '2'] } },
+            { projection: { turno: 1, status: 1, rodada_inicio: 1, rodada_fim: 1, ranking: { $slice: 1 } } }
+        ).toArray();
+
+        if (!turnos.length) return '';
+
+        const linhas = ['TURNO/RETURNO:'];
+        for (const t of turnos.sort((a, b) => a.turno.localeCompare(b.turno))) {
+            const label = t.turno === '1' ? '1o Turno' : '2o Turno';
+            const range = `R${t.rodada_inicio}-R${t.rodada_fim}`;
+            const lider = Array.isArray(t.ranking) && t.ranking[0];
+            if (t.status === 'em_andamento') {
+                linhas.push(`- ${label} (${range}): EM ANDAMENTO${lider ? ` — Lider: ${lider.nome_cartola || lider.nome_time} (${lider.pontos} pts)` : ''}`);
+            } else if (t.status === 'consolidado') {
+                linhas.push(`- ${label} (${range}): Encerrado${lider ? ` — Campeao: ${lider.nome_cartola || lider.nome_time}` : ''}`);
+            }
+        }
+        return linhas.length > 1 ? linhas.join('\n') : '';
+    } catch { return ''; }
+}
+
+async function buscarContextoArtilheiro(ligaId, temporada, db) {
+    try {
+        const cache = await db.collection('artilheirocampeao').findOne(
+            { ligaId: ligaId, temporada },
+            { projection: { dados: { $slice: 3 }, rodadaAtual: 1 } }
+        );
+        if (!cache || !Array.isArray(cache.dados) || cache.dados.length === 0) return '';
+
+        const linhas = [`ARTILHEIRO (ate R${cache.rodadaAtual || '?'}) — gols dos atletas escalados:`];
+        cache.dados.slice(0, 3).forEach((t, i) => {
+            linhas.push(`- ${i + 1}o ${t.nomeCartoleiro || t.nomeTime}: ${t.golsPro} gols pro, saldo ${t.saldoGols}`);
+        });
+        return linhas.join('\n');
+    } catch { return ''; }
+}
+
+async function buscarContextoCapitaoLuxo(ligaId, temporada, db) {
+    try {
+        const { ObjectId } = await import('mongodb');
+        const docs = await db.collection('capitaocaches').find(
+            { ligaId: new ObjectId(ligaId), temporada },
+            { projection: { nome_cartola: 1, nome_time: 1, pontuacao_total: 1, media_capitao: 1 } }
+        ).sort({ pontuacao_total: -1 }).limit(3).toArray();
+
+        if (!docs.length) return '';
+
+        const linhas = ['CAPITAO DE LUXO (top 3):'];
+        docs.forEach((t, i) => {
+            linhas.push(`- ${i + 1}o ${t.nome_cartola || t.nome_time}: ${t.pontuacao_total} pts (media ${(t.media_capitao || 0).toFixed(1)})`);
+        });
+        return linhas.join('\n');
+    } catch { return ''; }
+}
+
+async function buscarContextoLuvaOuro(ligaId, temporada, db) {
+    try {
+        const pipeline = [
+            { $match: { ligaId: ligaId, temporada, rodadaConcluida: true } },
+            { $group: {
+                _id: '$participanteId',
+                participanteNome: { $first: '$participanteNome' },
+                pontosTotais: { $sum: '$pontos' },
+                rodadasJogadas: { $sum: 1 },
+            }},
+            { $sort: { pontosTotais: -1 } },
+            { $limit: 3 },
+        ];
+        const docs = await db.collection('goleiros').aggregate(pipeline).toArray();
+        if (!docs.length) return '';
+
+        const linhas = ['LUVA DE OURO (top 3 em pontos de goleiros):'];
+        docs.forEach((t, i) => {
+            const media = t.rodadasJogadas > 0 ? (t.pontosTotais / t.rodadasJogadas).toFixed(1) : '0.0';
+            linhas.push(`- ${i + 1}o ${t.participanteNome}: ${t.pontosTotais} pts (${t.rodadasJogadas} rodadas, media ${media})`);
+        });
+        return linhas.join('\n');
+    } catch { return ''; }
+}
+
+async function buscarContextoTiroCerto(ligaId, temporada, db) {
+    try {
+        const edicoes = await db.collection('tirocertocaches').find(
+            { liga_id: ligaId, temporada },
+            { projection: { edicao: 1, nome: 1, status: 1, rodadaAtual: 1, rodadaFinal: 1, vivosCount: 1, eliminadosCount: 1 } }
+        ).sort({ edicao: 1 }).toArray();
+
+        if (!edicoes.length) return '';
+
+        const linhas = ['TIRO CERTO:'];
+        for (const ed of edicoes) {
+            if (ed.status === 'em_andamento') {
+                linhas.push(`- ${ed.nome || `Edicao ${ed.edicao}`}: EM ANDAMENTO (R${ed.rodadaAtual}) — ${ed.vivosCount ?? '?'} vivos, ${ed.eliminadosCount ?? '?'} eliminados`);
+            } else if (ed.status === 'finalizada') {
+                linhas.push(`- ${ed.nome || `Edicao ${ed.edicao}`}: Finalizada`);
+            } else if (ed.status === 'pendente') {
+                linhas.push(`- ${ed.nome || `Edicao ${ed.edicao}`}: Aguardando inicio (ate R${ed.rodadaFinal})`);
+            }
+        }
+        return linhas.length > 1 ? linhas.join('\n') : '';
+    } catch { return ''; }
+}
+
+async function buscarContextoRestaUm(ligaId, temporada, db) {
+    try {
+        const edicoes = await db.collection('restaumcaches').find(
+            { liga_id: ligaId, temporada },
+            { projection: { edicao: 1, nome: 1, status: 1, rodadaAtual: 1, rodadaInicial: 1, rodadaFinal: 1, participantes: 1 } }
+        ).sort({ edicao: 1 }).toArray();
+
+        if (!edicoes.length) return '';
+
+        const linhas = ['RESTA UM:'];
+        for (const ed of edicoes) {
+            const participantes = Array.isArray(ed.participantes) ? ed.participantes : [];
+            const vivos = participantes.filter(p => p.status === 'vivo' || p.status === 'zona_perigo');
+            const emZona = participantes.filter(p => p.status === 'zona_perigo');
+            const campeao = participantes.find(p => p.status === 'campeao');
+
+            if (ed.status === 'em_andamento') {
+                let info = `EM ANDAMENTO (R${ed.rodadaAtual}, de R${ed.rodadaInicial}-R${ed.rodadaFinal})`;
+                if (vivos.length > 0) info += ` — ${vivos.length} vivos`;
+                if (emZona.length > 0) info += `, ${emZona.length} na zona de perigo`;
+                linhas.push(`- ${ed.nome || `Edicao ${ed.edicao}`}: ${info}`);
+            } else if (ed.status === 'finalizada') {
+                linhas.push(`- ${ed.nome || `Edicao ${ed.edicao}`}: Finalizada${campeao ? ` — Campeao: ${campeao.nomeCartoleiro || campeao.nomeTime}` : ''}`);
+            } else if (ed.status === 'pendente') {
+                linhas.push(`- ${ed.nome || `Edicao ${ed.edicao}`}: Aguardando inicio (R${ed.rodadaInicial})`);
+            }
+        }
+        return linhas.length > 1 ? linhas.join('\n') : '';
+    } catch { return ''; }
+}
+
+/**
  * Busca dados atuais da liga e rodada para injetar no prompt.
  * @param {string} ligaId - ID da liga
  * @param {Object} db - Mongoose connection (passado pelo controller)
@@ -292,14 +594,16 @@ async function indexarDocumentos(options = {}) {
  */
 async function buscarContextoDinamico(ligaId, db) {
     try {
+        const { ObjectId } = await import('mongodb');
         const liga = await db.collection('ligas').findOne(
-            { _id: new (await import('mongodb')).ObjectId(ligaId) },
+            { _id: new ObjectId(ligaId) },
             { projection: { nome: 1, temporada: 1, participantes: 1, modulos_ativos: 1, status: 1 } }
         );
 
         if (!liga) return 'Contexto da liga nao disponivel.';
 
         const temporada = liga.temporada || new Date().getFullYear();
+        let rodadaAtualNum = null;
 
         // Buscar status do mercado/rodada via CalendarioRodada
         let rodadaInfo = '';
@@ -317,12 +621,16 @@ async function buscarContextoDinamico(ligaId, db) {
                 });
                 if (rodadaAtual) {
                     rodadaInfo = `Rodada atual: ${rodadaAtual.rodada}`;
+                    rodadaAtualNum = rodadaAtual.rodada;
                 } else {
                     // Pegar a mais recente passada
                     const passadas = calendario.rodadas
                         .filter(r => new Date(r.fim) < agora)
                         .sort((a, b) => b.rodada - a.rodada);
-                    if (passadas[0]) rodadaInfo = `Ultima rodada encerrada: ${passadas[0].rodada}`;
+                    if (passadas[0]) {
+                        rodadaInfo = `Ultima rodada encerrada: ${passadas[0].rodada}`;
+                        rodadaAtualNum = passadas[0].rodada;
+                    }
                 }
             }
         } catch {
@@ -336,7 +644,10 @@ async function buscarContextoDinamico(ligaId, db) {
             if (mercado) {
                 const statusMap = { 1: 'aberto', 2: 'fechado (rodada em andamento)', 4: 'encerrado' };
                 mercadoStatus = `Mercado: ${statusMap[mercado.status_mercado] || 'desconhecido'}`;
-                if (mercado.rodada_atual) rodadaInfo = `Rodada atual: ${mercado.rodada_atual}`;
+                if (mercado.rodada_atual) {
+                    rodadaInfo = `Rodada atual: ${mercado.rodada_atual}`;
+                    rodadaAtualNum = mercado.rodada_atual;
+                }
             }
         } catch {
             // Fallback silencioso
@@ -353,7 +664,7 @@ async function buscarContextoDinamico(ligaId, db) {
             ? liga.participantes.filter(p => p.ativo !== false).length
             : 0;
 
-        return [
+        const linhas = [
             `CONTEXTO ATUAL DA LIGA:`,
             `- Liga: "${liga.nome}" | Status: ${liga.status || 'ativa'}`,
             `- Temporada: ${temporada}`,
@@ -361,7 +672,33 @@ async function buscarContextoDinamico(ligaId, db) {
             `- ${mercadoStatus || 'Mercado: status nao disponivel'}`,
             `- Participantes ativos: ${qtdParticipantes}`,
             `- Modulos ativos: ${modulosAtivos}`,
-        ].join('\n');
+        ];
+
+        // Contexto especifico de modulos ativos — chamadas em paralelo
+        const ma = liga.modulos_ativos || {};
+        const moduloHelpers = [
+            ma.ranking_geral   && buscarContextoRankingGeral(ligaId, temporada, db),
+            ma.ranking_rodada  && buscarContextoRankingRodada(ligaId, rodadaAtualNum, temporada, db),
+            ma.pontos_corridos && buscarContextoPontosCorridos(ligaId, temporada, db),
+            ma.mata_mata       && buscarContextoMataMata(ligaId, rodadaAtualNum, temporada, db),
+            ma.top_10          && buscarContextoTop10(ligaId, temporada, db),
+            ma.melhor_mes      && buscarContextoMelhorMes(ligaId, temporada, db),
+            ma.turno_returno   && buscarContextoTurnoReturno(ligaId, temporada, db),
+            ma.artilheiro      && buscarContextoArtilheiro(ligaId, temporada, db),
+            ma.capitao_luxo    && buscarContextoCapitaoLuxo(ligaId, temporada, db),
+            ma.luva_ouro       && buscarContextoLuvaOuro(ligaId, temporada, db),
+            ma.tiro_certo      && buscarContextoTiroCerto(ligaId, temporada, db),
+            ma.resta_um        && buscarContextoRestaUm(ligaId, temporada, db),
+        ].filter(Boolean);
+
+        if (moduloHelpers.length > 0) {
+            const resultados = await Promise.allSettled(moduloHelpers);
+            for (const r of resultados) {
+                if (r.status === 'fulfilled' && r.value) linhas.push('', r.value);
+            }
+        }
+
+        return linhas.join('\n');
     } catch (error) {
         console.warn(`${LOG_PREFIX} Erro ao buscar contexto dinamico: ${error.message}`);
         return 'Contexto dinamico indisponivel.';
