@@ -189,12 +189,8 @@ async function carregarDadosERenderizar(ligaId, timeId, participante) {
     // Todos os participantes ativos na liga são considerados válidos
     // await verificarStatusRenovacao(ligaId, timeId); // ARQUIVADO
 
-    // ✅ v11.1: Verificar se participante é PRO
     // ✅ v12.1: Buscar status do mercado para cálculo correto de rodada
-    await Promise.all([
-        verificarStatusPremium(),
-        buscarStatusMercado()
-    ]);
+    await buscarStatusMercado();
 
     // ✅ v11.4: Buscar histórico APENAS para ligas NÃO estreantes
     // Ligas novas não têm histórico - evita 404 desnecessário

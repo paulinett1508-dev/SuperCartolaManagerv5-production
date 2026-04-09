@@ -215,13 +215,12 @@ async function carregarDadosERenderizar(ligaId, timeId, participante) {
         await cacheV2.preload(ligaId, timeId, temporadaCacheHome);
     }
 
-    // Verificar status de renovacao e premium em paralelo
+    // Verificar status de renovacao e mercado em paralelo
     // ✅ v1.4.1: Promise.race com timeout de 5s — evita travar em servidor frio (pós-restart VPS)
-    // As 3 funções já têm try/catch com fallback (false/null), então timeout é seguro
+    // As funções já têm try/catch com fallback (false/null), então timeout é seguro
     await Promise.race([
         Promise.all([
             verificarStatusRenovacao(ligaId, timeId),
-            verificarStatusPremium(),
             buscarStatusMercado()
         ]),
         new Promise(r => setTimeout(r, 5000))
