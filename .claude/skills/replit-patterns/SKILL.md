@@ -1,1 +1,0 @@
-../../../docs/skills/04-project-specific/replit-patterns.md

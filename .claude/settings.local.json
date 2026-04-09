@@ -354,7 +354,9 @@
       "Bash(rm /c/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/skill-creator)",
       "Bash(mkdir -p /c/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/frontend-design)",
       "Bash(mkdir -p /c/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/skill-creator)",
-      "Bash(cp /c/PROJETOS/SuperCartolaManagerv5-production/docs/skills/02-specialists/frontend-design.md /c/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/frontend-design/SKILL.md)"
+      "Bash(cp /c/PROJETOS/SuperCartolaManagerv5-production/docs/skills/02-specialists/frontend-design.md /c/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/frontend-design/SKILL.md)",
+      "Bash(rm -rf /c/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/replit-patterns)",
+      "Bash(rm -rf /c/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/replit-pull)"
     ]
   },
   "enableAllProjectMcpServers": true,
