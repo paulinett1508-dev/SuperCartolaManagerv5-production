@@ -171,6 +171,38 @@ export default class ArtilheiroManager extends BaseManager {
             const GolsConsolidados = mongoose.models.GolsConsolidados;
             if (!GolsConsolidados) throw new Error('GolsConsolidados model não registrado');
 
+            // Proteção anti-lock: rejeitar consolidação se >80% dos registros têm gols zero
+            // Evita travar dados ruins (ex: coleta prematura antes dos jogos ocorrerem)
+            const totalRegistros = await GolsConsolidados.countDocuments({
+                ligaId,
+                rodada: parseInt(rodada, 10),
+                temporada: CURRENT_SEASON,
+            });
+
+            if (totalRegistros > 0) {
+                const registrosComGols = await GolsConsolidados.countDocuments({
+                    ligaId,
+                    rodada: parseInt(rodada, 10),
+                    temporada: CURRENT_SEASON,
+                    $or: [{ golsPro: { $gt: 0 } }, { golsContra: { $gt: 0 } }],
+                });
+                const taxaZero = (totalRegistros - registrosComGols) / totalRegistros;
+
+                if (taxaZero > 0.8) {
+                    console.warn(
+                        `[ARTILHEIRO-MANAGER] ⚠️ R${rodada}: ${Math.round(taxaZero * 100)}% zeros (${totalRegistros - registrosComGols}/${totalRegistros}) — consolidação adiada (dados suspeitos)`
+                    );
+                    return {
+                        consolidado: false,
+                        rodada,
+                        motivo: 'dados_suspeitos_zeros',
+                        taxaZero: Math.round(taxaZero * 100),
+                        totalRegistros,
+                        registrosComGols,
+                    };
+                }
+            }
+
             const resultado = await GolsConsolidados.updateMany(
                 { ligaId, rodada: parseInt(rodada, 10), temporada: CURRENT_SEASON, parcial: true },
                 { $set: { parcial: false } },
