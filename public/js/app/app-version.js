@@ -20,6 +20,8 @@ const AppVersion = {
     isUpdating: false,
     _initDone: false, // Guarda contra init() duplicado
     _manutencaoPendente: false, // true = manutenção precisa ser reavaliada com timeId
+    _manutencaoPendenteAt: 0, // Timestamp de quando _manutencaoPendente foi ativado
+    MANUTENCAO_PENDING_TIMEOUT: 30000, // 30s: máximo de espera pelo timeId de auth
     _swCacheName: null, // Carregado do servidor via check-version (evita hardcode)
 
     // ✅ FIX MOBILE: Limpeza seletiva - remove apenas caches obsoletos, preserva SW ativo
@@ -132,6 +134,14 @@ const AppVersion = {
     // ✅ Verificar versão no servidor
     async verificarVersao() {
         const agora = Date.now();
+
+        // Reset de _manutencaoPendente se auth demorou mais que o timeout
+        if (this._manutencaoPendente &&
+            (agora - this._manutencaoPendenteAt) > this.MANUTENCAO_PENDING_TIMEOUT) {
+            if (window.Log) Log.warn('APP-VERSION', 'Timeout de manutenção pendente — resetando');
+            this._manutencaoPendente = false;
+        }
+
         // Bypass TTL se manutenção pendente de avaliação (aguardando auth)
         if (!this._manutencaoPendente && agora - this.lastCheck < this.CACHE_TTL) {
             if (window.Log) Log.debug('APP-VERSION', 'Verificação em cache, aguardando TTL');
@@ -156,6 +166,9 @@ const AppVersion = {
             if (servidor.manutencao?.ativo && window.ManutencaoScreen) {
                 if (!timeId) {
                     // Auth ainda não completou — re-verificar quando timeId disponível
+                    if (!this._manutencaoPendente) {
+                        this._manutencaoPendenteAt = Date.now(); // Iniciar timeout
+                    }
                     this._manutencaoPendente = true;
                     if (window.Log) Log.debug('APP-VERSION', 'Aguardando auth para verificar manutenção (pendente)');
                 } else {
@@ -258,92 +271,45 @@ const AppVersion = {
     mostrarOverlayAtualizacao(novaVersao) {
         if (document.getElementById('update-modal-overlay')) return;
 
+        // Usa classes de /css/app/app-version.css (sem inline styles nem cores hardcoded)
+        // Construção via DOM segura (sem innerHTML com dados dinâmicos)
         const overlay = document.createElement('div');
         overlay.id = 'update-modal-overlay';
-        overlay.innerHTML = `
-            <div class="update-modal">
-                <div class="update-modal-icon">
-                    <span class="material-symbols-outlined">autorenew</span>
-                </div>
-                <h3>Atualizando agora...</h3>
-                <p>Estamos carregando a versão mais recente${novaVersao ? ` (v${novaVersao})` : ''}.</p>
-                <p class="update-modal-sub">Aguarde alguns segundos.</p>
-            </div>
-        `;
+        overlay.className = 'app-update-overlay';
 
-        overlay.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 999999;
-            backdrop-filter: blur(6px);
-        `;
+        const modal = document.createElement('div');
+        modal.className = 'app-update-modal';
 
-        const modal = overlay.querySelector('.update-modal');
-        modal.style.cssText = `
-            background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
-            border-radius: 16px;
-            padding: 24px;
-            max-width: 320px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 69, 0, 0.3);
-        `;
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'app-update-icon';
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'material-symbols-outlined';
+        iconSpan.textContent = 'autorenew';
+        iconDiv.appendChild(iconSpan);
 
-        const icon = overlay.querySelector('.update-modal-icon');
-        icon.style.cssText = `
-            width: 64px;
-            height: 64px;
-            background: linear-gradient(135deg, #ff4500, #ff6b35);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 16px;
-            animation: spin 1.2s linear infinite;
-        `;
+        const title = document.createElement('h3');
+        title.textContent = 'Atualizando agora...';
 
-        const iconSpan = overlay.querySelector('.update-modal-icon span');
-        iconSpan.style.cssText = `
-            font-size: 32px;
-            color: white;
-        `;
+        modal.appendChild(iconDiv);
+        modal.appendChild(title);
 
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        `;
-        document.head.appendChild(style);
+        if (novaVersao) {
+            const versionEl = document.createElement('p');
+            versionEl.className = 'app-update-version';
+            versionEl.textContent = `v${novaVersao}`;
+            modal.appendChild(versionEl);
+        }
 
-        const h3 = overlay.querySelector('h3');
-        h3.style.cssText = `
-            color: #fff;
-            font-size: 1.1rem;
-            margin: 0 0 8px;
-        `;
+        const notes = document.createElement('p');
+        notes.className = 'app-update-notes';
+        notes.textContent = 'Estamos carregando a versão mais recente. Aguarde alguns segundos.';
+        modal.appendChild(notes);
 
-        const p = overlay.querySelector('p');
-        p.style.cssText = `
-            color: #ccc;
-            font-size: 0.95rem;
-            margin: 0 0 4px;
-        `;
-
-        const subP = overlay.querySelector('.update-modal-sub');
-        subP.style.cssText = `
-            color: #888;
-            font-size: 0.85rem;
-            margin: 0;
-        `;
-
+        overlay.appendChild(modal);
         document.body.appendChild(overlay);
+
+        // Forçar reflow para a animação de opacity funcionar
+        requestAnimationFrame(() => overlay.classList.add('visible'));
     },
 
     // ✅ Atualizar agora

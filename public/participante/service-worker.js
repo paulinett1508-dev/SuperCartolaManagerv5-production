@@ -18,6 +18,7 @@
 // BUILD: 2026-03-06T00:00:00Z
 // =====================================================================
 
+// ⚠️ Ao alterar este nome, atualizar também: config/sw-cache-name.js (fonte canônica do backend)
 const CACHE_NAME = "super-cartola-v30-20260306";
 
 // Arquivos essenciais para cache inicial
