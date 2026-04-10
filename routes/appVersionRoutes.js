@@ -17,6 +17,7 @@ import APP_VERSION, {
     VERSION_SCOPE
 } from "../config/appVersion.js";
 import { CURRENT_SEASON, SEASON_CONFIG } from "../config/seasons.js";
+import { verificarAdmin } from "../middleware/auth.js";
 import marketGate from "../utils/marketGate.js";
 
 const __filename_ver = fileURLToPath(import.meta.url);
@@ -123,7 +124,31 @@ router.get("/check-version", (req, res) => {
 
     // Incluir estado de manutenção para o app participante
     if (clientType === 'app') {
-        versionData.manutencao = lerEstadoManutencao();
+        const manutencao = lerEstadoManutencao();
+
+        // Verificar acesso por timeId (whitelist/blacklist — evita expor IDs no frontend)
+        if (manutencao.ativo) {
+            const timeId = String(req.headers['x-time-id'] || '');
+            const controle = manutencao.controle_acesso || {};
+            const modoLista = controle.modo_lista || 'whitelist';
+
+            if (timeId) {
+                if (modoLista === 'whitelist') {
+                    const whitelist = controle.whitelist_timeIds || [];
+                    if (whitelist.includes(timeId)) {
+                        manutencao.ativo = false; // Na whitelist → acesso liberado
+                    }
+                } else if (modoLista === 'blacklist') {
+                    const blacklist = controle.blacklist_timeIds || [];
+                    if (!blacklist.includes(timeId)) {
+                        manutencao.ativo = false; // Fora da blacklist → acesso liberado
+                    }
+                }
+            }
+            // Sem timeId ainda (auth pendente): mantém ativo:true, frontend re-verifica
+        }
+
+        versionData.manutencao = manutencao;
     }
 
     res.json(versionData);
@@ -156,7 +181,7 @@ router.get("/versao/admin", (req, res) => {
 // =====================================================================
 
 // GET /api/app/versao/all - Retorna todas as versões
-router.get("/versao/all", (req, res) => {
+router.get("/versao/all", verificarAdmin, (req, res) => {
     res.json({
         participante: PARTICIPANTE_VERSION,
         admin: ADMIN_VERSION,
@@ -167,7 +192,7 @@ router.get("/versao/all", (req, res) => {
 });
 
 // GET /api/app/versao/scope - Retorna configuração de escopo (debug)
-router.get("/versao/scope", (req, res) => {
+router.get("/versao/scope", verificarAdmin, (req, res) => {
     if (!VERSION_SCOPE) {
         return res.status(503).json({
             error: "version-scope.json não carregado",
@@ -187,7 +212,7 @@ router.get("/versao/scope", (req, res) => {
 });
 
 // GET /api/app/versao/debug - Info completa para troubleshooting
-router.get("/versao/debug", (req, res) => {
+router.get("/versao/debug", verificarAdmin, (req, res) => {
     const clientType = detectClientType(req);
 
     res.json({

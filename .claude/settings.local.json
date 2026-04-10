@@ -356,7 +356,11 @@
       "Bash(mkdir -p /c/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/skill-creator)",
       "Bash(cp /c/PROJETOS/SuperCartolaManagerv5-production/docs/skills/02-specialists/frontend-design.md /c/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/frontend-design/SKILL.md)",
       "Bash(rm -rf /c/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/replit-patterns)",
-      "Bash(rm -rf /c/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/replit-pull)"
+      "Bash(rm -rf /c/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/replit-pull)",
+      "Bash(mkdir -p C:/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/dead-code-auditor/references)",
+      "Bash(cp C:/PROJETOS/SuperCartolaManagerv5-production/.agnostic-core/skills/audit/dead-code-auditor/SKILL.md C:/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/dead-code-auditor/SKILL.md)",
+      "Bash(cp C:/PROJETOS/SuperCartolaManagerv5-production/.agnostic-core/skills/audit/dead-code-auditor/references/commands.md C:/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/dead-code-auditor/references/commands.md)",
+      "Bash(cp C:/PROJETOS/SuperCartolaManagerv5-production/.agnostic-core/skills/audit/dead-code-auditor/references/checklist.md C:/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/dead-code-auditor/references/checklist.md)"
     ]
   },
   "enableAllProjectMcpServers": true,
