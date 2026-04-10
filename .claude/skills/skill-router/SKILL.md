@@ -85,11 +85,18 @@ Ao ser invocado (ou antes de qualquer ação significativa), executar:
 - **Prioridade:** MAXIMA — sobrepõe `frontend-crafter` em decisões estéticas
 - **Localização:** `docs/skills/02-specialists/frontend-design.md`
 
+#### dead-code-auditor
+- **Keywords primárias:** `dead code`, `código órfão`, `código morto`, `arquivo não usado`, `função não chamada`, `script órfão`, `dependência não usada`, `vasculhar codebase`, `limpar codebase`, `orphan code`
+- **Frases PT-BR:** "tem código morto?", "vasculha o código", "quais arquivos não são usados", "limpa o que não é mais usado", "tem imports não usados?", "tem função que ninguém chama?", "audita o que é orfão", "remove o que está órfão", "tem script sem uso?"
+- **Contexto:** Limpeza de codebase, refactor, pré-release, redução de debt técnico, auditoria de dependências
+- **NAO confundir:** Auditoria de qualidade geral → `code-inspector`; Refatorar arquivo grande → `refactor-monolith`
+- **Localização:** `.claude/skills/dead-code-auditor/SKILL.md`
+
 #### code-inspector
 - **Keywords primárias:** `auditar código`, `code review`, `auditoria de código`, `security review`, `OWASP`, `inspeção`, `inspecionar código`
 - **Frases PT-BR:** "revise o código", "análise de segurança", "verifique vulnerabilidades", "débito técnico", "qualidade do código", "auditoria profunda", "code audit"
 - **Contexto:** Revisão pós-implementação, análise de segurança, troubleshooting, dívida técnica
-- **NAO confundir:** Auditoria de módulo específico → `auditor-module`; Auditoria de cache → `cache-auditor`
+- **NAO confundir:** Auditoria de módulo específico → `auditor-module`; Auditoria de cache → `cache-auditor`; Código órfão/morto → `dead-code-auditor`
 - **Localização:** `docs/skills/02-specialists/code-inspector.md`
 
 #### db-guardian
@@ -464,6 +471,9 @@ Ao ser invocado (ou antes de qualquer ação significativa), executar:
 | "cache tá lento" | `cache-auditor` | Performance de cache |
 | "cache antigo prevalecendo" | `cache-sentinel` | Monitoramento proativo |
 | "dado desatualizado no app" | `cache-sentinel` | Cache stale participante |
+| "tem código morto?" | `dead-code-auditor` | Limpeza de codebase |
+| "vasculha o que não é usado" | `dead-code-auditor` | Código órfão/morto |
+| "tem arquivo orfão?" | `dead-code-auditor` | Arquivos não importados |
 | "audite o módulo top 10" | `auditor-module` | Auditoria de módulo |
 | "auditar UX do app" | `ux-auditor-app` | Auditoria UX holística |
 | "quais branches existem" | `analise-branches` | Análise git |
