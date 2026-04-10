@@ -2,7 +2,7 @@
   "_meta": {
     "description": "Mapa lógico de versionamento Admin/App",
     "purpose": "Permite ao versionController identificar qual escopo foi alterado sem reorganizar pastas físicas",
-    "updated_at": "2025-12-16",
+    "updated_at": "2026-04-09",
     "criteria": "Inferência por nome de arquivo. Em caso de dúvida, marcado como 'shared'"
   },
 
@@ -137,10 +137,31 @@
       ],
       "participante_css": [
         "participante/css/participante.css",
+        "participante/css/_app-tokens.css",
         "participante/css/boas-vindas.css",
         "participante/css/pull-refresh.css",
         "participante/css/splash-screen.css",
-        "participante/css/top10-destaque.css"
+        "participante/css/top10-destaque.css",
+        "participante/css/error-toast.css",
+        "participante/css/quick-access-bar.css",
+        "participante/css/tabelas-esportes.css",
+        "participante/css/noticias-time.css",
+        "participante/css/brasileirao-tabela.css",
+        "participante/css/components/turno-group.css",
+        "participante/css/campinho.css",
+        "participante/css/copa-sc.css",
+        "participante/css/copa-mundo-2026.css",
+        "participante/css/tiro-certo.css",
+        "participante/css/extrato-bank.css",
+        "participante/css/matchday.css",
+        "participante/css/resta-um.css",
+        "participante/css/pontos-corridos.css",
+        "participante/css/module-lp.css",
+        "participante/css/whats-happening.css",
+        "participante/css/round-xray-widget.css",
+        "participante/css/campeao-widget.css",
+        "participante/css/mito-mico-modal.css",
+        "participante/css/chatbot.css"
       ]
     }
   },
