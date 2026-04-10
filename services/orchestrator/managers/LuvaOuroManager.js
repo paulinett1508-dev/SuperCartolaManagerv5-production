@@ -22,6 +22,8 @@
  */
 import BaseManager from './BaseManager.js';
 import { coletarDadosGoleiros, consolidarRodada } from '../../goleirosService.js';
+import Goleiros from '../../../models/Goleiros.js';
+import { CURRENT_SEASON } from '../../../config/seasons.js';
 
 export default class LuvaOuroManager extends BaseManager {
     constructor() {
@@ -123,6 +125,38 @@ export default class LuvaOuroManager extends BaseManager {
         console.log(`[LUVA-OURO-MANAGER] onConsolidate: consolidando R${rodada} liga ${ligaId}`);
 
         try {
+            // Proteção anti-lock: rejeitar consolidação se >80% dos registros têm pontos zero
+            // Evita travar dados ruins (ex: coleta prematura antes dos jogos ocorrerem)
+            const totalRegistros = await Goleiros.countDocuments({
+                ligaId,
+                rodada,
+                temporada: CURRENT_SEASON,
+            });
+
+            if (totalRegistros > 0) {
+                const registrosComPontos = await Goleiros.countDocuments({
+                    ligaId,
+                    rodada,
+                    temporada: CURRENT_SEASON,
+                    $or: [{ pontos: { $gt: 0 } }, { pontos: { $lt: 0 } }],
+                });
+                const taxaZero = (totalRegistros - registrosComPontos) / totalRegistros;
+
+                if (taxaZero > 0.8) {
+                    console.warn(
+                        `[LUVA-OURO-MANAGER] ⚠️ R${rodada}: ${Math.round(taxaZero * 100)}% zeros (${totalRegistros - registrosComPontos}/${totalRegistros}) — consolidação adiada (dados suspeitos)`
+                    );
+                    return {
+                        consolidado: false,
+                        rodada,
+                        motivo: 'dados_suspeitos_zeros',
+                        taxaZero: Math.round(taxaZero * 100),
+                        totalRegistros,
+                        registrosComPontos,
+                    };
+                }
+            }
+
             const resultado = await consolidarRodada(ligaId, rodada);
             console.log(`[LUVA-OURO-MANAGER] Consolidação R${rodada}: ${resultado.registrosAtualizados} registros atualizados`);
             return { consolidado: true, rodada, registrosAtualizados: resultado.registrosAtualizados };

@@ -227,7 +227,7 @@ function renderizarBannerRodadaFinal(
     if (rodadaAtual !== RODADA_FINAL) return "";
 
     const liderNome = lider ? getNome(lider) : "---";
-    const liderPontos = lider ? (Math.trunc(getPontos(lider) * 100) / 100).toFixed(2) : "0";
+    const liderPontos = lider ? truncarPontos(getPontos(lider)) : "0";
 
     // ✅ v3.8: Detectar se é campeão confirmado
     if (temporadaEncerrada) {
@@ -638,7 +638,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                     <div style="font-size: 28px; font-weight: 900; color: var(--app-text-primary);">${minhaColocacao}º</div>
                 </div>
                 <div style="text-align: center;">
-                    <div style="font-size: 26px; font-weight: 800; color: var(--app-gold);">${(Math.trunc(getPontos(meusDados) * 100) / 100).toFixed(2)}</div>
+                    <div style="font-size: 26px; font-weight: 800; color: var(--app-gold);">${truncarPontos(getPontos(meusDados))}</div>
                     <div style="font-size: 9px; color: #888;">pontos</div>
                 </div>
                 ${tendencia && tendencia.text ? `
@@ -654,7 +654,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                     ? `
             <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
                 <span style="color: #888; font-size: 11px;">Distância p/ ${labelLider.toLowerCase()}</span>
-                <span style="color: var(--app-amber); font-weight: 700; font-size: 13px;">-${(Math.trunc(distanciaLider * 100) / 100).toFixed(2)} pts</span>
+                <span style="color: var(--app-amber); font-weight: 700; font-size: 13px;">-${truncarPontos(distanciaLider)} pts</span>
             </div>
             `
                     : `
@@ -687,7 +687,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                     </div>
                 </div>
                 <div class="luva-top1-pontos">
-                    <div class="luva-top1-pontos-valor">${(Math.trunc((top1.pontos||0) * 100) / 100).toFixed(2)}</div>
+                    <div class="luva-top1-pontos-valor">${truncarPontos(top1.pontos)}</div>
                     <div class="luva-top1-pontos-label">pontos</div>
                 </div>
             </div>
@@ -699,7 +699,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                 <div class="luva-runner-content">
                     <div class="luva-runner-top">
                         <span class="luva-runner-nome">${escapeHtml(g.nome)}</span>
-                        <span class="luva-runner-pts">${(Math.trunc((g.pontos||0) * 100) / 100).toFixed(2)} pts</span>
+                        <span class="luva-runner-pts">${truncarPontos(g.pontos)} pts</span>
                     </div>
                     <div class="luva-runner-bar-bg"><div class="luva-runner-bar-fill" style="width: ${pct}%;"></div></div>
                 </div>
@@ -732,7 +732,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                         return `
                     <div class="luva-rodada-box" style="background: ${bgColor};" data-rodada="${r.rodada}">
                         <div class="luva-rodada-num">R${r.rodada}</div>
-                        <div class="luva-rodada-pts" style="color: ${textColor};">${(Math.trunc((pontos||0) * 100) / 100).toFixed(2)}</div>
+                        <div class="luva-rodada-pts" style="color: ${textColor};">${truncarPontos(pontos)}</div>
                     </div>`;
                     };
                     return `
@@ -780,7 +780,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                 </div>
             </div>
             <div style="text-align: right;">
-                <div style="font-size: 18px; font-weight: 800; color: var(--app-gold);">${(Math.trunc(getPontos(campeao) * 100) / 100).toFixed(2)}</div>
+                <div style="font-size: 18px; font-weight: 800; color: var(--app-gold);">${truncarPontos(getPontos(campeao))}</div>
                 <div style="font-size: 8px; color: #888;">pontos</div>
             </div>
         </div>
@@ -811,7 +811,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                     const isMeuTime = isMyTime(time, meuTimeId);
                     const pos = idx + 1;
                     const posDisplay = pos === 1 ? '<span class="material-symbols-outlined" style="font-size: 16px; color: var(--app-gold);">emoji_events</span>' : pos + '\u00BA';
-                    const pts = (Math.trunc(getPontos(time) * 100) / 100).toFixed(2);
+                    const pts = truncarPontos(getPontos(time));
                     const tid = time.participanteId || time.timeId || time.time_id || '';
 
                     const rodadas = _resumoRodadasGoleiro(time.rodadas);
@@ -837,7 +837,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                             htmlR += '<div class="luva-collapse-rodada">'
                                 + '<span class="luva-collapse-rodada-badge" style="color:' + cor + ';">R' + r.rodada + '</span>'
                                 + '<span class="luva-collapse-rodada-info">' + r.goleiro + '</span>'
-                                + '<span class="luva-collapse-rodada-pts" style="color:' + corPts + ';">' + (Math.trunc((r.pontos || 0) * 100) / 100).toFixed(2) + '</span>'
+                                + '<span class="luva-collapse-rodada-pts" style="color:' + corPts + ';">' + truncarPontos(r.pontos) + '</span>'
                                 + '</div>';
                         });
                     } else {
@@ -860,7 +860,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                             + '<div style="color:#666;font-weight:400;font-size:12px;">' + escapeHtml(time.participanteNome || time.nomeCartoleiro || time.nome || 'N/D') + '</div>'
                             + '<div style="color:#555;font-size:11px;">' + escapeHtml(time.nomeTime || time.nome_time || '') + '</div>'
                             + '</div></div>'
-                            + '<span style="color:#555;font-weight:500;font-size:13px;">' + (Math.trunc(getPontos(time) * 100) / 100).toFixed(2) + '</span>'
+                            + '<span style="color:#555;font-weight:500;font-size:13px;">' + truncarPontos(getPontos(time)) + '</span>'
                             + '</div>';
                     });
                 }
@@ -925,7 +925,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                 // Buscar dados da rodada
                 const rodadaData = meusDados.rodadas.find(r => r.rodada === rodadaNum);
                 const goleiro = rodadaData?.goleiroNome || 'Sem goleiro';
-                const pts = Math.trunc((rodadaData?.pontos || 0) * 100) / 100;
+                const pts = truncarPontos(rodadaData?.pontos);
 
                 detalheContainer.innerHTML = `
                     <div class="luva-rodada-detalhe-inner">
@@ -933,7 +933,7 @@ async function renderizarLuvaOuro(container, response, meuTimeId) {
                             <span class="material-icons">sports_handball</span>
                             ${escapeHtml(goleiro)}
                         </div>
-                        <span class="luva-rodada-detalhe-pts">${pts.toFixed(2)} pts</span>
+                        <span class="luva-rodada-detalhe-pts">${pts} pts</span>
                     </div>`;
 
                 detalheContainer.classList.add('open');

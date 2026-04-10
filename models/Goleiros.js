@@ -52,7 +52,9 @@ const goleirosSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["escalado", "banco", "sem_goleiro"],
+      // Valores reais observados no banco incluem: "nulo", "possivel_escalacao", "desconhecido"
+      // além dos valores semânticos originais — enum expandido para refletir a realidade
+      enum: ["escalado", "banco", "sem_goleiro", "nulo", "possivel_escalacao", "desconhecido"],
       default: "sem_goleiro",
     },
     dataColeta: {
@@ -74,6 +76,8 @@ const goleirosSchema = new mongoose.Schema(
 goleirosSchema.index({ ligaId: 1, temporada: 1, rodada: 1 });
 goleirosSchema.index({ ligaId: 1, participanteId: 1, rodada: 1 });
 goleirosSchema.index({ ligaId: 1, temporada: 1, rodadaConcluida: 1 });
+// Índice composto para a query principal de ranking (obterRankingGoleiros em goleirosService.js)
+goleirosSchema.index({ ligaId: 1, temporada: 1, participanteId: 1, rodada: 1, rodadaConcluida: 1 });
 
 // Método estático para buscar ranking (v3.0: filtro temporada obrigatório)
 goleirosSchema.statics.buscarRanking = async function (
