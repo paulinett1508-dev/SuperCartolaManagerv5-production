@@ -18,6 +18,7 @@ import APP_VERSION, {
 } from "../config/appVersion.js";
 import { CURRENT_SEASON, SEASON_CONFIG } from "../config/seasons.js";
 import { verificarAdmin } from "../middleware/auth.js";
+import { SW_CACHE_NAME } from "../config/sw-cache-name.js";
 import marketGate from "../utils/marketGate.js";
 
 const __filename_ver = fileURLToPath(import.meta.url);
@@ -121,6 +122,7 @@ router.get("/check-version", (req, res) => {
     versionData.timestamp = new Date().toISOString();
     versionData.serverBoot = SERVER_BOOT;
     versionData.serverUptimeSec = Math.floor(process.uptime());
+    versionData.swCacheName = SW_CACHE_NAME;
 
     // Incluir estado de manutenção para o app participante
     if (clientType === 'app') {

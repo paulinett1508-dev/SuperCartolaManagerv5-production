@@ -20,6 +20,7 @@ const AppVersion = {
     isUpdating: false,
     _initDone: false, // Guarda contra init() duplicado
     _manutencaoPendente: false, // true = manutenção precisa ser reavaliada com timeId
+    _swCacheName: null, // Carregado do servidor via check-version (evita hardcode)
 
     // ✅ FIX MOBILE: Limpeza seletiva - remove apenas caches obsoletos, preserva SW ativo
     async limparCachesAntigos() {
@@ -29,10 +30,11 @@ const AppVersion = {
         }
 
         try {
-            // Limpar apenas caches com nomes antigos (não o atual do SW)
-            // ⚠️ MANTER SINCRONIZADO com CACHE_NAME em service-worker.js
-            // ⚠️ MANTER SINCRONIZADO com CACHE_NAME em service-worker.js
-            const CURRENT_SW_CACHE = 'super-cartola-v30-20260306';
+            // Usar nome do cache carregado do servidor (evita hardcode manual)
+            // Fonte canônica: config/sw-cache-name.js → exposto via /api/app/check-version
+            const CURRENT_SW_CACHE = this._swCacheName;
+            if (!CURRENT_SW_CACHE) return; // Aguardar check-version carregar o nome
+
             const cacheNames = await caches.keys();
             const obsoletos = cacheNames.filter(name => name !== CURRENT_SW_CACHE);
 
@@ -138,85 +140,38 @@ const AppVersion = {
         this.lastCheck = agora;
 
         try {
-            // Usar novo endpoint com identificação de cliente
+            // Enviar timeId para backend avaliar whitelist/blacklist server-side
+            const timeId = String(window.participanteAuth?.timeId || '');
             const response = await fetch("/api/app/check-version", {
                 headers: {
-                    "x-client-type": this.CLIENT_TYPE
+                    "x-client-type": this.CLIENT_TYPE,
+                    ...(timeId && { "x-time-id": timeId })
                 }
             });
             if (!response.ok) return;
 
             const servidor = await response.json();
 
-            // Verificar modo manutenção (whitelist/blacklist por timeId)
+            // Verificar modo manutenção — backend já filtrou whitelist/blacklist
             if (servidor.manutencao?.ativo && window.ManutencaoScreen) {
-                const controleAcesso = servidor.manutencao.controle_acesso || {};
-                const modoLista = controleAcesso.modo_lista || 'whitelist';
-                const timeId = String(window.participanteAuth?.timeId || '');
-
-                // HARDCODE: Owner/Dev (Paulinett) NUNCA vê tela de manutenção
-                const OWNER_TIME_ID = '13935277';
-                if (timeId === OWNER_TIME_ID) {
-                    this._manutencaoPendente = false;
-                    if (window.Log) Log.info('APP-VERSION', `Owner bypass: timeId ${timeId} sempre liberado`);
-                    // Desativar manutenção se já foi ativada por race condition
-                    if (window.ManutencaoScreen.estaAtivo()) {
-                        window.ManutencaoScreen.desativar();
-                    }
-                } else if (!timeId) {
-                    // Auth ainda não completou - marcar pendente para bypass TTL na próxima chamada
+                if (!timeId) {
+                    // Auth ainda não completou — re-verificar quando timeId disponível
                     this._manutencaoPendente = true;
                     if (window.Log) Log.debug('APP-VERSION', 'Aguardando auth para verificar manutenção (pendente)');
                 } else {
-                    // timeId disponível - avaliar manutenção de verdade
                     this._manutencaoPendente = false;
-                    let deveMostrarManutencao = false;
-
-                    if (modoLista === 'blacklist') {
-                        // Modo blacklist: bloquear apenas IDs na lista
-                        const blacklistIds = controleAcesso.blacklist_timeIds || [];
-                        deveMostrarManutencao = timeId && blacklistIds.includes(timeId);
-                        if (deveMostrarManutencao && window.Log) {
-                            Log.info('APP-VERSION', `Blacklist: timeId ${timeId} bloqueado`);
-                        }
-                    } else {
-                        // Modo whitelist: bloquear todos exceto IDs na lista
-                        const whitelistIds = controleAcesso.whitelist_timeIds || [];
-                        const isWhitelisted = timeId && whitelistIds.includes(timeId);
-                        deveMostrarManutencao = !isWhitelisted;
-                        if (isWhitelisted && window.Log) {
-                            Log.info('APP-VERSION', `Whitelist: timeId ${timeId} liberado durante manutencao`);
-                        }
-                    }
-
-                    // Verificar modo de bloqueio
                     const modo = servidor.manutencao.modo || 'global';
 
-                    // Modo global: bloqueia tudo
-                    if (modo === 'global' && deveMostrarManutencao) {
-                        if (window.Log) Log.warn('APP-VERSION', `Manutenção ativada para timeId ${timeId} (modo: ${modo})`);
+                    if (modo === 'global' || modo === 'usuarios') {
+                        if (window.Log) Log.warn('APP-VERSION', `Manutenção ativa (modo: ${modo})`);
                         window.ManutencaoScreen.ativar(servidor.manutencao);
                         return;
                     }
 
-                    // Modo usuarios: bloqueia apenas por controle de acesso
-                    if (modo === 'usuarios' && deveMostrarManutencao) {
-                        if (window.Log) Log.warn('APP-VERSION', `Manutenção ativada para timeId ${timeId} (modo: ${modo})`);
-                        window.ManutencaoScreen.ativar(servidor.manutencao);
-                        return;
-                    }
-
-                    // Whitelisted/não bloqueado: desativar se estava ativo por race condition
-                    if (!deveMostrarManutencao && window.ManutencaoScreen.estaAtivo()) {
-                        if (window.Log) Log.info('APP-VERSION', `Whitelisted: desativando tela manutenção para timeId ${timeId}`);
-                        window.ManutencaoScreen.desativar();
-                    }
-
-                    // Modo modulos: setar lista e desativar splash global se ativa por race condition
                     if (modo === 'modulos') {
                         window.participanteModulosBloqueados = servidor.manutencao.modulos_bloqueados || [];
-                        if (window.ManutencaoScreen && window.ManutencaoScreen.estaAtivo()) {
-                            if (window.Log) Log.info('APP-VERSION', `Modo modulos: desativando splash global (race condition fix)`);
+                        if (window.ManutencaoScreen.estaAtivo()) {
+                            if (window.Log) Log.info('APP-VERSION', 'Modo modulos: desativando splash global');
                             window.ManutencaoScreen.desativar();
                         }
                     }
