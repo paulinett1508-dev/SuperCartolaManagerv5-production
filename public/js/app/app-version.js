@@ -65,14 +65,14 @@ const AppVersion = {
         }
         this._initDone = true;
 
-        // ✅ EMERGENCY: Limpar caches antigos UMA VEZ
-        await this.limparCachesAntigos();
-
         // Registrar Service Worker do PWA
         this.registrarServiceWorker();
 
-        // Buscar versão e verificar atualização
+        // Buscar versão (seta _swCacheName via resposta do servidor)
         await this.verificarVersao();
+
+        // ✅ EMERGENCY: Limpar caches antigos UMA VEZ (após ter _swCacheName)
+        await this.limparCachesAntigos();
 
         // Forçar checagem periódica (foreground)
         this.iniciarAutoCheck();
