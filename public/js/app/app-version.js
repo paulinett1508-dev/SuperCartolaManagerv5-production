@@ -190,6 +190,11 @@ const AppVersion = {
             const versaoLocal = localStorage.getItem(this.LOCAL_KEY);
             const bootLocal = localStorage.getItem(this.LOCAL_BOOT_KEY);
 
+            // Armazenar nome do cache SW (fonte: config/sw-cache-name.js via servidor)
+            if (servidor.swCacheName) {
+                this._swCacheName = servidor.swCacheName;
+            }
+
             // Log de debug (só em dev)
             if (window.Log && servidor.clientDetected) {
                 Log.debug('APP-VERSION', `Cliente detectado: ${servidor.clientDetected}`);
@@ -357,12 +362,14 @@ const AppVersion = {
         // porque o SW perdia seus assets e tudo precisava ser re-baixado do zero.
         if ('caches' in window) {
             try {
-                // ⚠️ MANTER SINCRONIZADO com CACHE_NAME em service-worker.js
-                const CURRENT_SW_CACHE = 'super-cartola-v30-20260306';
-                const names = await caches.keys();
-                const obsoletos = names.filter(name => name !== CURRENT_SW_CACHE);
-                if (obsoletos.length > 0) {
-                    await Promise.all(obsoletos.map(name => caches.delete(name)));
+                // Nome do cache carregado do servidor (config/sw-cache-name.js)
+                const CURRENT_SW_CACHE = this._swCacheName;
+                if (CURRENT_SW_CACHE) {
+                    const names = await caches.keys();
+                    const obsoletos = names.filter(name => name !== CURRENT_SW_CACHE);
+                    if (obsoletos.length > 0) {
+                        await Promise.all(obsoletos.map(name => caches.delete(name)));
+                    }
                 }
             } catch (e) {
                 // Ignorar erros de cache — prosseguir com reload de qualquer forma
