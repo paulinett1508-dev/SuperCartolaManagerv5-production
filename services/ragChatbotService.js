@@ -511,7 +511,7 @@ async function buscarContextoTurnoReturno(ligaId, temporada, db) {
 
 async function buscarContextoArtilheiro(ligaId, temporada, db) {
     try {
-        const cache = await db.collection('artilheirocampeao').findOne(
+        const cache = await db.collection('artilheirocampeaos').findOne(
             { ligaId: ligaId, temporada },
             { projection: { dados: { $slice: 3 }, rodadaAtual: 1 } }
         );
@@ -689,6 +689,29 @@ async function buscarContextoDinamico(ligaId, db) {
             // Fallback silencioso
         }
 
+        // Fallback: orchestrator_states e a fonte canonica de rodada/mercado
+        // quando mercadostatus nao existe e calendariorodadas esta vazio
+        if (!rodadaAtualNum || !mercadoStatus) {
+            try {
+                const orch = await db.collection('orchestrator_states').findOne(
+                    { chave: 'round_market_orchestrator' },
+                    { projection: { rodada_atual: 1, status_mercado: 1 } }
+                );
+                if (orch) {
+                    if (!rodadaAtualNum && orch.rodada_atual) {
+                        rodadaInfo = `Rodada atual: ${orch.rodada_atual}`;
+                        rodadaAtualNum = orch.rodada_atual;
+                    }
+                    if (!mercadoStatus && orch.status_mercado) {
+                        const statusMap = { 1: 'aberto', 2: 'fechado (rodada em andamento)', 4: 'encerrado' };
+                        mercadoStatus = `Mercado: ${statusMap[orch.status_mercado] || 'desconhecido'}`;
+                    }
+                }
+            } catch {
+                // Fallback silencioso
+            }
+        }
+
         const modulosAtivos = liga.modulos_ativos
             ? Object.entries(liga.modulos_ativos)
                 .filter(([, v]) => v === true)
@@ -711,20 +734,22 @@ async function buscarContextoDinamico(ligaId, db) {
         ];
 
         // Contexto especifico de modulos ativos — chamadas em paralelo
+        // NOTA: modulos_ativos usa nomenclatura mista (camelCase legado + snake_case novo)
+        // Ex: DB tem "pontosCorridos" mas tambem pode ter "pontos_corridos" — aceitar ambos
         const ma = liga.modulos_ativos || {};
         const moduloHelpers = [
-            ma.ranking_geral   && buscarContextoRankingGeral(ligaId, temporada, db),
-            ma.ranking_rodada  && buscarContextoRankingRodada(ligaId, rodadaAtualNum, temporada, db),
-            ma.pontos_corridos && buscarContextoPontosCorridos(ligaId, temporada, db),
-            ma.mata_mata       && buscarContextoMataMata(ligaId, rodadaAtualNum, temporada, db),
-            ma.top_10          && buscarContextoTop10(ligaId, temporada, db),
-            ma.melhor_mes      && buscarContextoMelhorMes(ligaId, temporada, db),
-            ma.turno_returno   && buscarContextoTurnoReturno(ligaId, temporada, db),
-            ma.artilheiro      && buscarContextoArtilheiro(ligaId, temporada, db),
-            ma.capitao_luxo    && buscarContextoCapitaoLuxo(ligaId, temporada, db),
-            ma.luva_ouro       && buscarContextoLuvaOuro(ligaId, temporada, db),
-            ma.tiro_certo      && buscarContextoTiroCerto(ligaId, temporada, db),
-            ma.resta_um        && buscarContextoRestaUm(ligaId, temporada, db),
+            (ma.ranking_geral   || ma.ranking)         && buscarContextoRankingGeral(ligaId, temporada, db),
+            (ma.ranking_rodada  || ma.rodadas)         && buscarContextoRankingRodada(ligaId, rodadaAtualNum, temporada, db),
+            (ma.pontos_corridos || ma.pontosCorridos)  && buscarContextoPontosCorridos(ligaId, temporada, db),
+            (ma.mata_mata       || ma.mataMata)        && buscarContextoMataMata(ligaId, rodadaAtualNum, temporada, db),
+            (ma.top_10          || ma.top10)           && buscarContextoTop10(ligaId, temporada, db),
+            (ma.melhor_mes      || ma.melhorMes)       && buscarContextoMelhorMes(ligaId, temporada, db),
+            (ma.turno_returno   || ma.turnoReturno)    && buscarContextoTurnoReturno(ligaId, temporada, db),
+            ma.artilheiro                              && buscarContextoArtilheiro(ligaId, temporada, db),
+            (ma.capitao_luxo    || ma.capitaoLuxo)     && buscarContextoCapitaoLuxo(ligaId, temporada, db),
+            (ma.luva_ouro       || ma.luvaOuro)        && buscarContextoLuvaOuro(ligaId, temporada, db),
+            (ma.tiro_certo      || ma.tiroCerto)       && buscarContextoTiroCerto(ligaId, temporada, db),
+            (ma.resta_um        || ma.restaUm)         && buscarContextoRestaUm(ligaId, temporada, db),
         ].filter(Boolean);
 
         if (moduloHelpers.length > 0) {
