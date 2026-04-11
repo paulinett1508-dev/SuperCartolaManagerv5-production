@@ -937,8 +937,10 @@ async function responderSemLLM(pergunta, ligaId, db) {
             partes.push(secaoLive);
         }
 
-        // Carregar regras do modulo: sempre que pediu sobre regras OU quando nao ha dados live
-        if (match.modulo && (/regra|como\s*funciona|o\s*que\s*[eé]|explica/i.test(pergunta) || !secaoLive)) {
+        // Carregar regras do modulo: APENAS quando a pergunta e explicitamente sobre regras/funcionamento
+        // Nao carregar regras para perguntas de dados ("quem lidera?", "qual edicao?") — nesses casos,
+        // sem dados live = resposta vazia (escalando para LLM se disponivel)
+        if (match.modulo && /regra|como\s*funciona|o\s*que\s*[eé]|explica/i.test(pergunta)) {
             const regraTexto = carregarRegraModulo(match.modulo);
             if (regraTexto) {
                 partes.push(`\n${regraTexto}`);
