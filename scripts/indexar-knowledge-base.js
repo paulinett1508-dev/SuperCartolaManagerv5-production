@@ -26,7 +26,7 @@ async function main() {
     console.log('  BIG CARTOLA IA — Indexacao da Knowledge Base');
     console.log('='.repeat(60));
 
-    if (!ragChatbotService.isDisponivel()) {
+    if (!ragChatbotService.isLLMDisponivel()) {
         console.error('\n❌ OPENAI_API_KEY nao configurada no .env');
         console.error('   Adicione: OPENAI_API_KEY=sk-proj-...');
         process.exit(1);

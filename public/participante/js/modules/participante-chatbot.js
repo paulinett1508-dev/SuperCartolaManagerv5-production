@@ -1,23 +1,27 @@
 /**
- * PARTICIPANTE CHATBOT — Big Cartola IA v1.0
- * Modulo frontend para o chatbot RAG.
+ * PARTICIPANTE CHATBOT — Big Cartola IA v2.0
+ * Modulo frontend para o chatbot (modo basico + LLM).
  * Carregado via SPA navigation (participante-navigation.js).
+ *
+ * v2.0: Persistencia de historico em localStorage, suporte a modoBasico.
  */
 
 const LOG_TAG = 'PARTICIPANTE-CHATBOT';
 const API_URL = '/api/chatbot/ask';
 const API_STATUS_URL = '/api/chatbot/status';
-const MAX_HISTORICO = 20;
-const FETCH_TIMEOUT = 15000; // 15s (LLM pode demorar)
+const MAX_HISTORICO = 50;
+const FETCH_TIMEOUT = 20000; // 20s (LLM pode demorar)
+const STORAGE_KEY = 'scm_chatbot_historico';
 
 let mensagens = [];
 let enviando = false;
+let _ligaId = null; // Para isolar historico por liga
 
 /**
  * Inicializa o modulo chatbot.
  */
-export async function inicializarChatbotParticipante() {
-    if (window.Log) Log.debug(LOG_TAG, 'Inicializando v1.0...');
+export async function inicializarChatbotParticipante(payload) {
+    if (window.Log) Log.debug(LOG_TAG, 'Inicializando v2.0...');
 
     const container = document.getElementById('chatbot-container');
     if (!container) {
@@ -25,22 +29,36 @@ export async function inicializarChatbotParticipante() {
         return;
     }
 
+    // Capturar liga do payload (para isolar historico por liga)
+    _ligaId = payload?.ligaId || payload?.participante?.ligaId || null;
+
+    // Restaurar historico salvo
+    restaurarHistorico();
+
     // Verificar status do bot
     try {
         const statusResp = await fetchComTimeout(API_STATUS_URL, { method: 'GET' }, 5000);
         const statusData = await statusResp.json();
 
-        if (!statusData.success || !statusData.data?.disponivel) {
+        if (!statusData.success) {
             mostrarIndisponivel(container);
             return;
         }
 
+        const data = statusData.data || {};
         const statusEl = document.getElementById('chatbot-status');
+
         if (statusEl) {
-            const chunks = statusData.data.totalChunks || 0;
-            statusEl.textContent = chunks > 0
-                ? `Pronto | ${chunks} docs indexados`
-                : 'Pronto (base de conhecimento vazia)';
+            if (data.modo === 'basico') {
+                statusEl.textContent = 'Modo basico — dados da liga em tempo real';
+            } else if (data.modo === 'llm') {
+                const chunks = data.totalChunks || 0;
+                statusEl.textContent = chunks > 0
+                    ? `IA ativa | ${chunks} docs indexados`
+                    : 'IA ativa';
+            } else {
+                statusEl.textContent = 'Pronto para ajudar';
+            }
         }
     } catch {
         // Status check falhou, continuar com UI normal
@@ -50,6 +68,7 @@ export async function inicializarChatbotParticipante() {
     const input = document.getElementById('chatbot-input');
     const btnEnviar = document.getElementById('chatbot-send');
     const sugestoes = document.querySelectorAll('.chatbot-suggestion-chip');
+    const btnLimpar = document.getElementById('chatbot-clear');
 
     if (input && btnEnviar) {
         btnEnviar.addEventListener('click', () => enviarPergunta());
@@ -73,6 +92,11 @@ export async function inicializarChatbotParticipante() {
             }
         });
     });
+
+    // Botao limpar historico
+    if (btnLimpar) {
+        btnLimpar.addEventListener('click', () => limparHistorico());
+    }
 
     // Focus no input
     if (input) input.focus();
@@ -163,10 +187,21 @@ function adicionarMensagem(tipo, texto, fontes = [], isError = false) {
     const container = document.getElementById('chatbot-messages');
     if (!container) return;
 
-    // Limitar historico
-    mensagens.push({ tipo, texto, fontes, timestamp: Date.now() });
+    // Salvar no historico
+    mensagens.push({ tipo, texto, fontes, timestamp: Date.now(), isError });
     if (mensagens.length > MAX_HISTORICO) mensagens.shift();
 
+    // Persistir no localStorage
+    salvarHistorico();
+
+    // Renderizar a mensagem
+    renderizarMensagem(container, tipo, texto, fontes, isError);
+}
+
+/**
+ * Renderiza uma unica mensagem no container.
+ */
+function renderizarMensagem(container, tipo, texto, fontes = [], isError = false) {
     const msgEl = document.createElement('div');
     msgEl.className = `chatbot-msg chatbot-msg-${tipo}${isError ? ' chatbot-msg-error' : ''}`;
 
@@ -260,6 +295,90 @@ function mostrarIndisponivel(container) {
     if (inputArea) inputArea.style.display = 'none';
     if (sugestoes) sugestoes.style.display = 'none';
 }
+
+// =====================================================================
+// PERSISTENCIA DO HISTORICO
+// =====================================================================
+
+/**
+ * Chave unica por liga para isolar historicos.
+ */
+function getStorageKey() {
+    return _ligaId ? `${STORAGE_KEY}_${_ligaId}` : STORAGE_KEY;
+}
+
+/**
+ * Salva historico de mensagens no localStorage.
+ */
+function salvarHistorico() {
+    try {
+        const dados = JSON.stringify(mensagens.slice(-MAX_HISTORICO));
+        localStorage.setItem(getStorageKey(), dados);
+    } catch {
+        // localStorage cheio ou indisponivel — ignorar silenciosamente
+    }
+}
+
+/**
+ * Restaura historico de mensagens do localStorage e renderiza no DOM.
+ */
+function restaurarHistorico() {
+    try {
+        const dados = localStorage.getItem(getStorageKey());
+        if (!dados) return;
+
+        const historico = JSON.parse(dados);
+        if (!Array.isArray(historico) || historico.length === 0) return;
+
+        mensagens = historico;
+
+        const container = document.getElementById('chatbot-messages');
+        if (!container) return;
+
+        // Esconder sugestoes se ja tem historico
+        const sugestoes = document.getElementById('chatbot-suggestions');
+        if (sugestoes) sugestoes.style.display = 'none';
+
+        // Renderizar mensagens salvas
+        for (const msg of mensagens) {
+            renderizarMensagem(container, msg.tipo, msg.texto, msg.fontes || [], msg.isError || false);
+        }
+
+        if (window.Log) Log.debug(LOG_TAG, `Historico restaurado: ${mensagens.length} mensagens`);
+    } catch {
+        // Dados corrompidos — limpar
+        localStorage.removeItem(getStorageKey());
+        mensagens = [];
+    }
+}
+
+/**
+ * Limpa historico de conversa (chamado pelo participante).
+ */
+function limparHistorico() {
+    mensagens = [];
+    localStorage.removeItem(getStorageKey());
+
+    const container = document.getElementById('chatbot-messages');
+    if (container) {
+        // Manter apenas a mensagem de boas-vindas
+        const bemVindo = container.querySelector('.chatbot-msg-bot');
+        container.innerHTML = '';
+        if (bemVindo) container.appendChild(bemVindo.cloneNode(true));
+    }
+
+    // Mostrar sugestoes novamente
+    const sugestoes = document.getElementById('chatbot-suggestions');
+    if (sugestoes) sugestoes.style.display = '';
+
+    if (window.ErrorToast) {
+        window.ErrorToast.show('Historico limpo', { tipo: 'info', duracao: 1500 });
+    }
+}
+
+// =====================================================================
+// UTILITARIOS
+// =====================================================================
 
 /**
  * Fetch com timeout (AbortController).

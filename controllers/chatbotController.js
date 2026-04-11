@@ -1,6 +1,7 @@
 /**
- * CHATBOT CONTROLLER — Big Cartola IA
- * Endpoints para o chatbot RAG do app participante.
+ * CHATBOT CONTROLLER — Big Cartola IA v2.0
+ * Endpoints para o chatbot do app participante.
+ * Suporta modo basico (sem LLM) e modo completo (com LLM/RAG).
  */
 
 import ragChatbotService from '../services/ragChatbotService.js';
@@ -10,9 +11,10 @@ const LOG_PREFIX = '[CHATBOT-CTRL]';
 
 /**
  * POST /api/chatbot/ask
- * Recebe pergunta do participante e retorna resposta RAG.
+ * Recebe pergunta do participante e retorna resposta.
  */
 export async function perguntarChatbot(req, res) {
+    const inicio = Date.now();
     try {
         // Validar sessao
         if (!req.session?.participante) {
@@ -39,8 +41,11 @@ export async function perguntarChatbot(req, res) {
         // Obter referencia ao database nativo
         const db = mongoose.connection.db;
 
-        // Chamar pipeline RAG
+        // Chamar pipeline
         const resultado = await ragChatbotService.perguntarBot(perguntaLimpa, ligaId, db);
+
+        const duracao = Date.now() - inicio;
+        console.log(`${LOG_PREFIX} Resposta em ${duracao}ms | modo=${resultado.modo || '?'} | cached=${resultado.cached} | liga=${ligaId}`);
 
         return res.json({
             success: true,
@@ -48,6 +53,7 @@ export async function perguntarChatbot(req, res) {
                 resposta: resultado.resposta,
                 fontes: resultado.fontes,
                 cached: resultado.cached,
+                modo: resultado.modo,
             },
         });
     } catch (error) {
@@ -58,11 +64,12 @@ export async function perguntarChatbot(req, res) {
 
 /**
  * GET /api/chatbot/status
- * Retorna status do chatbot (disponivel, indexado, etc.)
+ * Retorna status do chatbot (disponivel, modo, indexacao, etc.)
  */
 export async function statusChatbot(req, res) {
     try {
-        const status = await ragChatbotService.getStatus();
+        const db = mongoose.connection.db;
+        const status = await ragChatbotService.getStatus(db);
         return res.json({ success: true, data: status });
     } catch (error) {
         console.error(`${LOG_PREFIX} Erro status: ${error.message}`);

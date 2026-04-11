@@ -49,6 +49,29 @@
     line-height: 1.2;
 }
 
+/* Botao limpar historico no header */
+.chatbot-clear-btn {
+    background: none;
+    border: none;
+    color: var(--app-text-secondary, #9ca3af);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    transition: color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chatbot-clear-btn:hover {
+    color: var(--app-text-primary, #f5f5f5);
+    background: var(--app-surface-hover, rgba(255,255,255,0.08));
+}
+
+.chatbot-clear-btn .material-icons {
+    font-size: 20px;
+}
+
 /* Area de mensagens */
 .chatbot-messages {
     flex: 1;
