@@ -1,12 +1,10 @@
 /**
- * RAG CHATBOT SERVICE v1.0 — "Big Cartola IA"
- * Pipeline RAG com LangChain.js para responder perguntas sobre o app.
+ * RAG CHATBOT SERVICE v2.0 — "Big Cartola IA"
+ * Pipeline com 2 modos de operacao:
+ *   - Modo Basico: pattern matching + contexto dinamico (sem LLM, funciona SEMPRE)
+ *   - Modo Completo: contexto dinamico + vector search + LLM (requer OPENAI_API_KEY)
  *
- * Arquitetura:
- *   1. Indexacao (one-time): docs + rules → chunks → embeddings → MongoDB
- *   2. Query (per-request): pergunta → contexto dinamico + vector search → LLM → resposta
- *
- * Env: OPENAI_API_KEY (obrigatorio), RAG_MODEL, RAG_EMBEDDING_MODEL, RAG_TOP_K
+ * Env: OPENAI_API_KEY (opcional — modo basico funciona sem ela)
  * Cache: NodeCache 30min para respostas identicas
  * Multi-tenant: liga_id via session
  */
@@ -42,8 +40,10 @@ const CONFIG = {
 };
 
 const SYSTEM_PROMPT = `Voce e o Big Cartola IA, assistente oficial do Super Cartola Manager.
-Responda APENAS com base nos documentos fornecidos como contexto e nos dados dinamicos da liga.
-Se a pergunta nao pode ser respondida com o contexto disponivel, diga: "Nao encontrei essa informacao nas regras do app."
+Responda com base nos DADOS DA LIGA (contexto dinamico em tempo real) e nos DOCUMENTOS DE REGRAS fornecidos.
+Os dados da liga (rankings, rodada, modulos) sao dados REAIS e atualizados — use-os com confianca para responder sobre estado atual.
+Os documentos de regras descrevem como cada modulo funciona — use-os para perguntas sobre regras e funcionamento.
+Se a pergunta nao pode ser respondida com nenhum dos contextos, diga: "Nao encontrei essa informacao. Tente perguntar de outra forma."
 Responda sempre em portugues brasileiro, de forma clara e objetiva.
 Nao invente informacoes. Nao responda sobre assuntos fora do Super Cartola Manager.
 Use formatacao simples (sem markdown complexo). Seja conciso.`;
@@ -55,7 +55,25 @@ function getApiKey() {
     return process.env.OPENAI_API_KEY || null;
 }
 
+/**
+ * Retorna o modo de operacao do chatbot.
+ * @returns {'basico'|'llm'} 'llm' se OPENAI_API_KEY configurada, 'basico' caso contrario
+ */
+function getModoDisponivel() {
+    return getApiKey() ? 'llm' : 'basico';
+}
+
+/**
+ * Chatbot esta sempre disponivel (modo basico funciona sem API key).
+ */
 function isDisponivel() {
+    return true;
+}
+
+/**
+ * Verifica se o modo LLM esta disponivel (OPENAI_API_KEY configurada).
+ */
+function isLLMDisponivel() {
     return !!getApiKey();
 }
 
@@ -64,8 +82,8 @@ function isDisponivel() {
 // =====================================================================
 let _llm = null;
 let _embeddings = null;
-let _mongoClient = null;
 let _vectorStore = null;
+let _indexacaoIniciada = false;
 
 function getLLM() {
     if (!_llm) {
@@ -89,20 +107,25 @@ function getEmbeddings() {
     return _embeddings;
 }
 
-async function getMongoClient() {
-    if (!_mongoClient) {
-        const uri = process.env.MONGO_URI;
-        if (!uri) throw new Error('MONGO_URI nao configurada');
-        _mongoClient = new MongoClient(uri);
-        await _mongoClient.connect();
-    }
-    return _mongoClient;
+/**
+ * Cria MongoClient standalone (usado apenas pelo script CLI de indexacao).
+ * Para o pipeline normal, usar o `db` do Mongoose passado pelo controller.
+ */
+async function criarMongoClientStandalone() {
+    const uri = process.env.MONGO_URI;
+    if (!uri) throw new Error('MONGO_URI nao configurada');
+    const client = new MongoClient(uri);
+    await client.connect();
+    return client;
 }
 
-async function getVectorStore() {
+/**
+ * Retorna vector store usando a conexao db compartilhada.
+ * @param {Object} db - MongoDB database reference (mongoose.connection.db)
+ */
+function getVectorStore(db) {
     if (!_vectorStore) {
-        const client = await getMongoClient();
-        const collection = client.db().collection(CONFIG.collectionName);
+        const collection = db.collection(CONFIG.collectionName);
         _vectorStore = new MongoDBAtlasVectorSearch(getEmbeddings(), {
             collection,
             indexName: CONFIG.indexName,
@@ -200,13 +223,14 @@ function carregarDocsMarkdown() {
 
 /**
  * Indexa todos os documentos no MongoDB Atlas Vector Search.
- * @param {Object} options - { force: boolean, dryRun: boolean }
+ * @param {Object} options - { force: boolean, dryRun: boolean, db: Object }
+ *   db: se fornecido, usa essa conexao. Se nao, cria MongoClient standalone (CLI).
  * @returns {Object} { total, chunks, duracao }
  */
 async function indexarDocumentos(options = {}) {
-    const { force = false, dryRun = false } = options;
+    const { force = false, dryRun = false, db: dbParam = null } = options;
 
-    if (!isDisponivel()) {
+    if (!isLLMDisponivel()) {
         throw new Error('OPENAI_API_KEY nao configurada');
     }
 
@@ -242,42 +266,54 @@ async function indexarDocumentos(options = {}) {
         return { total: todosDocumentos.length, chunks: chunks.length, duracao: Date.now() - inicio, dryRun: true };
     }
 
-    // 3. Limpar collection se force
-    const client = await getMongoClient();
-    const collection = client.db().collection(CONFIG.collectionName);
-
-    if (force) {
-        const deleted = await collection.deleteMany({});
-        console.log(`${LOG_PREFIX} Collection limpa: ${deleted.deletedCount} docs removidos`);
+    // 3. Obter collection (usa db do Mongoose ou cria MongoClient standalone para CLI)
+    let standaloneClient = null;
+    let collection;
+    if (dbParam) {
+        collection = dbParam.collection(CONFIG.collectionName);
+    } else {
+        standaloneClient = await criarMongoClientStandalone();
+        collection = standaloneClient.db().collection(CONFIG.collectionName);
     }
 
-    // 4. Gerar embeddings e salvar
-    const embeddings = getEmbeddings();
-    const BATCH_SIZE = 20;
+    try {
+        if (force) {
+            const deleted = await collection.deleteMany({});
+            console.log(`${LOG_PREFIX} Collection limpa: ${deleted.deletedCount} docs removidos`);
+        }
 
-    for (let i = 0; i < chunks.length; i += BATCH_SIZE) {
-        const batch = chunks.slice(i, i + BATCH_SIZE);
-        const textos = batch.map(c => c.content);
-        const vetores = await embeddings.embedDocuments(textos);
+        // 4. Gerar embeddings e salvar
+        const embeddings = getEmbeddings();
+        const BATCH_SIZE = 20;
 
-        const documentos = batch.map((chunk, idx) => ({
-            content: chunk.content,
-            embedding: vetores[idx],
-            metadata: chunk.metadata,
-            indexadoEm: new Date(),
-        }));
+        for (let i = 0; i < chunks.length; i += BATCH_SIZE) {
+            const batch = chunks.slice(i, i + BATCH_SIZE);
+            const textos = batch.map(c => c.content);
+            const vetores = await embeddings.embedDocuments(textos);
 
-        await collection.insertMany(documentos);
-        console.log(`${LOG_PREFIX} Batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(chunks.length / BATCH_SIZE)} indexado`);
+            const documentos = batch.map((chunk, idx) => ({
+                content: chunk.content,
+                embedding: vetores[idx],
+                metadata: chunk.metadata,
+                indexadoEm: new Date(),
+            }));
+
+            await collection.insertMany(documentos);
+            console.log(`${LOG_PREFIX} Batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(chunks.length / BATCH_SIZE)} indexado`);
+        }
+
+        const duracao = Date.now() - inicio;
+        console.log(`${LOG_PREFIX} Indexacao concluida em ${duracao}ms. ${chunks.length} chunks salvos.`);
+
+        // Reset vector store para recarregar
+        _vectorStore = null;
+
+        return { total: todosDocumentos.length, chunks: chunks.length, duracao };
+    } finally {
+        if (standaloneClient) {
+            await standaloneClient.close().catch(() => {});
+        }
     }
-
-    const duracao = Date.now() - inicio;
-    console.log(`${LOG_PREFIX} Indexacao concluida em ${duracao}ms. ${chunks.length} chunks salvos.`);
-
-    // Reset vector store para recarregar
-    _vectorStore = null;
-
-    return { total: todosDocumentos.length, chunks: chunks.length, duracao };
 }
 
 // =====================================================================
@@ -706,22 +742,236 @@ async function buscarContextoDinamico(ligaId, db) {
 }
 
 // =====================================================================
+// MODO BASICO — Pattern matching (funciona sem LLM)
+// =====================================================================
+
+/**
+ * Mapa de keywords → secoes do contexto dinamico.
+ * Chave = regex pattern (case insensitive), valor = header da secao no contexto.
+ */
+const KEYWORD_SECOES = [
+    { pattern: /ranking\s*geral|classifica[cç][aã]o\s*geral|quem\s*lidera|primeiro\s*lugar/i, secao: 'RANKING GERAL', modulo: 'ranking_geral' },
+    { pattern: /ranking\s*(da\s*)?rodada|melhor\s*da\s*rodada|top\s*rodada/i, secao: 'RANKING RODADA', modulo: 'ranking_rodada' },
+    { pattern: /pontos?\s*corridos?|tabela|campeonato\s*pontos/i, secao: 'PONTOS CORRIDOS', modulo: 'pontos_corridos' },
+    { pattern: /mata[\s-]*mata|eliminat[oó]ria|bracket|chave(amento)?/i, secao: 'MATA-MATA', modulo: 'mata_mata' },
+    { pattern: /top\s*10|mito|mico|melhor\s*pontua/i, secao: 'TOP 10', modulo: 'top_10' },
+    { pattern: /melhor\s*m[eê]s/i, secao: 'MELHOR MES', modulo: 'melhor_mes' },
+    { pattern: /turno|returno|primeiro\s*turno|segundo\s*turno/i, secao: 'TURNO/RETURNO', modulo: 'turno_returno' },
+    { pattern: /artilheir[oa]|gol(s)?|goleador/i, secao: 'ARTILHEIRO', modulo: 'artilheiro' },
+    { pattern: /capit[aã]o|luxo/i, secao: 'CAPITAO DE LUXO', modulo: 'capitao_luxo' },
+    { pattern: /luva\s*(de\s*)?ouro|goleir[oa]/i, secao: 'LUVA DE OURO', modulo: 'luva_ouro' },
+    { pattern: /tiro\s*certo|palpite/i, secao: 'TIRO CERTO', modulo: 'tiro_certo' },
+    { pattern: /resta\s*um|eliminad[oa]|sobreviv|vivo/i, secao: 'RESTA UM', modulo: 'resta_um' },
+    { pattern: /rodada|mercado|aberto|fechado|quando\s*(abre|fecha)/i, secao: 'CONTEXTO ATUAL', modulo: null },
+    { pattern: /m[oó]dulo|ativo|desativado|quais\s*m[oó]dulos/i, secao: 'CONTEXTO ATUAL', modulo: null },
+    { pattern: /liga|participante|quantos|time/i, secao: 'CONTEXTO ATUAL', modulo: null },
+];
+
+/**
+ * Carrega regras de um modulo especifico para resposta legivel.
+ * @param {string} moduloId - ID do modulo (ex: 'ranking_geral', 'mata_mata')
+ * @returns {string} Texto legivel com nome, descricao e regras
+ */
+function carregarRegraModulo(moduloId) {
+    try {
+        const filePath = path.join(ROOT_DIR, 'config', 'rules', `${moduloId}.json`);
+        if (!fs.existsSync(filePath)) return '';
+
+        const conteudo = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+        const linhas = [];
+
+        linhas.push(`MODULO: ${conteudo.nome || moduloId}`);
+        if (conteudo.descricao) linhas.push(`Descricao: ${conteudo.descricao}`);
+
+        if (conteudo.regras) {
+            if (conteudo.regras.calculo) {
+                linhas.push(`Calculo: ${conteudo.regras.calculo.metodo || 'nao especificado'}`);
+            }
+            if (conteudo.regras.desempate?.criterios) {
+                linhas.push(`Desempate: ${conteudo.regras.desempate.criterios.join(', ')}`);
+            }
+            if (conteudo.regras.ordenacao) {
+                linhas.push(`Ordenacao: ${conteudo.regras.ordenacao.criterio_principal || ''} ${conteudo.regras.ordenacao.direcao || ''}`);
+            }
+        }
+
+        if (conteudo.wizard?.perguntas) {
+            linhas.push('Configuracoes:');
+            for (const p of conteudo.wizard.perguntas) {
+                linhas.push(`- ${p.label || p.campo}: ${p.descricao || p.help || ''}`);
+            }
+        }
+
+        return linhas.join('\n');
+    } catch (err) {
+        console.warn(`${LOG_PREFIX} Erro ao ler regra ${moduloId}: ${err.message}`);
+        return '';
+    }
+}
+
+/**
+ * Extrai secao relevante do contexto dinamico baseado em header.
+ * @param {string} contexto - Texto completo do contexto dinamico
+ * @param {string} secaoHeader - Header da secao (ex: 'RANKING GERAL')
+ * @returns {string} Secao extraida ou ''
+ */
+function extrairSecaoDoContexto(contexto, secaoHeader) {
+    if (secaoHeader === 'CONTEXTO ATUAL') {
+        // Retornar a parte geral do contexto (antes das secoes de modulos)
+        const primeiraSecao = contexto.indexOf('\n\n');
+        if (primeiraSecao === -1) return contexto;
+
+        // Pegar ate a primeira secao de modulo
+        const linhas = contexto.split('\n');
+        const secaoGeral = [];
+        for (const linha of linhas) {
+            // Secoes de modulos comecam com titulo em UPPERCASE seguido de ':'
+            if (secaoGeral.length > 0 && /^[A-Z][A-Z\s/()-]+:/.test(linha) && !linha.startsWith('CONTEXTO ATUAL')) {
+                break;
+            }
+            secaoGeral.push(linha);
+        }
+        return secaoGeral.join('\n');
+    }
+
+    // Buscar secao especifica
+    const idx = contexto.indexOf(secaoHeader);
+    if (idx === -1) return '';
+
+    // Pegar desde o header ate a proxima secao ou fim
+    const resto = contexto.substring(idx);
+    const linhas = resto.split('\n');
+    const resultado = [linhas[0]];
+
+    for (let i = 1; i < linhas.length; i++) {
+        const linha = linhas[i];
+        // Nova secao detectada (uppercase com :)
+        if (/^[A-Z][A-Z\s/()-]+:/.test(linha)) break;
+        resultado.push(linha);
+    }
+
+    return resultado.join('\n').trim();
+}
+
+/**
+ * Responde pergunta usando modo basico (sem LLM).
+ * Pattern matching + contexto dinamico + regras JSON.
+ * @param {string} pergunta
+ * @param {string} ligaId
+ * @param {Object} db
+ * @returns {Object} { resposta, fontes }
+ */
+async function responderSemLLM(pergunta, ligaId, db) {
+    const perguntaLower = pergunta.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // remover acentos para matching
+
+    // 1. Buscar contexto dinamico
+    const contextoDinamico = await buscarContextoDinamico(ligaId, db);
+
+    // 2. Detectar intencao via keyword matching
+    const matches = KEYWORD_SECOES.filter(ks => ks.pattern.test(perguntaLower));
+
+    if (matches.length === 0) {
+        // Sem match — verificar se e uma pergunta sobre regras genericas
+        const perguntaSobreRegras = /regra|como\s*funciona|o\s*que\s*[eé]/i.test(pergunta);
+        if (perguntaSobreRegras) {
+            // Tentar identificar qual modulo pela pergunta
+            const modulos = carregarRegrasJSON();
+            const moduloMatch = modulos.find(m => {
+                const nome = (m.metadata.modulo || '').toLowerCase();
+                return perguntaLower.includes(nome.replace(/_/g, ' '));
+            });
+
+            if (moduloMatch) {
+                return {
+                    resposta: moduloMatch.content,
+                    fontes: [moduloMatch.metadata.source],
+                };
+            }
+        }
+
+        // Fallback: mostrar contexto geral + topicos disponiveis
+        const contextoGeral = extrairSecaoDoContexto(contextoDinamico, 'CONTEXTO ATUAL');
+        return {
+            resposta: `${contextoGeral}\n\nPosso responder sobre: Ranking Geral, Ranking da Rodada, Pontos Corridos, Mata-Mata, Top 10, Melhor Mes, Turno/Returno, Artilheiro, Capitao de Luxo, Luva de Ouro, Tiro Certo, Resta Um, rodada atual e modulos ativos.`,
+            fontes: [],
+        };
+    }
+
+    // 3. Montar resposta com secoes relevantes
+    const partes = [];
+    const fontes = [];
+
+    for (const match of matches) {
+        // Extrair dados live do contexto dinamico
+        const secaoLive = extrairSecaoDoContexto(contextoDinamico, match.secao);
+        if (secaoLive) {
+            partes.push(secaoLive);
+        }
+
+        // Carregar regras do modulo se existir e a pergunta pedir sobre regras/funcionamento
+        if (match.modulo && /regra|como\s*funciona|o\s*que\s*[eé]|explica/i.test(pergunta)) {
+            const regraTexto = carregarRegraModulo(match.modulo);
+            if (regraTexto) {
+                partes.push(`\n${regraTexto}`);
+                fontes.push(`config/rules/${match.modulo}.json`);
+            }
+        }
+    }
+
+    if (partes.length === 0) {
+        // Match nos keywords mas sem dados disponiveis
+        const contextoGeral = extrairSecaoDoContexto(contextoDinamico, 'CONTEXTO ATUAL');
+        return {
+            resposta: `${contextoGeral}\n\nNao encontrei dados especificos para sua pergunta. O modulo pode nao estar ativo nesta liga.`,
+            fontes: [],
+        };
+    }
+
+    return {
+        resposta: partes.join('\n\n'),
+        fontes,
+    };
+}
+
+/**
+ * Carrega regras relevantes como contexto textual para o LLM (Tier 2 fallback).
+ * @param {string} pergunta
+ * @returns {string|null} Texto das regras relevantes ou null
+ */
+function carregarRegrasComoContexto(pergunta) {
+    const perguntaLower = pergunta.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+    const matches = KEYWORD_SECOES.filter(ks => ks.pattern.test(perguntaLower) && ks.modulo);
+    if (matches.length === 0) return null;
+
+    const textos = [];
+    for (const match of matches) {
+        const regra = carregarRegraModulo(match.modulo);
+        if (regra) textos.push(regra);
+    }
+
+    return textos.length > 0 ? textos.join('\n\n---\n\n') : null;
+}
+
+// =====================================================================
 // PIPELINE RAG — PERGUNTAR
 // =====================================================================
 
 /**
- * Responde uma pergunta usando RAG (vector search + contexto dinamico + LLM).
+ * Responde uma pergunta com fallback em 3 tiers:
+ *   Tier 1 (basico): pattern matching + contexto dinamico (sem LLM)
+ *   Tier 2 (llm sem RAG): contexto dinamico + regras diretas + LLM
+ *   Tier 3 (llm + RAG): contexto dinamico + vector search + LLM
+ *
  * @param {string} pergunta - Pergunta do usuario
  * @param {string} ligaId - ID da liga (multi-tenant)
  * @param {Object} db - MongoDB database reference
- * @returns {Object} { resposta, fontes, cached }
+ * @returns {Object} { resposta, fontes, cached, modo }
  */
 async function perguntarBot(pergunta, ligaId, db) {
-    if (!isDisponivel()) {
-        return { resposta: 'O Big Cartola IA nao esta disponivel no momento (chave de API nao configurada).', fontes: [], cached: false };
-    }
-
-    // Cache check
+    // Cache check (funciona para todos os modos)
     const cacheKey = `rag_${crypto.createHash('md5').update(`${pergunta}_${ligaId}`).digest('hex')}`;
     const cached = cache.get(cacheKey);
     if (cached) {
@@ -729,29 +979,68 @@ async function perguntarBot(pergunta, ligaId, db) {
         return { ...cached, cached: true };
     }
 
+    const modo = getModoDisponivel();
+    const inicio = Date.now();
+
+    // TIER 1: Modo basico (sem LLM)
+    if (modo === 'basico') {
+        console.log(`${LOG_PREFIX} [BASICO] Processando: "${pergunta.substring(0, 80)}..."`);
+        try {
+            const resultado = await responderSemLLM(pergunta, ligaId, db);
+            cache.set(cacheKey, resultado);
+            console.log(`${LOG_PREFIX} [BASICO] Resposta gerada em ${Date.now() - inicio}ms`);
+            return { ...resultado, cached: false, modo: 'basico' };
+        } catch (error) {
+            console.error(`${LOG_PREFIX} [BASICO] Erro: ${error.message}`);
+            return { resposta: 'Desculpe, ocorreu um erro ao buscar os dados. Tente novamente.', fontes: [], cached: false, modo: 'basico' };
+        }
+    }
+
+    // TIER 2/3: Modo LLM
     try {
-        console.log(`${LOG_PREFIX} Processando pergunta: "${pergunta.substring(0, 80)}..."`);
+        console.log(`${LOG_PREFIX} [LLM] Processando: "${pergunta.substring(0, 80)}..."`);
+
+        // Auto-indexacao lazy: na primeira pergunta, verificar se knowledge base esta vazia
+        if (!_indexacaoIniciada) {
+            _indexacaoIniciada = true;
+            try {
+                const totalChunks = await db.collection(CONFIG.collectionName).countDocuments();
+                if (totalChunks === 0) {
+                    console.log(`${LOG_PREFIX} Knowledge base vazia. Disparando indexacao em background...`);
+                    indexarDocumentos({ force: false, db }).catch(err => {
+                        console.warn(`${LOG_PREFIX} Auto-indexacao falhou: ${err.message}`);
+                    });
+                }
+            } catch (err) {
+                console.warn(`${LOG_PREFIX} Erro ao verificar knowledge base: ${err.message}`);
+            }
+        }
 
         // 1. Buscar contexto dinamico
         const contextoDinamico = await buscarContextoDinamico(ligaId, db);
 
-        // 2. Vector search — buscar chunks relevantes
+        // 2. Vector search — tentar buscar chunks relevantes (Tier 3)
         let chunksRelevantes = [];
         let fontes = [];
         try {
-            const vectorStore = await getVectorStore();
+            const vectorStore = getVectorStore(db);
             const resultados = await vectorStore.similaritySearch(pergunta, CONFIG.topK());
             chunksRelevantes = resultados.map(r => r.pageContent);
             fontes = [...new Set(resultados.map(r => r.metadata?.source).filter(Boolean))];
         } catch (vectorError) {
-            console.warn(`${LOG_PREFIX} Vector search falhou (index pode nao existir): ${vectorError.message}`);
-            // Continuar sem RAG — responde apenas com contexto dinamico
+            console.warn(`${LOG_PREFIX} Vector search indisponivel: ${vectorError.message}`);
+            // Tier 2 fallback: carregar regras diretamente como contexto
+            const regrasTexto = carregarRegrasComoContexto(pergunta);
+            if (regrasTexto) {
+                chunksRelevantes = [regrasTexto];
+                fontes = ['config/rules (carregamento direto)'];
+            }
         }
 
         // 3. Montar prompt
         const contextChunks = chunksRelevantes.length > 0
-            ? `\n\nDOCUMENTOS RELEVANTES:\n${chunksRelevantes.join('\n\n---\n\n')}`
-            : '\n\n(Nenhum documento relevante encontrado na base de conhecimento)';
+            ? `\n\nDOCUMENTOS DE REGRAS:\n${chunksRelevantes.join('\n\n---\n\n')}`
+            : '';
 
         const mensagens = [
             { role: 'system', content: `${SYSTEM_PROMPT}\n\n${contextoDinamico}${contextChunks}` },
@@ -768,12 +1057,21 @@ async function perguntarBot(pergunta, ligaId, db) {
         // 5. Cachear
         cache.set(cacheKey, resultado);
 
-        console.log(`${LOG_PREFIX} Resposta gerada (${textoResposta.length} chars, ${fontes.length} fontes)`);
-        return { ...resultado, cached: false };
+        const tier = chunksRelevantes.length > 0 && fontes.some(f => !f.includes('carregamento direto')) ? 3 : 2;
+        console.log(`${LOG_PREFIX} [LLM Tier ${tier}] Resposta gerada em ${Date.now() - inicio}ms (${textoResposta.length} chars, ${fontes.length} fontes)`);
+        return { ...resultado, cached: false, modo: `llm-tier${tier}` };
 
     } catch (error) {
-        console.error(`${LOG_PREFIX} Erro no pipeline RAG: ${error.message}`);
-        return { resposta: 'Desculpe, ocorreu um erro ao processar sua pergunta. Tente novamente.', fontes: [], cached: false };
+        // LLM falhou: fallback para modo basico
+        console.error(`${LOG_PREFIX} [LLM] Erro, fallback para basico: ${error.message}`);
+        try {
+            const resultado = await responderSemLLM(pergunta, ligaId, db);
+            cache.set(cacheKey, resultado);
+            return { ...resultado, cached: false, modo: 'basico-fallback' };
+        } catch (fallbackError) {
+            console.error(`${LOG_PREFIX} [BASICO-FALLBACK] Erro: ${fallbackError.message}`);
+            return { resposta: 'Desculpe, ocorreu um erro ao processar sua pergunta. Tente novamente.', fontes: [], cached: false, modo: 'erro' };
+        }
     }
 }
 
@@ -781,28 +1079,32 @@ async function perguntarBot(pergunta, ligaId, db) {
 // STATUS & UTILIDADES
 // =====================================================================
 
-async function getStatus() {
-    const disponivel = isDisponivel();
+/**
+ * Retorna status do chatbot.
+ * @param {Object} [db] - MongoDB database reference (opcional para modo basico)
+ */
+async function getStatus(db) {
+    const modo = getModoDisponivel();
     let indexado = false;
     let totalChunks = 0;
 
-    if (disponivel) {
+    if (modo === 'llm' && db) {
         try {
-            const client = await getMongoClient();
-            const collection = client.db().collection(CONFIG.collectionName);
+            const collection = db.collection(CONFIG.collectionName);
             totalChunks = await collection.countDocuments();
             indexado = totalChunks > 0;
-        } catch {
-            // Collection pode nao existir ainda
+        } catch (err) {
+            console.warn(`${LOG_PREFIX} Erro ao verificar chunks: ${err.message}`);
         }
     }
 
     return {
-        disponivel,
+        disponivel: true,
+        modo,
         indexado,
         totalChunks,
-        modelo: CONFIG.model(),
-        embeddingModel: CONFIG.embeddingModel(),
+        modelo: modo === 'llm' ? CONFIG.model() : 'local',
+        embeddingModel: modo === 'llm' ? CONFIG.embeddingModel() : null,
     };
 }
 
@@ -813,6 +1115,8 @@ function limparCache() {
 
 export default {
     isDisponivel,
+    isLLMDisponivel,
+    getModoDisponivel,
     indexarDocumentos,
     perguntarBot,
     buscarContextoDinamico,

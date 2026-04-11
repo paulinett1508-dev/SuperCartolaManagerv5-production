@@ -1,4 +1,4 @@
-<!-- BIG CARTOLA IA — Chatbot RAG v1.0 -->
+<!-- BIG CARTOLA IA — Chatbot v2.0 -->
 <div id="chatbot-container" class="chatbot-container">
 
     <!-- Header Strip -->
@@ -8,6 +8,9 @@
             <h1 class="chatbot-header-title">Big Cartola IA</h1>
             <p class="chatbot-header-status" id="chatbot-status">Pronto para ajudar</p>
         </div>
+        <button id="chatbot-clear" class="chatbot-clear-btn" aria-label="Limpar historico" title="Limpar historico">
+            <span class="material-icons">delete_sweep</span>
+        </button>
     </div>
 
     <!-- Mensagens -->
@@ -17,14 +20,14 @@
             <span class="material-icons chatbot-msg-avatar">smart_toy</span>
             <div class="chatbot-msg-content">
                 <p>Ola! Sou o Big Cartola IA, seu assistente do Super Cartola Manager.</p>
-                <p>Pergunte sobre regras, modulos, financeiro, rankings e mais.</p>
+                <p>Pergunte sobre rankings, modulos ativos, regras, rodada atual e mais.</p>
             </div>
         </div>
     </div>
 
     <!-- Sugestoes rapidas -->
     <div class="chatbot-suggestions" id="chatbot-suggestions">
-        <button class="chatbot-suggestion-chip" data-pergunta="Como funciona o ranking geral?">Ranking Geral</button>
+        <button class="chatbot-suggestion-chip" data-pergunta="Quem lidera o ranking geral?">Ranking Geral</button>
         <button class="chatbot-suggestion-chip" data-pergunta="Como funciona o mata-mata?">Mata-Mata</button>
         <button class="chatbot-suggestion-chip" data-pergunta="Quais modulos estao ativos na minha liga?">Modulos Ativos</button>
         <button class="chatbot-suggestion-chip" data-pergunta="Em qual rodada estamos?">Rodada Atual</button>
