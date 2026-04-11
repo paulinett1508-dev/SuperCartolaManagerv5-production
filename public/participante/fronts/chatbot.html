@@ -1,4 +1,4 @@
-<!-- BIG CARTOLA IA — Chatbot v2.0 -->
+<!-- BIG CARTOLA IA — Chatbot v3.0 -->
 <div id="chatbot-container" class="chatbot-container">
 
     <!-- Header Strip -->
@@ -8,21 +8,33 @@
             <h1 class="chatbot-header-title">Big Cartola IA</h1>
             <p class="chatbot-header-status" id="chatbot-status">Pronto para ajudar</p>
         </div>
-        <button id="chatbot-clear" class="chatbot-clear-btn" aria-label="Limpar historico" title="Limpar historico">
+        <button id="chatbot-conversations" class="chatbot-icon-btn" aria-label="Ver conversas" title="Ver conversas">
+            <span class="material-icons">forum</span>
+        </button>
+        <button id="chatbot-new" class="chatbot-icon-btn" aria-label="Nova conversa" title="Nova conversa">
+            <span class="material-icons">add_comment</span>
+        </button>
+        <button id="chatbot-clear" class="chatbot-icon-btn" aria-label="Limpar conversa" title="Limpar conversa">
             <span class="material-icons">delete_sweep</span>
         </button>
     </div>
 
+    <!-- Painel lateral de conversas -->
+    <div class="chatbot-conversations-panel" id="chatbot-conversations-panel" style="display:none">
+        <div class="chatbot-conv-panel-header">
+            <span class="chatbot-conv-panel-title">Conversas</span>
+            <button id="chatbot-conv-close" class="chatbot-icon-btn" aria-label="Fechar" title="Fechar">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+        <div id="chatbot-conv-list" class="chatbot-conv-list">
+            <!-- Renderizado via JS -->
+        </div>
+    </div>
+
     <!-- Mensagens -->
     <div class="chatbot-messages" id="chatbot-messages">
-        <!-- Mensagem de boas-vindas -->
-        <div class="chatbot-msg chatbot-msg-bot">
-            <span class="material-icons chatbot-msg-avatar">smart_toy</span>
-            <div class="chatbot-msg-content">
-                <p>Ola! Sou o Big Cartola IA, seu assistente do Super Cartola Manager.</p>
-                <p>Pergunte sobre rankings, modulos ativos, regras, rodada atual e mais.</p>
-            </div>
-        </div>
+        <!-- Mensagem de boas-vindas (renderizada via JS) -->
     </div>
 
     <!-- Sugestoes rapidas -->

@@ -21,7 +21,7 @@ export async function perguntarChatbot(req, res) {
             return res.status(401).json({ success: false, error: 'Sessao invalida', needsLogin: true });
         }
 
-        const { pergunta } = req.body;
+        const { pergunta, historico } = req.body;
         const ligaId = req.session.participante.ligaId;
 
         // Validar input
@@ -38,11 +38,19 @@ export async function perguntarChatbot(req, res) {
             return res.status(400).json({ success: false, error: 'Liga nao identificada na sessao' });
         }
 
+        // Validar histórico de conversa (últimas 10 msgs, sanitizadas)
+        const historicoValidado = Array.isArray(historico)
+            ? historico
+                .slice(-10)
+                .filter(m => m && typeof m.tipo === 'string' && typeof m.texto === 'string')
+                .map(m => ({ tipo: m.tipo, texto: m.texto.substring(0, 500) }))
+            : [];
+
         // Obter referencia ao database nativo
         const db = mongoose.connection.db;
 
         // Chamar pipeline
-        const resultado = await ragChatbotService.perguntarBot(perguntaLimpa, ligaId, db);
+        const resultado = await ragChatbotService.perguntarBot(perguntaLimpa, ligaId, db, historicoValidado);
 
         const duracao = Date.now() - inicio;
         console.log(`${LOG_PREFIX} Resposta em ${duracao}ms | modo=${resultado.modo || '?'} | cached=${resultado.cached} | liga=${ligaId}`);

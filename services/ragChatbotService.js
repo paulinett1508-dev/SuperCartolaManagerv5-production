@@ -733,24 +733,23 @@ async function buscarContextoDinamico(ligaId, db) {
             `- Modulos ativos: ${modulosAtivos}`,
         ];
 
-        // Contexto especifico de modulos ativos — chamadas em paralelo
-        // NOTA: modulos_ativos usa nomenclatura mista (camelCase legado + snake_case novo)
-        // Ex: DB tem "pontosCorridos" mas tambem pode ter "pontos_corridos" — aceitar ambos
-        const ma = liga.modulos_ativos || {};
+        // Contexto completo: todos os helpers sempre, independente de modulos_ativos
+        // O LLM filtra o que é relevante; helpers sem dados retornam '' silenciosamente
+        const ma = liga.modulos_ativos || {}; // mantido para log
         const moduloHelpers = [
-            (ma.ranking_geral   || ma.ranking)         && buscarContextoRankingGeral(ligaId, temporada, db),
-            (ma.ranking_rodada  || ma.rodadas)         && buscarContextoRankingRodada(ligaId, rodadaAtualNum, temporada, db),
-            (ma.pontos_corridos || ma.pontosCorridos)  && buscarContextoPontosCorridos(ligaId, temporada, db),
-            (ma.mata_mata       || ma.mataMata)        && buscarContextoMataMata(ligaId, rodadaAtualNum, temporada, db),
-            (ma.top_10          || ma.top10)           && buscarContextoTop10(ligaId, temporada, db),
-            (ma.melhor_mes      || ma.melhorMes)       && buscarContextoMelhorMes(ligaId, temporada, db),
-            (ma.turno_returno   || ma.turnoReturno)    && buscarContextoTurnoReturno(ligaId, temporada, db),
-            ma.artilheiro                              && buscarContextoArtilheiro(ligaId, temporada, db),
-            (ma.capitao_luxo    || ma.capitaoLuxo)     && buscarContextoCapitaoLuxo(ligaId, temporada, db),
-            (ma.luva_ouro       || ma.luvaOuro)        && buscarContextoLuvaOuro(ligaId, temporada, db),
-            (ma.tiro_certo      || ma.tiroCerto)       && buscarContextoTiroCerto(ligaId, temporada, db),
-            (ma.resta_um        || ma.restaUm)         && buscarContextoRestaUm(ligaId, temporada, db),
-        ].filter(Boolean);
+            buscarContextoRankingGeral(ligaId, temporada, db),
+            buscarContextoRankingRodada(ligaId, rodadaAtualNum, temporada, db),
+            buscarContextoPontosCorridos(ligaId, temporada, db),
+            buscarContextoMataMata(ligaId, rodadaAtualNum, temporada, db),
+            buscarContextoTop10(ligaId, temporada, db),
+            buscarContextoMelhorMes(ligaId, temporada, db),
+            buscarContextoTurnoReturno(ligaId, temporada, db),
+            buscarContextoArtilheiro(ligaId, temporada, db),
+            buscarContextoCapitaoLuxo(ligaId, temporada, db),
+            buscarContextoLuvaOuro(ligaId, temporada, db),
+            buscarContextoTiroCerto(ligaId, temporada, db),
+            buscarContextoRestaUm(ligaId, temporada, db),
+        ];
 
         if (moduloHelpers.length > 0) {
             const resultados = await Promise.allSettled(moduloHelpers);
@@ -1000,9 +999,12 @@ function carregarRegrasComoContexto(pergunta) {
  * @param {Object} db - MongoDB database reference
  * @returns {Object} { resposta, fontes, cached, modo }
  */
-async function perguntarBot(pergunta, ligaId, db) {
-    // Cache check (funciona para todos os modos)
-    const cacheKey = `rag_${crypto.createHash('md5').update(`${pergunta}_${ligaId}`).digest('hex')}`;
+async function perguntarBot(pergunta, ligaId, db, historico = []) {
+    // Cache key inclui hash das últimas 2 msgs do histórico para diferenciar follow-ups
+    const histHash = historico.length > 0
+        ? historico.slice(-2).map(m => `${(m.tipo || '')[0]}:${(m.texto || '').substring(0, 40)}`).join('|')
+        : '';
+    const cacheKey = `rag_${crypto.createHash('md5').update(`${pergunta}_${ligaId}_${histHash}`).digest('hex')}`;
     const cached = cache.get(cacheKey);
     if (cached) {
         console.log(`${LOG_PREFIX} Cache hit para: "${pergunta.substring(0, 50)}..."`);
@@ -1026,26 +1028,7 @@ async function perguntarBot(pergunta, ligaId, db) {
         }
     }
 
-    // TIER 1.5: Tentar modo basico PRIMEIRO mesmo com LLM disponivel
-    // Perguntas com keyword match + dados live → resposta direta sem gastar LLM
-    try {
-        const perguntaNorm = pergunta.toLowerCase()
-            .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-        const temKeywordMatch = KEYWORD_SECOES.some(ks => ks.pattern.test(perguntaNorm));
-
-        if (temKeywordMatch) {
-            const resultadoBasico = await responderSemLLM(pergunta, ligaId, db);
-            if (resultadoBasico.resposta && !resultadoBasico.resposta.includes('Nao encontrei dados especificos')) {
-                cache.set(cacheKey, resultadoBasico);
-                console.log(`${LOG_PREFIX} [BASICO-PRIORITARIO] Resposta direta em ${Date.now() - inicio}ms`);
-                return { ...resultadoBasico, cached: false, modo: 'basico' };
-            }
-        }
-    } catch (err) {
-        console.warn(`${LOG_PREFIX} [BASICO-PRIORITARIO] Falhou, continuando para LLM: ${err.message}`);
-    }
-
-    // TIER 2/3: Modo LLM (perguntas sem keyword match ou sem dados no basico)
+    // MODO LLM: contexto dinâmico completo + RAG + histórico de conversa
     try {
         console.log(`${LOG_PREFIX} [LLM] Processando: "${pergunta.substring(0, 80)}..."`);
 
@@ -1091,8 +1074,18 @@ async function perguntarBot(pergunta, ligaId, db) {
             ? `\n\nDOCUMENTOS DE REGRAS:\n${chunksRelevantes.join('\n\n---\n\n')}`
             : '';
 
+        // Injetar histórico da conversa (últimas 6 msgs = 3 pares Q&A)
+        const MAX_HIST_LLM = 6;
+        const mensagensHistorico = historico
+            .slice(-MAX_HIST_LLM)
+            .map(m => ({
+                role: m.tipo === 'user' ? 'user' : 'assistant',
+                content: String(m.texto || ''),
+            }));
+
         const mensagens = [
             { role: 'system', content: `${SYSTEM_PROMPT}\n\n${contextoDinamico}${contextChunks}` },
+            ...mensagensHistorico,
             { role: 'user', content: pergunta },
         ];
 
