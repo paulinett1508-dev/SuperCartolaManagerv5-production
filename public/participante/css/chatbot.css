@@ -185,7 +185,7 @@
 
 /* Sugestoes rapidas */
 .chatbot-suggestions {
-    display: flex;
+    display: none;
     gap: 8px;
     padding: 8px 16px;
     overflow-x: auto;

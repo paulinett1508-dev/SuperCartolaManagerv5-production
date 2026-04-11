@@ -996,7 +996,26 @@ async function perguntarBot(pergunta, ligaId, db) {
         }
     }
 
-    // TIER 2/3: Modo LLM
+    // TIER 1.5: Tentar modo basico PRIMEIRO mesmo com LLM disponivel
+    // Perguntas com keyword match + dados live → resposta direta sem gastar LLM
+    try {
+        const perguntaNorm = pergunta.toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        const temKeywordMatch = KEYWORD_SECOES.some(ks => ks.pattern.test(perguntaNorm));
+
+        if (temKeywordMatch) {
+            const resultadoBasico = await responderSemLLM(pergunta, ligaId, db);
+            if (resultadoBasico.resposta && !resultadoBasico.resposta.includes('Nao encontrei dados especificos')) {
+                cache.set(cacheKey, resultadoBasico);
+                console.log(`${LOG_PREFIX} [BASICO-PRIORITARIO] Resposta direta em ${Date.now() - inicio}ms`);
+                return { ...resultadoBasico, cached: false, modo: 'basico' };
+            }
+        }
+    } catch (err) {
+        console.warn(`${LOG_PREFIX} [BASICO-PRIORITARIO] Falhou, continuando para LLM: ${err.message}`);
+    }
+
+    // TIER 2/3: Modo LLM (perguntas sem keyword match ou sem dados no basico)
     try {
         console.log(`${LOG_PREFIX} [LLM] Processando: "${pergunta.substring(0, 80)}..."`);
 
