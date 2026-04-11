@@ -43,7 +43,7 @@ const SYSTEM_PROMPT = `Voce e o Big Cartola IA, assistente oficial do Super Cart
 Responda com base nos DADOS DA LIGA (contexto dinamico em tempo real) e nos DOCUMENTOS DE REGRAS fornecidos.
 Os dados da liga (rankings, rodada, modulos) sao dados REAIS e atualizados — use-os com confianca para responder sobre estado atual.
 Os documentos de regras descrevem como cada modulo funciona — use-os para perguntas sobre regras e funcionamento.
-Se a pergunta nao pode ser respondida com nenhum dos contextos, diga: "Nao encontrei essa informacao. Tente perguntar de outra forma."
+Se houver dados parciais, use-os para dar a melhor resposta possivel. Somente diga que nao encontrou a informacao se realmente nao houver nenhum dado relevante no contexto.
 Responda sempre em portugues brasileiro, de forma clara e objetiva.
 Nao invente informacoes. Nao responda sobre assuntos fora do Super Cartola Manager.
 Use formatacao simples (sem markdown complexo). Seja conciso.`;
@@ -349,17 +349,19 @@ const _FASE_LABEL = {
  */
 async function buscarContextoMataMata(ligaId, rodadaAtual, temporada, db) {
     try {
-        const { ObjectId } = await import('mongodb');
+        // moduleconfigs.liga_id e string (nao ObjectId) — nao usar new ObjectId()
         const config = await db.collection('moduleconfigs').findOne(
-            { liga_id: new ObjectId(ligaId), modulo: 'mata_mata', temporada },
-            { projection: { calendario_override: 1, regras_override: 1 } }
+            { liga_id: String(ligaId), modulo: 'mata_mata', temporada },
+            { projection: { calendario_override: 1, regras_override: 1, wizard_respostas: 1 } }
         );
 
         if (!config || !Array.isArray(config.calendario_override) || config.calendario_override.length === 0) {
             return '';
         }
 
-        const totalTimes = config.regras_override?.total_times || 16;
+        const totalTimes = config.regras_override?.total_times
+            || parseInt(config.wizard_respostas?.total_times, 10)
+            || 16;
         const fases = _getFasesMataMata(totalTimes);
 
         const linhas = [`MATA-MATA (${totalTimes} times, ${fases.length} fases):`];
@@ -392,10 +394,10 @@ async function buscarContextoMataMata(ligaId, rodadaAtual, temporada, db) {
 
 async function buscarContextoRankingGeral(ligaId, temporada, db) {
     try {
-        const { ObjectId } = await import('mongodb');
+        // rankinggeralcaches.ligaId e string (nao ObjectId) — nao usar new ObjectId()
         const cache = await db.collection('rankinggeralcaches').findOne(
-            { ligaId: new ObjectId(ligaId), temporada },
-            { projection: { ranking: { $slice: 3 }, rodadaFinal: 1 } }
+            { ligaId: String(ligaId), temporada },
+            { projection: { ranking: { $slice: 3 }, rodadaFinal: 1 }, sort: { rodadaFinal: -1 } }
         );
         if (!cache || !Array.isArray(cache.ranking) || cache.ranking.length === 0) return '';
 
@@ -427,9 +429,11 @@ async function buscarContextoRankingRodada(ligaId, rodadaAtual, temporada, db) {
 
 async function buscarContextoPontosCorridos(ligaId, temporada, db) {
     try {
+        const { ObjectId } = await import('mongodb');
+        // pontoscorridoscaches.liga_id e ObjectId
         const cache = await db.collection('pontoscorridoscaches').findOne(
-            { liga_id: ligaId, temporada },
-            { projection: { classificacao: { $slice: 3 }, rodada_consolidada: 1 } }
+            { liga_id: new ObjectId(ligaId), temporada },
+            { projection: { classificacao: { $slice: 3 }, rodada_consolidada: 1 }, sort: { rodada_consolidada: -1 } }
         );
         if (!cache || !Array.isArray(cache.classificacao) || cache.classificacao.length === 0) return '';
 
@@ -464,9 +468,9 @@ async function buscarContextoTop10(ligaId, temporada, db) {
 
 async function buscarContextoMelhorMes(ligaId, temporada, db) {
     try {
-        const { ObjectId } = await import('mongodb');
+        // melhor_mes_cache.ligaId e string (nao ObjectId) — nao usar new ObjectId()
         const cache = await db.collection('melhor_mes_cache').findOne(
-            { ligaId: new ObjectId(ligaId), temporada },
+            { ligaId: String(ligaId), temporada },
             { projection: { edicoes: 1 } }
         );
         if (!cache || !Array.isArray(cache.edicoes) || cache.edicoes.length === 0) return '';
@@ -486,9 +490,9 @@ async function buscarContextoMelhorMes(ligaId, temporada, db) {
 
 async function buscarContextoTurnoReturno(ligaId, temporada, db) {
     try {
-        const { ObjectId } = await import('mongodb');
+        // rankingturnos.ligaId e string (nao ObjectId) — nao usar new ObjectId()
         const turnos = await db.collection('rankingturnos').find(
-            { ligaId: new ObjectId(ligaId), temporada, turno: { $in: ['1', '2'] } },
+            { ligaId: String(ligaId), temporada, turno: { $in: ['1', '2'] } },
             { projection: { turno: 1, status: 1, rodada_inicio: 1, rodada_fim: 1, ranking: { $slice: 1 } } }
         ).toArray();
 
