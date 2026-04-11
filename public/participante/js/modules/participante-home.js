@@ -250,14 +250,22 @@ async function carregarDadosERenderizar(ligaId, timeId, participante) {
         }
     }
 
-    // Se nao tem cache, mostrar loading
+    // Se nao tem cache, mostrar loading overlay SEM destruir a estrutura do home.html
+    // ⚠️ FIX: container.innerHTML=<spinner> apagava todos os getElementById de renderizarHome,
+    // causando spinner eterno na primeira visita (cache miss). Overlay absoluto preserva o DOM.
     if (!liga || !ranking?.length) {
-        container.innerHTML = `
-            <div class="flex flex-col items-center justify-center min-h-[300px] py-16">
-                <div class="w-10 h-10 border-4 border-zinc-700 border-t-orange-500 rounded-full animate-spin mb-4"></div>
-                <p class="text-sm text-gray-400">Carregando...</p>
-            </div>
-        `;
+        const overlay = document.createElement('div');
+        overlay.id = 'home-loading-overlay';
+        overlay.style.cssText = 'position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:300px;padding:64px 0;background:var(--app-bg,#0f0f0f)';
+        const spinner = document.createElement('div');
+        spinner.style.cssText = 'width:40px;height:40px;border:4px solid #3f3f46;border-top-color:#f97316;border-radius:50%;animation:spin 0.8s linear infinite';
+        const label = document.createElement('p');
+        label.style.cssText = 'font-size:0.875rem;color:#9ca3af;margin-top:16px';
+        label.textContent = 'Carregando...';
+        overlay.appendChild(spinner);
+        overlay.appendChild(label);
+        container.style.position = 'relative';
+        container.appendChild(overlay);
     }
 
     // Buscar dados frescos da API
@@ -342,6 +350,8 @@ async function carregarDadosERenderizar(ligaId, timeId, participante) {
         const dadosFresh = processarDadosParaRender(
             ligaFresh, rankingFresh, rodadasFresh, extratoFresh, meuTimeIdNum, participante
         );
+        // Remover overlay de loading (cache miss) antes de atualizar os elementos
+        document.getElementById('home-loading-overlay')?.remove();
         renderizarHome(container, dadosFresh, ligaId);
 
         // Guardar saldo original para cálculos parciais
@@ -354,13 +364,21 @@ async function carregarDadosERenderizar(ligaId, timeId, participante) {
 
     } catch (error) {
         if (window.Log) Log.error("PARTICIPANTE-HOME", "Erro:", error);
+        // Remover overlay independente de ter cache ou não
+        document.getElementById('home-loading-overlay')?.remove();
         if (!liga || !ranking?.length) {
-            container.innerHTML = `
-                <div class="text-center py-16 px-5">
-                    <span class="material-icons text-5xl text-red-500">error</span>
-                    <p class="text-white/70 mt-4">Erro ao carregar dados</p>
-                </div>
-            `;
+            const errDiv = document.createElement('div');
+            errDiv.style.cssText = 'text-align:center;padding:64px 20px';
+            const icon = document.createElement('span');
+            icon.className = 'material-icons';
+            icon.style.cssText = 'font-size:3rem;color:#ef4444';
+            icon.textContent = 'error';
+            const msg = document.createElement('p');
+            msg.style.cssText = 'color:rgba(255,255,255,0.7);margin-top:16px';
+            msg.textContent = 'Erro ao carregar dados';
+            errDiv.appendChild(icon);
+            errDiv.appendChild(msg);
+            container.appendChild(errDiv);
         }
     }
 
