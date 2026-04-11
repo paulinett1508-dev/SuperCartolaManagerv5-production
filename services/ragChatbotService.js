@@ -716,12 +716,35 @@ async function buscarContextoDinamico(ligaId, db) {
             }
         }
 
-        const modulosAtivos = liga.modulos_ativos
+        const MODULO_NOMES = {
+            extrato: 'Extrato Financeiro',
+            ranking: 'Ranking Geral',
+            rodadas: 'Histórico de Rodadas',
+            historico: 'Histórico',
+            top10: 'Top 10 Cartoleiros',
+            melhorMes: 'Melhor Mês',
+            pontosCorridos: 'Pontos Corridos',
+            mataMata: 'Mata-Mata',
+            artilheiro: 'Artilheiro',
+            luvaOuro: 'Luva de Ouro',
+            capitaoLuxo: 'Capitão de Luxo',
+            campinho: 'Campinho',
+            dicas: 'Dicas',
+            raioX: 'Raio-X',
+            tiroCerto: 'Tiro Certo',
+            participantes: 'Lista de Participantes',
+            premiacoes: 'Premiações',
+            regras: 'Regras',
+            cartolaPro: 'Cartola Pro',
+        };
+        const modulosAtivosArr = liga.modulos_ativos
             ? Object.entries(liga.modulos_ativos)
                 .filter(([, v]) => v === true)
-                .map(([k]) => k)
-                .join(', ')
-            : 'nao definidos';
+                .map(([k]) => MODULO_NOMES[k] || k)
+            : [];
+        const modulosAtivos = modulosAtivosArr.length
+            ? `${modulosAtivosArr.length} módulos: ${modulosAtivosArr.join(', ')}`
+            : 'nenhum módulo ativo';
 
         const qtdParticipantes = Array.isArray(liga.participantes)
             ? liga.participantes.filter(p => p.ativo !== false).length
@@ -734,7 +757,7 @@ async function buscarContextoDinamico(ligaId, db) {
             `- ${rodadaInfo || 'Rodada: nao identificada'}`,
             `- ${mercadoStatus || 'Mercado: status nao disponivel'}`,
             `- Participantes ativos: ${qtdParticipantes}`,
-            `- Modulos ativos: ${modulosAtivos}`,
+            `- Módulos ativos nesta liga (${modulosAtivosArr.length} no total): ${modulosAtivos}`,
         ];
 
         // Contexto completo: todos os helpers sempre, independente de modulos_ativos
