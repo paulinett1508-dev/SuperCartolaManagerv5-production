@@ -90,6 +90,19 @@ export async function getRankingCapitaoLive(req, res) {
     const rankingLive = await Promise.all(
       cacheRanking.map(async (cached) => {
         const capitaoVivo = await buscarCapitaoRodada(cached.timeId, rodadaAtual, pontuadosMap);
+
+        // Montar historico_rodadas: consolidado (sem a rodada atual, se já existir) + rodada atual
+        const historicoAtualizado = (cached.historico_rodadas || []).filter(h => h.rodada !== rodadaAtual);
+        if (capitaoVivo.capitao_id) {
+          historicoAtualizado.push({
+            rodada: rodadaAtual,
+            atleta_nome: capitaoVivo.capitao_nome,
+            pontuacao: capitaoVivo.pontuacao,
+            parcial: true,
+            jogou: capitaoVivo.jogou,
+          });
+        }
+
         return {
           timeId: cached.timeId,
           nome_cartola: cached.nome_cartola,
@@ -101,6 +114,9 @@ export async function getRankingCapitaoLive(req, res) {
           capitao_jogou: capitaoVivo.jogou,
           pontuacao_total: truncarPontosNum(cached.pontuacao_total + capitaoVivo.pontuacao),
           media_capitao: cached.media_capitao,
+          rodadas_jogadas: cached.rodadas_jogadas,
+          melhor_capitao: cached.melhor_capitao,
+          historico_rodadas: historicoAtualizado,
         };
       })
     );
