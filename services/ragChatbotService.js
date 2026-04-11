@@ -731,10 +731,13 @@ async function buscarContextoDinamico(ligaId, db) {
             const resultados = await Promise.allSettled(moduloHelpers);
             for (const r of resultados) {
                 if (r.status === 'fulfilled' && r.value) linhas.push('', r.value);
+                if (r.status === 'rejected') console.warn(`${LOG_PREFIX} Helper falhou: ${r.reason?.message || r.reason}`);
             }
         }
 
-        return linhas.join('\n');
+        const contexto = linhas.join('\n');
+        console.log(`${LOG_PREFIX} [CONTEXTO] liga=${ligaId} | temporada=${temporada} | modulos=[${Object.entries(ma).filter(([,v])=>v).map(([k])=>k).join(',')}] | helpers=${moduloHelpers.length} | tamanho=${contexto.length}chars`);
+        return contexto;
     } catch (error) {
         console.warn(`${LOG_PREFIX} Erro ao buscar contexto dinamico: ${error.message}`);
         return 'Contexto dinamico indisponivel.';
@@ -909,8 +912,8 @@ async function responderSemLLM(pergunta, ligaId, db) {
             partes.push(secaoLive);
         }
 
-        // Carregar regras do modulo se existir e a pergunta pedir sobre regras/funcionamento
-        if (match.modulo && /regra|como\s*funciona|o\s*que\s*[eé]|explica/i.test(pergunta)) {
+        // Carregar regras do modulo: sempre que pediu sobre regras OU quando nao ha dados live
+        if (match.modulo && (/regra|como\s*funciona|o\s*que\s*[eé]|explica/i.test(pergunta) || !secaoLive)) {
             const regraTexto = carregarRegraModulo(match.modulo);
             if (regraTexto) {
                 partes.push(`\n${regraTexto}`);
@@ -920,7 +923,7 @@ async function responderSemLLM(pergunta, ligaId, db) {
     }
 
     if (partes.length === 0) {
-        // Match nos keywords mas sem dados disponiveis
+        // Match nos keywords mas sem dados disponiveis nem regras
         const contextoGeral = extrairSecaoDoContexto(contextoDinamico, 'CONTEXTO ATUAL');
         return {
             resposta: `${contextoGeral}\n\nNao encontrei dados especificos para sua pergunta. O modulo pode nao estar ativo nesta liga.`,

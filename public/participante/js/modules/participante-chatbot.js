@@ -29,6 +29,13 @@ export async function inicializarChatbotParticipante(payload) {
         return;
     }
 
+    // Esconder bottom nav — chatbot ocupa tela inteira
+    const bottomNav = document.querySelector('.bottom-nav');
+    if (bottomNav) bottomNav.style.display = 'none';
+    // Ajustar altura do container (sem bottom nav = tela inteira)
+    container.style.height = '100vh';
+    container.style.maxHeight = '100dvh';
+
     // Capturar liga do payload (para isolar historico por liga)
     _ligaId = payload?.ligaId || payload?.participante?.ligaId || null;
 
@@ -400,5 +407,12 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// Restaurar bottom nav ao sair do chatbot
+function destruirChatbotParticipante() {
+    const bottomNav = document.querySelector('.bottom-nav');
+    if (bottomNav) bottomNav.style.display = '';
+}
+
 // Exportar para o sistema de navegacao
 window.inicializarChatbotParticipante = inicializarChatbotParticipante;
+window.destruirChatbotParticipante = destruirChatbotParticipante;
