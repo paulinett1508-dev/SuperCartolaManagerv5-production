@@ -421,6 +421,13 @@
     color: var(--app-warning);
 }
 
+/* Input desabilitado (durante cooldown de rate limit) */
+.chatbot-input:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    border-color: var(--app-border);
+}
+
 /* Light mode */
 [data-theme="light"] .chatbot-msg-content {
     color: var(--app-text-primary, #1a1a1a);

@@ -11,18 +11,47 @@
 const LOG_TAG = 'PARTICIPANTE-CHATBOT';
 const API_URL = '/api/chatbot/ask';
 const API_STATUS_URL = '/api/chatbot/status';
+const API_MODULOS_URL = (ligaId) => `/api/liga/${ligaId}/modulos`;
 const MAX_HISTORICO = 50;
 const MAX_CONVERSAS = 20;
 const HISTORICO_LLM = 6;        // msgs enviadas ao LLM por request
 const DIAS_LIMPAR_ANTIGAS = 30;
-const FETCH_TIMEOUT = 20000;
+const FETCH_TIMEOUT = 30000;    // tool calling pode levar mais tempo
 const STORAGE_KEY_V2 = 'scm_chatbot_v2';
+
+// Sugestoes padrao por modulo. So aparecem se o modulo estiver ativo.
+// Chaves: mesmas do modulos_ativos no Liga.
+const SUGESTOES_POR_MODULO = {
+    pontosCorridos: [
+        { rotulo: 'Minha disputa', pergunta: 'Como esta minha disputa no Pontos Corridos?' },
+        { rotulo: 'Meu proximo jogo', pergunta: 'Contra quem estou jogando no Pontos Corridos?' },
+    ],
+    ranking: [
+        { rotulo: 'Minha posicao', pergunta: 'Qual minha posicao no ranking geral?' },
+    ],
+    extrato: [
+        { rotulo: 'Meu saldo', pergunta: 'Qual meu saldo financeiro na liga?' },
+    ],
+    turnoReturno: [
+        { rotulo: 'Meu turno', pergunta: 'Como estou no turno?' },
+    ],
+    restaUm: [
+        { rotulo: 'Resta Um', pergunta: 'Estou vivo no Resta Um?' },
+    ],
+};
+
+// Sugestoes sempre presentes.
+const SUGESTOES_UNIVERSAIS = [
+    { rotulo: 'Rodada atual', pergunta: 'Em qual rodada estamos e o mercado esta aberto?' },
+    { rotulo: 'Modulos ativos', pergunta: 'Quais modulos estao ativos na minha liga?' },
+];
 
 let conversas = [];
 let conversaAtualId = null;
 let mensagens = [];
 let enviando = false;
 let _ligaId = null;
+let _cooldownAtivo = null; // { ateEpochMs, intervalId }
 
 // =====================================================================
 // STORAGE
@@ -296,9 +325,11 @@ export async function inicializarChatbotParticipante(payload) {
         const d = statusData.data || {};
         const statusEl = document.getElementById('chatbot-status');
         if (statusEl) {
-            if (d.modo === 'basico') statusEl.textContent = 'Modo basico — dados da liga em tempo real';
-            else if (d.modo === 'llm') statusEl.textContent = d.totalChunks > 0 ? `IA ativa | ${d.totalChunks} docs indexados` : 'IA ativa';
-            else statusEl.textContent = 'Pronto para ajudar';
+            if (d.modo === 'indisponivel' || d.disponivel === false) {
+                mostrarIndisponivel(container);
+                return;
+            }
+            statusEl.textContent = 'Pronto para ajudar';
         }
     } catch { /* Status check falhou — continuar */ }
 
@@ -315,12 +346,18 @@ export async function inicializarChatbotParticipante(payload) {
         input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarPergunta(); } });
     }
 
-    document.querySelectorAll('.chatbot-suggestion-chip').forEach(chip => {
-        chip.addEventListener('click', () => {
-            const pergunta = chip.dataset.pergunta;
-            if (pergunta && input) { input.value = pergunta; enviarPergunta(); }
+    // Popular sugestoes dinamicamente baseado nos modulos ativos da liga
+    await popularSugestoesDinamicas();
+
+    const registrarHandlerChips = () => {
+        document.querySelectorAll('.chatbot-suggestion-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                const pergunta = chip.dataset.pergunta;
+                if (pergunta && input) { input.value = pergunta; enviarPergunta(); }
+            });
         });
-    });
+    };
+    registrarHandlerChips();
 
     if (btnConvs)  btnConvs.addEventListener('click', () => abrirPainelConversas());
     if (btnNova)   btnNova.addEventListener('click', () => criarNovaConversa());
@@ -332,11 +369,120 @@ export async function inicializarChatbotParticipante(payload) {
 }
 
 // =====================================================================
+// SUGESTOES DINAMICAS (baseadas nos modulos ativos da liga)
+// =====================================================================
+
+async function popularSugestoesDinamicas() {
+    const container = document.getElementById('chatbot-suggestions');
+    if (!container) return;
+
+    container.textContent = '';
+
+    const sugestoes = [...SUGESTOES_UNIVERSAIS];
+
+    if (_ligaId) {
+        try {
+            const resp = await fetchComTimeout(API_MODULOS_URL(_ligaId), { method: 'GET' }, 4000);
+            if (resp.ok) {
+                const data = await resp.json();
+                // Endpoint real retorna: { sucesso, modulos: [{ id, ativo, ... }] }
+                const listaMod = Array.isArray(data?.modulos) ? data.modulos
+                               : Array.isArray(data?.data?.modulos) ? data.data.modulos
+                               : [];
+
+                // Map id -> chave camelCase usada em SUGESTOES_POR_MODULO
+                const MAP_ID = {
+                    pontos_corridos: 'pontosCorridos',
+                    ranking_geral: 'ranking',
+                    extrato_financeiro: 'extrato',
+                    extrato: 'extrato',
+                    turno_returno: 'turnoReturno',
+                    resta_um: 'restaUm',
+                };
+
+                for (const m of listaMod) {
+                    if (m?.ativo !== true) continue;
+                    const chave = MAP_ID[m.id] || m.id;
+                    const lista = SUGESTOES_POR_MODULO[chave];
+                    if (Array.isArray(lista)) sugestoes.push(...lista);
+                }
+            }
+        } catch { /* fallback silencioso */ }
+    }
+
+    // Deduplicar por pergunta (preservando ordem)
+    const vistas = new Set();
+    const unicas = sugestoes.filter(s => {
+        if (vistas.has(s.pergunta)) return false;
+        vistas.add(s.pergunta);
+        return true;
+    });
+
+    for (const s of unicas.slice(0, 6)) {
+        const btn = document.createElement('button');
+        btn.className = 'chatbot-suggestion-chip';
+        btn.dataset.pergunta = s.pergunta;
+        btn.textContent = s.rotulo;
+        container.appendChild(btn);
+    }
+}
+
+// =====================================================================
+// COOLDOWN UI (bloqueio temporario apos rate limit 429)
+// =====================================================================
+
+function iniciarCooldown(segundos) {
+    const ateMs = Date.now() + segundos * 1000;
+
+    // Parar countdown anterior se houver
+    if (_cooldownAtivo?.intervalId) clearInterval(_cooldownAtivo.intervalId);
+
+    const input = document.getElementById('chatbot-input');
+    const btn = document.getElementById('chatbot-send');
+    const status = document.getElementById('chatbot-status');
+
+    if (input) input.disabled = true;
+    if (btn) btn.disabled = true;
+
+    const tick = () => {
+        const restantes = Math.max(0, Math.ceil((ateMs - Date.now()) / 1000));
+        if (restantes <= 0) {
+            encerrarCooldown();
+            return;
+        }
+        if (status) status.textContent = `Aguardando liberacao... ${restantes}s`;
+        if (input) input.placeholder = `Aguarde ${restantes}s para perguntar novamente`;
+    };
+
+    tick();
+    const intervalId = setInterval(tick, 1000);
+    _cooldownAtivo = { ateEpochMs: ateMs, intervalId };
+}
+
+function encerrarCooldown() {
+    if (_cooldownAtivo?.intervalId) clearInterval(_cooldownAtivo.intervalId);
+    _cooldownAtivo = null;
+
+    const input = document.getElementById('chatbot-input');
+    const btn = document.getElementById('chatbot-send');
+    const status = document.getElementById('chatbot-status');
+
+    if (input) {
+        input.disabled = false;
+        input.placeholder = 'Pergunte algo sobre o app...';
+        input.focus();
+    }
+    if (btn) btn.disabled = false;
+    if (status) status.textContent = 'Pronto para ajudar';
+}
+
+// =====================================================================
 // ENVIAR PERGUNTA
 // =====================================================================
 
 async function enviarPergunta() {
     if (enviando) return;
+    if (_cooldownAtivo && Date.now() < _cooldownAtivo.ateEpochMs) return;
 
     const input    = document.getElementById('chatbot-input');
     const pergunta = input?.value?.trim();
@@ -370,8 +516,24 @@ async function enviarPergunta() {
         removerDigitando(typingId);
 
         if (!resp.ok) {
-            const msg = resp.status === 429 ? 'Voce fez muitas perguntas. Aguarde 1 minuto e tente novamente.'
-                      : resp.status === 401 ? 'Sua sessao expirou. Faca login novamente.'
+            // Tratamento especial do 429: extrair cooldownSegundos e iniciar countdown
+            if (resp.status === 429) {
+                let cooldownSegundos = 120;
+                try {
+                    const j = await resp.json();
+                    if (j?.cooldownSegundos && Number.isFinite(j.cooldownSegundos)) {
+                        cooldownSegundos = Number(j.cooldownSegundos);
+                    }
+                    const msg = j?.error || `Voce fez 5 perguntas muito rapido. Aguarde ${cooldownSegundos}s.`;
+                    adicionarMensagem('bot', msg, [], true);
+                } catch {
+                    adicionarMensagem('bot', `Voce fez 5 perguntas muito rapido. Aguarde ${cooldownSegundos}s.`, [], true);
+                }
+                iniciarCooldown(cooldownSegundos);
+                return;
+            }
+
+            const msg = resp.status === 401 ? 'Sua sessao expirou. Faca login novamente.'
                       : 'Desculpe, ocorreu um erro. Tente novamente.';
             adicionarMensagem('bot', msg, [], true);
             return;
@@ -379,7 +541,11 @@ async function enviarPergunta() {
 
         const data = await resp.json();
         if (data.success && data.data) {
-            adicionarMensagem('bot', data.data.resposta, data.data.fontes || []);
+            // toolsUsadas = [{ name, ok }]. Renderiza como chips discretos.
+            const fontes = Array.isArray(data.data.toolsUsadas)
+                ? data.data.toolsUsadas.filter(t => t.ok !== false).map(t => t.name)
+                : (data.data.fontes || []);
+            adicionarMensagem('bot', data.data.resposta, fontes);
         } else {
             adicionarMensagem('bot', data.error || 'Erro ao processar resposta.', [], true);
         }
@@ -448,15 +614,18 @@ function _appendMensagem(container, tipo, texto, fontes = [], isError = false) {
         contentEl.appendChild(p);
     }
 
-    // Chips de fonte (nomes de arquivos do servidor — via textContent)
+    // Chips de fonte (tool names / arquivos — via textContent)
     if (fontes.length > 0) {
         const fontesDiv = document.createElement('div');
         fontesDiv.className = 'chatbot-msg-fontes';
         for (const f of fontes) {
-            const nome = f.split('/').pop().replace(/\.(json|md)$/, '');
+            const bruto = String(f).split('/').pop().replace(/\.(json|md)$/, '');
+            const legivel = bruto
+                .replace(/_/g, ' ')
+                .replace(/^\w/, c => c.toUpperCase());
             const chip = document.createElement('span');
             chip.className = 'chatbot-fonte-chip';
-            chip.textContent = nome;
+            chip.textContent = legivel;
             fontesDiv.appendChild(chip);
         }
         contentEl.appendChild(fontesDiv);
