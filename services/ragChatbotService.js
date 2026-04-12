@@ -40,13 +40,15 @@ const CONFIG = {
 };
 
 const SYSTEM_PROMPT = `Voce e o Big Cartola IA, assistente oficial do Super Cartola Manager.
-Responda com base nos DADOS DA LIGA (contexto dinamico em tempo real) e nos DOCUMENTOS DE REGRAS fornecidos.
-Os dados da liga (rankings, rodada, modulos) sao dados REAIS e atualizados — use-os com confianca para responder sobre estado atual.
-Os documentos de regras descrevem como cada modulo funciona — use-os para perguntas sobre regras e funcionamento.
-Se houver dados parciais, use-os para dar a melhor resposta possivel. Somente diga que nao encontrou a informacao se realmente nao houver nenhum dado relevante no contexto.
-Responda sempre em portugues brasileiro, de forma clara e objetiva.
-Nao invente informacoes. Nao responda sobre assuntos fora do Super Cartola Manager.
-Use formatacao simples (sem markdown complexo). Seja conciso.`;
+
+REGRAS DE RESPOSTA:
+1. Os DADOS DA LIGA abaixo sao dados REAIS desta liga especifica — use-os como fonte primaria e definitiva.
+2. Os DOCUMENTOS DE REGRAS descrevem como cada modulo funciona — use-os para perguntas sobre regras.
+3. Quando perguntarem sobre modulos ("quais modulos", "quantos modulos", "o sistema tem"): use EXATAMENTE a lista de "Modulos ativos nesta liga" fornecida no contexto. Nao use conhecimento geral nem invente modulos que nao estejam na lista.
+4. Se houver dados parciais, use-os para a melhor resposta possivel. So diga "nao encontrei" se realmente nao houver nenhum dado relevante.
+5. Responda sempre em portugues brasileiro, de forma clara e objetiva.
+6. Nao invente informacoes nem responda sobre assuntos fora do Super Cartola Manager.
+7. Use formatacao simples (sem markdown complexo). Seja conciso.`;
 
 // =====================================================================
 // VERIFICAR DISPONIBILIDADE
@@ -134,6 +136,38 @@ function getVectorStore(db) {
         });
     }
     return _vectorStore;
+}
+
+/**
+ * Busca chunks por cosine similarity manual — fallback quando o Atlas Search index
+ * nao existe. Usa os embeddings ja armazenados na collection rag_embeddings.
+ * @param {string} pergunta - Pergunta do usuario
+ * @param {Object} db - MongoDB database reference
+ * @param {number} topK - Numero de chunks a retornar
+ * @returns {Promise<Array<{content: string, source: string, score: number}>>}
+ */
+async function buscarChunksPorEmbedding(pergunta, db, topK) {
+    const embeds = getEmbeddings();
+    const queryVec = await embeds.embedQuery(pergunta);
+    const docs = await db.collection(CONFIG.collectionName)
+        .find({}, { projection: { content: 1, 'metadata.source': 1, embedding: 1 } })
+        .toArray();
+
+    const cosine = (a, b) => {
+        let dot = 0, na = 0, nb = 0;
+        for (let i = 0; i < a.length; i++) {
+            dot += a[i] * b[i];
+            na += a[i] * a[i];
+            nb += b[i] * b[i];
+        }
+        return dot / (Math.sqrt(na) * Math.sqrt(nb));
+    };
+
+    return docs
+        .filter(d => Array.isArray(d.embedding) && d.embedding.length > 0)
+        .map(d => ({ content: d.content, source: d.metadata?.source, score: cosine(queryVec, d.embedding) }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, topK);
 }
 
 // =====================================================================
@@ -1087,12 +1121,23 @@ async function perguntarBot(pergunta, ligaId, db, historico = []) {
             chunksRelevantes = resultados.map(r => r.pageContent);
             fontes = [...new Set(resultados.map(r => r.metadata?.source).filter(Boolean))];
         } catch (vectorError) {
-            console.warn(`${LOG_PREFIX} Vector search indisponivel: ${vectorError.message}`);
-            // Tier 2 fallback: carregar regras diretamente como contexto
-            const regrasTexto = carregarRegrasComoContexto(pergunta);
-            if (regrasTexto) {
-                chunksRelevantes = [regrasTexto];
-                fontes = ['config/rules (carregamento direto)'];
+            console.warn(`${LOG_PREFIX} Vector search indisponivel: ${vectorError.message}. Tentando cosine similarity...`);
+            // Tier 2.5: cosine similarity manual usando embeddings armazenados
+            try {
+                const resultados = await buscarChunksPorEmbedding(pergunta, db, CONFIG.topK());
+                if (resultados.length > 0) {
+                    chunksRelevantes = resultados.map(r => r.content);
+                    fontes = [...new Set(resultados.map(r => r.source).filter(Boolean))];
+                    console.log(`${LOG_PREFIX} Cosine similarity: ${resultados.length} chunks (score max: ${resultados[0]?.score?.toFixed(3)})`);
+                }
+            } catch (cosineError) {
+                console.warn(`${LOG_PREFIX} Cosine fallback falhou: ${cosineError.message}`);
+                // Tier 2: carregar regras diretamente como contexto (keyword fallback)
+                const regrasTexto = carregarRegrasComoContexto(pergunta);
+                if (regrasTexto) {
+                    chunksRelevantes = [regrasTexto];
+                    fontes = ['config/rules (carregamento direto)'];
+                }
             }
         }
 

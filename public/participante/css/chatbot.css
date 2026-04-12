@@ -23,6 +23,10 @@
     min-height: 56px;
     background: var(--app-surface);
     border-bottom: 2px solid var(--app-purple);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    flex-shrink: 0;
 }
 
 .chatbot-header-icon {
