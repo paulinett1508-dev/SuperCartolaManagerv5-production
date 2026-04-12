@@ -37,13 +37,8 @@
         <!-- Mensagem de boas-vindas (renderizada via JS) -->
     </div>
 
-    <!-- Sugestoes rapidas -->
-    <div class="chatbot-suggestions" id="chatbot-suggestions">
-        <button class="chatbot-suggestion-chip" data-pergunta="Quem lidera o ranking geral?">Ranking Geral</button>
-        <button class="chatbot-suggestion-chip" data-pergunta="Como funciona o mata-mata?">Mata-Mata</button>
-        <button class="chatbot-suggestion-chip" data-pergunta="Quais modulos estao ativos na minha liga?">Modulos Ativos</button>
-        <button class="chatbot-suggestion-chip" data-pergunta="Em qual rodada estamos?">Rodada Atual</button>
-    </div>
+    <!-- Sugestoes rapidas (populadas dinamicamente via JS baseado nos modulos ativos da liga) -->
+    <div class="chatbot-suggestions" id="chatbot-suggestions"></div>
 
     <!-- Input area -->
     <div class="chatbot-input-area">
