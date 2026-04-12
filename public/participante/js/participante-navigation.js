@@ -549,7 +549,7 @@ class ParticipanteNavigation {
      */
     _isModuloOpcionalInativo(moduloId) {
         // Módulos de sistema/base: sempre permitidos (inclui sub-módulos como rodada-xray)
-        const modulosPermitidos = ['home', 'boas-vindas', 'extrato', 'ranking', 'rodadas', 'rodada-xray', 'historico', 'configuracoes', 'copa-times-sc', 'copa-2026-mundo', 'regras', 'libertadores', 'copa-brasil', 'copa-nordeste', 'info-meu-time', 'agenda-tabelas', 'brasileirao', 'jogos-do-dia'];
+        const modulosPermitidos = ['home', 'boas-vindas', 'extrato', 'ranking', 'rodadas', 'rodada-xray', 'historico', 'configuracoes', 'copa-times-sc', 'copa-2026-mundo', 'regras', 'libertadores', 'copa-brasil', 'copa-nordeste', 'info-meu-time', 'agenda-tabelas', 'brasileirao', 'jogos-do-dia', 'chatbot'];
         if (modulosPermitidos.includes(moduloId)) return false;
 
         // Sem dados de módulos carregados: permitir (graceful degradation)
