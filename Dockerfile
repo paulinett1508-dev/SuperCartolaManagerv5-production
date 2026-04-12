@@ -16,7 +16,7 @@ WORKDIR /app
 FROM base AS deps
 
 COPY package.json package-lock.json* ./
-RUN npm ci --production=false
+RUN npm ci --production=false --legacy-peer-deps
 
 # ===========================
 # Stage 2: Build (TailwindCSS)
