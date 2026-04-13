@@ -637,14 +637,19 @@ export const obterRodadas = async (req, res) => {
       logger.log(`[OBTER-RODADAS] Retornando: ${rodadasComTotal.length} rodadas (SuperCartola - posições recalculadas)`);
       // ✅ v4.0: Cache HTTP — rodadas consolidadas mudam pouco (5min cache)
       res.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
-      // cacheHint para o frontend
-      const { buildCacheHint, getMercadoContext } = await import('../utils/cache-hint.js');
-      const ctx = await getMercadoContext();
-      const fimNum = parseInt(fim) || ctx.rodadaAtual;
-      const todasConsolidadas = fimNum < ctx.rodadaAtual && ctx.statusMercado === 1;
-      const cacheHint = todasConsolidadas
-        ? buildCacheHint({ rodada: fimNum, ...ctx, temporada: filtro.temporada })
-        : buildCacheHint({ rodada: ctx.rodadaAtual, ...ctx, temporada: filtro.temporada });
+      // cacheHint para o frontend (não-bloqueante — falha não impede resposta)
+      let cacheHint = null;
+      try {
+        const { buildCacheHint, getMercadoContext } = await import('../utils/cache-hint.js');
+        const ctx = await getMercadoContext();
+        const fimNum = parseInt(fim) || ctx.rodadaAtual;
+        const todasConsolidadas = fimNum < ctx.rodadaAtual && ctx.statusMercado === 1;
+        cacheHint = todasConsolidadas
+          ? buildCacheHint({ rodada: fimNum, ...ctx, temporada: filtro.temporada })
+          : buildCacheHint({ rodada: ctx.rodadaAtual, ...ctx, temporada: filtro.temporada });
+      } catch (hintErr) {
+        logger.warn('[OBTER-RODADAS] cache-hint falhou (não-bloqueante):', hintErr.message);
+      }
       return res.json({ rodadas: rodadasComTotal, cacheHint });
     }
 
@@ -737,14 +742,19 @@ export const obterRodadas = async (req, res) => {
 
     // ✅ v4.0: Cache HTTP — rodadas consolidadas mudam pouco (5min cache)
     res.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
-    // cacheHint para o frontend
-    const { buildCacheHint: buildHint2, getMercadoContext: getCtx2 } = await import('../utils/cache-hint.js');
-    const ctx2 = await getCtx2();
-    const fimNum2 = parseInt(fim) || ctx2.rodadaAtual;
-    const todasConsolidadas2 = fimNum2 < ctx2.rodadaAtual && ctx2.statusMercado === 1;
-    const cacheHint2 = todasConsolidadas2
-      ? buildHint2({ rodada: fimNum2, ...ctx2, temporada: filtro.temporada })
-      : buildHint2({ rodada: ctx2.rodadaAtual, ...ctx2, temporada: filtro.temporada });
+    // cacheHint para o frontend (não-bloqueante — falha não impede resposta)
+    let cacheHint2 = null;
+    try {
+      const { buildCacheHint: buildHint2, getMercadoContext: getCtx2 } = await import('../utils/cache-hint.js');
+      const ctx2 = await getCtx2();
+      const fimNum2 = parseInt(fim) || ctx2.rodadaAtual;
+      const todasConsolidadas2 = fimNum2 < ctx2.rodadaAtual && ctx2.statusMercado === 1;
+      cacheHint2 = todasConsolidadas2
+        ? buildHint2({ rodada: fimNum2, ...ctx2, temporada: filtro.temporada })
+        : buildHint2({ rodada: ctx2.rodadaAtual, ...ctx2, temporada: filtro.temporada });
+    } catch (hintErr) {
+      logger.warn('[OBTER-RODADAS] cache-hint falhou (não-bloqueante):', hintErr.message);
+    }
     res.json({ rodadas: rodadasProcessadas, cacheHint: cacheHint2 });
   } catch (error) {
     logger.error("[OBTER-RODADAS] Erro:", error);
