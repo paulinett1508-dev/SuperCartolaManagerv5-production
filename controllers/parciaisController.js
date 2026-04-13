@@ -114,12 +114,13 @@ function calcularPontuacao(dadosEscalacao, atletasPontuados, time) {
   });
 
   // ── FASE 2: Mapear ausentes por posição ──
-  // Usa entrou_em_campo_real (=== true estrito) em vez do flag conservador:
-  // null/undefined = jogo não iniciado → tratado como ausente para fins de substituição,
-  // espelhando o comportamento oficial do Cartola FC.
+  // Titular é ausente quando NÃO confirmou entrou_em_campo_real E tem pontos = 0.
+  // Guardar pontos === 0 evita dupla-contagem: se titular pontuou mas entrou_em_campo
+  // ainda é null (API atrasada), ele JÁ foi contabilizado na Fase 1 e não pode ser
+  // substituído ao mesmo tempo.
   const ausentesPorPosicao = {};
   titularesProcessados.forEach((t) => {
-    if (!t.entrou_em_campo_real) {
+    if (!t.entrou_em_campo_real && t.pontos === 0) {
       if (!ausentesPorPosicao[t.posicao_id]) ausentesPorPosicao[t.posicao_id] = [];
       ausentesPorPosicao[t.posicao_id].push(t);
     }

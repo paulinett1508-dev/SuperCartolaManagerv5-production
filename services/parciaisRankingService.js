@@ -164,10 +164,12 @@ function calcularPontuacaoTime(escalacao, atletasPontuados) {
     }
 
     // ── FASE 2: Mapear ausentes por posição ──
-    // Usa entrou_em_campo_real (=== true estrito): null/undefined → ausente para substituição.
+    // Titular é ausente quando NÃO confirmou entrou_em_campo_real E tem pontos = 0.
+    // Guard pontos === 0 evita dupla-contagem: titular que pontuou mas ainda sem
+    // entrou_em_campo confirmado (API lag) já foi contabilizado na Fase 1.
     const ausentesPorPosicao = {};
     for (const t of titularesProcessados) {
-        if (!t.entrou_em_campo_real) {
+        if (!t.entrou_em_campo_real && t.pontos === 0) {
             if (!ausentesPorPosicao[t.posicao_id]) ausentesPorPosicao[t.posicao_id] = [];
             ausentesPorPosicao[t.posicao_id].push(t);
         }
