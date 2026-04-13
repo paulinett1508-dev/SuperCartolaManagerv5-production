@@ -360,7 +360,8 @@
       "Bash(mkdir -p C:/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/dead-code-auditor/references)",
       "Bash(cp C:/PROJETOS/SuperCartolaManagerv5-production/.agnostic-core/skills/audit/dead-code-auditor/SKILL.md C:/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/dead-code-auditor/SKILL.md)",
       "Bash(cp C:/PROJETOS/SuperCartolaManagerv5-production/.agnostic-core/skills/audit/dead-code-auditor/references/commands.md C:/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/dead-code-auditor/references/commands.md)",
-      "Bash(cp C:/PROJETOS/SuperCartolaManagerv5-production/.agnostic-core/skills/audit/dead-code-auditor/references/checklist.md C:/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/dead-code-auditor/references/checklist.md)"
+      "Bash(cp C:/PROJETOS/SuperCartolaManagerv5-production/.agnostic-core/skills/audit/dead-code-auditor/references/checklist.md C:/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/dead-code-auditor/references/checklist.md)",
+      "Bash(npm ls:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
