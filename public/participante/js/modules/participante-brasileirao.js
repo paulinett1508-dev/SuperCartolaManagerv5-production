@@ -294,6 +294,9 @@ function _buildStatusBadge(j) {
     if (j.status === 'encerrado') {
         return `<span class="brasileirao-badge brasileirao-badge--enc">Encerrado</span>`;
     }
+    if (j.status === 'adiado' || j.status === 'cancelado' || j.status === 'suspendido') {
+        return `<span class="brasileirao-badge brasileirao-badge--adiado">ADIADO</span>`;
+    }
     // agendado / a_definir
     return `<span class="brasileirao-badge brasileirao-badge--agd">${escapeHtml(j.horario || 'A definir')}</span>`;
 }

@@ -11,54 +11,22 @@
     </button>
 
     <!-- ═══════════════════════════════════════════════════
-         HERO / COUNTDOWN
+         HERO
          ═══════════════════════════════════════════════════ -->
     <section class="liberta-hero">
         <!-- Accent bar verde → dourado -->
         <div class="liberta-flag-accent"></div>
 
         <div class="liberta-hero-content">
-            <!-- Troféu -->
             <div class="liberta-hero-trophy"><span class="material-icons">emoji_events</span></div>
-
             <h1 class="liberta-hero-title">Libertadores</h1>
             <p class="liberta-hero-subtitle">2026</p>
             <p class="liberta-hero-local">CONMEBOL Libertadores da América</p>
-
-            <!-- Status dinâmico da fase atual -->
-            <div id="liberta-hero-status" class="liberta-hero-status"></div>
-
-            <p class="liberta-hero-info">
-                <span class="material-icons">stadium</span>
-                Final: 28 Nov · Estádio Centenário, Montevidéu
-            </p>
         </div>
     </section>
 
     <!-- ═══════════════════════════════════════════════════
-         STATS STRIP — Formato da competição
-         ═══════════════════════════════════════════════════ -->
-    <div class="liberta-stats-strip liberta-stats-strip--4col">
-        <div class="liberta-stat-item">
-            <span class="liberta-stat-value">32</span>
-            <span class="liberta-stat-label">Clubes</span>
-        </div>
-        <div class="liberta-stat-item">
-            <span class="liberta-stat-value">10</span>
-            <span class="liberta-stat-label">Países</span>
-        </div>
-        <div class="liberta-stat-item">
-            <span class="liberta-stat-value">8</span>
-            <span class="liberta-stat-label">Grupos</span>
-        </div>
-        <div class="liberta-stat-item liberta-stat-item--highlight">
-            <span class="liberta-stat-value">6</span>
-            <span class="liberta-stat-label">Times BR</span>
-        </div>
-    </div>
-
-    <!-- ═══════════════════════════════════════════════════
-         GRUPOS — Sorteio 19/Mar/2026
+         GRUPOS (collapsible)
          ═══════════════════════════════════════════════════ -->
     <section class="liberta-section">
         <button class="liberta-section-header liberta-grupos-toggle" id="liberta-grupos-toggle" aria-expanded="false" aria-controls="liberta-grupos-body">
@@ -85,37 +53,6 @@
         </div>
         <div id="liberta-jogos-container" class="liberta-jogos-container">
             <div class="liberta-loading-placeholder">Carregando jogos...</div>
-        </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════════════════
-         NOTÍCIAS
-         ═══════════════════════════════════════════════════ -->
-    <section class="liberta-section">
-        <div class="liberta-section-header">
-            <span class="liberta-section-icon"><span class="material-icons">newspaper</span></span>
-            <h2 class="liberta-section-title">Notícias</h2>
-            <button id="liberta-noticias-refresh" class="liberta-noticias-refresh-btn" aria-label="Atualizar notícias">
-                <span class="material-icons">refresh</span>
-            </button>
-        </div>
-        <div id="liberta-noticias-status" class="liberta-noticias-status"></div>
-        <div id="liberta-noticias-lista" class="liberta-noticias-lista">
-            <div class="liberta-loading-placeholder">Carregando notícias...</div>
-        </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════════════════
-         FASES DA COMPETIÇÃO — Timeline
-         ═══════════════════════════════════════════════════ -->
-    <section class="liberta-section">
-        <div class="liberta-section-header">
-            <span class="liberta-section-icon"><span class="material-icons">military_tech</span></span>
-            <h2 class="liberta-section-title">Fases da Competição</h2>
-            <span class="liberta-section-badge">5 fases</span>
-        </div>
-        <div id="liberta-timeline" class="liberta-timeline">
-            <!-- Preenchido via JS -->
         </div>
     </section>
 

@@ -11,7 +11,7 @@
     </button>
 
     <!-- ═══════════════════════════════════════════════════
-         HERO / COUNTDOWN — Stitch-inspired minimal card
+         HERO / COUNTDOWN
          ═══════════════════════════════════════════════════ -->
     <section class="copa-hero">
         <!-- Flag accent bar (USA/Mexico/Canada tri-color) -->
@@ -49,48 +49,6 @@
                 <span class="material-icons">event_available</span>
                 Abertura: 11 de Junho &bull; MetLife Stadium
             </p>
-        </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════════════════
-         CALENDARIO DE JOGOS — Card consolidado (Stitch-style)
-         ═══════════════════════════════════════════════════ -->
-    <section class="copa-section" id="copa-calendario-section">
-        <div class="copa-section-header">
-            <span class="copa-section-icon"><span class="material-icons">calendar_month</span></span>
-            <h2 class="copa-section-title">Calendário de Jogos</h2>
-        </div>
-        <div id="copa-calendario-card" class="copa-calendario-card">
-            <!-- Preenchido via JS: jogos organizados por grupo -->
-            <div class="copa-loading-placeholder">Carregando jogos...</div>
-        </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════════════════
-         NOTÍCIAS DA COPA (Carousel)
-         ═══════════════════════════════════════════════════ -->
-    <section class="copa-section" id="copa-noticias-section">
-        <div class="copa-section-header">
-            <span class="copa-section-icon"><span class="material-icons">newspaper</span></span>
-            <h2 class="copa-section-title">Notícias da Copa</h2>
-            <button id="copa-noticias-refresh" class="copa-noticias-refresh-btn" aria-label="Atualizar notícias">
-                <span class="material-icons">refresh</span>
-            </button>
-        </div>
-
-        <!-- Status de última atualização -->
-        <div id="copa-noticias-status" class="copa-noticias-status"></div>
-
-        <!-- Tabs de categorias (filter chips) -->
-        <div class="copa-noticias-tabs" id="copa-noticias-tabs">
-            <button class="copa-tab copa-tab-active" data-categoria="geral">Copa 2026</button>
-            <button class="copa-tab" data-categoria="brasil">Selecao</button>
-            <button class="copa-tab" data-categoria="sedes">Sedes</button>
-        </div>
-
-        <!-- Lista de notícias -->
-        <div id="copa-noticias-lista" class="copa-noticias-lista">
-            <div class="copa-loading-placeholder">Carregando notícias...</div>
         </div>
     </section>
 
@@ -133,42 +91,6 @@
             <!-- Preenchido via JS -->
         </div>
     </section>
-
-    <!-- ═══════════════════════════════════════════════════
-         SEDES E ESTÁDIOS
-         ═══════════════════════════════════════════════════ -->
-    <section class="copa-section" id="copa-sedes-section">
-        <div class="copa-section-header">
-            <span class="copa-section-icon"><span class="material-icons">stadium</span></span>
-            <h2 class="copa-section-title">Sedes e Estádios</h2>
-            <span class="copa-section-badge">16 estádios &bull; 3 países</span>
-        </div>
-        <div id="copa-sedes-grid" class="copa-sedes-grid">
-            <!-- Preenchido via JS -->
-        </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════════════════
-         MODAL - FOTO DO ESTÁDIO
-         ═══════════════════════════════════════════════════ -->
-    <div id="copa-estadio-modal" class="copa-modal" role="dialog" aria-modal="true" aria-hidden="true">
-        <div class="copa-modal-backdrop"></div>
-        <div class="copa-modal-content">
-            <button class="copa-modal-close" aria-label="Fechar">
-                <span class="material-icons">close</span>
-            </button>
-            <div class="copa-modal-img-container">
-                <img id="copa-modal-foto" src="" alt="" class="copa-modal-foto">
-                <div class="copa-modal-fallback">
-                    <span class="material-icons">stadium</span>
-                </div>
-            </div>
-            <div class="copa-modal-info">
-                <h3 id="copa-modal-nome" class="copa-modal-nome"></h3>
-                <p id="copa-modal-detalhes" class="copa-modal-detalhes"></p>
-            </div>
-        </div>
-    </div>
 
     <!-- Bottom padding para bottom nav -->
     <div class="pb-24"></div>

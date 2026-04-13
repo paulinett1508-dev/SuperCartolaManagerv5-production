@@ -318,6 +318,106 @@
     background: linear-gradient(135deg, rgba(0, 48, 135, 0.15) 0%, rgba(212, 175, 55, 0.1) 100%);
 }
 
+/* Times com badge de sigla — v3.0 */
+.copabr-confronto-team {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex: 1;
+    min-width: 0;
+}
+.copabr-confronto-team--away {
+    justify-content: flex-end;
+}
+
+.copabr-confronto-badge {
+    flex-shrink: 0;
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 50%;
+    background: var(--app-copabr-muted, rgba(0, 48, 135, 0.25));
+    border: 1px solid var(--app-copabr-border, rgba(0, 48, 135, 0.45));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 0.42rem;
+    font-weight: 700;
+    color: var(--app-text-primary, #fff);
+    letter-spacing: 0.03em;
+}
+
+.copabr-confronto-nome {
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--app-text-primary, #fff);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Centro do card: vs ou placares */
+.copabr-confronto-meio {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    min-width: 4.5rem;
+    padding: 0 0.25rem;
+}
+
+.copabr-placar-vs {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--app-copabr-secondary, #D4AF37);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.copabr-placar-jogos {
+    display: grid;
+    grid-template-columns: auto auto;
+    column-gap: 0.3rem;
+    row-gap: 0.1rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.copabr-placar-leg {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.45rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--app-text-muted, rgba(255,255,255,0.4));
+    justify-self: end;
+}
+
+.copabr-placar-num {
+    font-family: var(--app-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--app-copabr-secondary, #D4AF37);
+}
+.copabr-placar-num--pend {
+    color: var(--app-text-muted, rgba(255,255,255,0.3));
+}
+
+/* Live dot (AO VIVO) */
+.copabr-live-dot {
+    width: 0.4rem;
+    height: 0.4rem;
+    background: #22c55e;
+    border-radius: 50%;
+    animation: copabr-pulse 1.4s ease-in-out infinite;
+}
+@keyframes copabr-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.5; transform: scale(0.75); }
+}
+
 /* ═══════════════════════════════════════════════════
    NOTÍCIAS — Cards lista
    ═══════════════════════════════════════════════════ */
