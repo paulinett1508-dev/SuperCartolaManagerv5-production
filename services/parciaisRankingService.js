@@ -158,14 +158,16 @@ function calcularPontuacaoTime(escalacao, atletasPontuados) {
             pontos: pontuacao,
             pontos_efetivos: pontosEfetivos,
             entrou_em_campo: jogou,
+            entrou_em_campo_real: entrouEmCampo === true,
             is_capitao: isCapitao,
         });
     }
 
     // ── FASE 2: Mapear ausentes por posição ──
+    // Usa entrou_em_campo_real (=== true estrito): null/undefined → ausente para substituição.
     const ausentesPorPosicao = {};
     for (const t of titularesProcessados) {
-        if (!t.entrou_em_campo) {
+        if (!t.entrou_em_campo_real) {
             if (!ausentesPorPosicao[t.posicao_id]) ausentesPorPosicao[t.posicao_id] = [];
             ausentesPorPosicao[t.posicao_id].push(t);
         }

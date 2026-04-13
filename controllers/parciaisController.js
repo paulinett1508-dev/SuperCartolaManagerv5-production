@@ -114,9 +114,12 @@ function calcularPontuacao(dadosEscalacao, atletasPontuados, time) {
   });
 
   // ── FASE 2: Mapear ausentes por posição ──
+  // Usa entrou_em_campo_real (=== true estrito) em vez do flag conservador:
+  // null/undefined = jogo não iniciado → tratado como ausente para fins de substituição,
+  // espelhando o comportamento oficial do Cartola FC.
   const ausentesPorPosicao = {};
   titularesProcessados.forEach((t) => {
-    if (!t.entrou_em_campo) {
+    if (!t.entrou_em_campo_real) {
       if (!ausentesPorPosicao[t.posicao_id]) ausentesPorPosicao[t.posicao_id] = [];
       ausentesPorPosicao[t.posicao_id].push(t);
     }
