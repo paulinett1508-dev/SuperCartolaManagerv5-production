@@ -1,5 +1,5 @@
 // =====================================================================
-// rodadasCorrecaoController.js v2.0.0 - SaaS DINÂMICO
+// rodadasCorrecaoController.js v2.1.0 - SaaS DINÂMICO
 // Controller para corrigir rodadas com dados corrompidos
 // v2.0.0: Configurações dinâmicas via liga.configuracoes (White Label)
 // Rota: POST /api/rodadas-correcao/:ligaId/corrigir
@@ -10,6 +10,7 @@ import Liga from "../models/Liga.js";
 import Time from "../models/Time.js";
 import mongoose from "mongoose";
 import logger from '../utils/logger.js';
+import { CURRENT_SEASON } from '../config/seasons.js';
 
 function toLigaId(ligaId) {
   if (mongoose.Types.ObjectId.isValid(ligaId)) {
@@ -120,6 +121,7 @@ export const corrigirRodadas = async (req, res) => {
     const timesValidos = await Rodada.distinct("timeId", {
       ligaId: ligaIdObj,
       rodada: { $lt: inicio },
+      temporada: CURRENT_SEASON,
       timeId: { $ne: null, $exists: true },
       nome_cartola: { $ne: "N/D" },
     });
@@ -147,6 +149,7 @@ export const corrigirRodadas = async (req, res) => {
       const deletados = await Rodada.deleteMany({
         ligaId: ligaIdObj,
         rodada,
+        temporada: CURRENT_SEASON,
         $or: [
           { timeId: null },
           { timeId: { $exists: false } },
@@ -167,6 +170,7 @@ export const corrigirRodadas = async (req, res) => {
         const deletadosInativos = await Rodada.deleteMany({
           ligaId: ligaIdObj,
           rodada,
+          temporada: CURRENT_SEASON,
           timeId: { $in: timesInativosNestaRodada },
         });
         logger.log(
@@ -247,11 +251,12 @@ export const corrigirRodadas = async (req, res) => {
         const valorFinanceiro = getValorFinanceiroPosicao(configRanking, posicao);
 
         await Rodada.findOneAndUpdate(
-          { ligaId: ligaIdObj, rodada, timeId: time.timeId },
+          { ligaId: ligaIdObj, rodada, timeId: time.timeId, temporada: CURRENT_SEASON },
           {
             ligaId: ligaIdObj,
             rodada,
             timeId: time.timeId,
+            temporada: CURRENT_SEASON,
             nome_cartola: time.nome_cartola,
             nome_time: time.nome_time,
             escudo: time.escudo,
@@ -322,6 +327,7 @@ export const verificarCorrompidos = async (req, res) => {
     // Buscar rodadas com dados corrompidos
     const corrompidos = await Rodada.find({
       ligaId: ligaIdObj,
+      temporada: CURRENT_SEASON,
       $or: [
         { timeId: null },
         { timeId: { $exists: false } },
@@ -344,6 +350,7 @@ export const verificarCorrompidos = async (req, res) => {
       contagem[i] = await Rodada.countDocuments({
         ligaId: ligaIdObj,
         rodada: i,
+        temporada: CURRENT_SEASON,
         timeId: { $ne: null },
       });
     }
@@ -379,4 +386,4 @@ export const verificarCorrompidos = async (req, res) => {
   }
 };
 
-logger.log("[RODADAS-CORRECAO] ✅ v2.0.0 carregado (SaaS Dinâmico)");
+logger.log("[RODADAS-CORRECAO] ✅ v2.1.0 carregado (SaaS Dinâmico + temporada)");
