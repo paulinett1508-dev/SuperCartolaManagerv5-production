@@ -27,7 +27,7 @@ COPY . .
 RUN npm run build:css
 
 # Remover devDependencies após build
-RUN npm prune --production
+RUN npm prune --production --legacy-peer-deps
 
 # ===========================
 # Stage 3: Runtime
