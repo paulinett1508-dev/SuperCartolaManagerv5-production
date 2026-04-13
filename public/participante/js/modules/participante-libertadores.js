@@ -119,6 +119,7 @@ export async function inicializarLibertadoresParticipante(params) {
         countdownInterval = setInterval(renderizarStatusHero, 60000);
 
         renderizarGrupos();
+        _inicializarToggleGrupos();
         renderizarFases();
         renderizarJogos();
 
@@ -244,6 +245,22 @@ function renderizarGrupos() {
             <div class="liberta-grupo-times">${timesHtml}</div>
         </div>`;
     }).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// GRUPOS — TOGGLE COLAPSÁVEL
+// ═══════════════════════════════════════════════════
+
+function _inicializarToggleGrupos() {
+    const btn = document.getElementById('liberta-grupos-toggle');
+    const body = document.getElementById('liberta-grupos-body');
+    if (!btn || !body) return;
+
+    btn.addEventListener('click', () => {
+        const expanded = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', String(!expanded));
+        body.classList.toggle('liberta-grupos-body--collapsed', expanded);
+    });
 }
 
 // ═══════════════════════════════════════════════════

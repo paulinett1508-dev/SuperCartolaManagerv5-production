@@ -284,6 +284,18 @@ async function obterClassificacao(competicao, temporada) {
 }
 
 /**
+ * Retorna true se um jogo com status 'ao_vivo' está caduco (data+hora > 4h no passado).
+ * Evita que jogos cujo status nunca foi atualizado para 'encerrado' apareçam como ao vivo.
+ */
+function _jogoAoVivoCaduco(p) {
+    if (!p.data || !p.horario) return false;
+    try {
+        const dataHora = new Date(`${p.data}T${p.horario}:00-03:00`);
+        return (Date.now() - dataHora.getTime()) > 4 * 60 * 60 * 1000;
+    } catch { return false; }
+}
+
+/**
  * Obtém resumo para exibição na LP (fase atual + próximos jogos + últimos resultados + standings)
  */
 async function obterResumo(competicao, temporada) {
@@ -300,21 +312,28 @@ async function obterResumo(competicao, temporada) {
     const temAoVivo = calendario.temJogosAoVivo();
     const proximoJogo = calendario.obterProximoJogo();
 
-    // Últimos 5 resultados
-    const ultimosResultados = calendario.partidas
-        .filter(p => p.status === 'encerrado')
+    // Jogos ao_vivo caducos (status preso, jogo já terminou há >4h) — tratados como encerrado
+    const aoVivoCaducos = calendario.partidas
+        .filter(p => p.status === 'ao_vivo' && _jogoAoVivoCaduco(p))
+        .map(p => ({ ...p.toObject?.() ?? p, status: 'encerrado' }));
+
+    // Últimos 5 resultados (encerrados + ao_vivo caducos)
+    const ultimosResultados = [
+        ...calendario.partidas.filter(p => p.status === 'encerrado'),
+        ...aoVivoCaducos,
+    ]
         .sort((a, b) => b.data.localeCompare(a.data) || b.horario.localeCompare(a.horario))
         .slice(0, 5);
 
-    // Próximos 5 jogos
+    // Próximos 5 jogos — só datas >= hoje para evitar jogos passados presos como agendado
     const proximosJogos = calendario.partidas
-        .filter(p => p.status === 'agendado' || p.status === 'a_definir')
+        .filter(p => (p.status === 'agendado' || p.status === 'a_definir') && p.data >= hoje)
         .sort((a, b) => a.data.localeCompare(b.data) || a.horario.localeCompare(b.horario))
         .slice(0, 5);
 
-    // Jogos ao vivo
+    // Jogos realmente ao vivo (não caducos)
     const jogosAoVivo = calendario.partidas
-        .filter(p => p.status === 'ao_vivo')
+        .filter(p => p.status === 'ao_vivo' && !_jogoAoVivoCaduco(p))
         .sort((a, b) => a.horario.localeCompare(b.horario));
 
     // Classificação atualizada

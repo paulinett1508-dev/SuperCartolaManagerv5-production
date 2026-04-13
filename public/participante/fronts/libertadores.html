@@ -61,14 +61,30 @@
          GRUPOS — Sorteio 19/Mar/2026
          ═══════════════════════════════════════════════════ -->
     <section class="liberta-section">
-        <div class="liberta-section-header">
+        <button class="liberta-section-header liberta-grupos-toggle" id="liberta-grupos-toggle" aria-expanded="false" aria-controls="liberta-grupos-body">
             <span class="liberta-section-icon"><span class="material-icons">grid_view</span></span>
             <h2 class="liberta-section-title">Grupos Definidos</h2>
             <span class="liberta-section-badge">sorteio 19/mar</span>
+            <span class="liberta-grupos-chevron material-icons">expand_more</span>
+        </button>
+        <div id="liberta-grupos-body" class="liberta-grupos-body liberta-grupos-body--collapsed">
+            <p class="liberta-grupos-chamada">Seu time caiu no grupo da morte?</p>
+            <div id="liberta-grupos-grid" class="liberta-grupos-grid">
+                <!-- Preenchido via JS -->
+            </div>
         </div>
-        <p class="liberta-grupos-chamada">Seu time caiu no grupo da morte?</p>
-        <div id="liberta-grupos-grid" class="liberta-grupos-grid">
-            <!-- Preenchido via JS -->
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         TABELA DE JOGOS
+         ═══════════════════════════════════════════════════ -->
+    <section class="liberta-section" id="liberta-jogos-section">
+        <div class="liberta-section-header">
+            <span class="liberta-section-icon"><span class="material-icons">sports_soccer</span></span>
+            <h2 class="liberta-section-title">Jogos</h2>
+        </div>
+        <div id="liberta-jogos-container" class="liberta-jogos-container">
+            <div class="liberta-loading-placeholder">Carregando jogos...</div>
         </div>
     </section>
 
@@ -90,19 +106,6 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════
-         TABELA DE JOGOS
-         ═══════════════════════════════════════════════════ -->
-    <section class="liberta-section" id="liberta-jogos-section">
-        <div class="liberta-section-header">
-            <span class="liberta-section-icon"><span class="material-icons">sports_soccer</span></span>
-            <h2 class="liberta-section-title">Jogos</h2>
-        </div>
-        <div id="liberta-jogos-container" class="liberta-jogos-container">
-            <div class="liberta-loading-placeholder">Carregando jogos...</div>
-        </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════════════════
          FASES DA COMPETIÇÃO — Timeline
          ═══════════════════════════════════════════════════ -->
     <section class="liberta-section">
@@ -120,4 +123,4 @@
     <div class="pb-24"></div>
 </div>
 
-<link rel="stylesheet" href="/participante/css/libertadores-lp.css?v=4">
+<link rel="stylesheet" href="/participante/css/libertadores-lp.css?v=5">

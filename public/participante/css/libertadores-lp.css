@@ -478,6 +478,45 @@
 }
 
 /* ═══════════════════════════════════════════════════
+   GRUPOS — Toggle colapsável
+   ═══════════════════════════════════════════════════ */
+.liberta-grupos-toggle {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.liberta-grupos-chevron {
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.4));
+    font-size: 1.1rem;
+    transition: transform 0.25s ease;
+    margin-left: auto;
+}
+
+.liberta-grupos-toggle[aria-expanded="true"] .liberta-grupos-chevron {
+    transform: rotate(180deg);
+}
+
+.liberta-grupos-body {
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.25s ease;
+    max-height: 1200px;
+    opacity: 1;
+}
+
+.liberta-grupos-body--collapsed {
+    max-height: 0;
+    opacity: 0;
+}
+
+/* ═══════════════════════════════════════════════════
    GRUPOS — Grid + Cards
    ═══════════════════════════════════════════════════ */
 .liberta-grupos-chamada {
