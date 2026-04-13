@@ -440,7 +440,8 @@ function construirEscalacaoFromRaw(rawJson, timeId, rodada, atletasPontuados) {
         reservas: reservasRaw,
         capitao_id: capitainId,
         reserva_luxo_id: reservaLuxoId,
-        pontos: rawJson.pontos ?? calcularPontosTotais({ titulares: titularesRaw, capitao_id: capitainId, reserva_luxo_id: reservaLuxoId }),
+        pontos: calcularPontosTotais({ titulares: titularesRaw, reservas: reservasRaw, capitao_id: capitainId, reserva_luxo_id: reservaLuxoId })
+            || (rawJson.pontos ?? 0),
         patrimonio: rawJson.patrimonio,
         variacao_patrimonio: rawJson.variacao_patrimonio,
         nome: rawJson.nome ?? rawJson.time?.nome ?? rawJson.nome_cartoleiro ?? 'Sua Escalação',
