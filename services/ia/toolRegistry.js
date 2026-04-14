@@ -24,6 +24,11 @@ import rodadaAtualMercado from './tools/rodadaAtualMercado.js';
 import topNLigaGenerico from './tools/topNLigaGenerico.js';
 import minhaPosicaoTurnoReturno from './tools/minhaPosicaoTurnoReturno.js';
 import minhaPosicaoRestaUm from './tools/minhaPosicaoRestaUm.js';
+import melhorDoMes from './tools/melhorDoMes.js';
+import meuDesempenhoMelhorMes from './tools/meuDesempenhoMelhorMes.js';
+import artilheiroCampeao from './tools/artilheiroCampeao.js';
+import luvaDeOuro from './tools/luvaDeOuro.js';
+import capitaoDoMes from './tools/capitaoDoMes.js';
 
 /**
  * Lista ordenada de tools disponiveis para o LLM.
@@ -41,6 +46,11 @@ export const TOOLS = [
     topNLigaGenerico,
     minhaPosicaoTurnoReturno,
     minhaPosicaoRestaUm,
+    melhorDoMes,
+    meuDesempenhoMelhorMes,
+    artilheiroCampeao,
+    luvaDeOuro,
+    capitaoDoMes,
 ];
 
 /**

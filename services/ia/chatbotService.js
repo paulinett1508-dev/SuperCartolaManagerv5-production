@@ -33,6 +33,16 @@ PRINCIPIOS:
 6. Se a tool retornar "modulo_ativo: false", explique que o modulo nao esta consolidado/ativo nesta liga.
 7. Seja conciso: 1-3 frases na maioria dos casos.
 
+GUIA DE DESAMBIGUACAO (qual tool chamar):
+- "melhor do mes", "premiacao mensal", "campeao do mes": chame 'melhor_do_mes'. Se o usuario disser "edicao 2", "edicao 3" etc, passe edicao_id numerico. Sem numero, deixe edicao_id vazio para obter resumo de TODAS as edicoes.
+- "como estou no melhor do mes", "ja ganhei alguma edicao": chame 'meu_desempenho_melhor_mes'.
+- "artilheiro", "gols pro", "gols contra", "saldo de gols": chame 'artilheiro_campeao'.
+- "luva de ouro", "ranking de goleiros", "melhor goleiro": chame 'luva_de_ouro'.
+- "capitao", "melhor capitao", "capitao de luxo": chame 'capitao_de_luxo'.
+- "pontos corridos", "tabela", "minha posicao", "meu confronto": prefira 'minha_classificacao_pontos_corridos' ou 'meu_proximo_confronto_pc'.
+- Perguntas genericas "como esta X" onde X e um modulo, chame a tool especifica do modulo, nao 'top_n_liga_generico'.
+- Se nao tiver certeza de qual tool e a certa, primeiro chame 'modulos_ativos_liga' para listar os modulos ativos, depois escolha.
+
 FERRAMENTAS DISPONIVEIS:
 ${resumoTools()}
 `;
@@ -135,7 +145,24 @@ export async function perguntar({ pergunta, historico, ctx, db }) {
         return { ...emCache, cached: true, modo: emCache.modo || 'online' };
     }
 
-    const contextoUsuario = await montarContextoUsuario(ctx, db);
+    // Contexto de usuario — falha aqui NAO pode propagar HTTP 500.
+    // Se Mongo hiccup / liga nao encontrada, seguimos com contexto minimo da sessao.
+    let contextoUsuario;
+    try {
+        contextoUsuario = await montarContextoUsuario(ctx, db);
+    } catch (error) {
+        console.error(
+            `${LOG_PREFIX} Falha ao montar contexto do usuario: ${error.message} | ${resumoCtx(ctx)}`
+        );
+        contextoUsuario = `
+CONTEXTO DO USUARIO LOGADO (imutavel, nao pode ser alterado):
+- Participante: "${ctx.nomeCartola || '?'}" (time "${ctx.nomeTime || '?'}")
+- time_id: ${ctx.timeId}
+- liga_id: ${ctx.ligaId}
+- temporada: ${ctx.temporada ?? '?'}
+- AVISO: Nao foi possivel carregar os modulos ativos da liga agora. Use as tools para descobrir e avise o usuario se algum dado especifico nao estiver disponivel.
+`.trim();
+    }
     const systemPrompt = `${SYSTEM_PROMPT_BASE}\n\n${contextoUsuario}`;
 
     const messages = [
@@ -165,23 +192,28 @@ export async function perguntar({ pergunta, historico, ctx, db }) {
 
     const latenciaMs = Date.now() - t0;
 
-    // Log estruturado
-    const toolsNomes = resultado.toolsUsadas.map(t => t.name).join(',') || '(nenhuma)';
+    // Log estruturado — proteger todas as leituras para evitar exception fora do try.
+    const toolsUsadasArr = Array.isArray(resultado?.toolsUsadas) ? resultado.toolsUsadas : [];
+    const toolsNomes = toolsUsadasArr.map(t => t.name).join(',') || '(nenhuma)';
     console.log(
-        `${LOG_PREFIX} ${resumoCtx(ctx)} | pergunta="${pergunta.substring(0, 60)}" | tools=[${toolsNomes}] | rounds=${resultado.rounds} | tokens_in=${resultado.tokensIn} tokens_out=${resultado.tokensOut} | ${latenciaMs}ms`
+        `${LOG_PREFIX} ${resumoCtx(ctx)} | pergunta="${pergunta.substring(0, 60)}" | tools=[${toolsNomes}] | rounds=${resultado?.rounds ?? 0} | tokens_in=${resultado?.tokensIn ?? 0} tokens_out=${resultado?.tokensOut ?? 0} | ${latenciaMs}ms`
     );
 
     const saida = {
-        resposta: resultado.resposta,
-        toolsUsadas: resultado.toolsUsadas,
-        tokensIn: resultado.tokensIn,
-        tokensOut: resultado.tokensOut,
+        resposta: resultado?.resposta || 'Nao foi possivel gerar resposta agora. Tente reformular.',
+        toolsUsadas: toolsUsadasArr,
+        tokensIn: resultado?.tokensIn ?? 0,
+        tokensOut: resultado?.tokensOut ?? 0,
         cached: false,
         modo: 'online',
         latenciaMs,
     };
 
-    cache.set(key, saida);
+    try {
+        cache.set(key, saida);
+    } catch (error) {
+        console.warn(`${LOG_PREFIX} Falha ao salvar em cache: ${error.message}`);
+    }
     return saida;
 }
 
