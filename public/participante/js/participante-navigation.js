@@ -65,18 +65,13 @@ class ParticipanteNavigation {
             capitao: "/participante/fronts/capitao.html",
             configuracoes: "/participante/fronts/configuracoes.html",
             "copa-times-sc": "/participante/fronts/copa-times-sc.html",
-            "copa-2026-mundo": "/participante/fronts/copa-2026-mundo.html",
             regras: "/participante/fronts/regras.html",
             "rodada-xray": "/participante/fronts/rodada-xray.html",
             "tiro-certo": "/participante/fronts/tiro-certo.html",
             "resta-um": "/participante/fronts/resta-um.html",
             "info-meu-time": "/participante/fronts/info-meu-time.html",
             "agenda-tabelas": "/participante/fronts/agenda-tabelas.html",
-            "brasileirao": "/participante/fronts/brasileirao.html",
             "jogos-do-dia": "/participante/fronts/jogos-do-dia.html",
-            "libertadores": "/participante/fronts/libertadores.html",
-            "copa-brasil": "/participante/fronts/copa-brasil.html",
-            "copa-nordeste": "/participante/fronts/copa-nordeste.html",
             chatbot: "/participante/fronts/chatbot.html",
         };
 
@@ -549,7 +544,7 @@ class ParticipanteNavigation {
      */
     _isModuloOpcionalInativo(moduloId) {
         // Módulos de sistema/base: sempre permitidos (inclui sub-módulos como rodada-xray)
-        const modulosPermitidos = ['home', 'boas-vindas', 'extrato', 'ranking', 'rodadas', 'rodada-xray', 'historico', 'configuracoes', 'copa-times-sc', 'copa-2026-mundo', 'regras', 'libertadores', 'copa-brasil', 'copa-nordeste', 'info-meu-time', 'agenda-tabelas', 'brasileirao', 'jogos-do-dia', 'chatbot'];
+        const modulosPermitidos = ['home', 'boas-vindas', 'extrato', 'ranking', 'rodadas', 'rodada-xray', 'historico', 'configuracoes', 'copa-times-sc', 'regras', 'info-meu-time', 'agenda-tabelas', 'jogos-do-dia', 'chatbot'];
         if (modulosPermitidos.includes(moduloId)) return false;
 
         // Sem dados de módulos carregados: permitir (graceful degradation)
@@ -1090,9 +1085,6 @@ class ParticipanteNavigation {
             "resta-um": "Resta Um",
             regras: "Regras",
             configuracoes: "Configurações",
-            "copa-2026-mundo": "Copa do Mundo 2026",
-            "libertadores": "Libertadores 2026",
-            "copa-brasil": "Copa do Brasil 2026",
         };
         return nomes[moduloId] || moduloId;
     }
@@ -1143,16 +1135,11 @@ class ParticipanteNavigation {
             capitao: "/participante/js/modules/participante-capitao.js",
             configuracoes: "/participante/js/modules/participante-notifications.js",
             "copa-times-sc": "/participante/js/modules/participante-copa-sc.js",
-            "copa-2026-mundo": "/participante/js/modules/participante-copa-2026-mundo.js",
             regras: "/participante/js/modules/participante-regras.js",
             "rodada-xray": "/participante/js/modules/participante-rodada-xray.js",
             "resta-um": "/participante/js/modules/participante-resta-um.js",
             "tiro-certo": "/participante/js/modules/participante-tiro-certo.js",
-            "libertadores": "/participante/js/modules/participante-libertadores.js",
-            "copa-brasil": "/participante/js/modules/participante-copa-brasil.js",
-            "copa-nordeste": "/participante/js/modules/participante-copa-nordeste.js",
             "agenda-tabelas": "/participante/js/modules/participante-agenda-tabelas.js",
-            "brasileirao": "/participante/js/modules/participante-brasileirao.js",
             "jogos-do-dia": "/participante/js/modules/participante-jogos-do-dia.js",
             "info-meu-time": "/participante/js/modules/participante-info-meu-time.js",
             chatbot: "/participante/js/modules/participante-chatbot.js",
