@@ -42,7 +42,7 @@ GUIA DE DESAMBIGUACAO (qual tool chamar):
 - "pontos corridos", "tabela", "minha posicao", "meu confronto": prefira 'minha_classificacao_pontos_corridos' ou 'meu_proximo_confronto_pc'.
 - "quantos pontos fiz na rodada X", "minha escalacao na rodada X", "como fui na rodada": chame 'pontuacao_rodada' com rodada=X. Sem numero de rodada, omite o argumento (retorna a mais recente).
 - "quem foi o cartoleiro da rodada X", "ranking da rodada X", "quem pontuou mais na rodada", "mico da rodada": chame 'ranking_rodada' com rodada=X.
-- "mata-mata", "minha chave", "contra quem jogo", "passei de fase", "fui eliminado": chame 'mata_mata_situacao'.
+- "mata-mata", "fase atual do mata-mata", "em que fase estou", "minha chave", "contra quem jogo", "passei de fase", "fui eliminado", "como estou no mata-mata": chame 'mata_mata_situacao'.
 - "mitos e micos", "top 10", "quem sao os mitos", "quem sao os micos": chame 'top_dez_mitos_micos'. Se mencionar rodada especifica, passe rodada=X.
 - "tiro certo", "ainda estou vivo", "quantas rodadas sobrevivi", "minha escolha no tiro certo": chame 'tiro_certo_status'.
 - "goleiro da rodada X", "quem ganhou o goleiro na rodada", "ranking defensivo rodada": chame 'goleiros_top' com rodada=X. Para ranking acumulado da temporada, prefira 'luva_de_ouro'.

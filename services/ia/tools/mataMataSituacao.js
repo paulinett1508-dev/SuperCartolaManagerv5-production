@@ -51,15 +51,29 @@ function encontrarMeuConfronto(dadosTorneio, timeId) {
 }
 
 /**
- * Determina a fase atual com base em dados_torneio.fases e rodada_atual.
+ * Deriva a fase atual diretamente dos confrontos em dados_torneio.
+ * - Retorna a fase mais avancada com confrontos pendentes/em_andamento.
+ * - Se todos concluidos, retorna a ultima fase com dados (torneio encerrado).
+ * Nao depende de dados_torneio.fases (campo inexistente no schema atual).
  */
-function faseDaRodada(dadosTorneio, rodadaAtual) {
-    const fases = dadosTorneio?.fases;
-    if (!fases || !rodadaAtual) return null;
+function derivarFaseAtual(dadosTorneio) {
+    if (!dadosTorneio) return null;
 
-    for (const nome of FASES_ORDEM) {
-        if (Number(fases[nome]) === Number(rodadaAtual)) return nome;
+    // Fase mais avancada com confronto ainda nao concluido
+    for (let i = FASES_ORDEM.length - 1; i >= 0; i--) {
+        const fase = FASES_ORDEM[i];
+        const confrontos = dadosTorneio[fase];
+        if (!Array.isArray(confrontos) || confrontos.length === 0) continue;
+        if (confrontos.some(c => statusConfronto(c) !== 'concluido')) return fase;
     }
+
+    // Tudo concluido — retornar a ultima fase com dados
+    for (let i = FASES_ORDEM.length - 1; i >= 0; i--) {
+        const fase = FASES_ORDEM[i];
+        const confrontos = dadosTorneio[fase];
+        if (Array.isArray(confrontos) && confrontos.length > 0) return fase;
+    }
+
     return null;
 }
 
@@ -90,7 +104,7 @@ function vencedorConfronto(c) {
 export default {
     name: 'mata_mata_situacao',
     description:
-        'Lista todas as edicoes do Mata-Mata desta liga com o confronto do participante logado em cada uma. Enfatiza qual edicao esta ativa/pendente de acao. Use quando perguntarem "minha chave no mata-mata", "contra quem jogo", "como estou no mata-mata", "passei de fase?", "fui eliminado?".',
+        'Lista todas as edicoes do Mata-Mata desta liga com o confronto do participante logado em cada uma. Retorna a fase atual (quartas, semis, final, etc.), o adversario, pontos e resultado. Use quando perguntarem "qual a fase atual do mata-mata", "em que fase estou", "minha chave no mata-mata", "contra quem jogo", "como estou no mata-mata", "passei de fase?", "fui eliminado?".',
     parameters: {
         type: 'object',
         properties: {},
@@ -129,7 +143,7 @@ export default {
 
         const resultado = edicoes.map(ed => {
             const dadosTorneio = ed.dados_torneio;
-            const faseAtual = faseDaRodada(dadosTorneio, ed.rodada_atual);
+            const faseAtual = derivarFaseAtual(dadosTorneio);
             const encontrado = encontrarMeuConfronto(dadosTorneio, timeId);
 
             let meuConfronto = null;
