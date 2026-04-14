@@ -6,7 +6,8 @@
  *   - ObjectId: ligas._id, rodadas.ligaId, pontoscorridoscaches.liga_id, capitaocaches.ligaId
  *   - String:   moduleconfigs.liga_id, rankinggeralcaches.ligaId, melhor_mes_cache.ligaId,
  *               rankingturnos.ligaId, top10caches.liga_id, artilheirocampeaos.ligaId,
- *               tirocertocaches.liga_id, goleiros.ligaId, restaumcaches.liga_id
+ *               tirocertocaches.liga_id, goleiros.ligaId, restaumcaches.liga_id,
+ *               matamatacaches.liga_id
  *
  * Este modulo exporta helpers para obter o filtro correto por collection.
  */
@@ -47,6 +48,7 @@ const LIGA_ID_FORMAT = {
     restaumcaches: { field: 'liga_id', format: 'string' },
     fluxofinanceirocampos: { field: 'liga_id', format: 'string' },
     extratofinanceirocaches: { field: 'liga_id', format: 'string' },
+    matamatacaches: { field: 'liga_id', format: 'string' },
 };
 
 /**
