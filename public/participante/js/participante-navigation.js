@@ -176,9 +176,6 @@ class ParticipanteNavigation {
         // ✅ v4.9: Inicializar Widget "O que tá rolando?" (engajamento ao vivo)
         this.inicializarWhatsHappeningWidget();
 
-        // ✅ Inicializar Widget "Raio-X da Rodada" (análise pós-rodada)
-        this.inicializarRaioXWidget();
-
         // ✅ Pré-carregar Widget "Campeão" (celebração de campeões)
         this.inicializarCampeaoWidget();
 
@@ -396,43 +393,6 @@ class ParticipanteNavigation {
             }
         } catch (error) {
             if (window.Log) Log.warn('PARTICIPANTE-NAV', '⚠️ Erro ao inicializar FAB IA:', error);
-        }
-    }
-
-    /**
-     * ✅ Widget "Raio-X da Rodada" - Análise pós-rodada
-     * Mostra análise de disputas quando rodada encerra
-     */
-    async inicializarRaioXWidget() {
-        // Só inicializar se não for liga aposentada
-        if (window.isLigaAposentada) {
-            if (window.Log) Log.debug('PARTICIPANTE-NAV', '⏭️ Widget Raio-X ignorado (liga aposentada)');
-            return;
-        }
-
-        // Verificar se módulo está ativo na liga
-        if (!this.verificarModuloAtivo('raioX')) {
-            if (window.Log) Log.debug('PARTICIPANTE-NAV', '⏭️ Widget Raio-X ignorado (módulo desativado)');
-            return;
-        }
-
-        try {
-            const module = await import('/participante/js/widgets/round-xray-widget.js');
-
-            if (module.inicializarRaioXWidget) {
-                // Buscar status do mercado
-                const mercadoStatus = await fetch('/api/cartola/mercado-status').then(r => r.json()).catch(() => null);
-
-                await module.inicializarRaioXWidget({
-                    ligaId: this.participanteData?.ligaId,
-                    timeId: this.participanteData?.timeId,
-                    temporada: new Date().getFullYear(),
-                }, mercadoStatus);
-
-                if (window.Log) Log.info('PARTICIPANTE-NAV', '⚽ Widget "Raio-X da Rodada" inicializado');
-            }
-        } catch (error) {
-            if (window.Log) Log.warn('PARTICIPANTE-NAV', '⚠️ Erro ao inicializar Widget Raio-X:', error);
         }
     }
 

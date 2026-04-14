@@ -70,18 +70,12 @@ const ManutencaoScreen = {
         if (container) container.style.cssText = 'display:none !important;';
         if (bottomNav) bottomNav.style.cssText = 'display:none !important;';
 
-        // Esconder FAB widget (bolinha Raio-X)
-        const rxrayFab = document.getElementById('rxrayFab');
-        if (rxrayFab) rxrayFab.style.cssText = 'display:none !important;';
-
         // Esconder quick bar (pode já existir ou não)
         this._esconderQuickBar();
 
-        // Observer para capturar Quick Bar e FAB se forem renderizados DEPOIS
+        // Observer para capturar Quick Bar se for renderizada DEPOIS
         this._observer = new MutationObserver(() => {
             this._esconderQuickBar();
-            const fab = document.getElementById('rxrayFab');
-            if (fab) fab.style.cssText = 'display:none !important;';
         });
         this._observer.observe(document.body, { childList: true, subtree: false });
 

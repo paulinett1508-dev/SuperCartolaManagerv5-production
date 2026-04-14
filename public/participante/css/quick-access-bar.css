@@ -181,17 +181,6 @@
 }
 
 /* =====================================================================
-   BOTÃO "RAIO X" — Laranja na bottom nav (v5.0)
-   ===================================================================== */
-.nav-item.raiox-btn .nav-icon,
-.nav-item.raiox-btn .nav-label {
-    color: var(--app-primary, #FF5500);
-}
-.nav-item.raiox-btn::before {
-    background: var(--app-primary, #FF5500);
-}
-
-/* =====================================================================
    AJUSTE DO CONTAINER PRINCIPAL
    ===================================================================== */
 .module-container {
