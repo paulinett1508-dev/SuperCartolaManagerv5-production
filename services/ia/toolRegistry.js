@@ -29,6 +29,19 @@ import meuDesempenhoMelhorMes from './tools/meuDesempenhoMelhorMes.js';
 import artilheiroCampeao from './tools/artilheiroCampeao.js';
 import luvaDeOuro from './tools/luvaDeOuro.js';
 import capitaoDoMes from './tools/capitaoDoMes.js';
+// Fase 2 — Desempenho por rodada + mata-mata + top 10
+import pontuacaoRodada from './tools/pontuacaoRodada.js';
+import rankingRodada from './tools/rankingRodada.js';
+import mataMataSituacao from './tools/mataMataSituacao.js';
+import topDezMitosMicos from './tools/topDezMitosMicos.js';
+import tiroCertoStatus from './tools/tiroCertoStatus.js';
+import goleirosTop from './tools/goleirosTop.js';
+// Fase 3 — Financeiro detalhado + config + jogos
+import meuExtratoDetalhado from './tools/meuExtratoDetalhado.js';
+import minhasInscricoes from './tools/minhasInscricoes.js';
+import configLigaDetalhada from './tools/configLigaDetalhada.js';
+import regrasLigaGerais from './tools/regrasLigaGerais.js';
+import jogosDoDia from './tools/jogosDoDia.js';
 
 /**
  * Lista ordenada de tools disponiveis para o LLM.
@@ -51,6 +64,19 @@ export const TOOLS = [
     artilheiroCampeao,
     luvaDeOuro,
     capitaoDoMes,
+    // Fase 2
+    pontuacaoRodada,
+    rankingRodada,
+    mataMataSituacao,
+    topDezMitosMicos,
+    tiroCertoStatus,
+    goleirosTop,
+    // Fase 3
+    meuExtratoDetalhado,
+    minhasInscricoes,
+    configLigaDetalhada,
+    regrasLigaGerais,
+    jogosDoDia,
 ];
 
 /**

@@ -37,9 +37,20 @@ GUIA DE DESAMBIGUACAO (qual tool chamar):
 - "melhor do mes", "premiacao mensal", "campeao do mes": chame 'melhor_do_mes'. Se o usuario disser "edicao 2", "edicao 3" etc, passe edicao_id numerico. Sem numero, deixe edicao_id vazio para obter resumo de TODAS as edicoes.
 - "como estou no melhor do mes", "ja ganhei alguma edicao": chame 'meu_desempenho_melhor_mes'.
 - "artilheiro", "gols pro", "gols contra", "saldo de gols": chame 'artilheiro_campeao'.
-- "luva de ouro", "ranking de goleiros", "melhor goleiro": chame 'luva_de_ouro'.
+- "luva de ouro", "ranking de goleiros acumulado", "melhor goleiro da temporada": chame 'luva_de_ouro'.
 - "capitao", "melhor capitao", "capitao de luxo": chame 'capitao_de_luxo'.
 - "pontos corridos", "tabela", "minha posicao", "meu confronto": prefira 'minha_classificacao_pontos_corridos' ou 'meu_proximo_confronto_pc'.
+- "quantos pontos fiz na rodada X", "minha escalacao na rodada X", "como fui na rodada": chame 'pontuacao_rodada' com rodada=X. Sem numero de rodada, omite o argumento (retorna a mais recente).
+- "quem foi o cartoleiro da rodada X", "ranking da rodada X", "quem pontuou mais na rodada", "mico da rodada": chame 'ranking_rodada' com rodada=X.
+- "mata-mata", "minha chave", "contra quem jogo", "passei de fase", "fui eliminado": chame 'mata_mata_situacao'.
+- "mitos e micos", "top 10", "quem sao os mitos", "quem sao os micos": chame 'top_dez_mitos_micos'. Se mencionar rodada especifica, passe rodada=X.
+- "tiro certo", "ainda estou vivo", "quantas rodadas sobrevivi", "minha escolha no tiro certo": chame 'tiro_certo_status'.
+- "goleiro da rodada X", "quem ganhou o goleiro na rodada", "ranking defensivo rodada": chame 'goleiros_top' com rodada=X. Para ranking acumulado da temporada, prefira 'luva_de_ouro'.
+- "meu extrato detalhado", "meus lancamentos", "quanto ganhei/perdi", "por que meu saldo e X": chame 'meu_extrato_detalhado'. Se nao quiser todos, passe ultimas_rodadas=N.
+- "minha inscricao", "status da inscricao", "estou em dia", "sou devedor", "paguei a inscricao": chame 'minhas_inscricoes'.
+- "como e configurado o X nesta liga", "quantas edicoes tem o melhor do mes", "formato do mata-mata aqui": chame 'config_liga_detalhada'.
+- "qual a taxa da liga", "posso parcelar", "prazo de renovacao", "regras gerais da liga": chame 'regras_liga_gerais'.
+- "tem jogo hoje", "jogos do cartola hoje", "quem joga hoje", "jogos ao vivo", "resultado de hoje": chame 'jogos_do_dia'.
 - Perguntas genericas "como esta X" onde X e um modulo, chame a tool especifica do modulo, nao 'top_n_liga_generico'.
 - Se nao tiver certeza de qual tool e a certa, primeiro chame 'modulos_ativos_liga' para listar os modulos ativos, depois escolha.
 

@@ -4,9 +4,12 @@
  * Centraliza normalizacao de `liga_id`/`ligaId` entre collections.
  * No projeto, diferentes collections armazenam o ID da liga em formatos diferentes:
  *   - ObjectId: ligas._id, rodadas.ligaId, pontoscorridoscaches.liga_id, capitaocaches.ligaId
+ *   - ObjectId: ligas._id, rodadas.ligaId, pontoscorridoscaches.liga_id, capitaocaches.ligaId,
+ *               inscricoestemporada.liga_id, ligarules.liga_id
  *   - String:   moduleconfigs.liga_id, rankinggeralcaches.ligaId, melhor_mes_cache.ligaId,
  *               rankingturnos.ligaId, top10caches.liga_id, artilheirocampeaos.ligaId,
- *               tirocertocaches.liga_id, goleiros.ligaId, restaumcaches.liga_id
+ *               tirocertocaches.liga_id, goleiros.ligaId, restaumcaches.liga_id,
+ *               matamatacaches.liga_id, extratofinanceirocaches.liga_id
  *
  * Este modulo exporta helpers para obter o filtro correto por collection.
  */
@@ -47,6 +50,10 @@ const LIGA_ID_FORMAT = {
     restaumcaches: { field: 'liga_id', format: 'string' },
     fluxofinanceirocampos: { field: 'liga_id', format: 'string' },
     extratofinanceirocaches: { field: 'liga_id', format: 'string' },
+    matamatacaches: { field: 'liga_id', format: 'string' },
+    inscricoestemporada: { field: 'liga_id', format: 'objectId' },
+    ligarules: { field: 'liga_id', format: 'objectId' },
+    ajustesfinanceiros: { field: 'liga_id', format: 'string' },
 };
 
 /**
