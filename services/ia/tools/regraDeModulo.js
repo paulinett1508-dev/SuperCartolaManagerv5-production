@@ -4,11 +4,16 @@
  * Retorna a regra textual de um modulo, lendo diretamente os arquivos
  * JSON em /config/rules/. Substitui o RAG antigo — volume pequeno e
  * leitura direta e mais simples e determinista.
+ *
+ * v2: cruza a regra estatica com as configuracoes customizadas da liga
+ * (ModuleConfig.wizard_respostas), devolvendo overrides especificos da liga.
  */
 
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { filtroLiga } from '../mongoHelpers.js';
+import { CURRENT_SEASON } from '../../../config/seasons.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -67,7 +72,7 @@ export default {
         additionalProperties: false,
     },
 
-    async handler({ args }) {
+    async handler({ args, ctx, db }) {
         const chave = normalizar(args?.modulo);
         const arquivo = MAPA[chave];
 
@@ -80,25 +85,64 @@ export default {
             };
         }
 
+        // Regra estatica do JSON
+        let regraEstatica = {};
         try {
             const caminho = path.join(RULES_DIR, arquivo);
             const raw = fs.readFileSync(caminho, 'utf-8');
-            const json = JSON.parse(raw);
-
-            return {
-                modulo: json.nome || chave,
-                descricao: json.descricao || null,
-                regras: json.regras || null,
-                pontuacao: json.pontuacao || null,
-                premiacao: json.premiacao || null,
-                observacoes: json.observacoes || null,
-                arquivo_fonte: arquivo,
-            };
+            regraEstatica = JSON.parse(raw);
         } catch (error) {
             return {
                 erro: 'arquivo_ilegivel',
                 detalhe: error.message,
             };
         }
+
+        // Overrides per-liga via ModuleConfig.wizard_respostas
+        let wizardRespostas = null;
+        if (ctx?.ligaId && db) {
+            try {
+                const filtroMod = filtroLiga('moduleconfigs', ctx.ligaId);
+                if (filtroMod) {
+                    const temporada = Number(ctx.temporada || CURRENT_SEASON);
+                    // Mapear chave normalizada -> nome do modulo no moduleconfigs
+                    const MAPA_MODULO = {
+                        pontos_corridos: 'pontos_corridos', pontoscorridos: 'pontos_corridos',
+                        mata_mata: 'mata_mata', matamata: 'mata_mata',
+                        top_10: 'top10', top10: 'top10',
+                        melhor_mes: 'melhor_mes', melhormes: 'melhor_mes',
+                        ranking_geral: 'ranking_geral', ranking: 'ranking_geral',
+                        turno_returno: 'turno_returno', turnoreturno: 'turno_returno',
+                        resta_um: 'resta_um', restaum: 'resta_um',
+                        tiro_certo: 'tiro_certo', tirocerto: 'tiro_certo',
+                        artilheiro: 'artilheiro',
+                        capitao_luxo: 'capitao_luxo', capitaoluxo: 'capitao_luxo',
+                        luva_ouro: 'luva_ouro', luvaouro: 'luva_ouro',
+                    };
+                    const nomeModulo = MAPA_MODULO[chave];
+                    if (nomeModulo) {
+                        const mc = await db
+                            .collection('moduleconfigs')
+                            .findOne(
+                                { ...filtroMod, modulo: nomeModulo, temporada },
+                                { projection: { wizard_respostas: 1 } }
+                            );
+                        if (mc?.wizard_respostas && Object.keys(mc.wizard_respostas).length > 0) {
+                            wizardRespostas = mc.wizard_respostas;
+                        }
+                    }
+                }
+            } catch { /* fallback silencioso */ }
+        }
+
+        return {
+            modulo: regraEstatica.nome || chave,
+            descricao: regraEstatica.descricao || null,
+            regras: regraEstatica.regras || null,
+            pontuacao: regraEstatica.pontuacao || null,
+            premiacao: regraEstatica.premiacao || null,
+            observacoes: regraEstatica.observacoes || null,
+            configuracoes_desta_liga: wizardRespostas,
+        };
     },
 };

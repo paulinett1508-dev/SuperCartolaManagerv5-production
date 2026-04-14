@@ -31,6 +31,7 @@ const SUGESTOES_POR_MODULO = {
     ],
     extrato: [
         { rotulo: 'Meu saldo', pergunta: 'Qual meu saldo financeiro na liga?' },
+        { rotulo: 'Meu extrato', pergunta: 'Me mostre meu extrato detalhado da liga.' },
     ],
     turnoReturno: [
         { rotulo: 'Meu turno', pergunta: 'Como estou no turno?' },
@@ -38,12 +39,37 @@ const SUGESTOES_POR_MODULO = {
     restaUm: [
         { rotulo: 'Resta Um', pergunta: 'Estou vivo no Resta Um?' },
     ],
+    melhorMes: [
+        { rotulo: 'Melhor do Mes', pergunta: 'Quem ganhou o Melhor do Mes?' },
+        { rotulo: 'Meu Melhor do Mes', pergunta: 'Como estou no Melhor do Mes?' },
+    ],
+    mataMata: [
+        { rotulo: 'Minha chave', pergunta: 'Qual minha chave no Mata-Mata?' },
+        { rotulo: 'Passei de fase?', pergunta: 'Passei de fase no Mata-Mata?' },
+    ],
+    top10: [
+        { rotulo: 'Mitos e Micos', pergunta: 'Quem sao os mitos e micos da ultima rodada?' },
+    ],
+    tiroCerto: [
+        { rotulo: 'Tiro Certo', pergunta: 'Ainda estou vivo no Tiro Certo?' },
+    ],
+    luvaOuro: [
+        { rotulo: 'Luva de Ouro', pergunta: 'Quem esta liderando a Luva de Ouro?' },
+    ],
+    artilheiro: [
+        { rotulo: 'Artilheiro', pergunta: 'Quem e o artilheiro da liga?' },
+    ],
+    capitaoLuxo: [
+        { rotulo: 'Capitao de Luxo', pergunta: 'Quem e o melhor capitao da liga?' },
+    ],
 };
 
 // Sugestoes sempre presentes.
 const SUGESTOES_UNIVERSAIS = [
     { rotulo: 'Rodada atual', pergunta: 'Em qual rodada estamos e o mercado esta aberto?' },
-    { rotulo: 'Modulos ativos', pergunta: 'Quais modulos estao ativos na minha liga?' },
+    { rotulo: 'Minha rodada', pergunta: 'Quantos pontos fiz na ultima rodada?' },
+    { rotulo: 'Ranking da rodada', pergunta: 'Quem foi o cartoleiro da ultima rodada?' },
+    { rotulo: 'Jogos hoje', pergunta: 'Tem jogo do Cartola hoje?' },
 ];
 
 let conversas = [];
@@ -398,6 +424,14 @@ async function popularSugestoesDinamicas() {
                     extrato: 'extrato',
                     turno_returno: 'turnoReturno',
                     resta_um: 'restaUm',
+                    melhor_mes: 'melhorMes',
+                    mata_mata: 'mataMata',
+                    top10: 'top10',
+                    top_10: 'top10',
+                    tiro_certo: 'tiroCerto',
+                    luva_ouro: 'luvaOuro',
+                    artilheiro: 'artilheiro',
+                    capitao_luxo: 'capitaoLuxo',
                 };
 
                 for (const m of listaMod) {
