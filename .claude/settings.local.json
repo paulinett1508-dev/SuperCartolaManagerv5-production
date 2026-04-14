@@ -361,7 +361,8 @@
       "Bash(cp C:/PROJETOS/SuperCartolaManagerv5-production/.agnostic-core/skills/audit/dead-code-auditor/SKILL.md C:/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/dead-code-auditor/SKILL.md)",
       "Bash(cp C:/PROJETOS/SuperCartolaManagerv5-production/.agnostic-core/skills/audit/dead-code-auditor/references/commands.md C:/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/dead-code-auditor/references/commands.md)",
       "Bash(cp C:/PROJETOS/SuperCartolaManagerv5-production/.agnostic-core/skills/audit/dead-code-auditor/references/checklist.md C:/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/dead-code-auditor/references/checklist.md)",
-      "Bash(npm ls:*)"
+      "Bash(npm ls:*)",
+      "Bash(/c/Users/Windows10/AppData/Local/GitHubCLI/bin/gh.exe pr:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
@@ -419,5 +420,8 @@
   "statusLine": {
     "type": "command",
     "command": "bash .claude/statusline-command.sh"
+  },
+  "remote": {
+    "defaultEnvironmentId": "env_016zXmbE9kYr5CAZap6Nx7ba"
   }
 }
