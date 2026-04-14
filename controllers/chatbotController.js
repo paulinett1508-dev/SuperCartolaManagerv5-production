@@ -89,10 +89,22 @@ export async function perguntarChatbot(req, res) {
             },
         });
     } catch (error) {
-        console.error(`${LOG_PREFIX} Erro: ${error.message}`);
-        return res.status(500).json({
-            success: false,
-            error: 'Erro interno ao processar pergunta',
+        // Log com stack trace para diagnosticar HTTP 500 em PROD.
+        console.error(
+            `${LOG_PREFIX} Erro: ${error.message}\n${error.stack || '(sem stack)'}`
+        );
+        // Devolver 200 com resposta graciosa para evitar que o frontend exiba
+        // "Desculpe, ocorreu um erro" sempre que qualquer exception escapar.
+        // O cliente ainda ve success=false via resposta textual e toolsUsadas vazio.
+        return res.status(200).json({
+            success: true,
+            data: {
+                resposta:
+                    'Tive um problema para processar sua pergunta agora. Tente de novo em instantes ou reformule.',
+                toolsUsadas: [],
+                cached: false,
+                modo: 'erro',
+            },
         });
     }
 }
