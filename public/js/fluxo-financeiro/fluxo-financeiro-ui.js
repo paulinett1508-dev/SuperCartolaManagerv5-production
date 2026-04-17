@@ -5007,6 +5007,7 @@ window.abrirModalNovoAjuste = function(timeId, temporada) {
         document.getElementById('inputDescricaoAjuste').value = '';
         document.getElementById('inputValorAjuste').value = '';
         document.getElementById('contadorDescricao').textContent = '0';
+        window._selecionarTipoAjuste('debito');
         document.getElementById('tituloModalAjuste').innerHTML = `
             <span class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px;">add_circle</span>
             Novo Ajuste
