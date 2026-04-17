@@ -4895,13 +4895,32 @@ window._criarModalAjuste = function() {
                     </div>
                 </div>
 
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+                        Tipo
+                    </label>
+                    <div style="display: flex; gap: 8px;">
+                        <label id="labelTipoCredito" style="flex: 1; display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.1); cursor: pointer; transition: all 0.2s;" onclick="window._selecionarTipoAjuste('credito')">
+                            <input type="radio" name="tipoAjusteNovo" value="credito" style="display:none;">
+                            <span class="material-icons" style="font-size: 16px; color: #4caf50;">add_circle</span>
+                            <span style="font-size: 13px; font-weight: 600; color: #4caf50;">Crédito</span>
+                        </label>
+                        <label id="labelTipoDebito" style="flex: 1; display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 8px; border: 2px solid #e53935; background: rgba(229,57,53,0.15); cursor: pointer; transition: all 0.2s;" onclick="window._selecionarTipoAjuste('debito')">
+                            <input type="radio" name="tipoAjusteNovo" value="debito" checked style="display:none;">
+                            <span class="material-icons" style="font-size: 16px; color: #e53935;">remove_circle</span>
+                            <span style="font-size: 13px; font-weight: 600; color: #e53935;">Débito</span>
+                        </label>
+                    </div>
+                </div>
+
                 <div style="margin-bottom: 24px;">
                     <label style="display: block; font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
                         Valor (R$)
                     </label>
                     <input type="number" id="inputValorAjuste"
                            step="0.01"
-                           placeholder="Ex: 50.00 ou -20.00"
+                           min="0.01"
+                           placeholder="Ex: 120.00"
                            style="
                                width: 100%;
                                background: rgba(255,255,255,0.05);
@@ -4912,10 +4931,6 @@ window._criarModalAjuste = function() {
                                font-size: 14px;
                                box-sizing: border-box;
                            ">
-                    <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 6px;">
-                        <span class="material-icons" style="font-size: 12px; vertical-align: middle;">info</span>
-                        Use valor positivo para credito, negativo para debito
-                    </div>
                 </div>
 
                 <div style="display: flex; gap: 12px;">
@@ -5034,9 +5049,11 @@ window.editarAjusteFinanceiro = function(ajusteId, descricao, valor) {
     };
 
     // Preencher campos
+    const tipoExistente = Number(valor) >= 0 ? 'credito' : 'debito';
     document.getElementById('inputDescricaoAjuste').value = descricao;
-    document.getElementById('inputValorAjuste').value = valor;
+    document.getElementById('inputValorAjuste').value = Math.abs(Number(valor));
     document.getElementById('contadorDescricao').textContent = descricao.length;
+    window._selecionarTipoAjuste(tipoExistente);
     document.getElementById('tituloModalAjuste').innerHTML = `
         <span class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px;">edit</span>
         Editar Ajuste
@@ -5065,17 +5082,41 @@ window.fecharModalAjuste = function() {
 /**
  * Salva ajuste (criar ou atualizar)
  */
+window._selecionarTipoAjuste = function(tipo) {
+    const labelCredito = document.getElementById('labelTipoCredito');
+    const labelDebito = document.getElementById('labelTipoDebito');
+    const radioCredito = document.querySelector('input[name="tipoAjusteNovo"][value="credito"]');
+    const radioDebito = document.querySelector('input[name="tipoAjusteNovo"][value="debito"]');
+    if (!labelCredito || !labelDebito) return;
+
+    if (tipo === 'credito') {
+        radioCredito.checked = true;
+        labelCredito.style.border = '2px solid #4caf50';
+        labelCredito.style.background = 'rgba(76,175,80,0.15)';
+        labelDebito.style.border = '2px solid rgba(255,255,255,0.1)';
+        labelDebito.style.background = 'transparent';
+    } else {
+        radioDebito.checked = true;
+        labelDebito.style.border = '2px solid #e53935';
+        labelDebito.style.background = 'rgba(229,57,53,0.15)';
+        labelCredito.style.border = '2px solid rgba(255,255,255,0.1)';
+        labelCredito.style.background = 'transparent';
+    }
+};
+
 window.salvarAjuste = async function() {
     const state = window._ajusteModalState;
     const descricao = document.getElementById('inputDescricaoAjuste').value.trim();
-    const valor = parseFloat(document.getElementById('inputValorAjuste').value);
+    const valorInput = parseFloat(document.getElementById('inputValorAjuste').value);
+    const tipoSelecionado = document.querySelector('input[name="tipoAjusteNovo"]:checked')?.value || 'debito';
+    const valor = tipoSelecionado === 'credito' ? Math.abs(valorInput) : -Math.abs(valorInput);
 
     // Validacoes
     if (!descricao || descricao.length < 3) {
         SuperModal.toast.warning('Informe uma descricao valida (minimo 3 caracteres)');
         return;
     }
-    if (isNaN(valor) || valor === 0) {
+    if (isNaN(valorInput) || valorInput === 0) {
         SuperModal.toast.warning('Informe um valor valido (diferente de zero)');
         return;
     }
