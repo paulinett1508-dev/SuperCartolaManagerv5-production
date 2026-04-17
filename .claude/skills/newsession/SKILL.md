@@ -9,12 +9,69 @@ Handover para nova sessão — carrega contexto do trabalho em andamento e instr
 
 ---
 
-## STATUS ATUAL: 2026 — SISTEMA ESTÁVEL
+## STATUS ATUAL: 2026-04-17 — AUDITORIA FINANCEIRA CONCLUÍDA + REDESIGN TESOURARIA SPEC PRONTO
 
-**Data:** 01/03/2026
-**Última ação:** Sessão de fixes Copa 2026 + CSP + imagens estádios. Commits `255fc01`, `dde4e3a`, `34550a5`, `e2d3290`.
+**Data:** 17/04/2026
+**Última ação:** Auditoria financeira completa dos 35 participantes da Liga Super Cartola (`684cb1c8af923da7c7df51de`). 58 registros criados (AjusteFinanceiro + AcertoFinanceiro). Spec do redesign da tesouraria admin escrito e aprovado — aguarda plano de implementação.
 
-**Pendências abertas:** Nenhuma. Ver `.claude/pending-tasks.md`.
+**Pendências abertas:**
+- Invocar `writing-plans` para gerar o plano de implementação do redesign da tesouraria admin (spec em `docs/superpowers/specs/2026-04-17-tesouraria-admin-redesign.md`)
+
+---
+
+## SESSÃO 17/04/2026 — AUDITORIA FINANCEIRA 2026 + SPEC TESOURARIA
+
+### Correções financeiras aplicadas (script `scripts/correcoes-financeiras-2026.js`)
+
+**58 registros criados** na Liga `684cb1c8af923da7c7df51de` para 33 participantes:
+- AjusteFinanceiro: Inscrição 2026 (−180) para todos os participantes devidos
+- AjusteFinanceiro: Saldo transferido/acumulado 2025 (positivo ou negativo)
+- AcertoFinanceiro: quitações e pagamentos parciais de inscrição
+
+**Participantes resolvidos anteriormente (não tocados):**
+- FloriMengo FC [645089] — ajuste −120 + acerto 60 = saldo −44 ✓
+- Urubu Play F.C. [13935277] — SEM_INSCRICAO (Paulinett Miranda)
+- China Guardiola [1097804] — inscrição + saldo anterior já no cache historico_transacoes
+
+**Posição financeira atual (saldo = rodadas + ajustes + acertos):**
+
+| Status | Participantes | Destaques |
+|---|---|---|
+| CREDORES (11) | BarrosB, China, Cássio, Diego, Mauricio, Randim, Sir Gegé, Tabaca, Vitim, Wesley, juniel | Vitim +1.394 / Mauricio +1.129 |
+| DEVEDORES (24) | demais | Raylson −491 / Raimundo −415 / Jonney −398 |
+
+### Auditoria de módulos financeiros 2026
+
+| Módulo | Mecanismo | Status |
+|---|---|---|
+| Pontos Corridos | Automático (historico_transacoes) | ✅ 20 transações |
+| Mata-Mata | Automático (historico_transacoes) | ✅ 7 transações |
+| Resta Um | Automático (AjusteFinanceiro) | ✅ 6 débitos −2,27 (E1 em andamento) |
+| Melhor do Mês | **Manual via Ajustes (admin)** | Intencional |
+| Top 10 | **Manual ao final da R38** | Intencional |
+| Ranking Geral | **Manual ao final da temporada** | Intencional |
+| Artilheiro | **Manual ao final da R38** | Intencional |
+| Luva de Ouro | **Manual ao final da R38** | Intencional |
+| Capitão de Luxo | **Manual ao final da R38** | Intencional |
+
+### Redesign Tesouraria Admin — Spec aprovado
+
+**Spec:** `docs/superpowers/specs/2026-04-17-tesouraria-admin-redesign.md`
+**Commit:** `6faac2c9`
+
+**Resumo do design (Opção B — Lista Compacta + Chips Inline):**
+- Remove 11 colunas de módulos (Timeline, PC, MM, Top10, MelhorMes, Artilheiro, Luva, RestaUm, Capitão, AjManuais, Acertos)
+- Adiciona barra de resumo (4 stats: A Receber / A Pagar / Devedores / Credores)
+- Filtros rápidos client-side (Todos / Devedores / Credores / Insc. Pendente / Ordenar Saldo ↓)
+- Chips inline por linha — só aparecem quando valor ≠ 0 (2025±, Insc✓/−, PC±, MM±, RU−, Pag+)
+- Mantém botão Extrato → modal existente inalterado
+
+**Arquivos a modificar:**
+- `public/js/fluxo-financeiro/fluxo-financeiro-ui.js` — substituir header e linhas da tabela
+- `public/css/modules/fluxo-financeiro.css` — estilos chips, summary bar, filtros
+- `public/js/fluxo-financeiro/fluxo-financeiro-core.js` — cálculo totais summary bar
+
+**Próximo passo:** invocar skill `writing-plans` passando o spec acima para gerar o plano de implementação passo a passo.
 
 ---
 
