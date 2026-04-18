@@ -2792,6 +2792,122 @@ table.fluxo-participantes-tabela {
     background: var(--laranja-dark, var(--color-primary-dark));
 }
 
+/* ============================================================
+   TESOURARIA V10 — CHIPS INLINE
+   Adicionado em 2026-04-18 — redesign tesouraria admin
+   ============================================================ */
+
+:root {
+    --chip-credito-bg:      rgba(34, 197, 94, 0.12);
+    --chip-credito-text:    #86efac;
+    --chip-credito-border:  rgba(34, 197, 94, 0.25);
+
+    --chip-debito-bg:       rgba(239, 68, 68, 0.15);
+    --chip-debito-text:     #f87171;
+    --chip-debito-border:   rgba(239, 68, 68, 0.30);
+
+    --chip-neutro-bg:       rgba(148, 163, 184, 0.10);
+    --chip-neutro-text:     #94a3b8;
+    --chip-neutro-border:   rgba(148, 163, 184, 0.20);
+
+    --chip-2025-bg:         rgba(99, 102, 241, 0.15);
+    --chip-2025-text:       #818cf8;
+    --chip-2025-border:     rgba(99, 102, 241, 0.30);
+
+    --chip-ru-bg:           rgba(249, 115, 22, 0.12);
+    --chip-ru-text:         #fdba74;
+    --chip-ru-border:       rgba(249, 115, 22, 0.25);
+}
+
+[data-theme="light"] {
+    --chip-credito-bg:      rgba(22, 163, 74, 0.10);
+    --chip-credito-text:    #15803d;
+    --chip-credito-border:  rgba(22, 163, 74, 0.25);
+
+    --chip-debito-bg:       rgba(220, 38, 38, 0.10);
+    --chip-debito-text:     #b91c1c;
+    --chip-debito-border:   rgba(220, 38, 38, 0.25);
+
+    --chip-neutro-bg:       rgba(71, 85, 105, 0.08);
+    --chip-neutro-text:     #475569;
+    --chip-neutro-border:   rgba(71, 85, 105, 0.18);
+
+    --chip-2025-bg:         rgba(79, 70, 229, 0.10);
+    --chip-2025-text:       #4338ca;
+    --chip-2025-border:     rgba(79, 70, 229, 0.25);
+
+    --chip-ru-bg:           rgba(234, 88, 12, 0.10);
+    --chip-ru-text:         #c2410c;
+    --chip-ru-border:       rgba(234, 88, 12, 0.25);
+}
+
+/* Container de chips dentro da linha */
+.participante-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+}
+
+/* Chip base */
+.chip-tes {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    border: 1px solid var(--chip-neutro-border);
+    background: var(--chip-neutro-bg);
+    color: var(--chip-neutro-text);
+    transition: transform 0.15s ease;
+}
+
+.chip-tes:hover {
+    transform: translateY(-1px);
+}
+
+.chip-tes .chip-label {
+    opacity: 0.7;
+    font-weight: 500;
+}
+
+/* Variantes */
+.chip-tes.chip-credito {
+    background: var(--chip-credito-bg);
+    color: var(--chip-credito-text);
+    border-color: var(--chip-credito-border);
+}
+
+.chip-tes.chip-debito {
+    background: var(--chip-debito-bg);
+    color: var(--chip-debito-text);
+    border-color: var(--chip-debito-border);
+}
+
+.chip-tes.chip-2025 {
+    background: var(--chip-2025-bg);
+    color: var(--chip-2025-text);
+    border-color: var(--chip-2025-border);
+}
+
+.chip-tes.chip-ru {
+    background: var(--chip-ru-bg);
+    color: var(--chip-ru-text);
+    border-color: var(--chip-ru-border);
+}
+
+.chip-tes .material-icons {
+    font-size: 12px;
+    line-height: 1;
+}
+
 /* Responsividade Ajustes */
 @media (max-width: 480px) {
     .extrato-ajustes-header {
