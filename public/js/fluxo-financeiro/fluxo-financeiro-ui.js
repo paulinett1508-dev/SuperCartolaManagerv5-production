@@ -731,9 +731,47 @@ export class FluxoFinanceiroUI {
                 <div class="toolbar-right"></div>
             </div>
 
+            ${temporadaNum >= 2026 && this._temRodadasConsolidadas ? `
+            <!-- Tesouraria V10: summary bar + filtros -->
+            <div class="tesouraria-summary-bar">
+                <div class="tesouraria-stat is-areceber">
+                    <span class="tesouraria-stat__label">A Receber</span>
+                    <span class="tesouraria-stat__value">${formatarMoedaBR(totais.totalAReceber)}</span>
+                </div>
+                <div class="tesouraria-stat is-apagar">
+                    <span class="tesouraria-stat__label">A Pagar</span>
+                    <span class="tesouraria-stat__value">${formatarMoedaBR(totais.totalAPagar)}</span>
+                </div>
+                <div class="tesouraria-stat is-devedores">
+                    <span class="tesouraria-stat__label">Devedores</span>
+                    <span class="tesouraria-stat__value">${totais.quantidadeDevedores || 0}</span>
+                </div>
+                <div class="tesouraria-stat is-credores">
+                    <span class="tesouraria-stat__label">Credores</span>
+                    <span class="tesouraria-stat__value">${totais.quantidadeCredores || 0}</span>
+                </div>
+            </div>
+            <div class="tesouraria-filtros" role="group" aria-label="Filtros rápidos">
+                <button type="button" class="tesouraria-filtro is-active" data-filtro="todos" onclick="window.filtrarTesouraria('todos')">
+                    Todos <span class="contador">${totais.totalParticipantes || 0}</span>
+                </button>
+                <button type="button" class="tesouraria-filtro" data-filtro="devedores" onclick="window.filtrarTesouraria('devedores')">
+                    Devedores <span class="contador">${totais.quantidadeDevedores || 0}</span>
+                </button>
+                <button type="button" class="tesouraria-filtro" data-filtro="credores" onclick="window.filtrarTesouraria('credores')">
+                    Credores <span class="contador">${totais.quantidadeCredores || 0}</span>
+                </button>
+                <button type="button" class="tesouraria-filtro" data-filtro="insc-pendente" onclick="window.filtrarTesouraria('insc-pendente')">
+                    Insc. Pendente
+                </button>
+                <button type="button" class="tesouraria-filtro" data-filtro="saldo-desc" onclick="window.filtrarTesouraria('saldo-desc')">
+                    <span class="material-icons" style="font-size:14px">sort</span> Saldo ↓
+                </button>
+            </div>
+            ` : ''}
             <!-- Tabela Financeira v4.2 - Layout Condicional por Temporada + Sticky Header -->
             <div class="fluxo-tabela-container">
-                <table class="fluxo-participantes-tabela tabela-financeira">
+                <table class="fluxo-participantes-tabela tabela-financeira ${temporadaNum >= 2026 && this._temRodadasConsolidadas ? 'tesouraria-v10' : ''}">
                     <thead>
                         ${temporadaNum >= 2026 && !this._temRodadasConsolidadas ? `
                         <!-- Header Temporada Atual (>= 2026) SEM rodadas: Colunas simplificadas de inscrição -->
@@ -754,30 +792,16 @@ export class FluxoFinanceiroUI {
                             <th class="col-acoes">Ações</th>
                         </tr>
                         ` : `
-                        <!-- Header com colunas de módulos (temporada com rodadas consolidadas) -->
+                        <!-- Header Tesouraria V10 — compacto -->
                         <tr>
                             <th class="col-num">#</th>
                             <th class="col-participante sortable" onclick="window.ordenarTabelaFinanceiro('nome')" data-sort="nome">
                                 <span class="th-sort">Participante <span class="material-icons sort-icon">unfold_more</span></span>
                             </th>
-                            <th class="col-time-coracao" title="Time do Coração">
-                                <span class="material-icons" style="font-size: 16px;">favorite</span>
-                            </th>
-                            ${this._modulosAtivos?.banco !== false ? '<th class="col-modulo" data-modulo="banco">Timeline</th>' : ''}
-                            ${this._modulosAtivos?.pontosCorridos ? '<th class="col-modulo" data-modulo="pontosCorridos">P.Corridos</th>' : ''}
-                            ${this._modulosAtivos?.mataMata ? '<th class="col-modulo" data-modulo="mataMata">Mata-Mata</th>' : ''}
-                            ${this._modulosAtivos?.top10 ? '<th class="col-modulo" data-modulo="top10">Top 10</th>' : ''}
-                            ${this._modulosAtivos?.melhorMes ? '<th class="col-modulo" data-modulo="melhorMes">Melhor Mês</th>' : ''}
-                            ${this._modulosAtivos?.artilheiro ? '<th class="col-modulo" data-modulo="artilheiro">Artilheiro</th>' : ''}
-                            ${this._modulosAtivos?.luvaOuro ? '<th class="col-modulo" data-modulo="luvaOuro">Luva Ouro</th>' : ''}
-                            ${this._modulosAtivos?.restaUm ? '<th class="col-modulo" data-modulo="restaUm">Resta Um</th>' : ''}
-                            ${this._modulosAtivos?.capitaoLuxo ? '<th class="col-modulo" data-modulo="capitaoLuxo">Cap. Luxo</th>' : ''}
-                            <th class="col-modulo">Aj. Manuais</th>
-                            <th class="col-modulo">Acertos</th>
-                            <th class="col-saldo sortable" onclick="window.ordenarTabelaFinanceiro('saldo')" data-sort="saldo">
+                            <th class="col-chips">Movimentação</th>
+                            <th class="col-saldo-v10 sortable" onclick="window.ordenarTabelaFinanceiro('saldo')" data-sort="saldo">
                                 <span class="th-sort">Saldo <span class="material-icons sort-icon">unfold_more</span></span>
                             </th>
-                            ${temporadaNum < 2026 ? '<th class="col-2026" title="Status Renovação 2026">2026</th>' : ''}
                             <th class="col-acoes">Ações</th>
                         </tr>
                         `}
