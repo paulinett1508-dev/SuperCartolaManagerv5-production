@@ -1081,62 +1081,41 @@ export class FluxoFinanceiroUI {
             ? p.saldoFinalIntegrado
             : (p.saldoFinal || 0);
         const situacao = p.situacaoIntegrada || p.situacao || 'quitado';
-        const breakdown = this._ajustarBreakdownPorIntegracoes(p.breakdown || {});
-
-        const classeSaldo = saldoFinal > 0 ? 'val-positivo' : saldoFinal < 0 ? 'val-negativo' : '';
 
         // Verificar se é novato (ID negativo = cadastro manual OU origem = novo_cadastro/cadastro_manual)
         const isNovato = timeId < 0 || p.origem === 'novo_cadastro' || p.origem === 'cadastro_manual' || p.novato === true;
         const badgeNovato = isNovato ? '<span class="badge-novato" title="Novo na liga">NOVATO</span>' : '';
 
-        // ✅ v2.13: Verificar se temporada foi quitada (extrato fechado)
+        // Verificar se temporada foi quitada (extrato fechado)
         const isQuitado = p.quitacao?.quitado === true;
         const badgeQuitado = isQuitado
             ? `<span class="badge-quitado" title="Temporada ${p.quitacao?.data_quitacao ? new Date(p.quitacao.data_quitacao).toLocaleDateString('pt-BR') : ''}: ${p.quitacao?.tipo || ''} por ${p.quitacao?.admin_responsavel || 'admin'}">QUITADO</span>`
             : '';
 
-        // Time do coração - usar escudos locais
-        const timeCoracaoId = p.time_coracao || p.clube_id;
-        const escudoTimeCoracao = timeCoracaoId
-            ? `<img src="/escudos/${timeCoracaoId}.png"
-                   alt="" class="escudo-coracao"
-                   onerror="this.onerror=null;this.src='/escudos/default.png'"
-                   title="Time do Coração">`
-            : '<span class="material-icons" style="font-size: 16px; color: #666;">favorite_border</span>';
+        // v10: Chips inline substituem colunas de módulos
+        const chipsHtml = this._derivarChips(p);
 
-        // Função helper para formatar valor monetário
-        const fmtModulo = (val) => {
-            if (!val || Math.abs(val) < 0.01) return '<span class="val-zero">-</span>';
-            const cls = val > 0 ? 'val-positivo' : 'val-negativo';
-            const sinal = val > 0 ? '+' : '';
-            const formatted = Math.abs(val).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            return `<span class="${cls}">${sinal}R$ ${formatted}</span>`;
-        };
+        // Saldo: TRUNCAR (nunca arredondar) e formatar compacto em BRL sem casas decimais
+        const saldoTruncado = Math.trunc(saldoFinal);
+        const saldoSinal = saldoTruncado > 0 ? '+' : saldoTruncado < 0 ? '−' : '';
+        const saldoAbs = Math.abs(saldoTruncado).toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+        const saldoFormatado = `${saldoSinal}${saldoAbs}`;
+        const classeSaldoV10 = saldoTruncado > 0 ? 'val-positivo' : saldoTruncado < 0 ? 'val-negativo' : '';
 
-        // Colunas de módulos baseadas nos módulos ativos (data-modulo para update dinâmico)
-        let modulosCols = '';
-        if (this._modulosAtivos?.banco !== false) modulosCols += `<td class="col-modulo" data-modulo="banco">${fmtModulo(breakdown.banco)}</td>`;
-        if (this._modulosAtivos?.pontosCorridos) modulosCols += `<td class="col-modulo" data-modulo="pontosCorridos">${fmtModulo(breakdown.pontosCorridos)}</td>`;
-        if (this._modulosAtivos?.mataMata) modulosCols += `<td class="col-modulo" data-modulo="mataMata">${fmtModulo(breakdown.mataMata)}</td>`;
-        if (this._modulosAtivos?.top10) modulosCols += `<td class="col-modulo" data-modulo="top10">${fmtModulo(breakdown.top10)}</td>`;
-        if (this._modulosAtivos?.melhorMes) modulosCols += `<td class="col-modulo" data-modulo="melhorMes">${fmtModulo(breakdown.melhorMes)}</td>`;
-        if (this._modulosAtivos?.artilheiro) modulosCols += `<td class="col-modulo" data-modulo="artilheiro">${fmtModulo(breakdown.artilheiro)}</td>`;
-        if (this._modulosAtivos?.luvaOuro) modulosCols += `<td class="col-modulo" data-modulo="luvaOuro">${fmtModulo(breakdown.luvaOuro)}</td>`;
-        if (this._modulosAtivos?.restaUm) modulosCols += `<td class="col-modulo" data-modulo="restaUm">${fmtModulo(breakdown.restaUm)}</td>`;
-        if (this._modulosAtivos?.capitaoLuxo) modulosCols += `<td class="col-modulo" data-modulo="capitaoLuxo">${fmtModulo(breakdown.capitaoLuxo)}</td>`;
-        modulosCols += `<td class="col-modulo" data-modulo="campos">${fmtModulo(breakdown.campos)}</td>`;
-        modulosCols += `<td class="col-modulo" data-modulo="acertos">${fmtModulo(breakdown.acertos)}</td>`;
-
-        // Formatar saldo final
-        const saldoFormatado = Math.abs(saldoFinal).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        const saldoSinal = saldoFinal > 0 ? '+' : saldoFinal < 0 ? '-' : '';
+        // Flag para filtro "Insc. Pendente"
+        const taxaInsc = p.breakdown?.taxaInscricao || 0;
+        const pagouInsc = p.breakdown?.pagouInscricao === true;
+        const saldoCobriuInsc = (p.breakdown?.saldoAnteriorTransferido || 0) >= taxaInsc && taxaInsc > 0;
+        const inscPendente = taxaInsc > 0 && !pagouInsc && !saldoCobriuInsc;
 
         return `
             <tr class="linha-participante ${situacao === 'devedor' ? 'row-devedor' : ''} ${isNovato ? 'row-novato' : ''}"
                 data-nome="${escapeHtml((p.nome_cartola || '').toLowerCase())}"
                 data-time="${escapeHtml((p.nome_time || '').toLowerCase())}"
                 data-time-id="${timeId}"
+                data-saldo="${saldoTruncado}"
                 data-situacao="${situacao}"
+                data-insc-pendente="${inscPendente}"
                 data-novato="${isNovato}">
                 <td class="col-num">${idx + 1}</td>
                 <td class="col-participante">
@@ -1153,17 +1132,15 @@ export class FluxoFinanceiroUI {
                         </div>
                     </div>
                 </td>
-                <td class="col-time-coracao">${escudoTimeCoracao}</td>
-                ${modulosCols}
-                <td class="col-saldo ${isQuitado ? 'quitado' : classeSaldo}">
+                <td class="col-chips">
+                    <div class="participante-chips">${chipsHtml}</div>
+                </td>
+                <td class="col-saldo-v10 ${isQuitado ? 'quitado' : classeSaldoV10}">
                     ${isQuitado
-                        ? `<strong>R$ 0,00</strong> ${badgeQuitado}`
-                        : `<strong>${saldoSinal}R$ ${saldoFormatado}</strong>`
+                        ? `<strong>0</strong> ${badgeQuitado}`
+                        : `<strong>${saldoFormatado}</strong>`
                     }
                 </td>
-                ${(window.temporadaAtual || 0) < 2026 ? `<td class="col-2026">
-                    ${this._renderizarBadge2026(timeId, p)}
-                </td>` : ''}
                 <td class="col-acoes">
                     <div class="acoes-row">
                         <button onclick="window.selecionarParticipante('${timeId}')"
@@ -1175,9 +1152,6 @@ export class FluxoFinanceiroUI {
                             <span class="material-icons">fact_check</span>
                         </button>
                         ${(() => {
-                            // v2.14: Botao de quitar removido para temporada 2025+ (coberta pelo modal unificado de renovacao)
-                            // Quitacao de 2025 e feita automaticamente no modal de decisao ao renovar para 2026
-                            // Manter botao apenas para temporadas retroativas antigas (2024, etc)
                             const tempAtual = window.temporadaAtual || CURRENT_SEASON;
                             const tempRenovacao = window.temporadaRenovacao || CURRENT_SEASON;
                             const isTemporadaRenovacao = tempAtual >= (tempRenovacao - 1);
