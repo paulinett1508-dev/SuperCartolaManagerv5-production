@@ -1008,7 +1008,7 @@ export class FluxoFinanceiroUI {
      */
     _derivarChips(p) {
         const b = p.breakdown || {};
-        const fmtInt = (v) => {
+        const formatarInteiro = (v) => {
             const truncado = Math.trunc(v);
             const sinal = truncado > 0 ? '+' : truncado < 0 ? '−' : '';
             const abs = Math.abs(truncado).toLocaleString('pt-BR', { maximumFractionDigits: 0 });
@@ -1022,7 +1022,7 @@ export class FluxoFinanceiroUI {
         const v2025 = b.saldoAnteriorTransferido || 0;
         if (Math.abs(v2025) >= 1) {
             const cls = v2025 > 0 ? 'chip-2025' : 'chip-debito';
-            chips.push(chip(cls, '2025', fmtInt(v2025)));
+            chips.push(chip(cls, '2025', formatarInteiro(v2025)));
         }
 
         // Inscrição
@@ -1034,33 +1034,38 @@ export class FluxoFinanceiroUI {
             if (quitada) {
                 chips.push(chip('chip-credito', 'Insc', '<span class="material-icons">check</span>'));
             } else {
-                chips.push(chip('chip-debito', 'Insc', fmtInt(-taxa)));
+                chips.push(chip('chip-debito', 'Insc', formatarInteiro(-taxa)));
             }
         }
 
         // Pontos Corridos
         const pc = b.pontosCorridos || 0;
         if (Math.abs(pc) >= 1) {
-            chips.push(chip(pc > 0 ? 'chip-credito' : 'chip-debito', 'PC', fmtInt(pc)));
+            chips.push(chip(pc > 0 ? 'chip-credito' : 'chip-debito', 'PC', formatarInteiro(pc)));
         }
 
         // Mata-Mata
         const mm = b.mataMata || 0;
         if (Math.abs(mm) >= 1) {
-            chips.push(chip(mm > 0 ? 'chip-credito' : 'chip-debito', 'MM', fmtInt(mm)));
+            chips.push(chip(mm > 0 ? 'chip-credito' : 'chip-debito', 'MM', formatarInteiro(mm)));
         }
 
-        // Resta Um (só aparece se negativo — é punição)
+        // Resta Um (só aparece se negativo — é punição).
+        // Threshold < -0.01 (não >= 1 como PC/MM) porque qualquer punição não-zero importa;
+        // PC/MM usam >= 1 para suprimir resíduos de float em rodadas.
         const ru = b.restaUm || 0;
         if (ru < -0.01) {
-            chips.push(chip('chip-ru', 'RU', fmtInt(ru)));
+            chips.push(chip('chip-ru', 'RU', formatarInteiro(ru)));
         }
 
-        // Pagamentos (acertos) — desconta taxa se já foi paga diretamente (evita double)
+        // Pagamentos (acertos) — desconta taxa APENAS se pagouDireto.
+        // Backend: breakdown.acertos = soma dos AcertoFinanceiros da temporada.
+        // Se pagouDireto → inscrição entrou como AcertoFinanceiro (tipo=pagamento) → taxa JÁ está em acertos → deduzir.
+        // Se saldoCobriu sem pagouDireto → inscrição veio de saldoAnteriorTransferido → NÃO está em acertos → não deduzir.
         let pag = b.acertos || 0;
         if (pagouDireto) pag = pag - taxa;
         if (pag > 0.01) {
-            chips.push(chip('chip-credito', 'Pag', fmtInt(pag)));
+            chips.push(chip('chip-credito', 'Pag', formatarInteiro(pag)));
         }
 
         return chips.join('');
