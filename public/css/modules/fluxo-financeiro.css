@@ -24,6 +24,27 @@
   --danger: var(--color-danger);
   --warning: #f59e0b;
   --info: var(--color-info);
+
+  /* Variáveis de Chips - Modo Escuro */
+  --chip-credito-bg:      rgba(34, 197, 94, 0.12);
+  --chip-credito-text:    var(--color-success-text);
+  --chip-credito-border:  rgba(34, 197, 94, 0.25);
+
+  --chip-debito-bg:       var(--color-danger-muted);
+  --chip-debito-text:     #f87171;
+  --chip-debito-border:   rgba(239, 68, 68, 0.30);
+
+  --chip-neutro-bg:       rgba(148, 163, 184, 0.10);
+  --chip-neutro-text:     #94a3b8;
+  --chip-neutro-border:   rgba(148, 163, 184, 0.20);
+
+  --chip-2025-bg:         rgba(99, 102, 241, 0.15);
+  --chip-2025-text:       #818cf8;
+  --chip-2025-border:     rgba(99, 102, 241, 0.30);
+
+  --chip-ru-bg:           rgba(249, 115, 22, 0.12);
+  --chip-ru-text:         #fdba74;
+  --chip-ru-border:       rgba(249, 115, 22, 0.25);
 }
 
 /* === CLASSES UTILITÁRIAS DE VALORES === */
@@ -2796,28 +2817,6 @@ table.fluxo-participantes-tabela {
    TESOURARIA V10 — CHIPS INLINE
    Adicionado em 2026-04-18 — redesign tesouraria admin
    ============================================================ */
-
-:root {
-    --chip-credito-bg:      rgba(34, 197, 94, 0.12);
-    --chip-credito-text:    #86efac;
-    --chip-credito-border:  rgba(34, 197, 94, 0.25);
-
-    --chip-debito-bg:       rgba(239, 68, 68, 0.15);
-    --chip-debito-text:     #f87171;
-    --chip-debito-border:   rgba(239, 68, 68, 0.30);
-
-    --chip-neutro-bg:       rgba(148, 163, 184, 0.10);
-    --chip-neutro-text:     #94a3b8;
-    --chip-neutro-border:   rgba(148, 163, 184, 0.20);
-
-    --chip-2025-bg:         rgba(99, 102, 241, 0.15);
-    --chip-2025-text:       #818cf8;
-    --chip-2025-border:     rgba(99, 102, 241, 0.30);
-
-    --chip-ru-bg:           rgba(249, 115, 22, 0.12);
-    --chip-ru-text:         #fdba74;
-    --chip-ru-border:       rgba(249, 115, 22, 0.25);
-}
 
 [data-theme="light"] {
     --chip-credito-bg:      rgba(22, 163, 74, 0.10);
