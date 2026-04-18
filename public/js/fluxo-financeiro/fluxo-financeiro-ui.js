@@ -1000,6 +1000,73 @@ export class FluxoFinanceiroUI {
     }
 
     /**
+     * v10: Deriva array de chips para uma linha a partir do breakdown.
+     * Cada chip renderiza somente se valor relevante (|v| >= 1 ou flag boolean).
+     * Truncamento: usa Math.trunc para não arredondar.
+     * @param {object} p - participante
+     * @returns {string} HTML dos chips concatenados
+     */
+    _derivarChips(p) {
+        const b = p.breakdown || {};
+        const fmtInt = (v) => {
+            const truncado = Math.trunc(v);
+            const sinal = truncado > 0 ? '+' : truncado < 0 ? '−' : '';
+            const abs = Math.abs(truncado).toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+            return `${sinal}${abs}`;
+        };
+        const chip = (cls, label, valorTxt) =>
+            `<span class="chip-tes ${cls}"><span class="chip-label">${label}</span>${valorTxt}</span>`;
+        const chips = [];
+
+        // 2025 transferido
+        const v2025 = b.saldoAnteriorTransferido || 0;
+        if (Math.abs(v2025) >= 1) {
+            const cls = v2025 > 0 ? 'chip-2025' : 'chip-debito';
+            chips.push(chip(cls, '2025', fmtInt(v2025)));
+        }
+
+        // Inscrição
+        const taxa = b.taxaInscricao || 0;
+        const pagouDireto = b.pagouInscricao === true;
+        const saldoCobriu = v2025 >= taxa && taxa > 0;
+        const quitada = pagouDireto || saldoCobriu;
+        if (taxa > 0) {
+            if (quitada) {
+                chips.push(chip('chip-credito', 'Insc', '<span class="material-icons">check</span>'));
+            } else {
+                chips.push(chip('chip-debito', 'Insc', fmtInt(-taxa)));
+            }
+        }
+
+        // Pontos Corridos
+        const pc = b.pontosCorridos || 0;
+        if (Math.abs(pc) >= 1) {
+            chips.push(chip(pc > 0 ? 'chip-credito' : 'chip-debito', 'PC', fmtInt(pc)));
+        }
+
+        // Mata-Mata
+        const mm = b.mataMata || 0;
+        if (Math.abs(mm) >= 1) {
+            chips.push(chip(mm > 0 ? 'chip-credito' : 'chip-debito', 'MM', fmtInt(mm)));
+        }
+
+        // Resta Um (só aparece se negativo — é punição)
+        const ru = b.restaUm || 0;
+        if (ru < -0.01) {
+            chips.push(chip('chip-ru', 'RU', fmtInt(ru)));
+        }
+
+        // Pagamentos (acertos) — desconta taxa se já foi paga diretamente (evita double)
+        let pag = b.acertos || 0;
+        if (pagouDireto) pag = pag - taxa;
+        if (pag > 0.01) {
+            chips.push(chip('chip-credito', 'Pag', fmtInt(pag)));
+        }
+
+        return chips.join('');
+    }
+
+    /**
      * Renderiza uma linha da tabela financeira
      * v3.1: Valores monetários + Layout expandido
      */
