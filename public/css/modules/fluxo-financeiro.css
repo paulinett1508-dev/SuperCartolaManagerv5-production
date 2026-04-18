@@ -45,6 +45,9 @@
   --chip-ru-bg:           rgba(249, 115, 22, 0.12);
   --chip-ru-text:         #fdba74;
   --chip-ru-border:       rgba(249, 115, 22, 0.25);
+
+  /* Variáveis Tesouraria V10 - Modo Escuro */
+  --tesouraria-contador-bg: rgba(0, 0, 0, 0.25);
 }
 
 /* === CLASSES UTILITÁRIAS DE VALORES === */
@@ -2838,6 +2841,9 @@ table.fluxo-participantes-tabela {
     --chip-ru-bg:           rgba(234, 88, 12, 0.10);
     --chip-ru-text:         #c2410c;
     --chip-ru-border:       rgba(234, 88, 12, 0.25);
+
+    /* Variáveis Tesouraria V10 - Modo Claro */
+    --tesouraria-contador-bg: rgba(255, 255, 255, 0.30);
 }
 
 /* Container de chips dentro da linha */
@@ -2924,8 +2930,8 @@ table.fluxo-participantes-tabela {
     gap: 4px;
     padding: 12px 16px;
     border-radius: 10px;
-    background: var(--bg-secondary, rgba(255,255,255,0.03));
-    border: 1px solid var(--border-subtle, rgba(255,255,255,0.08));
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .tesouraria-stat__label {
@@ -2965,8 +2971,8 @@ table.fluxo-participantes-tabela {
     margin: 0 0 12px;
     padding: 8px;
     border-radius: 10px;
-    background: var(--bg-secondary, rgba(255,255,255,0.02));
-    border: 1px solid var(--border-subtle, rgba(255,255,255,0.06));
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .tesouraria-filtro {
@@ -2998,7 +3004,7 @@ table.fluxo-participantes-tabela {
 .tesouraria-filtro .contador {
     padding: 0 6px;
     border-radius: 999px;
-    background: rgba(0,0,0,0.25);
+    background: var(--tesouraria-contador-bg);
     font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
 }
@@ -3033,6 +3039,32 @@ table.fluxo-participantes-tabela {
 
 /* Ocultar filter pills quando não aplicáveis (ex: pré-temporada) */
 .tesouraria-filtros[hidden] { display: none !important; }
+
+/* ============================================================
+   TESOURARIA V10 — OVERRIDES LIGHT MODE
+   ============================================================ */
+
+[data-theme="light"] .tesouraria-stat {
+    background: rgba(15, 23, 42, 0.03);
+    border-color: rgba(15, 23, 42, 0.10);
+}
+
+[data-theme="light"] .tesouraria-filtros {
+    background: rgba(15, 23, 42, 0.02);
+    border-color: rgba(15, 23, 42, 0.08);
+}
+
+[data-theme="light"] .tesouraria-filtro {
+    color: #475569;
+}
+
+[data-theme="light"] .tesouraria-filtro:hover {
+    color: #0f172a;
+}
+
+[data-theme="light"] .fluxo-participantes-tabela.tesouraria-v10 tbody tr:hover {
+    background: rgba(15, 23, 42, 0.04);
+}
 
 /* Responsividade Ajustes */
 @media (max-width: 480px) {
