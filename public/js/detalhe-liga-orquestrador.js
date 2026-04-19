@@ -1268,7 +1268,7 @@ async function carregarModuloCapitaoLuxo() {
 async function carregarModuloFluxoFinanceiro() {
     if (!window.orquestrador.modules.fluxoFinanceiro) {
         window.orquestrador.modules.fluxoFinanceiro = await vImport(
-            "./fluxo-financeiro.js?v10.3"
+            "./fluxo-financeiro.js?v10.4"
         );
     }
     return window.orquestrador.modules.fluxoFinanceiro;
