@@ -361,3 +361,128 @@
 .copa-shadow-strong {
     box-shadow: 0 20px 40px var(--copa-shadow-gold);
 }
+
+/* =====================================================================
+   BOTÃO REGRAS (teaser)
+   ===================================================================== */
+.copa-regras-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    background: transparent;
+    border: 1px solid var(--copa-gold, #d4af37);
+    border-radius: 20px;
+    color: var(--copa-gold, #d4af37);
+    font-size: 0.78rem;
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    line-height: 1.6;
+}
+.copa-regras-btn:hover {
+    background: var(--copa-gold, #d4af37);
+    color: #1a1a2e;
+}
+
+/* =====================================================================
+   MODAL DE REGRAS (bottom-sheet)
+   ===================================================================== */
+.copa-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    align-items: flex-end;
+    justify-content: center;
+}
+.copa-modal-overlay.ativo {
+    display: flex;
+}
+.copa-modal-sheet {
+    background: #1e293b;
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-width: 560px;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding-bottom: 32px;
+    animation: copaSlideUp 0.3s ease;
+}
+@keyframes copaSlideUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+}
+.copa-modal-handle {
+    width: 40px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    margin: 12px auto 0;
+}
+.copa-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.copa-modal-icon {
+    color: var(--copa-gold, #d4af37);
+    font-size: 24px !important;
+    flex-shrink: 0;
+}
+.copa-modal-title {
+    flex: 1;
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 0.95rem;
+    color: var(--copa-gold, #d4af37);
+    margin: 0;
+    text-align: left;
+}
+.copa-modal-close {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+.copa-modal-close:hover { color: #fff; }
+.copa-modal-body {
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+.copa-regras-section h4 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.83rem;
+    font-weight: 700;
+    color: var(--copa-gold, #d4af37);
+    margin: 0 0 6px;
+    text-align: left;
+}
+.copa-regras-section h4 .material-icons {
+    font-size: 17px !important;
+}
+.copa-regras-section p {
+    font-size: 0.81rem;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.55;
+    margin: 0;
+    text-align: left;
+}
+.copa-regras-section p + p { margin-top: 4px; }
+.copa-regras-sub {
+    font-size: 0.74rem !important;
+    color: rgba(255, 255, 255, 0.4) !important;
+    font-style: italic;
+}
