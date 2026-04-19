@@ -1211,4 +1211,31 @@ router.get('/:fixtureId/eventos', async (req, res) => {
   }
 });
 
+/**
+ * Retorna stats dos jogos do dia a partir do cache interno.
+ * Usado pelo matchday-routes para enriquecer /api/matchday/status
+ * sem duplicar fetch de APIs externas.
+ */
+export function getGameStatsFromCache() {
+  if (!cacheJogosDia) {
+    return { stats: { total: 0, aoVivo: 0, agendados: 0, encerrados: 0 }, fonte: 'sem-cache' };
+  }
+  const stats = calcularEstatisticas(cacheJogosDia);
+  const dataHoje = getDataHoje();
+  const staleAgeMs = cacheTimestamp ? Date.now() - cacheTimestamp : Infinity;
+
+  // Mesmas invalidacoes do /game-status
+  if (cacheFonte === 'cache-stale' && stats.aoVivo > 0 && (
+    (cacheDataReferencia && cacheDataReferencia !== dataHoje) ||
+    staleAgeMs > CACHE_STALE_MAX
+  )) {
+    stats.aoVivo = 0;
+  }
+  if (cacheFonte === 'globo' && stats.aoVivo > 0) {
+    stats.aoVivo = 0;
+  }
+
+  return { stats, fonte: cacheFonte };
+}
+
 export default router;

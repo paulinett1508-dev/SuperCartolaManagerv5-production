@@ -4,6 +4,7 @@ import cartolaApiService from '../services/cartolaApiService.js';
 import { buscarRankingParcial } from '../services/parciaisRankingService.js';
 import brasileiraoService from '../services/brasileirao-tabela-service.js';
 import { createMatchdayRateLimiter } from '../middleware/security.js';
+import { getGameStatsFromCache } from './jogos-ao-vivo-routes.js';
 
 const router = express.Router();
 
@@ -40,6 +41,15 @@ router.get('/status', async (req, res) => {
       console.warn('[MATCHDAY] Calendário não disponível:', err.message);
     }
 
+    // Stats de jogos ao vivo (reusa cache do jogos-ao-vivo-routes)
+    const { stats: gameStats } = getGameStatsFromCache();
+
+    // Polling recomendado baseado no estado real dos jogos
+    let pollRecomendado = 300; // 5min default
+    if (matchdayAtivo && gameStats.aoVivo > 0) pollRecomendado = 30;       // LIVE: 30s
+    else if (matchdayAtivo && gameStats.agendados > 0) pollRecomendado = 120; // INTERVAL: 2min
+    else if (matchdayAtivo) pollRecomendado = 180;                          // COOLING: 3min
+
     res.setHeader('Cache-Control', 'no-cache, must-revalidate');
     res.json({
       success: true,
@@ -47,6 +57,8 @@ router.get('/status', async (req, res) => {
       rodada_atual: status.rodadaAtual,
       mercado_aberto: status.mercadoAberto,
       status_mercado: status.status_mercado,
+      jogos: gameStats,
+      poll_recomendado: pollRecomendado,
       calendario
     });
   } catch (error) {
