@@ -171,7 +171,14 @@ Um documento por confronto.
 
 ## 6. Componentes Frontend
 
-### App Participante
+### 6.0 Teaser "Em Breve" (fase atual — pré-rodada 20)
+A tela teaser existente em `copa-times-sc.html` permanece como está, com um único acréscimo:
+- **Botão "Regras"** discreto (outline, pequeno) abaixo do badge "Em Breve".
+- Ao clicar: abre um **bottom-sheet/modal** com o resumo das regras da Copa (texto extraído desta spec, formatado em seções simples).
+- Conteúdo do modal: formato (grupos → oitavas → ... → final), como classificar (top 2 por grupo), mata-mata (soma de 2 rodadas), desempate (Ranking Geral), premiação (apenas finalistas).
+- Sem backend — conteúdo estático injetado via JS no próprio módulo.
+
+### App Participante (fase pós-sorteio)
 - `public/participante/js/modules/participante-copa-sc.js` — substituir teaser por módulo completo com 4 abas:
   - **Minha Copa:** próximo adversário, fase atual, caminho percorrido
   - **Grupos:** todos os 8 grupos com standings em tempo real
