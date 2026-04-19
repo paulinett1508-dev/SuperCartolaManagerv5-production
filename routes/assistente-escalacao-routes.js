@@ -1,12 +1,9 @@
 // =====================================================================
 // ASSISTENTE ESCALACAO ROUTES - Endpoints Multi-Fonte
 // =====================================================================
-// APENAS PARA PARTICIPANTES PREMIUM
-// =====================================================================
 
 import express from "express";
 import assistenteService from "../services/assistenteEscalacaoService.js";
-import { verificarParticipantePremium } from "../utils/premium-participante.js";
 import { sugerirModo, listarModos } from "../services/estrategia-sugestao.js";
 
 const router = express.Router();
@@ -25,26 +22,8 @@ function verificarSessaoParticipante(req, res, next) {
     next();
 }
 
-// =====================================================================
-// MIDDLEWARE: Verificar Acesso Premium
-// =====================================================================
-async function verificarPremium(req, res, next) {
-    const acesso = await verificarParticipantePremium(req);
-
-    if (!acesso.isPremium) {
-        return res.status(403).json({
-            success: false,
-            error: acesso.error || "Acesso restrito a participantes Premium",
-            code: acesso.code || 403,
-        });
-    }
-
-    req.premiumData = acesso;
-    next();
-}
-
-// Aplicar middlewares em todas as rotas
-router.use(verificarSessaoParticipante, verificarPremium);
+// Aplicar middleware de autenticação em todas as rotas
+router.use(verificarSessaoParticipante);
 
 // =====================================================================
 // GET /cenarios - Gera 3 cenarios de escalacao (Mitar/Equilibrado/Valorizar)

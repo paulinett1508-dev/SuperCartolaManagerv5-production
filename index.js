@@ -167,17 +167,11 @@ import { cleanExpiredSubscriptions } from "./controllers/notificationsController
 import { cronEscalacaoPendente } from "./services/notificationTriggers.js";
 import { verificarENotificarEscalacao, limparCacheNotificacoes } from "./services/smartEscalacaoNotifier.js";
 
-// 🎯 Dicas Premium
-import dicasPremiumRoutes from "./routes/dicas-premium-routes.js";
-
 // 🤖 Assistente Inteligente de Escalação (Multi-Fonte)
 import assistenteEscalacaoRoutes from "./routes/assistente-escalacao-routes.js";
 
 // 📰 Notícias personalizadas do time do coração
 import noticiasTimeRoutes from "./routes/noticias-time-routes.js";
-
-// 🤖 Big Cartola IA — RAG Chatbot
-import chatbotRoutes from "./routes/chatbot-routes.js";
 
 // 🏆 Copa do Mundo 2026 - Notícias e dados
 import copa2026NoticiasRoutes from "./routes/copa-2026-noticias-routes.js";
@@ -702,10 +696,6 @@ app.use("/api/admin/raio-x", raioXAnalyticsRoutes);
 app.use("/api/admin/escalacao-ia", escalacaoIARoutes);
 console.log("[SERVER] 📊 Rotas de Raio-X Analytics registradas em /api/admin/raio-x");
 
-// 🎯 Dicas Premium
-app.use("/api/dicas-premium", dicasPremiumRoutes);
-console.log("[SERVER] 🎯 Rotas de Dicas Premium registradas em /api/dicas-premium");
-
 // 🤖 Assistente Inteligente de Escalação
 app.use("/api/assistente", assistenteEscalacaoRoutes);
 console.log("[SERVER] 🤖 Rotas do Assistente de Escalação registradas em /api/assistente");
@@ -713,10 +703,6 @@ console.log("[SERVER] 🤖 Rotas do Assistente de Escalação registradas em /ap
 // 📰 Notícias do Time do Coração
 app.use("/api/noticias", noticiasTimeRoutes);
 console.log("[SERVER] 📰 Rotas de notícias personalizadas registradas em /api/noticias");
-
-// 🤖 Big Cartola IA — RAG Chatbot
-app.use("/api/chatbot", chatbotRoutes);
-console.log("[SERVER] 🤖 Rotas do Big Cartola IA registradas em /api/chatbot");
 
 // 🏆 Copa do Mundo 2026
 app.use("/api/copa-2026", copa2026NoticiasRoutes);

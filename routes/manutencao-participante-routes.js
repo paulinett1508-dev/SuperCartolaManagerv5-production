@@ -10,7 +10,6 @@ import express from "express";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { verificarParticipantePremium } from "../utils/premium-participante.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -58,17 +57,6 @@ router.get("/status", async (req, res) => {
                 ativo: true,
                 bloqueado: false,
                 devBypass: true
-            });
-        }
-
-        // Premium bypass: participante premium nunca é bloqueado por manutenção
-        const acesso = await verificarParticipantePremium(req);
-        if (acesso.isPremium) {
-            console.log("[MANUTENCAO-APP] Premium bypass para timeId:", req.session?.participante?.timeId);
-            return res.json({
-                ativo: true,
-                bloqueado: false,
-                premiumBypass: true
             });
         }
 
