@@ -157,11 +157,9 @@
         "participante/css/resta-um.css",
         "participante/css/pontos-corridos.css",
         "participante/css/module-lp.css",
-        "participante/css/whats-happening.css",
         "participante/css/round-xray-widget.css",
         "participante/css/campeao-widget.css",
-        "participante/css/mito-mico-modal.css",
-        "participante/css/chatbot.css"
+        "participante/css/mito-mico-modal.css"
       ]
     }
   },

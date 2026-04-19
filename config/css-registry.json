@@ -324,11 +324,6 @@
         "description": "Pull-to-refresh com glass-morphism"
       },
       {
-        "path": "public/participante/css/whats-happening.css",
-        "loadedBy": ["participante/index.html"],
-        "description": "Widget 'O que ta rolando' com disputas em tempo real"
-      },
-      {
         "path": "public/participante/css/round-xray-widget.css",
         "loadedBy": ["participante/index.html"],
         "description": "Widget pos-rodada com analise detalhada"
