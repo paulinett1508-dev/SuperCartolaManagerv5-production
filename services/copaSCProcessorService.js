@@ -227,26 +227,24 @@ export async function processarRodada(rodada, ligaId, temporada = CURRENT_SEASON
  * @returns {Promise<void>}
  */
 async function _verificarAvancamentoDeFase(ligaId, temporada, status, rodada) {
-    const ligaIdObj = new mongoose.Types.ObjectId(ligaId);
-
     switch (status) {
         case 'classificatorio':
-            await _verificarClassificatorio(ligaIdObj, temporada);
+            await _verificarClassificatorio(ligaId, temporada);
             break;
 
         case 'grupos':
-            await _verificarGrupos(ligaIdObj, temporada, rodada);
+            await _verificarGrupos(ligaId, temporada, rodada);
             break;
 
         case 'oitavas':
         case 'quartas':
         case 'semis':
-            await _verificarMataMata(ligaIdObj, temporada, status, rodada);
+            await _verificarMataMata(ligaId, temporada, status, rodada);
             break;
 
         case 'terceiro_lugar':
         case 'final':
-            await _verificarFinal(ligaIdObj, temporada);
+            await _verificarFinal(ligaId, temporada);
             break;
 
         default:
@@ -301,7 +299,7 @@ async function _verificarGrupos(ligaId, temporada, rodada) {
     const config = await CopaSCConfig.findOne({
         liga_id: ligaId,
         temporada
-    });
+    }).lean();
 
     if (!config) {
         console.error(`[COPA-SC] Config não encontrada ao avanço de grupos`);
