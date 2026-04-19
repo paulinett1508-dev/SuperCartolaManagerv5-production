@@ -84,9 +84,6 @@ export const ligaPatrimonio = loadDefinition('liga_patrimonio_def.json');
 // MÓDULOS SURVIVAL
 // =============================================================================
 
-/** Tiro Certo - Palpites de resultados reais */
-export const tiroCerto = loadDefinition('tiro_certo_def.json');
-
 /** Resta Um - Eliminação progressiva */
 export const restaUm = loadDefinition('resta_um_def.json');
 
@@ -116,7 +113,6 @@ export const allDefinitions = {
     ligaPatrimonio,
 
     // Survival
-    tiroCerto,
     restaUm,
 };
 
@@ -127,7 +123,7 @@ export const definitionsByCategory = {
     base: [rankingGeral, rankingRodada],
     confronto: [pontosCorridos, mataMata],
     estatistico: [ligasMensais, turnoReturno, top10, capitaoLuxo, luvaOuro, artilheiro, ligaPatrimonio],
-    survival: [tiroCerto, restaUm],
+    survival: [restaUm],
 };
 
 /**
@@ -148,7 +144,6 @@ export function getDefinitionById(moduleId) {
         'luva_ouro': luvaOuro,
         'artilheiro': artilheiro,
         'liga_patrimonio': ligaPatrimonio,
-        'tiro_certo': tiroCerto,
         'resta_um': restaUm,
     };
 
@@ -241,8 +236,7 @@ export default {
     luvaOuro,
     artilheiro,
     ligaPatrimonio,
-    tiroCerto,
     restaUm,
 };
 
-console.log('[DEFINITIONS] ✅ Camada de Definição carregada - 13 módulos disponíveis');
+console.log('[DEFINITIONS] ✅ Camada de Definição carregada - 12 módulos disponíveis');

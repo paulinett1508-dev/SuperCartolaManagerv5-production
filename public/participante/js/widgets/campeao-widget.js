@@ -9,7 +9,7 @@
  *
  * Modulos suportados:
  * - artilheiro, luva, capitao, mata-mata, pontos-corridos
- * - resta-um, tiro-certo, copa
+ * - resta-um, copa
  *
  * Uso (celebracao full-screen):
  *   window.CampeaoWidget.celebrar({
@@ -243,7 +243,6 @@ function dispararConfetti(modulo) {
         'mata-mata':['#FF5500', '#e8472b', '#ffffff'],
         'pontos-corridos': ['#FF5500', '#e8472b', '#ffffff'],
         'resta-um': ['#ffd700', '#f43f5e', '#ffffff'],
-        'tiro-certo':['#ffd700', '#FF5500', '#ffffff'],
         copa:       ['#ffd700', '#FF5500', '#ffffff'],
     };
 
