@@ -843,6 +843,7 @@ export class FluxoFinanceiroUI {
 
         // ✅ v5.1: Forçar CSS sticky nativo (sem workaround de clone)
         this._aplicarStickyHeader();
+        this._registrarFuncoesGlobaisTesouraria();
 
         // ✅ NOVO: Anexar tooltips de regras financeiras aos headers de módulos
         if (temporadaNum < 2026 || this._temRodadasConsolidadas) {
@@ -1859,6 +1860,50 @@ export class FluxoFinanceiroUI {
                 // Em caso de erro, tentar reload como último recurso
                 location.reload();
             }
+        };
+    }
+
+    /**
+     * v10: Filtros client-side da tesouraria.
+     * Aplica visibilidade via data-attributes na <tbody>.
+     */
+    _registrarFuncoesGlobaisTesouraria() {
+        if (window._filtrarTesourariaRegistered) return;
+        window._filtrarTesourariaRegistered = true;
+
+        let filtroAtual = 'todos';
+
+        const aplicar = () => {
+            const tbody = document.getElementById('participantesTableBody');
+            if (!tbody) return;
+            const linhas = [...tbody.querySelectorAll('tr.linha-participante')];
+
+            linhas.forEach((tr) => {
+                const sit = tr.dataset.situacao || '';
+                const inscPend = tr.dataset.inscPendente === 'true';
+                let visivel = true;
+                if (filtroAtual === 'devedores')          visivel = sit === 'devedor';
+                else if (filtroAtual === 'credores')      visivel = sit === 'credor';
+                else if (filtroAtual === 'insc-pendente') visivel = inscPend;
+                tr.style.display = visivel ? '' : 'none';
+            });
+
+            if (filtroAtual === 'saldo-desc') {
+                const ordenadas = linhas.sort((a, b) => {
+                    const sa = Math.abs(Number(a.dataset.saldo) || 0);
+                    const sb = Math.abs(Number(b.dataset.saldo) || 0);
+                    return sb - sa;
+                });
+                ordenadas.forEach((tr) => tbody.appendChild(tr));
+            }
+        };
+
+        window.filtrarTesouraria = (filtro) => {
+            filtroAtual = filtro;
+            document.querySelectorAll('.tesouraria-filtro').forEach((btn) => {
+                btn.classList.toggle('is-active', btn.dataset.filtro === filtro);
+            });
+            aplicar();
         };
     }
 
