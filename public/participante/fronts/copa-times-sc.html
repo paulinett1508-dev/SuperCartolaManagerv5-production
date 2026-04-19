@@ -37,12 +37,12 @@
             </div>
 
             <!-- Modal de Regras (bottom-sheet) -->
-            <div class="copa-modal-overlay" id="copaRegrasOverlay">
-                <div class="copa-modal-sheet" id="copaRegrasSheet">
+            <div class="copa-modal-overlay" id="copaRegrasOverlay" role="presentation">
+                <div class="copa-modal-sheet" id="copaRegrasSheet" role="dialog" aria-modal="true" aria-labelledby="copaRegrasTitle">
                     <div class="copa-modal-handle"></div>
                     <div class="copa-modal-header">
                         <span class="material-icons copa-modal-icon">emoji_events</span>
-                        <h3 class="copa-modal-title">Regras da Copa de Times SC</h3>
+                        <h3 class="copa-modal-title" id="copaRegrasTitle">Regras da Copa de Times SC</h3>
                         <button class="copa-modal-close" id="copaRegrasBtnClose" aria-label="Fechar">
                             <span class="material-icons">close</span>
                         </button>
@@ -188,6 +188,9 @@
     if (btnClose) btnClose.addEventListener('click', fecharModal);
     if (overlay) overlay.addEventListener('click', function(e) {
         if (e.target === overlay) fecharModal();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && overlay && overlay.classList.contains('ativo')) fecharModal();
     });
 })();
 </script>

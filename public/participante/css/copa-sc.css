@@ -382,7 +382,7 @@
 }
 .copa-regras-btn:hover {
     background: var(--copa-gold, #d4af37);
-    color: #1a1a2e;
+    color: var(--copa-dark, #1a1a2e);
 }
 
 /* =====================================================================
@@ -401,7 +401,7 @@
     display: flex;
 }
 .copa-modal-sheet {
-    background: #1e293b;
+    background: var(--copa-gray, #1e293b);
     border-radius: 20px 20px 0 0;
     width: 100%;
     max-width: 560px;
