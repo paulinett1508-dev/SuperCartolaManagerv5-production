@@ -9,6 +9,7 @@ const router = express.Router();
 const COMPETICAO_ID = 'BSA';
 
 router.get('/', async (req, res) => {
+    // Public endpoint — intentionally open to all (no auth required)
     try {
         // Buscar jogos reais da API
         const dataHoje = new Date().toISOString().split('T')[0];

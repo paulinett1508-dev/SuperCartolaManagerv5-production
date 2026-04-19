@@ -36,9 +36,8 @@ function lerEstado() {
  * Verifica na ordem:
  *   1. Manutenção ativa? Se não → libera
  *   2. Sessão admin (dev bypass)? → libera com flag devBypass
- *   3. Participante Premium? → libera com flag premiumBypass
- *   4. TimeId na whitelist? → libera
- *   5. Senão → bloqueado, retorna customização da splash
+ *   3. TimeId na whitelist? → libera
+ *   4. Modo de operação (global/modulos/usuarios) → retorna estado
  */
 router.get("/status", async (req, res) => {
     try {
