@@ -1,0 +1,197 @@
+<h2>Redesign — Tesouraria Admin</h2>
+<p class="subtitle">3 abordagens para substituir a tabela de colunas atual. Qual direção faz mais sentido?</p>
+
+<style>
+  .mockup-demo { background: #1a1a2e; border-radius: 10px; padding: 16px; margin: 0; font-family: Inter, sans-serif; font-size: 12px; color: #ccc; }
+  .mock-header { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .chip { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 20px; font-size: 10px; font-weight: 600; margin: 1px; }
+  .chip-green { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+  .chip-red { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+  .chip-blue { background: rgba(99,102,241,0.15); color: #818cf8; border: 1px solid rgba(99,102,241,0.3); }
+  .chip-gray { background: rgba(107,114,128,0.15); color: #9ca3af; border: 1px solid rgba(107,114,128,0.2); }
+  .chip-orange { background: rgba(249,115,22,0.15); color: #fb923c; border: 1px solid rgba(249,115,22,0.3); }
+  .saldo-pos { color: #4ade80; font-weight: 700; font-size: 13px; }
+  .saldo-neg { color: #f87171; font-weight: 700; font-size: 13px; }
+  .row-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #2a2a3e; }
+  .avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg,#FF5500,#ff8040); display: flex; align-items:center; justify-content:center; font-weight:700; font-size:11px; color:#fff; flex-shrink:0; }
+  .name { font-size: 12px; font-weight: 600; color: #e0e0e0; min-width: 110px; }
+  .chips-row { flex: 1; display: flex; flex-wrap: wrap; gap: 2px; }
+  .btn-mini { padding: 2px 8px; border-radius: 4px; font-size: 9px; background: rgba(255,85,0,0.2); color: #FF5500; border: 1px solid rgba(255,85,0,0.3); cursor: pointer; white-space: nowrap; }
+  .summary-bar { display: flex; gap: 12px; margin-bottom: 12px; }
+  .stat-box { flex: 1; background: rgba(255,255,255,0.04); border-radius: 8px; padding: 8px 10px; text-align: center; }
+  .stat-val { font-size: 14px; font-weight: 700; }
+  .stat-lbl { font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+  .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .p-card { background: rgba(255,255,255,0.04); border-radius: 8px; padding: 8px 10px; border-left: 3px solid; }
+  .p-card.credor { border-color: #4ade80; }
+  .p-card.devedor { border-color: #f87171; }
+  .p-card-name { font-size: 11px; font-weight: 600; color: #e0e0e0; margin-bottom: 4px; }
+  .expand-row { background: rgba(255,255,255,0.02); border-radius: 6px; margin-bottom: 4px; }
+  .expand-header { display: flex; align-items: center; gap: 8px; padding: 8px 10px; cursor: pointer; }
+  .expand-body { padding: 6px 10px 10px 46px; display: none; }
+  .expand-body.open { display: block; }
+  .section-label { font-size: 9px; text-transform: uppercase; color: #888; letter-spacing: 0.8px; margin: 6px 0 3px; }
+</style>
+
+<div class="options">
+
+  <!-- OPÇÃO A -->
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Card Grid por Status</h3>
+      <p>Cards compactos agrupados em Credores / Devedores. Chips de módulos visíveis no card. Saldo em destaque.</p>
+      <div class="mockup-demo" style="margin-top:10px">
+        <div class="mock-header">Tesouraria 2026 — 11 credores · 24 devedores</div>
+        <div class="section-label">● Credores</div>
+        <div class="card-grid">
+          <div class="p-card credor">
+            <div class="p-card-name">Vitim</div>
+            <div style="margin-bottom:4px">
+              <span class="chip chip-blue">2025 +1524</span>
+              <span class="chip chip-red">Insc −180</span>
+            </div>
+            <div class="saldo-pos">+R$1.394,67</div>
+          </div>
+          <div class="p-card credor">
+            <div class="p-card-name">Mauricio Wendel</div>
+            <div style="margin-bottom:4px">
+              <span class="chip chip-blue">2025 +1300</span>
+              <span class="chip chip-red">Insc −180</span>
+            </div>
+            <div class="saldo-pos">+R$1.129,38</div>
+          </div>
+        </div>
+        <div class="section-label" style="margin-top:8px">!! Devedores</div>
+        <div class="card-grid">
+          <div class="p-card devedor">
+            <div class="p-card-name">Raylson Fernandes</div>
+            <div style="margin-bottom:4px">
+              <span class="chip chip-red">2025 −209</span>
+              <span class="chip chip-red">Insc −180</span>
+              <span class="chip chip-orange">RU −2</span>
+            </div>
+            <div class="saldo-neg">−R$491,27</div>
+          </div>
+          <div class="p-card devedor">
+            <div class="p-card-name">Raimundo</div>
+            <div style="margin-bottom:4px">
+              <span class="chip chip-red">2025 −404</span>
+              <span class="chip chip-red">Insc −180</span>
+            </div>
+            <div class="saldo-neg">−R$415,46</div>
+          </div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Pros</h4><ul><li>Visual, fácil de escanear</li><li>Agrupa por situação</li></ul></div>
+        <div class="cons"><h4>Contras</h4><ul><li>Toma mais espaço vertical</li><li>Navegar para extrato requer mais cliques</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPÇÃO B -->
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Lista Compacta + Chips Inline ⭐ Recomendado</h3>
+      <p>Linha por participante. Chips aparecem <em>apenas quando têm valor</em>. Saldo à direita, ação rápida de acesso ao extrato.</p>
+      <div class="mockup-demo" style="margin-top:10px">
+        <div class="mock-header">Tesouraria 2026</div>
+        <div class="summary-bar">
+          <div class="stat-box"><div class="stat-val saldo-pos">R$3.652</div><div class="stat-lbl">A Receber</div></div>
+          <div class="stat-box"><div class="stat-val saldo-neg">R$4.221</div><div class="stat-lbl">A Pagar</div></div>
+          <div class="stat-box"><div class="stat-val" style="color:#fb923c">24</div><div class="stat-lbl">Devedores</div></div>
+          <div class="stat-box"><div class="stat-val" style="color:#4ade80">11</div><div class="stat-lbl">Credores</div></div>
+        </div>
+        <div class="row-item">
+          <div class="avatar">V</div>
+          <div class="name">Vitim</div>
+          <div class="chips-row">
+            <span class="chip chip-blue">2025 +1.524</span>
+            <span class="chip chip-red">Insc −180</span>
+            <span class="chip chip-gray">PC +51</span>
+          </div>
+          <div class="saldo-pos">+1.394</div>
+          <button class="btn-mini">Extrato</button>
+        </div>
+        <div class="row-item">
+          <div class="avatar">R</div>
+          <div class="name">Raylson F.</div>
+          <div class="chips-row">
+            <span class="chip chip-red">2025 −209</span>
+            <span class="chip chip-red">Insc −180</span>
+            <span class="chip chip-orange">RU −2</span>
+            <span class="chip chip-gray">PC −100</span>
+          </div>
+          <div class="saldo-neg">−491</div>
+          <button class="btn-mini">Extrato</button>
+        </div>
+        <div class="row-item">
+          <div class="avatar">B</div>
+          <div class="name">BarrosB</div>
+          <div class="chips-row">
+            <span class="chip chip-green">Insc ✓</span>
+            <span class="chip chip-gray">PC +44</span>
+          </div>
+          <div class="saldo-pos">+44</div>
+          <button class="btn-mini">Extrato</button>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Pros</h4><ul><li>Denso e eficiente</li><li>Summary bar no topo</li><li>Chips surgem só quando relevantes</li><li>Linha por linha — fácil comparar</li></ul></div>
+        <div class="cons"><h4>Contras</h4><ul><li>Pode ficar longo com 35 participantes</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPÇÃO C -->
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Linhas Expansíveis</h3>
+      <p>Lista ultra-compacta: só nome + saldo + status. Clicando na linha expande chips de detalhe. Máxima densidade.</p>
+      <div class="mockup-demo" style="margin-top:10px">
+        <div class="mock-header">Tesouraria 2026 — 35 participantes</div>
+        <div class="expand-row">
+          <div class="expand-header" onclick="this.nextElementSibling.classList.toggle('open')">
+            <div class="avatar">V</div>
+            <div class="name">Vitim</div>
+            <span class="chip chip-green" style="margin-left:auto">CREDOR</span>
+            <div class="saldo-pos" style="margin-left:8px;min-width:60px;text-align:right">+1.394</div>
+            <span style="font-size:10px;color:#888;margin-left:6px">▾</span>
+          </div>
+          <div class="expand-body open">
+            <span class="chip chip-blue">2025 +1.524</span>
+            <span class="chip chip-red">Insc −180</span>
+            <span class="chip chip-gray">PC +51</span>
+            <button class="btn-mini" style="margin-left:8px">Ver Extrato</button>
+          </div>
+        </div>
+        <div class="expand-row">
+          <div class="expand-header">
+            <div class="avatar">R</div>
+            <div class="name">Raylson F.</div>
+            <span class="chip chip-red" style="margin-left:auto">DEVEDOR</span>
+            <div class="saldo-neg" style="margin-left:8px;min-width:60px;text-align:right">−491</div>
+            <span style="font-size:10px;color:#888;margin-left:6px">▸</span>
+          </div>
+        </div>
+        <div class="expand-row">
+          <div class="expand-header">
+            <div class="avatar">B</div>
+            <div class="name">BarrosB</div>
+            <span class="chip chip-green" style="margin-left:auto">CREDOR</span>
+            <div class="saldo-pos" style="margin-left:8px;min-width:60px;text-align:right">+44</div>
+            <span style="font-size:10px;color:#888;margin-left:6px">▸</span>
+          </div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Pros</h4><ul><li>Máxima densidade — 35 linhas numa tela</li><li>Detalhes sob demanda</li></ul></div>
+        <div class="cons"><h4>Contras</h4><ul><li>Requer interação para ver contexto</li><li>Chips ficam escondidos por padrão</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>

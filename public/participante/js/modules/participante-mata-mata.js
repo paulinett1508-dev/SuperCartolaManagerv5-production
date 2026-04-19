@@ -399,40 +399,65 @@ function iniciarAutoRefresh() {
   estado._refreshAtivo = true;
   if (window.Log) Log.info(`[MATA-MATA] 🔄 Auto-refresh ativado (${REFRESH_INTERVAL_MS / 1000}s)`);
 
-  estado._refreshInterval = setInterval(async () => {
-    if (!isParciaisAoVivo()) {
-      pararAutoRefresh();
-      return;
-    }
+  // ✅ v2.0: Usar MatchdayService events quando disponível (elimina polling duplicado)
+  const MS = window.MatchdayService;
+  if (MS && MS.isActive) {
+    const _onParciais = async () => {
+      try {
+        if (estado.edicaoSelecionada && estado.faseSelecionada) {
+          await carregarFase(estado.edicaoSelecionada, estado.faseSelecionada);
+          estado._ultimaAtualizacao = new Date();
+          atualizarIndicadorAtualizacao();
+        }
+      } catch (e) {
+        if (window.Log) Log.warn("[MATA-MATA] Erro no refresh via MS:", e.message);
+      }
+    };
+    const _onStop = () => pararAutoRefresh();
 
-    try {
-      if (window.Log) Log.info("[MATA-MATA] 🔄 Atualizando parciais...");
+    MS.on('data:parciais', _onParciais);
+    MS.on('matchday:stop', _onStop);
 
-      // Verificar se mercado mudou
-      await carregarStatusMercado();
-      if (estado.mercadoAberto) {
-        if (window.Log) Log.info("[MATA-MATA] ✅ Mercado abriu, parando auto-refresh");
+    // Guardar refs para cleanup
+    estado._msOnParciais = _onParciais;
+    estado._msOnStop = _onStop;
+  } else {
+    // Fallback: polling tradicional quando MatchdayService não está ativo
+    estado._refreshInterval = setInterval(async () => {
+      if (!isParciaisAoVivo()) {
         pararAutoRefresh();
         return;
       }
 
-      // Recarregar fase atual com parciais frescos
-      if (estado.edicaoSelecionada && estado.faseSelecionada) {
-        await carregarFase(estado.edicaoSelecionada, estado.faseSelecionada);
-        estado._ultimaAtualizacao = new Date();
-        atualizarIndicadorAtualizacao();
-        if (window.Log) Log.info("[MATA-MATA] ✅ Parciais atualizadas");
+      try {
+        await carregarStatusMercado();
+        if (estado.mercadoAberto) {
+          pararAutoRefresh();
+          return;
+        }
+
+        if (estado.edicaoSelecionada && estado.faseSelecionada) {
+          await carregarFase(estado.edicaoSelecionada, estado.faseSelecionada);
+          estado._ultimaAtualizacao = new Date();
+          atualizarIndicadorAtualizacao();
+        }
+      } catch (e) {
+        if (window.Log) Log.warn("[MATA-MATA] Erro no auto-refresh:", e.message);
       }
-    } catch (e) {
-      if (window.Log) Log.warn("[MATA-MATA] ⚠️ Erro no auto-refresh:", e.message);
-    }
-  }, REFRESH_INTERVAL_MS);
+    }, REFRESH_INTERVAL_MS);
+  }
 }
 
 function pararAutoRefresh() {
   if (estado._refreshInterval) {
     clearInterval(estado._refreshInterval);
     estado._refreshInterval = null;
+  }
+  // Cleanup MatchdayService listeners
+  const MS = window.MatchdayService;
+  if (MS) {
+    if (estado._msOnParciais) { MS.off('data:parciais', estado._msOnParciais); estado._msOnParciais = null; }
+    if (estado._msOnStop) { MS.off('matchday:stop', estado._msOnStop); estado._msOnStop = null; }
   }
   if (estado._abortController) {
     estado._abortController.abort();
@@ -476,18 +501,33 @@ function atualizarIndicadorAtualizacao() {
 // ✅ v8.0: Buscar parciais para fase ativa e enriquecer confrontos com pontos ao vivo
 async function buscarParciaisFaseAtiva(confrontos) {
   try {
-    estado._abortController = new AbortController();
-    const res = await fetch(`/api/matchday/parciais/${estado.ligaId}`, {
-      signal: estado._abortController.signal,
-    });
-    if (!res.ok) return null;
+    // ✅ v2.0: Reusar dados do MatchdayService (já faz polling a cada 30s)
+    // em vez de fetch independente que duplicava requisições
+    const MS = window.MatchdayService;
+    let ranking = null;
+    let rodada = null;
 
-    const data = await res.json();
-    if (!data || !data.disponivel || !data.ranking) return null;
+    if (MS && MS.isActive && MS.lastRanking && MS.lastRanking.length > 0) {
+      ranking = MS.lastRanking;
+      rodada = MS.currentRodada;
+    } else {
+      // Fallback: fetch direto quando MatchdayService não está ativo
+      estado._abortController = new AbortController();
+      const res = await fetch(`/api/matchday/parciais/${estado.ligaId}`, {
+        signal: estado._abortController.signal,
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (!data || !data.disponivel || !data.ranking) return null;
+      ranking = data.ranking;
+      rodada = data.rodada;
+    }
+
+    if (!ranking) return null;
 
     // Criar mapa de pontos por timeId (usar pontos_rodada_atual, não acumulado)
     const pontosMap = new Map();
-    data.ranking.forEach(t => {
+    ranking.forEach(t => {
       pontosMap.set(String(t.timeId), t.pontos_rodada_atual ?? t.pontos ?? 0);
     });
 
@@ -511,7 +551,7 @@ async function buscarParciaisFaseAtiva(confrontos) {
     });
 
     estado._ultimaAtualizacao = new Date();
-    return { confrontos: confrontosAoVivo, rodada: data.rodada };
+    return { confrontos: confrontosAoVivo, rodada };
   } catch (e) {
     if (e.name === "AbortError") return null;
     if (window.Log) Log.warn("[MATA-MATA] ⚠️ Erro ao buscar parciais fase:", e.message);

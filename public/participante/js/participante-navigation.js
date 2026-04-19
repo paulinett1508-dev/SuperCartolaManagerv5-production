@@ -918,21 +918,25 @@ class ParticipanteNavigation {
                 this._carregandoModulo = null;
             }
 
-            // ✅ v4.2: SEMPRE restaurar opacity e esconder overlays (evita UI travada)
-            // ✅ v4.3: Restaurar com transição suave de entrada
-            container.style.transition = 'opacity 0.2s ease-out, transform 0.2s ease-out';
-            container.style.opacity = '1';
-            container.style.transform = 'translateY(0)';
-            // ✅ v4.4: Limpar transform após animação — transform: translateY(0) cria
-            // containing block para position:fixed, quebrando modais/bottom-sheets
-            setTimeout(() => { container.style.transform = ''; }, 250);
+            // ✅ v5.9: Só restaurar UI se esta ainda é a navegação atual
+            // Se outra navegação já começou, ela gerencia o estado visual
+            if (this._navegacaoEmAndamento === navegacaoId) {
+                // ✅ v4.2: Restaurar opacity e esconder overlays (evita UI travada)
+                // ✅ v4.3: Restaurar com transição suave de entrada
+                container.style.transition = 'opacity 0.2s ease-out, transform 0.2s ease-out';
+                container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
+                // ✅ v4.4: Limpar transform após animação — transform: translateY(0) cria
+                // containing block para position:fixed, quebrando modais/bottom-sheets
+                setTimeout(() => { container.style.transform = ''; }, 250);
 
-            if (window.SplashScreen) {
-                window.SplashScreen.hide();
-            }
+                if (window.SplashScreen) {
+                    window.SplashScreen.hide();
+                }
 
-            if (window.LoadingOverlay) {
-                window.LoadingOverlay.hide();
+                if (window.LoadingOverlay) {
+                    window.LoadingOverlay.hide();
+                }
             }
         }
     }

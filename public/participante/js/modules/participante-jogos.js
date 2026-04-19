@@ -43,7 +43,7 @@ const EVENTO_ICONES = {
 
 // Intervalo de auto-refresh (ms)
 // v5.7: Reduzido de 60s para 30s para acompanhar TTL do cache backend
-const AUTO_REFRESH_INTERVAL = 30000; // 30 segundos
+const AUTO_REFRESH_INTERVAL = 45000; // 45 segundos (reduzido de 30s para diminuir carga)
 let refreshTimer = null;
 
 // Status que indicam jogo ao vivo

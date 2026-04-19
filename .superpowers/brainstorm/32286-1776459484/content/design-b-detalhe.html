@@ -1,0 +1,160 @@
+<h2>Design B — Detalhamento</h2>
+<p class="subtitle">Tesouraria Admin · Lista Compacta + Chips Inline. Revise cada seção e confirme.</p>
+
+<style>
+  body { font-family: Inter, sans-serif; }
+  .demo { background: #12121f; border-radius: 12px; padding: 20px; color: #ccc; font-size: 12px; }
+  .section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #FF5500; font-weight: 700; margin: 0 0 10px; }
+
+  /* Summary bar */
+  .summary-bar { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 20px; }
+  .stat { background: rgba(255,255,255,0.05); border-radius: 8px; padding: 10px 12px; text-align: center; border: 1px solid rgba(255,255,255,0.06); }
+  .stat-val { font-size: 15px; font-weight: 700; line-height: 1; }
+  .stat-lbl { font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 0.6px; margin-top: 3px; }
+  .green { color: #4ade80; } .red { color: #f87171; } .orange { color: #fb923c; } .blue { color: #818cf8; }
+
+  /* Filters */
+  .filters { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+  .filt { padding: 4px 10px; border-radius: 20px; font-size: 10px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: #aaa; }
+  .filt.active { background: rgba(255,85,0,0.2); border-color: rgba(255,85,0,0.5); color: #FF5500; font-weight: 600; }
+
+  /* Table rows */
+  .trow { display: flex; align-items: center; gap: 10px; padding: 9px 4px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.15s; }
+  .trow:hover { background: rgba(255,255,255,0.03); border-radius: 6px; }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items:center; justify-content:center; font-weight:700; font-size:11px; color:#fff; flex-shrink:0; }
+  .name { font-size: 12px; font-weight: 600; color: #e0e0e0; width: 130px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chips { flex: 1; display: flex; flex-wrap: wrap; gap: 3px; align-items: center; }
+  .chip { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 20px; font-size: 10px; font-weight: 600; white-space: nowrap; }
+  .c-2025p  { background: rgba(99,102,241,0.15); color: #818cf8; border: 1px solid rgba(99,102,241,0.3); }
+  .c-2025n  { background: rgba(239,68,68,0.12); color: #fca5a5; border: 1px solid rgba(239,68,68,0.25); }
+  .c-inscok { background: rgba(34,197,94,0.12); color: #86efac; border: 1px solid rgba(34,197,94,0.25); }
+  .c-inscn  { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+  .c-pc     { background: rgba(148,163,184,0.1); color: #94a3b8; border: 1px solid rgba(148,163,184,0.2); }
+  .c-mm     { background: rgba(148,163,184,0.1); color: #94a3b8; border: 1px solid rgba(148,163,184,0.2); }
+  .c-ru     { background: rgba(249,115,22,0.12); color: #fdba74; border: 1px solid rgba(249,115,22,0.25); }
+  .c-ac     { background: rgba(34,197,94,0.12); color: #86efac; border: 1px solid rgba(34,197,94,0.25); }
+  .saldo { font-size: 13px; font-weight: 700; width: 72px; text-align: right; flex-shrink: 0; }
+  .btn-ex { padding: 3px 10px; border-radius: 5px; font-size: 10px; background: rgba(255,85,0,0.15); color: #FF5500; border: 1px solid rgba(255,85,0,0.3); cursor: pointer; flex-shrink: 0; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.06); }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: #888; }
+</style>
+
+<div class="mockup">
+  <div class="mockup-header">Tesouraria 2026 — prévia completa</div>
+  <div class="mockup-body">
+    <div class="demo">
+
+      <!-- 1. SUMMARY BAR -->
+      <div class="section-title">1 · Barra de Resumo</div>
+      <div class="summary-bar">
+        <div class="stat"><div class="stat-val green">R$3.652</div><div class="stat-lbl">A Receber</div></div>
+        <div class="stat"><div class="stat-val red">R$4.883</div><div class="stat-lbl">A Pagar</div></div>
+        <div class="stat"><div class="stat-val orange">24</div><div class="stat-lbl">Devedores</div></div>
+        <div class="stat"><div class="stat-val blue">11</div><div class="stat-lbl">Credores</div></div>
+      </div>
+
+      <!-- 2. FILTROS -->
+      <div class="section-title">2 · Filtros Rápidos</div>
+      <div class="filters">
+        <div class="filt active">Todos (35)</div>
+        <div class="filt">Devedores (24)</div>
+        <div class="filt">Credores (11)</div>
+        <div class="filt">Insc. Pendente</div>
+        <div class="filt">Ordenar: Saldo ↓</div>
+      </div>
+
+      <!-- 3. LISTA -->
+      <div class="section-title">3 · Lista — Chips por Contexto</div>
+
+      <!-- credor com saldo 2025 positivo -->
+      <div class="trow">
+        <div class="avatar" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">V</div>
+        <div class="name">Vitim</div>
+        <div class="chips">
+          <span class="chip c-2025p">2025 +1.524</span>
+          <span class="chip c-inscn">Insc −180</span>
+          <span class="chip c-pc">PC +51</span>
+        </div>
+        <div class="saldo green">+1.394</div>
+        <button class="btn-ex">Extrato</button>
+      </div>
+
+      <!-- devedor com saldo 2025 negativo + resta um -->
+      <div class="trow">
+        <div class="avatar" style="background:linear-gradient(135deg,#dc2626,#ef4444)">R</div>
+        <div class="name">Raylson Fernandes</div>
+        <div class="chips">
+          <span class="chip c-2025n">2025 −209</span>
+          <span class="chip c-inscn">Insc −180</span>
+          <span class="chip c-ru">RU −2</span>
+          <span class="chip c-pc">PC −100</span>
+        </div>
+        <div class="saldo red">−491</div>
+        <button class="btn-ex">Extrato</button>
+      </div>
+
+      <!-- inscricao quitada + credor -->
+      <div class="trow">
+        <div class="avatar" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">B</div>
+        <div class="name">BarrosB</div>
+        <div class="chips">
+          <span class="chip c-inscok">Insc ✓</span>
+          <span class="chip c-pc">PC +44</span>
+        </div>
+        <div class="saldo green">+44</div>
+        <button class="btn-ex">Extrato</button>
+      </div>
+
+      <!-- pagou parcial + mata-mata -->
+      <div class="trow">
+        <div class="avatar" style="background:linear-gradient(135deg,#b45309,#f59e0b)">G</div>
+        <div class="name">GAAVAZ.FC</div>
+        <div class="chips">
+          <span class="chip c-inscn">Insc −180</span>
+          <span class="chip c-ac">Pag +50</span>
+          <span class="chip c-mm">MM +20</span>
+        </div>
+        <div class="saldo red">−110</div>
+        <button class="btn-ex">Extrato</button>
+      </div>
+
+      <!-- sem pendencia 2025 so inscricao -->
+      <div class="trow">
+        <div class="avatar" style="background:linear-gradient(135deg,#065f46,#10b981)">F</div>
+        <div class="name">fc.catumbi</div>
+        <div class="chips">
+          <span class="chip c-inscn">Insc −180</span>
+          <span class="chip c-pc">PC +30</span>
+        </div>
+        <div class="saldo red">−150</div>
+        <button class="btn-ex">Extrato</button>
+      </div>
+
+      <!-- legenda de chips -->
+      <div class="legend">
+        <span class="legend-item"><span class="chip c-2025p" style="font-size:9px">2025 +</span> Saldo anterior positivo</span>
+        <span class="legend-item"><span class="chip c-2025n" style="font-size:9px">2025 −</span> Dívida acumulada</span>
+        <span class="legend-item"><span class="chip c-inscok" style="font-size:9px">Insc ✓</span> Inscrição quitada</span>
+        <span class="legend-item"><span class="chip c-inscn" style="font-size:9px">Insc −180</span> Inscrição devida</span>
+        <span class="legend-item"><span class="chip c-pc" style="font-size:9px">PC ±</span> Pontos Corridos</span>
+        <span class="legend-item"><span class="chip c-mm" style="font-size:9px">MM ±</span> Mata-Mata</span>
+        <span class="legend-item"><span class="chip c-ru" style="font-size:9px">RU −</span> Resta Um</span>
+        <span class="legend-item"><span class="chip c-ac" style="font-size:9px">Pag +</span> Pagamento recebido</span>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:20px">
+  <h3>O que muda vs. o atual</h3>
+  <ul>
+    <li><strong>Remove:</strong> colunas Timeline, P.Corridos, Mata-Mata, Top 10, Melhor Mês, Artilheiro, Luva Ouro, Resta Um, Cap. Luxo, Aj. Manuais (13 colunas)</li>
+    <li><strong>Adiciona:</strong> barra de resumo (4 stats), filtros rápidos, chips contextuais por linha</li>
+    <li><strong>Mantém:</strong> botão de extrato detalhado (abre o modal existente), ordenação por saldo</li>
+    <li><strong>Chips aparecem só quando relevantes</strong> — participante sem saldo 2025 não mostra chip 2025</li>
+  </ul>
+</div>
+
+<p class="subtitle" style="margin-top:16px">Esse design está correto? Algum chip ou seção que precisa ajustar antes de escrever o spec?</p>
