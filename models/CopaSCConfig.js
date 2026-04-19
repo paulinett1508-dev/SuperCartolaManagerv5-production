@@ -8,7 +8,7 @@ import mongoose from 'mongoose';
 import { CURRENT_SEASON } from '../config/seasons.js';
 
 const standingSchema = new mongoose.Schema({
-    participante_id: { type: mongoose.Schema.Types.ObjectId, required: true },
+    participante_id: { type: Number, required: true },
     pontos: { type: Number, default: 0 },
     jogos: { type: Number, default: 0 },
     vitorias: { type: Number, default: 0 },
@@ -21,7 +21,7 @@ const standingSchema = new mongoose.Schema({
 
 const grupoSchema = new mongoose.Schema({
     nome: { type: String, required: true },
-    times: [{ type: mongoose.Schema.Types.ObjectId }],
+    times: [{ type: Number }],
     standings: [standingSchema]
 }, { _id: false });
 
@@ -47,7 +47,7 @@ const CopaSCConfigSchema = new mongoose.Schema({
         ],
         default: 'pre_sorteio'
     },
-    cabecas_de_chave: [{ type: mongoose.Schema.Types.ObjectId }],
+    cabecas_de_chave: [{ type: Number }],
     grupos: [grupoSchema],
     calendario: {
         classificatorio: { type: [Number], default: [20, 21, 22, 23] },

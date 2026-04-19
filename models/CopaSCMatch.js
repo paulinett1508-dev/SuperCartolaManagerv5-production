@@ -31,11 +31,11 @@ const CopaSCMatchSchema = new mongoose.Schema({
     confronto_num: { type: Number, default: 1 },
     jornada: { type: Number, default: null },
     mandante_id: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Number,
         required: true
     },
     visitante_id: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Number,
         required: true
     },
     pontos: {
@@ -46,7 +46,7 @@ const CopaSCMatchSchema = new mongoose.Schema({
         mandante:  { type: Number, default: 0 },
         visitante: { type: Number, default: 0 }
     },
-    vencedor_id: { type: mongoose.Schema.Types.ObjectId, default: null },
+    vencedor_id: { type: Number, default: null },
     status: {
         type: String,
         enum: ['agendado', 'em_andamento', 'finalizado'],
