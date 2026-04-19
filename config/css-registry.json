@@ -209,11 +209,6 @@
         "description": "Analytics de repositorio e gestao de branches"
       },
       {
-        "path": "public/css/modules/admin-tiro-certo.css",
-        "loadedBy": ["admin-tiro-certo.html"],
-        "description": "Gerenciamento admin do modo Tiro Certo (Survival)"
-      },
-      {
         "path": "public/css/modules/admin-resta-um.css",
         "loadedBy": ["admin-resta-um.html"],
         "description": "Gerenciamento admin do modo Resta Um (Eliminacao Progressiva)"
@@ -306,12 +301,6 @@
         "path": "public/participante/css/copa-sc.css",
         "loadedBy": ["participante/index.html"],
         "description": "Tema Copa Super Cartola (dourado/trofeu)"
-      },
-      {
-        "path": "public/participante/css/tiro-certo.css",
-        "loadedBy": ["participante/index.html"],
-        "description": "Tema Tiro Certo Survival (laranja/mira) — teaser 2º turno",
-        "moduleColor": "--tc-primary (mapeia var(--app-primary))"
       },
       {
         "path": "public/participante/css/extrato-bank.css",

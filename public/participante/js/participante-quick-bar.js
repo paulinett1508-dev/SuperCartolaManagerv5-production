@@ -264,8 +264,6 @@ class QuickAccessBar {
         const hallDaFama = isLigaEstreante ? '' :
             '<div class="home-module-card" data-module="historico"><span class="material-icons">history</span><span class="home-module-card-label">Hall da Fama</span></div>';
 
-        const tiro = '<div class="home-module-card" data-module="tiro-certo"><span class="material-icons" style="color:var(--app-primary)">gps_fixed</span><span class="home-module-card-label">Tiro Certo</span><span class="home-badge-em-breve" style="background:rgba(255,85,0,0.12);color:var(--app-primary);border:1px solid rgba(255,85,0,0.25);">EM BREVE</span></div>';
-
         return [
             '<div class="home-module-category">',
             '<div class="home-module-category-title"><span class="material-icons">emoji_events</span>Competições</div>',
@@ -290,7 +288,6 @@ class QuickAccessBar {
             '<div class="home-module-category-title"><span class="material-icons">upcoming</span>Em Breve</div>',
             '<div class="home-module-grid">',
             '<div class="home-module-card" data-module="copa-times-sc"><span class="material-icons" style="color:var(--app-gold)">emoji_events</span><span class="home-module-card-label">Copa de Times SC</span><span class="home-badge-em-breve" style="background:rgba(255,215,0,0.2);color:var(--app-gold);border:1px solid var(--app-gold)">EM BREVE</span></div>',
-            tiro,
             '<div class="home-module-card" data-module="bolao-copa" data-action="em-breve" style="opacity:0.4"><span class="material-icons">sports</span><span class="home-module-card-label">Bolão Copa</span></div>',
             '</div></div>'
         ].join('');
