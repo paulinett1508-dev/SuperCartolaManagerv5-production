@@ -48,6 +48,7 @@ const CopaSCConfigSchema = new mongoose.Schema({
         default: 'pre_sorteio'
     },
     cabecas_de_chave: [{ type: Number }],
+    times_classificados: [{ type: Number }],  // 32 time_ids preenchidos pelo admin antes do sorteio
     grupos: [grupoSchema],
     calendario: {
         classificatorio: { type: [Number], default: [20, 21, 22, 23] },

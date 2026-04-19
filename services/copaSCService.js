@@ -55,9 +55,13 @@ export async function realizarSorteio(ligaId, temporada = CURRENT_SEASON) {
         throw { status: 400, message: 'Fase Classificatória ainda não concluída.' };
     }
 
-    const cabecas = [...config.cabecas_de_chave]; // [Number]
-    const sobreviventes = await _getSobreviventesClassificatorio(ligaId, temporada);
-    const todos32 = _montar32Classificados(config, sobreviventes);
+    // Validar que o admin configurou os 32 times classificados
+    if (!config.times_classificados || config.times_classificados.length < 32) {
+        throw { status: 400, message: `Lista de classificados incompleta: ${config.times_classificados?.length ?? 0}/32 times. Configure via /admin/configurar.` };
+    }
+
+    const todos32 = config.times_classificados.slice(0, 32);
+    const cabecas = config.cabecas_de_chave.slice(0, 8);
 
     const restantes = _shuffleArray(
         todos32.filter(id => !cabecas.includes(id))
@@ -120,24 +124,6 @@ export async function realizarSorteio(ligaId, temporada = CURRENT_SEASON) {
 
 function _standingVazio(timeId) {
     return { participante_id: timeId, pontos: 0, jogos: 0, vitorias: 0, empates: 0, derrotas: 0, pontos_marcados: 0, pontos_sofridos: 0, saldo: 0 };
-}
-
-async function _getSobreviventesClassificatorio(ligaId, temporada) {
-    const matches = await CopaSCMatch.find({ liga_id: ligaId, temporada, fase: 'classificatorio', status: 'finalizado' }).lean();
-    // O sobrevivente final é o vencedor do último confronto (confronto_num mais alto)
-    if (!matches.length) return [];
-    const ultimo = matches.reduce((acc, m) => m.confronto_num > acc.confronto_num ? m : acc, matches[0]);
-    return ultimo.vencedor_id ? [ultimo.vencedor_id] : [];
-}
-
-function _montar32Classificados(config, sobreviventes) {
-    // Os 32 classificados = cabecas_de_chave + participantes adicionais até 32
-    // A config deve ter been populada com os 32 antes do sorteio pelo admin
-    // Aqui retornamos todos os times configurados nas cabecas + sobreviventes
-    // Note: a config completa deve ter todos os 32 time_ids em cabecas_de_chave (8) + outros 24
-    // Para simplificar: retornamos os cabecas + sobreviventes e o admin configura corretamente
-    const todos = [...new Set([...config.cabecas_de_chave, ...sobreviventes])];
-    return todos.slice(0, 32);
 }
 
 // =============================================================================
@@ -245,6 +231,10 @@ export async function gerarProximaFaseMM(ligaId, temporada, faseAtual, proximaFa
         m.vencedor_id === m.mandante_id ? m.visitante_id : m.mandante_id
     );
 
+    if (vencedores.some(v => v == null)) {
+        throw { status: 400, message: 'Existem partidas não finalizadas na fase atual.' };
+    }
+
     const matchesDraft = [];
 
     if (proximaFase === 'terceiro_lugar') {
@@ -297,6 +287,11 @@ export async function aplicarPremiacao(ligaId, temporada) {
     const campeaoId = finalMatch.vencedor_id;
     const viceId = campeaoId === finalMatch.mandante_id ? finalMatch.visitante_id : finalMatch.mandante_id;
     const terceiroId = terceiroMatch.vencedor_id;
+
+    if (!campeaoId) {
+        console.warn(`[COPA-SC] aplicarPremiacao chamado com final sem vencedor definido — abortando`);
+        return;
+    }
 
     const premios = [
         { timeId: campeaoId, valor: vCampeao, label: 'campeao' },
