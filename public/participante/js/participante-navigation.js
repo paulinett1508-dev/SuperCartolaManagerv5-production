@@ -1045,7 +1045,6 @@ class ParticipanteNavigation {
             artilheiro: "/participante/js/modules/participante-artilheiro.js",
             "luva-ouro": "/participante/js/modules/participante-luva-ouro.js",
             campinho: "/participante/js/modules/participante-campinho.js",
-            dicas: "/participante/js/modules/participante-dicas.js",
             capitao: "/participante/js/modules/participante-capitao.js",
             configuracoes: "/participante/js/modules/participante-notifications.js",
             "copa-times-sc": "/participante/js/modules/participante-copa-sc.js",
@@ -1056,7 +1055,6 @@ class ParticipanteNavigation {
             "agenda-tabelas": "/participante/js/modules/participante-agenda-tabelas.js",
             "jogos-do-dia": "/participante/js/modules/participante-jogos-do-dia.js",
             "info-meu-time": "/participante/js/modules/participante-info-meu-time.js",
-            chatbot: "/participante/js/modules/participante-chatbot.js",
         };
 
         const jsPath = modulosPaths[modulo];

@@ -32,7 +32,6 @@ const TEMPORADA_FINANCEIRA = window.ParticipanteConfig?.getFinancialSeason
 
 // Estado do modulo
 let participanteRenovado = false;
-let participantePremium = false;
 let mercadoStatus = null;
 
 const CLUBES_CACHE_KEY = 'cartola_clubes_cache_v1';
