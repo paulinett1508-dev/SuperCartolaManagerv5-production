@@ -693,6 +693,9 @@ export class FluxoFinanceiroUI {
         const mostrarTab2025 = (window.ligaPrimeiraTemporada || 2025) < 2026;
         console.log(`[FLUXO-UI] 📅 Renderizando tabs: ligaPrimeiraTemporada=${window.ligaPrimeiraTemporada}, mostrar2025=${mostrarTab2025}`);
 
+        // ✅ REGRA V10: Layout compacto para 2025 OU 2026 com rodadas consolidadas
+        const isV10Layout = temporadaNum < 2026 || this._temRodadasConsolidadas;
+
         // Layout Dashboard — Header condensado v9.0
         container.innerHTML = `
             <div class="module-toolbar fluxo-toolbar-v9">
@@ -731,7 +734,7 @@ export class FluxoFinanceiroUI {
                 <div class="toolbar-right"></div>
             </div>
 
-            ${temporadaNum >= 2026 && this._temRodadasConsolidadas ? `
+            ${isV10Layout ? `
             <!-- Tesouraria V10: summary bar + filtros -->
             <div class="tesouraria-summary-bar">
                 <div class="tesouraria-stat is-areceber">
@@ -765,15 +768,15 @@ export class FluxoFinanceiroUI {
                     Insc. Pendente
                 </button>
                 <button type="button" class="tesouraria-filtro" data-filtro="saldo-desc" onclick="window.filtrarTesouraria('saldo-desc')">
-                    <span class="material-icons" style="font-size:14px">sort</span> Saldo ↓
+                    <span class="material-icons" style="font-size:14px">sort</span> Saldo <span class="material-icons" style="font-size:14px">arrow_downward</span>
                 </button>
             </div>
             ` : ''}
             <!-- Tabela Financeira v4.2 - Layout Condicional por Temporada + Sticky Header -->
             <div class="fluxo-tabela-container">
-                <table class="fluxo-participantes-tabela tabela-financeira ${temporadaNum >= 2026 && this._temRodadasConsolidadas ? 'tesouraria-v10' : ''}">
+                <table class="fluxo-participantes-tabela tabela-financeira ${isV10Layout ? 'tesouraria-v10' : ''}">
                     <thead>
-                        ${temporadaNum >= 2026 && !this._temRodadasConsolidadas ? `
+                        ${!isV10Layout ? `
                         <!-- Header Temporada Atual (>= 2026) SEM rodadas: Colunas simplificadas de inscrição -->
                         <tr>
                             <th class="col-num">#</th>
