@@ -662,19 +662,7 @@ function renderizarBoasVindas(container, data, ligaRules) {
 
     const zona = getZonaInfo(posicao, totalParticipantes);
     const primeiroNome = nomeCartola.split(" ")[0];
-    // ✅ v11.1: Selo premium agora usa estado verificado via API
-    const isPremium = participantePremium;
-    const seloPremium = isPremium ? `<span title="Participante Premium" class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full border border-yellow-400/40 bg-yellow-400/10 text-xs font-semibold text-yellow-300 shadow-sm" style="vertical-align:middle;">Premium <span class="material-icons text-yellow-300 text-base ml-1" style="font-size:14px;">star</span></span>` : '';
 
-    // ✅ v11.1: Botão Cartola PRO (só para premium)
-    const botaoCartolaPro = isPremium ? `
-                    <!-- Botao Cartola PRO (gradiente amarelo/laranja) -->
-                    <button onclick="window.abrirCartolaPro && window.abrirCartolaPro()"
-                            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium active:scale-95 transition-all"
-                            style="background: linear-gradient(135deg, rgba(234,179,8,0.2), rgba(249,115,22,0.2)); border: 1px solid rgba(234,179,8,0.4);">
-                        <span class="material-icons text-sm text-yellow-400">sports_soccer</span>
-                        <span class="text-yellow-300">Cartola PRO</span>
-                    </button>` : '';
     // ✅ v10.11: Badge de ambiente movido para o header (próximo à versão)
     const rodadasRestantes = Math.max(0, RODADA_FINAL_CAMPEONATO - rodadaAtual);
     const pontosUltimaRodada = ultimaRodada
@@ -776,7 +764,7 @@ function renderizarBoasVindas(container, data, ligaRules) {
         container.innerHTML = `
             <div class="pb-28">
 
-                <!-- Header com botoes Premiacoes, Participantes, Regras e Cartola PRO -->
+                <!-- Header com botoes Premiacoes, Participantes e Regras -->
                 <div class="px-4 pt-3 pb-2 flex items-center justify-between gap-2 refresh-button-container">
                     <div class="flex items-center gap-2 flex-wrap">
                         <!-- Botao Premiacoes (laranja) -->
@@ -797,7 +785,6 @@ function renderizarBoasVindas(container, data, ligaRules) {
                             <span class="material-icons text-sm">gavel</span>
                             Regras
                         </button>
-                        ${botaoCartolaPro}
                     </div>
                     <!-- Ícones discretos: Dicas e Configurações -->
                     <div class="flex items-center gap-1">
@@ -815,7 +802,6 @@ function renderizarBoasVindas(container, data, ligaRules) {
                     <div class="flex items-center justify-between mb-1">
                         <div class="flex items-center gap-2">
                             <h1 class="text-xl font-bold leading-tight tracking-tight text-white">Olá, ${escapeHtml(primeiroNome)}! 👋</h1>
-                            ${seloPremium}
                         </div>
                         <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide" style="background: var(--app-gradient-primary); color: var(--app-text-white);">
                             ${TEMPORADA_ATUAL}
@@ -916,7 +902,7 @@ function renderizarBoasVindas(container, data, ligaRules) {
         container.innerHTML = `
             <div class="pb-28">
 
-                <!-- Header com botoes de acao (Premiacoes + Participantes + Regras + Cartola PRO + Atualizar) -->
+                <!-- Header com botoes de acao (Premiacoes + Participantes + Regras + Atualizar) -->
                 <div class="px-4 pt-3 pb-2 flex items-center justify-between gap-2 refresh-button-container">
                     <div class="flex items-center gap-2 flex-wrap">
                         <!-- Botao Premiacoes (laranja) -->
@@ -937,7 +923,6 @@ function renderizarBoasVindas(container, data, ligaRules) {
                             <span class="material-icons text-sm">gavel</span>
                             Regras
                         </button>
-                        ${botaoCartolaPro}
                     </div>
                     <!-- Ícones discretos: Atualizar, Dicas e Configurações -->
                     <div class="flex items-center gap-1">
@@ -956,7 +941,6 @@ function renderizarBoasVindas(container, data, ligaRules) {
                     <div class="flex items-center justify-between mb-1">
                         <div class="flex items-center gap-2">
                             <h1 class="text-xl font-bold leading-tight tracking-tight text-white">Olá, ${escapeHtml(primeiroNome)}! 👋</h1>
-                            ${seloPremium}
                         </div>
                         <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide" style="background: var(--app-gradient-primary); color: var(--app-text-white);">
                             ${TEMPORADA_ATUAL}

@@ -72,18 +72,7 @@ export async function inicializarTiroCertoParticipante({ participante, ligaId, t
         colorClass:   'module-lp-tiro-certo',
     });
 
-    // Detectar premium via participante-navigation (com fallbacks)
-    const isPremiumNav = window.participanteNav?._isPremium === true;
-    const isPremiumParticipante = participante?.premium === true;
-    const isPremiumAuth = (() => {
-        const ligaData = window.participanteAuth?.ligaDataCache;
-        const participantes = ligaData?.participantes || [];
-        const p = participantes.find(pt => String(pt.time_id) === String(timeId));
-        return p?.premium === true;
-    })();
-    const isPremium = isPremiumNav || isPremiumParticipante || isPremiumAuth;
-
-    if (window.Log) Log.info('TIRO-CERTO', `Inicializando: liga=${ligaId} time=${timeId} premium=${isPremium}`);
+    if (window.Log) Log.info('TIRO-CERTO', `Inicializando: liga=${ligaId} time=${timeId}`);
 
     // Aguardar DOM estar renderizado (double RAF — padrao SPA)
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
@@ -100,21 +89,12 @@ export async function inicializarTiroCertoParticipante({ participante, ligaId, t
         const status = await fetchStatus(ligaId);
         if (status && status.edicao && status.edicao.status !== 'pendente') {
             await ativarModoAtivo(status);
-        } else if (isPremium) {
-            // Premium sem edicao ativa: exibir modo ativo com banner de teste
-            await ativarModoTestePremium();
         } else {
             ativarModoTeaser();
         }
     } catch (err) {
-        if (isPremium) {
-            // Premium: mesmo sem API, mostrar modo teste
-            if (window.Log) Log.info('TIRO-CERTO', 'Premium sem edicao, ativando modo teste');
-            await ativarModoTestePremium();
-        } else {
-            if (window.Log) Log.warn('TIRO-CERTO', 'Sem edicao ativa, exibindo teaser:', err.message);
-            ativarModoTeaser();
-        }
+        if (window.Log) Log.warn('TIRO-CERTO', 'Sem edicao ativa, exibindo teaser:', err.message);
+        ativarModoTeaser();
     }
 }
 
