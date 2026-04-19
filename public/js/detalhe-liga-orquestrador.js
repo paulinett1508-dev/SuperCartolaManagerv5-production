@@ -672,7 +672,6 @@ class DetalheLigaOrquestrador {
             "artilheiro-campeao": "Artilheiro",
             "fluxo-financeiro": "Fluxo Financeiro",
             // Módulos 2026
-            "bolao-copa": "Bolão Copa & Liberta",
             "resta-um": "Resta Um",
             "capitao-luxo": "Capitão Luxo",
         };
@@ -681,7 +680,7 @@ class DetalheLigaOrquestrador {
 
     // Verifica se módulo é 2026 (em breve)
     isModule2026(module) {
-        const modules2026 = ["bolao-copa"];
+        const modules2026 = [];
         return modules2026.includes(module);
     }
 

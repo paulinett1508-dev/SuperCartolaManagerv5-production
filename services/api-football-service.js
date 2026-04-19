@@ -528,7 +528,7 @@ async function buscarJogosAoVivo() {
 /**
  * Busca fixtures de uma rodada especifica do Brasileirao Serie A.
  * Custo: 1 request
- * Usado pelo TiroCertoManager para obter resultados reais por rodada.
+ * Obtém resultados reais por rodada via API-Football.
  *
  * @param {number} rodada - Numero da rodada (1-38)
  * @param {number} liga - ID da liga (default: 71 = Brasileirao A)
