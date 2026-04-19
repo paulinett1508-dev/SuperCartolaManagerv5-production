@@ -1051,6 +1051,10 @@ function renderizarHome(container, data, ligaId) {
         timeId
     } = data;
 
+    // Atualizar header
+    const iniciais = getIniciais(nomeCartola);
+    atualizarHeader(nomeTime, nomeCartola, iniciais, clubeId);
+
     // === PAINEL DE AVISOS ===
     atualizarPainelAvisos(rodadaAtual, totalParticipantes, { saldoFinanceiro, posicao, posicaoAnterior });
 

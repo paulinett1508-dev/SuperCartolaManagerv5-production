@@ -166,7 +166,6 @@ class QuickAccessBar {
         this.modulosAtivos = modulosAtivos;
         if (window.Log) Log.debug('QUICK-BAR', 'Módulos atualizados');
 
-        const isPremium   = window.participanteNav?._isPremium === true;
         const modulosBase = ['extrato', 'rodadas'];
         modulosBase.forEach(key => {
             const btn = document.querySelector('.nav-item[data-page="' + key + '"]');
@@ -174,7 +173,7 @@ class QuickAccessBar {
             const bloqueadoLiga = modulosAtivos[key] === false;
             const bloqueadoMnt  = Array.isArray(window.participanteModulosBloqueados) &&
                 window.participanteModulosBloqueados.includes(key);
-            if ((bloqueadoLiga || bloqueadoMnt) && !isPremium) {
+            if (bloqueadoLiga || bloqueadoMnt) {
                 btn.style.opacity = '0.35';
                 btn.style.filter  = 'grayscale(0.5)';
             } else {
@@ -185,8 +184,6 @@ class QuickAccessBar {
     }
 
     sincronizarBloqueioManutencao(modulosBloqueados) {
-        if (window.participanteNav?._isPremium === true) return;
-
         const modulosBase = ['extrato', 'rodadas'];
         modulosBase.forEach(key => {
             const btn = document.querySelector('.nav-item[data-page="' + key + '"]');
@@ -202,7 +199,7 @@ class QuickAccessBar {
             'pontos-corridos': 'Pontos Corridos', 'mata-mata': 'Mata-Mata',
             'top10': 'TOP 10',   'melhor-mes': 'Melhor do Mês',
             'artilheiro': 'Artilheiro', 'luva-ouro': 'Luva de Ouro',
-            'campinho': 'Meu Time da Rodada', 'dicas': 'Dicas', 'resta-um': 'Resta Um'
+            'campinho': 'Meu Time da Rodada', 'resta-um': 'Resta Um'
         };
         const nome = nomesModulos[moduloId] || moduloId;
         const nomeEscapado = typeof window.escapeHtml === 'function' ? window.escapeHtml(nome) : nome;
@@ -243,12 +240,10 @@ class QuickAccessBar {
         const modulosAtivos   = this.modulosAtivos || {};
         const isLigaEstreante = window.isLigaEstreante || false;
         const modulosBase     = ['extrato', 'ranking', 'rodadas'];
-        const isPremium       = window.participanteNav?._isPremium === true;
         const bloqMnt         = Array.isArray(window.participanteModulosBloqueados) ? window.participanteModulosBloqueados : [];
 
         const isAtivo = (k) => modulosBase.includes(k) || modulosAtivos[k] === true;
         const isEmMnt = (k) => {
-            if (isPremium) return false;
             return (modulosBase.includes(k) && modulosAtivos[k] === false) || bloqMnt.includes(k);
         };
 
@@ -269,8 +264,7 @@ class QuickAccessBar {
         const hallDaFama = isLigaEstreante ? '' :
             '<div class="home-module-card" data-module="historico"><span class="material-icons">history</span><span class="home-module-card-label">Hall da Fama</span></div>';
 
-        const tiro = isPremium ?
-            '<div class="home-module-card" data-module="tiro-certo"><span class="material-icons" style="color:var(--app-primary)">gps_fixed</span><span class="home-module-card-label">Tiro Certo</span><span class="home-badge-em-breve" style="background:rgba(255,85,0,0.12);color:var(--app-primary);border:1px solid rgba(255,85,0,0.25);">EM BREVE</span></div>' : '';
+        const tiro = '<div class="home-module-card" data-module="tiro-certo"><span class="material-icons" style="color:var(--app-primary)">gps_fixed</span><span class="home-module-card-label">Tiro Certo</span><span class="home-badge-em-breve" style="background:rgba(255,85,0,0.12);color:var(--app-primary);border:1px solid rgba(255,85,0,0.25);">EM BREVE</span></div>';
 
         return [
             '<div class="home-module-category">',

@@ -217,9 +217,6 @@ class ParticipanteNavigation {
                 nomeCartola: window.participanteAuth.participante.participante?.nome_cartola || "Participante",
                 nomeTime: window.participanteAuth.participante.participante?.nome_time || "Meu Time",
             };
-            if (window.participanteAuth.ligaDataCache) {
-                this._resolverPremium(window.participanteAuth.ligaDataCache, window.participanteAuth.timeId);
-            }
             if (window.Log) Log.info('PARTICIPANTE-NAV', '✅ Dados obtidos do Auth (sem requisição extra)');
             return;
         }
@@ -237,9 +234,6 @@ class ParticipanteNavigation {
                         nomeCartola: window.participanteAuth.participante.participante?.nome_cartola || "Participante",
                         nomeTime: window.participanteAuth.participante.participante?.nome_time || "Meu Time",
                     };
-                    if (window.participanteAuth.ligaDataCache) {
-                        this._resolverPremium(window.participanteAuth.ligaDataCache, window.participanteAuth.timeId);
-                    }
                     if (window.Log) Log.info('PARTICIPANTE-NAV', '✅ Dados obtidos via polling');
                     resolve();
                 }
@@ -258,9 +252,6 @@ class ParticipanteNavigation {
                         nomeCartola: window.participanteAuth.participante.participante?.nome_cartola || "Participante",
                         nomeTime: window.participanteAuth.participante.participante?.nome_time || "Meu Time",
                     };
-                    if (window.participanteAuth.ligaDataCache) {
-                        this._resolverPremium(window.participanteAuth.ligaDataCache, window.participanteAuth.timeId);
-                    }
                     if (window.Log) Log.info('PARTICIPANTE-NAV', '✅ Dados obtidos no timeout final');
                     resolve();
                     return;
@@ -283,7 +274,6 @@ class ParticipanteNavigation {
                 // ✅ v2.1: Guardar dados da liga para evitar requisição extra
                 if (ligaData) {
                     this._ligaDataFromEvent = ligaData;
-                    this._resolverPremium(ligaData, timeId);
                 }
                 if (window.Log) Log.info('PARTICIPANTE-NAV', '✅ Dados obtidos via evento Auth');
                 resolve();

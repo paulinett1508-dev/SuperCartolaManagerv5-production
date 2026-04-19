@@ -20,7 +20,6 @@ import { RODADA_FINAL_CAMPEONATO } from "/js/config/seasons-client.js";
 //           - Não renderiza Hall da Fama para ligas estreantes
 // ✅ v11.3: Logo da liga exibida ao lado do nome na saudação
 // ✅ v11.2: Ícones discretos Dicas e Configurações no header
-// ✅ v11.1: Integração Cartola PRO para participantes premium
 // ✅ v10.9: Jogos ao vivo com API-Football para TODOS os participantes
 // ✅ v10.0: Hall da Fama discreto na tela inicial
 // ✅ v8.0: Carregamento INSTANTÂNEO com cache offline (IndexedDB)
@@ -42,9 +41,6 @@ let historicoParticipante = null;
 // ✅ v12.0: Temporada 2026 em andamento - sempre mostrar dados reais
 // Em pré-temporada, este valor seria alterado pela função verificarStatusRenovacao
 let participanteRenovado = false;
-
-// ✅ v11.1: Estado PRO do participante
-let participantePremium = false;
 
 // ✅ v12.1: Estado do mercado para cálculo correto de rodada
 let mercadoStatus = null;
