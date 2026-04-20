@@ -173,9 +173,6 @@ class ParticipanteNavigation {
         // ⚠️ IMPORTANTE: Aguardar para que o Widget tenha os módulos corretos
         await this.refreshModulosAtivos();
 
-        // ✅ v4.9: Inicializar Widget "O que tá rolando?" (engajamento ao vivo)
-        this.inicializarWhatsHappeningWidget();
-
         // ✅ Pré-carregar Widget "Campeão" (celebração de campeões)
         this.inicializarCampeaoWidget();
 
@@ -370,29 +367,6 @@ class ParticipanteNavigation {
             if (window.Log) Log.debug('PARTICIPANTE-NAV', '🔄 Módulos ativos atualizados via API');
         } catch (error) {
             if (window.Log) Log.warn('PARTICIPANTE-NAV', '⚠️ Erro ao atualizar módulos:', error);
-        }
-    }
-
-    /**
-     * ✅ v5.0: FAB "Big Cartola IA" - Coming soon
-     * Mostra FAB com ícone de IA e toast "Em breve"
-     */
-    async inicializarWhatsHappeningWidget() {
-        // Só inicializar se não for liga aposentada
-        if (window.isLigaAposentada) {
-            if (window.Log) Log.debug('PARTICIPANTE-NAV', '⏭️ FAB IA ignorado (liga aposentada)');
-            return;
-        }
-
-        try {
-            const module = await import('/participante/js/widgets/whats-happening-widget.js?v=' + Date.now());
-
-            if (module.initWhatsHappeningWidget) {
-                await module.initWhatsHappeningWidget();
-                if (window.Log) Log.info('PARTICIPANTE-NAV', 'FAB "Big Cartola IA" inicializado');
-            }
-        } catch (error) {
-            if (window.Log) Log.warn('PARTICIPANTE-NAV', '⚠️ Erro ao inicializar FAB IA:', error);
         }
     }
 

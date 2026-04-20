@@ -155,7 +155,7 @@ function isTemporadaHistorica() {
  * Módulos que NUNCA existiram em 2025 (em nenhuma liga)
  * Estes são sempre ocultados em temporadas históricas
  */
-const MODULOS_2026_ONLY = ['tiro-certo', 'bolao-copa'];
+const MODULOS_2026_ONLY = [];
 
 /**
  * Mapeamento de chave de modulos_ativos -> data-module do card HTML

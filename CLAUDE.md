@@ -1,5 +1,9 @@
 # SUPER CARTOLA MANAGER - PROJECT RULES
 
+<!-- BEGIN agnostic-core/response-contract -->
+@.agnostic-core/skills/communication/response-contract.md
+<!-- END agnostic-core/response-contract -->
+
 ## Auditoria de Interface — Protocolo Menos é Mais
 
 Antes de revisar qualquer frontend, carregar:
