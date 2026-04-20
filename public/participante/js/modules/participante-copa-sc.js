@@ -96,13 +96,15 @@ async function _renderMinhaCopa(ligaId,timeId) {
     if (!resp.ok) throw new Error("HTTP "+resp.status);
     const data=await resp.json();
     const matches=Array.isArray(data.matches)?data.matches:[];
+    const faseAtualHtml="<div class=\"copa-fase-atual\"><span class=\"material-icons\">flag</span>"
+        +"Fase atual: <strong>"+_esc(STATUS_LABELS[estadoCopaSC.config?.status]||estadoCopaSC.config?.status||"")+"</strong></div>";
     if (matches.length===0) {
-        return "<div class=\"copa-card\"><p class=\"copa-card-title\"><span class=\"material-icons\">person</span> Minha Copa</p>"
+        return faseAtualHtml+"<div class=\"copa-card\"><p class=\"copa-card-title\"><span class=\"material-icons\">person</span> Minha Copa</p>"
             +"<p class=\"copa-empty\">Nenhum confronto encontrado ainda.</p></div>";
     }
     const agendados=matches.filter(m=>m.status!=="finalizado");
     const finalizados=matches.filter(m=>m.status==="finalizado");
-    let html="";
+    let html=faseAtualHtml;
     if (agendados.length>0) {
         html+="<div class=\"copa-card\"><p class=\"copa-card-title\"><span class=\"material-icons\">upcoming</span> Próximo Confronto</p>"
             +renderConfrontoCard(agendados[0],timeId)+"</div>";
@@ -162,12 +164,13 @@ async function _renderGrupos(ligaId) {
                 +"<td>"+(time.jogos!=null?time.jogos:0)+"</td>"
                 +"<td><strong>"+(time.pontos!=null?time.pontos:0)+"</strong></td>"
                 +"<td>"+(time.vitorias!=null?time.vitorias:0)+"</td>"
-                +"<td>"+(time.saldo!=null?time.saldo:0)+"</td></tr>";
+                +"<td>"+(time.saldo!=null?time.saldo:0)+"</td>"
+            +"<td>"+(time.pontos_marcados!=null?time.pontos_marcados:0)+"</td></tr>";
         }).join("");
         return "<div class=\"copa-grupo-card\"><p class=\"copa-grupo-nome\">"+_esc(grupo.nome)+"</p>"
             +"<table class=\"copa-standings-table\"><thead><tr>"
             +"<th>#</th><th class=\"copa-nome\" style=\"text-align:left;\">Time</th>"
-            +"<th>J</th><th>Pts</th><th>V</th><th>Saldo</th>"
+            +"<th>J</th><th>Pts</th><th>V</th><th>Saldo</th><th>PM</th>"
             +"</tr></thead><tbody>"+rowsHtml+"</tbody></table></div>";
     }).join("");
     return "<div class=\"copa-grupos-grid\">"+gruposHtml+"</div>";
@@ -232,10 +235,11 @@ async function _renderClassificatorio(ligaId,timeId) {
                 ptsVisitante=m.total.visitante!=null?m.total.visitante:0;
             } else { ptsMandante=m.total; }
         }
-        const statusTexto=m.status==="finalizado"?"Finalizado":"Agendado";
+        const statusTexto=m.status==="finalizado"?"Finalizado":(m.status==="em_andamento"?"Em andamento":"Agendado");
+        const statusClass="copa-status-"+(m.status||"agendado");
         const ptsMandanteHtml=ptsMandante!==""?"<div class=\"copa-pts\">"+ptsMandante+"</div>":"";
         const ptsVisitanteHtml=ptsVisitante!==""?"<div class=\"copa-pts\">"+ptsVisitante+"</div>":"";
-        return "<div class=\"copa-confronto-card copa-status-agendado\">"
+        return "<div class=\"copa-confronto-card "+statusClass+"\""+">"
             +"<div class=\"copa-confronto-fase\">Classificatória"+(rodadas?" · Rods. "+_esc(String(rodadas)):"")+"</div>"
             +"<div class=\"copa-confronto-placar\">"
             +"<div style=\"text-align:center;\"><div class=\"copa-nome\">"+_esc(m.mandante_nome||"A definir")+"</div>"+ptsMandanteHtml+"</div>"
