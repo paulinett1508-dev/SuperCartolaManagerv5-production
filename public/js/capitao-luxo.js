@@ -181,9 +181,8 @@ const CapitaoLuxo = {
             return;
         }
 
-        const rodadaFim = this.estado.mercadoAberto
-            ? Math.max(0, this.estado.rodadaAtual - 1)
-            : this.estado.rodadaAtual;
+        // Cartola API mantém rodada_atual = N (última concluída) mesmo com mercado aberto
+        const rodadaFim = this.estado.rodadaAtual;
 
         const isParcial = !this.estado.mercadoAberto && !this.estado.temporadaEncerrada;
 
@@ -305,9 +304,8 @@ const CapitaoLuxo = {
                 if (temParcialStale) console.warn("⚠️ [CAPITAO-LUXO] Dados parciais stale detectados (rodada encerrada mas cache com parcial:true), re-consolidando...");
 
                 // Verificar se há rodadas finalizadas para auto-consolidar
-                const rodadaConsolidada = this.estado.mercadoAberto
-                    ? Math.max(0, this.estado.rodadaAtual - 1)
-                    : this.estado.rodadaAtual;
+                // Cartola API mantém rodada_atual = N (última concluída) mesmo com mercado aberto
+                const rodadaConsolidada = this.estado.rodadaAtual;
 
                 if (rodadaConsolidada > 0) {
                     console.log(`🔄 [CAPITAO-LUXO] Cache vazio, auto-consolidando até rodada ${rodadaConsolidada}...`);

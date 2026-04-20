@@ -120,12 +120,10 @@ const ArtilheiroCampeao = {
                     this.estado.temporadaEncerrada =
                         data.data.temporadaEncerrada || false;
 
-                    // v4.6: Calcular rodadaFim de forma segura
-                    // Se mercado aberto e rodada 1, rodadaFim = 0 (sem dados ainda)
-                    if (this.estado.mercadoAberto && this.estado.rodadaAtual <= 1) {
+                    // Cartola API mantém rodada_atual = N (última concluída) mesmo com mercado aberto
+                    // Se rodada 1 e antes de qualquer jogo, sem dados ainda
+                    if (this.estado.mercadoAberto && this.estado.rodadaAtual <= 0) {
                         this.estado.rodadaFim = 0;
-                    } else if (this.estado.mercadoAberto) {
-                        this.estado.rodadaFim = this.estado.rodadaAtual - 1;
                     } else {
                         this.estado.rodadaFim = this.estado.rodadaAtual;
                     }
