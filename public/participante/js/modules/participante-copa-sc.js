@@ -20,38 +20,44 @@ const FASE_LABELS = { oitavas:"Oitavas de Final", quartas:"Quartas de Final", se
 const FASES_ORDEM = ["oitavas","quartas","semis","terceiro_lugar","final"];
 
 export async function inicializarCopaTimesSC({ participante, ligaId, timeId }) {
+    if (estadoCopaSC.carregando) return;
+    estadoCopaSC.carregando = true;
     if (window.Log) Log.info("PARTICIPANTE-COPA-SC", "Inicializando ligaId="+ligaId+", timeId="+timeId);
     estadoCopaSC.ligaId=ligaId; estadoCopaSC.timeId=timeId; estadoCopaSC.participante=participante;
     const container=document.getElementById("copa-times-sc-container");
-    if (!container) { if (window.Log) Log.error("PARTICIPANTE-COPA-SC","Container nao encontrado!"); return; }
+    if (!container) { if (window.Log) Log.error("PARTICIPANTE-COPA-SC","Container nao encontrado!"); estadoCopaSC.carregando=false; return; }
     let config=null;
     try {
         const resp=await fetch("/api/copa-sc/"+ligaId+"/config");
         if (!resp.ok) throw new Error("HTTP "+resp.status);
         config=await resp.json();
-    } catch(err) { if (window.Log) Log.warn("PARTICIPANTE-COPA-SC","Falha ao buscar config.",err); return; }
-    if (!config||config.status==="pre_sorteio") { if (window.Log) Log.info("PARTICIPANTE-COPA-SC","Mantendo teaser."); return; }
-    estadoCopaSC.config=config;
-    const statusLabel=_esc(STATUS_LABELS[config.status]||config.status||"");
-    const strip=document.createElement("div"); strip.className="copa-module-strip";
-    const ic=document.createElement("span"); ic.className="material-icons copa-strip-icon"; ic.textContent="emoji_events";
-    const tit=document.createElement("span"); tit.className="copa-strip-title"; tit.textContent="Copa de Times SC";
-    const bdg=document.createElement("span"); bdg.className="copa-strip-badge"; bdg.textContent=statusLabel;
-    strip.appendChild(ic); strip.appendChild(tit); strip.appendChild(bdg);
-    const tabsEl=document.createElement("div"); tabsEl.className="copa-tabs"; tabsEl.setAttribute("role","tablist");
-    [["minha-copa","Minha Copa",true],["grupos","Grupos",false],["chaveamento","Chaveamento",false],["classificatorio","Classificatória",false]]
-    .forEach(([id,label,ativo])=>{
-        const btn=document.createElement("button");
-        btn.className="copa-tab"+(ativo?" ativo":""); btn.dataset.tab=id;
-        btn.setAttribute("role","tab"); btn.setAttribute("aria-selected",String(ativo));
-        btn.textContent=label; tabsEl.appendChild(btn);
-    });
-    const contentEl=document.createElement("div"); contentEl.id="copa-tab-content"; contentEl.className="copa-tab-content";
-    container.innerHTML="";
-    container.appendChild(strip); container.appendChild(tabsEl); container.appendChild(contentEl);
-    _setupTabs(ligaId,timeId);
-    await _carregarTab("minha-copa",ligaId,timeId);
-    if (window.Log) Log.info("PARTICIPANTE-COPA-SC","Módulo v2.0 carregado.");
+    } catch(err) { if (window.Log) Log.warn("PARTICIPANTE-COPA-SC","Falha ao buscar config.",err); estadoCopaSC.carregando=false; return; }
+    if (!config||config.status==="pre_sorteio") { if (window.Log) Log.info("PARTICIPANTE-COPA-SC","Mantendo teaser."); estadoCopaSC.carregando=false; return; }
+    try {
+        estadoCopaSC.config=config;
+        const statusLabel=_esc(STATUS_LABELS[config.status]||config.status||"");
+        const strip=document.createElement("div"); strip.className="copa-module-strip";
+        const ic=document.createElement("span"); ic.className="material-icons copa-strip-icon"; ic.textContent="emoji_events";
+        const tit=document.createElement("span"); tit.className="copa-strip-title"; tit.textContent="Copa de Times SC";
+        const bdg=document.createElement("span"); bdg.className="copa-strip-badge"; bdg.textContent=statusLabel;
+        strip.appendChild(ic); strip.appendChild(tit); strip.appendChild(bdg);
+        const tabsEl=document.createElement("div"); tabsEl.className="copa-tabs"; tabsEl.setAttribute("role","tablist");
+        [["minha-copa","Minha Copa",true],["grupos","Grupos",false],["chaveamento","Chaveamento",false],["classificatorio","Classificatória",false]]
+        .forEach(([id,label,ativo])=>{
+            const btn=document.createElement("button");
+            btn.className="copa-tab"+(ativo?" ativo":""); btn.dataset.tab=id;
+            btn.setAttribute("role","tab"); btn.setAttribute("aria-selected",String(ativo));
+            btn.textContent=label; tabsEl.appendChild(btn);
+        });
+        const contentEl=document.createElement("div"); contentEl.id="copa-tab-content"; contentEl.className="copa-tab-content";
+        container.innerHTML="";
+        container.appendChild(strip); container.appendChild(tabsEl); container.appendChild(contentEl);
+        _setupTabs(ligaId,timeId);
+        await _carregarTab("minha-copa",ligaId,timeId);
+        if (window.Log) Log.info("PARTICIPANTE-COPA-SC","Módulo v2.0 carregado.");
+    } finally {
+        estadoCopaSC.carregando = false;
+    }
 }
 
 function _setupTabs(ligaId,timeId) {
@@ -66,8 +72,6 @@ function _setupTabs(ligaId,timeId) {
     });
 }
 
-const _IH="innerHTML";
-
 async function _carregarTab(nomeTab,ligaId,timeId) {
     const content=document.getElementById("copa-tab-content"); if (!content) return;
     _mostrarLoading(content);
@@ -80,15 +84,15 @@ async function _carregarTab(nomeTab,ligaId,timeId) {
             case "classificatorio": html=await _renderClassificatorio(ligaId,timeId); break;
             default: html="<p class=\"copa-empty\">Aba não encontrada.</p>";
         }
-        content[_IH]=html;
+        content.innerHTML=html;
     } catch(err) {
         if (window.Log) Log.error("PARTICIPANTE-COPA-SC","Erro aba "+nomeTab+":",err);
-        content[_IH]="<p class=\"copa-empty\">Nao foi possivel carregar.</p>";
+        content.innerHTML="<p class=\"copa-empty\">Nao foi possivel carregar.</p>";
     }
 }
 
 function _mostrarLoading(c) {
-    c[_IH]="<div class=\"copa-loading\"><span class=\"material-icons rotating\">refresh</span></div>";
+    c.innerHTML="<div class=\"copa-loading\"><span class=\"material-icons rotating\">refresh</span></div>";
 }
 
 async function _renderMinhaCopa(ligaId,timeId) {
@@ -122,7 +126,7 @@ function renderConfrontoCard(match,timeId) {
     const adversarioNome=_esc(isMandante?match.visitante_nome:match.mandante_nome);
     let statusClass="copa-status-agendado",statusTexto="Agendado";
     if (match.status==="finalizado") {
-        if (match.vencedor_id===timeId) { statusClass="copa-status-vitoria"; statusTexto="Vitória"; }
+        if (Number(match.vencedor_id)===Number(timeId)) { statusClass="copa-status-vitoria"; statusTexto="Vitória"; }
         else if (match.vencedor_id!=null) { statusClass="copa-status-derrota"; statusTexto="Derrota"; }
         else { statusTexto="Finalizado"; }
     }
@@ -133,15 +137,15 @@ function renderConfrontoCard(match,timeId) {
         if (typeof match.total==="object") {
             const ptsMandante=match.total.mandante!=null?match.total.mandante:0;
             const ptsVisitante=match.total.visitante!=null?match.total.visitante:0;
-            const ptsEu=isMandante?ptsMandante:ptsVisitante;
-            const ptsAdv=isMandante?ptsVisitante:ptsMandante;
+            const ptsEu=_esc(String(isMandante?ptsMandante:ptsVisitante));
+            const ptsAdv=_esc(String(isMandante?ptsVisitante:ptsMandante));
             placarHtml="<div class=\"copa-confronto-placar\"><span class=\"copa-pts\">"+ptsEu
                 +"</span><span class=\"copa-confronto-vs\">vs</span><span class=\"copa-pts\">"+ptsAdv+"</span></div>";
         } else {
-            placarHtml="<div class=\"copa-confronto-placar\"><span class=\"copa-pts\">"+match.total+"</span></div>";
+            placarHtml="<div class=\"copa-confronto-placar\"><span class=\"copa-pts\">"+_esc(String(match.total))+"</span></div>";
         }
     } else {
-        placarHtml="<div class=\"copa-confronto-placar\"><span style=\"font-size:0.9rem;color:rgba(255,255,255,0.5);\">"+meuNome+" vs "+adversarioNome+"</span></div>";
+        placarHtml="<div class=\"copa-confronto-placar\"><span class=\"copa-matchup-label\">"+meuNome+" vs "+adversarioNome+"</span></div>";
     }
     return "<div class=\"copa-confronto-card "+statusClass+"\">"
         +"<div class=\"copa-confronto-fase\">"+faseLabel+(rodadas?" · Rods. "+_esc(String(rodadas)):"")+"</div>"
@@ -195,14 +199,14 @@ async function _renderChaveamento(ligaId,timeId) {
         const faseMatches=porFase[fase];
         const faseLabel=_esc(FASE_LABELS[fase]||fase);
         const matchesHtml=faseMatches.map(m=>{
-            const mandanteVenceu=m.status==="finalizado"&&m.vencedor_id===m.mandante_id;
-            const visitanteVenceu=m.status==="finalizado"&&m.vencedor_id===m.visitante_id;
+            const mandanteVenceu=m.status==="finalizado"&&Number(m.vencedor_id)===Number(m.mandante_id);
+            const visitanteVenceu=m.status==="finalizado"&&Number(m.vencedor_id)===Number(m.visitante_id);
             let ptsMandante="",ptsVisitante="";
             if (m.status==="finalizado"&&m.total!=null) {
                 if (typeof m.total==="object") {
-                    ptsMandante=m.total.mandante!=null?m.total.mandante:"";
-                    ptsVisitante=m.total.visitante!=null?m.total.visitante:"";
-                } else { ptsMandante=m.total; }
+                    ptsMandante=m.total.mandante!=null?_esc(String(m.total.mandante)):"";
+                    ptsVisitante=m.total.visitante!=null?_esc(String(m.total.visitante)):"";
+                } else { ptsMandante=_esc(String(m.total)); }
             }
             return "<div class=\"copa-bracket-match\">"
                 +"<div class=\"copa-bracket-time "+(mandanteVenceu?"vencedor":"")+"\">"
@@ -231,9 +235,9 @@ async function _renderClassificatorio(ligaId,timeId) {
         let ptsMandante="",ptsVisitante="";
         if (m.status==="finalizado"&&m.total!=null) {
             if (typeof m.total==="object") {
-                ptsMandante=m.total.mandante!=null?m.total.mandante:0;
-                ptsVisitante=m.total.visitante!=null?m.total.visitante:0;
-            } else { ptsMandante=m.total; }
+                ptsMandante=m.total.mandante!=null?_esc(String(m.total.mandante)):0;
+                ptsVisitante=m.total.visitante!=null?_esc(String(m.total.visitante)):0;
+            } else { ptsMandante=_esc(String(m.total)); }
         }
         const statusTexto=m.status==="finalizado"?"Finalizado":(m.status==="em_andamento"?"Em andamento":"Agendado");
         const statusClass="copa-status-"+(m.status||"agendado");

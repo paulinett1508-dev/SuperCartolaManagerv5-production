@@ -495,13 +495,13 @@
 .copa-module-strip { display:flex; align-items:center; gap:10px; padding:12px 16px; border-left:4px solid var(--copa-gold,#d4af37); background:var(--bg-card,#1e1e2e); margin-bottom:12px; }
 .copa-strip-icon { color:var(--copa-gold,#d4af37); }
 .copa-strip-title { font-family:'Russo One',sans-serif; font-size:1rem; flex:1; }
-.copa-strip-badge { font-size:0.65rem; font-weight:700; padding:2px 8px; border-radius:10px; background:var(--copa-gold,#d4af37); color:#1a1a2e; letter-spacing:0.05em; }
+.copa-strip-badge { font-size:0.65rem; font-weight:700; padding:2px 8px; border-radius:10px; background:var(--copa-gold,#d4af37); color:var(--app-text-inverse, #0f172a); letter-spacing:0.05em; }
 
 /* Tabs */
 .copa-tabs { display:flex; gap:4px; overflow-x:auto; padding-bottom:4px; margin-bottom:12px; scrollbar-width:none; }
 .copa-tabs::-webkit-scrollbar { display:none; }
 .copa-tab { flex:none; padding:7px 14px; border:1px solid rgba(255,255,255,0.15); border-radius:20px; background:transparent; color:rgba(255,255,255,0.6); font-size:0.78rem; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
-.copa-tab.ativo { background:var(--copa-gold,#d4af37); border-color:var(--copa-gold,#d4af37); color:#1a1a2e; font-weight:700; }
+.copa-tab.ativo { background:var(--copa-gold,#d4af37); border-color:var(--copa-gold,#d4af37); color:var(--app-text-inverse, #0f172a); font-weight:700; }
 .copa-tab-content { padding:0 4px; }
 
 /* Cards v2 */
@@ -555,4 +555,7 @@
 
 /* Status dinâmico na Classificatória */
 .copa-status-em_andamento { border-color: var(--copa-yellow, #fbbf24); }
+
+/* Matchup label (agendado, sem placar) */
+.copa-matchup-label { font-size:0.9rem; color:var(--app-text-muted,rgba(255,255,255,0.5)); }
 .copa-status-finalizado { border-color: rgba(255,255,255,0.35); }
