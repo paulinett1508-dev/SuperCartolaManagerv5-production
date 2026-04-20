@@ -83,6 +83,7 @@ import AcertoFinanceiro from "../models/AcertoFinanceiro.js";
 import AjusteFinanceiro from "../models/AjusteFinanceiro.js";
 import LigaRules from "../models/LigaRules.js";
 import InscricaoTemporada from "../models/InscricaoTemporada.js";
+import PontosCorridosCache from "../models/PontosCorridosCache.js";
 import { getResultadosMataMataCompleto } from "./mata-mata-backend.js";
 // ✅ v8.20.0: Parciais ao vivo no extrato individual
 import { buscarRankingParcial } from "../services/parciaisRankingService.js";
@@ -436,6 +437,39 @@ async function calcularTop10Historico(liga, timeId, temporada) {
 // ============================================================================
 
 /**
+ * Extrai a ordem canônica de IDs a partir dos caches salvos pelo admin.
+ * Lógica idêntica à extrairOrdemDoCache em pontosCorridosCacheController.js.
+ * Deve permanecer sincronizada com aquela função.
+ */
+function _extrairOrdemCanonica(caches) {
+    if (!caches || caches.length === 0) return null;
+
+    const cacheBase = [...caches]
+        .sort((a, b) => b.rodada - a.rodada)
+        .find(c => c.confrontos?.length > 0);
+
+    if (!cacheBase) return null;
+
+    const rodadaNum = cacheBase.rodada;
+    const confrontos = cacheBase.confrontos;
+    const n = confrontos.length * 2;
+
+    const listaRodada = new Array(n);
+    for (let i = 0; i < confrontos.length; i++) {
+        listaRodada[i] = String(confrontos[i].time1?.id || confrontos[i].time1);
+        listaRodada[n - 1 - i] = String(confrontos[i].time2?.id || confrontos[i].time2);
+    }
+
+    const lista = [...listaRodada];
+    for (let r = 0; r < rodadaNum - 1; r++) {
+        const x = lista.splice(1, 1)[0];
+        lista.push(x);
+    }
+
+    return lista;
+}
+
+/**
  * Algoritmo round-robin canônico (rotação).
  * IDÊNTICO ao gerarBracketFromIds de pontosCorridosCacheController.js e
  * ao gerarBracket de scripts/regenerar-bracket-pontos-corridos.js.
@@ -467,6 +501,7 @@ export async function calcularConfrontoPontosCorridos(
     rodadaCartola,
     pontuacaoTime,
     todasPontuacoes,
+    canonicalPCIds = null, // opcional: pré-buscar fora do loop para evitar query por rodada
 ) {
     const RODADA_INICIAL_LIGA =
         liga.configuracoes?.pontos_corridos?.rodadaInicial ??
@@ -475,12 +510,30 @@ export async function calcularConfrontoPontosCorridos(
 
     if (rodadaLiga < 1) return null;
 
-    // ✅ v8.8.0 FIX: Filtrar apenas participantes ativos no round-robin do PC
-    // Inativos (desistentes) distorcem os confrontos de todos os participantes
-    const participantesOrdenados = liga.participantes
-        .filter(p => p.ativo !== false)
-        .slice()
-        .sort((a, b) => a.nome_cartola.localeCompare(b.nome_cartola));
+    // Busca a ordem canônica do bracket a partir dos caches salvos pelo admin.
+    // CRÍTICO: deve usar a mesma ordem que o PC cache controller — não alphabetical sort.
+    let canonicalIds = canonicalPCIds;
+    if (canonicalIds === null) {
+        const cachesPC = await PontosCorridosCache.find({ ligaId: liga._id })
+            .select('rodada confrontos').lean();
+        canonicalIds = _extrairOrdemCanonica(cachesPC);
+    }
+
+    let participantesOrdenados;
+    if (canonicalIds) {
+        // Usar a ordem canônica do admin, filtrando apenas os ativos presentes no bracket
+        const ativosSet = new Set(
+            liga.participantes.filter(p => p.ativo !== false).map(p => String(p.time_id))
+        );
+        const idsOrdenados = canonicalIds.filter(id => ativosSet.has(id));
+        participantesOrdenados = idsOrdenados
+            .map(id => liga.participantes.find(p => String(p.time_id) === id))
+            .filter(Boolean);
+    } else {
+        // Fallback: nenhum cache admin disponível — usa liga.participantes em ordem natural
+        // (idêntico ao fallback do cache controller: gerarConfrontos(times))
+        participantesOrdenados = liga.participantes.filter(p => p.ativo !== false);
+    }
 
     const meuTimeId = String(timeId);
     const meuParticipante = participantesOrdenados.find(
