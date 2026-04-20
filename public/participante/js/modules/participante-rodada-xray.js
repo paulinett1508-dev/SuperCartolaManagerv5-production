@@ -554,8 +554,6 @@ function renderizarUpcoming(disputas) {
 
     // === PLACEHOLDERS "EM BREVE" ===
     const emBreve = [
-        { icon: 'public', nome: 'Bolão Copa do Mundo', desc: 'Palpites nos jogos da Copa' },
-        { icon: 'casino', nome: 'Tiro Certo', desc: 'Acerte o placar exato' },
         { icon: 'swords', nome: 'Copa de Times SC', desc: 'Torneio eliminatório entre times' },
         { icon: 'casino', nome: 'RestaUM', desc: 'Sobrevivência rodada a rodada' },
     ];

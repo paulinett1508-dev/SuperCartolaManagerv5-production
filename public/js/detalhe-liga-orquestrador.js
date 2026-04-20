@@ -671,7 +671,6 @@ class DetalheLigaOrquestrador {
             "luva-de-ouro": "Luva de Ouro",
             "artilheiro-campeao": "Artilheiro",
             "fluxo-financeiro": "Fluxo Financeiro",
-            // Módulos 2026
             "resta-um": "Resta Um",
             "capitao-luxo": "Capitão Luxo",
         };

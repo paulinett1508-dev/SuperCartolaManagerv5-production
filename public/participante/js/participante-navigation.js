@@ -356,10 +356,6 @@ class ParticipanteNavigation {
     }
 
     /**
-     * ✅ v5.0: FAB "Big Cartola IA" - Coming soon
-     * Mostra FAB com ícone de IA e toast "Em breve"
-     */
-    /**
      * Widget "Campeao" - Celebracao de campeoes
      * Pre-carrega o modulo para que window.CampeaoWidget fique disponivel
      * para qualquer modulo que precise disparar celebracoes.
