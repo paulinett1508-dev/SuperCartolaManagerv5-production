@@ -282,10 +282,10 @@ class ArtilheiroCampeaoController {
             let rodadaFim;
             if (fim) {
                 rodadaFim = parseInt(fim, 10);
-                if (mercadoAberto && rodadaFim >= rodadaAtual && rodadaAtual < RODADA_FINAL) {
-                    rodadaFim = rodadaAtual - 1;
+                if (mercadoAberto && rodadaFim > rodadaAtual && rodadaAtual < RODADA_FINAL) {
+                    rodadaFim = rodadaAtual;
                     logger.log(
-                        `⚠️ Corrigido: fim=${fim} → ${rodadaFim} (mercado aberto, sem scouts)`,
+                        `⚠️ Corrigido: fim=${fim} → ${rodadaFim} (mercado aberto, rodadaAtual é a última concluída)`,
                     );
                 }
             } else {
@@ -293,7 +293,8 @@ class ArtilheiroCampeaoController {
                     rodadaFim = RODADA_FINAL;
                     logger.log(`🏁 Temporada encerrada - usando R${RODADA_FINAL}`);
                 } else if (mercadoAberto) {
-                    rodadaFim = rodadaAtual - 1;
+                    // Cartola API mantém rodada_atual = N (última concluída) mesmo com mercado aberto
+                    rodadaFim = rodadaAtual;
                 } else {
                     rodadaFim = rodadaAtual;
                 }

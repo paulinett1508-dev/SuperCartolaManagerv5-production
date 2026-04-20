@@ -149,9 +149,8 @@ class AdminCapitao {
         } catch (e) { /* silencioso */ }
 
         // Calcular rodada sugerida para consolidação
-        const rodadaSugerida = mercadoAberto && typeof rodadaAtual === 'number'
-            ? rodadaAtual - 1
-            : rodadaAtual;
+        // Cartola API mantém rodada_atual = N (última concluída) mesmo com mercado aberto
+        const rodadaSugerida = typeof rodadaAtual === 'number' ? rodadaAtual : rodadaAtual;
         const precisaConsolidar = typeof ultimaRodada === 'number' && typeof rodadaSugerida === 'number' && ultimaRodada < rodadaSugerida;
 
         container.innerHTML = `

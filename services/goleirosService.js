@@ -646,7 +646,8 @@ export async function obterRankingGoleiros(
             `🔥 [GOLEIROS-SERVICE] Mercado FECHADO - incluindo parciais R${rodadaFim}`,
           );
         } else {
-          rodadaFim = Math.max(1, rodadaAtualAPI - 1);
+          // Cartola API mantém rodada_atual = N (última concluída) mesmo com mercado aberto
+          rodadaFim = rodadaAtualAPI;
           console.log(
             `📊 [GOLEIROS-SERVICE] Mercado ABERTO - até R${rodadaFim}`,
           );
@@ -873,7 +874,8 @@ export async function detectarUltimaRodadaConcluida() {
     if (mercadoFechado) {
       recomendacao = rodadaAtual;
     } else {
-      recomendacao = Math.max(1, rodadaAtual - 1);
+      // Cartola API mantém rodada_atual = N (última concluída) mesmo com mercado aberto
+      recomendacao = rodadaAtual;
     }
 
     const resultado = {
@@ -914,9 +916,10 @@ async function obterDetalhesParticipante(
     // Detectar rodada fim se não especificada
     if (!rodadaFim) {
       const statusRodada = await verificarStatusRodada(999);
-      rodadaFim = statusRodada.concluida
-        ? statusRodada.rodadaAtual
-        : Math.max(1, statusRodada.rodadaAtual - 1);
+      // mercadoFechado = round em andamento, usar N-1; mercadoAberto = última rodada concluída = N
+      rodadaFim = statusRodada.mercadoFechado
+        ? Math.max(1, statusRodada.rodadaAtual - 1)
+        : statusRodada.rodadaAtual;
     }
 
     // ✅ NOVO: Verificar se participante está ativo
