@@ -28,6 +28,51 @@
                 <span class="text-yellow-500 font-bold text-sm tracking-wider font-brand">EM BREVE</span>
             </div>
 
+            <!-- Botão Regras -->
+            <div class="mt-3 mb-4">
+                <button class="copa-regras-btn" id="copaRegrasBtnOpen">
+                    <span class="material-icons" style="font-size:16px;vertical-align:middle;">menu_book</span>
+                    Regras
+                </button>
+            </div>
+
+            <!-- Modal de Regras (bottom-sheet) -->
+            <div class="copa-modal-overlay" id="copaRegrasOverlay" role="presentation">
+                <div class="copa-modal-sheet" id="copaRegrasSheet" role="dialog" aria-modal="true" aria-labelledby="copaRegrasTitle">
+                    <div class="copa-modal-handle"></div>
+                    <div class="copa-modal-header">
+                        <span class="material-icons copa-modal-icon">emoji_events</span>
+                        <h3 class="copa-modal-title" id="copaRegrasTitle">Regras da Copa de Times SC</h3>
+                        <button class="copa-modal-close" id="copaRegrasBtnClose" aria-label="Fechar">
+                            <span class="material-icons">close</span>
+                        </button>
+                    </div>
+                    <div class="copa-modal-body">
+                        <section class="copa-regras-section">
+                            <h4><span class="material-icons">groups</span> Participantes</h4>
+                            <p>35 times da Liga SuperCartola. Uma <strong>Fase Classificatória</strong> elimina 3 times, deixando 32 classificados para os grupos.</p>
+                        </section>
+                        <section class="copa-regras-section">
+                            <h4><span class="material-icons">filter_3</span> Fase Classificatória (Rod. 20–23)</h4>
+                            <p>Os times <strong>33°, 34° e 35°</strong> do Pontos Corridos disputam 2 confrontos eliminatórios (soma de 2 rodadas cada). O sobrevivente se junta aos 31 classificados diretos.</p>
+                        </section>
+                        <section class="copa-regras-section">
+                            <h4><span class="material-icons">table_chart</span> Fase de Grupos (Rod. 24–26)</h4>
+                            <p><strong>8 grupos de 4 times</strong>. Cada time joga 3 partidas (round-robin), 1 rodada por partida. Os <strong>2 primeiros</strong> de cada grupo avançam. Sem impacto financeiro nessa fase.</p>
+                            <p class="copa-regras-sub">Critérios: Pontos &rarr; Vitórias &rarr; Saldo &rarr; Pontos marcados &rarr; Ranking Geral</p>
+                        </section>
+                        <section class="copa-regras-section">
+                            <h4><span class="material-icons">account_tree</span> Mata-Mata (Rod. 27–34)</h4>
+                            <p>Oitavas &rarr; Quartas &rarr; Semis &rarr; 3° Lugar + Final. Cada confronto = soma de <strong>2 rodadas</strong>. Empate: melhor posição no Ranking Geral.</p>
+                        </section>
+                        <section class="copa-regras-section">
+                            <h4><span class="material-icons">emoji_events</span> Premiação</h4>
+                            <p>Apenas ao encerramento (após rodada 34). Premiados: <strong>Campeão, Vice e 3° Lugar</strong>. Valores definidos pelo admin.</p>
+                        </section>
+                    </div>
+                </div>
+            </div>
+
             <!-- Título Principal -->
             <h1 class="text-5xl md:text-6xl font-bold text-white mb-4 font-brand">
                 <span class="bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 bg-clip-text text-transparent">
@@ -119,6 +164,36 @@
     </div>
 
 </div>
+
+<script>
+(function() {
+    function abrirModal() {
+        var overlay = document.getElementById('copaRegrasOverlay');
+        if (overlay) {
+            overlay.classList.add('ativo');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+    function fecharModal() {
+        var overlay = document.getElementById('copaRegrasOverlay');
+        if (overlay) {
+            overlay.classList.remove('ativo');
+            document.body.style.overflow = '';
+        }
+    }
+    var btnOpen = document.getElementById('copaRegrasBtnOpen');
+    var btnClose = document.getElementById('copaRegrasBtnClose');
+    var overlay = document.getElementById('copaRegrasOverlay');
+    if (btnOpen) btnOpen.addEventListener('click', abrirModal);
+    if (btnClose) btnClose.addEventListener('click', fecharModal);
+    if (overlay) overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) fecharModal();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && overlay && overlay.classList.contains('ativo')) fecharModal();
+    });
+})();
+</script>
 
 <!-- Estilos customizados inline -->
 <style>

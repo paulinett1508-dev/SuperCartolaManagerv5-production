@@ -32,7 +32,6 @@ const TEMPORADA_FINANCEIRA = window.ParticipanteConfig?.getFinancialSeason
 
 // Estado do modulo
 let participanteRenovado = false;
-let participantePremium = false;
 let mercadoStatus = null;
 
 const CLUBES_CACHE_KEY = 'cartola_clubes_cache_v1';
@@ -967,7 +966,7 @@ function renderShortcutButton(label, icon, onClick, enabled) {
 // =====================================================================
 // ATUALIZAR HEADER PREMIUM
 // =====================================================================
-function atualizarHeaderPremium(nomeTime, nomeCartola, iniciais, isPremium, clubeId) {
+function atualizarHeader(nomeTime, nomeCartola, iniciais, clubeId) {
     const header = document.getElementById('home-header-premium');
     if (!header) return;
 
@@ -979,17 +978,6 @@ function atualizarHeaderPremium(nomeTime, nomeCartola, iniciais, isPremium, club
     const userName = header.querySelector('.home-user-name');
     if (userName) {
         userName.textContent = nomeTime;
-    }
-
-    // Badge Premium
-    const badgePlaceholder = document.getElementById('home-badge-premium-placeholder');
-    if (badgePlaceholder && isPremium) {
-        badgePlaceholder.innerHTML = `
-            <div class="home-badge-premium">
-                <span class="material-icons badge-icon">star</span>
-                <span>Premium</span>
-            </div>
-        `;
     }
 
     // Substituir botão do canto por refresh (mais discreto)
@@ -1063,7 +1051,9 @@ function renderizarHome(container, data, ligaId) {
         timeId
     } = data;
 
-    const isPremium = participantePremium;
+    // Atualizar header
+    const iniciais = getIniciais(nomeCartola);
+    atualizarHeader(nomeTime, nomeCartola, iniciais, clubeId);
 
     // === PAINEL DE AVISOS ===
     atualizarPainelAvisos(rodadaAtual, totalParticipantes, { saldoFinanceiro, posicao, posicaoAnterior });
@@ -1149,21 +1139,13 @@ function renderizarHome(container, data, ligaId) {
         if (perfStatusEl) perfStatusEl.innerHTML = '';
     }
 
-    // === JOGUINHOS (exclusivo premium) ===
-    const btnJoguinhos = document.getElementById('btn-joguinhos');
-    if (btnJoguinhos) {
-        btnJoguinhos.style.display = isPremium ? '' : 'none';
-    }
-
     // === BOTOES DE ATALHOS (Modulos Ativos) ===
     const modulosAtivos = window.participanteNav?.modulosAtivos || {};
-    const isParticipantePremium = window.participanteNav?._isPremium === true;
     const atalhoMap = {
         'btn-participantes': 'participantes',
     };
     for (const [btnId, moduloKey] of Object.entries(atalhoMap)) {
         if (modulosAtivos[moduloKey] === false) {
-            if (isParticipantePremium) continue;
             const btn = document.getElementById(btnId);
             if (btn) btn.style.display = 'none';
         }

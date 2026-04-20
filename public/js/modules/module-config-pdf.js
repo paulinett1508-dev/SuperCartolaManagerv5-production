@@ -47,7 +47,6 @@ const MODULOS_INFO = {
     luva_ouro: { nome: 'Luva de Ouro', icone: '🧤', tipo: 'Opcional' },
     turno_returno: { nome: 'Turno e Returno', icone: '🔄', tipo: 'Opcional' },
     capitao_luxo: { nome: 'Capitão de Luxo', icone: '👑', tipo: 'Planejado' },
-    tiro_certo: { nome: 'Tiro Certo', icone: '🎯', tipo: 'Planejado' },
     resta_um: { nome: 'Resta Um', icone: '🃏', tipo: 'Planejado' }
 };
 

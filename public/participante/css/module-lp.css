@@ -74,12 +74,6 @@
     --lp-border: rgba(239, 68, 68, 0.25);
 }
 
-.module-lp-tiro-certo {
-    --lp-primary: var(--app-warning-orange, #f97316);
-    --lp-muted: rgba(249, 115, 22, 0.12);
-    --lp-border: rgba(249, 115, 22, 0.25);
-}
-
 .module-lp-raio-x {
     --lp-primary: var(--app-cyan, #06b6d4);
     --lp-muted: rgba(6, 182, 212, 0.12);

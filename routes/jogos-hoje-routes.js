@@ -1,26 +1,16 @@
 // routes/jogos-hoje-routes.js
-// v1.1 - Jogos do dia com mock para premium
+// v1.2 - Jogos do dia para todos os participantes autenticados
 import express from 'express';
 import fetch from 'node-fetch';
-import { verificarParticipantePremium } from '../utils/premium-participante.js';
 
 const router = express.Router();
 
 // Campeonato Brasileiro Série A (BSA)
 const COMPETICAO_ID = 'BSA';
 
-// Jogos mock para pré-temporada
-const JOGOS_MOCK = [
-    { mandante: 'Flamengo', visitante: 'Botafogo', horario: '16:00', status: 'Em breve', placar: '-' },
-    { mandante: 'Palmeiras', visitante: 'São Paulo', horario: '18:30', status: 'Em breve', placar: '-' },
-    { mandante: 'Corinthians', visitante: 'Santos', horario: '21:00', status: 'Em breve', placar: '-' },
-];
-
 router.get('/', async (req, res) => {
+    // Public endpoint — intentionally open to all (no auth required)
     try {
-        const acesso = await verificarParticipantePremium(req);
-        const isPremium = acesso.isPremium === true;
-
         // Buscar jogos reais da API
         const dataHoje = new Date().toISOString().split('T')[0];
         const url = `https://api.football-data.org/v4/competitions/${COMPETICAO_ID}/matches?dateFrom=${dataHoje}&dateTo=${dataHoje}`;
@@ -45,20 +35,9 @@ router.get('/', async (req, res) => {
             console.log('[JOGOS-HOJE] API indisponível, usando fallback');
         }
 
-        // Se não tem jogos reais e é premium, usar mock
-        if (jogos.length === 0 && isPremium) {
-            jogos = JOGOS_MOCK;
-        }
-
-        // Se não é premium e não tem jogos reais, retorna vazio
-        if (!isPremium && jogos.length === 0) {
-            return res.json({ jogos: [], premium: false });
-        }
-
         res.json({
             jogos,
-            premium: isPremium,
-            fonte: jogos === JOGOS_MOCK ? 'mock' : 'api',
+            fonte: 'api',
             data: dataHoje
         });
     } catch (err) {

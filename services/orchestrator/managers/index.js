@@ -18,8 +18,8 @@ import PontosCorridosManager from './PontosCorridosManager.js';
 import Top10Manager from './Top10Manager.js';
 import MelhorMesManager from './MelhorMesManager.js';
 import TurnoManager from './TurnoManager.js';
-import TiroCertoManager from './TiroCertoManager.js';
 import RestaUmManager from './RestaUmManager.js';
+import CopaSCManager from './CopaSCManager.js';
 
 /**
  * Cria e retorna todas as instâncias de managers
@@ -38,8 +38,8 @@ export function criarManagers() {
         new Top10Manager(),         // 55 - Mito/Mico
         new MelhorMesManager(),     // 60 - Prêmio mensal
         new TurnoManager(),         // 65 - Turno/Returno
-        new TiroCertoManager(),     // 70 - Sobrevivência (2026)
         new RestaUmManager(),       // 72 - Eliminação (2026)
+        new CopaSCManager(),       // 75 - Copa de Times SC
         new ExtratoManager(),       // 80 - Financeiro (quase último)
         new HistoricoManager(),     // 90 - Hall da Fama (último)
     ];

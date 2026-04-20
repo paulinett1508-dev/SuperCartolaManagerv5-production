@@ -45,7 +45,6 @@ class ParticipanteNavigation {
         this.moduloAtual = "home";
         this.participanteData = null;
         this.modulosAtivos = {};
-        this._isPremium = false; // ✅ v4.10: Premium bypass para módulos em manutenção
         this.historicoNavegacao = []; // Histórico interno de navegação
         this.modulos = {
             "boas-vindas": "/participante/fronts/boas-vindas.html",
@@ -61,18 +60,15 @@ class ParticipanteNavigation {
             artilheiro: "/participante/fronts/artilheiro.html",
             "luva-ouro": "/participante/fronts/luva-ouro.html",
             campinho: "/participante/fronts/campinho.html",
-            dicas: "/participante/fronts/dicas.html",
             capitao: "/participante/fronts/capitao.html",
             configuracoes: "/participante/fronts/configuracoes.html",
             "copa-times-sc": "/participante/fronts/copa-times-sc.html",
             regras: "/participante/fronts/regras.html",
             "rodada-xray": "/participante/fronts/rodada-xray.html",
-            "tiro-certo": "/participante/fronts/tiro-certo.html",
             "resta-um": "/participante/fronts/resta-um.html",
             "info-meu-time": "/participante/fronts/info-meu-time.html",
             "agenda-tabelas": "/participante/fronts/agenda-tabelas.html",
             "jogos-do-dia": "/participante/fronts/jogos-do-dia.html",
-            chatbot: "/participante/fronts/chatbot.html",
         };
 
         // ✅ v3.0: Controles simplificados (apenas debounce por tempo)
@@ -114,7 +110,6 @@ class ParticipanteNavigation {
                         };
                         if (event.detail.ligaData) {
                             this._ligaDataFromEvent = event.detail.ligaData;
-                            this._resolverPremium(event.detail.ligaData, event.detail.timeId);
                         }
                     }
                     resolve();
@@ -173,9 +168,6 @@ class ParticipanteNavigation {
         // ⚠️ IMPORTANTE: Aguardar para que o Widget tenha os módulos corretos
         await this.refreshModulosAtivos();
 
-        // ✅ v4.9: Inicializar Widget "O que tá rolando?" (engajamento ao vivo)
-        this.inicializarWhatsHappeningWidget();
-
         // ✅ Pré-carregar Widget "Campeão" (celebração de campeões)
         this.inicializarCampeaoWidget();
 
@@ -224,9 +216,6 @@ class ParticipanteNavigation {
                 nomeCartola: window.participanteAuth.participante.participante?.nome_cartola || "Participante",
                 nomeTime: window.participanteAuth.participante.participante?.nome_time || "Meu Time",
             };
-            if (window.participanteAuth.ligaDataCache) {
-                this._resolverPremium(window.participanteAuth.ligaDataCache, window.participanteAuth.timeId);
-            }
             if (window.Log) Log.info('PARTICIPANTE-NAV', '✅ Dados obtidos do Auth (sem requisição extra)');
             return;
         }
@@ -244,9 +233,6 @@ class ParticipanteNavigation {
                         nomeCartola: window.participanteAuth.participante.participante?.nome_cartola || "Participante",
                         nomeTime: window.participanteAuth.participante.participante?.nome_time || "Meu Time",
                     };
-                    if (window.participanteAuth.ligaDataCache) {
-                        this._resolverPremium(window.participanteAuth.ligaDataCache, window.participanteAuth.timeId);
-                    }
                     if (window.Log) Log.info('PARTICIPANTE-NAV', '✅ Dados obtidos via polling');
                     resolve();
                 }
@@ -265,9 +251,6 @@ class ParticipanteNavigation {
                         nomeCartola: window.participanteAuth.participante.participante?.nome_cartola || "Participante",
                         nomeTime: window.participanteAuth.participante.participante?.nome_time || "Meu Time",
                     };
-                    if (window.participanteAuth.ligaDataCache) {
-                        this._resolverPremium(window.participanteAuth.ligaDataCache, window.participanteAuth.timeId);
-                    }
                     if (window.Log) Log.info('PARTICIPANTE-NAV', '✅ Dados obtidos no timeout final');
                     resolve();
                     return;
@@ -290,7 +273,6 @@ class ParticipanteNavigation {
                 // ✅ v2.1: Guardar dados da liga para evitar requisição extra
                 if (ligaData) {
                     this._ligaDataFromEvent = ligaData;
-                    this._resolverPremium(ligaData, timeId);
                 }
                 if (window.Log) Log.info('PARTICIPANTE-NAV', '✅ Dados obtidos via evento Auth');
                 resolve();
@@ -377,25 +359,6 @@ class ParticipanteNavigation {
      * ✅ v5.0: FAB "Big Cartola IA" - Coming soon
      * Mostra FAB com ícone de IA e toast "Em breve"
      */
-    async inicializarWhatsHappeningWidget() {
-        // Só inicializar se não for liga aposentada
-        if (window.isLigaAposentada) {
-            if (window.Log) Log.debug('PARTICIPANTE-NAV', '⏭️ FAB IA ignorado (liga aposentada)');
-            return;
-        }
-
-        try {
-            const module = await import('/participante/js/widgets/whats-happening-widget.js?v=' + Date.now());
-
-            if (module.initWhatsHappeningWidget) {
-                await module.initWhatsHappeningWidget();
-                if (window.Log) Log.info('PARTICIPANTE-NAV', 'FAB "Big Cartola IA" inicializado');
-            }
-        } catch (error) {
-            if (window.Log) Log.warn('PARTICIPANTE-NAV', '⚠️ Erro ao inicializar FAB IA:', error);
-        }
-    }
-
     /**
      * Widget "Campeao" - Celebracao de campeoes
      * Pre-carrega o modulo para que window.CampeaoWidget fique disponivel
@@ -462,21 +425,6 @@ class ParticipanteNavigation {
     }
 
     /**
-     * ✅ v4.10: Resolve flag premium do participante a partir dos dados da liga.
-     * Participantes premium (ex: owner Paulinett) bypassam módulos em manutenção.
-     */
-    _resolverPremium(ligaData, timeId) {
-        if (!ligaData?.participantes || !timeId) return;
-        const p = ligaData.participantes.find(
-            (part) => String(part.time_id) === String(timeId)
-        );
-        this._isPremium = p?.premium === true;
-        if (this._isPremium && window.Log) {
-            Log.info('PARTICIPANTE-NAV', '👑 Participante premium detectado - bypass de manutenção ativo');
-        }
-    }
-
-    /**
      * Verifica se um módulo base foi desativado pelo admin (em manutenção)
      * Módulos opcionais desativados simplesmente não aparecem no menu.
      * Módulos base desativados aparecem opaco com "Em manutenção".
@@ -504,7 +452,7 @@ class ParticipanteNavigation {
      */
     _isModuloOpcionalInativo(moduloId) {
         // Módulos de sistema/base: sempre permitidos (inclui sub-módulos como rodada-xray)
-        const modulosPermitidos = ['home', 'boas-vindas', 'extrato', 'ranking', 'rodadas', 'rodada-xray', 'historico', 'configuracoes', 'copa-times-sc', 'regras', 'info-meu-time', 'agenda-tabelas', 'jogos-do-dia', 'chatbot'];
+        const modulosPermitidos = ['home', 'boas-vindas', 'extrato', 'ranking', 'rodadas', 'rodada-xray', 'historico', 'configuracoes', 'regras', 'info-meu-time', 'agenda-tabelas', 'jogos-do-dia'];
         if (modulosPermitidos.includes(moduloId)) return false;
 
         // Sem dados de módulos carregados: permitir (graceful degradation)
@@ -518,6 +466,7 @@ class ParticipanteNavigation {
             'luva-ouro': 'luvaOuro',
             'capitao': 'capitaoLuxo',
             'resta-um': 'restaUm',
+            'copa-times-sc': 'copaSC',
         };
         const configKey = configKeyMap[moduloId] || moduloId;
 
@@ -749,19 +698,14 @@ class ParticipanteNavigation {
 
     async navegarPara(moduloId, forcarReload = false, voltandoHistorico = false) {
         // ✅ v4.7: Bloqueio de módulos em manutenção (admin desativou via toggle)
-        // ✅ v4.10: Premium bypass - participantes premium acessam módulos em manutenção
-        if (this.isModuloEmManutencao(moduloId) && !this._isPremium) {
+        if (this.isModuloEmManutencao(moduloId)) {
             if (window.Log) Log.info('PARTICIPANTE-NAV', `🔧 Modulo em manutenção: ${moduloId}`);
             this.mostrarModalManutencaoModulo(moduloId);
             return;
         }
-        if (this.isModuloEmManutencao(moduloId) && this._isPremium) {
-            if (window.Log) Log.info('PARTICIPANTE-NAV', `👑 Premium bypass: acessando ${moduloId} em manutenção`);
-        }
 
         // ✅ v4.8: Bloqueio de módulos opcionais desativados pelo admin
-        // ✅ v4.10: Premium bypass também para módulos opcionais inativos
-        if (this._isModuloOpcionalInativo(moduloId) && !this._isPremium) {
+        if (this._isModuloOpcionalInativo(moduloId)) {
             if (window.Log) Log.info('PARTICIPANTE-NAV', `🚫 Módulo opcional inativo: ${moduloId}`);
             this.mostrarModalManutencaoModulo(moduloId);
             return;
@@ -803,7 +747,7 @@ class ParticipanteNavigation {
         // ✅ v4.11: Verificação fresca de manutenção para módulos base (fecha gap de 45s do polling)
         // Evita que o participante carregue um módulo bloqueado durante o gap entre ciclos de polling
         const MODULOS_BASE_VERIFICACAO_MANUT = ['extrato', 'ranking', 'rodadas'];
-        if (MODULOS_BASE_VERIFICACAO_MANUT.includes(moduloId) && !this._isPremium) {
+        if (MODULOS_BASE_VERIFICACAO_MANUT.includes(moduloId)) {
             try {
                 const resMt = await fetch('/api/participante/manutencao/status', { cache: 'no-store' });
                 if (resMt.ok) {
@@ -975,21 +919,25 @@ class ParticipanteNavigation {
                 this._carregandoModulo = null;
             }
 
-            // ✅ v4.2: SEMPRE restaurar opacity e esconder overlays (evita UI travada)
-            // ✅ v4.3: Restaurar com transição suave de entrada
-            container.style.transition = 'opacity 0.2s ease-out, transform 0.2s ease-out';
-            container.style.opacity = '1';
-            container.style.transform = 'translateY(0)';
-            // ✅ v4.4: Limpar transform após animação — transform: translateY(0) cria
-            // containing block para position:fixed, quebrando modais/bottom-sheets
-            setTimeout(() => { container.style.transform = ''; }, 250);
+            // ✅ v5.9: Só restaurar UI se esta ainda é a navegação atual
+            // Se outra navegação já começou, ela gerencia o estado visual
+            if (this._navegacaoEmAndamento === navegacaoId) {
+                // ✅ v4.2: Restaurar opacity e esconder overlays (evita UI travada)
+                // ✅ v4.3: Restaurar com transição suave de entrada
+                container.style.transition = 'opacity 0.2s ease-out, transform 0.2s ease-out';
+                container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
+                // ✅ v4.4: Limpar transform após animação — transform: translateY(0) cria
+                // containing block para position:fixed, quebrando modais/bottom-sheets
+                setTimeout(() => { container.style.transform = ''; }, 250);
 
-            if (window.SplashScreen) {
-                window.SplashScreen.hide();
-            }
+                if (window.SplashScreen) {
+                    window.SplashScreen.hide();
+                }
 
-            if (window.LoadingOverlay) {
-                window.LoadingOverlay.hide();
+                if (window.LoadingOverlay) {
+                    window.LoadingOverlay.hide();
+                }
             }
         }
     }
@@ -1091,18 +1039,15 @@ class ParticipanteNavigation {
             artilheiro: "/participante/js/modules/participante-artilheiro.js",
             "luva-ouro": "/participante/js/modules/participante-luva-ouro.js",
             campinho: "/participante/js/modules/participante-campinho.js",
-            dicas: "/participante/js/modules/participante-dicas.js",
             capitao: "/participante/js/modules/participante-capitao.js",
             configuracoes: "/participante/js/modules/participante-notifications.js",
             "copa-times-sc": "/participante/js/modules/participante-copa-sc.js",
             regras: "/participante/js/modules/participante-regras.js",
             "rodada-xray": "/participante/js/modules/participante-rodada-xray.js",
             "resta-um": "/participante/js/modules/participante-resta-um.js",
-            "tiro-certo": "/participante/js/modules/participante-tiro-certo.js",
             "agenda-tabelas": "/participante/js/modules/participante-agenda-tabelas.js",
             "jogos-do-dia": "/participante/js/modules/participante-jogos-do-dia.js",
             "info-meu-time": "/participante/js/modules/participante-info-meu-time.js",
-            chatbot: "/participante/js/modules/participante-chatbot.js",
         };
 
         const jsPath = modulosPaths[modulo];

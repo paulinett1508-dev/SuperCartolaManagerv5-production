@@ -215,24 +215,6 @@ const MODULOS_DEFAULT = [
 <p><em>Fique atento ao prazo! Quem não renovar a tempo pode perder a vaga.</em></p>`
     },
     {
-        modulo: 'bolao_copa_mundo',
-        titulo: 'Bolão da Copa do Mundo',
-        icone: 'public',
-        cor: '#eab308',
-        ordem: 12,
-        conteudo_html: `<h3>🌍 Como funciona o Bolão da Copa do Mundo?</h3>
-<p>Em ano de Copa do Mundo, a liga ganha um módulo especial de <strong>palpites</strong>!</p>
-<h4>Mecânica:</h4>
-<ul>
-<li>Antes de cada jogo, você dá seu <strong>palpite no placar</strong></li>
-<li>Acertou o placar exato? Pontuação máxima!</li>
-<li>Acertou o resultado (vitória/empate/derrota)? Pontuação parcial</li>
-<li>Errou tudo? Zero pontos naquele jogo</li>
-</ul>
-<p>Quem acumular mais pontos ao longo da Copa é o <strong>campeão do Bolão</strong> e leva o prêmio!</p>
-<p><em>Módulo especial — ativado apenas em anos de Copa do Mundo.</em></p>`
-    },
-    {
         modulo: 'copa_mundo_sc',
         titulo: 'Copa do Mundo do Super Cartola',
         icone: 'stadium',
@@ -382,15 +364,6 @@ const MODULOS_DEFAULT = [
         ativo: true
     },
     {
-        modulo: 'tiro_certo_premiacao',
-        titulo: 'Premiação — Tiro Certo',
-        icone: 'emoji_events',
-        cor: '#f97316',
-        ordem: 122,
-        conteudo_html: '',
-        ativo: true
-    },
-    {
         modulo: 'raio_x_premiacao',
         titulo: 'Premiação — Raio-X da Rodada',
         icone: 'emoji_events',
@@ -407,27 +380,6 @@ const MODULOS_DEFAULT = [
         ordem: 124,
         conteudo_html: '',
         ativo: true
-    },
-    {
-        modulo: 'tiro_certo',
-        titulo: 'Tiro Certo',
-        icone: 'gps_fixed',
-        cor: '#f97316',
-        ordem: 16,
-        conteudo_html: `<h3>Como funciona o Tiro Certo?</h3>
-<p><strong>Modo Survival</strong> — disponível no segundo turno do Brasileirão. Escolha um time por rodada e sobreviva o máximo possível!</p>
-<h4>Duração</h4>
-<p>Até sobrar apenas um jogador!</p>
-<h4>Como jogar:</h4>
-<ul>
-<li>Em cada rodada, escolha apenas <strong>1 time</strong> para vencer</li>
-<li>Se ele <strong>vencer</strong>, você avança para a próxima rodada</li>
-<li>Se <strong>empatar ou perder</strong>, você está eliminado</li>
-<li>Você <strong>não pode repetir times</strong> — use cada um só uma vez por edição</li>
-</ul>
-<h4>Estratégia</h4>
-<p>Pense bem antes de escolher! Guarde os grandes favoritos para as rodadas finais e tente avançar com times menores no início.</p>
-<p><em>O último sobrevivente leva o prêmio sozinho!</em></p>`
     },
     {
         modulo: 'raio_x',

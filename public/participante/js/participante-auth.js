@@ -521,22 +521,17 @@ class ParticipanteAuth {
             if (nomeCartolaTextEl) nomeCartolaTextEl.textContent = nomeCartolaTextoFinal;
             this._atualizarEscudos(escudoCoracao, escudoTimeEl, clubeIdFinal, fotoTimeFinal);
 
-            // ✅ Badge de ambiente (DEV/PROD) - apenas para participante premium
+            // ✅ Badge de ambiente (DEV/PROD) - visível para todos os participantes
             const envBadge = document.getElementById("app-env-badge");
             if (envBadge) {
-                const isPremium = participanteDataNaLiga?.premium === true;
                 const isProduction = window.Log?.isProduction ?? !window.location.hostname.includes('staging.');
-                if (isPremium) {
-                    envBadge.classList.remove('hidden');
-                    if (isProduction) {
-                        envBadge.textContent = 'PROD';
-                        envBadge.className = 'text-[9px] bg-green-500/20 border border-green-500/50 text-green-400 px-1.5 py-0.5 rounded ml-1 font-bold uppercase';
-                    } else {
-                        envBadge.textContent = 'DEV';
-                        envBadge.className = 'text-[9px] bg-red-500/20 border border-red-500/50 text-red-400 px-1.5 py-0.5 rounded ml-1 font-bold uppercase';
-                    }
+                envBadge.classList.remove('hidden');
+                if (isProduction) {
+                    envBadge.textContent = 'PROD';
+                    envBadge.className = 'text-[9px] bg-green-500/20 border border-green-500/50 text-green-400 px-1.5 py-0.5 rounded ml-1 font-bold uppercase';
                 } else {
-                    envBadge.classList.add('hidden');
+                    envBadge.textContent = 'DEV';
+                    envBadge.className = 'text-[9px] bg-red-500/20 border border-red-500/50 text-red-400 px-1.5 py-0.5 rounded ml-1 font-bold uppercase';
                 }
             }
 

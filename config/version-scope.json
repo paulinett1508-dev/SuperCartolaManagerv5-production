@@ -151,17 +151,14 @@
         "participante/css/campinho.css",
         "participante/css/copa-sc.css",
         "participante/css/copa-mundo-2026.css",
-        "participante/css/tiro-certo.css",
         "participante/css/extrato-bank.css",
         "participante/css/matchday.css",
         "participante/css/resta-um.css",
         "participante/css/pontos-corridos.css",
         "participante/css/module-lp.css",
-        "participante/css/whats-happening.css",
         "participante/css/round-xray-widget.css",
         "participante/css/campeao-widget.css",
-        "participante/css/mito-mico-modal.css",
-        "participante/css/chatbot.css"
+        "participante/css/mito-mico-modal.css"
       ]
     }
   },

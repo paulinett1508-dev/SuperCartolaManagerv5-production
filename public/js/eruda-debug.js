@@ -107,7 +107,6 @@
         ctx.timeId = auth.timeId || '?';
         ctx.timeNome = auth.timeNome || auth.nomeTime || '?';
         ctx.temporada = auth.temporada || '?';
-        ctx.premium = auth._isPremium || false;
       }
 
       // Contexto do admin
@@ -169,7 +168,6 @@
       lines.push('| Time | ' + (ctx.timeNome || '?') + ' (ID: ' + ctx.timeId + ') |');
     }
     if (ctx.temporada) lines.push('| Temporada | ' + ctx.temporada + ' |');
-    if (ctx.premium !== undefined) lines.push('| Premium | ' + (ctx.premium ? 'Sim' : 'Nao') + ' |');
     if (ctx.moduloAtual) lines.push('| Modulo Atual | ' + ctx.moduloAtual + ' |');
     if (ctx.mercadoAberto !== undefined) lines.push('| Mercado | ' + (ctx.mercadoAberto ? 'ABERTO' : 'Fechado') + ' |');
     lines.push('');

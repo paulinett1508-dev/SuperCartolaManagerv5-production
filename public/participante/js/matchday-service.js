@@ -30,7 +30,8 @@
     // ─── Constantes ─────────────────────────────────────────────────
     const POLL_STATUS_INACTIVE_MS  = 5 * 60 * 1000;   // 5 min (inativo)
     const POLL_STATUS_ANTECIPA_MS  = 2 * 60 * 1000;   // 2 min (mercado fechado, sem live yet)
-    const POLL_PARCIAIS_MS         = 30 * 1000;        // 30s (ativo)
+    const POLL_PARCIAIS_LIVE_MS    = 30 * 1000;        // 30s (jogos ao vivo)
+    const POLL_PARCIAIS_COOLING_MS = 120 * 1000;       // 120s (entre jogos / consolidando)
     const STALE_THRESHOLD_MS       = 2 * 60 * 1000;    // 2 min sem atualizar = stale
     const TS_UPDATE_INTERVAL_MS    = 10 * 1000;        // Atualizar indicador de tempo a cada 10s
     const MAX_SILENT_FAILURES      = 3;                // Após 3 falhas consecutivas, notificar
@@ -39,7 +40,8 @@
     const MATCHDAY_STATES = {
         LOADING: 'loading',      // Buscando dados pela primeira vez
         WAITING: 'waiting',      // Mercado fechado, jogos ainda não começaram
-        LIVE: 'live',            // Dados fluindo normalmente
+        LIVE: 'live',            // Dados fluindo normalmente (jogos ao vivo)
+        COOLING: 'cooling',      // Rodada ativa mas sem jogos ao vivo neste momento
         STALE: 'stale',          // Sem atualização há >2min
         ERROR: 'error',          // Falha na API
         ENDED: 'ended'           // Rodada encerrada
@@ -61,6 +63,8 @@
     let _currentState        = null;
     let _consecutiveFailures = 0;
     let _currentRodada       = null;
+    let _jogosAoVivo         = 0;         // Contagem real de jogos ao vivo
+    let _pollRecomendado     = 30;        // Poll interval recomendado pelo backend (segundos)
 
     // ─── EventEmitter ───────────────────────────────────────────────
     function _on(event, fn) {
@@ -151,17 +155,23 @@
 
             const matchdayPotencial = data.matchday_ativo === true;
 
+            // Capturar dados de jogos ao vivo do endpoint enriquecido
+            const jogosAntes = _jogosAoVivo;
+            _jogosAoVivo = data.jogos?.aoVivo || 0;
+            _pollRecomendado = data.poll_recomendado || 30;
+
             // Refrescar stats de jogos ao vivo (para labels AO VIVO / EM ANDAMENTO)
             if (matchdayPotencial && window.isRodadaRealmenteAoVivo) {
                 await window.isRodadaRealmenteAoVivo();
             }
 
             if (matchdayPotencial && !_isActive) {
-                // Rodada em andamento (mercado fechado) → ativar matchday
-                // Mercado fechado → ativar matchday
                 _onMatchdayStart();
             } else if (!matchdayPotencial && _isActive) {
                 _onMatchdayStop();
+            } else if (_isActive && jogosAntes !== _jogosAoVivo) {
+                // Transicao LIVE <-> COOLING baseada em jogos reais
+                _ajustarPollingParciais();
             }
 
             // Ajustar intervalo de polling de status
@@ -221,11 +231,30 @@
         if (window.Log) Log.info('[MatchdayService] Matchday encerrado');
     }
 
-    // ─── Polling de parciais ────────────────────────────────────────
+    // ─── Polling de parciais (intervalo adaptativo) ────────────────
+    function _getParciaisInterval() {
+        return _jogosAoVivo > 0 ? POLL_PARCIAIS_LIVE_MS : POLL_PARCIAIS_COOLING_MS;
+    }
+
     function _startParciaisPolling() {
         clearInterval(_parciaisTimer);
         _fetchParciais(); // imediato
-        _parciaisTimer = setInterval(_fetchParciais, POLL_PARCIAIS_MS);
+        _parciaisTimer = setInterval(_fetchParciais, _getParciaisInterval());
+    }
+
+    function _ajustarPollingParciais() {
+        if (!_isActive || _destroyed) return;
+        const novoIntervalo = _getParciaisInterval();
+        clearInterval(_parciaisTimer);
+        _parciaisTimer = setInterval(_fetchParciais, novoIntervalo);
+
+        if (_jogosAoVivo > 0 && _currentState === MATCHDAY_STATES.COOLING) {
+            _setState(MATCHDAY_STATES.LIVE);
+            _toast('Jogos ao vivo! Atualizando parciais em tempo real.', 'info', 3000);
+        } else if (_jogosAoVivo === 0 && _currentState === MATCHDAY_STATES.LIVE) {
+            _setState(MATCHDAY_STATES.COOLING);
+            _toast('Intervalo entre jogos. Próxima atualização em breve.', 'info', 4000);
+        }
     }
 
     async function _fetchParciais() {
@@ -357,6 +386,8 @@
         get lastDiff() { return _lastDiff; },
         get lastRanking() { return _lastRanking; },
         get currentRodada() { return _currentRodada; },
+        get jogosAoVivo() { return _jogosAoVivo; },
+        get pollRecomendado() { return _pollRecomendado; },
 
         // Constantes para consumidores
         STATES: MATCHDAY_STATES,

@@ -122,11 +122,36 @@ async function buscarEscalacaoTime(timeId, rodada) {
 }
 
 /**
+ * Mapeia clube_id → estado da partida ('pre' | 'liveOrEnded').
+ * Reserva só substitui titular quando a partida do titular já saiu do pré-jogo
+ * (caso contrário o titular ainda pode entrar em campo).
+ * Fallback conservador: clube ausente do mapa = 'pre' (não substitui).
+ */
+function mapearStatusClubes(partidasInfo) {
+    const mapa = {};
+    if (!partidasInfo) return mapa;
+
+    const partidas = Array.isArray(partidasInfo) ? partidasInfo : Object.values(partidasInfo);
+    const PRE_REGEX = /pré|pre-?jogo|aguard|preliminar/i;
+
+    for (const p of partidas) {
+        if (!p) continue;
+        const status = p.status_cronometro_tr || p.status_partida || '';
+        const ehPre = !status || PRE_REGEX.test(status);
+        const estado = ehPre ? 'pre' : 'liveOrEnded';
+        if (p.clube_casa_id) mapa[p.clube_casa_id] = estado;
+        if (p.clube_visitante_id) mapa[p.clube_visitante_id] = estado;
+    }
+    return mapa;
+}
+
+/**
  * Calcula pontuação de um time baseado na escalação e atletas pontuados.
  * ✅ v2.0: Lógica completa com reservas comuns + reserva de luxo
  *          (porta fiel de parciaisController.js::calcularPontuacao)
+ * ✅ v2.1: statusPorClube bloqueia substituição de titular cuja partida ainda não começou
  */
-function calcularPontuacaoTime(escalacao, atletasPontuados) {
+function calcularPontuacaoTime(escalacao, atletasPontuados, statusPorClube = {}) {
     if (!escalacao || !escalacao.atletas || escalacao.atletas.length === 0) {
         return { pontos: 0, calculado: false, atletasEmCampo: 0, totalAtletas: 0 };
     }
@@ -155,6 +180,7 @@ function calcularPontuacaoTime(escalacao, atletasPontuados) {
         titularesProcessados.push({
             atleta_id: atletaId,
             posicao_id: atleta.posicao_id,
+            clube_id: atleta.clube_id || ap?.clube_id || null,
             pontos: pontuacao,
             pontos_efetivos: pontosEfetivos,
             entrou_em_campo: jogou,
@@ -164,12 +190,15 @@ function calcularPontuacaoTime(escalacao, atletasPontuados) {
     }
 
     // ── FASE 2: Mapear ausentes por posição ──
-    // Titular é ausente quando NÃO confirmou entrou_em_campo_real E tem pontos = 0.
-    // Guard pontos === 0 evita dupla-contagem: titular que pontuou mas ainda sem
-    // entrou_em_campo confirmado (API lag) já foi contabilizado na Fase 1.
+    // Titular é ausente quando: NÃO confirmou entrou_em_campo_real E pontos = 0
+    // E partida do clube dele já saiu do pré-jogo (caso contrário ele ainda pode jogar
+    // e o reserva NÃO deve substituir antecipadamente). Fallback: status desconhecido
+    // = pré-jogo (conservador, evita pagar reserva indevida em caso de falha de dados).
     const ausentesPorPosicao = {};
     for (const t of titularesProcessados) {
-        if (!t.entrou_em_campo_real && t.pontos === 0) {
+        const statusClube = statusPorClube[t.clube_id];
+        const partidaJaComecou = statusClube === 'liveOrEnded';
+        if (!t.entrou_em_campo_real && t.pontos === 0 && partidaJaComecou) {
             if (!ausentesPorPosicao[t.posicao_id]) ausentesPorPosicao[t.posicao_id] = [];
             ausentesPorPosicao[t.posicao_id].push(t);
         }
@@ -274,7 +303,6 @@ export async function buscarRankingParcial(ligaId) {
         }
 
         // 2. Buscar atletas pontuados + frozen scouts em paralelo
-        const temporada = statusMercado.temporada || CURRENT_SEASON;
         const [dadosApi, scoutsFrozen] = await Promise.all([
             buscarAtletasPontuados(),
             scoutSnapshotService.buscarScoutsFrozen(rodadaAtual),
@@ -282,20 +310,12 @@ export async function buscarRankingParcial(ligaId) {
         // Frozen tem prioridade: dados definitivos do banco sobrescrevem a API live
         const atletasPontuados = { ...dadosApi.atletas, ...scoutsFrozen };
         const partidasInfo = dadosApi.partidas;
+        const statusPorClube = mapearStatusClubes(partidasInfo);
         const numAtletasPontuados = Object.keys(atletasPontuados).length;
         const numFrozen = Object.keys(scoutsFrozen).length;
 
         console.debug(`${LOG_PREFIX} Atletas pontuados: ${numAtletasPontuados} (${numFrozen} frozen)`);
-        console.debug(`${LOG_PREFIX} Partidas da rodada: ${Object.keys(partidasInfo).length}`);
-
-        // Persistência assíncrona (não bloqueia resposta)
-        if (Object.keys(dadosApi.atletas).length > 0) {
-            scoutSnapshotService.salvarScouts(rodadaAtual, temporada, dadosApi.atletas).catch(() => {});
-            scoutSnapshotService
-                .detectarClubesCongelados(rodadaAtual, temporada)
-                .then(clubes => scoutSnapshotService.congelarAtletasDeClubes(rodadaAtual, clubes))
-                .catch(() => {});
-        }
+        console.debug(`${LOG_PREFIX} Partidas da rodada: ${Object.keys(partidasInfo).length} (${Object.keys(statusPorClube).length} clubes mapeados)`);
 
         if (numAtletasPontuados === 0) {
             console.debug(`${LOG_PREFIX} Nenhum atleta pontuado ainda`);
@@ -398,7 +418,7 @@ export async function buscarRankingParcial(ligaId) {
 
                 if (escalacao) {
                     // API respondeu: calcular pontos via atletas pontuados
-                    ({ pontos, calculado, atletasEmCampo, totalAtletas } = calcularPontuacaoTime(escalacao, atletasPontuados));
+                    ({ pontos, calculado, atletasEmCampo, totalAtletas } = calcularPontuacaoTime(escalacao, atletasPontuados, statusPorClube));
                 } else {
                     // ✅ v1.4: API falhou — usar fallback do banco de dados
                     const fallback = fallbackRodadaMap.get(participante.time_id);

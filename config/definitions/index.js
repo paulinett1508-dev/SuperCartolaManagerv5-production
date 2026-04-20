@@ -84,11 +84,15 @@ export const ligaPatrimonio = loadDefinition('liga_patrimonio_def.json');
 // MÓDULOS SURVIVAL
 // =============================================================================
 
-/** Tiro Certo - Palpites de resultados reais */
-export const tiroCerto = loadDefinition('tiro_certo_def.json');
-
 /** Resta Um - Eliminação progressiva */
 export const restaUm = loadDefinition('resta_um_def.json');
+
+// =============================================================================
+// MÓDULOS COPA
+// =============================================================================
+
+/** Copa de Times SC — Torneio eliminatório */
+export const copaSC = loadDefinition('copa_sc_def.json');
 
 // =============================================================================
 // EXPORTAÇÕES AGRUPADAS
@@ -116,8 +120,10 @@ export const allDefinitions = {
     ligaPatrimonio,
 
     // Survival
-    tiroCerto,
     restaUm,
+
+    // Copa
+    copaSC,
 };
 
 /**
@@ -127,7 +133,8 @@ export const definitionsByCategory = {
     base: [rankingGeral, rankingRodada],
     confronto: [pontosCorridos, mataMata],
     estatistico: [ligasMensais, turnoReturno, top10, capitaoLuxo, luvaOuro, artilheiro, ligaPatrimonio],
-    survival: [tiroCerto, restaUm],
+    survival: [restaUm],
+    copa: [copaSC],
 };
 
 /**
@@ -148,8 +155,8 @@ export function getDefinitionById(moduleId) {
         'luva_ouro': luvaOuro,
         'artilheiro': artilheiro,
         'liga_patrimonio': ligaPatrimonio,
-        'tiro_certo': tiroCerto,
         'resta_um': restaUm,
+        'copa_sc': copaSC,
     };
 
     return mapping[moduleId] || null;
@@ -241,8 +248,8 @@ export default {
     luvaOuro,
     artilheiro,
     ligaPatrimonio,
-    tiroCerto,
     restaUm,
+    copaSC,
 };
 
 console.log('[DEFINITIONS] ✅ Camada de Definição carregada - 13 módulos disponíveis');

@@ -672,8 +672,6 @@ class DetalheLigaOrquestrador {
             "artilheiro-campeao": "Artilheiro",
             "fluxo-financeiro": "Fluxo Financeiro",
             // Módulos 2026
-            "tiro-certo": "Tiro Certo",
-            "bolao-copa": "Bolão Copa & Liberta",
             "resta-um": "Resta Um",
             "capitao-luxo": "Capitão Luxo",
         };
@@ -682,7 +680,7 @@ class DetalheLigaOrquestrador {
 
     // Verifica se módulo é 2026 (em breve)
     isModule2026(module) {
-        const modules2026 = ["tiro-certo", "bolao-copa"];
+        const modules2026 = [];
         return modules2026.includes(module);
     }
 
@@ -1268,7 +1266,7 @@ async function carregarModuloCapitaoLuxo() {
 async function carregarModuloFluxoFinanceiro() {
     if (!window.orquestrador.modules.fluxoFinanceiro) {
         window.orquestrador.modules.fluxoFinanceiro = await vImport(
-            "./fluxo-financeiro.js?v10.3"
+            "./fluxo-financeiro.js?v10.4"
         );
     }
     return window.orquestrador.modules.fluxoFinanceiro;

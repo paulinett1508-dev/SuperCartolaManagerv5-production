@@ -42,10 +42,37 @@ async function fetchCartola(url) {
 async function buscarAtletasPontuados() {
   try {
     const data = await fetchCartola(`${CARTOLA_API_BASE}/atletas/pontuados`);
-    return data?.atletas || {};
+    return {
+      atletas: data?.atletas || {},
+      partidas: data?.partidas || {},
+    };
   } catch {
-    return {};
+    return { atletas: {}, partidas: {} };
   }
+}
+
+/**
+ * Mapeia clube_id → estado da partida ('pre' | 'liveOrEnded').
+ * Reserva só substitui titular quando a partida do titular já saiu do pré-jogo
+ * (caso contrário o titular ainda pode entrar em campo).
+ * Fallback conservador: clube ausente do mapa = 'pre' (não substitui).
+ */
+function mapearStatusClubes(partidasInfo) {
+  const mapa = {};
+  if (!partidasInfo) return mapa;
+
+  const partidas = Array.isArray(partidasInfo) ? partidasInfo : Object.values(partidasInfo);
+  const PRE_REGEX = /pré|pre-?jogo|aguard|preliminar/i;
+
+  for (const p of partidas) {
+    if (!p) continue;
+    const status = p.status_cronometro_tr || p.status_partida || '';
+    const ehPre = !status || PRE_REGEX.test(status);
+    const estado = ehPre ? 'pre' : 'liveOrEnded';
+    if (p.clube_casa_id) mapa[p.clube_casa_id] = estado;
+    if (p.clube_visitante_id) mapa[p.clube_visitante_id] = estado;
+  }
+  return mapa;
 }
 
 async function buscarEscalacao(timeId, rodada) {
@@ -69,7 +96,7 @@ async function buscarEscalacao(timeId, rodada) {
 //         reserva de luxo: Cenário A (ausente) ou Cenário B (pior titular)
 // ──────────────────────────────────────────────────────────────────────────────
 
-function calcularPontuacao(dadosEscalacao, atletasPontuados, time) {
+function calcularPontuacao(dadosEscalacao, atletasPontuados, time, statusPorClube = {}) {
   if (!dadosEscalacao?.atletas?.length) {
     return _timeVazio(time, true);
   }
@@ -114,13 +141,14 @@ function calcularPontuacao(dadosEscalacao, atletasPontuados, time) {
   });
 
   // ── FASE 2: Mapear ausentes por posição ──
-  // Titular é ausente quando NÃO confirmou entrou_em_campo_real E tem pontos = 0.
-  // Guardar pontos === 0 evita dupla-contagem: se titular pontuou mas entrou_em_campo
-  // ainda é null (API atrasada), ele JÁ foi contabilizado na Fase 1 e não pode ser
-  // substituído ao mesmo tempo.
+  // Titular é ausente quando: NÃO confirmou entrou_em_campo_real E pontos = 0
+  // E partida do clube dele já saiu do pré-jogo (caso contrário ele ainda pode jogar
+  // e o reserva NÃO deve substituir antecipadamente). Fallback: status desconhecido
+  // = pré-jogo (conservador, evita pagar reserva indevida em caso de falha de dados).
   const ausentesPorPosicao = {};
   titularesProcessados.forEach((t) => {
-    if (!t.entrou_em_campo_real && t.pontos === 0) {
+    const partidaJaComecou = statusPorClube[t.clube_id] === 'liveOrEnded';
+    if (!t.entrou_em_campo_real && t.pontos === 0 && partidaJaComecou) {
       if (!ausentesPorPosicao[t.posicao_id]) ausentesPorPosicao[t.posicao_id] = [];
       ausentesPorPosicao[t.posicao_id].push(t);
     }
@@ -387,10 +415,13 @@ export async function getParciais(req, res) {
     console.log(`[PARCIAIS-CTRL] Liga ${ligaId}: ativos=${timesAtivos.length}, inativos=${timesInativosArr.length}`);
 
     // 3. Scouts: frozen (MongoDB) + live (API Cartola)
-    const [scoutsFrozen, atletasLive] = await Promise.all([
+    const [scoutsFrozen, dadosLive] = await Promise.all([
       scoutSnapshotService.buscarScoutsFrozen(rodadaAtual),
       buscarAtletasPontuados(),
     ]);
+    const atletasLive = dadosLive.atletas;
+    const partidasInfo = dadosLive.partidas;
+    const statusPorClube = mapearStatusClubes(partidasInfo);
 
     // Persistência assíncrona (não bloqueia resposta)
     if (Object.keys(atletasLive).length > 0) {
@@ -416,7 +447,7 @@ export async function getParciais(req, res) {
           const time = timesAtivos[idx++];
           ativos++;
           buscarEscalacao(time.timeId, rodadaAtual)
-            .then((esc) => resultados.push(esc ? calcularPontuacao(esc, atletasPontuados, time) : _timeVazio(time, true)))
+            .then((esc) => resultados.push(esc ? calcularPontuacao(esc, atletasPontuados, time, statusPorClube) : _timeVazio(time, true)))
             .catch(() => resultados.push(_timeVazio(time, true)))
             .finally(() => {
               ativos--;

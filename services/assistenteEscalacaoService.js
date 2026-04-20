@@ -22,7 +22,6 @@ import {
     resolverPesoValorizacao,
     sugerirModo,
 } from './estrategia-sugestao.js';
-import dicasPremiumService from './dicasPremiumService.js';
 import bettingOddsService from './bettingOddsService.js';
 import cartolaFCBrasilScraper from './cartolaFCBrasilScraperService.js';
 import systemTokenService from './systemTokenService.js';
@@ -99,11 +98,11 @@ async function buscarCedidosPorClube() {
     try {
         // Buscar cedidos para todas as posicoes de campo (1-5)
         const resultados = await Promise.allSettled([
-            dicasPremiumService.buscarPontuacaoCedida(1, 5), // GOL
-            dicasPremiumService.buscarPontuacaoCedida(2, 5), // LAT
-            dicasPremiumService.buscarPontuacaoCedida(3, 5), // ZAG
-            dicasPremiumService.buscarPontuacaoCedida(4, 5), // MEI
-            dicasPremiumService.buscarPontuacaoCedida(5, 5), // ATA
+            Promise.resolve([]), // GOL — dicasPremiumService removido
+            Promise.resolve([]), // LAT — dicasPremiumService removido
+            Promise.resolve([]), // ZAG — dicasPremiumService removido
+            Promise.resolve([]), // MEI — dicasPremiumService removido
+            Promise.resolve([]), // ATA — dicasPremiumService removido
         ]);
 
         // Agregar por clube: { clubeId: { posicao1: mediaCedida, ... } }

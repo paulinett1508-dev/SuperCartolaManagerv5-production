@@ -19,7 +19,6 @@ import axios from 'axios';
 import NodeCache from 'node-cache';
 import mongoose from 'mongoose';
 import systemTokenService from '../systemTokenService.js';
-import dicasPremiumService from '../dicasPremiumService.js';
 import cartolaAnaliticoScraper from '../scrapers/cartolaAnaliticoScraper.js';
 import cartolaWebScraper from '../scrapers/cartolaWebScraper.js';
 import perplexityService from '../perplexityAnalysisService.js';
@@ -151,11 +150,11 @@ async function buscarCedidosPorClube() {
 
     try {
         const resultados = await Promise.allSettled([
-            dicasPremiumService.buscarPontuacaoCedida(1, 5), // GOL
-            dicasPremiumService.buscarPontuacaoCedida(2, 5), // LAT
-            dicasPremiumService.buscarPontuacaoCedida(3, 5), // ZAG
-            dicasPremiumService.buscarPontuacaoCedida(4, 5), // MEI
-            dicasPremiumService.buscarPontuacaoCedida(5, 5), // ATA
+            Promise.resolve([]), // GOL — dicasPremiumService removido
+            Promise.resolve([]), // LAT — dicasPremiumService removido
+            Promise.resolve([]), // ZAG — dicasPremiumService removido
+            Promise.resolve([]), // MEI — dicasPremiumService removido
+            Promise.resolve([]), // ATA — dicasPremiumService removido
         ]);
 
         const cedidosPorClube = {};

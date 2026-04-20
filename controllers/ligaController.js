@@ -851,8 +851,6 @@ const buscarModulosAtivos = async (req, res) => {
       participantes: true,
       premiacoes: true,
       regras: true,
-      cartolaPro: false,
-      tiroCerto: false,
       restaUm: false,
       whatsHappening: true,
       raioX: true,
@@ -905,8 +903,6 @@ const mapearModuloId = (moduloFrontend) => {
     participantes: "participantes",
     premiacoes: "premiacoes",
     regras: "regras",
-    cartolaPro: "cartola_pro",
-    tiroCerto: "tiro_certo",
   };
   return mapeamento[moduloFrontend] || moduloFrontend;
 };

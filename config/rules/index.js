@@ -82,9 +82,6 @@ export const capitaoLuxo = loadRule('capitao_luxo.json');
 // REGRAS NOVAS (PLANEJADAS)
 // =============================================================================
 
-/** Tiro Certo - Acertar faixas de pontuação */
-export const tiroCerto = loadRule('tiro_certo.json');
-
 /** Resta Um - Eliminação progressiva */
 export const restaUm = loadRule('resta_um.json');
 
@@ -116,7 +113,6 @@ export const allRules = {
     capitaoLuxo,
 
     // Planejadas
-    tiroCerto,
     restaUm,
 };
 
@@ -138,7 +134,6 @@ export function getRuleById(ruleId) {
         'luva_ouro': luvaOuro,
         'artilheiro': artilheiro,
         'capitao_luxo': capitaoLuxo,
-        'tiro_certo': tiroCerto,
         'resta_um': restaUm,
     };
 
@@ -202,8 +197,7 @@ export default {
     luvaOuro,
     artilheiro,
     capitaoLuxo,
-    tiroCerto,
     restaUm,
 };
 
-console.log('[RULES] ✅ Sistema de Regras carregado - 13 módulos disponíveis');
+console.log('[RULES] ✅ Sistema de Regras carregado - 12 módulos disponíveis');

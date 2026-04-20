@@ -94,7 +94,7 @@ export function sugerirModo(patrimonio) {
 
 /**
  * Calcula score de um atleta com base no modo escolhido.
- * Reutilizado por dicasPremiumService e cartolaProService.
+ * Reutilizado por assistenteEscalacaoService e outros.
  *
  * @param {object} atleta - { media, preco, mpv, variacao, jogos }
  * @param {number} pesoValorizacao - 0 (mitar) a 100 (valorizar)

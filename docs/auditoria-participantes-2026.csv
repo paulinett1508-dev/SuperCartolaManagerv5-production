@@ -1,0 +1,49 @@
+INSTRUCOES,"Preencha as colunas SALDO_2025 e INSCRICAO_2026_STATUS para cada participante."
+INSTRUCOES,"SALDO_2025: valor positivo (ex: 112.54) ou negativo (ex: -36) ou 0 se nao ha saldo a transferir"
+INSTRUCOES,"INSCRICAO_2026_STATUS: use um dos valores abaixo:"
+INSTRUCOES,"  PAGO_TOTAL        = pagou os 180 completos"
+INSTRUCOES,"  PAGO_PARCIAL_XX   = pagou parcialmente (substitua XX pelo valor pago, ex: PAGO_PARCIAL_100)"
+INSTRUCOES,"  NAO_PAGOU         = nao pagou nada ainda"
+INSTRUCOES,"  SEM_INSCRICAO     = isento (ex: Paulinett)"
+INSTRUCOES,"OBSERVACAO: campo livre para qualquer nota adicional"
+INSTRUCOES,""
+INSTRUCOES,"=== PARTICIPANTES JA RESOLVIDOS (nao precisa preencher) ==="
+NOME_TIME,NOME_CARTOLEIRO,TIME_ID,SALDO_2025,INSCRICAO_2026_STATUS,OBSERVACAO
+FloriMengo FC,Antonio Luis,645089,[JA_RESOLVIDO],[JA_RESOLVIDO],Ajuste -120 + acerto 60. Saldo -44 correto
+China Guardiola,China Guardiola,1097804,[JA_RESOLVIDO],[JA_RESOLVIDO],Cache tem +255.54 mas saldo real e +421.54 - aguardando confirmacao
+Itaueira Mengao,Eudes Pereira,621609,[JA_RESOLVIDO],[JA_RESOLVIDO],Saldo 2025 +112.54 confirmado - ajuste pendente
+Urubu Play F.C.,Paulinett Miranda,13935277,[JA_RESOLVIDO],SEM_INSCRICAO,Sem inscricao
+INSTRUCOES,""
+INSTRUCOES,"=== PREENCHA OS CAMPOS ABAIXO ==="
+NOME_TIME,NOME_CARTOLEIRO,TIME_ID,SALDO_2025,INSCRICAO_2026_STATUS,OBSERVACAO
+Banege F.C,Felipe Barbosa,8098497,?,?,
+BarrosB,Bruno Barros,1113367,?,PAGO_TOTAL,Ja consta acerto de 180 no sistema
+Cassio Marques,Cassio Marques,39786,?,?,
+Diego Barbosa,Diego Barbosa,1323370,?,?,
+Engenhando,Lucas Sousa,476869,?,?,
+Felipe Jokstay,Felipe Jokstay,575856,?,?,
+Felipe Santos,Felipe Santos,8188312,?,?,
+Flavio Andre,Flavio Andre,2718174,?,?,
+GAAVAZ.FC,Geones Vaz,1649056,?,?,
+Jonney Vojvoda,Jonney Vojvoda,715731,?,?,
+LEJORA FC,Leilson Bezerra,3300583,?,?,
+Lucio de Souza,Lucio de Souza,19615809,?,?,
+Mauricio Wendel,Mauricio Wendel,5254799,?,?,
+Mr. Carmilton,Mr. Carmilton,1173066,?,?,
+Neto Waquim,Neto Waquim,8183683,?,?,
+Palestra Italia JN,Marconi Araujo,14003233,?,PAGO_PARCIAL_100,Ja consta acerto de 100 - falta -80 confirmado por voce
+Pedro Antonio,Pedro Antonio,25324292,?,?,
+Rafael Janderson,Rafael Janderson,14569704,?,?,
+Raimundo Pinheiro,Raimundo Pinheiro,14916330,?,?,
+Randim,Randerson Rodrigues,1039496,?,?,
+Raylson Fernandes,Raylson Fernandes,20165417,?,?,
+Rony Morais,Rony Morais,4966295,?,?,
+Sir Gege,Sir Gege,1568358,?,?,
+Savio C Cavalcante,Savio C Cavalcante,1459952,?,?,
+Tabaca Neon,Diogo Monte,25371297,?,?,
+Trem Bala Jua,Yuri Jivago,752847,?,?,
+VILA LEAO F.C,RODRIGO PAES LANDIM,1932235,?,?,
+Vitim,Vitim,3027272,?,?,
+Wesley Oliveira,Wesley Oliveira,7698677,?,?,
+fc.catumbi,fucim,45004009,0,NAO_PAGOU,Sem pendencia 2025 confirmado - so deve inscricao 2026
+juniel henrique,juniel henrique,5902324,?,?,

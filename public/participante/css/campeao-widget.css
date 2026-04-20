@@ -63,8 +63,7 @@
     --cw-shine-color: var(--app-primary);
 }
 
-.cw--resta-um,
-.cw--tiro-certo {
+.cw--resta-um {
     --cw-accent: var(--app-gold);
     --cw-accent-muted: var(--app-gold-muted);
     --cw-accent-border: rgba(255, 215, 0, 0.4);

@@ -693,6 +693,9 @@ export class FluxoFinanceiroUI {
         const mostrarTab2025 = (window.ligaPrimeiraTemporada || 2025) < 2026;
         console.log(`[FLUXO-UI] 📅 Renderizando tabs: ligaPrimeiraTemporada=${window.ligaPrimeiraTemporada}, mostrar2025=${mostrarTab2025}`);
 
+        // ✅ REGRA V10: Layout compacto para 2025 OU 2026 com rodadas consolidadas
+        const isV10Layout = temporadaNum < 2026 || this._temRodadasConsolidadas;
+
         // Layout Dashboard — Header condensado v9.0
         container.innerHTML = `
             <div class="module-toolbar fluxo-toolbar-v9">
@@ -731,11 +734,49 @@ export class FluxoFinanceiroUI {
                 <div class="toolbar-right"></div>
             </div>
 
+            ${isV10Layout ? `
+            <!-- Tesouraria V10: summary bar + filtros -->
+            <div class="tesouraria-summary-bar">
+                <div class="tesouraria-stat is-areceber">
+                    <span class="tesouraria-stat__label">A Receber</span>
+                    <span class="tesouraria-stat__value">${formatarMoedaBR(totais.totalAReceber)}</span>
+                </div>
+                <div class="tesouraria-stat is-apagar">
+                    <span class="tesouraria-stat__label">A Pagar</span>
+                    <span class="tesouraria-stat__value">${formatarMoedaBR(totais.totalAPagar)}</span>
+                </div>
+                <div class="tesouraria-stat is-devedores">
+                    <span class="tesouraria-stat__label">Devedores</span>
+                    <span class="tesouraria-stat__value">${totais.quantidadeDevedores || 0}</span>
+                </div>
+                <div class="tesouraria-stat is-credores">
+                    <span class="tesouraria-stat__label">Credores</span>
+                    <span class="tesouraria-stat__value">${totais.quantidadeCredores || 0}</span>
+                </div>
+            </div>
+            <div class="tesouraria-filtros" role="group" aria-label="Filtros rápidos">
+                <button type="button" class="tesouraria-filtro is-active" data-filtro="todos" onclick="window.filtrarTesouraria('todos')">
+                    Todos <span class="contador">${totais.totalParticipantes || 0}</span>
+                </button>
+                <button type="button" class="tesouraria-filtro" data-filtro="devedores" onclick="window.filtrarTesouraria('devedores')">
+                    Devedores <span class="contador">${totais.quantidadeDevedores || 0}</span>
+                </button>
+                <button type="button" class="tesouraria-filtro" data-filtro="credores" onclick="window.filtrarTesouraria('credores')">
+                    Credores <span class="contador">${totais.quantidadeCredores || 0}</span>
+                </button>
+                <button type="button" class="tesouraria-filtro" data-filtro="insc-pendente" onclick="window.filtrarTesouraria('insc-pendente')">
+                    Insc. Pendente
+                </button>
+                <button type="button" class="tesouraria-filtro" data-filtro="saldo-desc" onclick="window.filtrarTesouraria('saldo-desc')">
+                    <span class="material-icons" style="font-size:14px">sort</span> Saldo <span class="material-icons" style="font-size:14px">arrow_downward</span>
+                </button>
+            </div>
+            ` : ''}
             <!-- Tabela Financeira v4.2 - Layout Condicional por Temporada + Sticky Header -->
             <div class="fluxo-tabela-container">
-                <table class="fluxo-participantes-tabela tabela-financeira">
+                <table class="fluxo-participantes-tabela tabela-financeira ${isV10Layout ? 'tesouraria-v10' : ''}">
                     <thead>
-                        ${temporadaNum >= 2026 && !this._temRodadasConsolidadas ? `
+                        ${!isV10Layout ? `
                         <!-- Header Temporada Atual (>= 2026) SEM rodadas: Colunas simplificadas de inscrição -->
                         <tr>
                             <th class="col-num">#</th>
@@ -754,30 +795,16 @@ export class FluxoFinanceiroUI {
                             <th class="col-acoes">Ações</th>
                         </tr>
                         ` : `
-                        <!-- Header com colunas de módulos (temporada com rodadas consolidadas) -->
+                        <!-- Header Tesouraria V10 — compacto -->
                         <tr>
                             <th class="col-num">#</th>
                             <th class="col-participante sortable" onclick="window.ordenarTabelaFinanceiro('nome')" data-sort="nome">
                                 <span class="th-sort">Participante <span class="material-icons sort-icon">unfold_more</span></span>
                             </th>
-                            <th class="col-time-coracao" title="Time do Coração">
-                                <span class="material-icons" style="font-size: 16px;">favorite</span>
-                            </th>
-                            ${this._modulosAtivos?.banco !== false ? '<th class="col-modulo" data-modulo="banco">Timeline</th>' : ''}
-                            ${this._modulosAtivos?.pontosCorridos ? '<th class="col-modulo" data-modulo="pontosCorridos">P.Corridos</th>' : ''}
-                            ${this._modulosAtivos?.mataMata ? '<th class="col-modulo" data-modulo="mataMata">Mata-Mata</th>' : ''}
-                            ${this._modulosAtivos?.top10 ? '<th class="col-modulo" data-modulo="top10">Top 10</th>' : ''}
-                            ${this._modulosAtivos?.melhorMes ? '<th class="col-modulo" data-modulo="melhorMes">Melhor Mês</th>' : ''}
-                            ${this._modulosAtivos?.artilheiro ? '<th class="col-modulo" data-modulo="artilheiro">Artilheiro</th>' : ''}
-                            ${this._modulosAtivos?.luvaOuro ? '<th class="col-modulo" data-modulo="luvaOuro">Luva Ouro</th>' : ''}
-                            ${this._modulosAtivos?.restaUm ? '<th class="col-modulo" data-modulo="restaUm">Resta Um</th>' : ''}
-                            ${this._modulosAtivos?.capitaoLuxo ? '<th class="col-modulo" data-modulo="capitaoLuxo">Cap. Luxo</th>' : ''}
-                            <th class="col-modulo">Aj. Manuais</th>
-                            <th class="col-modulo">Acertos</th>
-                            <th class="col-saldo sortable" onclick="window.ordenarTabelaFinanceiro('saldo')" data-sort="saldo">
+                            <th class="col-chips">Movimentação</th>
+                            <th class="col-saldo-v10 sortable" onclick="window.ordenarTabelaFinanceiro('saldo')" data-sort="saldo">
                                 <span class="th-sort">Saldo <span class="material-icons sort-icon">unfold_more</span></span>
                             </th>
-                            ${temporadaNum < 2026 ? '<th class="col-2026" title="Status Renovação 2026">2026</th>' : ''}
                             <th class="col-acoes">Ações</th>
                         </tr>
                         `}
@@ -816,6 +843,7 @@ export class FluxoFinanceiroUI {
 
         // ✅ v5.1: Forçar CSS sticky nativo (sem workaround de clone)
         this._aplicarStickyHeader();
+        this._registrarFuncoesGlobaisTesouraria();
 
         // ✅ NOVO: Anexar tooltips de regras financeiras aos headers de módulos
         if (temporadaNum < 2026 || this._temRodadasConsolidadas) {
@@ -1000,6 +1028,78 @@ export class FluxoFinanceiroUI {
     }
 
     /**
+     * v10: Deriva array de chips para uma linha a partir do breakdown.
+     * Cada chip renderiza somente se valor relevante (|v| >= 1 ou flag boolean).
+     * Truncamento: usa Math.trunc para não arredondar.
+     * @param {object} p - participante
+     * @returns {string} HTML dos chips concatenados
+     */
+    _derivarChips(p) {
+        const b = p.breakdown || {};
+        const formatarInteiro = (v) => {
+            const truncado = Math.trunc(v);
+            const sinal = truncado > 0 ? '+' : truncado < 0 ? '−' : '';
+            const abs = Math.abs(truncado).toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+            return `${sinal}${abs}`;
+        };
+        const chip = (cls, label, valorTxt) =>
+            `<span class="chip-tes ${cls}"><span class="chip-label">${label}</span>${valorTxt}</span>`;
+        const chips = [];
+
+        // 2025 transferido
+        const v2025 = b.saldoAnteriorTransferido || 0;
+        if (Math.abs(v2025) >= 1) {
+            const cls = v2025 > 0 ? 'chip-2025' : 'chip-debito';
+            chips.push(chip(cls, '2025', formatarInteiro(v2025)));
+        }
+
+        // Inscrição
+        const taxa = b.taxaInscricao || 0;
+        const pagouDireto = b.pagouInscricao === true;
+        const saldoCobriu = v2025 >= taxa && taxa > 0;
+        const quitada = pagouDireto || saldoCobriu;
+        if (taxa > 0) {
+            if (quitada) {
+                chips.push(chip('chip-credito', 'Insc', '<span class="material-icons">check</span>'));
+            } else {
+                chips.push(chip('chip-debito', 'Insc', formatarInteiro(-taxa)));
+            }
+        }
+
+        // Pontos Corridos
+        const pc = b.pontosCorridos || 0;
+        if (Math.abs(pc) >= 1) {
+            chips.push(chip(pc > 0 ? 'chip-credito' : 'chip-debito', 'PC', formatarInteiro(pc)));
+        }
+
+        // Mata-Mata
+        const mm = b.mataMata || 0;
+        if (Math.abs(mm) >= 1) {
+            chips.push(chip(mm > 0 ? 'chip-credito' : 'chip-debito', 'MM', formatarInteiro(mm)));
+        }
+
+        // Resta Um (só aparece se negativo — é punição).
+        // Threshold < -0.01 (não >= 1 como PC/MM) porque qualquer punição não-zero importa;
+        // PC/MM usam >= 1 para suprimir resíduos de float em rodadas.
+        const ru = b.restaUm || 0;
+        if (ru < -0.01) {
+            chips.push(chip('chip-ru', 'RU', formatarInteiro(ru)));
+        }
+
+        // Pagamentos (acertos) — desconta taxa APENAS se pagouDireto.
+        // Backend: breakdown.acertos = soma dos AcertoFinanceiros da temporada.
+        // Se pagouDireto → inscrição entrou como AcertoFinanceiro (tipo=pagamento) → taxa JÁ está em acertos → deduzir.
+        // Se saldoCobriu sem pagouDireto → inscrição veio de saldoAnteriorTransferido → NÃO está em acertos → não deduzir.
+        let pag = b.acertos || 0;
+        if (pagouDireto) pag = pag - taxa;
+        if (pag > 0.01) {
+            chips.push(chip('chip-credito', 'Pag', formatarInteiro(pag)));
+        }
+
+        return chips.join('');
+    }
+
+    /**
      * Renderiza uma linha da tabela financeira
      * v3.1: Valores monetários + Layout expandido
      */
@@ -1009,62 +1109,41 @@ export class FluxoFinanceiroUI {
             ? p.saldoFinalIntegrado
             : (p.saldoFinal || 0);
         const situacao = p.situacaoIntegrada || p.situacao || 'quitado';
-        const breakdown = this._ajustarBreakdownPorIntegracoes(p.breakdown || {});
-
-        const classeSaldo = saldoFinal > 0 ? 'val-positivo' : saldoFinal < 0 ? 'val-negativo' : '';
 
         // Verificar se é novato (ID negativo = cadastro manual OU origem = novo_cadastro/cadastro_manual)
         const isNovato = timeId < 0 || p.origem === 'novo_cadastro' || p.origem === 'cadastro_manual' || p.novato === true;
         const badgeNovato = isNovato ? '<span class="badge-novato" title="Novo na liga">NOVATO</span>' : '';
 
-        // ✅ v2.13: Verificar se temporada foi quitada (extrato fechado)
+        // Verificar se temporada foi quitada (extrato fechado)
         const isQuitado = p.quitacao?.quitado === true;
         const badgeQuitado = isQuitado
             ? `<span class="badge-quitado" title="Temporada ${p.quitacao?.data_quitacao ? new Date(p.quitacao.data_quitacao).toLocaleDateString('pt-BR') : ''}: ${p.quitacao?.tipo || ''} por ${p.quitacao?.admin_responsavel || 'admin'}">QUITADO</span>`
             : '';
 
-        // Time do coração - usar escudos locais
-        const timeCoracaoId = p.time_coracao || p.clube_id;
-        const escudoTimeCoracao = timeCoracaoId
-            ? `<img src="/escudos/${timeCoracaoId}.png"
-                   alt="" class="escudo-coracao"
-                   onerror="this.onerror=null;this.src='/escudos/default.png'"
-                   title="Time do Coração">`
-            : '<span class="material-icons" style="font-size: 16px; color: #666;">favorite_border</span>';
+        // v10: Chips inline substituem colunas de módulos
+        const chipsHtml = this._derivarChips(p);
 
-        // Função helper para formatar valor monetário
-        const fmtModulo = (val) => {
-            if (!val || Math.abs(val) < 0.01) return '<span class="val-zero">-</span>';
-            const cls = val > 0 ? 'val-positivo' : 'val-negativo';
-            const sinal = val > 0 ? '+' : '';
-            const formatted = Math.abs(val).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            return `<span class="${cls}">${sinal}R$ ${formatted}</span>`;
-        };
+        // Saldo: TRUNCAR (nunca arredondar) e formatar compacto em BRL sem casas decimais
+        const saldoTruncado = Math.trunc(saldoFinal);
+        const saldoSinal = saldoTruncado > 0 ? '+' : saldoTruncado < 0 ? '−' : '';
+        const saldoAbs = Math.abs(saldoTruncado).toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+        const saldoFormatado = `${saldoSinal}${saldoAbs}`;
+        const classeSaldoV10 = saldoTruncado > 0 ? 'val-positivo' : saldoTruncado < 0 ? 'val-negativo' : '';
 
-        // Colunas de módulos baseadas nos módulos ativos (data-modulo para update dinâmico)
-        let modulosCols = '';
-        if (this._modulosAtivos?.banco !== false) modulosCols += `<td class="col-modulo" data-modulo="banco">${fmtModulo(breakdown.banco)}</td>`;
-        if (this._modulosAtivos?.pontosCorridos) modulosCols += `<td class="col-modulo" data-modulo="pontosCorridos">${fmtModulo(breakdown.pontosCorridos)}</td>`;
-        if (this._modulosAtivos?.mataMata) modulosCols += `<td class="col-modulo" data-modulo="mataMata">${fmtModulo(breakdown.mataMata)}</td>`;
-        if (this._modulosAtivos?.top10) modulosCols += `<td class="col-modulo" data-modulo="top10">${fmtModulo(breakdown.top10)}</td>`;
-        if (this._modulosAtivos?.melhorMes) modulosCols += `<td class="col-modulo" data-modulo="melhorMes">${fmtModulo(breakdown.melhorMes)}</td>`;
-        if (this._modulosAtivos?.artilheiro) modulosCols += `<td class="col-modulo" data-modulo="artilheiro">${fmtModulo(breakdown.artilheiro)}</td>`;
-        if (this._modulosAtivos?.luvaOuro) modulosCols += `<td class="col-modulo" data-modulo="luvaOuro">${fmtModulo(breakdown.luvaOuro)}</td>`;
-        if (this._modulosAtivos?.restaUm) modulosCols += `<td class="col-modulo" data-modulo="restaUm">${fmtModulo(breakdown.restaUm)}</td>`;
-        if (this._modulosAtivos?.capitaoLuxo) modulosCols += `<td class="col-modulo" data-modulo="capitaoLuxo">${fmtModulo(breakdown.capitaoLuxo)}</td>`;
-        modulosCols += `<td class="col-modulo" data-modulo="campos">${fmtModulo(breakdown.campos)}</td>`;
-        modulosCols += `<td class="col-modulo" data-modulo="acertos">${fmtModulo(breakdown.acertos)}</td>`;
-
-        // Formatar saldo final
-        const saldoFormatado = Math.abs(saldoFinal).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        const saldoSinal = saldoFinal > 0 ? '+' : saldoFinal < 0 ? '-' : '';
+        // Flag para filtro "Insc. Pendente"
+        const taxaInsc = p.breakdown?.taxaInscricao || 0;
+        const pagouInsc = p.breakdown?.pagouInscricao === true;
+        const saldoCobriuInsc = (p.breakdown?.saldoAnteriorTransferido || 0) >= taxaInsc && taxaInsc > 0;
+        const inscPendente = taxaInsc > 0 && !pagouInsc && !saldoCobriuInsc;
 
         return `
             <tr class="linha-participante ${situacao === 'devedor' ? 'row-devedor' : ''} ${isNovato ? 'row-novato' : ''}"
                 data-nome="${escapeHtml((p.nome_cartola || '').toLowerCase())}"
                 data-time="${escapeHtml((p.nome_time || '').toLowerCase())}"
                 data-time-id="${timeId}"
+                data-saldo="${saldoTruncado}"
                 data-situacao="${situacao}"
+                data-insc-pendente="${inscPendente}"
                 data-novato="${isNovato}">
                 <td class="col-num">${idx + 1}</td>
                 <td class="col-participante">
@@ -1081,17 +1160,15 @@ export class FluxoFinanceiroUI {
                         </div>
                     </div>
                 </td>
-                <td class="col-time-coracao">${escudoTimeCoracao}</td>
-                ${modulosCols}
-                <td class="col-saldo ${isQuitado ? 'quitado' : classeSaldo}">
+                <td class="col-chips">
+                    <div class="participante-chips">${chipsHtml}</div>
+                </td>
+                <td class="col-saldo-v10 ${isQuitado ? 'quitado' : classeSaldoV10}">
                     ${isQuitado
-                        ? `<strong>R$ 0,00</strong> ${badgeQuitado}`
-                        : `<strong>${saldoSinal}R$ ${saldoFormatado}</strong>`
+                        ? `<strong>0</strong> ${badgeQuitado}`
+                        : `<strong>${saldoFormatado}</strong>`
                     }
                 </td>
-                ${(window.temporadaAtual || 0) < 2026 ? `<td class="col-2026">
-                    ${this._renderizarBadge2026(timeId, p)}
-                </td>` : ''}
                 <td class="col-acoes">
                     <div class="acoes-row">
                         <button onclick="window.selecionarParticipante('${timeId}')"
@@ -1103,9 +1180,6 @@ export class FluxoFinanceiroUI {
                             <span class="material-icons">fact_check</span>
                         </button>
                         ${(() => {
-                            // v2.14: Botao de quitar removido para temporada 2025+ (coberta pelo modal unificado de renovacao)
-                            // Quitacao de 2025 e feita automaticamente no modal de decisao ao renovar para 2026
-                            // Manter botao apenas para temporadas retroativas antigas (2024, etc)
                             const tempAtual = window.temporadaAtual || CURRENT_SEASON;
                             const tempRenovacao = window.temporadaRenovacao || CURRENT_SEASON;
                             const isTemporadaRenovacao = tempAtual >= (tempRenovacao - 1);
@@ -1786,6 +1860,50 @@ export class FluxoFinanceiroUI {
                 // Em caso de erro, tentar reload como último recurso
                 location.reload();
             }
+        };
+    }
+
+    /**
+     * v10: Filtros client-side da tesouraria.
+     * Aplica visibilidade via data-attributes na <tbody>.
+     */
+    _registrarFuncoesGlobaisTesouraria() {
+        if (window._filtrarTesourariaRegistered) return;
+        window._filtrarTesourariaRegistered = true;
+
+        let filtroAtual = 'todos';
+
+        const aplicar = () => {
+            const tbody = document.getElementById('participantesTableBody');
+            if (!tbody) return;
+            const linhas = [...tbody.querySelectorAll('tr.linha-participante')];
+
+            linhas.forEach((tr) => {
+                const sit = tr.dataset.situacao || '';
+                const inscPend = tr.dataset.inscPendente === 'true';
+                let visivel = true;
+                if (filtroAtual === 'devedores')          visivel = sit === 'devedor';
+                else if (filtroAtual === 'credores')      visivel = sit === 'credor';
+                else if (filtroAtual === 'insc-pendente') visivel = inscPend;
+                tr.style.display = visivel ? '' : 'none';
+            });
+
+            if (filtroAtual === 'saldo-desc') {
+                const ordenadas = linhas.sort((a, b) => {
+                    const sa = Math.abs(Number(a.dataset.saldo) || 0);
+                    const sb = Math.abs(Number(b.dataset.saldo) || 0);
+                    return sb - sa;
+                });
+                ordenadas.forEach((tr) => tbody.appendChild(tr));
+            }
+        };
+
+        window.filtrarTesouraria = (filtro) => {
+            filtroAtual = filtro;
+            document.querySelectorAll('.tesouraria-filtro').forEach((btn) => {
+                btn.classList.toggle('is-active', btn.dataset.filtro === filtro);
+            });
+            aplicar();
         };
     }
 

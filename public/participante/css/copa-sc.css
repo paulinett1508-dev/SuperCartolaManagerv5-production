@@ -361,3 +361,201 @@
 .copa-shadow-strong {
     box-shadow: 0 20px 40px var(--copa-shadow-gold);
 }
+
+/* =====================================================================
+   BOTÃO REGRAS (teaser)
+   ===================================================================== */
+.copa-regras-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    background: transparent;
+    border: 1px solid var(--copa-gold, #d4af37);
+    border-radius: 20px;
+    color: var(--copa-gold, #d4af37);
+    font-size: 0.78rem;
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    line-height: 1.6;
+}
+.copa-regras-btn:hover {
+    background: var(--copa-gold, #d4af37);
+    color: var(--copa-dark, #1a1a2e);
+}
+
+/* =====================================================================
+   MODAL DE REGRAS (bottom-sheet)
+   ===================================================================== */
+.copa-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    align-items: flex-end;
+    justify-content: center;
+}
+.copa-modal-overlay.ativo {
+    display: flex;
+}
+.copa-modal-sheet {
+    background: var(--copa-gray, #1e293b);
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-width: 560px;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding-bottom: 32px;
+    animation: copaSlideUp 0.3s ease;
+}
+@keyframes copaSlideUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+}
+.copa-modal-handle {
+    width: 40px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    margin: 12px auto 0;
+}
+.copa-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.copa-modal-icon {
+    color: var(--copa-gold, #d4af37);
+    font-size: 24px !important;
+    flex-shrink: 0;
+}
+.copa-modal-title {
+    flex: 1;
+    font-family: var(--app-font-brand, 'Russo One', sans-serif);
+    font-size: 0.95rem;
+    color: var(--copa-gold, #d4af37);
+    margin: 0;
+    text-align: left;
+}
+.copa-modal-close {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+.copa-modal-close:hover { color: #fff; }
+.copa-modal-body {
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+.copa-regras-section h4 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--app-font-base, 'Inter', sans-serif);
+    font-size: 0.83rem;
+    font-weight: 700;
+    color: var(--copa-gold, #d4af37);
+    margin: 0 0 6px;
+    text-align: left;
+}
+.copa-regras-section h4 .material-icons {
+    font-size: 17px !important;
+}
+.copa-regras-section p {
+    font-size: 0.81rem;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.55;
+    margin: 0;
+    text-align: left;
+}
+.copa-regras-section p + p { margin-top: 4px; }
+.copa-regras-sub {
+    font-size: 0.74rem !important;
+    color: rgba(255, 255, 255, 0.4) !important;
+    font-style: italic;
+}
+
+/* =====================================================================
+   COPA SC v2.0 - ESTILOS DO MÓDULO COMPLETO (4 abas)
+   ===================================================================== */
+
+/* Module Strip */
+.copa-module-strip { display:flex; align-items:center; gap:10px; padding:12px 16px; border-left:4px solid var(--copa-gold,#d4af37); background:var(--bg-card,#1e1e2e); margin-bottom:12px; }
+.copa-strip-icon { color:var(--copa-gold,#d4af37); }
+.copa-strip-title { font-family:'Russo One',sans-serif; font-size:1rem; flex:1; }
+.copa-strip-badge { font-size:0.65rem; font-weight:700; padding:2px 8px; border-radius:10px; background:var(--copa-gold,#d4af37); color:var(--app-text-inverse, #0f172a); letter-spacing:0.05em; }
+
+/* Tabs */
+.copa-tabs { display:flex; gap:4px; overflow-x:auto; padding-bottom:4px; margin-bottom:12px; scrollbar-width:none; }
+.copa-tabs::-webkit-scrollbar { display:none; }
+.copa-tab { flex:none; padding:7px 14px; border:1px solid rgba(255,255,255,0.15); border-radius:20px; background:transparent; color:rgba(255,255,255,0.6); font-size:0.78rem; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
+.copa-tab.ativo { background:var(--copa-gold,#d4af37); border-color:var(--copa-gold,#d4af37); color:var(--app-text-inverse, #0f172a); font-weight:700; }
+.copa-tab-content { padding:0 4px; }
+
+/* Cards v2 */
+.copa-card { background:var(--bg-card,#1e1e2e); border-radius:12px; padding:16px; margin-bottom:10px; }
+.copa-card-title { display:flex; align-items:center; gap:6px; font-size:0.85rem; font-weight:700; color:var(--copa-gold,#d4af37); margin:0 0 12px; }
+.copa-card-title .material-icons { font-size:18px; }
+.copa-empty { font-size:0.8rem; color:rgba(255,255,255,0.4); margin:0; }
+
+/* Confrontos */
+.copa-confronto-card { border-radius:8px; padding:10px 14px; margin-bottom:8px; border:1px solid rgba(255,255,255,0.1); }
+.copa-confronto-fase { font-size:0.72rem; color:rgba(255,255,255,0.5); text-transform:uppercase; }
+.copa-confronto-placar { display:flex; align-items:center; justify-content:center; gap:12px; font-size:1.4rem; font-weight:700; font-family:'JetBrains Mono',monospace; margin-top:6px; }
+.copa-confronto-vs { font-size:0.9rem; color:rgba(255,255,255,0.4); }
+.copa-status-vitoria { border-color:#4caf50; }
+.copa-status-derrota { border-color:#f44336; }
+.copa-status-agendado { border-color:rgba(255,255,255,0.15); }
+
+/* Grupos */
+.copa-grupos-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
+.copa-grupo-card { background:var(--bg-card,#1e1e2e); border-radius:12px; padding:14px; }
+.copa-grupo-nome { font-family:'Russo One',sans-serif; color:var(--copa-gold,#d4af37); font-size:0.9rem; margin:0 0 10px; }
+.copa-standings-table { width:100%; border-collapse:collapse; font-size:0.78rem; }
+.copa-standings-table th,.copa-standings-table td { padding:5px 6px; text-align:center; }
+.copa-standings-table th { color:rgba(255,255,255,0.4); font-weight:600; }
+.copa-standings-table .copa-nome { text-align:left; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.copa-standings-table tr.copa-classificado td { color:var(--copa-gold,#d4af37); }
+
+/* Bracket */
+.copa-bracket { display:flex; gap:16px; overflow-x:auto; padding-bottom:8px; }
+.copa-bracket-fase { flex:none; min-width:160px; }
+.copa-bracket-fase-nome { font-size:0.72rem; font-weight:700; text-transform:uppercase; color:rgba(255,255,255,0.5); margin:0 0 8px; letter-spacing:0.05em; }
+.copa-bracket-match { background:var(--bg-card,#1e1e2e); border-radius:8px; padding:8px 10px; margin-bottom:8px; border:1px solid rgba(255,255,255,0.1); }
+.copa-bracket-time { display:flex; justify-content:space-between; font-size:0.8rem; padding:3px 0; }
+.copa-bracket-time.vencedor { color:var(--copa-gold,#d4af37); font-weight:700; }
+
+/* Classificatória */
+.copa-classificatorio { }
+.copa-classificatorio-desc { font-size:0.82rem; color:rgba(255,255,255,0.6); margin:0 0 14px; line-height:1.5; }
+.copa-pts { font-size:1.4rem; font-weight:700; font-family:'JetBrains Mono',monospace; }
+.copa-status-badge { font-size:0.72rem; margin:8px 0 0; padding:3px 8px; border-radius:10px; display:inline-block; background:rgba(255,255,255,0.08); }
+
+/* Loading v2 */
+.copa-loading { display:flex; justify-content:center; padding:40px; color:rgba(255,255,255,0.4); }
+.rotating { animation:copaRotate 1s linear infinite; }
+@keyframes copaRotate { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+
+/* Fase Atual badge (Minha Copa) */
+.copa-fase-atual { display:flex; align-items:center; gap:6px; font-size:0.82rem; color:rgba(255,255,255,0.6); margin-bottom:12px; }
+.copa-fase-atual .material-icons { font-size:16px; color:var(--copa-gold,#d4af37); }
+.copa-fase-atual strong { color:var(--copa-gold,#d4af37); }
+
+/* Status dinâmico na Classificatória */
+.copa-status-em_andamento { border-color: var(--copa-yellow, #fbbf24); }
+
+/* Matchup label (agendado, sem placar) */
+.copa-matchup-label { font-size:0.9rem; color:var(--app-text-muted,rgba(255,255,255,0.5)); }
+.copa-status-finalizado { border-color: rgba(255,255,255,0.35); }

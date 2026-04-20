@@ -24,6 +24,30 @@
   --danger: var(--color-danger);
   --warning: #f59e0b;
   --info: var(--color-info);
+
+  /* Variáveis de Chips - Modo Escuro */
+  --chip-credito-bg:      rgba(34, 197, 94, 0.12);
+  --chip-credito-text:    var(--color-success-text);
+  --chip-credito-border:  rgba(34, 197, 94, 0.25);
+
+  --chip-debito-bg:       var(--color-danger-muted);
+  --chip-debito-text:     #f87171;
+  --chip-debito-border:   rgba(239, 68, 68, 0.30);
+
+  --chip-neutro-bg:       rgba(148, 163, 184, 0.10);
+  --chip-neutro-text:     #94a3b8;
+  --chip-neutro-border:   rgba(148, 163, 184, 0.20);
+
+  --chip-2025-bg:         rgba(99, 102, 241, 0.15);
+  --chip-2025-text:       #818cf8;
+  --chip-2025-border:     rgba(99, 102, 241, 0.30);
+
+  --chip-ru-bg:           rgba(249, 115, 22, 0.12);
+  --chip-ru-text:         #fdba74;
+  --chip-ru-border:       rgba(249, 115, 22, 0.25);
+
+  /* Variáveis Tesouraria V10 - Modo Escuro */
+  --tesouraria-contador-bg: rgba(0, 0, 0, 0.25);
 }
 
 /* === CLASSES UTILITÁRIAS DE VALORES === */
@@ -2790,6 +2814,256 @@ table.fluxo-participantes-tabela {
 
 .modal-ajuste-footer .btn-salvar:hover {
     background: var(--laranja-dark, var(--color-primary-dark));
+}
+
+/* ============================================================
+   TESOURARIA V10 — CHIPS INLINE
+   Adicionado em 2026-04-18 — redesign tesouraria admin
+   ============================================================ */
+
+[data-theme="light"] {
+    --chip-credito-bg:      rgba(22, 163, 74, 0.10);
+    --chip-credito-text:    #15803d;
+    --chip-credito-border:  rgba(22, 163, 74, 0.25);
+
+    --chip-debito-bg:       rgba(220, 38, 38, 0.10);
+    --chip-debito-text:     #b91c1c;
+    --chip-debito-border:   rgba(220, 38, 38, 0.25);
+
+    --chip-neutro-bg:       rgba(71, 85, 105, 0.08);
+    --chip-neutro-text:     #475569;
+    --chip-neutro-border:   rgba(71, 85, 105, 0.18);
+
+    --chip-2025-bg:         rgba(79, 70, 229, 0.10);
+    --chip-2025-text:       #4338ca;
+    --chip-2025-border:     rgba(79, 70, 229, 0.25);
+
+    --chip-ru-bg:           rgba(234, 88, 12, 0.10);
+    --chip-ru-text:         #c2410c;
+    --chip-ru-border:       rgba(234, 88, 12, 0.25);
+
+    /* Variáveis Tesouraria V10 - Modo Claro */
+    --tesouraria-contador-bg: rgba(255, 255, 255, 0.30);
+}
+
+/* Container de chips dentro da linha */
+.participante-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+}
+
+/* Chip base */
+.chip-tes {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    border: 1px solid var(--chip-neutro-border);
+    background: var(--chip-neutro-bg);
+    color: var(--chip-neutro-text);
+    transition: transform 0.15s ease;
+}
+
+.chip-tes:hover {
+    transform: translateY(-1px);
+}
+
+.chip-tes .chip-label {
+    opacity: 0.7;
+    font-weight: 500;
+}
+
+/* Variantes */
+.chip-tes.chip-credito {
+    background: var(--chip-credito-bg);
+    color: var(--chip-credito-text);
+    border-color: var(--chip-credito-border);
+}
+
+.chip-tes.chip-debito {
+    background: var(--chip-debito-bg);
+    color: var(--chip-debito-text);
+    border-color: var(--chip-debito-border);
+}
+
+.chip-tes.chip-2025 {
+    background: var(--chip-2025-bg);
+    color: var(--chip-2025-text);
+    border-color: var(--chip-2025-border);
+}
+
+.chip-tes.chip-ru {
+    background: var(--chip-ru-bg);
+    color: var(--chip-ru-text);
+    border-color: var(--chip-ru-border);
+}
+
+.chip-tes .material-icons {
+    font-size: 12px;
+    line-height: 1;
+}
+
+/* ============================================================
+   TESOURARIA V10 — SUMMARY BAR (4 stat-boxes)
+   ============================================================ */
+
+.tesouraria-summary-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 16px 0 12px;
+}
+
+.tesouraria-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tesouraria-stat__label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted, #9ca3af);
+}
+
+.tesouraria-stat__value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.tesouraria-stat.is-areceber   .tesouraria-stat__value { color: var(--chip-credito-text); }
+.tesouraria-stat.is-apagar     .tesouraria-stat__value { color: var(--chip-debito-text); }
+.tesouraria-stat.is-devedores  .tesouraria-stat__value { color: var(--chip-ru-text); }
+.tesouraria-stat.is-credores   .tesouraria-stat__value { color: var(--chip-2025-text); }
+
+@media (max-width: 768px) {
+    .tesouraria-summary-bar {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ============================================================
+   TESOURARIA V10 — FILTER PILLS
+   ============================================================ */
+
+.tesouraria-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 12px;
+    padding: 8px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tesouraria-filtro {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-secondary, #94a3b8);
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.tesouraria-filtro:hover {
+    background: var(--chip-neutro-bg);
+    color: var(--text-primary, #e2e8f0);
+}
+
+.tesouraria-filtro.is-active {
+    background: var(--laranja, #FF5500);
+    color: #fff;
+    border-color: var(--laranja, #FF5500);
+}
+
+.tesouraria-filtro .contador {
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--tesouraria-contador-bg);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+}
+
+/* ============================================================
+   TESOURARIA V10 — LINHA COMPACTA (substitui 13 colunas)
+   ============================================================ */
+
+.fluxo-participantes-tabela.tesouraria-v10 tbody tr {
+    transition: background 0.15s ease;
+}
+
+.fluxo-participantes-tabela.tesouraria-v10 tbody tr:hover {
+    background: var(--chip-neutro-bg);
+}
+
+.fluxo-participantes-tabela.tesouraria-v10 .col-chips {
+    padding: 8px 12px;
+}
+
+.fluxo-participantes-tabela.tesouraria-v10 .col-saldo-v10 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: right;
+    min-width: 90px;
+    white-space: nowrap;
+}
+
+.fluxo-participantes-tabela.tesouraria-v10 .col-saldo-v10.val-positivo { color: var(--chip-credito-text); }
+.fluxo-participantes-tabela.tesouraria-v10 .col-saldo-v10.val-negativo { color: var(--chip-debito-text); }
+
+/* Ocultar filter pills quando não aplicáveis (ex: pré-temporada) */
+.tesouraria-filtros[hidden] { display: none !important; }
+
+/* ============================================================
+   TESOURARIA V10 — OVERRIDES LIGHT MODE
+   ============================================================ */
+
+[data-theme="light"] .tesouraria-stat {
+    background: rgba(15, 23, 42, 0.03);
+    border-color: rgba(15, 23, 42, 0.10);
+}
+
+[data-theme="light"] .tesouraria-filtros {
+    background: rgba(15, 23, 42, 0.02);
+    border-color: rgba(15, 23, 42, 0.08);
+}
+
+[data-theme="light"] .tesouraria-filtro {
+    color: #475569;
+}
+
+[data-theme="light"] .tesouraria-filtro:hover {
+    color: #0f172a;
+}
+
+[data-theme="light"] .fluxo-participantes-tabela.tesouraria-v10 tbody tr:hover {
+    background: rgba(15, 23, 42, 0.04);
 }
 
 /* Responsividade Ajustes */

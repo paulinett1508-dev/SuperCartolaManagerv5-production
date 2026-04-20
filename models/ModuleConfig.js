@@ -32,8 +32,8 @@ export const MODULOS_DISPONIVEIS = [
     'artilheiro',
     'capitao_luxo',
     'raio_x',
-    'tiro_certo',
-    'resta_um'
+    'resta_um',
+    'copa_sc'
 ];
 
 // =============================================================================

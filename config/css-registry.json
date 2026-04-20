@@ -209,11 +209,6 @@
         "description": "Analytics de repositorio e gestao de branches"
       },
       {
-        "path": "public/css/modules/admin-tiro-certo.css",
-        "loadedBy": ["admin-tiro-certo.html"],
-        "description": "Gerenciamento admin do modo Tiro Certo (Survival)"
-      },
-      {
         "path": "public/css/modules/admin-resta-um.css",
         "loadedBy": ["admin-resta-um.html"],
         "description": "Gerenciamento admin do modo Resta Um (Eliminacao Progressiva)"
@@ -300,18 +295,12 @@
       {
         "path": "public/participante/css/campinho.css",
         "loadedBy": ["participante/index.html"],
-        "description": "Campo virtual de escalacao premium v2"
+        "description": "Campo virtual de escalação v2"
       },
       {
         "path": "public/participante/css/copa-sc.css",
         "loadedBy": ["participante/index.html"],
         "description": "Tema Copa Super Cartola (dourado/trofeu)"
-      },
-      {
-        "path": "public/participante/css/tiro-certo.css",
-        "loadedBy": ["participante/index.html"],
-        "description": "Tema Tiro Certo Survival (laranja/mira) — teaser 2º turno",
-        "moduleColor": "--tc-primary (mapeia var(--app-primary))"
       },
       {
         "path": "public/participante/css/extrato-bank.css",
@@ -322,11 +311,6 @@
         "path": "public/participante/css/pull-refresh.css",
         "loadedBy": ["participante/index.html"],
         "description": "Pull-to-refresh com glass-morphism"
-      },
-      {
-        "path": "public/participante/css/whats-happening.css",
-        "loadedBy": ["participante/index.html"],
-        "description": "Widget 'O que ta rolando' com disputas em tempo real"
       },
       {
         "path": "public/participante/css/round-xray-widget.css",
@@ -426,13 +410,6 @@
         "description": "Componente TurnoGroup colapsável — agrupa rodadas em 1º/2º Turno com subtotais. Inclui trend-indicator (.trend-up/down/flat). Reutilizável por todos os módulos premium.",
         "features": ["turno-collapse", "module-color-overrides", "trend-indicator"],
         "moduleColor": "Per-module via .capitao/.artilheiro/.luva/.restaum/.tirocerto overrides"
-      },
-      {
-        "path": "public/participante/css/chatbot.css",
-        "loadedBy": ["participante/index.html"],
-        "description": "Big Cartola IA — chat UI com header strip roxo, bolhas de mensagem, input area e sugestoes rapidas. Namespace .chatbot-*",
-        "tokens": ["--app-purple", "--app-purple-muted", "--app-surface", "--app-bg", "--app-border", "--app-text-primary", "--app-text-secondary"],
-        "keyframes": ["chatbot-fade-in", "chatbot-typing-bounce"]
       }
     ]
   },

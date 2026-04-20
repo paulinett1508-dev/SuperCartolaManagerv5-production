@@ -14,7 +14,6 @@ const participanteSchema = new mongoose.Schema(
         senha_acesso: { type: String, default: "" },
         ativo: { type: Boolean, default: true }, // ✅ NOVO: Controle de participante ativo/inativo
         contato: { type: String, default: "" }, // ✅ v2.12: WhatsApp/telefone para contato direto
-        premium: { type: Boolean, default: false }, // ✅ v2.13: Acesso a recursos PRO (Cartola PRO)
         cartolaAuth: { // ✅ v2.14: Metadados de autenticacao Cartola (tokens ficam na sessao)
             type: new mongoose.Schema({
                 email: { type: String, default: null },
@@ -113,12 +112,11 @@ const ligaSchema = new mongoose.Schema({
             campinho: false,
             dicas: false,
             raioX: false,
-            tiroCerto: false,
+            copaSC: false,
             // Atalhos da home do participante
             participantes: true,
             premiacoes: true,
             regras: true,
-            cartolaPro: false,
         },
     },
     criadaEm: { type: Date, default: Date.now },
