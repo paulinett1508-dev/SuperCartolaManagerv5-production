@@ -452,7 +452,7 @@ class ParticipanteNavigation {
      */
     _isModuloOpcionalInativo(moduloId) {
         // Módulos de sistema/base: sempre permitidos (inclui sub-módulos como rodada-xray)
-        const modulosPermitidos = ['home', 'boas-vindas', 'extrato', 'ranking', 'rodadas', 'rodada-xray', 'historico', 'configuracoes', 'copa-times-sc', 'regras', 'info-meu-time', 'agenda-tabelas', 'jogos-do-dia'];
+        const modulosPermitidos = ['home', 'boas-vindas', 'extrato', 'ranking', 'rodadas', 'rodada-xray', 'historico', 'configuracoes', 'regras', 'info-meu-time', 'agenda-tabelas', 'jogos-do-dia'];
         if (modulosPermitidos.includes(moduloId)) return false;
 
         // Sem dados de módulos carregados: permitir (graceful degradation)
@@ -466,6 +466,7 @@ class ParticipanteNavigation {
             'luva-ouro': 'luvaOuro',
             'capitao': 'capitaoLuxo',
             'resta-um': 'restaUm',
+            'copa-times-sc': 'copaSC',
         };
         const configKey = configKeyMap[moduloId] || moduloId;
 
