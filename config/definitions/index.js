@@ -88,6 +88,13 @@ export const ligaPatrimonio = loadDefinition('liga_patrimonio_def.json');
 export const restaUm = loadDefinition('resta_um_def.json');
 
 // =============================================================================
+// MÓDULOS COPA
+// =============================================================================
+
+/** Copa de Times SC — Torneio eliminatório */
+export const copaSC = loadDefinition('copa_sc_def.json');
+
+// =============================================================================
 // EXPORTAÇÕES AGRUPADAS
 // =============================================================================
 
@@ -114,6 +121,9 @@ export const allDefinitions = {
 
     // Survival
     restaUm,
+
+    // Copa
+    copaSC,
 };
 
 /**
@@ -124,6 +134,7 @@ export const definitionsByCategory = {
     confronto: [pontosCorridos, mataMata],
     estatistico: [ligasMensais, turnoReturno, top10, capitaoLuxo, luvaOuro, artilheiro, ligaPatrimonio],
     survival: [restaUm],
+    copa: [copaSC],
 };
 
 /**
@@ -145,6 +156,7 @@ export function getDefinitionById(moduleId) {
         'artilheiro': artilheiro,
         'liga_patrimonio': ligaPatrimonio,
         'resta_um': restaUm,
+        'copa_sc': copaSC,
     };
 
     return mapping[moduleId] || null;
@@ -237,6 +249,7 @@ export default {
     artilheiro,
     ligaPatrimonio,
     restaUm,
+    copaSC,
 };
 
-console.log('[DEFINITIONS] ✅ Camada de Definição carregada - 12 módulos disponíveis');
+console.log('[DEFINITIONS] ✅ Camada de Definição carregada - 13 módulos disponíveis');

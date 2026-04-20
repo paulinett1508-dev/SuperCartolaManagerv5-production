@@ -1,0 +1,37 @@
+{
+    "id": "copa_sc",
+    "nome": "Copa de Times SC",
+    "descricao": "Torneio eliminatório estilo Copa do Mundo com 32 times — grupos, oitavas, quartas, semis e final.",
+    "versao": "1.0.0",
+    "status": "ativo",
+    "obrigatorio": false,
+    "categoria": "copa",
+    "restricoes": {
+        "min_participantes": 32,
+        "max_participantes": 35,
+        "ideal_participantes": [35]
+    },
+    "parametros": [
+        {
+            "id": "premiacao_campeao",
+            "label": "Prêmio Campeão (R$)",
+            "tipo": "number",
+            "default": 0,
+            "min": 0
+        },
+        {
+            "id": "premiacao_vice",
+            "label": "Prêmio Vice (R$)",
+            "tipo": "number",
+            "default": 0,
+            "min": 0
+        },
+        {
+            "id": "premiacao_terceiro",
+            "label": "Prêmio 3° Lugar (R$)",
+            "tipo": "number",
+            "default": 0,
+            "min": 0
+        }
+    ]
+}
