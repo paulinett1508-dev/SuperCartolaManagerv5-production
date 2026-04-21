@@ -262,7 +262,8 @@ router.get("/:id/ranking", async (req, res) => {
     const inativos = await getParticipantesInativos(ligaId);
 
     // ✅ v9.0: Filtrar por temporada para nao misturar dados de temporadas diferentes
-    const rodadas = await Rodada.find({ ligaId, temporada: temporadaFiltro }).lean();
+    // ✅ v9.1: Excluir rodadas com falha de API (consistente com endpoint de rodadas)
+    const rodadas = await Rodada.find({ ligaId, temporada: temporadaFiltro, populacaoFalhou: { $ne: true } }).lean();
 
     if (!rodadas || rodadas.length === 0) {
       return res.json([]);
