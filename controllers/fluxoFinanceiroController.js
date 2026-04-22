@@ -878,6 +878,54 @@ export const getExtratoFinanceiro = async (req, res) => {
             }
         }
 
+        // ✅ v8.22.0 FIX: Auto-healing — rodadas com entrada ausente no historico_transacoes
+        // Bug (v8.8.0-v8.18.x): ultima_rodada_consolidada era atualizado mesmo quando
+        // calcularFinanceiroDaRodada retornava [] (zona neutra antes de v8.10, ou participante
+        // sem doc de pontuação antes de v8.19). Cache ficava "travado": loop nunca re-processava.
+        // Solução: detectar primeiro gap → truncar cache até antes do gap → loop recalcula do gap em diante.
+        if (cache && cache.ultima_rodada_consolidada > 0 && !forcarRecalculo && !usouFallback) {
+            const rodadasPresentes = new Set(
+                (cache.historico_transacoes || [])
+                    .filter(t => (t.rodada || 0) >= 1 && t.tipo !== 'MITO' && t.tipo !== 'MICO')
+                    .map(t => t.rodada)
+            );
+            let primeiraRodadaFaltante = null;
+            for (let r = 1; r <= cache.ultima_rodada_consolidada; r++) {
+                if (!rodadasPresentes.has(r)) {
+                    primeiraRodadaFaltante = r;
+                    break;
+                }
+            }
+            if (primeiraRodadaFaltante !== null) {
+                logger.log(
+                    `[FLUXO-CONTROLLER] 🔧 AUTO-HEALING GAP: R${primeiraRodadaFaltante} sem entrada no cache (consolidado até R${cache.ultima_rodada_consolidada}) - truncando`
+                );
+                const entradasPreservadas = (cache.historico_transacoes || []).filter(t =>
+                    (t.rodada === 0 || t.tipo === 'INSCRICAO_TEMPORADA' ||
+                     t.tipo === 'SALDO_TEMPORADA_ANTERIOR' || t.tipo === 'LEGADO_ANTERIOR') ||
+                    ((t.rodada || 0) >= 1 && (t.rodada || 0) < primeiraRodadaFaltante &&
+                     t.tipo !== 'MITO' && t.tipo !== 'MICO' && t.tipo !== 'MATA_MATA')
+                );
+                const saldoPreservado = entradasPreservadas.reduce(
+                    (acc, t) => acc + (t.valor ?? t.saldo ?? 0), 0
+                );
+                if (cache._id) {
+                    await ExtratoFinanceiroCache.deleteOne({ _id: cache._id });
+                }
+                cache = new ExtratoFinanceiroCache({
+                    liga_id: ligaId,
+                    time_id: timeId,
+                    temporada: temporadaAtual,
+                    ultima_rodada_consolidada: primeiraRodadaFaltante - 1,
+                    saldo_consolidado: saldoPreservado,
+                    historico_transacoes: entradasPreservadas,
+                });
+                logger.log(
+                    `[FLUXO-CONTROLLER] ✅ Cache truncado: ${entradasPreservadas.length} entradas preservadas, recalculando a partir de R${primeiraRodadaFaltante}`
+                );
+            }
+        }
+
         // Verificar se time é inativo
         const participante = liga.participantes.find(
             (p) => String(p.time_id) === String(timeId),
