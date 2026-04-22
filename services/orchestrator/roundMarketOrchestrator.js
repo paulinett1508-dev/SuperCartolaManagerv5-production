@@ -505,7 +505,7 @@ class RoundMarketOrchestrator extends EventEmitter {
                     const popResponse = await fetch(`${BASE_URL}/api/rodadas/${ligaId}/rodadas`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ rodada }),
+                        body: JSON.stringify({ rodada, repopular: true }),
                     });
                     const popResult = await popResponse.json();
                     if (popResult.success) {
