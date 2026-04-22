@@ -410,11 +410,15 @@ export class FluxoFinanceiroCore {
         // VERIFICAR CACHE MONGODB
         // =====================================================================
         if (!forcarRecalculo) {
+            // ✅ FIX: rodadaParaCalculo já é o limite ajustado (rodadaAtualMercado - 1).
+            // Passar mercadoAberto=true causava double-subtraction no backend
+            // (rodadaEsperada = rodadaParaCalculo - 1), tornando o cache sempre "válido"
+            // mesmo sem a última rodada consolidada.
             const cacheValido = await this._verificarCacheMongoDB(
                 ligaId,
                 timeId,
                 rodadaParaCalculo,
-                mercadoAberto,
+                false,
             );
 
             if (cacheValido && cacheValido.valido) {
