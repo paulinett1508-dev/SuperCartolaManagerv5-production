@@ -1024,7 +1024,7 @@ class ParticipanteNavigation {
         const modulosPaths = {
             "boas-vindas": "/participante/js/modules/participante-boas-vindas.js",
             home: "/participante/js/modules/participante-home.js",
-            extrato: "/participante/js/modules/participante-extrato.js",
+            extrato: "/participante/js/modules/participante-extrato.js?v=4.13",
             ranking: "/participante/js/modules/participante-ranking.js",
             rodadas: "/participante/js/modules/participante-rodadas.js",
             historico: "/participante/js/modules/participante-historico.js",

@@ -616,6 +616,22 @@ async function carregarExtrato(ligaId, timeId) {
                 // ✅ v2.8: Verificar se cache parece completo
                 precisaRecalculo = detectarCacheIncompleto(cacheData.rodadas);
 
+                // ✅ v4.13 FIX CRÍTICO: Verificar se cache está desatualizado temporalmente.
+                // detectarCacheIncompleto só verifica qualidade estrutural (bonusOnus, mata-mata),
+                // não se a rodada mais recente está presente. Cache com R11 "completo" nunca
+                // dispara PASSO 2 quando R12 foi consolidada. rodadaAtual vem do mercado/status.
+                if (!precisaRecalculo && rodadaAtual > 0) {
+                    const maxRodadaNoCache = cacheData.rodadas.reduce(
+                        (max, r) => Math.max(max, r.rodada || 0), 0
+                    );
+                    const rodadaEsperada = rodadaAtual - 1; // mercado aberto: última rodada consolidada
+                    if (maxRodadaNoCache < rodadaEsperada) {
+                        precisaRecalculo = true;
+                        if (window.Log) Log.warn("EXTRATO-PARTICIPANTE",
+                            `⚠️ Cache temporal stale: maxRodada=${maxRodadaNoCache} < R${rodadaEsperada} esperado`);
+                    }
+                }
+
                 if (!precisaRecalculo) {
                     extratoData = {
                         ligaId: ligaId,
