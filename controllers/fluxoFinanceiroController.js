@@ -985,6 +985,17 @@ export const getExtratoFinanceiro = async (req, res) => {
                     novasTransacoes.push(...resultado.transacoes);
                     novoSaldo += resultado.saldo;
                     cacheModificado = true;
+                } else {
+                    // ✅ v8.23.0 FIX: Rodada processada com zero transações recebe marcador NEUTRO.
+                    // Sem ele, o auto-healing (v8.22.0) lê a ausência da rodada como "gap" e
+                    // trunca o cache perpetuamente, impedindo consolidação de R12+.
+                    const jaExiste = cache.historico_transacoes.some(
+                        t => t.rodada === r && t.tipo !== 'MITO' && t.tipo !== 'MICO'
+                    );
+                    if (!jaExiste) {
+                        novasTransacoes.push({ rodada: r, tipo: 'NEUTRO', valor: 0, saldo: 0 });
+                        cacheModificado = true;
+                    }
                 }
             }
         }
@@ -1329,7 +1340,7 @@ export const getExtratoFinanceiro = async (req, res) => {
 
         const todasTransacoes = [
             ...transacoesInscricao,     // ✅ v8.10.0: Inscrição primeiro (lançamento inicial)
-            ...cache.historico_transacoes,
+            ...cache.historico_transacoes.filter(t => t.tipo !== 'NEUTRO'), // marcadores internos não vão ao cliente
             ...transacoesCampos,
             ...transacoesAcertos,
         ].sort((a, b) => {
