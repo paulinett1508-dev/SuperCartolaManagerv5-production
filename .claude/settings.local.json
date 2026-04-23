@@ -362,7 +362,15 @@
       "Bash(cp C:/PROJETOS/SuperCartolaManagerv5-production/.agnostic-core/skills/audit/dead-code-auditor/references/commands.md C:/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/dead-code-auditor/references/commands.md)",
       "Bash(cp C:/PROJETOS/SuperCartolaManagerv5-production/.agnostic-core/skills/audit/dead-code-auditor/references/checklist.md C:/PROJETOS/SuperCartolaManagerv5-production/.claude/skills/dead-code-auditor/references/checklist.md)",
       "Bash(npm ls:*)",
-      "Bash(/c/Users/Windows10/AppData/Local/GitHubCLI/bin/gh.exe pr:*)"
+      "Bash(/c/Users/Windows10/AppData/Local/GitHubCLI/bin/gh.exe pr:*)",
+      "mcp__mongo-remote__find_documents",
+      "PowerShell(gh run *)",
+      "PowerShell(git push *)",
+      "PowerShell(git diff *)",
+      "PowerShell(iwr -useb https://raw.githubusercontent.com/paulinett1508-dev/agnostic-core/main/scripts/install.ps1 | iex 2>&1)",
+      "PowerShell(npm run *)",
+      "PowerShell($env:NODE_ENV=\"development\"; node index.js 2>&1)",
+      "PowerShell(Invoke-RestMethod -Uri \"http://localhost:3000/api/rodadas/684cb1c8af923da7c7df51de/rodadas?inicio=12&fim=12\" -ErrorAction Stop | ConvertTo-Json -Depth 3)"
     ]
   },
   "enableAllProjectMcpServers": true,
