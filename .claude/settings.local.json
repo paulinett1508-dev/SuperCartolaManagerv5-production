@@ -376,7 +376,11 @@
       "mcp__plugin_github_github__update_pull_request",
       "mcp__plugin_github_github__merge_pull_request",
       "mcp__plugin_github_github__create_pull_request",
-      "mcp__claude_ai_MCP_MongoDB__insert_document"
+      "mcp__claude_ai_MCP_MongoDB__insert_document",
+      "mcp__mongo-remote__list_collections",
+      "mcp__mongo-remote__get_collection_schema",
+      "Bash(claude auth *)",
+      "Bash(~/bin/jq.exe -r '.email // \"\"')"
     ]
   },
   "enableAllProjectMcpServers": true,
