@@ -1,10 +1,9 @@
 // =====================================================================
-// QUICK ACCESS BAR v5.0 - Raio X da Rodada
+// QUICK ACCESS BAR v5.1 - Copa de Times SC
 // =====================================================================
-// 4 botões: Início (home), Ranking, Raio X (rodada-xray), Financeiro
+// 4 botões: Início (home), Ranking, Copa de Times SC (copa-times-sc), Financeiro
 // GPU-accelerated, 60fps guaranteed, DOM caching
-// v5.0: Botão "Especial" substituído por "Raio X" — navegação direta.
-//       Removido: sheet overlay, menu animado, 5 LPs de campeonatos.
+// v5.1: Botão "Raio X" substituído por "Copa de Times SC" — navegação direta.
 // =====================================================================
 //
 // Segurança: todos os usos de innerHTML neste arquivo utilizam
@@ -74,12 +73,12 @@ class QuickAccessBar {
         // Todos os valores abaixo são estáticos — sem injeção de dados externos
         const btnInicio   = '<button class="nav-item active" data-page="home" type="button" aria-current="page"><span class="material-icons nav-icon">home</span><span class="nav-label">Início</span></button>';
         const btnRanking  = '<button class="nav-item" data-page="ranking" type="button"><span class="material-icons nav-icon">trending_up</span><span class="nav-label">Ranking Geral</span></button>';
-        const btnRaioX    = '<button class="nav-item raiox-btn" data-page="rodada-xray" type="button"><span class="material-icons nav-icon">sports_soccer</span><span class="nav-label">Raio X</span></button>';
+        const btnCopaSC   = '<button class="nav-item" data-page="copa-times-sc" type="button"><span class="material-icons nav-icon">emoji_events</span><span class="nav-label">Copa SC</span></button>';
         const btnExtrato  = '<button class="nav-item" data-page="extrato" type="button"><span class="material-icons nav-icon">account_balance_wallet</span><span class="nav-label">Financeiro</span></button>';
 
         const container = document.createElement('div');
         container.className = 'nav-container';
-        container.innerHTML = btnInicio + btnRanking + btnRaioX + btnExtrato;
+        container.innerHTML = btnInicio + btnRanking + btnCopaSC + btnExtrato;
         nav.appendChild(container);
         document.body.appendChild(nav);
 
@@ -303,4 +302,4 @@ if (document.readyState === 'loading') {
     quickAccessBar.inicializar();
 }
 
-if (window.Log) Log.info('QUICK-BAR', '✅ v5.0 carregado (Raio X)');
+if (window.Log) Log.info('QUICK-BAR', '✅ v5.1 carregado (Copa SC)');
