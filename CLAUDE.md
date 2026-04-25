@@ -1,5 +1,16 @@
 # SUPER CARTOLA MANAGER - PROJECT RULES
 
+## Orquestração do Fluxo de Trabalho
+
+Índice das 6 práticas que disciplinam toda sessão neste repo. Detalhes nas seções referenciadas — este bloco é apenas o mapa.
+
+1. **Modo de Planejamento (padrão).** Plan mode obrigatório para qualquer tarefa não trivial (3+ etapas ou decisão arquitetural). Especificações detalhadas antecipadas reduzem ambiguidade. Plan mode também para verificação, não só construção. Se algo der errado durante a execução, PARE e replanejeje. Detalhes: §"Protocolo de Planejamento Obrigatório".
+2. **Estratégia de Subagentes.** Use subagents liberalmente para preservar a janela de contexto principal — pesquisa, exploração e análise paralela. Uma tarefa por subagent, prompt auto-contido. Detalhes: §"Uso de Subagents".
+3. **Verificação Antes de Concluir.** Nunca marque done sem provar — diff, log, teste, screenshot. *"Um senior engineer aprovaria esse diff?"* Se não puder verificar, declare explicitamente em vez de afirmar sucesso. Detalhes: §"Verificação antes de Concluir".
+4. **Exigência de Elegância (balanceada).** Mudanças que tocam 3+ arquivos: pause e pergunte "há solução mais elegante?". Pule isso para fixes simples e óbvios — não over-engenheirar. Detalhes: §"Elegância (features não-triviais)".
+5. **Correção de Bugs Autônoma.** Recebeu bug? Resolva. Persiga logs/erros/testes falhando até a causa raiz. Zero troca de contexto exigida do usuário. Detalhes: §"Bug Fix Protocol".
+6. **Loop de Auto-aperfeiçoamento.** Após qualquer correção do usuário: registre o padrão em `.claude/LESSONS.md` com regra concreta que previna a repetição. Revisar no início de cada sessão. Detalhes: §"Auto-Aprendizado".
+
 <!-- BEGIN agnostic-core/response-contract -->
 @.agnostic-core/skills/communication/response-contract.md
 <!-- END agnostic-core/response-contract -->
@@ -24,6 +35,8 @@ Se QUALQUER tarefa envolve CSS/HTML/visual (mesmo "acessório" de feature backen
 - Ativar `anti-frankenstein` antes de escrever CSS (verificar `config/css-registry.json`, tokens, animações existentes)
 - Ativar `frontend-design` se houver decisão estética (cores, layout, motion)
 - Skills não ativadas no plano = skills que serão esquecidas na execução
+- **Plan mode também para verificação, não só construção.** Especificações detalhadas antecipadas reduzem ambiguidade — invista em escopo claro antes de codar. Se algo der errado durante a execução, PARE e replanejeje imediatamente
+- Skills relacionadas: `goal-backward-planning` (Goal→Truths→Artifacts), `workflow` (maestro Pesquisa→Spec→Code), `pre-implementation` (checklist anti-duplicação)
 
 Detalhes completos: [`docs/references/protocolo-planejamento.md`](docs/references/protocolo-planejamento.md)
 
@@ -45,6 +58,7 @@ Node.js (Docker/VPS) · MongoDB (Native Driver) · HTML5/CSS3/Vanilla JS (ES6 Mo
 - **Cache busting obrigatório:** ao criar ou modificar CSS significativamente, incrementar `?v=X` no `<link>` correspondente em `index.html`. CSS sem `?v=` em PROD = bug invisível (browser serve versão antiga)
 - **Seletores CSS descendentes + DOM injetado:** antes de usar `.parent .child {}`, verificar se o child está realmente dentro do parent na árvore DOM. Elementos injetados via JS (`insertBefore`, `prepend`) podem estar fora do container esperado — preferir toggle via JS direto
 - **NUNCA `alert()` nativo do browser** — usar toasts do design system: `window.ErrorToast.show(msg, { tipo, duracao })` (app participante) ou equivalente no admin. `alert()` é visual amador e quebra a experiência dark mode
+- **Honestidade técnica:** se não pode verificar (UI sem dev server, ambiente externo indisponível, dependência ausente) — declare explicitamente em vez de afirmar sucesso. Type check e suíte de testes verificam corretude do código, não corretude da feature
 
 ## UI/UX (resumo)
 
@@ -75,18 +89,11 @@ Controle: `Liga.modulos_ativos` (on/off) + `ModuleConfig` (granular).
 REGRA CRÍTICA: módulos de premiação final (Artilheiro, Luva, Capitão, etc.) NUNCA geram campos por-rodada — entram como `tipo: "AJUSTE"` com `rodada: null`.
 Detalhes: [`docs/references/sistema-modulos.md`](docs/references/sistema-modulos.md)
 
-## Princípios de Engenharia
-
-- **Simplicidade:** mudança mais simples possível, sem melhorias além do pedido
-- **Causa raiz:** investigar o problema real, zero fixes temporários
-- **S.A.I.S:** Solicitar (ler) → Analisar → Identificar dependências → Alterar (mínimo)
-- **Autonomia:** NUNCA pergunte "onde fica o arquivo?" — busque sozinho (Grep, Glob, Read)
-- **Exceção:** decisões de negócio ou ambiguidade de requisito — aí sim, pergunte
-
 ## Bug Fix Protocol
 
 Recebeu bug? Resolva. Investigar → Corrigir (cirúrgico, S.A.I.S) → Verificar (FASE 3.5) → Reportar.
 O usuário NÃO deve guiar passo a passo. Se teste/lint falhar após fix, corrija sem esperar instrução.
+**Zero troca de contexto exigida do usuário** — persiga logs, mensagens de erro e testes falhando até a causa raiz. Skill: `audit-systematic-debugging` (4 fases: reproduzir, isolar, entender com 5 Porquês, corrigir).
 
 ## Uso de Subagents
 
@@ -94,6 +101,8 @@ O usuário NÃO deve guiar passo a passo. Se teste/lint falhar após fix, corrij
 - Offload investigação de codebase, leitura de logs e tarefas independentes para subagents
 - Uma tarefa por subagent para execução focada; prefira paralelismo a execução sequencial
 - Para problemas complexos: jogue mais compute via subagents antes de travar o contexto principal
+- **Prompt auto-contido:** o subagent não vê o histórico desta sessão — inclua todo contexto necessário (paths exatos, snippets relevantes, restrições, formato esperado de resposta)
+- **Use subagents liberalmente** para preservar a janela de contexto principal — leituras grandes, varreduras amplas e análises paralelas devem rodar em subagent
 
 ## Verificação antes de Concluir
 
@@ -101,6 +110,7 @@ O usuário NÃO deve guiar passo a passo. Se teste/lint falhar após fix, corrij
 - Checagem mental obrigatória: *"Um senior engineer aprovaria esse diff?"*
 - Aplica-se a features e refactors — não apenas ao Bug Fix Protocol
 - Se algo parece incerto: demonstre a correção, não apenas afirme
+- **Se não puder verificar** (UI sem dev server, ambiente externo, dependência indisponível) — declare explicitamente em vez de afirmar sucesso. Type checks e testes provam corretude do código, não corretude da feature em PROD
 
 ## Elegância (features não-triviais)
 
@@ -281,6 +291,27 @@ Hook `PostToolUse` (`.claude/hooks/post-tool-use-autopush`) faz push automático
 - Retry com backoff exponencial (2s/4s/8s/16s, até 4 tentativas) em falha de rede
 - O hook só ativa quando `tool_name == Bash` e o comando contém `git commit`
 
+## Gerenciamento de Tarefas
+
+Adaptação do ritual de `tasks/todo.md` à infraestrutura JÁ existente neste projeto — não criar diretório novo:
+
+- **Plano primeiro:** Plan Mode é forçado por [`.claude/hooks/session-start-planning-enforcer`](.claude/hooks/session-start-planning-enforcer) e [`.claude/hooks/pre-tool-use-planning-gate`](.claude/hooks/pre-tool-use-planning-gate). Plan files vão para `/root/.claude/plans/<slug>.md` — verifique o plano antes de iniciar
+- **Tracking em sessão:** `TodoWrite` com itens `pending`/`in_progress`/`completed`. Apenas UMA task `in_progress` por vez. Marcar `completed` IMEDIATAMENTE ao terminar — nunca em lote
+- **Backlog persistente:** [`BACKLOG.md`](BACKLOG.md), priorizado CRÍTICO/ALTA/MÉDIA/BAIXA. CLI: `node scripts/backlog-helper.js`
+- **Lições aprendidas:** [`.claude/LESSONS.md`](.claude/LESSONS.md) (NÃO `tasks/lessons.md` — o projeto já tem o seu, em formato tabular). Atualizar após CADA correção do usuário
+- **Resumo de alto nível** em cada checkpoint (PR, fim de fase, fim de sessão) + seção "Revisão" no final do plan file
+
+## Princípios Básicos
+
+- **Simplicidade:** mudança mais simples possível, sem melhorias além do pedido
+- **Causa raiz:** investigar o problema real, zero fixes temporários ou paliativos
+- **Impacto mínimo:** toque só no necessário; sem efeitos colaterais ou refactor oportunista
+- **Sem over-engineering:** nada de features/abstrações/error handling que a tarefa não pediu
+- **Honestidade técnica:** se não pode verificar, declare; nunca finja sucesso
+- **S.A.I.S:** Solicitar (ler) → Analisar → Identificar dependências → Alterar (mínimo)
+- **Autonomia:** NUNCA pergunte "onde fica o arquivo?" — busque sozinho (Grep, Glob, Read)
+- **Exceção:** decisões de negócio ou ambiguidade de requisito — aí sim, pergunte
+
 ## Critical Rules
 
 1. NEVER remove `gemini_audit.py`
@@ -294,8 +325,9 @@ Hook `PostToolUse` (`.claude/hooks/post-tool-use-autopush`) faz push automático
 
 ## Auto-Aprendizado
 
-Após correção do usuário: registrar em [`.claude/LESSONS.md`](.claude/LESSONS.md) (categorias: DADOS, FRONTEND, LOGICA, PROCESSO).
+Após correção do usuário: registrar em [`.claude/LESSONS.md`](.claude/LESSONS.md) (categorias: DADOS, FRONTEND, LOGICA, PROCESSO) com regra concreta que previna a repetição do erro.
 3+ lições da mesma categoria → propor nova regra. Lição crítica → adicionar às Critical Rules imediatamente.
+**Revisar `.claude/LESSONS.md` no início de cada sessão** (a skill `newsession` faz handover automático carregando contexto e lições recentes).
 
 ## Referência Agnostic-Core
 
@@ -306,3 +338,5 @@ Skills instaladas em `.claude/skills/` a partir do agnostic-core (21 novas skill
 Agents disponíveis em `.claude/agents/` (9 agentes especializados).
 Guia de integração: [`.agnostic-core/docs/integration-guide.md`](.agnostic-core/docs/integration-guide.md)
 Roteamento de agents: [`.agnostic-core/docs/agent-routing-guide.md`](.agnostic-core/docs/agent-routing-guide.md)
+
+> ⚠️ Se `.agnostic-core/` estiver vazio em algum clone (submódulo não inicializado), rodar `git submodule update --init --recursive`. As skills críticas estão também espelhadas em `.claude/skills/` (162 skills) e podem ser usadas diretamente sem o submódulo.
