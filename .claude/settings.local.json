@@ -397,6 +397,11 @@
             "type": "command",
             "command": "bash .claude/hooks/session-start-planning-enforcer",
             "statusMessage": "Carregando protocolo de planejamento obrigatório..."
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/session-start-mcp-bootstrap",
+            "statusMessage": "Verificando auto-bootstrap do Mongo MCP..."
           }
         ]
       }

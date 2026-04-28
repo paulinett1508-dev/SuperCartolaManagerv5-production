@@ -1,0 +1,42 @@
+#!/bin/bash
+# SessionStart hook: auto-bootstrap .mcp.json a partir de $MCP_SECRET_TOKEN
+# Permite que sandboxes CCW (mobile, sem terminal) recuperem o Mongo MCP automaticamente.
+#
+# Comportamento:
+#   - .mcp.json já existe → no-op (não sobrescreve)
+#   - $MCP_SECRET_TOKEN ausente → log informativo e sai com 0
+#   - Token presente + arquivo ausente → escreve .mcp.json e avisa para reabrir sessão
+
+set -uo pipefail
+
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
+MCP_FILE="${PROJECT_DIR}/.mcp.json"
+MCP_URL="https://supercartolamanager.com.br/mcp-mongo/mcp"
+
+if [ -f "$MCP_FILE" ]; then
+  echo "🔌 Mongo MCP: .mcp.json ja existe (mantido)"
+  exit 0
+fi
+
+if [ -z "${MCP_SECRET_TOKEN:-}" ]; then
+  echo "🔌 Mongo MCP: \$MCP_SECRET_TOKEN nao definido - pulando bootstrap"
+  echo "   Para auto-conectar em sandboxes CCW novos, defina MCP_SECRET_TOKEN nas Environment Variables do CCW"
+  exit 0
+fi
+
+cat > "$MCP_FILE" <<EOF
+{
+  "mcpServers": {
+    "mongo-remote": {
+      "type": "http",
+      "url": "${MCP_URL}",
+      "headers": {
+        "x-mcp-token": "${MCP_SECRET_TOKEN}"
+      }
+    }
+  }
+}
+EOF
+
+echo "🔌 Mongo MCP: .mcp.json criado a partir de \$MCP_SECRET_TOKEN"
+echo "   ⚠️  Reabra a sessao CCW uma vez para o servidor mongo-remote conectar"

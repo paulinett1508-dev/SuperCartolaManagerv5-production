@@ -241,7 +241,15 @@ Container: `scm-mcp` (Docker, porta 3099 interna). Antes de qualquer código que
 Token e URL completa: ver `MCP_SECRET_TOKEN` no `.env.prod` da VPS.
 
 **Reativar Mongo MCP em nova sessão CCW (sandbox limpo):**
-`.mcp.json` está no `.gitignore` — cada sandbox novo precisa recriar. Procedimento:
+`.mcp.json` está no `.gitignore` — cada sandbox novo nasce sem ele.
+
+**Fluxo automático (preferido — funciona inclusive no CCW mobile sem terminal):**
+1. Setar UMA VEZ no CCW Settings → Environment Variables: `MCP_SECRET_TOKEN=<token_da_vps>`
+2. O hook `SessionStart` (`.claude/hooks/session-start-mcp-bootstrap`) detecta `.mcp.json` ausente + env var presente → cria o arquivo automaticamente
+3. Reabrir a sessão CCW UMA vez (MCP só é lido na inicialização)
+4. `/mcp` → `mongo-remote ✓ connected`
+
+**Fluxo manual (terminal disponível, ou primeira configuração da env var):**
 1. Obter token na VPS: `ssh vps 'grep MCP_SECRET_TOKEN /var/www/cartola/.env.prod | cut -d= -f2-'`
 2. Copiar `.mcp.json.example` → `.mcp.json` e manter SÓ o bloco `mongo-remote` (URL `https://supercartolamanager.com.br/mcp-mongo/mcp` + header `x-mcp-token: <token>`)
 3. Validar antes de reiniciar: `curl -sS -i -H "x-mcp-token: <TOKEN>" -H "Accept: application/json, text/event-stream" -X POST https://supercartolamanager.com.br/mcp-mongo/mcp -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"diag","version":"0.1"}}}'` — esperado: HTTP 200 + header `mcp-session-id`
