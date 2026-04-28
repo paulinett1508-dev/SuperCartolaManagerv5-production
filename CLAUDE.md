@@ -240,6 +240,16 @@ Ferramentas: `list_collections`, `find_documents`, `get_collection_schema`, `ins
 Container: `scm-mcp` (Docker, porta 3099 interna). Antes de qualquer código que toque dados → consultar este MCP.
 Token e URL completa: ver `MCP_SECRET_TOKEN` no `.env.prod` da VPS.
 
+**Reativar Mongo MCP em nova sessão CCW (sandbox limpo):**
+`.mcp.json` está no `.gitignore` — cada sandbox novo precisa recriar. Procedimento:
+1. Obter token na VPS: `ssh vps 'grep MCP_SECRET_TOKEN /var/www/cartola/.env.prod | cut -d= -f2-'`
+2. Copiar `.mcp.json.example` → `.mcp.json` e manter SÓ o bloco `mongo-remote` (URL `https://supercartolamanager.com.br/mcp-mongo/mcp` + header `x-mcp-token: <token>`)
+3. Validar antes de reiniciar: `curl -sS -i -H "x-mcp-token: <TOKEN>" -H "Accept: application/json, text/event-stream" -X POST https://supercartolamanager.com.br/mcp-mongo/mcp -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"diag","version":"0.1"}}}'` — esperado: HTTP 200 + header `mcp-session-id`
+4. Reiniciar a sessão CCW (`.mcp.json` é lido só na inicialização, não em hot-reload)
+5. Confirmar: rodar `/mcp` na nova sessão → `mongo-remote ✓ connected`
+
+Diagnóstico rápido: `GET /mcp-mongo/health` (sem auth) → `{"status":"ok","sessions":N}` indica container vivo.
+
 ## Pontos Corridos (REGRA CRÍTICA)
 
 Liga com número **ímpar** de times usa sistema de BYE: um time folga por rodada, rotacionando deterministicamente. Time com BYE: `jogos` NÃO é incrementado, pontos/financeiro não alteram.
