@@ -303,9 +303,9 @@
         "description": "Tema Copa Super Cartola (dourado/trofeu)"
       },
       {
-        "path": "public/participante/css/extrato-bank.css",
+        "path": "public/participante/css/extrato-thermal.css",
         "loadedBy": ["participante/index.html"],
-        "description": "Extrato estilo banco digital (Nubank/Inter)"
+        "description": "Extrato financeiro estilo cupom de impressora termica (papel branco off-white, JetBrains Mono, asteriscos dividers, codigo de barras decorativo)"
       },
       {
         "path": "public/participante/css/pull-refresh.css",
