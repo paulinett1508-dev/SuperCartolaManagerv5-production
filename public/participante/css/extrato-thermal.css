@@ -514,6 +514,193 @@
     margin: 4px 0;
 }
 
+/* ===== Mini-ticket de projeção ao vivo (stub destacável) =====
+ * Pedaço discreto do mesmo papel, sentado acima do ticket principal.
+ * Borda inferior tracejada simula perfuração "destacar aqui".
+ * Quando rodada não está em curso, fica oculto (controlado pelo JS).
+ */
+.thermal-projection {
+    width: calc(100% - 16px);
+    max-width: 380px;
+    margin: 16px auto 0;
+    padding: 12px 18px 14px;
+    background: var(--thermal-paper);
+    color: var(--thermal-ink);
+    font-family: var(--app-font-mono);
+    font-size: 11px;
+    line-height: 1.5;
+    box-shadow:
+        0 16px 24px -10px rgba(0, 0, 0, 0.55),
+        0 4px 8px -2px rgba(0, 0, 0, 0.35);
+    /* Define tokens locais (mesmos do ticket — papel branco fixo) */
+    --thermal-paper: #FAFAF7;
+    --thermal-ink: #1a1a1a;
+    --thermal-ink-soft: #4a4a4a;
+    --thermal-ink-dim: #9ca3af;
+    --thermal-ink-credit: #0d7a3f;
+    --thermal-ink-debit: #b91c1c;
+    /* Linha tracejada na borda inferior: sugere "destacar aqui" */
+    border-bottom: 1px dashed var(--thermal-ink-soft);
+}
+
+.thermal-projection .thermal-projection__live-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--thermal-ink);
+    margin: 0 0 6px;
+}
+
+.thermal-projection .thermal-projection__live-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--thermal-ink-credit);
+    animation: app-pulse 2s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+.thermal-projection .thermal-projection__live-time {
+    margin-left: auto;
+    font-size: 9px;
+    color: var(--thermal-ink-soft);
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+.thermal-projection .thermal-projection__time {
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--thermal-ink);
+    margin: 0 0 6px;
+    word-break: break-word;
+}
+
+.thermal-projection .thermal-projection__pos-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 0 5px;
+    border: 1px solid var(--thermal-ink-soft);
+    border-radius: 2px;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--thermal-ink-soft);
+    letter-spacing: 0.5px;
+    vertical-align: middle;
+}
+
+.thermal-projection .thermal-projection__divider {
+    border-top: 1px dashed var(--thermal-ink-soft);
+    margin: 8px 0 6px;
+}
+
+.thermal-projection .thermal-projection__row {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin: 3px 0;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.thermal-projection .thermal-projection__row-label {
+    color: var(--thermal-ink);
+    font-weight: 700;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.thermal-projection .thermal-projection__row-leader {
+    flex: 1;
+    min-width: 10px;
+    height: 1em;
+    background-image: radial-gradient(circle, var(--thermal-ink-soft) 0.5px, transparent 1.2px);
+    background-size: 5px 5px;
+    background-repeat: repeat-x;
+    background-position: center 70%;
+    align-self: flex-end;
+    margin: 0 4px;
+}
+
+.thermal-projection .thermal-projection__row-value {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-weight: 700;
+    color: var(--thermal-ink);
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+}
+
+.thermal-projection .thermal-projection__row-value[data-sign="+"] { color: var(--thermal-ink-credit); }
+.thermal-projection .thermal-projection__row-value[data-sign="-"] { color: var(--thermal-ink-debit); }
+.thermal-projection .thermal-projection__row-value[data-sign="0"] { color: var(--thermal-ink-dim); }
+
+.thermal-projection .thermal-projection__breakdown {
+    list-style: none;
+    margin: 2px 0 4px 12px;
+    padding: 0;
+}
+
+.thermal-projection .thermal-projection__breakdown-item {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin: 1px 0;
+    font-size: 10px;
+    line-height: 1.45;
+    color: var(--thermal-ink-soft);
+}
+
+.thermal-projection .thermal-projection__breakdown-label {
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+.thermal-projection .thermal-projection__breakdown-leader {
+    flex: 1;
+    min-width: 8px;
+    height: 1em;
+    background-image: radial-gradient(circle, var(--thermal-ink-dim) 0.5px, transparent 1.2px);
+    background-size: 4px 4px;
+    background-repeat: repeat-x;
+    background-position: center 70%;
+    align-self: flex-end;
+    margin: 0 4px;
+}
+
+.thermal-projection .thermal-projection__breakdown-value {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-weight: 600;
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+}
+
+.thermal-projection .thermal-projection__breakdown-value[data-sign="+"] { color: var(--thermal-ink-credit); }
+.thermal-projection .thermal-projection__breakdown-value[data-sign="-"] { color: var(--thermal-ink-debit); }
+
+/* Quando o card de projeção existe, gruda no ticket abaixo (sem gap) */
+.thermal-projection + .thermal-stage {
+    padding-top: 0;
+}
+.thermal-projection + .thermal-stage .thermal-ticket {
+    margin-top: 0;
+}
+
 /* ===== Tablet ===== */
 @media (min-width: 768px) {
     .thermal-ticket {
@@ -524,6 +711,8 @@
 
     .thermal-ticket__row { font-size: 13px; }
     .thermal-ticket__display { padding: 22px 16px; }
+
+    .thermal-projection { max-width: 420px; }
 }
 
 /* ===== Desktop ===== */
@@ -537,6 +726,14 @@
         margin: 32px auto;
         transform: rotate(-0.4deg);
         transition: transform 0.3s ease;
+    }
+
+    .thermal-projection {
+        max-width: 460px;
+        margin-top: 32px;
+    }
+    .thermal-projection + .thermal-stage .thermal-ticket {
+        margin-top: 0;
     }
 
     .thermal-ticket:hover {
