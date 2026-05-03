@@ -108,18 +108,18 @@
 }
 
 .thermal-ticket__title {
-    font-family: var(--app-font-brand);
-    font-size: clamp(2.1rem, 10vw, 2.85rem);
-    line-height: 0.92;
+    font-family: var(--app-font-mono);
+    font-size: 16px;
+    line-height: 1.35;
     color: var(--thermal-ink);
-    margin: 0 0 8px;
-    letter-spacing: -1px;
+    margin: 0 0 6px;
+    letter-spacing: 4px;
     text-transform: uppercase;
-    font-weight: 400;
+    font-weight: 700;
 }
 
 .thermal-ticket__title span {
-    display: block;
+    display: inline;
 }
 
 .thermal-ticket__subtitle {
@@ -241,6 +241,64 @@
 .thermal-ticket__row-value[data-sign="-"] { color: var(--thermal-ink-debit); }
 .thermal-ticket__row-value[data-sign="0"] { color: var(--thermal-ink-dim); }
 
+/* ===== Breakdown por rodada (sub-linhas) ===== */
+.thermal-ticket__row-wrap {
+    margin: 5px 0;
+}
+
+.thermal-ticket__row-wrap .thermal-ticket__row {
+    margin: 0;
+}
+
+.thermal-ticket__row-breakdown {
+    list-style: none;
+    margin: 2px 0 4px 14px;
+    padding: 0;
+}
+
+.thermal-ticket__row-breakdown-item {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin: 1px 0;
+    font-size: 11px;
+    line-height: 1.45;
+    color: var(--thermal-ink-soft);
+}
+
+.thermal-ticket__row-breakdown-label {
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+.thermal-ticket__row-breakdown-leader {
+    flex: 1;
+    min-width: 10px;
+    height: 1em;
+    background-image: radial-gradient(circle, var(--thermal-ink-dim) 0.5px, transparent 1.2px);
+    background-size: 4px 4px;
+    background-repeat: repeat-x;
+    background-position: center 70%;
+    align-self: flex-end;
+    margin: 0 4px;
+}
+
+.thermal-ticket__row-breakdown-value {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-weight: 600;
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+}
+
+.thermal-ticket__row-breakdown-value[data-sign="+"] { color: var(--thermal-ink-credit); }
+.thermal-ticket__row-breakdown-value[data-sign="-"] { color: var(--thermal-ink-debit); }
+
 /* ===== Position badge ===== */
 .thermal-ticket__pos-badge {
     display: inline-block;
@@ -315,12 +373,13 @@
 }
 
 .thermal-ticket__display-value {
-    font-family: var(--app-font-brand);
-    font-size: clamp(2.25rem, 9vw, 3.25rem);
-    line-height: 1;
+    font-family: var(--app-font-mono);
+    font-size: clamp(1.75rem, 7vw, 2.25rem);
+    line-height: 1.1;
     color: var(--thermal-ink);
-    margin: 4px 0;
-    letter-spacing: -1px;
+    margin: 6px 0;
+    letter-spacing: 1px;
+    font-weight: 800;
     font-feature-settings: "tnum";
     font-variant-numeric: tabular-nums;
     word-break: break-word;
