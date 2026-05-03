@@ -92,15 +92,20 @@
     z-index: 2;
 }
 
-/* ===== Header (cupom fiscal clássico) ===== */
-.thermal-ticket__header {
+/* ===== Header (cupom fiscal clássico) =====
+ * IMPORTANTE: seletores prefixados com .thermal-ticket para ganhar
+ * especificidade sobre .module-container h1/h2/p que vem do
+ * participante.css (cor branca/cinza claro do dark mode).
+ * Especificidade local: 0,2,0 vs global 0,1,1 — wins.
+ */
+.thermal-ticket .thermal-ticket__header {
     text-align: center;
     margin-bottom: 12px;
     padding: 14px 0 6px;
     border-top: 3px double var(--thermal-ink);
 }
 
-.thermal-ticket__store {
+.thermal-ticket .thermal-ticket__store {
     font-size: 11px;
     letter-spacing: 2.5px;
     color: var(--thermal-ink);
@@ -109,7 +114,7 @@
     font-weight: 700;
 }
 
-.thermal-ticket__title {
+.thermal-ticket .thermal-ticket__title {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -124,20 +129,20 @@
     font-weight: 700;
 }
 
-.thermal-ticket__title::before,
-.thermal-ticket__title::after {
+.thermal-ticket .thermal-ticket__title::before,
+.thermal-ticket .thermal-ticket__title::after {
     content: "";
     flex: 0 0 24px;
     height: 1px;
     background: var(--thermal-ink);
 }
 
-.thermal-ticket__title span {
+.thermal-ticket .thermal-ticket__title span {
     display: inline-block;
     flex-shrink: 0;
 }
 
-.thermal-ticket__subtitle {
+.thermal-ticket .thermal-ticket__subtitle {
     font-size: 14px;
     color: var(--thermal-ink);
     font-weight: 800;
@@ -147,7 +152,7 @@
     word-break: break-word;
 }
 
-.thermal-ticket__meta {
+.thermal-ticket .thermal-ticket__meta {
     font-size: 10px;
     color: var(--thermal-ink-soft);
     margin: 0 0 4px;
@@ -180,7 +185,7 @@
     margin: 12px 0;
 }
 
-.thermal-ticket__section-title {
+.thermal-ticket .thermal-ticket__section-title {
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 2px;
@@ -379,7 +384,7 @@
     border-bottom: 2px solid var(--thermal-ink);
 }
 
-.thermal-ticket__display-label {
+.thermal-ticket .thermal-ticket__display-label {
     font-size: 10px;
     letter-spacing: 3px;
     color: var(--thermal-ink-soft);
@@ -388,7 +393,7 @@
     font-weight: 700;
 }
 
-.thermal-ticket__display-value {
+.thermal-ticket .thermal-ticket__display-value {
     font-family: var(--app-font-mono);
     font-size: clamp(1.75rem, 7vw, 2.25rem);
     line-height: 1.1;
@@ -425,7 +430,7 @@
 }
 
 /* ===== Note (pré-temporada) ===== */
-.thermal-ticket__note {
+.thermal-ticket .thermal-ticket__note {
     font-size: 11px;
     color: var(--thermal-ink-soft);
     text-align: center;
@@ -477,7 +482,7 @@
     border-top: 1px dashed var(--thermal-ink-soft);
 }
 
-.thermal-ticket__footer p {
+.thermal-ticket .thermal-ticket__footer p {
     margin: 4px 0;
     font-size: 9px;
     letter-spacing: 1px;
@@ -493,13 +498,20 @@
     margin-bottom: 8px !important;
 }
 
-/* ===== Empty / Erro state genérico ===== */
-.thermal-ticket__empty {
+/* ===== Empty / Erro state genérico =====
+ * Scoped selectors para vencer .module-container p (cor cinza claro do dark mode)
+ */
+.thermal-ticket .thermal-ticket__empty {
     text-align: center;
     padding: 24px 12px;
     color: var(--thermal-ink-soft);
     font-size: 11px;
     line-height: 1.6;
+}
+
+.thermal-ticket .thermal-ticket__empty p {
+    color: var(--thermal-ink-soft);
+    margin: 4px 0;
 }
 
 /* ===== Tablet ===== */
