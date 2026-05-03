@@ -244,12 +244,16 @@ function renderThermalTicket(extrato, acertos, ligaId, options = {}) {
         `);
     }
 
-    // --- Rodadas ---
+    // --- Rodadas (com breakdown de componentes) ---
     if (rodadasOrdenadas.length > 0) {
         let totalRodadas = 0;
         const rowsHtml = rodadasOrdenadas.map(r => {
-            const saldoR = (r.bonusOnus || 0) + (r.pontosCorridos || 0)
-                + (r.mataMata || 0) + (r.top10 || 0) + (r.restaUm || 0);
+            const bonusOnus = r.bonusOnus || 0;
+            const pontosCorridos = r.pontosCorridos || 0;
+            const mataMata = r.mataMata || 0;
+            const top10 = r.top10 || 0;
+            const restaUm = r.restaUm || 0;
+            const saldoR = bonusOnus + pontosCorridos + mataMata + top10 + restaUm;
             totalRodadas += saldoR;
 
             const faixas = getFaixasParaRodada(ligaId, r.rodada);
@@ -263,13 +267,53 @@ function renderThermalTicket(extrato, acertos, ligaId, options = {}) {
                 ? `<span class="thermal-ticket__pos-badge" data-pos-tier="${tier}">${r.posicao}º</span>`
                 : '';
 
-            const nameHtml = `RODADA ${numStr}${posBadge}`;
-            return renderRow({
-                name: nameHtml,
-                valor: saldoR,
-                isZero: saldoR === 0,
-                allowHtmlInName: true
-            });
+            const sign = signKey(saldoR);
+            const valueText = saldoR === 0 ? '—' : valorTextWithSign(saldoR);
+            const rowClass = saldoR === 0
+                ? 'thermal-ticket__row thermal-ticket__row--zero'
+                : 'thermal-ticket__row';
+
+            // Compor breakdown de componentes != 0
+            const breakdown = [];
+            if (bonusOnus !== 0) {
+                let label;
+                if (isMito) label = 'MITO DA RODADA';
+                else if (isMico) label = 'MICO DA RODADA';
+                else label = bonusOnus > 0 ? 'BONUS POSICAO' : 'ONUS POSICAO';
+                breakdown.push({ label, valor: bonusOnus });
+            }
+            if (pontosCorridos !== 0) breakdown.push({ label: 'PONTOS CORRIDOS', valor: pontosCorridos });
+            if (mataMata !== 0) breakdown.push({ label: 'MATA-MATA', valor: mataMata });
+            if (top10 !== 0) breakdown.push({ label: top10 > 0 ? 'TOP10 MITO' : 'TOP10 MICO', valor: top10 });
+            if (restaUm !== 0) breakdown.push({ label: 'RESTA UM', valor: restaUm });
+
+            // Mostrar breakdown apenas se houver 2+ componentes (single-component é redundante)
+            const breakdownHtml = breakdown.length > 1 ? `
+                <ul class="thermal-ticket__row-breakdown" role="list">
+                    ${breakdown.map(b => {
+                        const bSign = signKey(b.valor);
+                        const bValor = `${b.valor > 0 ? '+' : '−'}${formatarMoeda(b.valor).replace('R$ ', '')}`;
+                        return `
+                            <li class="thermal-ticket__row-breakdown-item">
+                                <span class="thermal-ticket__row-breakdown-label">${safeEscapeHtml(b.label)}</span>
+                                <span class="thermal-ticket__row-breakdown-leader" aria-hidden="true"></span>
+                                <span class="thermal-ticket__row-breakdown-value" data-sign="${bSign}">${bValor}</span>
+                            </li>
+                        `;
+                    }).join('')}
+                </ul>
+            ` : '';
+
+            return `
+                <li class="thermal-ticket__row-wrap">
+                    <div class="${rowClass}">
+                        <span class="thermal-ticket__row-name">RODADA ${numStr}${posBadge}</span>
+                        <span class="thermal-ticket__row-leader" aria-hidden="true"></span>
+                        <span class="thermal-ticket__row-value" data-sign="${sign}">${valueText}</span>
+                    </div>
+                    ${breakdownHtml}
+                </li>
+            `;
         }).join('');
 
         sections.push(`
@@ -281,19 +325,33 @@ function renderThermalTicket(extrato, acertos, ligaId, options = {}) {
         `);
     }
 
-    // --- Ajustes ---
+    // --- Premiações & Ajustes (manuais lançados pelo admin) ---
+    // Engloba: Melhor do Mês, Campeão de Turnos, Artilheiro, Luva, Capitão,
+    // Top10, Copa SC, multas, ajustes manuais. Ordenado cronologicamente por `data`.
     if (ajustes.length > 0) {
-        const total = ajustes.reduce((s, l) => s + (l.valor || 0), 0);
-        const rowsHtml = ajustes.map(l => renderRow({
-            name: (l.descricao || 'Ajuste').toUpperCase(),
-            valor: l.valor || 0
-        })).join('');
+        const ajustesOrdenados = [...ajustes].sort((a, b) => {
+            const tA = a.data ? new Date(a.data).getTime() : 0;
+            const tB = b.data ? new Date(b.data).getTime() : 0;
+            return tA - tB; // mais antigo primeiro
+        });
+
+        const total = ajustesOrdenados.reduce((s, l) => s + (l.valor || 0), 0);
+        const rowsHtml = ajustesOrdenados.map(l => {
+            const dataFormatada = l.data
+                ? new Date(l.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                : '';
+            return renderRow({
+                name: (l.descricao || 'Ajuste').toUpperCase(),
+                detail: dataFormatada,
+                valor: l.valor || 0
+            });
+        }).join('');
 
         sections.push(`
-            <section class="thermal-ticket__section" data-section="ajustes">
-                <h2 class="thermal-ticket__section-title">Ajustes</h2>
+            <section class="thermal-ticket__section" data-section="premiacoes">
+                <h2 class="thermal-ticket__section-title">Premiações &amp; Ajustes</h2>
                 <ul class="thermal-ticket__rows" role="list">${rowsHtml}</ul>
-                ${renderSubtotal('Subtotal', total)}
+                ${renderSubtotal('Subtotal Premiações', total)}
             </section>
         `);
     }
@@ -381,7 +439,7 @@ function renderThermalTicket(extrato, acertos, ligaId, options = {}) {
 
                 <header class="thermal-ticket__header">
                     <p class="thermal-ticket__store">Super Cartola Manager</p>
-                    <h1 class="thermal-ticket__title"><span>Extrato</span><span>${temporada}</span></h1>
+                    <h1 class="thermal-ticket__title"><span>Extrato ${temporada}</span></h1>
                     <p class="thermal-ticket__subtitle">${timeNome}</p>
                     <p class="thermal-ticket__meta">${safeEscapeHtml(ligaNomeRaw)} · ${dataEmissao}</p>
                 </header>
@@ -555,7 +613,7 @@ function renderizarErro() {
             <article class="thermal-ticket" role="alert">
                 <header class="thermal-ticket__header">
                     <p class="thermal-ticket__store">Super Cartola Manager</p>
-                    <h1 class="thermal-ticket__title"><span>Extrato</span><span>Erro</span></h1>
+                    <h1 class="thermal-ticket__title"><span>Extrato — Erro</span></h1>
                 </header>
                 <div class="thermal-ticket__divider thermal-ticket__divider--asterisks" aria-hidden="true">* * * * * * * * * * * * * *</div>
                 <div class="thermal-ticket__empty">
