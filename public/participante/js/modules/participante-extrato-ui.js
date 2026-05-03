@@ -444,12 +444,12 @@ function renderThermalTicket(extrato, acertos, ligaId, options = {}) {
                     <p class="thermal-ticket__meta">${safeEscapeHtml(ligaNomeRaw)} · ${dataEmissao}</p>
                 </header>
 
-                <div class="thermal-ticket__divider thermal-ticket__divider--asterisks" aria-hidden="true">* * * * * * * * * * * * * *</div>
+                <div class="thermal-ticket__divider thermal-ticket__divider--asterisks" aria-hidden="true">**********************************</div>
 
                 ${sectionsWithDividers}
                 ${emptyNote}
 
-                <div class="thermal-ticket__divider thermal-ticket__divider--asterisks" aria-hidden="true">* * * * * * * * * * * * * *</div>
+                <div class="thermal-ticket__divider thermal-ticket__divider--asterisks" aria-hidden="true">**********************************</div>
 
                 <div class="thermal-ticket__display">
                     <p class="thermal-ticket__display-label">${displayLabel}</p>
@@ -615,7 +615,7 @@ function renderizarErro() {
                     <p class="thermal-ticket__store">Super Cartola Manager</p>
                     <h1 class="thermal-ticket__title"><span>Extrato — Erro</span></h1>
                 </header>
-                <div class="thermal-ticket__divider thermal-ticket__divider--asterisks" aria-hidden="true">* * * * * * * * * * * * * *</div>
+                <div class="thermal-ticket__divider thermal-ticket__divider--asterisks" aria-hidden="true">**********************************</div>
                 <div class="thermal-ticket__empty">
                     <p style="font-weight:700;margin-bottom:8px">Erro ao carregar extrato</p>
                     <p>Tente novamente em alguns instantes</p>
