@@ -187,11 +187,16 @@ function renderThermalTicket(extrato, acertos, ligaId, options = {}) {
     const { isPreTemporadaMode = false } = options;
 
     // ===== Identidade do time/liga =====
+    // Cadeia de fallbacks segue paths usados em participante-auth.js, participante-navigation.js
+    // e o source-of-truth no DOM (#nomeTime, atualizado pelo auth ao trocar de liga).
     const timeNome = safeEscapeHtml(
         extrato.time?.nome
+        || extrato.nome_time
         || extrato.timeNome
-        || window.participanteData?.time?.nome
-        || window.participanteData?.timeNome
+        || window.participanteData?.nomeTime
+        || window.participanteData?.participante?.participante?.nome_time
+        || window.participanteAuth?.participante?.participante?.nome_time
+        || document.getElementById('nomeTime')?.textContent?.trim()
         || 'Meu Time'
     );
 
