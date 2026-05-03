@@ -638,10 +638,13 @@ function renderizarErro() {
 }
 
 // =====================================================================
-// PROJEÇÃO FINANCEIRA EM TEMPO REAL
+// PROJEÇÃO FINANCEIRA EM TEMPO REAL — mini-ticket destacável
+// =====================================================================
 // Card exibido durante rodada em andamento (status_mercado === 2).
 // Importado por participante-extrato.js — manter assinatura.
-// Insere card como overlay informacional ABOVE do ticket no container principal.
+// Estilo: pedaço discreto do mesmo papel térmico, sentado acima do
+// ticket principal, com perfuração tracejada na borda inferior.
+// Mostra apenas o IMPACTO da rodada em curso (não saldo total da temporada).
 // =====================================================================
 
 export function renderizarProjecaoFinanceira(projecaoData) {
@@ -654,50 +657,73 @@ export function renderizarProjecaoFinanceira(projecaoData) {
         if (!mainContainer) return;
         card = document.createElement("div");
         card.id = "projecaoFinanceiraCard";
-        // Inserir antes do ticket térmico
+        card.className = "thermal-projection";
         mainContainer.insertBefore(card, mainContainer.firstChild);
+    } else {
+        // Garantir classe correta caso já exista (re-render)
+        card.className = "thermal-projection";
     }
 
-    const { rodada, time, financeiro, saldo, atualizado_em } = projecaoData;
+    const { rodada, time, financeiro, atualizado_em } = projecaoData;
     const horaAtualizada = atualizado_em
         ? new Date(atualizado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
         : '--:--';
 
-    const saldoProjetado = saldo?.projetado || 0;
-    const saldoCor = saldoProjetado >= 0 ? 'var(--app-success-light, #22c55e)' : 'var(--app-danger-light, #f87171)';
-    const sinal = saldoProjetado > 0 ? '+' : saldoProjetado < 0 ? '−' : '';
-    const valorAbs = Math.abs(saldoProjetado).toFixed(2).replace('.', ',');
+    // Impacto da rodada em curso (delta — NÃO saldo total da temporada)
+    const impacto = financeiro?.impactoProjetado || 0;
+    const sinalImp = signKey(impacto);
+    const valorImpacto = impacto === 0
+        ? formatarMoeda(0)
+        : `${impacto > 0 ? '+ ' : '− '}${formatarMoeda(impacto)}`;
+
+    // Breakdown — só componentes ≠ 0 (mesma lógica das rodadas finalizadas)
+    const breakdown = [];
+    const banco = financeiro?.banco?.valor || 0;
+    const pc = financeiro?.pontosCorridos?.valor || 0;
+    const mm = financeiro?.mataMata?.valor || 0;
+    const top10 = financeiro?.top10?.valor || 0;
+    if (banco !== 0) breakdown.push({ label: banco > 0 ? 'BONUS POSICAO' : 'ONUS POSICAO', valor: banco });
+    if (pc !== 0) breakdown.push({ label: 'PONTOS CORRIDOS', valor: pc });
+    if (mm !== 0) breakdown.push({ label: 'MATA-MATA', valor: mm });
+    if (top10 !== 0) breakdown.push({ label: top10 > 0 ? 'TOP10 MITO' : 'TOP10 MICO', valor: top10 });
+
+    const breakdownHtml = breakdown.length > 1 ? `
+        <ul class="thermal-projection__breakdown" role="list">
+            ${breakdown.map(b => {
+                const bSign = signKey(b.valor);
+                const bValor = `${b.valor > 0 ? '+' : '−'}${formatarMoeda(b.valor).replace('R$ ', '')}`;
+                return `
+                    <li class="thermal-projection__breakdown-item">
+                        <span class="thermal-projection__breakdown-label">${safeEscapeHtml(b.label)}</span>
+                        <span class="thermal-projection__breakdown-leader" aria-hidden="true"></span>
+                        <span class="thermal-projection__breakdown-value" data-sign="${bSign}">${bValor}</span>
+                    </li>
+                `;
+            }).join('')}
+        </ul>
+    ` : '';
+
     const posParcial = time?.posicao_parcial || '-';
-    const nomeTime = time?.nome_time || 'Meu Time';
+    const nomeTime = safeEscapeHtml(
+        time?.nome_time
+        || window.participanteData?.nomeTime
+        || document.getElementById('nomeTime')?.textContent?.trim()
+        || 'Meu Time'
+    );
 
     card.innerHTML = `
-        <div style="
-            margin: 16px 12px 0;
-            padding: 14px 16px;
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.03) 100%);
-            border: 1.5px dashed rgba(34, 197, 94, 0.4);
-            border-radius: 12px;
-            color: var(--app-text-primary, #e5e5e5);
-            font-family: 'Inter', sans-serif;
-        ">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-                <div style="display:flex;align-items:center;gap:8px">
-                    <span style="display:inline-block;width:8px;height:8px;background:#22c55e;border-radius:50%;animation:app-pulse 2s ease-in-out infinite"></span>
-                    <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#22c55e">
-                        Projeção R${rodada} ao vivo
-                    </span>
-                </div>
-                <span style="font-size:10px;color:var(--app-text-dim,#9ca3af)">${horaAtualizada}</span>
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
-                <div>
-                    <div style="font-size:13px;font-weight:600">${safeEscapeHtml(nomeTime)}</div>
-                    <div style="font-size:10px;color:var(--app-text-dim,#9ca3af);margin-top:2px">Posição parcial: ${posParcial}º</div>
-                </div>
-                <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:800;color:${saldoCor}">
-                    ${sinal} R$ ${valorAbs}
-                </div>
-            </div>
+        <div class="thermal-projection__live-indicator">
+            <span class="thermal-projection__live-dot" aria-hidden="true"></span>
+            <span>Projeção R${rodada} ao vivo</span>
+            <span class="thermal-projection__live-time">${horaAtualizada}</span>
         </div>
+        <p class="thermal-projection__time">${nomeTime}<span class="thermal-projection__pos-badge">${posParcial}º</span></p>
+        <div class="thermal-projection__divider" aria-hidden="true"></div>
+        <div class="thermal-projection__row">
+            <span class="thermal-projection__row-label">Impacto R${rodada}</span>
+            <span class="thermal-projection__row-leader" aria-hidden="true"></span>
+            <span class="thermal-projection__row-value" data-sign="${sinalImp}">${valorImpacto}</span>
+        </div>
+        ${breakdownHtml}
     `;
 }
