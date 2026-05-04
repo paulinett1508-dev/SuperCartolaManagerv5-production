@@ -472,6 +472,11 @@ function renderThermalTicket(extrato, acertos, ligaId, options = {}) {
             <article class="thermal-ticket" role="region" aria-label="Extrato financeiro de ${timeNome}">
                 <span class="thermal-ticket__edge thermal-ticket__edge--top" aria-hidden="true"></span>
                 <span class="thermal-ticket__pin" aria-hidden="true"></span>
+                <button class="thermal-ticket__refresh"
+                        type="button"
+                        onclick="window.forcarRefreshExtratoParticipante && window.forcarRefreshExtratoParticipante()"
+                        aria-label="Atualizar extrato"
+                        title="Atualizar extrato">↻</button>
 
                 <header class="thermal-ticket__header">
                     <p class="thermal-ticket__store">Super Cartola Manager</p>
