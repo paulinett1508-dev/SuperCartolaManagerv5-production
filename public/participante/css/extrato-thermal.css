@@ -92,46 +92,6 @@
     z-index: 2;
 }
 
-/* ===== Botão "atualizar" discreto no canto superior direito =====
- * Single character ↻ em mono. Discreto — não compete com header.
- * Onclick chama window.forcarRefreshExtratoParticipante() que invalida
- * cache local + bate no backend com ?refresh=true.
- */
-.thermal-ticket .thermal-ticket__refresh {
-    position: absolute;
-    top: 12px;
-    right: 14px;
-    background: transparent;
-    border: 1px solid var(--thermal-ink-soft);
-    border-radius: 50%;
-    width: 26px;
-    height: 26px;
-    color: var(--thermal-ink-soft);
-    font-family: var(--app-font-mono);
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    padding: 0;
-    line-height: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-    z-index: 3;
-    -webkit-tap-highlight-color: transparent;
-}
-
-.thermal-ticket .thermal-ticket__refresh:hover,
-.thermal-ticket .thermal-ticket__refresh:focus-visible {
-    color: var(--thermal-ink);
-    border-color: var(--thermal-ink);
-    outline: none;
-}
-
-.thermal-ticket .thermal-ticket__refresh:active {
-    transform: rotate(180deg);
-}
-
 /* ===== Header (cupom fiscal clássico) =====
  * IMPORTANTE: seletores prefixados com .thermal-ticket para ganhar
  * especificidade sobre .module-container h1/h2/p que vem do
