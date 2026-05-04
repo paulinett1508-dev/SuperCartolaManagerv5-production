@@ -136,6 +136,9 @@ function safeEscapeHtml(str) {
 function getNomeLancamento(l, temporada) {
     if (l.tipo === 'INSCRICAO_TEMPORADA') return `INSCRIÇÃO ${temporada}`;
     if (l.tipo === 'TRANSFERENCIA_SALDO' || l.tipo === 'SALDO_TEMPORADA_ANTERIOR') return 'SALDO ANTERIOR';
+    if (l.tipo === 'INSCRICAO_GRATUITA') return `INSCRIÇÃO ${temporada} — LIGA SEM TAXA`;
+    if (l.tipo === 'INSCRICAO_QUITADA') return `INSCRIÇÃO ${temporada} QUITADA`;
+    if (l.tipo === 'INSCRICAO_DISPENSADA') return `INSCRIÇÃO ${temporada} DISPENSADA`;
     return safeEscapeHtml((l.descricao || l.tipo || 'LANÇAMENTO')).toUpperCase();
 }
 
@@ -232,9 +235,37 @@ function renderThermalTicket(extrato, acertos, ligaId, options = {}) {
     const sections = [];
 
     // --- Inscrição ---
-    if (entradas.length > 0) {
-        const total = entradas.reduce((s, l) => s + (l.valor || 0), 0);
-        const rowsHtml = entradas.map(l => renderRow({
+    // Quando NÃO existe lancamento INSCRICAO_TEMPORADA, sintetizar entrada
+    // de status para expor a situação ao participante (em vez de simplesmente
+    // omitir a seção). Categorização baseada nos campos resumo.taxaInscricao
+    // e resumo.pagouInscricao que vêm do backend (extratoFinanceiroCacheController).
+    const taxaInscConfig = extrato.resumo?.taxaInscricao || extrato.resumo?.taxa_inscricao || 0;
+    const pagouInscConfig = extrato.resumo?.pagouInscricao === true
+        || extrato.resumo?.pagou_inscricao === true;
+    const hasInscLancamento = entradas.some(l => l.tipo === 'INSCRICAO_TEMPORADA');
+
+    let entradasComStatus = [...entradas];
+    if (!hasInscLancamento && !isPreTemporadaMode) {
+        // Sem débito de inscrição em modo regular — sintetizar linha explicativa
+        let tipoSintetico;
+        if (taxaInscConfig === 0) {
+            tipoSintetico = 'INSCRICAO_GRATUITA';
+        } else if (pagouInscConfig) {
+            tipoSintetico = 'INSCRICAO_QUITADA';
+        } else {
+            // taxa > 0 mas sem lancamento e sem flag pago → owner/premium isento
+            tipoSintetico = 'INSCRICAO_DISPENSADA';
+        }
+        entradasComStatus.unshift({
+            tipo: tipoSintetico,
+            valor: 0,
+            _sintetico: true,
+        });
+    }
+
+    if (entradasComStatus.length > 0) {
+        const total = entradasComStatus.reduce((s, l) => s + (l.valor || 0), 0);
+        const rowsHtml = entradasComStatus.map(l => renderRow({
             name: getNomeLancamento(l, temporada),
             valor: l.valor || 0,
             allowHtmlInName: true
