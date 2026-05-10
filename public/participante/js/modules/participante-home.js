@@ -1632,16 +1632,25 @@ function _buildLiveRankingSkeleton() {
     </div>`;
 }
 
-function _buildLiveRankingError() {
+function _buildLiveRankingError(motivo = 'erro') {
+    const mensagens = {
+        mercado_aberto: { titulo: 'Aguardando início da rodada', sub: 'A rodada ainda não começou. As parciais aparecerão quando a bola rolar.' },
+        rodada_encerrada: { titulo: 'Rodada encerrada', sub: 'Os resultados consolidados estão disponíveis em Rodadas.' },
+        sessao_expirada: { titulo: 'Sessão expirada', sub: 'Faça login novamente para ver as parciais ao vivo.' },
+        sem_dados_parciais: { titulo: 'Sem dados de parciais', sub: 'Aguarde alguns segundos enquanto buscamos as parciais.' },
+        timeout: { titulo: 'Demora ao carregar parciais', sub: 'A rede está lenta — vamos tentar de novo.' },
+        erro: { titulo: 'Parciais indisponíveis', sub: 'Falha temporária ao buscar dados. Vamos tentar de novo.' }
+    };
+    const { titulo, sub } = mensagens[motivo] || mensagens.erro;
     return `<div class="live-ranking-card" id="live-ranking-card">
         <div class="live-ranking-header">
             <div class="live-ranking-header-left">
                 <span class="live-ranking-dot" style="background:var(--app-danger);animation:none"></span>
-                <span class="live-ranking-title">Rodada em andamento</span>
+                <span class="live-ranking-title">${titulo}</span>
             </div>
         </div>
         <div class="live-ranking-error">
-            Parciais indisponíveis
+            ${sub}
             <br>
             <button onclick="window.MatchdayService && window.MatchdayService._fetchParciais && window.MatchdayService._fetchParciais()">Tentar novamente</button>
         </div>
@@ -1713,6 +1722,37 @@ function ativarLiveRankingCard() {
 
     // Render inicial
     const ranking = MS?.lastRanking;
+
+    // Guards anti-skeleton-infinito: se em 15s nenhum dado chegou, troca para erro com retry automático a cada 30s
+    let _skeletonTimeoutId = null;
+    let _autoRetryIntervalId = null;
+    const SKELETON_TIMEOUT_MS = Number(window.PARCIAIS_SKELETON_TIMEOUT_MS) > 0
+        ? Number(window.PARCIAIS_SKELETON_TIMEOUT_MS) : 15000;
+    const AUTO_RETRY_INTERVAL_MS = 30000;
+
+    const cancelSkeletonGuards = () => {
+        if (_skeletonTimeoutId) { clearTimeout(_skeletonTimeoutId); _skeletonTimeoutId = null; }
+        if (_autoRetryIntervalId) { clearInterval(_autoRetryIntervalId); _autoRetryIntervalId = null; }
+    };
+
+    const armSkeletonTimeout = () => {
+        cancelSkeletonGuards();
+        _skeletonTimeoutId = setTimeout(() => {
+            const r = MS?.lastRanking;
+            if (r && r.length > 0) return;
+            if (window.Log) Log.warn("PARTICIPANTE-HOME", `Live card: skeleton timeout ${SKELETON_TIMEOUT_MS}ms sem dados — mostrando erro com retry`);
+            container.innerHTML = _buildLiveRankingError('timeout');
+            _autoRetryIntervalId = setInterval(() => {
+                const cur = MS?.lastRanking;
+                if (cur && cur.length > 0) { cancelSkeletonGuards(); return; }
+                if (window.MatchdayService?._fetchParciais) {
+                    if (window.Log) Log.info("PARTICIPANTE-HOME", "Live card: auto-retry parciais");
+                    window.MatchdayService._fetchParciais();
+                }
+            }, AUTO_RETRY_INTERVAL_MS);
+        }, SKELETON_TIMEOUT_MS);
+    };
+
     if (ranking && ranking.length > 0) {
         const { sorted } = _sortAndDiffRanking(ranking);
         const rodada = MS.currentRodada || mercadoStatus?.rodada_atual || '';
@@ -1720,12 +1760,14 @@ function ativarLiveRankingCard() {
         _updateLiveTimestamp();
     } else {
         container.innerHTML = _buildLiveRankingSkeleton();
+        armSkeletonTimeout();
     }
 
     // Evento: novos dados parciais
     const onParciais = () => {
         const r = MS.lastRanking;
         if (!r || r.length === 0) return;
+        cancelSkeletonGuards();
 
         const { sorted, diffs } = _sortAndDiffRanking(r);
         const rodada = MS.currentRodada || mercadoStatus?.rodada_atual || '';
@@ -1761,7 +1803,8 @@ function ativarLiveRankingCard() {
     _liveCardUnsubscribers.push(
         () => MS?.off('data:parciais', onParciais),
         () => MS?.off('matchday:stop', onStop),
-        () => MS?.off('matchday:state', onState)
+        () => MS?.off('matchday:state', onState),
+        () => cancelSkeletonGuards()
     );
 
     const tsTimer = setInterval(_updateLiveTimestamp, 10000);
