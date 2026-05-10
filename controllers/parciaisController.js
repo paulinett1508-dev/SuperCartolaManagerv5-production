@@ -23,6 +23,9 @@ const MAX_CONCURRENT = 8;
 const parciaisCache = new NodeCache({ stdTTL: 30, maxKeys: 200 });
 // Cache de escalações por timeId+rodada: 5min (espelha o escalacaoProxyCache do cartola-proxy)
 const escCache = new NodeCache({ stdTTL: 300, maxKeys: 1000 });
+// Cache de status do mercado (Cartola): 60s — elimina fetch sincronico a /mercado/status
+// em toda chamada de /api/parciais (antes custava ate 10s no cache miss + 503 em falha)
+const statusMercadoCache = new NodeCache({ stdTTL: 60, maxKeys: 1 });
 
 // ──────────────────────────────────────────────────────────────────────────────
 // UTILITÁRIOS
@@ -338,15 +341,27 @@ export async function getParciais(req, res) {
   }
 
   try {
-    // 1. Status do mercado
+    // 1. Status do mercado — cache 60s para evitar fetch sincrono a Cartola em toda request
     let statusMercado, rodadaAtual, temporada;
-    try {
-      const statusData = await fetchCartola(`${CARTOLA_API_BASE}/mercado/status`);
-      statusMercado = statusData?.status_mercado;
-      rodadaAtual = statusData?.rodada_atual;
-      temporada = statusData?.temporada || CURRENT_SEASON;
-    } catch {
-      return res.status(503).json({ erro: "API Cartola indisponível" });
+    const statusCached = statusMercadoCache.get("mercado_status");
+    if (statusCached) {
+      statusMercado = statusCached.status_mercado;
+      rodadaAtual = statusCached.rodada_atual;
+      temporada = statusCached.temporada;
+    } else {
+      try {
+        const statusData = await fetchCartola(`${CARTOLA_API_BASE}/mercado/status`);
+        statusMercado = statusData?.status_mercado;
+        rodadaAtual = statusData?.rodada_atual;
+        temporada = statusData?.temporada || CURRENT_SEASON;
+        statusMercadoCache.set("mercado_status", {
+          status_mercado: statusMercado,
+          rodada_atual: rodadaAtual,
+          temporada,
+        });
+      } catch {
+        return res.status(503).json({ erro: "API Cartola indisponível" });
+      }
     }
 
     // Status 2 = rodada em andamento | Status 3 = desbloqueado (jogos parcialmente encerrados,
