@@ -275,6 +275,37 @@ _Próximas sprints - Impacto significativo no sistema_
     - [ ] Histórico de notificações recebidas (tela no app)
     - [ ] Analytics: Taxa de abertura, cliques, conversões
 
+- [ ] [LIVE-001] **Endpoint unificado `/api/live/:ligaId`** 🚀 ALTA
+  - **Origem:** Auditoria Live Experience 2026-05-10 — `/root/.claude/plans/root-claude-uploads-6b53a3a2-7128-487d-stateless-oasis.md`
+  - **Problema:** Hoje existem 2 endpoints duplicados (`/api/parciais/:ligaId` em `parciaisController.js` e `/api/matchday/parciais/:ligaId` em `matchday-routes.js`) consultando os mesmos `/atletas/pontuados` do Cartola. Cada módulo (Rodadas, PC, MM, Top10, MTR, Resta1) faz fetch isolado.
+  - **Solução:** Agregador único que retorna `{rodada, status_mercado, parciais, ranking, confrontos: {pontos_corridos, mata_mata}, resta_um, atualizadoEm}` com cache 30s e invalidação coordenada
+  - **Impacto:** Elimina divergência entre módulos (cada um lê do mesmo snapshot), reduz carga Cartola 3x, simplifica frontend
+  - **Arquivos:** `controllers/liveController.js` (novo), `routes/live-routes.js` (novo), deprecar os 2 endpoints atuais
+
+- [ ] [LIVE-002] **Server-Sent Events (SSE) para parciais ao vivo** 🚀 ALTA
+  - **Origem:** Auditoria Live Experience 2026-05-10
+  - **Problema:** Frontend faz polling 30s. Latência cliente→servidor + tráfego desnecessário quando não há mudança
+  - **Solução:** Backend emite `event: parciais-update` quando `parciaisCache` invalida. Frontend escuta com `EventSource` em vez de polling. Infra SSE já existe em `routes/orchestrator-routes.js:142` (não-utilizada para parciais)
+  - **Impacto:** Reduz tráfego ~85%, elimina lag cliente→servidor, parciais "ao vivo" de verdade
+
+- [ ] [LIVE-003] **Migrar NodeCache para Redis (cache compartilhado entre containers)** 🟠 MÉDIA
+  - **Origem:** Auditoria Live Experience 2026-05-10
+  - **Problema:** Hoje `NodeCache` é por-processo. Em produção com múltiplas instâncias (futuro), cada uma teria cache independente
+  - **Solução:** Migrar `parciaisCache`, `escCache`, `statusMercadoCache` para Redis. Referência: skill `caching-strategies`
+  - **Impacto:** Habilita escala horizontal e mantém coerência entre instâncias
+
+- [ ] [LIVE-004] **Pré-aquecimento programado do parciaisCache durante rodada ao vivo** 🚀 ALTA
+  - **Origem:** Auditoria Live Experience 2026-05-10
+  - **Problema:** Primeira request da rodada após 30s (cache expirou) leva 17-27s no pior caso. Usuário paga a latência
+  - **Solução:** Cron worker que, durante rodada ao vivo (`status_mercado === 2 || 3`), faz fetch a cada 30s para popular `parciaisCache` antes da primeira request do usuário
+  - **Impacto:** Latência percebida → cache hit constante (<10ms)
+
+- [ ] [LIVE-005] **Top10Cache reativo (invalidação ao atualizar pontuação)** 🟠 MÉDIA
+  - **Origem:** Auditoria Live Experience 2026-05-10
+  - **Problema:** `Top10Cache` é permanente (sem TTL). Quando `Time.pontuacao` muda, cache não é invalidado — frontend serve dado antigo até nova geração manual via admin
+  - **Solução:** Hook no `Time.pontuacao` update OU listener em `pontosCorridosCache` update que invalida `Top10Cache`. Alternativa: TTL 5min com fallback ao MongoDB
+  - **Impacto:** Top 10 reflete pontuação atual em tempo real, sem ação manual do admin
+
 - [ ] [FEAT-014] **Co-Piloto de Análise via CLI (Lab 2026)**
   - **Descrição:** Ferramenta de terminal para curadoria de dados assistida por IA (Admin).
   - **Escopo:** MVP restrito a 1 time na temporada 2026 (fase de testes) (participante Paulinett Miranda)
