@@ -135,7 +135,8 @@ export async function inicializarParciais(ligaId, timeId) {
 // =====================================================================
 async function _buscarParciais(ligaId) {
     try {
-        const response = await fetchComTimeout(`/api/parciais/${ligaId}`);
+        // LIVE-001: migrado para endpoint agregador /api/live (mesmo shape em .parciais)
+        const response = await fetchComTimeout(`/api/live/${ligaId}?include=parciais`);
         if (!response.ok) {
             if (response.status === 401) {
                 // ✅ v5.8: Sessão expirada — retornar motivo para que caller possa agir
@@ -145,7 +146,10 @@ async function _buscarParciais(ligaId) {
             if (window.Log) Log.warn(`[PARCIAIS] HTTP ${response.status} ao buscar parciais`);
             return null;
         }
-        return await response.json();
+        const data = await response.json();
+        // O endpoint /api/live retorna { parciais: {...}, atualizadoEm, rodada }
+        // Mantemos compatibilidade extraindo o sub-objeto parciais.
+        return data?.parciais || data;
     } catch (error) {
         if (window.Log) Log.error("[PARCIAIS] Erro ao buscar parciais:", error);
         return null;

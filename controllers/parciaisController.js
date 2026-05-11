@@ -326,18 +326,20 @@ function _timeVazio(time, rodadaNaoJogada = false) {
 // GET /api/parciais/:ligaId
 // ──────────────────────────────────────────────────────────────────────────────
 
-export async function getParciais(req, res) {
-  const { ligaId } = req.params;
-
+/**
+ * Núcleo do cálculo de parciais — agnóstico de req/res.
+ * Retorna { ok: true, payload, cached? } ou { ok: false, status, body }.
+ * Usado por getParciais (handler HTTP) e por liveController (agregador).
+ */
+export async function computeParciais(ligaId) {
   if (!mongoose.Types.ObjectId.isValid(ligaId)) {
-    return res.status(400).json({ erro: "ligaId inválido" });
+    return { ok: false, status: 400, body: { erro: "ligaId inválido" } };
   }
 
-  // Cache hit — compartilhado entre todos os usuários da liga
   const cacheKey = `parciais_${ligaId}`;
   const cached = parciaisCache.get(cacheKey);
   if (cached) {
-    return res.json({ ...cached, _cache: true });
+    return { ok: true, payload: cached, cached: true };
   }
 
   try {
@@ -360,7 +362,7 @@ export async function getParciais(req, res) {
           temporada,
         });
       } catch {
-        return res.status(503).json({ erro: "API Cartola indisponível" });
+        return { ok: false, status: 503, body: { erro: "API Cartola indisponível" } };
       }
     }
 
@@ -368,18 +370,21 @@ export async function getParciais(req, res) {
     // mercado parcialmente reaberto — dados live ainda válidos). Status 4+ = round finalizado.
     const rodadaAoVivo = statusMercado === 2 || statusMercado === 3;
     if (!rodadaAoVivo) {
-      return res.json({
-        disponivel: false,
-        motivo: statusMercado === 4 ? "rodada_encerrada" : "mercado_aberto",
-        rodada: rodadaAtual,
-        participantes: [],
-        inativos: [],
-      });
+      return {
+        ok: true,
+        payload: {
+          disponivel: false,
+          motivo: statusMercado === 4 ? "rodada_encerrada" : "mercado_aberto",
+          rodada: rodadaAtual,
+          participantes: [],
+          inativos: [],
+        },
+      };
     }
 
     // 2. Buscar times da liga (MongoDB)
     const liga = await Liga.findById(ligaId).lean();
-    if (!liga) return res.status(404).json({ erro: "Liga não encontrada" });
+    if (!liga) return { ok: false, status: 404, body: { erro: "Liga não encontrada" } };
 
     const timesRaw = liga.times?.length
       ? await Time.find({ id: { $in: liga.times } }).lean()
@@ -523,9 +528,22 @@ export async function getParciais(req, res) {
     if (temResultados) {
       parciaisCache.set(cacheKey, payload);
     }
-    return res.json(payload);
+    return { ok: true, payload };
   } catch (err) {
     console.error("[PARCIAIS-CTRL] Erro:", err.message);
-    return res.status(500).json({ erro: "Erro ao calcular parciais", detalhe: err.message });
+    return { ok: false, status: 500, body: { erro: "Erro ao calcular parciais", detalhe: err.message } };
   }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// HANDLER HTTP
+// GET /api/parciais/:ligaId
+// ──────────────────────────────────────────────────────────────────────────────
+
+export async function getParciais(req, res) {
+  const { ligaId } = req.params;
+  const result = await computeParciais(ligaId);
+  if (!result.ok) return res.status(result.status).json(result.body);
+  if (result.cached) return res.json({ ...result.payload, _cache: true });
+  return res.json(result.payload);
 }

@@ -193,6 +193,9 @@ import raioXAnalyticsRoutes from "./routes/raioXAnalyticsRoutes.js";
 // 📊 Parciais unificados (substitui N+1 do frontend)
 import parciaisRoutes from "./routes/parciais-routes.js";
 
+// 🔴 LIVE-001: agregador unificado de dados ao vivo
+import liveRoutes from "./routes/live-routes.js";
+
 // 📦 Versionamento do App
 import appVersionRoutes from "./routes/appVersionRoutes.js";
 
@@ -604,6 +607,7 @@ app.use("/api/jogos-hoje-globo", jogosHojeGloboRoutes); // NOVA ROTA
 app.use("/api/jogos-ao-vivo", jogosAoVivoRoutes); // API-Football
 app.use("/api/ligas", ligaRoutes);
 app.use("/api/parciais", parciaisRoutes);
+app.use("/api/live", liveRoutes);
 app.use("/api/cartola", cartolaRoutes);
 app.use("/api/cartola", cartolaProxyRoutes);
 app.use("/api/times", timesRoutes);
