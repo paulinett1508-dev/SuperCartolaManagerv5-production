@@ -283,6 +283,14 @@ try {
   console.warn('[INDEX] Orquestrador init falhou (não-crítico):', err.message);
 }
 
+// LIVE-004: pré-aquecimento do parciaisCache durante rodada ao vivo
+try {
+  const { default: liveCacheWarmer } = await import("./services/liveCacheWarmer.js");
+  liveCacheWarmer.start();
+} catch (err) {
+  console.warn('[INDEX] LIVE-WARMER init falhou (não-crítico):', err.message);
+}
+
 // ====================================================================
 // 🛡️ MIDDLEWARES DE SEGURANÇA (PRIMEIRO!)
 // ====================================================================

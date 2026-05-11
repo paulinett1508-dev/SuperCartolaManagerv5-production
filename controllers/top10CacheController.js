@@ -39,6 +39,10 @@ export const salvarCacheTop10 = async (req, res) => {
     }
 };
 
+// LIVE-005: caches não-permanentes expiram após 5min — força regeneração
+// e evita servir Top10 desatualizado quando pontuações mudaram.
+const TOP10_STALE_MS = 5 * 60 * 1000;
+
 export const lerCacheTop10 = async (req, res) => {
     try {
         const { ligaId } = req.params;
@@ -54,6 +58,18 @@ export const lerCacheTop10 = async (req, res) => {
         });
         if (!cache) {
             return res.status(200).json({ cached: false });
+        }
+        // LIVE-005: aplica TTL 5min em caches não-permanentes (working cache).
+        // Permanentes (rodada encerrada) são imutáveis e sempre servidos.
+        if (!cache.cache_permanente) {
+            const idade = Date.now() - new Date(cache.ultima_atualizacao).getTime();
+            if (idade > TOP10_STALE_MS) {
+                return res.status(200).json({
+                    cached: false,
+                    stale: true,
+                    message: "Cache expirou (>5min) — regenerar",
+                });
+            }
         }
         res.json({
             cached: true,

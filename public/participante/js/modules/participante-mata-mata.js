@@ -513,11 +513,13 @@ async function buscarParciaisFaseAtiva(confrontos) {
     } else {
       // Fallback: fetch direto quando MatchdayService não está ativo
       estado._abortController = new AbortController();
-      const res = await fetch(`/api/matchday/parciais/${estado.ligaId}`, {
+      // LIVE-001: migrado para endpoint agregador
+      const res = await fetch(`/api/live/${estado.ligaId}?include=ranking`, {
         signal: estado._abortController.signal,
       });
       if (!res.ok) return null;
-      const data = await res.json();
+      const raw = await res.json();
+      const data = raw?.ranking || raw;
       if (!data || !data.disponivel || !data.ranking) return null;
       ranking = data.ranking;
       rodada = data.rodada;
@@ -1784,8 +1786,10 @@ async function carregarClassificadosParciais(container, edicao) {
     </div>`;
 
   try {
-    const res = await fetch(`/api/matchday/parciais/${estado.ligaId}`);
-    const data = res.ok ? await res.json() : null;
+    // LIVE-001: migrado para endpoint agregador
+    const res = await fetch(`/api/live/${estado.ligaId}?include=ranking`);
+    const raw = res.ok ? await res.json() : null;
+    const data = raw?.ranking || raw;
 
     if (!data || !data.disponivel) {
       const msg = data?.message || "Parciais não disponíveis no momento.";
@@ -1890,8 +1894,10 @@ async function carregarConfrontosParciais(container, edicao) {
     </div>`;
 
   try {
-    const res = await fetch(`/api/matchday/parciais/${estado.ligaId}`);
-    const data = res.ok ? await res.json() : null;
+    // LIVE-001: migrado para endpoint agregador
+    const res = await fetch(`/api/live/${estado.ligaId}?include=ranking`);
+    const raw = res.ok ? await res.json() : null;
+    const data = raw?.ranking || raw;
 
     if (!data || !data.disponivel) {
       const msg = data?.message || "Parciais não disponíveis no momento.";
