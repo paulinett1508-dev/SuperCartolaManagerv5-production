@@ -15,6 +15,7 @@ import NodeCache from "node-cache";
 import mongoose from "mongoose";
 import { computeParciais } from "./parciaisController.js";
 import { buscarRankingParcial } from "../services/parciaisRankingService.js";
+import liveEmitter from "../services/liveEvents.js";
 
 const liveCache = new NodeCache({ stdTTL: 30, maxKeys: 200 });
 const VALID_INCLUDES = ["parciais", "ranking"];
@@ -97,4 +98,50 @@ export async function getLiveSnapshot(req, res) {
     console.error("[LIVE-CTRL] Erro:", err.message);
     return res.status(500).json({ erro: "Erro ao agregar dados live", detalhe: err.message });
   }
+}
+
+// LIVE-002 — SSE endpoint: GET /api/live/:ligaId/stream
+// Substitui polling 30s por push (EventSource). Depende de liveEmitter emitido pelo liveCacheWarmer.
+const SSE_HEARTBEAT_MS = 20_000;
+
+export function getLiveStream(req, res) {
+  const { ligaId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(ligaId)) {
+    return res.status(400).json({ erro: "ligaId inválido" });
+  }
+
+  res.writeHead(200, {
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    "Connection": "keep-alive",
+    "X-Accel-Buffering": "no",
+  });
+
+  // Envia snapshot inicial imediatamente se já estiver quente no cache
+  const cachedKey = `live_${ligaId}_parciais-ranking`;
+  const snapshot = liveCache.get(cachedKey) ?? liveCache.get(`live_${ligaId}_parciais`);
+  if (snapshot) {
+    res.write(`event: parciais-update\ndata: ${JSON.stringify(snapshot)}\n\n`);
+  }
+
+  const onUpdate = (parciaisPayload) => {
+    const envelope = {
+      parciais: parciaisPayload,
+      atualizadoEm: new Date().toISOString(),
+    };
+    res.write(`event: parciais-update\ndata: ${JSON.stringify(envelope)}\n\n`);
+  };
+
+  const eventName = `parciais-updated:${ligaId}`;
+  liveEmitter.on(eventName, onUpdate);
+
+  const heartbeat = setInterval(() => {
+    res.write(`:heartbeat\n\n`);
+  }, SSE_HEARTBEAT_MS);
+
+  req.on("close", () => {
+    clearInterval(heartbeat);
+    liveEmitter.removeListener(eventName, onUpdate);
+  });
 }

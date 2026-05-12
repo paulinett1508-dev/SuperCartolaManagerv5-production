@@ -3,7 +3,7 @@
 // Endpoint agregador unificado de dados da rodada em andamento.
 
 import express from "express";
-import { getLiveSnapshot } from "../controllers/liveController.js";
+import { getLiveSnapshot, getLiveStream } from "../controllers/liveController.js";
 
 const router = express.Router();
 
@@ -14,6 +14,7 @@ function verificarSessao(req, res, next) {
   next();
 }
 
+router.get("/:ligaId/stream", verificarSessao, getLiveStream);
 router.get("/:ligaId", verificarSessao, getLiveSnapshot);
 
 export default router;

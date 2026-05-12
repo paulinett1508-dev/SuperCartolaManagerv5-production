@@ -14,6 +14,7 @@
 import axios from "axios";
 import Liga from "../models/Liga.js";
 import { computeParciais } from "../controllers/parciaisController.js";
+import liveEmitter from "./liveEvents.js";
 
 const CARTOLA_API_BASE = "https://api.cartola.globo.com";
 const TICK_AO_VIVO_MS = 25_000;
@@ -39,7 +40,11 @@ async function fetchStatusMercado() {
 async function aquecerLiga(ligaId) {
   try {
     const r = await computeParciais(String(ligaId));
-    return r?.ok === true;
+    if (r?.ok === true) {
+      liveEmitter.emit(`parciais-updated:${ligaId}`, r.payload);
+      return true;
+    }
+    return false;
   } catch (err) {
     console.warn(`[LIVE-WARMER] Falha ao aquecer ${ligaId}: ${err.message}`);
     return false;

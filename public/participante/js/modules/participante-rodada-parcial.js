@@ -51,6 +51,10 @@ let estadoParciais = {
         nextAt: null,
         onUpdate: null,
         onStatus: null,
+        // LIVE-002: SSE via EventSource (substitui polling quando disponível)
+        sseSource: null,
+        sseErrors: 0,
+        sseAtivo: false,
     },
 };
 
@@ -233,6 +237,90 @@ function emitirStatusAutoRefresh(motivo) {
     });
 }
 
+// =====================================================================
+// SSE — EventSource (LIVE-002)
+// Preferido ao polling. Fallback automático após SSE_MAX_ERRORS falhas.
+// =====================================================================
+const SSE_MAX_ERRORS = 3;
+
+function _processarEventoSSE(payload) {
+    const dados = payload?.parciais || payload;
+    if (!dados || !dados.disponivel) return;
+
+    estadoParciais.rodadaAtual = dados.rodada;
+    estadoParciais.mercadoDisponivel = true;
+    estadoParciais.dadosParciais = dados.participantes || [];
+    estadoParciais.dadosInativos = dados.inativos || [];
+    estadoParciais.ultimaAtualizacao = new Date();
+    estadoParciais.autoRefresh.cycles += 1;
+
+    if (window.Log) Log.info(`[PARCIAIS-SSE] 📡 evento recebido — R${dados.rodada}, ${dados.totalTimes} times`);
+
+    if (typeof estadoParciais.autoRefresh.onUpdate === "function") {
+        estadoParciais.autoRefresh.onUpdate({
+            rodada: dados.rodada,
+            participantes: dados.participantes,
+            inativos: dados.inativos,
+            totalTimes: dados.totalTimes,
+            totalInativos: dados.totalInativos,
+            atualizadoEm: estadoParciais.ultimaAtualizacao,
+        });
+    }
+}
+
+function _fecharSSE() {
+    if (estadoParciais.autoRefresh.sseSource) {
+        estadoParciais.autoRefresh.sseSource.close();
+        estadoParciais.autoRefresh.sseSource = null;
+    }
+    estadoParciais.autoRefresh.sseAtivo = false;
+}
+
+function _iniciarSSE(onUpdate, onStatus) {
+    if (typeof EventSource === "undefined") return false;
+    if (!estadoParciais.ligaId) return false;
+
+    const url = `/api/live/${estadoParciais.ligaId}/stream`;
+    const es = new EventSource(url);
+    estadoParciais.autoRefresh.sseSource = es;
+    estadoParciais.autoRefresh.sseAtivo = true;
+    estadoParciais.autoRefresh.sseErrors = 0;
+    estadoParciais.autoRefresh.onUpdate = onUpdate;
+    estadoParciais.autoRefresh.onStatus = onStatus;
+
+    es.addEventListener("parciais-update", (e) => {
+        try {
+            estadoParciais.autoRefresh.sseErrors = 0;
+            _processarEventoSSE(JSON.parse(e.data));
+        } catch (err) {
+            if (window.Log) Log.warn("[PARCIAIS-SSE] Erro ao parsear evento:", err?.message);
+        }
+    });
+
+    es.onerror = () => {
+        estadoParciais.autoRefresh.sseErrors += 1;
+        if (window.Log) Log.warn(`[PARCIAIS-SSE] Erro SSE #${estadoParciais.autoRefresh.sseErrors}`);
+        if (estadoParciais.autoRefresh.sseErrors >= SSE_MAX_ERRORS) {
+            if (window.Log) Log.warn("[PARCIAIS-SSE] Máx. erros atingido — caindo para polling");
+            _fecharSSE();
+            _iniciarPolling(onUpdate, onStatus);
+        }
+    };
+
+    if (window.Log) Log.info(`[PARCIAIS-SSE] 🔌 EventSource aberto: ${url}`);
+    return true;
+}
+
+function _iniciarPolling(onUpdate, onStatus) {
+    estadoParciais.autoRefresh.ativo = true;
+    estadoParciais.autoRefresh.onUpdate = onUpdate;
+    estadoParciais.autoRefresh.onStatus = onStatus;
+    estadoParciais.autoRefresh.failures = 0;
+    estadoParciais.autoRefresh.cycles = 0;
+    programarAutoRefresh();
+    emitirStatusAutoRefresh("start");
+}
+
 async function executarAutoRefresh() {
     if (!estadoParciais.autoRefresh.ativo) return;
 
@@ -283,18 +371,22 @@ async function executarAutoRefresh() {
 }
 
 export function iniciarAutoRefresh(onUpdate = null, onStatus = null) {
-    if (estadoParciais.autoRefresh.ativo) return;
+    if (estadoParciais.autoRefresh.ativo || estadoParciais.autoRefresh.sseAtivo) return;
     aplicarConfigAutoRefresh();
-    estadoParciais.autoRefresh.ativo = true;
-    estadoParciais.autoRefresh.onUpdate = onUpdate;
-    estadoParciais.autoRefresh.onStatus = onStatus;
-    estadoParciais.autoRefresh.failures = 0;
-    estadoParciais.autoRefresh.cycles = 0;
-    programarAutoRefresh();
-    emitirStatusAutoRefresh("start");
+
+    // LIVE-002: tentar SSE primeiro; polling como fallback
+    const sseOk = _iniciarSSE(onUpdate, onStatus);
+    if (!sseOk) {
+        _iniciarPolling(onUpdate, onStatus);
+    }
 }
 
 export function pararAutoRefresh() {
+    // Fecha SSE se ativo
+    if (estadoParciais.autoRefresh.sseAtivo) {
+        _fecharSSE();
+    }
+    // Para polling se ativo
     estadoParciais.autoRefresh.ativo = false;
     emitirStatusAutoRefresh("stop");
     estadoParciais.autoRefresh.onUpdate = null;
