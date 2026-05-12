@@ -383,7 +383,10 @@
       "Bash(~/bin/jq.exe -r '.email // \"\"')",
       "Bash(~/bin/jq.exe -r '.[] | \"\\\\\\(.createdAt\\) \\\\\\(.name\\) → \\\\\\(.status\\)/\\\\\\(.conclusion // \"running\"\\)\"')",
       "Bash(~/bin/jq.exe -r '.[] | \"\\\\\\(.name\\) → \\\\\\(.status\\)/\\\\\\(.conclusion // \"running\"\\)\"')",
-      "PowerShell([System.Environment]::SetEnvironmentVariable\\(\"MCP_SECRET_TOKEN\", \"2f42170e26d936e2b7d57ba9fe3d9edf084ac3e20a4484b900c9a8c289243337\", \"User\"\\))"
+      "PowerShell([System.Environment]::SetEnvironmentVariable\\(\"MCP_SECRET_TOKEN\", \"2f42170e26d936e2b7d57ba9fe3d9edf084ac3e20a4484b900c9a8c289243337\", \"User\"\\))",
+      "Read(//root/.claude/**)",
+      "Read(//c/tmp/**)",
+      "Bash(find /root -name \"*stateless-oasis*\")"
     ]
   },
   "enableAllProjectMcpServers": true,

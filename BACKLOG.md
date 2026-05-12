@@ -282,10 +282,10 @@ _Próximas sprints - Impacto significativo no sistema_
   - **Impacto:** Elimina divergência entre módulos (cada um lê do mesmo snapshot), reduz carga Cartola 3x, simplifica frontend
   - **Arquivos:** `controllers/liveController.js` (novo), `routes/live-routes.js` (novo), deprecar os 2 endpoints atuais
 
-- [ ] [LIVE-002] **Server-Sent Events (SSE) para parciais ao vivo** 🚀 ALTA
+- [x] [LIVE-002] **Server-Sent Events (SSE) para parciais ao vivo** ✅ FEITO 2026-05-11 (commit 256c9c63)
   - **Origem:** Auditoria Live Experience 2026-05-10
   - **Problema:** Frontend faz polling 30s. Latência cliente→servidor + tráfego desnecessário quando não há mudança
-  - **Solução:** Backend emite `event: parciais-update` quando `parciaisCache` invalida. Frontend escuta com `EventSource` em vez de polling. Infra SSE já existe em `routes/orchestrator-routes.js:142` (não-utilizada para parciais)
+  - **Solução:** `services/liveEvents.js` (EventEmitter), warmer emite `parciais-updated:<ligaId>`, `getLiveStream` SSE handler em `liveController.js`, frontend usa `EventSource` com fallback automático para polling após 3 erros
   - **Impacto:** Reduz tráfego ~85%, elimina lag cliente→servidor, parciais "ao vivo" de verdade
 
 - [ ] [LIVE-003] **Migrar NodeCache para Redis (cache compartilhado entre containers)** 🟠 MÉDIA
